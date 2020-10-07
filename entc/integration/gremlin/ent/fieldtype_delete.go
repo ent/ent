@@ -21,14 +21,13 @@ import (
 // FieldTypeDelete is the builder for deleting a FieldType entity.
 type FieldTypeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *FieldTypeMutation
-	predicates []predicate.FieldType
+	hooks    []Hook
+	mutation *FieldTypeMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
-	ftd.predicates = append(ftd.predicates, ps...)
+	ftd.mutation.predicates = append(ftd.mutation.predicates, ps...)
 	return ftd
 }
 
@@ -81,7 +80,7 @@ func (ftd *FieldTypeDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (ftd *FieldTypeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(fieldtype.Label)
-	for _, p := range ftd.predicates {
+	for _, p := range ftd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

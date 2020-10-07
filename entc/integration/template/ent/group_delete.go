@@ -20,14 +20,13 @@ import (
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupMutation
-	predicates []predicate.Group
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.predicates = append(gd.predicates, ps...)
+	gd.mutation.predicates = append(gd.mutation.predicates, ps...)
 	return gd
 }
 
@@ -79,7 +78,7 @@ func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := gd.predicates; len(ps) > 0 {
+	if ps := gd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

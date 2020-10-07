@@ -20,14 +20,13 @@ import (
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	id.predicates = append(id.predicates, ps...)
+	id.mutation.predicates = append(id.mutation.predicates, ps...)
 	return id
 }
 
@@ -79,7 +78,7 @@ func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := id.predicates; len(ps) > 0 {
+	if ps := id.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

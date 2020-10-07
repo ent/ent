@@ -20,14 +20,13 @@ import (
 // GoodsDelete is the builder for deleting a Goods entity.
 type GoodsDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GoodsMutation
-	predicates []predicate.Goods
+	hooks    []Hook
+	mutation *GoodsMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (gd *GoodsDelete) Where(ps ...predicate.Goods) *GoodsDelete {
-	gd.predicates = append(gd.predicates, ps...)
+	gd.mutation.predicates = append(gd.mutation.predicates, ps...)
 	return gd
 }
 
@@ -79,7 +78,7 @@ func (gd *GoodsDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := gd.predicates; len(ps) > 0 {
+	if ps := gd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

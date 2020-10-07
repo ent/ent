@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
 	"github.com/facebook/ent/examples/edgeindex/ent/street"
 
 	"github.com/facebook/ent"
@@ -44,6 +45,7 @@ type CityMutation struct {
 	clearedstreets bool
 	done           bool
 	oldValue       func(context.Context) (*City, error)
+	predicates     []predicate.City
 }
 
 var _ ent.Mutation = (*CityMutation)(nil)
@@ -428,6 +430,7 @@ type StreetMutation struct {
 	clearedcity   bool
 	done          bool
 	oldValue      func(context.Context) (*Street, error)
+	predicates    []predicate.Street
 }
 
 var _ ent.Mutation = (*StreetMutation)(nil)

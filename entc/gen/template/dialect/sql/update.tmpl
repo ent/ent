@@ -31,7 +31,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		}
 		_spec.Node.ID.Value = id
 	{{- else }}
-		if ps := {{ $receiver }}.predicates; len(ps) > 0 {
+		if ps := {{ $mutation }}.predicates; len(ps) > 0 {
 			_spec.Predicate = func(selector *sql.Selector) {
 				for i := range ps {
 					ps[i](selector)

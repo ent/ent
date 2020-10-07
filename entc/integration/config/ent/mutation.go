@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/entc/integration/config/ent/predicate"
 )
 
 const (
@@ -36,6 +37,7 @@ type UserMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

@@ -14,6 +14,7 @@ import (
 
 	"github.com/facebook/ent/examples/start/ent/car"
 	"github.com/facebook/ent/examples/start/ent/group"
+	"github.com/facebook/ent/examples/start/ent/predicate"
 	"github.com/facebook/ent/examples/start/ent/user"
 
 	"github.com/facebook/ent"
@@ -47,6 +48,7 @@ type CarMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Car, error)
+	predicates    []predicate.Car
 }
 
 var _ ent.Mutation = (*CarMutation)(nil)
@@ -464,6 +466,7 @@ type GroupMutation struct {
 	clearedusers  bool
 	done          bool
 	oldValue      func(context.Context) (*Group, error)
+	predicates    []predicate.Group
 }
 
 var _ ent.Mutation = (*GroupMutation)(nil)
@@ -854,6 +857,7 @@ type UserMutation struct {
 	clearedgroups bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

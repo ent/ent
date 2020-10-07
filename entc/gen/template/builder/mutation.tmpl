@@ -63,6 +63,7 @@ type {{ $mutation }} struct {
 	{{- end }}
 	done bool
 	oldValue func(context.Context) (*{{ $n.Name }}, error)
+	predicates []predicate.{{ $n.Name }}
 }
 
 var _ ent.Mutation = (*{{ $mutation }})(nil)

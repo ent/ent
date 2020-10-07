@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/facebook/ent/entc/integration/privacy/ent/predicate"
 	"github.com/facebook/ent/entc/integration/privacy/ent/task"
 	"github.com/facebook/ent/entc/integration/privacy/ent/team"
 	"github.com/facebook/ent/entc/integration/privacy/ent/user"
@@ -50,6 +51,7 @@ type TaskMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Task, error)
+	predicates    []predicate.Task
 }
 
 var _ ent.Mutation = (*TaskMutation)(nil)
@@ -625,6 +627,7 @@ type TeamMutation struct {
 	clearedusers  bool
 	done          bool
 	oldValue      func(context.Context) (*Team, error)
+	predicates    []predicate.Team
 }
 
 var _ ent.Mutation = (*TeamMutation)(nil)
@@ -1094,6 +1097,7 @@ type UserMutation struct {
 	clearedtasks  bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

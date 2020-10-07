@@ -20,14 +20,13 @@ import (
 // TeamDelete is the builder for deleting a Team entity.
 type TeamDelete struct {
 	config
-	hooks      []Hook
-	mutation   *TeamMutation
-	predicates []predicate.Team
+	hooks    []Hook
+	mutation *TeamMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (td *TeamDelete) Where(ps ...predicate.Team) *TeamDelete {
-	td.predicates = append(td.predicates, ps...)
+	td.mutation.predicates = append(td.mutation.predicates, ps...)
 	return td
 }
 
@@ -79,7 +78,7 @@ func (td *TeamDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := td.predicates; len(ps) > 0 {
+	if ps := td.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

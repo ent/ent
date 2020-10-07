@@ -21,14 +21,13 @@ import (
 // CardDelete is the builder for deleting a Card entity.
 type CardDelete struct {
 	config
-	hooks      []Hook
-	mutation   *CardMutation
-	predicates []predicate.Card
+	hooks    []Hook
+	mutation *CardMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (cd *CardDelete) Where(ps ...predicate.Card) *CardDelete {
-	cd.predicates = append(cd.predicates, ps...)
+	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd
 }
 
@@ -81,7 +80,7 @@ func (cd *CardDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (cd *CardDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(card.Label)
-	for _, p := range cd.predicates {
+	for _, p := range cd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

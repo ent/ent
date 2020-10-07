@@ -21,14 +21,13 @@ import (
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupMutation
-	predicates []predicate.Group
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.predicates = append(gd.predicates, ps...)
+	gd.mutation.predicates = append(gd.mutation.predicates, ps...)
 	return gd
 }
 
@@ -81,7 +80,7 @@ func (gd *GroupDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (gd *GroupDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(group.Label)
-	for _, p := range gd.predicates {
+	for _, p := range gd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

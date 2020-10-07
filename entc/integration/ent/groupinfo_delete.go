@@ -20,14 +20,13 @@ import (
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupInfoMutation
-	predicates []predicate.GroupInfo
+	hooks    []Hook
+	mutation *GroupInfoMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
-	gid.predicates = append(gid.predicates, ps...)
+	gid.mutation.predicates = append(gid.mutation.predicates, ps...)
 	return gid
 }
 
@@ -79,7 +78,7 @@ func (gid *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := gid.predicates; len(ps) > 0 {
+	if ps := gid.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

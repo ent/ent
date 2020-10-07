@@ -21,14 +21,13 @@ import (
 // FileTypeDelete is the builder for deleting a FileType entity.
 type FileTypeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *FileTypeMutation
-	predicates []predicate.FileType
+	hooks    []Hook
+	mutation *FileTypeMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
-	ftd.predicates = append(ftd.predicates, ps...)
+	ftd.mutation.predicates = append(ftd.mutation.predicates, ps...)
 	return ftd
 }
 
@@ -81,7 +80,7 @@ func (ftd *FileTypeDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (ftd *FileTypeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(filetype.Label)
-	for _, p := range ftd.predicates {
+	for _, p := range ftd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

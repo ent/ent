@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/facebook/ent/examples/m2mrecur/ent/predicate"
 	"github.com/facebook/ent/examples/m2mrecur/ent/user"
 
 	"github.com/facebook/ent"
@@ -47,6 +48,7 @@ type UserMutation struct {
 	clearedfollowing bool
 	done             bool
 	oldValue         func(context.Context) (*User, error)
+	predicates       []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

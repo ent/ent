@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/entc/integration/customid/ent/car"
 	"github.com/facebook/ent/entc/integration/customid/ent/group"
 	"github.com/facebook/ent/entc/integration/customid/ent/pet"
+	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
 	"github.com/facebook/ent/entc/integration/customid/ent/user"
 	"github.com/google/uuid"
 
@@ -53,6 +54,7 @@ type BlobMutation struct {
 	clearedlinks  bool
 	done          bool
 	oldValue      func(context.Context) (*Blob, error)
+	predicates    []predicate.Blob
 }
 
 var _ ent.Mutation = (*BlobMutation)(nil)
@@ -504,6 +506,7 @@ type CarMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Car, error)
+	predicates    []predicate.Car
 }
 
 var _ ent.Mutation = (*CarMutation)(nil)
@@ -1090,6 +1093,7 @@ type GroupMutation struct {
 	clearedusers  bool
 	done          bool
 	oldValue      func(context.Context) (*Group, error)
+	predicates    []predicate.Group
 }
 
 var _ ent.Mutation = (*GroupMutation)(nil)
@@ -1425,6 +1429,7 @@ type PetMutation struct {
 	clearedbest_friend bool
 	done               bool
 	oldValue           func(context.Context) (*Pet, error)
+	predicates         []predicate.Pet
 }
 
 var _ ent.Mutation = (*PetMutation)(nil)
@@ -1954,6 +1959,7 @@ type UserMutation struct {
 	clearedpets     bool
 	done            bool
 	oldValue        func(context.Context) (*User, error)
+	predicates      []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

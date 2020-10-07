@@ -20,14 +20,13 @@ import (
 // ItemUpdate is the builder for updating Item entities.
 type ItemUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
 // Where adds a new predicate for the builder.
 func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	iu.predicates = append(iu.predicates, ps...)
+	iu.mutation.predicates = append(iu.mutation.predicates, ps...)
 	return iu
 }
 
@@ -101,7 +100,7 @@ func (iu *ItemUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (iu *ItemUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(item.Label)
-	for _, p := range iu.predicates {
+	for _, p := range iu.mutation.predicates {
 		p(v)
 	}
 	var (
