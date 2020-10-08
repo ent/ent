@@ -202,12 +202,11 @@ func createDir(schema, entity string) error {
 	}
 
 	if entity == "" {
+		entity = defaultEntity
 		if strings.Contains(schema, "/") {
 			if schmDir := filepath.Dir(schema); schmDir != "." {
 				entity = schmDir
 			}
-		} else {
-			entity = defaultEntity
 		}
 	}
 
