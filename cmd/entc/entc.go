@@ -36,7 +36,6 @@ func main() {
 					Example: examples(
 						"entc init Example",
 						"entc init --target entv1/schema User Group",
-						"entc init --target entv1/schema --entity entities User Group",
 					),
 					Args: func(_ *cobra.Command, names []string) error {
 						for _, name := range names {
