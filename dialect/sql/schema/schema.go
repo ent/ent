@@ -100,7 +100,7 @@ func (t *Table) column(name string) (*Column, bool) {
 // index returns a table index by its name.
 func (t *Table) index(name string) (*Index, bool) {
 	for _, idx := range t.Indexes {
-		if idx.Name == name {
+		if name == idx.Name || name == idx.realname {
 			return idx, true
 		}
 		// Same as below, there are cases where the index name

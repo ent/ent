@@ -39,6 +39,19 @@ func (f GroupFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Value, e
 	return f(ctx, mv)
 }
 
+// The MediaFunc type is an adapter to allow the use of ordinary
+// function as Media mutator.
+type MediaFunc func(context.Context, *entv2.MediaMutation) (entv2.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MediaFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
+	mv, ok := m.(*entv2.MediaMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv2.MediaMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The PetFunc type is an adapter to allow the use of ordinary
 // function as Pet mutator.
 type PetFunc func(context.Context, *entv2.PetMutation) (entv2.Value, error)

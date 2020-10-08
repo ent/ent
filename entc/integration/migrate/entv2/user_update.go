@@ -363,6 +363,11 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf("entv2: validator failed for field \"mixed_enum\": %w", err)}
 		}
 	}
+	if v, ok := uu.mutation.Nickname(); ok {
+		if err := user.NicknameValidator(v); err != nil {
+			return &ValidationError{Name: "nickname", err: fmt.Errorf("entv2: validator failed for field \"nickname\": %w", err)}
+		}
+	}
 	if v, ok := uu.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
@@ -1005,6 +1010,11 @@ func (uuo *UserUpdateOne) check() error {
 	if v, ok := uuo.mutation.MixedEnum(); ok {
 		if err := user.MixedEnumValidator(v); err != nil {
 			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf("entv2: validator failed for field \"mixed_enum\": %w", err)}
+		}
+	}
+	if v, ok := uuo.mutation.Nickname(); ok {
+		if err := user.NicknameValidator(v); err != nil {
+			return &ValidationError{Name: "nickname", err: fmt.Errorf("entv2: validator failed for field \"nickname\": %w", err)}
 		}
 	}
 	if v, ok := uuo.mutation.State(); ok {

@@ -189,8 +189,10 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 		if err := rows.Scan(&name, &column, &primary, &unique, &seqindex); err != nil {
 			return nil, fmt.Errorf("scanning index description: %v", err)
 		}
-		// If the index is prefixed with the table, it's probably was
-		// added by `addIndex` (and not entc) and it should be trimmed.
+		// If the index is prefixed with the table, it may was added by
+		// `addIndex` and it should be trimmed. But, since entc prefixes
+		// all indexes with schema-type, for uncountable types (like, media
+		// or equipment) this isn't correct, and we fallback for the real-name.
 		short := strings.TrimPrefix(name, table+"_")
 		idx, ok := names[short]
 		if !ok {
