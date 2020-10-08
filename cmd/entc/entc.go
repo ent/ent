@@ -197,9 +197,6 @@ func createDir(schema, entity string) error {
 	if err == nil || !os.IsNotExist(err) {
 		return err
 	}
-	if err := os.MkdirAll(schema, os.ModePerm); err != nil {
-		return fmt.Errorf("creating schema directory: %w", err)
-	}
 
 	if entity == "" {
 		entity = defaultEntity
@@ -208,6 +205,14 @@ func createDir(schema, entity string) error {
 				entity = schmDir
 			}
 		}
+	}
+
+	if relPath, err := filepath.Rel(entity, schema); err == nil && relPath == "." {
+		return errors.New("schemas and entities can't be generated in the same path. see: entc help init")
+	}
+
+	if err := os.MkdirAll(schema, os.ModePerm); err != nil {
+		return fmt.Errorf("creating schema directory: %w", err)
 	}
 
 	_, err = os.Stat(entity)
