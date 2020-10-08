@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/media"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
@@ -30,6 +31,7 @@ const (
 	// Node types.
 	TypeCar   = "Car"
 	TypeGroup = "Group"
+	TypeMedia = "Media"
 	TypePet   = "Pet"
 	TypeUser  = "User"
 )
@@ -563,6 +565,396 @@ func (m *GroupMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *GroupMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Group edge %s", name)
+}
+
+// MediaMutation represents an operation that mutate the MediaSlice
+// nodes in the graph.
+type MediaMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	source        *string
+	source_uri    *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Media, error)
+	predicates    []predicate.Media
+}
+
+var _ ent.Mutation = (*MediaMutation)(nil)
+
+// mediaOption allows to manage the mutation configuration using functional options.
+type mediaOption func(*MediaMutation)
+
+// newMediaMutation creates new mutation for $n.Name.
+func newMediaMutation(c config, op Op, opts ...mediaOption) *MediaMutation {
+	m := &MediaMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMedia,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMediaID sets the id field of the mutation.
+func withMediaID(id int) mediaOption {
+	return func(m *MediaMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Media
+		)
+		m.oldValue = func(ctx context.Context) (*Media, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Media.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMedia sets the old Media of the mutation.
+func withMedia(node *Media) mediaOption {
+	return func(m *MediaMutation) {
+		m.oldValue = func(context.Context) (*Media, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MediaMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MediaMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("entv2: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *MediaMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetSource sets the source field.
+func (m *MediaMutation) SetSource(s string) {
+	m.source = &s
+}
+
+// Source returns the source value in the mutation.
+func (m *MediaMutation) Source() (r string, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old source value of the Media.
+// If the Media object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *MediaMutation) OldSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSource is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// ClearSource clears the value of source.
+func (m *MediaMutation) ClearSource() {
+	m.source = nil
+	m.clearedFields[media.FieldSource] = struct{}{}
+}
+
+// SourceCleared returns if the field source was cleared in this mutation.
+func (m *MediaMutation) SourceCleared() bool {
+	_, ok := m.clearedFields[media.FieldSource]
+	return ok
+}
+
+// ResetSource reset all changes of the "source" field.
+func (m *MediaMutation) ResetSource() {
+	m.source = nil
+	delete(m.clearedFields, media.FieldSource)
+}
+
+// SetSourceURI sets the source_uri field.
+func (m *MediaMutation) SetSourceURI(s string) {
+	m.source_uri = &s
+}
+
+// SourceURI returns the source_uri value in the mutation.
+func (m *MediaMutation) SourceURI() (r string, exists bool) {
+	v := m.source_uri
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceURI returns the old source_uri value of the Media.
+// If the Media object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *MediaMutation) OldSourceURI(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSourceURI is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSourceURI requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceURI: %w", err)
+	}
+	return oldValue.SourceURI, nil
+}
+
+// ClearSourceURI clears the value of source_uri.
+func (m *MediaMutation) ClearSourceURI() {
+	m.source_uri = nil
+	m.clearedFields[media.FieldSourceURI] = struct{}{}
+}
+
+// SourceURICleared returns if the field source_uri was cleared in this mutation.
+func (m *MediaMutation) SourceURICleared() bool {
+	_, ok := m.clearedFields[media.FieldSourceURI]
+	return ok
+}
+
+// ResetSourceURI reset all changes of the "source_uri" field.
+func (m *MediaMutation) ResetSourceURI() {
+	m.source_uri = nil
+	delete(m.clearedFields, media.FieldSourceURI)
+}
+
+// Op returns the operation name.
+func (m *MediaMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Media).
+func (m *MediaMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *MediaMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.source != nil {
+		fields = append(fields, media.FieldSource)
+	}
+	if m.source_uri != nil {
+		fields = append(fields, media.FieldSourceURI)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *MediaMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case media.FieldSource:
+		return m.Source()
+	case media.FieldSourceURI:
+		return m.SourceURI()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *MediaMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case media.FieldSource:
+		return m.OldSource(ctx)
+	case media.FieldSourceURI:
+		return m.OldSourceURI(ctx)
+	}
+	return nil, fmt.Errorf("unknown Media field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *MediaMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case media.FieldSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case media.FieldSourceURI:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceURI(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Media field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *MediaMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *MediaMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *MediaMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Media numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *MediaMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(media.FieldSource) {
+		fields = append(fields, media.FieldSource)
+	}
+	if m.FieldCleared(media.FieldSourceURI) {
+		fields = append(fields, media.FieldSourceURI)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *MediaMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MediaMutation) ClearField(name string) error {
+	switch name {
+	case media.FieldSource:
+		m.ClearSource()
+		return nil
+	case media.FieldSourceURI:
+		m.ClearSourceURI()
+		return nil
+	}
+	return fmt.Errorf("unknown Media nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *MediaMutation) ResetField(name string) error {
+	switch name {
+	case media.FieldSource:
+		m.ResetSource()
+		return nil
+	case media.FieldSourceURI:
+		m.ResetSourceURI()
+		return nil
+	}
+	return fmt.Errorf("unknown Media field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *MediaMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *MediaMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *MediaMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *MediaMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *MediaMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *MediaMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *MediaMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Media unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *MediaMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Media edge %s", name)
 }
 
 // PetMutation represents an operation that mutate the Pets

@@ -23,6 +23,10 @@ func init() {
 	userDescMixedString := userMixinFields0[0].Descriptor()
 	// user.DefaultMixedString holds the default value on creation for the mixed_string field.
 	user.DefaultMixedString = userDescMixedString.Default.(string)
+	// userDescNickname is the schema descriptor for nickname field.
+	userDescNickname := userFields[3].Descriptor()
+	// user.NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
+	user.NicknameValidator = userDescNickname.Validators[0].(func(string) error)
 	// userDescPhone is the schema descriptor for phone field.
 	userDescPhone := userFields[4].Descriptor()
 	// user.DefaultPhone holds the default value on creation for the phone field.

@@ -43,6 +43,26 @@ var (
 		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// MediaColumns holds the columns for the "media" table.
+	MediaColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "source", Type: field.TypeString, Nullable: true},
+		{Name: "source_uri", Type: field.TypeString, Nullable: true},
+	}
+	// MediaTable holds the schema information for the "media" table.
+	MediaTable = &schema.Table{
+		Name:        "media",
+		Columns:     MediaColumns,
+		PrimaryKey:  []*schema.Column{MediaColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "media_source_source_uri",
+				Unique:  true,
+				Columns: []*schema.Column{MediaColumns[1], MediaColumns[2]},
+			},
+		},
+	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -70,7 +90,7 @@ var (
 		{Name: "mixed_enum", Type: field.TypeEnum, Enums: []string{"on", "off"}, Default: "on"},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
-		{Name: "nickname", Type: field.TypeString},
+		{Name: "nickname", Type: field.TypeString, Size: 255},
 		{Name: "phone", Type: field.TypeString, Default: "unknown"},
 		{Name: "buffer", Type: field.TypeBytes, Nullable: true},
 		{Name: "title", Type: field.TypeString, Default: "SWE"},
@@ -124,6 +144,7 @@ var (
 	Tables = []*schema.Table{
 		CarsTable,
 		GroupsTable,
+		MediaTable,
 		PetsTable,
 		UsersTable,
 		FriendsTable,

@@ -483,20 +483,32 @@ func TestPostgres_Create(t *testing.T) {
 		{
 			name: "add and remove indexes",
 			tables: func() []*Table {
-				c := []*Column{
+				c1 := []*Column{
 					{Name: "id", Type: field.TypeInt, Increment: true},
 					// Add implicit index.
 					{Name: "age", Type: field.TypeInt, Unique: true},
 					{Name: "score", Type: field.TypeInt},
 				}
+				c2 := []*Column{
+					{Name: "id", Type: field.TypeInt, Increment: true},
+					{Name: "score", Type: field.TypeInt},
+				}
 				return []*Table{
 					{
 						Name:       "users",
-						Columns:    c,
-						PrimaryKey: c[0:1],
+						Columns:    c1,
+						PrimaryKey: c1[0:1],
 						Indexes: Indexes{
 							// Change non-unique index to unique.
-							{Name: "user_score", Columns: c[2:3], Unique: true},
+							{Name: "user_score", Columns: c1[2:3], Unique: true},
+						},
+					},
+					{
+						Name:       "equipment",
+						Columns:    c2,
+						PrimaryKey: c2[0:1],
+						Indexes: Indexes{
+							{Name: "equipment_score", Columns: c2[1:]},
 						},
 					},
 				}
@@ -525,6 +537,16 @@ func TestPostgres_Create(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectExec(escape(`CREATE UNIQUE INDEX "user_score" ON "users"("score")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.tableExists("equipment", true)
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+					WithArgs("equipment").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
+						AddRow("id", "bigint", "NO", "NULL").
+						AddRow("score", "bigint", "NO", "NULL"))
+				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "equipment"))).
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
+						AddRow("users_pkey", "id", "t", "t", 0).
+						AddRow("equipment_score", "score", "f", "f", 0))
 				mock.ExpectCommit()
 			},
 		},

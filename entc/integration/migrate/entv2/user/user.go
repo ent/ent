@@ -107,6 +107,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultMixedString holds the default value on creation for the mixed_string field.
 	DefaultMixedString string
+	// NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
+	NicknameValidator func(string) error
 	// DefaultPhone holds the default value on creation for the phone field.
 	DefaultPhone string
 	// DefaultTitle holds the default value on creation for the title field.

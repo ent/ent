@@ -49,7 +49,7 @@ func TestMySQL(t *testing.T) {
 func TestPostgres(t *testing.T) {
 	// Version 12 is disabled here due to segfault on migration. It will be re-enabled on its next release.
 	// More info can be found here: https://www.postgresql.org/message-id/23031.1572362774%40sss.pgh.pa.us
-	for version, port := range map[string]int{"10": 5430, "11": 5431} {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433} {
 		t.Run(version, func(t *testing.T) {
 			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable", port)
 			root, err := sql.Open(dialect.Postgres, dsn)
@@ -83,10 +83,11 @@ func TestSQLite(t *testing.T) {
 	SanityV2(t, client)
 	idRange(t, client.Car.Create().SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, client.Pet.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
-	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, client.Media.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, client.Pet.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 4<<32-1, 5<<32)
 
-	// override the default behavior of LIKE in SQLite.
+	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
 	_, err = drv.ExecContext(ctx, "PRAGMA case_sensitive_like=1")
 	require.NoError(t, err)
@@ -97,22 +98,24 @@ func TestSQLite(t *testing.T) {
 func V1ToV2(t *testing.T, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 	ctx := context.Background()
 
-	// run migration and execute queries on v1.
+	// Run migration and execute queries on v1.
 	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
 	SanityV1(t, clientv1)
 
-	// run migration and execute queries on v2.
+	// Run migration and execute queries on v2.
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, clientv2)
 
-	// since "users" created in the migration of v1, it will occupy the range of 0 ... 1<<32-1,
-	// even though they are ordered differently in the migration of v2 (groups, pets, users).
 	idRange(t, clientv2.Car.Create().SaveX(ctx).ID, 0, 1<<32)
+	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
+	// even though they are ordered differently in the migration of v2 (groups, pets, users).
 	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
-	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
 
-	// sql specific predicates.
+	// SQL specific predicates.
 	EqualFold(t, clientv2)
 	ContainsFold(t, clientv2)
 
@@ -130,18 +133,18 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	_, err := client.User.Create().SetAge(2).SetName("foobarbazqux").Save(ctx)
 	require.Error(t, err, "name is limited to 10 chars")
 
-	// unique index on (name, address).
+	// Unique index on (name, address).
 	client.User.Create().SetAge(3).SetName("foo").SetNickname("nick_foo_2").SetAddress("tlv").SetState(userv1.StateLoggedIn).SaveX(ctx)
 	_, err = client.User.Create().SetAge(4).SetName("foo").SetAddress("tlv").Save(ctx)
 	require.Error(t, err)
 
-	// blob type limited to 255.
+	// Blob type limited to 255.
 	u = u.Update().SetBlob([]byte("hello")).SaveX(ctx)
 	require.Equal(t, "hello", string(u.Blob))
 	_, err = u.Update().SetBlob(make([]byte, 256)).Save(ctx)
 	require.True(t, strings.Contains(t.Name(), "Postgres") || err != nil, "blob should be limited on SQLite and MySQL")
 
-	// invalid enum value.
+	// Invalid enum value.
 	_, err = client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetState("unknown").Save(ctx)
 	require.Error(t, err)
 }
@@ -164,19 +167,19 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 	_, err = client.User.Create().SetAge(1).SetName("foobarbazqux").SetNickname("nick_bar").SetPhone("200").Save(ctx)
 	require.NoError(t, err, "name is not limited to 10 chars and nickname is not unique")
 
-	// new unique index was added to (age, phone).
+	// New unique index was added to (age, phone).
 	_, err = client.User.Create().SetAge(1).SetName("foo").SetPhone("200").SetNickname("nick_bar").Save(ctx)
 	require.Error(t, err)
 	require.True(t, entv2.IsConstraintError(err))
 
-	// ensure all rows in the database have the same default for the `title` column.
+	// Ensure all rows in the database have the same default for the `title` column.
 	require.Equal(
 		t,
 		client.User.Query().CountX(ctx),
 		client.User.Query().Where(user.Title(user.DefaultTitle)).CountX(ctx),
 	)
 
-	// blob type was extended.
+	// Blob type was extended.
 	u, err = u.Update().SetBlob(make([]byte, 256)).SetState(user.StateLoggedOut).Save(ctx)
 	require.NoError(t, err, "data type blob was extended in v2")
 	require.Equal(t, make([]byte, 256), u.Blob)
