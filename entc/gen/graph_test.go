@@ -47,7 +47,8 @@ var (
 		},
 	}
 	T2 = &load.Schema{
-		Name: "T2",
+		Name:        "T2",
+		Annotations: dict("GQL", map[string]string{"Name": "T2"}),
 		Fields: []*load.Field{
 			{Name: "active", Info: &field.TypeInfo{Type: field.TypeBool}},
 		},
@@ -112,6 +113,7 @@ func TestNewGraph(t *testing.T) {
 	}
 
 	t2 := graph.Nodes[1]
+	require.Equal(map[string]string{"Name": "T2"}, t2.Annotations["GQL"])
 	f1, e1 := t2.Fields[0], t2.Edges[0]
 	require.Equal("bool", f1.Type.String())
 	require.Equal("active", f1.Name)
