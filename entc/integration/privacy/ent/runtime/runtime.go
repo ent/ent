@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/entc/integration/privacy/ent/user"
 
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/privacy"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -22,7 +23,7 @@ import (
 // to their package variables.
 func init() {
 	taskMixin := schema.Task{}.Mixin()
-	task.Policy = newPolicy(taskMixin[0], taskMixin[1], schema.Task{})
+	task.Policy = privacy.NewPolicies(taskMixin[0], taskMixin[1], schema.Task{})
 	task.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 			if err := task.Policy.EvalMutation(ctx, m); err != nil {
@@ -41,7 +42,7 @@ func init() {
 	// task.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	task.TitleValidator = taskDescTitle.Validators[0].(func(string) error)
 	teamMixin := schema.Team{}.Mixin()
-	team.Policy = newPolicy(teamMixin[0], schema.Team{})
+	team.Policy = privacy.NewPolicies(teamMixin[0], schema.Team{})
 	team.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 			if err := team.Policy.EvalMutation(ctx, m); err != nil {
@@ -57,7 +58,7 @@ func init() {
 	// team.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	team.NameValidator = teamDescName.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
-	user.Policy = newPolicy(userMixin[0], userMixin[1], schema.User{})
+	user.Policy = privacy.NewPolicies(userMixin[0], userMixin[1], schema.User{})
 	user.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 			if err := user.Policy.EvalMutation(ctx, m); err != nil {
@@ -72,37 +73,6 @@ func init() {
 	userDescName := userFields[0].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
-}
-
-type policies []ent.Policy
-
-// newPolicy creates a policy from list of mixin and ent.Schema.
-func newPolicy(ps ...interface{ Policy() ent.Policy }) ent.Policy {
-	pocs := make(policies, 0, len(ps))
-	for _, p := range ps {
-		if policy := p.Policy(); policy != nil {
-			pocs = append(pocs, policy)
-		}
-	}
-	return pocs
-}
-
-func (p policies) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	for i := range p {
-		if err := p[i].EvalMutation(ctx, m); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (p policies) EvalQuery(ctx context.Context, q ent.Query) error {
-	for i := range p {
-		if err := p[i].EvalQuery(ctx, q); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 const (

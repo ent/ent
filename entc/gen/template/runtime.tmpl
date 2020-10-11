@@ -76,6 +76,7 @@ import (
 	{{- end }}
 
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/privacy"
 )
 
 
@@ -91,7 +92,7 @@ func init() {
 	{{- end }}
 	{{- with $policies := $n.PolicyPositions }}
 		{{- /* policies defined in schema and mixins. */}}
-		{{ $pkg }}.Policy = newPolicy({{ range $idx := $n.MixedInPolicies }}{{ $pkg }}Mixin[{{ $idx }}],{{ end }}{{ $schema }}.{{ $n.Name }}{})
+		{{ $pkg }}.Policy = privacy.NewPolicies({{ range $idx := $n.MixedInPolicies }}{{ $pkg }}Mixin[{{ $idx }}],{{ end }}{{ $schema }}.{{ $n.Name }}{})
 		{{ $pkg }}.Hooks[0] = func(next ent.Mutator) ent.Mutator {
 			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 				if err := {{ $pkg }}.Policy.EvalMutation(ctx, m); err != nil {
@@ -190,39 +191,4 @@ func init() {
 {{- end }}
 {{- end }}
 }
-
-{{ $hasPolicy := false }}{{ range $n := $.Nodes }}{{ if $n.NumPolicy }}{{ $hasPolicy = true }}{{ end }}{{ end }}
-{{ if $hasPolicy }}
-	type policies []ent.Policy
-
-	// newPolicy creates a policy from list of mixin and ent.Schema.
-	func newPolicy(ps ...interface{ Policy() ent.Policy }) ent.Policy {
-		pocs := make(policies, 0, len(ps))
-		for _, p := range ps {
-			if policy := p.Policy(); policy != nil {
-				pocs = append(pocs, policy)
-			}
-		}
-		return pocs
-	}
-
-	func (p policies) EvalMutation(ctx context.Context, m ent.Mutation) error {
-		for i := range p {
-			if err := p[i].EvalMutation(ctx, m); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	func (p policies) EvalQuery(ctx context.Context, q ent.Query) error {
-		for i := range p {
-			if err := p[i].EvalQuery(ctx, q); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-{{ end }}
-
 {{ end }}
