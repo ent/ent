@@ -153,6 +153,9 @@ type (
 		// Policy returns a privacy policy to add to the schema.
 		// Note that mixin policy are executed before schema policy.
 		Policy() Policy
+		// Annotations returns a list of schema annotations to add
+		// to the schema annotations.
+		Annotations() []schema.Annotation
 	}
 
 	// The Policy type defines the write privacy policy of an entity.

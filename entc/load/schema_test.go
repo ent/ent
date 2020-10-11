@@ -30,12 +30,32 @@ func (OrderConfig) Name() string {
 	return "order_config"
 }
 
-func (o *OrderConfig) MarshalJSON() ([]byte, error) {
-	return json.Marshal(*o)
+type IDConfig struct {
+	TagName string
+}
+
+func (IDConfig) Name() string {
+	return "id_config"
+}
+
+type AnnotationMixin struct {
+	mixin.Schema
+}
+
+func (AnnotationMixin) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		IDConfig{TagName: "id tag"},
+	}
 }
 
 type User struct {
 	ent.Schema
+}
+
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		AnnotationMixin{},
+	}
 }
 
 func (User) Annotations() []schema.Annotation {
@@ -110,7 +130,7 @@ func TestMarshalSchema(t *testing.T) {
 		schema, err := UnmarshalSchema(buf)
 		require.NoError(t, err)
 		require.Equal(t, "User", schema.Name)
-		require.Len(t, schema.Annotations, 1)
+		require.Len(t, schema.Annotations, 2)
 		ant := schema.Annotations["order_config"].(map[string]interface{})
 		require.Equal(t, ant["FieldName"], "type annotations")
 
