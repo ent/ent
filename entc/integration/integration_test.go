@@ -221,6 +221,12 @@ func Sanity(t *testing.T, client *ent.Client) {
 	fi, ok := reflect.TypeOf(ent.Card{}).FieldByName("Edges")
 	require.True(ok)
 	require.NotEmpty(fi.Tag.Get("mashraki"))
+	fi, ok = reflect.TypeOf(ent.Card{}).FieldByName("ID")
+	require.True(ok)
+	require.Equal("-", fi.Tag.Get("json"))
+	fi, ok = reflect.TypeOf(ent.Card{}).FieldByName("Number")
+	require.True(ok)
+	require.Equal("-", fi.Tag.Get("json"))
 }
 
 func Clone(t *testing.T, client *ent.Client) {

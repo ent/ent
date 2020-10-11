@@ -20,6 +20,10 @@ type Card struct {
 
 func (Card) Annotations() []schema.Annotation {
 	return []schema.Annotation{
+		field.StructTag(
+			"id", `json:"-"`,
+			"number", `json:"-"`,
+		),
 		edge.StructTag(`json:"card_edges" mashraki:"edges"`),
 	}
 }
