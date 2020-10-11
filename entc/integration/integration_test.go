@@ -215,8 +215,12 @@ func Sanity(t *testing.T, client *ent.Client) {
 	client.User.Delete().Where(user.IDIn(ids...)).ExecX(ctx)
 	ids = client.User.Query().IDsX(ctx)
 	require.Empty(ids)
-	// nop.
+	// Nop.
 	client.User.Delete().Where(user.IDIn(ids...)).ExecX(ctx)
+	// Check the struct-tag annotation.
+	fi, ok := reflect.TypeOf(ent.Card{}).FieldByName("Edges")
+	require.True(ok)
+	require.NotEmpty(fi.Tag.Get("mashraki"))
 }
 
 func Clone(t *testing.T, client *ent.Client) {
