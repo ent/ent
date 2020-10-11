@@ -115,22 +115,26 @@ There are ~2 ways to do this:
 ```go
 // Option 1: use type assertion.
 client.Use(func(next ent.Mutator) ent.Mutator {
-	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-		if ns, ok := m.(interface{ SetName(string) }); ok {
-		    ns.SetName("Ariel Mashraki")
-		}
-		return next.Mutate(ctx, m)
+    type NameSetter interface {
+        SetName(value string)
+    }
+    return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+        // A schema with a "name" field must implement the NameSetter interface. 
+        if ns, ok := m.(NameSetter); ok {
+            ns.SetName("Ariel Mashraki")
+        }
+        return next.Mutate(ctx, m)
     })
 })
 
 // Option 2: use the generic ent.Mutation interface.
 client.Use(func(next ent.Mutator) ent.Mutator {
 	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-		if err := m.SetField("name", "Ariel Mashraki"); err != nil {
+        if err := m.SetField("name", "Ariel Mashraki"); err != nil {
             // An error is returned, if the field is not defined in
 			// the schema, or if the type mismatch the field type.
         }
-		return next.Mutate(ctx, m)
+        return next.Mutate(ctx, m)
     })
 })
 ```
@@ -172,7 +176,7 @@ func (Card) Hooks() []ent.Hook {
 					return next.Mutate(ctx, m)
 				})
 			},
-            // Limit the hook only for these operations.
+			// Limit the hook only for these operations.
 			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
 		),
 		// Second hook.
@@ -238,3 +242,8 @@ func (SomeMixin) Hooks() []ent.Hook {
     }
 }
 ```
+
+## Transaction Hooks
+
+Hooks can also be registered on active transactions, and will be executed on `Tx.Commit` or `Tx.Rollback`.
+For more information, read about it in the [transactions page](transactions.md#hooks). 
