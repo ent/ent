@@ -36,6 +36,9 @@ func (Schema) Hooks() []ent.Hook { return nil }
 // Policy of the mixin.
 func (Schema) Policy() ent.Policy { return nil }
 
+// Annotations of the mixin.
+func (Schema) Annotations() []schema.Annotation { return nil }
+
 // time mixin must implement `Mixin` interface.
 var _ ent.Mixin = (*Schema)(nil)
 

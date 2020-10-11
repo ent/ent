@@ -158,11 +158,12 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		Name:        indirect(reflect.TypeOf(schema)).Name(),
 		Annotations: make(map[string]interface{}),
 	}
-	for _, at := range schema.Annotations() {
-		s.Annotations[at.Name()] = at
-	}
 	if err := s.loadMixin(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+	}
+	// Schema annotations override mixed-in annotations.
+	for _, at := range schema.Annotations() {
+		s.Annotations[at.Name()] = at
 	}
 	if err := s.loadFields(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
@@ -262,6 +263,9 @@ func (s *Schema) loadMixin(schema ent.Interface) error {
 				MixedIn:    true,
 				MixinIndex: i,
 			})
+		}
+		for _, at := range mx.Annotations() {
+			s.Annotations[at.Name()] = at
 		}
 	}
 	return nil
