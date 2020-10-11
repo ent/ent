@@ -8,6 +8,7 @@ package ent
 import (
 	"context"
 
+	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 	"github.com/facebook/ent/schema/index"
@@ -54,6 +55,9 @@ type (
 		Hooks() []Hook
 		// Policy returns the privacy policy of the schema.
 		Policy() Policy
+		// Annotations returns a list of schema annotations to be used by
+		// codegen extensions.
+		Annotations() []schema.Annotation
 	}
 
 	// A Field interface returns a field descriptor for vertex fields/properties.
@@ -200,6 +204,9 @@ func (Schema) Hooks() []Hook { return nil }
 
 // Policy of the schema.
 func (Schema) Policy() Policy { return nil }
+
+// Annotations of the schema.
+func (Schema) Annotations() []schema.Annotation { return nil }
 
 type (
 	// Value represents a value returned by ent.

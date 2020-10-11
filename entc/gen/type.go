@@ -44,6 +44,9 @@ type (
 		// ForeignKeys are the foreign-keys that resides in the type table.
 		ForeignKeys []*ForeignKey
 		foreignKeys map[string]struct{}
+		// Annotations that were defined for the field in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
+		Annotations map[string]interface{}
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -173,6 +176,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		},
 		schema:      schema,
 		Name:        schema.Name,
+		Annotations: schema.Annotations,
 		Fields:      make([]*Field, 0, len(schema.Fields)),
 		fields:      make(map[string]*Field, len(schema.Fields)),
 		foreignKeys: make(map[string]struct{}),

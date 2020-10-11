@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 	"github.com/facebook/ent/schema/index"
@@ -35,6 +36,12 @@ func (o *OrderConfig) MarshalJSON() ([]byte, error) {
 
 type User struct {
 	ent.Schema
+}
+
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		OrderConfig{FieldName: "type annotations"},
+	}
 }
 
 func (User) Fields() []ent.Field {
@@ -103,6 +110,10 @@ func TestMarshalSchema(t *testing.T) {
 		schema, err := UnmarshalSchema(buf)
 		require.NoError(t, err)
 		require.Equal(t, "User", schema.Name)
+		require.Len(t, schema.Annotations, 1)
+		ant := schema.Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "type annotations")
+
 		require.Len(t, schema.Fields, 8)
 		require.Equal(t, "age", schema.Fields[0].Name)
 		require.Equal(t, field.TypeInt, schema.Fields[0].Info.Type)
@@ -111,7 +122,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, field.TypeString, schema.Fields[1].Info.Type)
 		require.Equal(t, "unknown", schema.Fields[1].DefaultValue)
 		require.NotEmpty(t, schema.Fields[1].Annotations)
-		ant := schema.Fields[1].Annotations["order_config"].(map[string]interface{})
+		ant = schema.Fields[1].Annotations["order_config"].(map[string]interface{})
 		require.Equal(t, ant["FieldName"], "name")
 
 		require.Equal(t, "nillable", schema.Fields[2].Name)

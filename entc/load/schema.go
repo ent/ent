@@ -17,13 +17,14 @@ import (
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
-	Name    string      `json:"name,omitempty"`
-	Config  ent.Config  `json:"config,omitempty"`
-	Edges   []*Edge     `json:"edges,omitempty"`
-	Fields  []*Field    `json:"fields,omitempty"`
-	Indexes []*Index    `json:"indexes,omitempty"`
-	Hooks   []*Position `json:"hooks,omitempty"`
-	Policy  []*Position `json:"policy,omitempty"`
+	Name        string                 `json:"name,omitempty"`
+	Config      ent.Config             `json:"config,omitempty"`
+	Edges       []*Edge                `json:"edges,omitempty"`
+	Fields      []*Field               `json:"fields,omitempty"`
+	Indexes     []*Index               `json:"indexes,omitempty"`
+	Hooks       []*Position            `json:"hooks,omitempty"`
+	Policy      []*Position            `json:"policy,omitempty"`
+	Annotations map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // Position describes a position in the schema.
@@ -153,8 +154,12 @@ func NewIndex(idx *index.Descriptor) *Index {
 // that can be decoded into the Schema object object.
 func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	s := &Schema{
-		Config: schema.Config(),
-		Name:   indirect(reflect.TypeOf(schema)).Name(),
+		Config:      schema.Config(),
+		Name:        indirect(reflect.TypeOf(schema)).Name(),
+		Annotations: make(map[string]interface{}),
+	}
+	for _, at := range schema.Annotations() {
+		s.Annotations[at.Name()] = at
 	}
 	if err := s.loadMixin(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
