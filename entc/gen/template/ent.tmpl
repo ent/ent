@@ -29,7 +29,7 @@ type {{ $.Name }} struct {
 	{{- with $.Edges }}
 		// Edges holds the relations/edges for other nodes in the graph.
 		// The values are being populated by the {{ $.Name }}Query when eager-loading is set.
-		Edges {{ $.Name }}Edges `json:"edges"`
+		Edges {{ $.Name }}Edges {{ template "model/edgetags" $ }}
 	{{- end -}}
 	{{- /* Additional fields to add by the storage driver. */}}
 	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}
@@ -154,6 +154,9 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	}
 }
 {{ end }}
+
+{{/* A template for generating the tag of the Edges struct-field. */}}
+{{ define "model/edgetags" }}{{ with $.Annotations.Edges.StructTag }}`{{ . }}`{{ else }}`json:"edges"`{{ end }}{{ end }}
 
 {{/* A template for omitting struct-tags. */}}
 {{ define "model/omittags" }}{{ with $.TagTypes }}`{{ range $i, $t := . }}{{ if ne $i 0 }} {{ end }}{{ $t }}:"-"{{ end }}`{{ end }}{{ end }}

@@ -7,6 +7,7 @@ package schema
 import (
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/entc/integration/ent/template"
+	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 	"github.com/facebook/ent/schema/mixin"
@@ -15,6 +16,12 @@ import (
 // Card holds the schema definition for the CreditCard entity.
 type Card struct {
 	ent.Schema
+}
+
+func (Card) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		edge.StructTag(`json:"card_edges" mashraki:"edges"`),
+	}
 }
 
 func (Card) Mixin() []ent.Mixin {
