@@ -74,3 +74,6 @@ issues:
     - text: "Expect WriteFile permissions to be 0600 or less"
       linters:
         - gosec
+    - path: privacy/privacy.go
+      linters:
+        - stylecheck
