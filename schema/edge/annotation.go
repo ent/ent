@@ -24,9 +24,4 @@ func (Annotation) Name() string {
 	return "Edges"
 }
 
-// StructTag returns an annotation with the configured struct-tag.
-func StructTag(tag string) Annotation {
-	return Annotation{StructTag: tag}
-}
-
 var _ schema.Annotation = (*Annotation)(nil)
