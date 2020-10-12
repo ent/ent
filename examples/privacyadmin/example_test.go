@@ -61,5 +61,10 @@ func Do(ctx context.Context, client *ent.Client) error {
 		count := client.User.Query().CountX(ctx)
 		fmt.Println(count)
 	}
+	// Bind a privacy decision to the context (bypass all other rules).
+	allow := privacy.DecisionContext(ctx, privacy.Allow)
+	if _, err := client.User.Create().Save(allow); err != nil {
+		return fmt.Errorf("expect operation to pass, but got %v", err)
+	}
 	return nil
 }
