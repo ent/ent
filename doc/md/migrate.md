@@ -174,3 +174,43 @@ func main() {
 	}
 }
 ```
+
+## Foreign Key Config
+
+By default, `ent` uses FKs when defining relationships to enforce correctness and consistency on the database side.
+
+We also provide option `WithForeignKeys` to disable this feature.
+If you set this option by `migrate.WithForeignKeys(false)`,`ent` will not create foreign-keys in ddl. Database
+will not check foreign key constraints neither.
+
+We would like to provide a set of hooks for implementing foreign key constraint checks in program side, instead of
+database side.
+
+```golang
+package main
+
+import (
+    "context"
+    "log"
+
+    "<project>/ent"
+    "<project>/ent/migrate"
+)
+
+func main() {
+    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalf("failed connecting to mysql: %v", err)
+    }
+    defer client.Close()
+    ctx := context.Background()
+    // Run migration.
+    err = client.Schema.Create(
+        ctx,
+        migrate.WithForeignKeys(false), // Disable foreign keys
+    )
+    if err != nil {
+        log.Fatalf("failed creating schema resources: %v", err)
+    }
+}
+```

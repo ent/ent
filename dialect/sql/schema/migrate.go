@@ -59,11 +59,11 @@ func WithFixture(b bool) MigrateOption {
 	}
 }
 
-// WithForeighKeys enables creating foreigh-key in ddl. In some case we are
-// not allowed to use foreigh-key. Defaults to true
-func WithForeighKeys(b bool) MigrateOption {
+// WithForeignKeys enables creating foreign-key in ddl. In some case we are
+// not allowed to use foreign-key. Defaults to true
+func WithForeignKeys(b bool) MigrateOption {
 	return func(m *Migrate) {
-		m.withForeighKeys = b
+		m.withForeignKeys = b
 	}
 }
 
@@ -74,25 +74,25 @@ type Migrate struct {
 	dropColumns     bool     // drop deleted columns.
 	dropIndexes     bool     // drop deleted indexes.
 	withFixture     bool     // with fks rename fixture.
-	withForeighKeys bool     // with foreigh keys
+	withForeignKeys bool     // with foreign keys
 	typeRanges      []string // types order by their range.
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
 func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
-	m := &Migrate{withFixture: true, withForeighKeys: true}
+	m := &Migrate{withFixture: true, withForeignKeys: true}
+	for _, opt := range opts {
+		opt(m)
+	}
 	switch d.Dialect() {
 	case dialect.MySQL:
 		m.sqlDialect = &MySQL{Driver: d}
 	case dialect.SQLite:
-		m.sqlDialect = &SQLite{Driver: d}
+		m.sqlDialect = &SQLite{Driver: d, WithForeignKeys: m.withForeignKeys}
 	case dialect.Postgres:
 		m.sqlDialect = &Postgres{Driver: d}
 	default:
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", d.Dialect())
-	}
-	for _, opt := range opts {
-		opt(m)
 	}
 	return m, nil
 }
@@ -150,14 +150,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 				return err
 			}
 		default: // !exist
-			// special case: sqllite driver create foreigh keys during table creating period,
-			// we need to set foreigh keys empty before it, and get FKS back after Query().
-			bks := t.ForeignKeys
-			if _, ok := m.sqlDialect.(*SQLite); ok && !m.withForeighKeys {
-				t.ForeignKeys = nil
-			}
 			query, args := m.tBuilder(t).Query()
-			t.ForeignKeys = bks
 			// create table
 			if err := tx.Exec(ctx, query, args, nil); err != nil {
 				return fmt.Errorf("create table %q: %v", t.Name, err)
@@ -180,30 +173,29 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 	}
 	// Create foreign keys after tables were created/altered,
 	// because circular foreign-key constraints are possible.
-	for _, t := range tables {
-		if !m.withForeighKeys || len(t.ForeignKeys) == 0 {
-			continue
-		}
-		fks := make([]*ForeignKey, 0, len(t.ForeignKeys))
-		for _, fk := range t.ForeignKeys {
-			exist, err := m.fkExist(ctx, tx, fk.Symbol)
-			if err != nil {
-				return err
+	if m.withForeignKeys {
+		for _, t := range tables {
+			fks := make([]*ForeignKey, 0, len(t.ForeignKeys))
+			for _, fk := range t.ForeignKeys {
+				exist, err := m.fkExist(ctx, tx, fk.Symbol)
+				if err != nil {
+					return err
+				}
+				if !exist {
+					fks = append(fks, fk)
+				}
 			}
-			if !exist {
-				fks = append(fks, fk)
+			if len(fks) == 0 {
+				continue
 			}
-		}
-		if len(fks) == 0 {
-			continue
-		}
-		b := sql.Dialect(m.Dialect()).AlterTable(t.Name)
-		for _, fk := range fks {
-			b.AddForeignKey(fk.DSL())
-		}
-		query, args := b.Query()
-		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create foreign keys for %q: %v", t.Name, err)
+			b := sql.Dialect(m.Dialect()).AlterTable(t.Name)
+			for _, fk := range fks {
+				b.AddForeignKey(fk.DSL())
+			}
+			query, args := b.Query()
+			if err := tx.Exec(ctx, query, args, nil); err != nil {
+				return fmt.Errorf("create foreign keys for %q: %v", t.Name, err)
+			}
 		}
 	}
 	return nil
@@ -362,7 +354,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 // fixture is a special migration code for renaming foreign-key columns (issue-#285).
 func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) error {
 	d, ok := m.sqlDialect.(fkRenamer)
-	if !m.withFixture || !m.withForeighKeys || !ok {
+	if !m.withFixture || !m.withForeignKeys || !ok {
 		return nil
 	}
 	rename := make(map[string]*Index)

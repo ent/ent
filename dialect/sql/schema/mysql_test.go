@@ -146,7 +146,7 @@ func TestMySQL_Create(t *testing.T) {
 		{
 			name: "create new table with foreign key diabled",
 			options: []MigrateOption{
-				WithForeighKeys(false),
+				WithForeignKeys(false),
 			},
 			tables: func() []*Table {
 				var (
