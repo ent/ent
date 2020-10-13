@@ -7,13 +7,20 @@ package schema
 import (
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/examples/privacyadmin/ent/privacy"
-	"github.com/facebook/ent/examples/privacyadmin/rule"
 	"github.com/facebook/ent/schema/field"
 )
 
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
+}
+
+// Mixin of the User schema.
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+		TenantMixin{},
+	}
 }
 
 // Fields of the User.
@@ -27,13 +34,7 @@ func (User) Fields() []ent.Field {
 // Policy defines the privacy policy of the User.
 func (User) Policy() ent.Policy {
 	return privacy.Policy{
-		Mutation: privacy.MutationPolicy{
-			rule.DenyIfNoViewer(),
-			rule.AllowIfAdmin(),
-			privacy.AlwaysDenyRule(),
-		},
-		Query: privacy.QueryPolicy{
-			privacy.AlwaysAllowRule(),
-		},
+		Mutation: privacy.MutationPolicy{},
+		Query:    privacy.QueryPolicy{},
 	}
 }

@@ -16,11 +16,12 @@
       "crud",
       "traversals",
       "eager-load",
-      "aggregate",
-      "predicates",
-      "paging",
       "hooks",
-      "transactions"
+      "privacy",
+      "transactions",
+      "predicates",
+      "aggregate",
+      "paging"
     ],
     "Migration": [
       "migrate",
