@@ -64,13 +64,13 @@ func Do(ctx context.Context, client *ent.Client) error {
 	}
 	fmt.Println(lab)
 
-	// Create a few users in the 2 tenants we created above.
+	// Create 2 users connected to the 2 tenants we created above (a8m->GitHub, nati->GitLab).
 	a8m := client.User.Create().SetName("a8m").SetTenant(hub).SaveX(admin)
 	nati := client.User.Create().SetName("nati").SetTenant(lab).SaveX(admin)
 
 	hubView := viewer.NewContext(ctx, viewer.UserViewer{T: hub})
 	out := client.User.Query().OnlyX(hubView)
-	// Expect that the GitHub tenant to read only its users (i.e. a8m).
+	// Expect that "GitHub" tenant to read only its users (i.e. a8m).
 	if out.ID != a8m.ID {
 		return fmt.Errorf("expect result for user query, got %v", out)
 	}
@@ -78,7 +78,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	labView := viewer.NewContext(ctx, viewer.UserViewer{T: lab})
 	out = client.User.Query().OnlyX(labView)
-	// Expect that the GitHub tenant to read only its users (i.e. a8m).
+	// Expect that "GitLab" tenant to read only its users (i.e. nati).
 	if out.ID != nati.ID {
 		return fmt.Errorf("expect result for user query, got %v", out)
 	}

@@ -263,4 +263,260 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/privacyadmin).
 
+### Multi Tenancy
+
+In this example, we're going to create a schema with 3 entity types - `Tenant`, `User` and `Group`.
+The helper packages `viewer` and `rule` (as mentioned above) also exist in this example to help us structure the application.
+
+![tenant-example](https://entgo.io/assets/tenant_medium.png)
+
+Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://github.com/facebook/ent/tree/master/examples/privacytenant/ent/schema)),
+and since we want to share some logic between them, we create another [mixed-in schema](schema-mixin.md) and add it to all other schemas as follows:
+
+```go
+// BaseMixin for all schemas in the graph.
+type BaseMixin struct {
+	mixin.Schema
+}
+
+// Policy defines the privacy policy of the BaseMixin.
+func (BaseMixin) Policy() ent.Policy {
+	return privacy.Policy{
+		Mutation: privacy.MutationPolicy{
+			rule.DenyIfNoViewer(),
+		},
+		Query: privacy.QueryPolicy{
+			rule.DenyIfNoViewer(),
+		},
+	}
+}
+
+// Mixin of the Tenant schema.
+func (Tenant) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
+}
+```
+
+As explained in the first example, the `DenyIfNoViewer` privacy rule, denies the operation if the `context.Context` does not
+contain the `viewer.Viewer` information.
+
+Similar to the previous example, we want add a constraint that only admin users can create tenants (and deny otherwise).
+We do it by copying the `AllowIfAdmin` rule from above, and adding it to the `Policy` of the `Tenant` schema:
+
+```go
+// Policy defines the privacy policy of the User.
+func (Tenant) Policy() ent.Policy {
+	return privacy.Policy{
+		Mutation: privacy.MutationPolicy{
+			// For Tenant type, we only allow admin users to mutate
+			// the tenant information and deny otherwise.
+			rule.AllowIfAdmin(),
+			privacy.AlwaysDenyRule(),
+		},
+	}
+}
+```
+
+Then, we expect the following code to run successfully:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+	// Expect operation to fail, because viewer-context
+	// is missing (first mutation rule check).
+	if _, err := client.Tenant.Create().Save(ctx); !errors.Is(err, privacy.Deny) {
+		return fmt.Errorf("expect operation to fail, but got %v", err)
+	}
+	// Deny tenant creation if the viewer is not admin.
+	viewOnly := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
+	if _, err := client.Tenant.Create().Save(viewOnly); !errors.Is(err, privacy.Deny) {
+		return fmt.Errorf("expect operation to fail, but got %v", err)
+	}
+	// Apply the same operation with "Admin" role.
+	admin := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
+	hub, err := client.Tenant.Create().SetName("GitHub").Save(admin)
+	if err != nil {
+		return fmt.Errorf("expect operation to pass, but got %v", err)
+	}
+	fmt.Println(hub)
+	lab, err := client.Tenant.Create().SetName("GitLab").Save(admin)
+	if err != nil {
+		return fmt.Errorf("expect operation to pass, but got %v", err)
+	}
+	fmt.Println(lab)
+    return nil
+}
+```
+
+We continue by adding the rest of the edges in our data-model (see image above), and since both `User` and `Group` have
+an edge to the `Tenant` schema, we create a shared [mixed-in schema](schema-mixin.md) named `TenantMixin` for this:
+
+```go
+// TenantMixin for embedding the tenant info in different schemas.
+type TenantMixin struct {
+	mixin.Schema
+}
+
+// Edges for all schemas that embed TenantMixin.
+func (TenantMixin) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("tenant", Tenant.Type).
+			Unique().
+			Required(),
+	}
+}
+```
+
+Now, we want to enforce that viewers can see only groups and users that are connected to the tenant they belong to.
+In this case, there's another type of privacy rule named `FilterRule`. This rule can help us to filters out entities that
+are not connected to the same tenant.
+
+> Note, the filtering option for privacy needs to be enabled using the `entql` feature-flag (see instructions [above](#configuration)).
+
+```go
+// FilterTenantRule is a query rule that filters out entities that are not in the tenant.
+func FilterTenantRule() privacy.QueryRule {
+	type TeamsFilter interface {
+		WhereHasTenantWith(...predicate.Tenant)
+	}
+	return privacy.FilterFunc(func(ctx context.Context, f privacy.Filter) error {
+		view := viewer.FromContext(ctx)
+		if view.Tenant() == "" {
+			return privacy.Denyf("missing tenant information in viewer")
+		}
+		tf, ok := f.(TeamsFilter)
+		if !ok {
+			return privacy.Denyf("unexpected filter type %T", f)
+		}
+		// Make sure that a tenant reads only entities that has an edge to it.
+		tf.WhereHasTenantWith(tenant.Name(view.Tenant()))
+		// Skip to the next privacy rule (equivalent to return nil).
+		return privacy.Skip
+	})
+}
+```
+
+After creating the `FilterTenantRule` privacy rule, we add it to the `TenantMixin` to make sure **all schemas**
+that use this mixin, will also have this privacy rule.
+
+```go
+// Policy for all schemas that embed TenantMixin.
+func (TenantMixin) Policy() ent.Policy {
+	return privacy.Policy{
+		Query: privacy.QueryPolicy{
+			rule.AllowIfAdmin(),
+			// Filter out entities that are not connected to the tenant.
+			// If the viewer is admin, this policy rule is skipped above.
+			rule.FilterTenantRule(),
+		},
+	}
+}
+```
+
+Then, after running the code-generation, we expect the privacy-rules to take effect on the client operations.
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+    // A continuation of the code-block above.
+
+	// Create 2 users connected to the 2 tenants we created above (a8m->GitHub, nati->GitLab).
+	a8m := client.User.Create().SetName("a8m").SetTenant(hub).SaveX(admin)
+	nati := client.User.Create().SetName("nati").SetTenant(lab).SaveX(admin)
+
+	hubView := viewer.NewContext(ctx, viewer.UserViewer{T: hub})
+	out := client.User.Query().OnlyX(hubView)
+	// Expect that "GitHub" tenant to read only its users (i.e. a8m).
+	if out.ID != a8m.ID {
+		return fmt.Errorf("expect result for user query, got %v", out)
+	}
+	fmt.Println(out)
+
+	labView := viewer.NewContext(ctx, viewer.UserViewer{T: lab})
+	out = client.User.Query().OnlyX(labView)
+	// Expect that "GitLab" tenant to read only its users (i.e. nati).
+	if out.ID != nati.ID {
+		return fmt.Errorf("expect result for user query, got %v", out)
+	}
+	fmt.Println(out)
+	return nil
+}
+```
+
+We finish our example with another privacy-rule named `DenyMismatchedTenants` on the `Group` schema.
+The `DenyMismatchedTenants` rule rejects the group creation if the associated users don't belong to
+the same tenant as the group.
+
+```go
+// DenyMismatchedTenants is a rule runs only on create operations, and returns a deny decision
+// if the operation tries to add users to groups that are not in the same tenant.
+func DenyMismatchedTenants() privacy.MutationRule {
+    // Create a rule, and limit it to create operations below.
+	rule := privacy.GroupMutationRuleFunc(func(ctx context.Context, m *ent.GroupMutation) error {
+		tid, exists := m.TenantID()
+		if !exists {
+			return privacy.Denyf("missing tenant information in mutation")
+		}
+		users := m.UsersIDs()
+		// If there are no users in the mutation, skip this rule-check.
+		if len(users) == 0 {
+			return privacy.Skip
+		}
+		// Query the tenant-id of all users. Expect to have exact 1 result,
+		// and it matches the tenant-id of the group above.
+		uid, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
+		if err != nil {
+			return privacy.Denyf("querying the tenant-id %v", err)
+		}
+		if uid != tid {
+			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, uid)
+		}
+		// Skip to the next privacy rule (equivalent to return nil).
+		return privacy.Skip
+	})
+	// Evaluate the mutation rule only on group creation.
+	return privacy.OnMutationOperation(rule, ent.OpCreate)
+}
+```
+
+We add this rule to the `Group` schema and run code-generation.
+
+```go
+// Policy defines the privacy policy of the Group.
+func (Group) Policy() ent.Policy {
+	return privacy.Policy{
+		Mutation: privacy.MutationPolicy{
+			rule.DenyMismatchedTenants(),
+		},
+	}
+}
+```
+
+Again, we expect the privacy-rules to take effect on the client operations.
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+    // A continuation of the code-block above.
+
+	// We expect operation to fail, because the DenyMismatchedTenants rule
+	// makes sure the group and the users are connected to the same tenant.
+	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(nati).Save(admin)
+	if !errors.Is(err, privacy.Deny) {
+		return fmt.Errorf("expect operatio to fail, since user (nati) is not connected to the same tenant")
+	}
+	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(nati, a8m).Save(admin)
+	if !errors.Is(err, privacy.Deny) {
+		return fmt.Errorf("expect operatio to fail, since some users (nati) are not connected to the same tenant")
+	}
+	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(a8m).Save(admin)
+	if err != nil {
+		return fmt.Errorf("expect operation to pass, but got %v", err)
+	}
+	fmt.Println(entgo)
+	return nil
+}
+```
+
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/privacytenant).
+
 Please note that this documentation is under active development.
