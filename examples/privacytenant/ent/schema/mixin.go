@@ -49,7 +49,7 @@ func (TenantMixin) Policy() ent.Policy {
 		Query: privacy.QueryPolicy{
 			rule.AllowIfAdmin(),
 			// Filter out entities that are not connected to the tenant.
-			// If the viewer is admin, this policy rule skipped above.
+			// If the viewer is admin, this policy rule is skipped above.
 			rule.FilterTenantRule(),
 		},
 	}
