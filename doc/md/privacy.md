@@ -22,7 +22,7 @@ the second defines the write-policy. A policy contains zero or more privacy rule
 in the same order they are declared in the schema.
 
 If all rules are evaluated without returning an error, the evaluation finishes successfully, and the executed operation 
-ets access to the target nodes.
+gets access to the target nodes.
 
 ![privacy-rules](https://entgo.io/assets/permission_1.png)
 
