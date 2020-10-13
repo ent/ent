@@ -95,28 +95,28 @@ func (policies Policies) eval(ctx context.Context, eval func(ent.Policy) error) 
 	return nil
 }
 
-// queryMutationRule is a union-like for rules (see usage below).
-type queryMutationRule struct {
-	QueryRule
-	MutationRule
-}
-
 // EvalQuery evaluates a query against a query policy.
-func (policy QueryPolicy) EvalQuery(ctx context.Context, q ent.Query) error {
-	policies := make(Policies, len(policy))
-	for i, rule := range policy {
-		policies[i] = queryMutationRule{QueryRule: rule}
+func (policies QueryPolicy) EvalQuery(ctx context.Context, q ent.Query) error {
+	for _, policy := range policies {
+		switch decision := policy.EvalQuery(ctx, q); {
+		case decision == nil || errors.Is(decision, Skip):
+		default:
+			return decision
+		}
 	}
-	return policies.EvalQuery(ctx, q)
+	return nil
 }
 
 // EvalMutation evaluates a mutation against a mutation policy.
-func (policy MutationPolicy) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	policies := make(Policies, len(policy))
-	for i, rule := range policy {
-		policies[i] = queryMutationRule{MutationRule: rule}
+func (policies MutationPolicy) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	for _, policy := range policies {
+		switch decision := policy.EvalMutation(ctx, m); {
+		case decision == nil || errors.Is(decision, Skip):
+		default:
+			return decision
+		}
 	}
-	return policies.EvalMutation(ctx, m)
+	return nil
 }
 
 type decisionCtxKey struct{}

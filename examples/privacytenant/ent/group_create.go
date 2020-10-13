@@ -18,88 +18,88 @@ import (
 	"github.com/facebook/ent/schema/field"
 )
 
-// UserCreate is the builder for creating a User entity.
-type UserCreate struct {
+// GroupCreate is the builder for creating a Group entity.
+type GroupCreate struct {
 	config
-	mutation *UserMutation
+	mutation *GroupMutation
 	hooks    []Hook
 }
 
 // SetName sets the name field.
-func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.mutation.SetName(s)
-	return uc
+func (gc *GroupCreate) SetName(s string) *GroupCreate {
+	gc.mutation.SetName(s)
+	return gc
 }
 
 // SetNillableName sets the name field if the given value is not nil.
-func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
+func (gc *GroupCreate) SetNillableName(s *string) *GroupCreate {
 	if s != nil {
-		uc.SetName(*s)
+		gc.SetName(*s)
 	}
-	return uc
+	return gc
 }
 
 // SetTenantID sets the tenant edge to Tenant by id.
-func (uc *UserCreate) SetTenantID(id int) *UserCreate {
-	uc.mutation.SetTenantID(id)
-	return uc
+func (gc *GroupCreate) SetTenantID(id int) *GroupCreate {
+	gc.mutation.SetTenantID(id)
+	return gc
 }
 
 // SetTenant sets the tenant edge to Tenant.
-func (uc *UserCreate) SetTenant(t *Tenant) *UserCreate {
-	return uc.SetTenantID(t.ID)
+func (gc *GroupCreate) SetTenant(t *Tenant) *GroupCreate {
+	return gc.SetTenantID(t.ID)
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
-func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
-	uc.mutation.AddGroupIDs(ids...)
-	return uc
+// AddUserIDs adds the users edge to User by ids.
+func (gc *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
+	gc.mutation.AddUserIDs(ids...)
+	return gc
 }
 
-// AddGroups adds the groups edges to Group.
-func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+// AddUsers adds the users edges to User.
+func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return uc.AddGroupIDs(ids...)
+	return gc.AddUserIDs(ids...)
 }
 
-// Mutation returns the UserMutation object of the builder.
-func (uc *UserCreate) Mutation() *UserMutation {
-	return uc.mutation
+// Mutation returns the GroupMutation object of the builder.
+func (gc *GroupCreate) Mutation() *GroupMutation {
+	return gc.mutation
 }
 
-// Save creates the User in the database.
-func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
+// Save creates the Group in the database.
+func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 	var (
 		err  error
-		node *User
+		node *Group
 	)
-	uc.defaults()
-	if len(uc.hooks) == 0 {
-		if err = uc.check(); err != nil {
+	gc.defaults()
+	if len(gc.hooks) == 0 {
+		if err = gc.check(); err != nil {
 			return nil, err
 		}
-		node, err = uc.sqlSave(ctx)
+		node, err = gc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*UserMutation)
+			mutation, ok := m.(*GroupMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
-			if err = uc.check(); err != nil {
+			if err = gc.check(); err != nil {
 				return nil, err
 			}
-			uc.mutation = mutation
-			node, err = uc.sqlSave(ctx)
+			gc.mutation = mutation
+			node, err = gc.sqlSave(ctx)
 			mutation.done = true
 			return node, err
 		})
-		for i := len(uc.hooks) - 1; i >= 0; i-- {
-			mut = uc.hooks[i](mut)
+		for i := len(gc.hooks) - 1; i >= 0; i-- {
+			mut = gc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -107,8 +107,8 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (uc *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := uc.Save(ctx)
+func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
+	v, err := gc.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -116,27 +116,27 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 // defaults sets the default values of the builder before save.
-func (uc *UserCreate) defaults() {
-	if _, ok := uc.mutation.Name(); !ok {
-		v := user.DefaultName
-		uc.mutation.SetName(v)
+func (gc *GroupCreate) defaults() {
+	if _, ok := gc.mutation.Name(); !ok {
+		v := group.DefaultName
+		gc.mutation.SetName(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.Name(); !ok {
+func (gc *GroupCreate) check() error {
+	if _, ok := gc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
-	if _, ok := uc.mutation.TenantID(); !ok {
+	if _, ok := gc.mutation.TenantID(); !ok {
 		return &ValidationError{Name: "tenant", err: errors.New("ent: missing required edge \"tenant\"")}
 	}
 	return nil
 }
 
-func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
-	_node, _spec := uc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
+func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
+	_node, _spec := gc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -147,31 +147,31 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	return _node, nil
 }
 
-func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
+func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	var (
-		_node = &User{config: uc.config}
+		_node = &Group{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: user.Table,
+			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: user.FieldID,
+				Column: group.FieldID,
 			},
 		}
 	)
-	if value, ok := uc.mutation.Name(); ok {
+	if value, ok := gc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: user.FieldName,
+			Column: group.FieldName,
 		})
 		_node.Name = value
 	}
-	if nodes := uc.mutation.TenantIDs(); len(nodes) > 0 {
+	if nodes := gc.mutation.TenantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
-			Table:   user.TenantTable,
-			Columns: []string{user.TenantColumn},
+			Table:   group.TenantTable,
+			Columns: []string{group.TenantColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -185,17 +185,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := gc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GroupsTable,
-			Columns: user.GroupsPrimaryKey,
+			Inverse: true,
+			Table:   group.UsersTable,
+			Columns: group.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: group.FieldID,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -207,23 +207,23 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
-type UserCreateBulk struct {
+// GroupCreateBulk is the builder for creating a bulk of Group entities.
+type GroupCreateBulk struct {
 	config
-	builders []*UserCreate
+	builders []*GroupCreate
 }
 
-// Save creates the User entities in the database.
-func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
-	specs := make([]*sqlgraph.CreateSpec, len(ucb.builders))
-	nodes := make([]*User, len(ucb.builders))
-	mutators := make([]Mutator, len(ucb.builders))
-	for i := range ucb.builders {
+// Save creates the Group entities in the database.
+func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(gcb.builders))
+	nodes := make([]*Group, len(gcb.builders))
+	mutators := make([]Mutator, len(gcb.builders))
+	for i := range gcb.builders {
 		func(i int, root context.Context) {
-			builder := ucb.builders[i]
+			builder := gcb.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*UserMutation)
+				mutation, ok := m.(*GroupMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -234,10 +234,10 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				nodes[i], specs[i] = builder.createSpec()
 				var err error
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, gcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ucb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, gcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -258,7 +258,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ucb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, gcb.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -266,8 +266,8 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
-	v, err := ucb.Save(ctx)
+func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
+	v, err := gcb.Save(ctx)
 	if err != nil {
 		panic(err)
 	}

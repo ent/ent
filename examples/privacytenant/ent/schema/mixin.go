@@ -6,7 +6,7 @@ package schema
 
 import (
 	"github.com/facebook/ent"
-	"github.com/facebook/ent/examples/privacyadmin/ent/privacy"
+	"github.com/facebook/ent/examples/privacytenant/ent/privacy"
 	"github.com/facebook/ent/examples/privacytenant/rule"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/mixin"
@@ -22,11 +22,9 @@ func (BaseMixin) Policy() ent.Policy {
 	return privacy.Policy{
 		Mutation: privacy.MutationPolicy{
 			rule.DenyIfNoViewer(),
-			rule.AllowIfAdmin(),
 		},
 		Query: privacy.QueryPolicy{
 			rule.DenyIfNoViewer(),
-			rule.AllowIfAdmin(),
 		},
 	}
 }
@@ -40,11 +38,19 @@ type TenantMixin struct {
 func (TenantMixin) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("tenant", Tenant.Type).
-			Unique(),
+			Unique().
+			Required(),
 	}
 }
 
 // Policy for all schemas that embed TenantMixin.
 func (TenantMixin) Policy() ent.Policy {
-	return privacy.Policy{}
+	return privacy.Policy{
+		Query: privacy.QueryPolicy{
+			rule.AllowIfAdmin(),
+			// Filter out entities that are not connected to the tenant.
+			// If the viewer is admin, this policy rule skipped above.
+			rule.FilterTenantRule(),
+		},
+	}
 }

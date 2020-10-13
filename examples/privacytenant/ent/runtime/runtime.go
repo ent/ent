@@ -9,6 +9,7 @@ package runtime
 import (
 	"context"
 
+	"github.com/facebook/ent/examples/privacytenant/ent/group"
 	"github.com/facebook/ent/examples/privacytenant/ent/schema"
 	"github.com/facebook/ent/examples/privacytenant/ent/tenant"
 	"github.com/facebook/ent/examples/privacytenant/ent/user"
@@ -21,6 +22,22 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	groupMixin := schema.Group{}.Mixin()
+	group.Policy = privacy.NewPolicies(groupMixin[0], groupMixin[1], schema.Group{})
+	group.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := group.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	groupFields := schema.Group{}.Fields()
+	_ = groupFields
+	// groupDescName is the schema descriptor for name field.
+	groupDescName := groupFields[0].Descriptor()
+	// group.DefaultName holds the default value on creation for the name field.
+	group.DefaultName = groupDescName.Default.(string)
 	tenantMixin := schema.Tenant{}.Mixin()
 	tenant.Policy = privacy.NewPolicies(tenantMixin[0], schema.Tenant{})
 	tenant.Hooks[0] = func(next ent.Mutator) ent.Mutator {
