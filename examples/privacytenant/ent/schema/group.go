@@ -8,37 +8,44 @@ import (
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/examples/privacytenant/ent/privacy"
 	"github.com/facebook/ent/examples/privacytenant/rule"
+	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 )
 
-// Tenant holds the schema definition for the Tenant entity.
-type Tenant struct {
+// User holds the schema definition for the Group entity.
+type Group struct {
 	ent.Schema
 }
 
-// Mixin of the Tenant schema.
-func (Tenant) Mixin() []ent.Mixin {
+// Mixin of the User schema.
+func (Group) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		BaseMixin{},
+		TenantMixin{},
 	}
 }
 
-// Fields of the Tenant.
-func (Tenant) Fields() []ent.Field {
+// Fields of the User.
+func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
-			NotEmpty(),
+			Default("Unknown"),
 	}
 }
 
-// Policy defines the privacy policy of the User.
-func (Tenant) Policy() ent.Policy {
+// Edges of the Group.
+func (Group) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("users", User.Type).
+			Ref("groups"),
+	}
+}
+
+// Policy defines the privacy policy of the Group.
+func (Group) Policy() ent.Policy {
 	return privacy.Policy{
 		Mutation: privacy.MutationPolicy{
-			// For Tenant type, we only allow admin users to mutate
-			// the tenant information and deny otherwise.
-			rule.AllowIfAdmin(),
-			privacy.AlwaysDenyRule(),
+			rule.DenyMismatchedTenants(),
 		},
 	}
 }

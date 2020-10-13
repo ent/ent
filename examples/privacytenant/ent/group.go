@@ -11,29 +11,29 @@ import (
 	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/examples/privacytenant/ent/group"
 	"github.com/facebook/ent/examples/privacytenant/ent/tenant"
-	"github.com/facebook/ent/examples/privacytenant/ent/user"
 )
 
-// User is the model entity for the User schema.
-type User struct {
+// Group is the model entity for the Group schema.
+type Group struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges       UserEdges `json:"edges"`
-	user_tenant *int
+	// The values are being populated by the GroupQuery when eager-loading is set.
+	Edges        GroupEdges `json:"edges"`
+	group_tenant *int
 }
 
-// UserEdges holds the relations/edges for other nodes in the graph.
-type UserEdges struct {
+// GroupEdges holds the relations/edges for other nodes in the graph.
+type GroupEdges struct {
 	// Tenant holds the value of the tenant edge.
 	Tenant *Tenant
-	// Groups holds the value of the groups edge.
-	Groups []*Group
+	// Users holds the value of the users edge.
+	Users []*User
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -41,7 +41,7 @@ type UserEdges struct {
 
 // TenantOrErr returns the Tenant value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) TenantOrErr() (*Tenant, error) {
+func (e GroupEdges) TenantOrErr() (*Tenant, error) {
 	if e.loadedTypes[0] {
 		if e.Tenant == nil {
 			// The edge tenant was loaded in eager-loading,
@@ -53,17 +53,17 @@ func (e UserEdges) TenantOrErr() (*Tenant, error) {
 	return nil, &NotLoadedError{edge: "tenant"}
 }
 
-// GroupsOrErr returns the Groups value or an error if the edge
+// UsersOrErr returns the Users value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) GroupsOrErr() ([]*Group, error) {
+func (e GroupEdges) UsersOrErr() ([]*User, error) {
 	if e.loadedTypes[1] {
-		return e.Groups, nil
+		return e.Users, nil
 	}
-	return nil, &NotLoadedError{edge: "groups"}
+	return nil, &NotLoadedError{edge: "users"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues() []interface{} {
+func (*Group) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullString{}, // name
@@ -71,85 +71,85 @@ func (*User) scanValues() []interface{} {
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*User) fkValues() []interface{} {
+func (*Group) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // user_tenant
+		&sql.NullInt64{}, // group_tenant
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the User fields.
-func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m < n {
+// to the Group fields.
+func (gr *Group) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(group.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	u.ID = int(value.Int64)
+	gr.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field name", values[0])
 	} else if value.Valid {
-		u.Name = value.String
+		gr.Name = value.String
 	}
 	values = values[1:]
-	if len(values) == len(user.ForeignKeys) {
+	if len(values) == len(group.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_tenant", value)
+			return fmt.Errorf("unexpected type %T for edge-field group_tenant", value)
 		} else if value.Valid {
-			u.user_tenant = new(int)
-			*u.user_tenant = int(value.Int64)
+			gr.group_tenant = new(int)
+			*gr.group_tenant = int(value.Int64)
 		}
 	}
 	return nil
 }
 
-// QueryTenant queries the tenant edge of the User.
-func (u *User) QueryTenant() *TenantQuery {
-	return (&UserClient{config: u.config}).QueryTenant(u)
+// QueryTenant queries the tenant edge of the Group.
+func (gr *Group) QueryTenant() *TenantQuery {
+	return (&GroupClient{config: gr.config}).QueryTenant(gr)
 }
 
-// QueryGroups queries the groups edge of the User.
-func (u *User) QueryGroups() *GroupQuery {
-	return (&UserClient{config: u.config}).QueryGroups(u)
+// QueryUsers queries the users edge of the Group.
+func (gr *Group) QueryUsers() *UserQuery {
+	return (&GroupClient{config: gr.config}).QueryUsers(gr)
 }
 
-// Update returns a builder for updating this User.
-// Note that, you need to call User.Unwrap() before calling this method, if this User
+// Update returns a builder for updating this Group.
+// Note that, you need to call Group.Unwrap() before calling this method, if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+func (gr *Group) Update() *GroupUpdateOne {
+	return (&GroupClient{config: gr.config}).UpdateOne(gr)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
 // so that all next queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	tx, ok := u.config.driver.(*txDriver)
+func (gr *Group) Unwrap() *Group {
+	tx, ok := gr.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: User is not a transactional entity")
+		panic("ent: Group is not a transactional entity")
 	}
-	u.config.driver = tx.drv
-	return u
+	gr.config.driver = tx.drv
+	return gr
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (gr *Group) String() string {
 	var builder strings.Builder
-	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString("Group(")
+	builder.WriteString(fmt.Sprintf("id=%v", gr.ID))
 	builder.WriteString(", name=")
-	builder.WriteString(u.Name)
+	builder.WriteString(gr.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// Users is a parsable slice of User.
-type Users []*User
+// Groups is a parsable slice of Group.
+type Groups []*Group
 
-func (u Users) config(cfg config) {
-	for _i := range u {
-		u[_i].config = cfg
+func (gr Groups) config(cfg config) {
+	for _i := range gr {
+		gr[_i].config = cfg
 	}
 }

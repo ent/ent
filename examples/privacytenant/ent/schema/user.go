@@ -6,7 +6,7 @@ package schema
 
 import (
 	"github.com/facebook/ent"
-	"github.com/facebook/ent/examples/privacyadmin/ent/privacy"
+	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -31,10 +31,15 @@ func (User) Fields() []ent.Field {
 	}
 }
 
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("groups", Group.Type),
+	}
+}
+
 // Policy defines the privacy policy of the User.
 func (User) Policy() ent.Policy {
-	return privacy.Policy{
-		Mutation: privacy.MutationPolicy{},
-		Query:    privacy.QueryPolicy{},
-	}
+	// Privacy policy defined in the TenantMixin.
+	return nil
 }
