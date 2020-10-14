@@ -7,6 +7,7 @@
 package entc
 
 import (
+	"errors"
 	"fmt"
 	"go/token"
 	"path"
@@ -14,7 +15,10 @@ import (
 	"strings"
 
 	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/entc/internal"
 	"github.com/facebook/ent/entc/load"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // LoadGraph loads the schema package from the given schema path,
@@ -76,14 +80,7 @@ func Generate(schemaPath string, cfg *gen.Config, options ...Option) (err error)
 			_ = undo()
 		}
 	}()
-	graph, err := LoadGraph(schemaPath, cfg)
-	if err != nil {
-		return err
-	}
-	if err := normalizePkg(cfg); err != nil {
-		return err
-	}
-	return graph.Gen()
+	return generate(schemaPath, cfg)
 }
 
 func normalizePkg(c *gen.Config) error {
@@ -162,4 +159,36 @@ func templateOption(next func(t *gen.Template) (*gen.Template, error)) Option {
 		cfg.Templates = append(cfg.Templates, tmpl)
 		return nil
 	}
+}
+
+// generate loads the given schema and run codegen.
+func generate(schemaPath string, cfg *gen.Config) error {
+	graph, err := LoadGraph(schemaPath, cfg)
+	if err != nil {
+		if err := mayRecover(err, schemaPath, cfg); err != nil {
+			return err
+		}
+		if graph, err = LoadGraph(schemaPath, cfg); err != nil {
+			return err
+		}
+	}
+	if err := normalizePkg(cfg); err != nil {
+		return err
+	}
+	return graph.Gen()
+}
+
+func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
+	if enabled, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); !enabled {
+		return err
+	}
+	if errors.As(err, &packages.Error{}) || !internal.IsBuildError(err) {
+		return err
+	}
+	// If the build error comes from the schema package.
+	if err := internal.CheckDir(schemaPath); err != nil {
+		return fmt.Errorf("schema failure: %w", err)
+	}
+	target := filepath.Join(cfg.Target, "internal/schema.go")
+	return (&internal.Snapshot{Path: target, Config: cfg}).Restore()
 }

@@ -32,10 +32,22 @@ var (
 		},
 	}
 
+	// FeatureSnapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852).
+	FeatureSnapshot = Feature{
+		Name:        "schema/snapshot",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Schema snapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852)",
+		cleanup: func(c *Config) error {
+			return os.RemoveAll(filepath.Join(c.Target, "internal"))
+		},
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
 		FeatureEntQL,
+		FeatureSnapshot,
 	}
 )
 
