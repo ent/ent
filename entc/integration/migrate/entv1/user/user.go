@@ -31,6 +31,8 @@ const (
 	FieldState = "state"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldWorkplace holds the string denoting the workplace field in the database.
+	FieldWorkplace = "workplace"
 
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
@@ -77,6 +79,7 @@ var Columns = []string{
 	FieldBlob,
 	FieldState,
 	FieldStatus,
+	FieldWorkplace,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
@@ -103,6 +106,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.
+	WorkplaceValidator func(string) error
 )
 
 // State defines the type for the state enum field.

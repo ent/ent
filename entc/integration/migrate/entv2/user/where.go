@@ -158,6 +158,13 @@ func Blob(v []byte) predicate.User {
 	})
 }
 
+// Workplace applies equality check predicate on the "workplace" field. It's identical to WorkplaceEQ.
+func Workplace(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWorkplace), v))
+	})
+}
+
 // MixedStringEQ applies the EQ predicate on the "mixed_string" field.
 func MixedStringEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1263,6 +1270,131 @@ func StatusIsNil() predicate.User {
 func StatusNotNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldStatus)))
+	})
+}
+
+// WorkplaceEQ applies the EQ predicate on the "workplace" field.
+func WorkplaceEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceNEQ applies the NEQ predicate on the "workplace" field.
+func WorkplaceNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceIn applies the In predicate on the "workplace" field.
+func WorkplaceIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldWorkplace), v...))
+	})
+}
+
+// WorkplaceNotIn applies the NotIn predicate on the "workplace" field.
+func WorkplaceNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldWorkplace), v...))
+	})
+}
+
+// WorkplaceGT applies the GT predicate on the "workplace" field.
+func WorkplaceGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceGTE applies the GTE predicate on the "workplace" field.
+func WorkplaceGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceLT applies the LT predicate on the "workplace" field.
+func WorkplaceLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceLTE applies the LTE predicate on the "workplace" field.
+func WorkplaceLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceContains applies the Contains predicate on the "workplace" field.
+func WorkplaceContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceHasPrefix applies the HasPrefix predicate on the "workplace" field.
+func WorkplaceHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceHasSuffix applies the HasSuffix predicate on the "workplace" field.
+func WorkplaceHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceIsNil applies the IsNil predicate on the "workplace" field.
+func WorkplaceIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldWorkplace)))
+	})
+}
+
+// WorkplaceNotNil applies the NotNil predicate on the "workplace" field.
+func WorkplaceNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldWorkplace)))
+	})
+}
+
+// WorkplaceEqualFold applies the EqualFold predicate on the "workplace" field.
+func WorkplaceEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceContainsFold applies the ContainsFold predicate on the "workplace" field.
+func WorkplaceContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldWorkplace), v))
 	})
 }
 

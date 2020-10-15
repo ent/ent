@@ -21,4 +21,8 @@ func init() {
 	userDescName := userFields[2].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
+	// userDescWorkplace is the schema descriptor for workplace field.
+	userDescWorkplace := userFields[9].Descriptor()
+	// user.WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.
+	user.WorkplaceValidator = userDescWorkplace.Validators[0].(func(string) error)
 }

@@ -76,6 +76,9 @@ func (User) Fields() []ent.Field {
 		field.Enum("status").
 			Optional().
 			Values("done", "pending"),
+		// remove the max-length constraint from varchar.
+		field.String("workplace").
+			Optional(),
 		// deleting the `address` column.
 	}
 }

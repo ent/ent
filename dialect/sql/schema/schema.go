@@ -165,7 +165,11 @@ func (c *Column) PrimaryKey() bool { return c.Key == PrimaryKey }
 func (c *Column) ConvertibleTo(d *Column) bool {
 	switch {
 	case c.Type == d.Type:
-		return c.Size <= d.Size
+		if c.Size != 0 && d.Size != 0 {
+			// Types match and have a size constraint.
+			return c.Size <= d.Size
+		}
+		return true
 	case c.IntType() && d.IntType() || c.UintType() && d.UintType():
 		return c.Type <= d.Type
 	case c.UintType() && d.IntType():

@@ -104,6 +104,20 @@ func (uc *UserCreate) SetNillableStatus(s *string) *UserCreate {
 	return uc
 }
 
+// SetWorkplace sets the workplace field.
+func (uc *UserCreate) SetWorkplace(s string) *UserCreate {
+	uc.mutation.SetWorkplace(s)
+	return uc
+}
+
+// SetNillableWorkplace sets the workplace field if the given value is not nil.
+func (uc *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
+	if s != nil {
+		uc.SetWorkplace(*s)
+	}
+	return uc
+}
+
 // SetID sets the id field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -252,6 +266,11 @@ func (uc *UserCreate) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf("entv1: validator failed for field \"state\": %w", err)}
 		}
 	}
+	if v, ok := uc.mutation.Workplace(); ok {
+		if err := user.WorkplaceValidator(v); err != nil {
+			return &ValidationError{Name: "workplace", err: fmt.Errorf("entv1: validator failed for field \"workplace\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -348,6 +367,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldStatus,
 		})
 		_node.Status = value
+	}
+	if value, ok := uc.mutation.Workplace(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldWorkplace,
+		})
+		_node.Workplace = value
 	}
 	if nodes := uc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

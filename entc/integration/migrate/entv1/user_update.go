@@ -148,6 +148,26 @@ func (uu *UserUpdate) ClearStatus() *UserUpdate {
 	return uu
 }
 
+// SetWorkplace sets the workplace field.
+func (uu *UserUpdate) SetWorkplace(s string) *UserUpdate {
+	uu.mutation.SetWorkplace(s)
+	return uu
+}
+
+// SetNillableWorkplace sets the workplace field if the given value is not nil.
+func (uu *UserUpdate) SetNillableWorkplace(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetWorkplace(*s)
+	}
+	return uu
+}
+
+// ClearWorkplace clears the value of workplace.
+func (uu *UserUpdate) ClearWorkplace() *UserUpdate {
+	uu.mutation.ClearWorkplace()
+	return uu
+}
+
 // SetParentID sets the parent edge to User by id.
 func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
 	uu.mutation.SetParentID(id)
@@ -333,6 +353,11 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf("entv1: validator failed for field \"state\": %w", err)}
 		}
 	}
+	if v, ok := uu.mutation.Workplace(); ok {
+		if err := user.WorkplaceValidator(v); err != nil {
+			return &ValidationError{Name: "workplace", err: fmt.Errorf("entv1: validator failed for field \"workplace\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -445,6 +470,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldStatus,
+		})
+	}
+	if value, ok := uu.mutation.Workplace(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldWorkplace,
+		})
+	}
+	if uu.mutation.WorkplaceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldWorkplace,
 		})
 	}
 	if uu.mutation.ParentCleared() {
@@ -741,6 +779,26 @@ func (uuo *UserUpdateOne) ClearStatus() *UserUpdateOne {
 	return uuo
 }
 
+// SetWorkplace sets the workplace field.
+func (uuo *UserUpdateOne) SetWorkplace(s string) *UserUpdateOne {
+	uuo.mutation.SetWorkplace(s)
+	return uuo
+}
+
+// SetNillableWorkplace sets the workplace field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableWorkplace(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetWorkplace(*s)
+	}
+	return uuo
+}
+
+// ClearWorkplace clears the value of workplace.
+func (uuo *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
+	uuo.mutation.ClearWorkplace()
+	return uuo
+}
+
 // SetParentID sets the parent edge to User by id.
 func (uuo *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
 	uuo.mutation.SetParentID(id)
@@ -926,6 +984,11 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf("entv1: validator failed for field \"state\": %w", err)}
 		}
 	}
+	if v, ok := uuo.mutation.Workplace(); ok {
+		if err := user.WorkplaceValidator(v); err != nil {
+			return &ValidationError{Name: "workplace", err: fmt.Errorf("entv1: validator failed for field \"workplace\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -1036,6 +1099,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldStatus,
+		})
+	}
+	if value, ok := uuo.mutation.Workplace(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldWorkplace,
+		})
+	}
+	if uuo.mutation.WorkplaceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldWorkplace,
 		})
 	}
 	if uuo.mutation.ParentCleared() {
