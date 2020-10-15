@@ -38,6 +38,9 @@ func (User) Fields() []ent.Field {
 			Values("logged_in", "logged_out"),
 		field.String("status").
 			Optional(),
+		field.String("workplace").
+			MaxLen(30).
+			Optional(),
 	}
 }
 
