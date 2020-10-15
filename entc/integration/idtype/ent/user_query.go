@@ -162,8 +162,8 @@ func (uq *UserQuery) FirstID(ctx context.Context) (id uint64, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (uq *UserQuery) FirstXID(ctx context.Context) uint64 {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (uq *UserQuery) FirstIDX(ctx context.Context) uint64 {
 	id, err := uq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)

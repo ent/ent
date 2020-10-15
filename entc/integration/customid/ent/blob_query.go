@@ -140,8 +140,8 @@ func (bq *BlobQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (bq *BlobQuery) FirstXID(ctx context.Context) uuid.UUID {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (bq *BlobQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := bq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)

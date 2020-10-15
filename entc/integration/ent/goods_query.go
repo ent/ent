@@ -90,8 +90,8 @@ func (gq *GoodsQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (gq *GoodsQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (gq *GoodsQuery) FirstIDX(ctx context.Context) int {
 	id, err := gq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)

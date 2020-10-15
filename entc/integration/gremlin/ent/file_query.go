@@ -139,8 +139,8 @@ func (fq *FileQuery) FirstID(ctx context.Context) (id string, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (fq *FileQuery) FirstXID(ctx context.Context) string {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (fq *FileQuery) FirstIDX(ctx context.Context) string {
 	id, err := fq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)

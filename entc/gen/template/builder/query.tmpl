@@ -122,8 +122,8 @@ func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) FirstXID(ctx context.Context) {{ $.ID.Type }} {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} {
 	id, err := {{ $receiver }}.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)

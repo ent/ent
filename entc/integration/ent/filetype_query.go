@@ -116,8 +116,8 @@ func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (ftq *FileTypeQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (ftq *FileTypeQuery) FirstIDX(ctx context.Context) int {
 	id, err := ftq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
