@@ -178,6 +178,25 @@ func TestNewGraphBadInverse(t *testing.T) {
 	require.Errorf(t, err, "mismatch type for back-reference")
 }
 
+func TestNewGraphDuplicateEdges(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]},
+		&load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "groups", Type: "Group"},
+				{Name: "groups", Type: "Group", RefName: "owner", Inverse: true},
+			},
+		},
+		&load.Schema{
+			Name: "Group",
+			Edges: []*load.Edge{
+				{Name: "users", Type: "User", RefName: "groups", Inverse: true},
+				{Name: "owner", Type: "User", Unique: true},
+			},
+		})
+	require.EqualError(t, err, `entc/gen: User schema contains multiple "groups" edges`)
+}
+
 func TestRelation(t *testing.T) {
 	require := require.New(t)
 	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, T1)

@@ -200,9 +200,13 @@ func (g *Graph) addIndexes(schema *load.Schema) {
 // addEdges adds the node edges to the graph.
 func (g *Graph) addEdges(schema *load.Schema) {
 	t, _ := g.typ(schema.Name)
+	seen := make(map[string]struct{}, len(schema.Edges))
 	for _, e := range schema.Edges {
 		typ, ok := g.typ(e.Type)
 		expect(ok, "type %q does not exist for edge", e.Type)
+		_, ok = seen[e.Name]
+		expect(!ok, "%s schema contains multiple %q edges", schema.Name, e.Name)
+		seen[e.Name] = struct{}{}
 		switch {
 		// Assoc only.
 		case !e.Inverse:

@@ -239,11 +239,11 @@ func (t Type) Receiver() string {
 	return receiver(t.Name)
 }
 
-// HasAssoc returns true if this type has an assoc edge with the given name.
-// faster than map access for most cases.
+// HasAssoc returns true if this type has an assoc-edge (non-inverse)
+// with the given name. faster than map access for most cases.
 func (t Type) HasAssoc(name string) (*Edge, bool) {
 	for _, e := range t.Edges {
-		if name == e.Name {
+		if name == e.Name && !e.IsInverse() {
 			return e, true
 		}
 	}
