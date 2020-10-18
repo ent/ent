@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
-	"text/template"
 	"text/template/parse"
 
 	"github.com/facebook/ent/dialect/sql/schema"
@@ -42,26 +41,12 @@ type (
 		// The supported types are string and int, which also the default.
 		IDType *field.TypeInfo
 
-		// Template specifies an alternative template to execute or
-		// to override the default. If nil, the default template is used.
-		//
-		// Deprecated: the Template option predates the Templates option and it
-		// is planned be removed in v0.5.0. New code should use Templates instead.
-		Template *template.Template
-
 		// Templates specifies a list of alternative templates to execute or
 		// to override the default. If nil, the default template is used.
 		//
 		// Note that, additional templates are executed on the Graph object and
 		// the execution output is stored in a file derived by the template name.
-		Templates []*template.Template
-
-		// Funcs specifies external functions to add to the template execution.
-		//
-		// Templates that use custom functions and override (or extend) the default
-		// templates will need to provide the same FuncMap that was used for parsing
-		// the template.
-		Funcs template.FuncMap
+		Templates []*Template
 
 		// Features defines a list of additional features to add to the codegen phase.
 		// For example, the PrivacyFeature.
@@ -468,29 +453,25 @@ func (g *Graph) typ(name string) (*Type, bool) {
 
 // templates returns the template.Template for the code and external templates
 // to execute on the Graph object if provided.
-func (g *Graph) templates() (*template.Template, []GraphTemplate) {
-	if g.Template != nil {
-		g.Templates = append(g.Templates, g.Template)
-	}
-	templates.Funcs(g.Funcs)
+func (g *Graph) templates() (*Template, []GraphTemplate) {
+	initTemplates()
 	external := make([]GraphTemplate, 0, len(g.Templates))
 	for _, rootT := range g.Templates {
-		rootT.Funcs(Funcs)
-		rootT.Funcs(g.Funcs)
+		templates.Funcs(rootT.FuncMap)
 		for _, tmpl := range rootT.Templates() {
 			if parse.IsEmptyTree(tmpl.Root) {
 				continue
 			}
 			name := tmpl.Name()
-			// If this template doesn't override or extend one of the
-			// default templates, generate it in a new file.
+			// If the template does not override or extend one of
+			// the builtin templates, generate it in a new file.
 			if templates.Lookup(name) == nil && !extendExisting(name) {
 				external = append(external, GraphTemplate{
 					Name:   name,
 					Format: snake(name) + ".go",
 				})
 			}
-			templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
+			templates = MustParse(templates.AddParseTree(name, tmpl.Tree))
 		}
 	}
 	return templates, external
