@@ -9,11 +9,9 @@ package entc
 import (
 	"fmt"
 	"go/token"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
-	"text/template"
 
 	"github.com/facebook/ent/entc/gen"
 	"github.com/facebook/ent/entc/load"
@@ -129,24 +127,10 @@ func FeatureNames(names ...string) Option {
 	}
 }
 
-// Funcs specifies external functions to add to the template execution.
-func Funcs(funcMap template.FuncMap) Option {
-	return func(cfg *gen.Config) error {
-		if cfg.Funcs == nil {
-			cfg.Funcs = funcMap
-			return nil
-		}
-		for name, fn := range funcMap {
-			cfg.Funcs[name] = fn
-		}
-		return nil
-	}
-}
-
 // TemplateFiles parses the named files and associates the resulting templates
 // with codegen templates.
 func TemplateFiles(filenames ...string) Option {
-	return templateOption(func(t *template.Template) (*template.Template, error) {
+	return templateOption(func(t *gen.Template) (*gen.Template, error) {
 		return t.ParseFiles(filenames...)
 	})
 }
@@ -154,7 +138,7 @@ func TemplateFiles(filenames ...string) Option {
 // TemplateGlob parses the template definitions from the files identified
 // by the pattern and associates the resulting templates with codegen templates.
 func TemplateGlob(pattern string) Option {
-	return templateOption(func(t *template.Template) (*template.Template, error) {
+	return templateOption(func(t *gen.Template) (*gen.Template, error) {
 		return t.ParseGlob(pattern)
 	})
 }
@@ -162,29 +146,16 @@ func TemplateGlob(pattern string) Option {
 // TemplateDir parses the template definitions from the files in the directory
 // and associates the resulting templates with codegen templates.
 func TemplateDir(path string) Option {
-	return templateOption(func(t *template.Template) (*template.Template, error) {
-		err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return fmt.Errorf("load template: %v", err)
-			}
-			if info.IsDir() || strings.HasSuffix(path, ".go") {
-				return nil
-			}
-			t, err = t.ParseFiles(path)
-			return err
-		})
-		if err != nil {
-			return nil, err
-		}
-		return t, nil
+	return templateOption(func(t *gen.Template) (*gen.Template, error) {
+		return t.ParseDir(path)
 	})
 }
 
 // templateOption ensures the template instantiate
 // once for config and execute the given Option.
-func templateOption(next func(t *template.Template) (*template.Template, error)) Option {
+func templateOption(next func(t *gen.Template) (*gen.Template, error)) Option {
 	return func(cfg *gen.Config) (err error) {
-		tmpl, err := next(template.New("external").Funcs(gen.Funcs).Funcs(cfg.Funcs))
+		tmpl, err := next(gen.NewTemplate("external"))
 		if err != nil {
 			return err
 		}

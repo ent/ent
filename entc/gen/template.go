@@ -9,9 +9,12 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
+	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"text/template"
+	"text/template/parse"
 
 	"github.com/facebook/ent/entc/gen/internal"
 )
@@ -151,17 +154,15 @@ var (
 		},
 	}
 	// templates holds the Go templates for the code generation.
-	// the init function below initializes the templates and its
-	// funcs to avoid initialization loop.
-	templates = template.New("templates")
+	templates *Template
 	// importPkg are the import packages used for code generation.
 	importPkg = make(map[string]string)
 )
 
-func init() {
-	templates.Funcs(Funcs)
+func initTemplates() {
+	templates = NewTemplate("templates")
 	for _, asset := range internal.AssetNames() {
-		templates = template.Must(templates.Parse(string(internal.MustAsset(asset))))
+		templates = MustParse(templates.Parse(string(internal.MustAsset(asset))))
 	}
 	b := bytes.NewBuffer([]byte("package main\n"))
 	check(templates.ExecuteTemplate(b, "import", Type{Config: &Config{}}), "load imports")
@@ -177,6 +178,91 @@ func init() {
 			importPkg[filepath.Base(path)] = path
 		}
 	}
+}
+
+// Template wraps the standard template.Template to
+// provide additional functionality for ent extensions.
+type Template struct {
+	*template.Template
+	FuncMap template.FuncMap
+}
+
+// NewTemplate creates an empty template with the standard codegen functions.
+func NewTemplate(name string) *Template {
+	t := &Template{Template: template.New(name)}
+	return t.Funcs(Funcs)
+}
+
+// Funcs merges the given funcMap to the template functions.
+func (t *Template) Funcs(funcMap template.FuncMap) *Template {
+	t.Template.Funcs(funcMap)
+	if t.FuncMap == nil {
+		t.FuncMap = template.FuncMap{}
+	}
+	for name, f := range funcMap {
+		if _, ok := t.FuncMap[name]; !ok {
+			t.FuncMap[name] = f
+		}
+	}
+	return t
+}
+
+// Parse parses text as a template body for t.
+func (t *Template) Parse(text string) (*Template, error) {
+	if _, err := t.Template.Parse(text); err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+// ParseFiles parses a list of files as templates and associate them with t.
+// Each file can be a standalone template.
+func (t *Template) ParseFiles(filenames ...string) (*Template, error) {
+	if _, err := t.Template.ParseFiles(filenames...); err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+// ParseGlob parses the files that match the given pattern as templates and
+// associate them with t.
+func (t *Template) ParseGlob(pattern string) (*Template, error) {
+	if _, err := t.Template.ParseGlob(pattern); err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+// ParseDir walks on the given dir path and parses the given matches with aren't Go files.
+func (t *Template) ParseDir(path string) (*Template, error) {
+	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("walk path %s: %v", path, err)
+		}
+		if info.IsDir() || strings.HasSuffix(path, ".go") {
+			return nil
+		}
+		_, err = t.ParseFiles(path)
+		return err
+	})
+	return t, err
+}
+
+// AddParseTree adds the given parse tree to the template.
+func (t *Template) AddParseTree(name string, tree *parse.Tree) (*Template, error) {
+	if _, err := t.Template.AddParseTree(name, tree); err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+// MustParse is a helper that wraps a call to a function returning (*Template, error)
+// and panics if the error is non-nil.
+func MustParse(t *Template, err error) *Template {
+	if err != nil {
+		panic(err)
+	}
+	return t
 }
 
 func pkgf(s string) func(t *Type) string {

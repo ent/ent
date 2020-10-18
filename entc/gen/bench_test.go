@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"text/template"
 
 	"github.com/facebook/ent/entc"
 	"github.com/facebook/ent/entc/gen"
@@ -27,8 +26,8 @@ func BenchmarkGraph_Gen(b *testing.B) {
 		IDType:  &field.TypeInfo{Type: field.TypeInt},
 		Target:  target,
 		Package: "github.com/facebook/ent/entc/integration/ent",
-		Templates: []*template.Template{
-			template.Must(template.New("template").
+		Templates: []*gen.Template{
+			gen.MustParse(gen.NewTemplate("template").
 				Funcs(gen.Funcs).
 				ParseGlob("../integration/ent/template/*.tmpl")),
 		},
