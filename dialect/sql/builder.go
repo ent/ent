@@ -1054,10 +1054,17 @@ func NotIn(col string, args ...interface{}) *Predicate {
 
 // NotIn appends the `Not IN` predicate.
 func (p *Predicate) NotIn(col string, args ...interface{}) *Predicate {
+	if len(args) == 0 {
+		return p
+	}
 	return p.Append(func(b *Builder) {
 		b.Ident(col).WriteOp(OpNotIn)
 		b.Nested(func(b *Builder) {
-			b.Args(args...)
+			if s, ok := args[0].(*Selector); ok {
+				b.Join(s)
+			} else {
+				b.Args(args...)
+			}
 		})
 	})
 }
