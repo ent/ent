@@ -7,6 +7,7 @@ package gen
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/parser"
 	"go/token"
@@ -440,6 +441,35 @@ func (g *Graph) Tables() (all []*schema.Table) {
 // SupportMigrate reports if the codegen supports schema migration.
 func (g *Graph) SupportMigrate() bool {
 	return g.Storage.SchemaMode.Support(Migrate)
+}
+
+// Snapshot holds the information for storing the schema snapshot.
+type Snapshot struct {
+	Schema   string
+	Package  string
+	Schemas  []*load.Schema
+	Features []string
+}
+
+// MarshalSchema returns a JSON string represents the graph schema in loadable format.
+func (g *Graph) SchemaSnapshot() (string, error) {
+	schemas := make([]*load.Schema, len(g.Nodes))
+	for i := range g.Nodes {
+		schemas[i] = g.Nodes[i].schema
+	}
+	snap := Snapshot{
+		Schema:  g.Schema,
+		Package: g.Package,
+		Schemas: schemas,
+	}
+	for _, feat := range g.Features {
+		snap.Features = append(snap.Features, feat.Name)
+	}
+	out, err := json.Marshal(snap)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
 }
 
 func (g *Graph) typ(name string) (*Type, bool) {
