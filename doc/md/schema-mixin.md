@@ -18,6 +18,12 @@ type Mixin interface {
 	// Hooks returns a slice of hooks to add to the schema.
 	// Note that mixin hooks are executed before schema hooks.
 	Hooks() []Hook
+	// Policy returns a privacy policy to add to the schema.
+	// Note that mixin policy are executed before schema policy.
+	Policy() Policy
+	// Annotations returns a list of schema annotations to add
+	// to the schema annotations.
+	Annotations() []schema.Annotation
 }
 ```
 
