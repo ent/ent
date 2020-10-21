@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/facebook/ent/entc/load"
@@ -302,4 +303,44 @@ func TestGraph_Gen(t *testing.T) {
 	}
 	_, err = os.Stat(target + "/external.go")
 	require.NoError(err)
+}
+
+func ensureStructTag(name string) Hook {
+	return func(next Generator) Generator {
+		return GenerateFunc(func(g *Graph) error {
+			// Ensure all fields have a specific tag.
+			for _, node := range g.Nodes {
+				for _, f := range node.Fields {
+					tag := reflect.StructTag(f.StructTag)
+					if _, ok := tag.Lookup(name); !ok {
+						return fmt.Errorf("struct tag %q is missing for field %s.%s", name, node.Name, f.Name)
+					}
+				}
+			}
+			return next.Generate(g)
+		})
+	}
+}
+
+func TestGraph_Hooks(t *testing.T) {
+	require := require.New(t)
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+		Hooks:   []Hook{ensureStructTag("yaml")},
+	}, &load.Schema{
+		Name: "T1",
+		Fields: []*load.Field{
+			{Name: "age", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+			{Name: "expired_at", Info: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Optional: true},
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Edges: []*load.Edge{
+			{Name: "t1", Type: "T1", Unique: true},
+		},
+	})
+	require.NoError(err)
+	require.NotNil(graph)
+	require.EqualError(graph.Gen(), `struct tag "yaml" is missing for field T1.age`)
 }
