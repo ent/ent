@@ -1254,6 +1254,7 @@ var (
 		"AggregateFunc",
 		"As",
 		"Asc",
+		"Client",
 		"Count",
 		"Debug",
 		"Desc",
