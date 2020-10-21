@@ -17,6 +17,7 @@ import (
 // SQLite is an SQLite migration driver.
 type SQLite struct {
 	dialect.Driver
+	WithForeignKeys bool
 }
 
 // init makes sure that foreign_keys support is enabled.
@@ -76,8 +77,10 @@ func (d *SQLite) tBuilder(t *Table) *sql.TableBuilder {
 	// not always valid (because circular foreign-keys situation is possible).
 	// We stay consistent by not using constraints at all, and just defining the
 	// foreign keys in the `CREATE TABLE` statement.
-	for _, fk := range t.ForeignKeys {
-		b.ForeignKeys(fk.DSL())
+	if d.WithForeignKeys {
+		for _, fk := range t.ForeignKeys {
+			b.ForeignKeys(fk.DSL())
+		}
 	}
 	// If it's an ID based primary key with autoincrement, we add
 	// the `PRIMARY KEY` clause to the column declaration. Otherwise,

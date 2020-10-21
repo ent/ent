@@ -144,6 +144,56 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
+			name: "create new table with foreign key diabled",
+			options: []MigrateOption{
+				WithForeignKeys(false),
+			},
+			tables: func() []*Table {
+				var (
+					c1 = []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "created_at", Type: field.TypeTime},
+					}
+					c2 = []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString},
+						{Name: "owner_id", Type: field.TypeInt, Nullable: true},
+					}
+					t1 = &Table{
+						Name:       "users",
+						Columns:    c1,
+						PrimaryKey: c1[0:1],
+					}
+					t2 = &Table{
+						Name:       "pets",
+						Columns:    c2,
+						PrimaryKey: c2[0:1],
+						ForeignKeys: []*ForeignKey{
+							{
+								Symbol:     "pets_owner",
+								Columns:    c2[2:],
+								RefTable:   t1,
+								RefColumns: c1[0:1],
+								OnDelete:   Cascade,
+							},
+						},
+					}
+				)
+				return []*Table{t1, t2}
+			}(),
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", false)
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` timestamp NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.tableExists("pets", false)
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` bigint NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
 			name: "add column to table",
 			tables: []*Table{
 				{

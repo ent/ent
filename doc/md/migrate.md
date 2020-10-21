@@ -174,3 +174,43 @@ func main() {
 	}
 }
 ```
+
+## Foreign Keys
+
+By default, `ent` uses foreign-keys when defining relationships (edges) to enforce correctness and consistency on the
+database side.
+
+However, `ent` also provide an option to disable this functionality using the `WithForeignKeys` option.
+You should note that setting this option to `false`, will tell the migration to not create foreign-keys in the
+schema DDL and the edges validation and clearing must be handled manually by the developer.
+
+We expect to provide a set of hooks for implementing the foreign-key constraints in the application level in the near future.
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "<project>/ent"
+    "<project>/ent/migrate"
+)
+
+func main() {
+    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalf("failed connecting to mysql: %v", err)
+    }
+    defer client.Close()
+    ctx := context.Background()
+    // Run migration.
+    err = client.Schema.Create(
+        ctx,
+        migrate.WithForeignKeys(false), // Disable foreign keys.
+    )
+    if err != nil {
+        log.Fatalf("failed creating schema resources: %v", err)
+    }
+}
+```
