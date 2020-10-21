@@ -180,3 +180,52 @@ User:
 	| pets | Pet  | false   |         | O2M      | false  | true     |
 	+------+------+---------+---------+----------+--------+----------+
 ```
+
+## Code Generation Hooks
+
+The `entc` package provides an option to add a list of hooks (middlewares) to the code-generation phase.
+This option is ideal for adding custom validators for the schema, or for generating additional assets
+using the graph schema.
+
+```go
+// +build ignore
+
+package main
+
+import (
+	"fmt"
+	"log"
+	"reflect"
+
+	"github.com/facebook/ent/entc"
+	"github.com/facebook/ent/entc/gen"
+)
+
+func main() {
+	err := entc.Generate("./schema", &gen.Config{
+		Hooks: []gen.Hook{
+			EnsureStructTag("json"),
+		},
+	})
+	if err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
+}
+
+// EnsureStructTag ensures all fields in the graph have a specific tag name.
+func EnsureStructTag(name string) gen.Hook {
+	return func(next gen.Generator) gen.Generator {
+		return gen.GenerateFunc(func(g *gen.Graph) error {
+			for _, node := range g.Nodes {
+				for _, field := range node.Fields {
+					tag := reflect.StructTag(field.StructTag)
+					if _, ok := tag.Lookup(name); !ok {
+						return fmt.Errorf("struct tag %q is missing for field %s.%s", name, node.Name, f.Name)
+					}
+				}
+			}
+			return next.Generate(g)
+		})
+	}
+}
+```
