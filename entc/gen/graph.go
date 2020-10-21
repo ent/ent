@@ -52,7 +52,11 @@ type (
 		// Features defines a list of additional features to add to the codegen phase.
 		// For example, the PrivacyFeature.
 		Features []Feature
+
+		// Hooks holds an optional list of Hooks to apply on the graph before/after the code-generation.
+		Hooks []Hook
 	}
+
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
 	Graph struct {
@@ -62,7 +66,35 @@ type (
 		// Schemas holds the raw interfaces for the loaded schemas.
 		Schemas []*load.Schema
 	}
+
+	// Generator is the interface that wraps the Generate method.
+	Generator interface {
+		// Generate generates the ent artifacts for the given graph.
+		Generate(*Graph) error
+	}
+
+	// The GenerateFunc type is an adapter to allow the use of ordinary
+	// function as Generator. If f is a function with the appropriate signature,
+	// GenerateFunc(f) is a Generator that calls f.
+	GenerateFunc func(*Graph) error
+
+	// Hook defines the "generate middleware". A function that gets a Generator
+	// and returns a Generator. For example:
+	//
+	//	hook := func(next gen.Generator) gen.Generator {
+	//		return gen.GenerateFunc(func(g *Graph) error {
+	//			fmt.Println("Graph:", g)
+	//			return next.Generate(g)
+	//		})
+	//	}
+	//
+	Hook func(Generator) Generator
 )
+
+// Generate calls f(g).
+func (f GenerateFunc) Generate(g *Graph) error {
+	return f(g)
+}
 
 // NewGraph creates a new Graph for the code generation from the given schema definitions.
 // It fails if one of the schemas is invalid.
@@ -115,6 +147,15 @@ func (g *Graph) defaults() {
 
 // Gen generates the artifacts for the graph.
 func (g *Graph) Gen() error {
+	var gen Generator = GenerateFunc(generate)
+	for i := len(g.Hooks) - 1; i >= 0; i-- {
+		gen = g.Hooks[i](gen)
+	}
+	return gen.Generate(g)
+}
+
+// generate is the default Generator implementation.
+func generate(g *Graph) error {
 	var (
 		assets   assets
 		external []GraphTemplate
