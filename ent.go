@@ -46,6 +46,16 @@ type (
 		// Indexes returns the indexes of the schema.
 		Indexes() []Index
 		// Config returns an optional config for the schema.
+		//
+		// Deprecated: the Config method predates the Annotations method and it
+		// is planned be removed in v0.5.0. New code should use Annotations instead.
+		//
+		//	func (T) Annotations() []schema.Annotation {
+		//		return []schema.Annotation{
+		//			entsql.Annotation{Table: "Name"},
+		//		}
+		//	}
+		//
 		Config() Config
 		// Mixin returns an optional list of Mixin to extends
 		// the schema.
@@ -106,6 +116,15 @@ type (
 	//	func (T) Config() ent.Config {
 	//		return ent.Config{
 	//			Table: "Name",
+	//		}
+	//	}
+	//
+	// Deprecated: the Config object predates the schema.Annotation method and it
+	// is planned be removed in v0.5.0. New code should use Annotations instead.
+	//
+	//	func (T) Annotations() []schema.Annotation {
+	//		return []schema.Annotation{
+	//			entsql.Annotation{Table: "Name"},
 	//		}
 	//	}
 	//
