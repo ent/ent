@@ -6,6 +6,7 @@ package gen
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"go/token"
 	"go/types"
@@ -17,6 +18,7 @@ import (
 	"unicode"
 
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/dialect/sql/schema"
 	"github.com/facebook/ent/entc/load"
 	"github.com/facebook/ent/schema/field"
@@ -222,10 +224,25 @@ func (t Type) Label() string {
 
 // Table returns SQL table name of the node/type.
 func (t Type) Table() string {
+	if table := t.EntSQL().Table; table != "" {
+		return table
+	}
 	if t.schema != nil && t.schema.Config.Table != "" {
 		return t.schema.Config.Table
 	}
 	return snake(rules.Pluralize(t.Name))
+}
+
+// EntSQL returns the EntSQL annotation if exists, or an empty one.
+func (t Type) EntSQL() entsql.Annotation {
+	annotate := entsql.Annotation{}
+	if t.Annotations == nil || t.Annotations[annotate.Name()] == nil {
+		return annotate
+	}
+	if buf, err := json.Marshal(t.Annotations[annotate.Name()]); err == nil {
+		_ = json.Unmarshal(buf, &annotate)
+	}
+	return annotate
 }
 
 // Package returns the package name of this node.

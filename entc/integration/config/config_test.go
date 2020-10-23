@@ -8,6 +8,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/config/ent"
 	"github.com/facebook/ent/entc/integration/config/ent/migrate"
@@ -26,8 +27,8 @@ func TestSchemaConfig(t *testing.T) {
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 	client.User.Create().SaveX(ctx)
 
-	// check that the table was created with the given custom name.
-	table := schema.User{}.Config().Table
+	// Check that the table was created with the given custom name.
+	table := schema.User{}.Annotations()[0].(entsql.Annotation).Table
 	query, args := sql.Select().Count().
 		From(sql.Table("sqlite_master")).
 		Where(sql.And(sql.EQ("type", "table"), sql.EQ("name", table))).

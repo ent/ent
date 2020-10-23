@@ -4,16 +4,20 @@
 
 package schema
 
-import "github.com/facebook/ent"
+import (
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/entsql"
+	"github.com/facebook/ent/schema"
+)
 
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
 }
 
-// Config of the User.
-func (User) Config() ent.Config {
-	return ent.Config{
-		Table: "Users",
+// Annotations of the User schema.
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "Users"},
 	}
 }
