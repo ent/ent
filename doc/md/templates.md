@@ -69,7 +69,7 @@ In order to override an existing template, use its name. For example:
 ```
 
 ## Annotations
-Schema annotations allow to attach metadata to fields and edges and inject them to external templates.  
+Schema annotations allow attaching metadata to fields and edges and inject them to external templates.  
 An annotation must be a Go type that is serializable to JSON raw value (e.g. struct, map or slice)
 and implement the [Annotation](https://pkg.go.dev/github.com/facebook/ent/schema/field?tab=doc#Annotation) interface.
 
