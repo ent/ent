@@ -270,9 +270,9 @@ err := client.User.
 Delete using predicates.
 
 ```go
-err := client.File.
+_, err := client.File.
 	Delete().
-	Where(file.UpdatedAtLT(date))
+	Where(file.UpdatedAtLT(date)).
 	Exec(ctx)
 ```
 
