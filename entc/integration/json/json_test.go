@@ -243,8 +243,8 @@ func Predicates(t *testing.T, client *ent.Client) {
 	client.User.Delete().ExecX(ctx)
 	users, err = client.User.CreateBulk(
 		client.User.Create().SetInts([]int{1}),
-		client.User.Create().SetInts([]int{1, 2}),
-		client.User.Create().SetInts([]int{1, 2, 3}),
+		client.User.Create().SetInts([]int{1, 2}).SetT(&schema.T{Li: []int{1, 2}, Ls: []string{"a"}}),
+		client.User.Create().SetInts([]int{1, 2, 3}).SetT(&schema.T{Li: []int{3, 4}, Ls: []string{"b"}}),
 	).Save(ctx)
 	require.NoError(t, err)
 
@@ -254,4 +254,18 @@ func Predicates(t *testing.T, client *ent.Client) {
 		}).OnlyX(ctx)
 		require.Equal(t, u.Ints, r.Ints)
 	}
+
+	r := client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.ValueContains(user.FieldInts, 3))
+	}).OnlyX(ctx)
+	require.Contains(t, r.Ints, 3)
+	r = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.ValueContains(user.FieldT, 3, sqljson.Path("li")))
+	}).OnlyX(ctx)
+	require.Contains(t, r.T.Li, 3)
+
+	r = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.ValueContains(user.FieldT, "a", sqljson.Path("ls")))
+	}).OnlyX(ctx)
+	require.Contains(t, r.T.Ls, "a")
 }
