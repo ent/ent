@@ -39,9 +39,11 @@ func (User) Fields() []ent.Field {
 }
 
 type T struct {
-	I int     `json:"i,omitempty"`
-	F float64 `json:"f,omitempty"`
-	B bool    `json:"b,omitempty"`
-	S string  `json:"s,omitempty"`
-	T *T      `json:"t,omitempty"`
+	I  int      `json:"i,omitempty"`
+	F  float64  `json:"f,omitempty"`
+	B  bool     `json:"b,omitempty"`
+	S  string   `json:"s,omitempty"`
+	T  *T       `json:"t,omitempty"`
+	Li []int    `json:"li,omitempty"`
+	Ls []string `json:"ls,omitempty"`
 }

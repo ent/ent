@@ -147,6 +147,54 @@ func TestWritePath(t *testing.T) {
 			wantQuery: "SELECT * FROM `users` WHERE JSON_ARRAY_LENGTH(`a`, \"$.b\") > ? OR JSON_ARRAY_LENGTH(`a`, \"$.c\") >= ? OR JSON_ARRAY_LENGTH(`a`, \"$.d\") < ? OR JSON_ARRAY_LENGTH(`a`, \"$.e\") <= ?",
 			wantArgs:  []interface{}{1, 1, 1, 1},
 		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueContains("tags", "foo")),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`tags`, ?, \"$\") = ?",
+			wantArgs:  []interface{}{"\"foo\"", 1},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`tags`, ?, \"$.a\") = ?",
+			wantArgs:  []interface{}{"1", 1},
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueContains("tags", "foo")),
+			wantQuery: "SELECT * FROM `users` WHERE EXISTS(SELECT * FROM JSON_EACH(`tags`, \"$\") WHERE `value` = ?)",
+			wantArgs:  []interface{}{"foo"},
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM `users` WHERE EXISTS(SELECT * FROM JSON_EACH(`tags`, \"$.a\") WHERE `value` = ?)",
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueContains("tags", "foo")),
+			wantQuery: "SELECT * FROM \"users\" WHERE \"tags\" @> $1",
+			wantArgs:  []interface{}{"\"foo\""},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM \"users\" WHERE (\"tags\"->'a')::jsonb @> $1",
+			wantArgs:  []interface{}{"1"},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
