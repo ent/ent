@@ -389,13 +389,27 @@ func (uq *UserQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (uq *UserQuery) Clone() *UserQuery {
+	if uq == nil {
+		return nil
+	}
 	return &UserQuery{
-		config:     uq.config,
-		limit:      uq.limit,
-		offset:     uq.offset,
-		order:      append([]OrderFunc{}, uq.order...),
-		unique:     append([]string{}, uq.unique...),
-		predicates: append([]predicate.User{}, uq.predicates...),
+		config:        uq.config,
+		limit:         uq.limit,
+		offset:        uq.offset,
+		order:         append([]OrderFunc{}, uq.order...),
+		unique:        append([]string{}, uq.unique...),
+		predicates:    append([]predicate.User{}, uq.predicates...),
+		withCard:      uq.withCard.Clone(),
+		withPets:      uq.withPets.Clone(),
+		withFiles:     uq.withFiles.Clone(),
+		withGroups:    uq.withGroups.Clone(),
+		withFriends:   uq.withFriends.Clone(),
+		withFollowers: uq.withFollowers.Clone(),
+		withFollowing: uq.withFollowing.Clone(),
+		withTeam:      uq.withTeam.Clone(),
+		withSpouse:    uq.withSpouse.Clone(),
+		withChildren:  uq.withChildren.Clone(),
+		withParent:    uq.withParent.Clone(),
 		// clone intermediate query.
 		gremlin: uq.gremlin.Clone(),
 		path:    uq.path,

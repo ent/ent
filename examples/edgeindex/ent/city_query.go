@@ -248,13 +248,17 @@ func (cq *CityQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *CityQuery) Clone() *CityQuery {
+	if cq == nil {
+		return nil
+	}
 	return &CityQuery{
-		config:     cq.config,
-		limit:      cq.limit,
-		offset:     cq.offset,
-		order:      append([]OrderFunc{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
-		predicates: append([]predicate.City{}, cq.predicates...),
+		config:      cq.config,
+		limit:       cq.limit,
+		offset:      cq.offset,
+		order:       append([]OrderFunc{}, cq.order...),
+		unique:      append([]string{}, cq.unique...),
+		predicates:  append([]predicate.City{}, cq.predicates...),
+		withStreets: cq.withStreets.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,

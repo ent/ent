@@ -254,6 +254,9 @@ func ({{ $receiver }} *{{ $builder }}) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
+	if {{ $receiver }} == nil {
+		return nil
+	}
 	return &{{ $builder }}{
 		config: 	{{ $receiver }}.config,
 		limit: 		{{ $receiver }}.limit,
@@ -261,6 +264,9 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		order: 		append([]OrderFunc{}, {{ $receiver }}.order...),
 		unique: 	append([]string{}, {{ $receiver }}.unique...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
+		{{- range $e := $.Edges }}
+			{{ $e.EagerLoadField }}: {{ $receiver }}.{{ $e.EagerLoadField }}.Clone(),
+		{{- end }}
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
 		path: {{ $receiver }}.path,
