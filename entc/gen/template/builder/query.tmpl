@@ -31,7 +31,7 @@ type {{ $builder }} struct {
 	{{- with $.Edges }}
 		// eager-loading edges.
 		{{- range $e := . }}
-			with{{ pascal $e.Name }} *{{ $e.Type.QueryName }}
+			{{ $e.EagerLoadField }} *{{ $e.Type.QueryName }}
 		{{- end }}
 	{{- end }}
 	{{- /* Additional fields to add to the builder. */}}
@@ -276,7 +276,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		for _, opt := range opts {
 			opt(query)
 		}
-		{{ $receiver }}.with{{ pascal $e.Name }} = query
+		{{ $receiver }}.{{ $e.EagerLoadField }} = query
 		return {{ $receiver }}
 	}
 {{- end }}
