@@ -26,14 +26,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		{{- with $.Edges }}
 			loadedTypes = [{{ len . }}]bool{
 				{{- range $e := . }}
-					{{ $receiver }}.with{{ pascal $e.Name }} != nil,
+					{{ $receiver }}.{{ $e.EagerLoadField }} != nil,
 				{{- end }}
 			}
 		{{- end }}
 	)
 	{{- with $.ForeignKeys }}
 			{{- with $.FKEdges }}
-				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }} {
+				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.{{ $e.EagerLoadField }} != nil{{ end }} {
 					withFKs = true
 				}
 			{{- end }}
@@ -199,7 +199,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 {{ define "dialect/sql/query/eagerloading" }}
 	{{- $e := $.Scope.Edge }}
 	{{- $receiver := $.Scope.Rec }}
-	if query := {{ $receiver }}.with{{ pascal $e.Name }}; query != nil {
+	if query := {{ $receiver }}.{{ $e.EagerLoadField }}; query != nil {
 		{{- if $e.M2M }}
 			fks := make([]driver.Value, 0, len(nodes))
 			ids := make(map[{{ $.ID.Type }}]*{{ $.Name }}, len(nodes))
