@@ -239,6 +239,9 @@ func (sq *SpecQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (sq *SpecQuery) Clone() *SpecQuery {
+	if sq == nil {
+		return nil
+	}
 	return &SpecQuery{
 		config:     sq.config,
 		limit:      sq.limit,
@@ -246,6 +249,7 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 		order:      append([]OrderFunc{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Spec{}, sq.predicates...),
+		withCard:   sq.withCard.Clone(),
 		// clone intermediate query.
 		gremlin: sq.gremlin.Clone(),
 		path:    sq.path,

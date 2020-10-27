@@ -222,6 +222,9 @@ func (mq *MediaQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (mq *MediaQuery) Clone() *MediaQuery {
+	if mq == nil {
+		return nil
+	}
 	return &MediaQuery{
 		config:     mq.config,
 		limit:      mq.limit,

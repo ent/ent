@@ -285,13 +285,20 @@ func (gq *GroupQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (gq *GroupQuery) Clone() *GroupQuery {
+	if gq == nil {
+		return nil
+	}
 	return &GroupQuery{
-		config:     gq.config,
-		limit:      gq.limit,
-		offset:     gq.offset,
-		order:      append([]OrderFunc{}, gq.order...),
-		unique:     append([]string{}, gq.unique...),
-		predicates: append([]predicate.Group{}, gq.predicates...),
+		config:      gq.config,
+		limit:       gq.limit,
+		offset:      gq.offset,
+		order:       append([]OrderFunc{}, gq.order...),
+		unique:      append([]string{}, gq.unique...),
+		predicates:  append([]predicate.Group{}, gq.predicates...),
+		withFiles:   gq.withFiles.Clone(),
+		withBlocked: gq.withBlocked.Clone(),
+		withUsers:   gq.withUsers.Clone(),
+		withInfo:    gq.withInfo.Clone(),
 		// clone intermediate query.
 		gremlin: gq.gremlin.Clone(),
 		path:    gq.path,

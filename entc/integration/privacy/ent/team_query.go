@@ -272,6 +272,9 @@ func (tq *TeamQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (tq *TeamQuery) Clone() *TeamQuery {
+	if tq == nil {
+		return nil
+	}
 	return &TeamQuery{
 		config:     tq.config,
 		limit:      tq.limit,
@@ -279,6 +282,8 @@ func (tq *TeamQuery) Clone() *TeamQuery {
 		order:      append([]OrderFunc{}, tq.order...),
 		unique:     append([]string{}, tq.unique...),
 		predicates: append([]predicate.Team{}, tq.predicates...),
+		withTasks:  tq.withTasks.Clone(),
+		withUsers:  tq.withUsers.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,

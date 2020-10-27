@@ -248,6 +248,9 @@ func (sq *StreetQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (sq *StreetQuery) Clone() *StreetQuery {
+	if sq == nil {
+		return nil
+	}
 	return &StreetQuery{
 		config:     sq.config,
 		limit:      sq.limit,
@@ -255,6 +258,7 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 		order:      append([]OrderFunc{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Street{}, sq.predicates...),
+		withCity:   sq.withCity.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,

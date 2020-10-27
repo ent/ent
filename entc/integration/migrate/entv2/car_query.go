@@ -248,6 +248,9 @@ func (cq *CarQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *CarQuery) Clone() *CarQuery {
+	if cq == nil {
+		return nil
+	}
 	return &CarQuery{
 		config:     cq.config,
 		limit:      cq.limit,
@@ -255,6 +258,7 @@ func (cq *CarQuery) Clone() *CarQuery {
 		order:      append([]OrderFunc{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Car{}, cq.predicates...),
+		withOwner:  cq.withOwner.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,

@@ -248,6 +248,9 @@ func (giq *GroupInfoQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
+	if giq == nil {
+		return nil
+	}
 	return &GroupInfoQuery{
 		config:     giq.config,
 		limit:      giq.limit,
@@ -255,6 +258,7 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		order:      append([]OrderFunc{}, giq.order...),
 		unique:     append([]string{}, giq.unique...),
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
+		withGroups: giq.withGroups.Clone(),
 		// clone intermediate query.
 		sql:  giq.sql.Clone(),
 		path: giq.path,

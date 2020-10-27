@@ -319,13 +319,20 @@ func (pq *PetQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (pq *PetQuery) Clone() *PetQuery {
+	if pq == nil {
+		return nil
+	}
 	return &PetQuery{
-		config:     pq.config,
-		limit:      pq.limit,
-		offset:     pq.offset,
-		order:      append([]OrderFunc{}, pq.order...),
-		unique:     append([]string{}, pq.unique...),
-		predicates: append([]predicate.Pet{}, pq.predicates...),
+		config:         pq.config,
+		limit:          pq.limit,
+		offset:         pq.offset,
+		order:          append([]OrderFunc{}, pq.order...),
+		unique:         append([]string{}, pq.unique...),
+		predicates:     append([]predicate.Pet{}, pq.predicates...),
+		withOwner:      pq.withOwner.Clone(),
+		withCars:       pq.withCars.Clone(),
+		withFriends:    pq.withFriends.Clone(),
+		withBestFriend: pq.withBestFriend.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,

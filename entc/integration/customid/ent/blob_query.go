@@ -272,6 +272,9 @@ func (bq *BlobQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (bq *BlobQuery) Clone() *BlobQuery {
+	if bq == nil {
+		return nil
+	}
 	return &BlobQuery{
 		config:     bq.config,
 		limit:      bq.limit,
@@ -279,6 +282,8 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		order:      append([]OrderFunc{}, bq.order...),
 		unique:     append([]string{}, bq.unique...),
 		predicates: append([]predicate.Blob{}, bq.predicates...),
+		withParent: bq.withParent.Clone(),
+		withLinks:  bq.withLinks.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,

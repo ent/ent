@@ -223,6 +223,9 @@ func (gq *GoodsQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (gq *GoodsQuery) Clone() *GoodsQuery {
+	if gq == nil {
+		return nil
+	}
 	return &GoodsQuery{
 		config:     gq.config,
 		limit:      gq.limit,
