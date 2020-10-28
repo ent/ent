@@ -25,11 +25,7 @@ import (
 )
 
 func TestPostgresNativeEnum(t *testing.T) {
-	for version, port := range map[string]int{
-		//"10": 5430,
-		//"11": 5431,
-		"12": 5433,
-	} {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433} {
 		t.Run(version, func(t *testing.T) {
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
@@ -44,9 +40,9 @@ func TestPostgresNativeEnum(t *testing.T) {
 					require.NoError(t, err, "creating database")
 					defer db.Exec("DROP DATABASE native_enum")
 
-					nativeEnumDb, err := sql.Open(dialect.Postgres, dsn+" dbname=native_enum")
+					nativeEnumDB, err := sql.Open(dialect.Postgres, dsn+" dbname=native_enum")
 					require.NoError(t, err, "opening connection to native_enum db")
-					nativeEnumDriver := entsql.OpenDB(dialect.Postgres, nativeEnumDb)
+					nativeEnumDriver := entsql.OpenDB(dialect.Postgres, nativeEnumDB)
 
 					client := ent.NewClient(ent.Driver(nativeEnumDriver))
 					require.NoError(t, err, "connecting to json database")
@@ -54,7 +50,7 @@ func TestPostgresNativeEnum(t *testing.T) {
 					err = client.Schema.Create(context.Background())
 					require.NoError(t, err)
 
-					tt(t, client, nativeEnumDb)
+					tt(t, client, nativeEnumDB)
 				})
 			}
 		})

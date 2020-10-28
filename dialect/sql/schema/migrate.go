@@ -124,33 +124,45 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 	return tx.Commit()
 }
 
+func enumsPreTableMigration(ctx context.Context, enumer nativeEnumer, tx dialect.Tx, tables ...*Table) (*enumChanges, error) {
+	ec, err := enumer.enumChanges(ctx, tx, tables...)
+	if err != nil {
+		return nil, err
+	}
+
+	err = enumer.createEnums(ctx, tx, ec.add)
+	if err != nil {
+		return nil, err
+	}
+
+	if enumer != nil {
+		err = enumer.alterEnums(ctx, tx, ec.modify)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return ec, nil
+}
+
+func enumsPostTableMigration(ctx context.Context, enumer nativeEnumer, tx dialect.Tx, changes *enumChanges) error {
+	return enumer.dropEnums(ctx, tx, changes.drop)
+}
+
 func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
 	var (
-		ec     *enumChanges
-		enumer nativeEnumer
-		err    error
-		ok     bool
+		enumChanges *enumChanges
+		enumer      nativeEnumer
+		err         error
+		ok          bool
 	)
 
 	if enumer, ok = m.sqlDialect.(nativeEnumer); ok {
-		ec, err = enumer.enumChanges(ctx, tx, tables...)
+		enumChanges, err = enumsPreTableMigration(ctx, enumer, tx, tables...)
 
 		if err != nil {
 			return err
-		}
-
-		err = enumer.createEnums(ctx, tx, ec.add)
-
-		if err != nil {
-			return err
-		}
-
-		if enumer != nil {
-			err = enumer.alterEnums(ctx, tx, ec.modify)
-
-			if err != nil {
-				return err
-			}
 		}
 	}
 
@@ -231,7 +243,7 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 	}
 
 	if enumer != nil {
-		err = enumer.dropEnums(ctx, tx, ec.drop)
+		err = enumsPostTableMigration(ctx, enumer, tx, enumChanges)
 
 		if err != nil {
 			return err

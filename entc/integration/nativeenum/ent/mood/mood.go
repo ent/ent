@@ -8,8 +8,8 @@ type Mood string
 
 const (
 	Happy Mood = "happy"
-	Ok         = "ok"
-	Sad        = "sad"
+	Ok    Mood = "ok"
+	Sad   Mood = "sad"
 )
 
 func (Mood) Values() (roles []string) {

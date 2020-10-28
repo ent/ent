@@ -435,7 +435,7 @@ func (d *Postgres) enumChanges(ctx context.Context, tx dialect.Tx, tables ...*Ta
 			actualEnum.Diff = actualEnum.Values.diff(expectedEnum.Values)
 
 			if !actualEnum.Diff.equal() {
-				changes.modify = append(changes.add, actualEnum)
+				changes.modify = append(changes.modify, actualEnum)
 			}
 		} else {
 			// Add new enum
