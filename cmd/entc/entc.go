@@ -20,6 +20,7 @@ import (
 	"github.com/facebook/ent/entc/gen"
 	"github.com/facebook/ent/schema/field"
 
+	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 )
 
@@ -183,7 +184,7 @@ func initEnv(target string, names []string) error {
 		if err := tmpl.Execute(b, name); err != nil {
 			log.Fatalln(err)
 		}
-		target := filepath.Join(target, strings.ToLower(name+".go"))
+		target := filepath.Join(target, strcase.ToSnake(name+".go"))
 		if err := ioutil.WriteFile(target, b.Bytes(), 0644); err != nil {
 			log.Fatalln(err)
 		}
