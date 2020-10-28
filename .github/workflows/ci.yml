@@ -70,6 +70,8 @@ jobs:
           if [ -n "$status" ]; then
             echo "you need to run 'go generate ./...' and commit the changes"
             echo "$status"
+            # Debug changes
+            git diff
             exit 1
           fi
 
