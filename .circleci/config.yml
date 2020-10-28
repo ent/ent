@@ -149,6 +149,8 @@ jobs:
             then
               echo "Running 'go generate ./...' introduced untracked files"
               git status --porcelain
+              # Debug changes
+              git diff
               exit 1
             fi
       - run:
