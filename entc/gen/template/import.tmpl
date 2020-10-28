@@ -34,13 +34,14 @@ import (
 
 {{/* A template for importing fields with custom types */}}
 {{ define "import/types" -}}
-    {{- range $f := $.Fields }}
-        {{- $pkg := $f.Type.PkgPath }}
-        {{- if and $pkg (not (hasImport (base $pkg ))) }}
+	{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+	{{- range $f := $fields }}
+		{{- $pkg := $f.Type.PkgPath }}
+		{{- if and $pkg (not (hasImport (base $pkg ))) }}
 			"{{ $pkg }}"
-        {{- end }}
-    {{- end }}
+		{{- end }}
+	{{- end }}
 {{- end }}
 
 {{/* A template that can be overrided in order to add additional imports to packages.*/}}
-{{ define "import/additional" }}{{end}}
+{{ define "import/additional" }}{{ end }}
