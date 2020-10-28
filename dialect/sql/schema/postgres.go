@@ -225,6 +225,20 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Nullable = nullable.String == "YES"
 	}
 	switch c.typ {
+	case "USER-DEFINED":
+		c.Type = field.TypeEnum
+
+		// Override schema type if not presented
+		if _, ok := c.SchemaType[dialect.Postgres]; !ok {
+			if c.SchemaType == nil {
+				c.SchemaType = make(map[string]string)
+			}
+			c.SchemaType[dialect.Postgres] = userDefinedType.String
+		}
+
+		if !userDefinedType.Valid {
+			return fmt.Errorf("user defined enum type not found")
+		}
 	case "boolean":
 		c.Type = field.TypeBool
 	case "smallint":
@@ -343,13 +357,239 @@ func (d *Postgres) addColumn(c *Column) *sql.ColumnBuilder {
 // alterColumn returns list of ColumnBuilder for applying in order to alter a column.
 func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 	b := sql.Dialect(dialect.Postgres)
-	ops = append(ops, b.Column(c.Name).Type(d.cType(c)))
+
+	// Migrating to enum? this will be invoked even when the column is already an enum
+	if typ, ok := c.SchemaType[dialect.Postgres]; ok && c.Type == field.TypeEnum {
+		ops = append(ops, b.Column(c.Name).Type(typ).Attr(fmt.Sprintf("using (%s::%s)", typ, typ)))
+	} else {
+		ops = append(ops, b.Column(c.Name).Type(d.cType(c)))
+	}
+
 	if c.Nullable {
 		ops = append(ops, b.Column(c.Name).Attr("DROP NOT NULL"))
 	} else {
 		ops = append(ops, b.Column(c.Name).Attr("SET NOT NULL"))
 	}
+
 	return ops
+}
+
+const nativeEnumsQuery = `SELECT pg_type.typname,
+       pg_enum.enumlabel
+FROM pg_type
+         JOIN
+     pg_enum ON pg_enum.enumtypid = pg_type.oid
+         INNER JOIN pg_namespace on pg_namespace.oid = pg_type.typnamespace
+WHERE pg_namespace.nspname = current_schema()
+ORDER BY pg_type.typname, pg_enum.enumlabel`
+
+func (d *Postgres) enumChanges(ctx context.Context, tx dialect.Tx, tables ...*Table) (*enumChanges, error) {
+	expectedEnums := make(map[string]*NativeEnum)
+
+	for _, t := range tables {
+		// How do we retrieve annotation here?
+		for _, col := range t.Columns {
+			// Native Enum
+			if enumName, ok := col.SchemaType[dialect.Postgres]; ok && col.Type == field.TypeEnum {
+				expectedEnums[enumName] = &NativeEnum{
+					Name:   enumName,
+					Values: col.Enums,
+				}
+			}
+		}
+	}
+
+	actualEnums := make(map[string]*NativeEnum)
+
+	rows := &sql.Rows{}
+
+	if err := tx.Query(ctx, nativeEnumsQuery, []interface{}{}, rows); err != nil {
+		return nil, fmt.Errorf("querying native enums: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var (
+			typ, label string
+		)
+
+		if err := rows.Scan(&typ, &label); err != nil {
+			return nil, fmt.Errorf("scanning enum label: %v", err)
+		}
+
+		if e, ok := actualEnums[typ]; ok {
+			e.Values = append(e.Values, label)
+		} else {
+			actualEnums[typ] = &NativeEnum{
+				Name:   typ,
+				Values: []string{label},
+			}
+		}
+	}
+
+	changes := &enumChanges{}
+
+	for enumName, expectedEnum := range expectedEnums {
+		// Modify
+		if actualEnum, ok := actualEnums[enumName]; ok {
+			actualEnum.Diff = actualEnum.Values.diff(expectedEnum.Values)
+
+			if !actualEnum.Diff.equal() {
+				changes.modify = append(changes.add, actualEnum)
+			}
+		} else {
+			// Add new enum
+			changes.add = append(changes.add, expectedEnum)
+		}
+	}
+
+	// Find enums to delete
+	for enumName, v := range actualEnums {
+		if _, ok := actualEnums[enumName]; !ok {
+			changes.drop = append(changes.drop, v)
+		}
+	}
+
+	return changes, nil
+}
+
+func (d *Postgres) createEnums(ctx context.Context, tx dialect.Tx, nativeEnums []*NativeEnum) error {
+	for _, ne := range nativeEnums {
+		var result sql.Result
+		err := tx.Exec(ctx, fmt.Sprintf("CREATE TYPE %s as ENUM ('%s')", ne.Name, strings.Join(ne.Values, "','")), []interface{}{}, result)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+const enumColumnsQuery = `
+select col.table_name,
+       col.column_name,
+       col.udt_name
+from information_schema.columns col
+         join information_schema.tables tab on tab.table_schema = col.table_schema
+    and tab.table_name = col.table_name
+    and tab.table_type = 'BASE TABLE'
+         join pg_type typ on col.udt_name = typ.typname
+where col.table_schema = current_schema()
+  and typ.typtype = 'e'
+order by col.table_schema,
+         col.table_name,
+         col.ordinal_position;
+`
+
+type columnsUsingEnum struct {
+	tableName string
+	colName   string
+}
+
+func (d *Postgres) alterEnums(ctx context.Context, tx dialect.Tx, nativeEnums []*NativeEnum) error {
+	if len(nativeEnums) == 0 {
+		return nil
+	}
+
+	rows := &sql.Rows{}
+	err := tx.Query(ctx, enumColumnsQuery, []interface{}{}, rows)
+
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	enumsInUse := make(map[string][]columnsUsingEnum)
+
+	for rows.Next() {
+		var (
+			tableName string
+			colName   string
+			enumName  string
+		)
+		if err := rows.Scan(&tableName, &colName, &enumName); err != nil {
+			return fmt.Errorf("scanning index description %v", err)
+		}
+
+		if _, ok := enumsInUse[enumName]; ok {
+			enumsInUse[enumName] = append(enumsInUse[enumName], columnsUsingEnum{
+				tableName: tableName,
+				colName:   colName,
+			})
+		} else {
+			enumsInUse[enumName] = []columnsUsingEnum{{
+				tableName: tableName,
+				colName:   colName,
+			}}
+		}
+	}
+
+	typeTempName := func(name string) string {
+		return fmt.Sprintf(" %s_entmigrate", name)
+	}
+
+	// Step 1. Rename types to be modified to <type>_entmigrate
+	for typeName := range enumsInUse {
+		var result sql.Result
+		err := tx.Exec(ctx, fmt.Sprintf("ALTER TYPE %s RENAME TO %s", typeName, typeTempName(typeName)), []interface{}{}, result)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	// Step 2. Create new Enums
+	err = d.createEnums(ctx, tx, nativeEnums)
+
+	if err != nil {
+		return err
+	}
+
+	// Step 3. Change columns to use 'new' type
+	for typeName, cols := range enumsInUse {
+		for _, c := range cols {
+			b := sql.Dialect(dialect.Postgres).AlterTable(c.tableName)
+
+			// TODO: batch these?
+			q, args := b.ModifyColumn(sql.Column(c.colName).Type(typeName).Attr(fmt.Sprintf(" using %s::text::%s", c.colName, typeName))).Query()
+			err = tx.Exec(ctx, q, args, nil)
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// Step 4. Drop migration enums
+	var drops []*NativeEnum
+
+	for typeName := range enumsInUse {
+		drops = append(drops, &NativeEnum{
+			Name: typeTempName(typeName),
+		})
+	}
+	err = d.dropEnums(ctx, tx, drops)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Postgres) dropEnums(ctx context.Context, tx dialect.Tx, nativeEnums []*NativeEnum) error {
+	for _, ne := range nativeEnums {
+		var result sql.Result
+		err := tx.Exec(ctx, fmt.Sprintf("DROP TYPE %s", ne.Name), []interface{}{}, result)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // hasUniqueName reports if the index has a unique name in the schema.

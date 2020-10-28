@@ -95,3 +95,24 @@ func TestColumn_ScanDefault(t *testing.T) {
 	require.Equal(t, false, c1.Default)
 	require.Error(t, c1.ScanDefault("foo"))
 }
+
+func Test_diff(t *testing.T) {
+	require := require.New(t)
+
+	require.Equal(NativeEnumDiff{}, Values{"a"}.diff(Values{"a"}))
+
+	require.Equal(NativeEnumDiff{
+		added:   nil,
+		removed: []string{"b"},
+	}, Values{"a", "b"}.diff(Values{"a"}))
+
+	require.Equal(NativeEnumDiff{
+		added:   []string{"b"},
+		removed: nil,
+	}, Values{"a"}.diff(Values{"a", "b"}))
+
+	require.Equal(NativeEnumDiff{
+		added:   []string{"c"},
+		removed: []string{"b"},
+	}, Values{"a", "b"}.diff(Values{"a", "c"}))
+}

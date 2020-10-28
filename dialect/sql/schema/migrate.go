@@ -125,6 +125,35 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 }
 
 func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
+	var (
+		ec     *enumChanges
+		enumer nativeEnumer
+		err    error
+		ok     bool
+	)
+
+	if enumer, ok = m.sqlDialect.(nativeEnumer); ok {
+		ec, err = enumer.enumChanges(ctx, tx, tables...)
+
+		if err != nil {
+			return err
+		}
+
+		err = enumer.createEnums(ctx, tx, ec.add)
+
+		if err != nil {
+			return err
+		}
+
+		if enumer != nil {
+			err = enumer.alterEnums(ctx, tx, ec.modify)
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	for _, t := range tables {
 		m.setupTable(t)
 		switch exist, err := m.tableExist(ctx, tx, t.Name); {
@@ -200,6 +229,15 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 			return fmt.Errorf("create foreign keys for %q: %v", t.Name, err)
 		}
 	}
+
+	if enumer != nil {
+		err = enumer.dropEnums(ctx, tx, ec.drop)
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -254,6 +292,12 @@ type changes struct {
 		add  Indexes
 		drop Indexes
 	}
+}
+
+type enumChanges struct {
+	add    []*NativeEnum
+	drop   []*NativeEnum
+	modify []*NativeEnum
 }
 
 // dropColumn returns the dropped column by name (if any).
@@ -601,6 +645,13 @@ type sqlDialect interface {
 	tBuilder(*Table) *sql.TableBuilder
 	addIndex(*Index, string) *sql.IndexBuilder
 	alterColumns(table string, add, modify, drop []*Column) sql.Queries
+}
+
+type nativeEnumer interface {
+	enumChanges(ctx context.Context, tx dialect.Tx, tables ...*Table) (*enumChanges, error)
+	createEnums(ctx context.Context, tx dialect.Tx, nativeEnums []*NativeEnum) error
+	alterEnums(ctx context.Context, tx dialect.Tx, nativeEnums []*NativeEnum) error
+	dropEnums(ctx context.Context, tx dialect.Tx, nativeEnums []*NativeEnum) error
 }
 
 type preparer interface {

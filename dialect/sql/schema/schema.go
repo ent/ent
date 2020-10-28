@@ -501,3 +501,51 @@ func compare(v1, v2 int) int {
 	}
 	return 1
 }
+
+type Values []string
+
+type NativeEnum struct {
+	Name   string
+	Values Values
+	Diff   NativeEnumDiff
+}
+
+type NativeEnumDiff struct {
+	added   []string
+	removed []string
+}
+
+func (d NativeEnumDiff) equal() bool {
+	return len(d.added) == 0 && len(d.removed) == 0
+}
+
+func (v Values) diff(expected Values) NativeEnumDiff {
+	e := expected.createMap()
+	a := v.createMap()
+
+	diff := NativeEnumDiff{}
+
+	for label := range e {
+		if _, ok := a[label]; !ok {
+			diff.added = append(diff.added, label)
+		} // else both exist
+	}
+
+	for label := range a {
+		if _, ok := e[label]; !ok {
+			diff.removed = append(diff.removed, label)
+		} // else both exist
+	}
+
+	return diff
+}
+
+func (v Values) createMap() map[string]interface{} {
+	m := make(map[string]interface{})
+
+	for _, label := range v {
+		m[label] = nil
+	}
+
+	return m
+}
