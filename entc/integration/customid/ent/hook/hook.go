@@ -201,6 +201,15 @@ func Unless(hk ent.Hook, op ent.Op) ent.Hook {
 	return If(hk, Not(HasOp(op)))
 }
 
+// FixedError is a hook returning a fixed error.
+func FixedError(err error) ent.Hook {
+	return func(ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(context.Context, ent.Mutation) (ent.Value, error) {
+			return nil, err
+		})
+	}
+}
+
 // Reject returns a hook that rejects all operations that match op.
 //
 //	func (T) Hooks() []ent.Hook {
@@ -210,11 +219,7 @@ func Unless(hk ent.Hook, op ent.Op) ent.Hook {
 //	}
 //
 func Reject(op ent.Op) ent.Hook {
-	hk := func(ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(_ context.Context, m ent.Mutation) (ent.Value, error) {
-			return nil, fmt.Errorf("%s operation is not allowed", m.Op())
-		})
-	}
+	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
 	return On(hk, op)
 }
 
