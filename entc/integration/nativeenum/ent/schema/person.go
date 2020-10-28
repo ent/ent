@@ -8,7 +8,6 @@ import (
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/entc/integration/nativeenum/ent/mood"
-	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -21,9 +20,7 @@ type Person struct {
 func (Person) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
-		field.Enum("mood").Native(true).Annotations(schema.PostgresEnumAnnotation{
-			CreateUserType: true,
-		}).GoType(mood.Mood("mood")).SchemaType(map[string]string{dialect.Postgres: "mood"}),
+		field.Enum("mood").GoType(mood.Mood("mood")).SchemaType(map[string]string{dialect.Postgres: "mood"}),
 	}
 }
 
