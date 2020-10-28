@@ -71,7 +71,7 @@ import (
 	"database/sql/driver"
 
 	"<project>/ent"
-	
+
 	"contrib.go.opencensus.io/integrations/ocsql"
 	"github.com/go-sql-driver/mysql"
 	entsql "github.com/facebook/ent/dialect/sql"
@@ -128,7 +128,6 @@ func Open(databaseUrl string) *ent.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	// Create an ent.Driver from `db`.
 	drv := entsql.OpenDB(dialect.Postgres, db)
