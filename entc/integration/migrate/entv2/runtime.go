@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -7,16 +7,26 @@
 package entv2
 
 import (
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/schema"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/schema"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 )
 
-// The init function reads all schema descriptors with runtime
-// code (default values, validators or hooks) and stitches it
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	userMixin := schema.User{}.Mixin()
+	userMixinFields0 := userMixin[0].Fields()
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescMixedString is the schema descriptor for mixed_string field.
+	userDescMixedString := userMixinFields0[0].Descriptor()
+	// user.DefaultMixedString holds the default value on creation for the mixed_string field.
+	user.DefaultMixedString = userDescMixedString.Default.(string)
+	// userDescNickname is the schema descriptor for nickname field.
+	userDescNickname := userFields[3].Descriptor()
+	// user.NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
+	user.NicknameValidator = userDescNickname.Validators[0].(func(string) error)
 	// userDescPhone is the schema descriptor for phone field.
 	userDescPhone := userFields[4].Descriptor()
 	// user.DefaultPhone holds the default value on creation for the phone field.

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/o2mrecur/ent/node"
+	"github.com/facebook/ent/examples/o2mrecur/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // NodeUpdate is the builder for updating Node entities.
 type NodeUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *NodeMutation
-	predicates []predicate.Node
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
 // Where adds a new predicate for the builder.
 func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
-	nu.predicates = append(nu.predicates, ps...)
+	nu.mutation.predicates = append(nu.mutation.predicates, ps...)
 	return nu
 }
 
@@ -83,9 +82,15 @@ func (nu *NodeUpdate) Mutation() *NodeMutation {
 	return nu.mutation
 }
 
-// ClearParent clears the parent edge to Node.
+// ClearParent clears the "parent" edge to type Node.
 func (nu *NodeUpdate) ClearParent() *NodeUpdate {
 	nu.mutation.ClearParent()
+	return nu
+}
+
+// ClearChildren clears all "children" edges to type Node.
+func (nu *NodeUpdate) ClearChildren() *NodeUpdate {
+	nu.mutation.ClearChildren()
 	return nu
 }
 
@@ -106,7 +111,6 @@ func (nu *NodeUpdate) RemoveChildren(n ...*Node) *NodeUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -167,7 +171,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := nu.predicates; len(ps) > 0 {
+	if ps := nu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -223,7 +227,23 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := nu.mutation.RemovedChildrenIDs(); len(nodes) > 0 {
+	if nu.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   node.ChildrenTable,
+			Columns: []string{node.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: node.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := nu.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !nu.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -331,9 +351,15 @@ func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
 	return nuo.mutation
 }
 
-// ClearParent clears the parent edge to Node.
+// ClearParent clears the "parent" edge to type Node.
 func (nuo *NodeUpdateOne) ClearParent() *NodeUpdateOne {
 	nuo.mutation.ClearParent()
+	return nuo
+}
+
+// ClearChildren clears all "children" edges to type Node.
+func (nuo *NodeUpdateOne) ClearChildren() *NodeUpdateOne {
+	nuo.mutation.ClearChildren()
 	return nuo
 }
 
@@ -354,7 +380,6 @@ func (nuo *NodeUpdateOne) RemoveChildren(n ...*Node) *NodeUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
-
 	var (
 		err  error
 		node *Node
@@ -384,11 +409,11 @@ func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (nuo *NodeUpdateOne) SaveX(ctx context.Context) *Node {
-	n, err := nuo.Save(ctx)
+	node, err := nuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -404,7 +429,7 @@ func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
+func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   node.Table,
@@ -469,7 +494,23 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := nuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 {
+	if nuo.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   node.ChildrenTable,
+			Columns: []string{node.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: node.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := nuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !nuo.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -507,9 +548,9 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	n = &Node{config: nuo.config}
-	_spec.Assign = n.assignValues
-	_spec.ScanValues = n.scanValues()
+	_node = &Node{config: nuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, nuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{node.Label}
@@ -518,5 +559,5 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (n *Node, err error) {
 		}
 		return nil, err
 	}
-	return n, nil
+	return _node, nil
 }

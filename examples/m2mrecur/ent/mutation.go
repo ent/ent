@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,9 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/examples/m2mrecur/ent/user"
+	"github.com/facebook/ent/examples/m2mrecur/ent/predicate"
+	"github.com/facebook/ent/examples/m2mrecur/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -41,10 +42,13 @@ type UserMutation struct {
 	clearedFields    map[string]struct{}
 	followers        map[int]struct{}
 	removedfollowers map[int]struct{}
+	clearedfollowers bool
 	following        map[int]struct{}
 	removedfollowing map[int]struct{}
+	clearedfollowing bool
 	done             bool
 	oldValue         func(context.Context) (*User, error)
+	predicates       []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -230,6 +234,16 @@ func (m *UserMutation) AddFollowerIDs(ids ...int) {
 	}
 }
 
+// ClearFollowers clears the followers edge to User.
+func (m *UserMutation) ClearFollowers() {
+	m.clearedfollowers = true
+}
+
+// FollowersCleared returns if the edge followers was cleared.
+func (m *UserMutation) FollowersCleared() bool {
+	return m.clearedfollowers
+}
+
 // RemoveFollowerIDs removes the followers edge to User by ids.
 func (m *UserMutation) RemoveFollowerIDs(ids ...int) {
 	if m.removedfollowers == nil {
@@ -259,6 +273,7 @@ func (m *UserMutation) FollowersIDs() (ids []int) {
 // ResetFollowers reset all changes of the "followers" edge.
 func (m *UserMutation) ResetFollowers() {
 	m.followers = nil
+	m.clearedfollowers = false
 	m.removedfollowers = nil
 }
 
@@ -270,6 +285,16 @@ func (m *UserMutation) AddFollowingIDs(ids ...int) {
 	for i := range ids {
 		m.following[ids[i]] = struct{}{}
 	}
+}
+
+// ClearFollowing clears the following edge to User.
+func (m *UserMutation) ClearFollowing() {
+	m.clearedfollowing = true
+}
+
+// FollowingCleared returns if the edge following was cleared.
+func (m *UserMutation) FollowingCleared() bool {
+	return m.clearedfollowing
 }
 
 // RemoveFollowingIDs removes the following edge to User by ids.
@@ -301,6 +326,7 @@ func (m *UserMutation) FollowingIDs() (ids []int) {
 // ResetFollowing reset all changes of the "following" edge.
 func (m *UserMutation) ResetFollowing() {
 	m.following = nil
+	m.clearedfollowing = false
 	m.removedfollowing = nil
 }
 
@@ -518,6 +544,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
+	if m.clearedfollowers {
+		edges = append(edges, user.EdgeFollowers)
+	}
+	if m.clearedfollowing {
+		edges = append(edges, user.EdgeFollowing)
+	}
 	return edges
 }
 
@@ -525,6 +557,10 @@ func (m *UserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgeFollowers:
+		return m.clearedfollowers
+	case user.EdgeFollowing:
+		return m.clearedfollowing
 	}
 	return false
 }

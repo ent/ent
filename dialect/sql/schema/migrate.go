@@ -11,9 +11,9 @@ import (
 	"math"
 	"sort"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 )
 
 const (
@@ -52,38 +52,46 @@ func WithDropIndex(b bool) MigrateOption {
 }
 
 // WithFixture sets the foreign-key renaming option to the migration when upgrading
-// ent from v0.1.0 (issue-#285). Defaults to true.
+// ent from v0.1.0 (issue-#285). Defaults to false.
 func WithFixture(b bool) MigrateOption {
 	return func(m *Migrate) {
 		m.withFixture = b
 	}
 }
 
+// WithForeignKeys enables creating foreign-key in ddl. Defaults to true.
+func WithForeignKeys(b bool) MigrateOption {
+	return func(m *Migrate) {
+		m.withForeignKeys = b
+	}
+}
+
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
-	universalID bool     // global unique ids.
-	dropColumns bool     // drop deleted columns.
-	dropIndexes bool     // drop deleted indexes.
-	withFixture bool     // with fks rename fixture.
-	typeRanges  []string // types order by their range.
+	universalID     bool     // global unique ids.
+	dropColumns     bool     // drop deleted columns.
+	dropIndexes     bool     // drop deleted indexes.
+	withFixture     bool     // with fks rename fixture.
+	withForeignKeys bool     // with foreign keys
+	typeRanges      []string // types order by their range.
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
 func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
-	m := &Migrate{withFixture: true}
+	m := &Migrate{withForeignKeys: true}
+	for _, opt := range opts {
+		opt(m)
+	}
 	switch d.Dialect() {
 	case dialect.MySQL:
 		m.sqlDialect = &MySQL{Driver: d}
 	case dialect.SQLite:
-		m.sqlDialect = &SQLite{Driver: d}
+		m.sqlDialect = &SQLite{Driver: d, WithForeignKeys: m.withForeignKeys}
 	case dialect.Postgres:
 		m.sqlDialect = &Postgres{Driver: d}
 	default:
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", d.Dialect())
-	}
-	for _, opt := range opts {
-		opt(m)
 	}
 	return m, nil
 }
@@ -160,6 +168,9 @@ func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) e
 				}
 			}
 		}
+	}
+	if !m.withForeignKeys {
+		return nil
 	}
 	// Create foreign keys after tables were created/altered,
 	// because circular foreign-key constraints are possible.
@@ -345,7 +356,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 // fixture is a special migration code for renaming foreign-key columns (issue-#285).
 func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) error {
 	d, ok := m.sqlDialect.(fkRenamer)
-	if !m.withFixture || !ok {
+	if !m.withFixture || !m.withForeignKeys || !ok {
 		return nil
 	}
 	rename := make(map[string]*Index)
@@ -439,7 +450,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 	}
 	if !exists {
 		t := NewTable(TypeTable).
-			AddPrimary(&Column{Name: "id", Type: field.TypeInt, Increment: true}).
+			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
 			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
 		query, args := m.tBuilder(t).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,13 +12,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -145,49 +145,24 @@ func (gc *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	if _, ok := gc.mutation.Active(); !ok {
-		v := group.DefaultActive
-		gc.mutation.SetActive(v)
-	}
-	if _, ok := gc.mutation.Expire(); !ok {
-		return nil, &ValidationError{Name: "expire", err: errors.New("ent: missing required field \"expire\"")}
-	}
-	if v, ok := gc.mutation.GetType(); ok {
-		if err := group.TypeValidator(v); err != nil {
-			return nil, &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
-		}
-	}
-	if _, ok := gc.mutation.MaxUsers(); !ok {
-		v := group.DefaultMaxUsers
-		gc.mutation.SetMaxUsers(v)
-	}
-	if v, ok := gc.mutation.MaxUsers(); ok {
-		if err := group.MaxUsersValidator(v); err != nil {
-			return nil, &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
-		}
-	}
-	if _, ok := gc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
-	if v, ok := gc.mutation.Name(); ok {
-		if err := group.NameValidator(v); err != nil {
-			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
-		}
-	}
-	if _, ok := gc.mutation.InfoID(); !ok {
-		return nil, &ValidationError{Name: "info", err: errors.New("ent: missing required edge \"info\"")}
-	}
 	var (
 		err  error
 		node *Group
 	)
+	gc.defaults()
 	if len(gc.hooks) == 0 {
+		if err = gc.check(); err != nil {
+			return nil, err
+		}
 		node, err = gc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GroupMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gc.check(); err != nil {
+				return nil, err
 			}
 			gc.mutation = mutation
 			node, err = gc.gremlinSave(ctx)
@@ -211,6 +186,50 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 		panic(err)
 	}
 	return v
+}
+
+// defaults sets the default values of the builder before save.
+func (gc *GroupCreate) defaults() {
+	if _, ok := gc.mutation.Active(); !ok {
+		v := group.DefaultActive
+		gc.mutation.SetActive(v)
+	}
+	if _, ok := gc.mutation.MaxUsers(); !ok {
+		v := group.DefaultMaxUsers
+		gc.mutation.SetMaxUsers(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (gc *GroupCreate) check() error {
+	if _, ok := gc.mutation.Active(); !ok {
+		return &ValidationError{Name: "active", err: errors.New("ent: missing required field \"active\"")}
+	}
+	if _, ok := gc.mutation.Expire(); !ok {
+		return &ValidationError{Name: "expire", err: errors.New("ent: missing required field \"expire\"")}
+	}
+	if v, ok := gc.mutation.GetType(); ok {
+		if err := group.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if v, ok := gc.mutation.MaxUsers(); ok {
+		if err := group.MaxUsersValidator(v); err != nil {
+			return &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
+		}
+	}
+	if _, ok := gc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if v, ok := gc.mutation.Name(); ok {
+		if err := group.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	if _, ok := gc.mutation.InfoID(); !ok {
+		return &ValidationError{Name: "info", err: errors.New("ent: missing required edge \"info\"")}
+	}
+	return nil
 }
 
 func (gc *GroupCreate) gremlinSave(ctx context.Context) (*Group, error) {
@@ -279,4 +298,10 @@ func (gc *GroupCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// GroupCreateBulk is the builder for creating a bulk of Group entities.
+type GroupCreateBulk struct {
+	config
+	builders []*GroupCreate
 }

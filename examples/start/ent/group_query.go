@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -13,12 +13,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/start/ent/group"
-	"github.com/facebookincubator/ent/examples/start/ent/predicate"
-	"github.com/facebookincubator/ent/examples/start/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/start/ent/group"
+	"github.com/facebook/ent/examples/start/ent/predicate"
+	"github.com/facebook/ent/examples/start/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GroupQuery is the builder for querying Group entities.
@@ -67,8 +67,12 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := gq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(group.Table, group.FieldID, gq.sqlQuery()),
+			sqlgraph.From(group.Table, group.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
 		)
@@ -80,23 +84,23 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 
 // First returns the first Group entity in the query. Returns *NotFoundError when no group was found.
 func (gq *GroupQuery) First(ctx context.Context) (*Group, error) {
-	grs, err := gq.Limit(1).All(ctx)
+	nodes, err := gq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(grs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{group.Label}
 	}
-	return grs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (gq *GroupQuery) FirstX(ctx context.Context) *Group {
-	gr, err := gq.First(ctx)
+	node, err := gq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // FirstID returns the first Group id in the query. Returns *NotFoundError when no id was found.
@@ -112,8 +116,8 @@ func (gq *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (gq *GroupQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (gq *GroupQuery) FirstIDX(ctx context.Context) int {
 	id, err := gq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -123,13 +127,13 @@ func (gq *GroupQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Group entity in the query, returns an error if not exactly one entity was returned.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
-	grs, err := gq.Limit(2).All(ctx)
+	nodes, err := gq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(grs) {
+	switch len(nodes) {
 	case 1:
-		return grs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{group.Label}
 	default:
@@ -139,11 +143,11 @@ func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
-	gr, err := gq.Only(ctx)
+	node, err := gq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // OnlyID returns the only Group id in the query, returns an error if not exactly one id was returned.
@@ -163,8 +167,8 @@ func (gq *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (gq *GroupQuery) OnlyXID(ctx context.Context) int {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (gq *GroupQuery) OnlyIDX(ctx context.Context) int {
 	id, err := gq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -182,11 +186,11 @@ func (gq *GroupQuery) All(ctx context.Context) ([]*Group, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (gq *GroupQuery) AllX(ctx context.Context) []*Group {
-	grs, err := gq.All(ctx)
+	nodes, err := gq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return grs
+	return nodes
 }
 
 // IDs executes the query and returns a list of Group ids.
@@ -244,6 +248,9 @@ func (gq *GroupQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (gq *GroupQuery) Clone() *GroupQuery {
+	if gq == nil {
+		return nil
+	}
 	return &GroupQuery{
 		config:     gq.config,
 		limit:      gq.limit,
@@ -251,6 +258,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		order:      append([]OrderFunc{}, gq.order...),
 		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
+		withUsers:  gq.withUsers.Clone(),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),
 		path: gq.path,
@@ -365,6 +373,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Users = []*User{}
 		}
 		var (
 			edgeids []int
@@ -467,7 +476,7 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := gq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, group.ValidColumn)
 			}
 		}
 	}
@@ -486,7 +495,7 @@ func (gq *GroupQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range gq.order {
-		p(selector)
+		p(selector, group.ValidColumn)
 	}
 	if offset := gq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -553,6 +562,32 @@ func (ggb *GroupGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GroupGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ggb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ggb *GroupGroupBy) StringX(ctx context.Context) string {
+	v, err := ggb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (ggb *GroupGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ggb.fields) > 1 {
@@ -568,6 +603,32 @@ func (ggb *GroupGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ggb *GroupGroupBy) IntsX(ctx context.Context) []int {
 	v, err := ggb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GroupGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ggb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ggb *GroupGroupBy) IntX(ctx context.Context) int {
+	v, err := ggb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -595,6 +656,32 @@ func (ggb *GroupGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GroupGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ggb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ggb *GroupGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := ggb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (ggb *GroupGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ggb.fields) > 1 {
@@ -616,9 +703,44 @@ func (ggb *GroupGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (ggb *GroupGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ggb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ggb *GroupGroupBy) BoolX(ctx context.Context) bool {
+	v, err := ggb.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (ggb *GroupGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ggb.fields {
+		if !group.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
+	selector := ggb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := ggb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := ggb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -631,7 +753,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 	columns = append(columns, ggb.fields...)
 	for _, fn := range ggb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, group.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(ggb.fields...)
 }
@@ -683,6 +805,32 @@ func (gs *GroupSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = gs.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (gs *GroupSelect) StringX(ctx context.Context) string {
+	v, err := gs.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (gs *GroupSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(gs.fields) > 1 {
@@ -698,6 +846,32 @@ func (gs *GroupSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (gs *GroupSelect) IntsX(ctx context.Context) []int {
 	v, err := gs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = gs.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (gs *GroupSelect) IntX(ctx context.Context) int {
+	v, err := gs.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -725,6 +899,32 @@ func (gs *GroupSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = gs.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (gs *GroupSelect) Float64X(ctx context.Context) float64 {
+	v, err := gs.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (gs *GroupSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(gs.fields) > 1 {
@@ -746,7 +946,38 @@ func (gs *GroupSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (gs *GroupSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = gs.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{group.Label}
+	default:
+		err = fmt.Errorf("ent: GroupSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (gs *GroupSelect) BoolX(ctx context.Context) bool {
+	v, err := gs.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range gs.fields {
+		if !group.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := gs.sqlQuery().Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {

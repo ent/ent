@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,15 +9,16 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GroupInfoQuery is the builder for querying GroupInfo entities.
@@ -75,23 +76,23 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 
 // First returns the first GroupInfo entity in the query. Returns *NotFoundError when no groupinfo was found.
 func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
-	gis, err := giq.Limit(1).All(ctx)
+	nodes, err := giq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(gis) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{groupinfo.Label}
 	}
-	return gis[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
-	gi, err := giq.First(ctx)
+	node, err := giq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return gi
+	return node
 }
 
 // FirstID returns the first GroupInfo id in the query. Returns *NotFoundError when no id was found.
@@ -107,8 +108,8 @@ func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (giq *GroupInfoQuery) FirstXID(ctx context.Context) string {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (giq *GroupInfoQuery) FirstIDX(ctx context.Context) string {
 	id, err := giq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -118,13 +119,13 @@ func (giq *GroupInfoQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only GroupInfo entity in the query, returns an error if not exactly one entity was returned.
 func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
-	gis, err := giq.Limit(2).All(ctx)
+	nodes, err := giq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(gis) {
+	switch len(nodes) {
 	case 1:
-		return gis[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{groupinfo.Label}
 	default:
@@ -134,11 +135,11 @@ func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
-	gi, err := giq.Only(ctx)
+	node, err := giq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gi
+	return node
 }
 
 // OnlyID returns the only GroupInfo id in the query, returns an error if not exactly one id was returned.
@@ -158,8 +159,8 @@ func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (giq *GroupInfoQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (giq *GroupInfoQuery) OnlyIDX(ctx context.Context) string {
 	id, err := giq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -177,11 +178,11 @@ func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
-	gis, err := giq.All(ctx)
+	nodes, err := giq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gis
+	return nodes
 }
 
 // IDs executes the query and returns a list of GroupInfo ids.
@@ -239,6 +240,9 @@ func (giq *GroupInfoQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
+	if giq == nil {
+		return nil
+	}
 	return &GroupInfoQuery{
 		config:     giq.config,
 		limit:      giq.limit,
@@ -246,6 +250,7 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		order:      append([]OrderFunc{}, giq.order...),
 		unique:     append([]string{}, giq.unique...),
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
+		withGroups: giq.withGroups.Clone(),
 		// clone intermediate query.
 		gremlin: giq.gremlin.Clone(),
 		path:    giq.path,
@@ -439,6 +444,32 @@ func (gigb *GroupInfoGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (gigb *GroupInfoGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = gigb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{groupinfo.Label}
+	default:
+		err = fmt.Errorf("ent: GroupInfoGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (gigb *GroupInfoGroupBy) StringX(ctx context.Context) string {
+	v, err := gigb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (gigb *GroupInfoGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(gigb.fields) > 1 {
@@ -454,6 +485,32 @@ func (gigb *GroupInfoGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (gigb *GroupInfoGroupBy) IntsX(ctx context.Context) []int {
 	v, err := gigb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (gigb *GroupInfoGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = gigb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{groupinfo.Label}
+	default:
+		err = fmt.Errorf("ent: GroupInfoGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (gigb *GroupInfoGroupBy) IntX(ctx context.Context) int {
+	v, err := gigb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -481,6 +538,32 @@ func (gigb *GroupInfoGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (gigb *GroupInfoGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = gigb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{groupinfo.Label}
+	default:
+		err = fmt.Errorf("ent: GroupInfoGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (gigb *GroupInfoGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := gigb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (gigb *GroupInfoGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(gigb.fields) > 1 {
@@ -496,6 +579,32 @@ func (gigb *GroupInfoGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (gigb *GroupInfoGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := gigb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (gigb *GroupInfoGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = gigb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{groupinfo.Label}
+	default:
+		err = fmt.Errorf("ent: GroupInfoGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (gigb *GroupInfoGroupBy) BoolX(ctx context.Context) bool {
+	v, err := gigb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -586,6 +695,32 @@ func (gis *GroupInfoSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (gis *GroupInfoSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = gis.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{groupinfo.Label}
+	default:
+		err = fmt.Errorf("ent: GroupInfoSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (gis *GroupInfoSelect) StringX(ctx context.Context) string {
+	v, err := gis.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(gis.fields) > 1 {
@@ -601,6 +736,32 @@ func (gis *GroupInfoSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (gis *GroupInfoSelect) IntsX(ctx context.Context) []int {
 	v, err := gis.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (gis *GroupInfoSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = gis.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{groupinfo.Label}
+	default:
+		err = fmt.Errorf("ent: GroupInfoSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (gis *GroupInfoSelect) IntX(ctx context.Context) int {
+	v, err := gis.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -628,6 +789,32 @@ func (gis *GroupInfoSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (gis *GroupInfoSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = gis.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{groupinfo.Label}
+	default:
+		err = fmt.Errorf("ent: GroupInfoSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (gis *GroupInfoSelect) Float64X(ctx context.Context) float64 {
+	v, err := gis.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(gis.fields) > 1 {
@@ -643,6 +830,32 @@ func (gis *GroupInfoSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (gis *GroupInfoSelect) BoolsX(ctx context.Context) []bool {
 	v, err := gis.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (gis *GroupInfoSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = gis.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{groupinfo.Label}
+	default:
+		err = fmt.Errorf("ent: GroupInfoSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (gis *GroupInfoSelect) BoolX(ctx context.Context) bool {
+	v, err := gis.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

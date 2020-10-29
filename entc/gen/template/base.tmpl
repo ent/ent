@@ -23,21 +23,21 @@ type (
 	MutateFunc = ent.MutateFunc
 )
 
-// OrderFunc applies an ordering on either graph traversal or sql selector.
-type OrderFunc func({{ $.Storage.Builder }})
+{{ $tmpl := printf "dialect/%s/order/signature" $.Storage }}
+{{ xtemplate $tmpl . }}
 
 {{ range $f, $order := order }}
 	{{ $f = pascal $f }}
 	// {{ $f }} applies the given fields in {{ upper $f }} order.
 	func {{ $f }}(fields ...string) OrderFunc {
 		{{- with extend (index $.Nodes 0) "Func" $f "Order" $order -}}
-			{{ $tmpl := printf "dialect/%s/order" $.Storage }}
+			{{ $tmpl := printf "dialect/%s/order/func" $.Storage }}
 			return {{ xtemplate $tmpl . }}
 		{{ end -}}
 	}
 {{ end }}
 
-{{ $tmpl := printf "dialect/%s/group/signature" $.Storage }}
+{{ $tmpl = printf "dialect/%s/group/signature" $.Storage }}
 // AggregateFunc applies an aggregation step on the group-by traversal/selector.
 {{ xtemplate $tmpl . }}
 

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupMutation
-	predicates []predicate.Group
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.predicates = append(gd.predicates, ps...)
+	gd.mutation.predicates = append(gd.mutation.predicates, ps...)
 	return gd
 }
 
@@ -79,7 +78,7 @@ func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := gd.predicates; len(ps) > 0 {
+	if ps := gd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

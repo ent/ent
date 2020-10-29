@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,14 +11,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/migrate"
+	"github.com/facebook/ent/examples/o2o2types/ent/migrate"
 
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/card"
-	"github.com/facebookincubator/ent/examples/o2o2types/ent/user"
+	"github.com/facebook/ent/examples/o2o2types/ent/card"
+	"github.com/facebook/ent/examples/o2o2types/ent/user"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -63,7 +63,8 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client.
+// Tx returns a new transactional client. The provided context
+// is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
@@ -74,6 +75,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
+		ctx:    ctx,
 		config: cfg,
 		Card:   NewCardClient(cfg),
 		User:   NewUserClient(cfg),
@@ -148,6 +150,11 @@ func (c *CardClient) Create() *CardCreate {
 	return &CardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Card entities.
+func (c *CardClient) CreateBulk(builders ...*CardCreate) *CardCreateBulk {
+	return &CardCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Card.
 func (c *CardClient) Update() *CardUpdate {
 	mutation := newCardMutation(c.config, OpUpdate)
@@ -185,7 +192,7 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	return &CardDeleteOne{builder}
 }
 
-// Create returns a query builder for Card.
+// Query returns a query builder for Card.
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{config: c.config}
 }
@@ -197,11 +204,11 @@ func (c *CardClient) Get(ctx context.Context, id int) (*Card, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CardClient) GetX(ctx context.Context, id int) *Card {
-	ca, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ca
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Card.
@@ -247,6 +254,11 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
 	mutation := newUserMutation(c.config, OpUpdate)
@@ -284,7 +296,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }
@@ -296,11 +308,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryCard queries the card edge of a User.

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,24 +11,26 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/migrate"
+	"github.com/facebook/ent/entc/integration/ent/migrate"
 
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/comment"
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/ent/item"
-	"github.com/facebookincubator/ent/entc/integration/ent/node"
-	"github.com/facebookincubator/ent/entc/integration/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/ent/spec"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/comment"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/goods"
+	"github.com/facebook/ent/entc/integration/ent/group"
+	"github.com/facebook/ent/entc/integration/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/ent/item"
+	"github.com/facebook/ent/entc/integration/ent/node"
+	"github.com/facebook/ent/entc/integration/ent/pet"
+	"github.com/facebook/ent/entc/integration/ent/spec"
+	"github.com/facebook/ent/entc/integration/ent/task"
+	"github.com/facebook/ent/entc/integration/ent/user"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -46,6 +48,8 @@ type Client struct {
 	File *FileClient
 	// FileType is the client for interacting with the FileType builders.
 	FileType *FileTypeClient
+	// Goods is the client for interacting with the Goods builders.
+	Goods *GoodsClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// GroupInfo is the client for interacting with the GroupInfo builders.
@@ -58,8 +62,11 @@ type Client struct {
 	Pet *PetClient
 	// Spec is the client for interacting with the Spec builders.
 	Spec *SpecClient
+	// Task is the client for interacting with the Task builders.
+	Task *TaskClient
 	// User is the client for interacting with the User builders.
-	User *UserClient
+	User          *UserClient
+	TemplateField struct{}
 }
 
 // NewClient creates a new client configured with the given options.
@@ -78,12 +85,14 @@ func (c *Client) init() {
 	c.FieldType = NewFieldTypeClient(c.config)
 	c.File = NewFileClient(c.config)
 	c.FileType = NewFileTypeClient(c.config)
+	c.Goods = NewGoodsClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.GroupInfo = NewGroupInfoClient(c.config)
 	c.Item = NewItemClient(c.config)
 	c.Node = NewNodeClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.Spec = NewSpecClient(c.config)
+	c.Task = NewTaskClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -103,7 +112,8 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client.
+// Tx returns a new transactional client. The provided context
+// is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
@@ -114,18 +124,21 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
+		ctx:       ctx,
 		config:    cfg,
 		Card:      NewCardClient(cfg),
 		Comment:   NewCommentClient(cfg),
 		FieldType: NewFieldTypeClient(cfg),
 		File:      NewFileClient(cfg),
 		FileType:  NewFileTypeClient(cfg),
+		Goods:     NewGoodsClient(cfg),
 		Group:     NewGroupClient(cfg),
 		GroupInfo: NewGroupInfoClient(cfg),
 		Item:      NewItemClient(cfg),
 		Node:      NewNodeClient(cfg),
 		Pet:       NewPetClient(cfg),
 		Spec:      NewSpecClient(cfg),
+		Task:      NewTaskClient(cfg),
 		User:      NewUserClient(cfg),
 	}, nil
 }
@@ -147,12 +160,14 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		FieldType: NewFieldTypeClient(cfg),
 		File:      NewFileClient(cfg),
 		FileType:  NewFileTypeClient(cfg),
+		Goods:     NewGoodsClient(cfg),
 		Group:     NewGroupClient(cfg),
 		GroupInfo: NewGroupInfoClient(cfg),
 		Item:      NewItemClient(cfg),
 		Node:      NewNodeClient(cfg),
 		Pet:       NewPetClient(cfg),
 		Spec:      NewSpecClient(cfg),
+		Task:      NewTaskClient(cfg),
 		User:      NewUserClient(cfg),
 	}, nil
 }
@@ -187,12 +202,14 @@ func (c *Client) Use(hooks ...Hook) {
 	c.FieldType.Use(hooks...)
 	c.File.Use(hooks...)
 	c.FileType.Use(hooks...)
+	c.Goods.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.GroupInfo.Use(hooks...)
 	c.Item.Use(hooks...)
 	c.Node.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.Spec.Use(hooks...)
+	c.Task.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -216,6 +233,11 @@ func (c *CardClient) Use(hooks ...Hook) {
 func (c *CardClient) Create() *CardCreate {
 	mutation := newCardMutation(c.config, OpCreate)
 	return &CardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Card entities.
+func (c *CardClient) CreateBulk(builders ...*CardCreate) *CardCreateBulk {
+	return &CardCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Card.
@@ -255,7 +277,7 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	return &CardDeleteOne{builder}
 }
 
-// Create returns a query builder for Card.
+// Query returns a query builder for Card.
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{config: c.config}
 }
@@ -267,11 +289,11 @@ func (c *CardClient) Get(ctx context.Context, id int) (*Card, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CardClient) GetX(ctx context.Context, id int) *Card {
-	ca, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ca
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Card.
@@ -333,6 +355,11 @@ func (c *CommentClient) Create() *CommentCreate {
 	return &CommentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Comment entities.
+func (c *CommentClient) CreateBulk(builders ...*CommentCreate) *CommentCreateBulk {
+	return &CommentCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Comment.
 func (c *CommentClient) Update() *CommentUpdate {
 	mutation := newCommentMutation(c.config, OpUpdate)
@@ -370,7 +397,7 @@ func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 	return &CommentDeleteOne{builder}
 }
 
-// Create returns a query builder for Comment.
+// Query returns a query builder for Comment.
 func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{config: c.config}
 }
@@ -382,11 +409,11 @@ func (c *CommentClient) Get(ctx context.Context, id int) (*Comment, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CommentClient) GetX(ctx context.Context, id int) *Comment {
-	co, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return co
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -414,6 +441,11 @@ func (c *FieldTypeClient) Use(hooks ...Hook) {
 func (c *FieldTypeClient) Create() *FieldTypeCreate {
 	mutation := newFieldTypeMutation(c.config, OpCreate)
 	return &FieldTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of FieldType entities.
+func (c *FieldTypeClient) CreateBulk(builders ...*FieldTypeCreate) *FieldTypeCreateBulk {
+	return &FieldTypeCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for FieldType.
@@ -453,7 +485,7 @@ func (c *FieldTypeClient) DeleteOneID(id int) *FieldTypeDeleteOne {
 	return &FieldTypeDeleteOne{builder}
 }
 
-// Create returns a query builder for FieldType.
+// Query returns a query builder for FieldType.
 func (c *FieldTypeClient) Query() *FieldTypeQuery {
 	return &FieldTypeQuery{config: c.config}
 }
@@ -465,11 +497,11 @@ func (c *FieldTypeClient) Get(ctx context.Context, id int) (*FieldType, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *FieldTypeClient) GetX(ctx context.Context, id int) *FieldType {
-	ft, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -497,6 +529,11 @@ func (c *FileClient) Use(hooks ...Hook) {
 func (c *FileClient) Create() *FileCreate {
 	mutation := newFileMutation(c.config, OpCreate)
 	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of File entities.
+func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
+	return &FileCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for File.
@@ -536,7 +573,7 @@ func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	return &FileDeleteOne{builder}
 }
 
-// Create returns a query builder for File.
+// Query returns a query builder for File.
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{config: c.config}
 }
@@ -548,11 +585,11 @@ func (c *FileClient) Get(ctx context.Context, id int) (*File, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *FileClient) GetX(ctx context.Context, id int) *File {
-	f, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return f
+	return obj
 }
 
 // QueryOwner queries the owner edge of a File.
@@ -630,6 +667,11 @@ func (c *FileTypeClient) Create() *FileTypeCreate {
 	return &FileTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of FileType entities.
+func (c *FileTypeClient) CreateBulk(builders ...*FileTypeCreate) *FileTypeCreateBulk {
+	return &FileTypeCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for FileType.
 func (c *FileTypeClient) Update() *FileTypeUpdate {
 	mutation := newFileTypeMutation(c.config, OpUpdate)
@@ -667,7 +709,7 @@ func (c *FileTypeClient) DeleteOneID(id int) *FileTypeDeleteOne {
 	return &FileTypeDeleteOne{builder}
 }
 
-// Create returns a query builder for FileType.
+// Query returns a query builder for FileType.
 func (c *FileTypeClient) Query() *FileTypeQuery {
 	return &FileTypeQuery{config: c.config}
 }
@@ -679,11 +721,11 @@ func (c *FileTypeClient) Get(ctx context.Context, id int) (*FileType, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *FileTypeClient) GetX(ctx context.Context, id int) *FileType {
-	ft, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return obj
 }
 
 // QueryFiles queries the files edge of a FileType.
@@ -707,6 +749,94 @@ func (c *FileTypeClient) Hooks() []Hook {
 	return c.hooks.FileType
 }
 
+// GoodsClient is a client for the Goods schema.
+type GoodsClient struct {
+	config
+}
+
+// NewGoodsClient returns a client for the Goods from the given config.
+func NewGoodsClient(c config) *GoodsClient {
+	return &GoodsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `goods.Hooks(f(g(h())))`.
+func (c *GoodsClient) Use(hooks ...Hook) {
+	c.hooks.Goods = append(c.hooks.Goods, hooks...)
+}
+
+// Create returns a create builder for Goods.
+func (c *GoodsClient) Create() *GoodsCreate {
+	mutation := newGoodsMutation(c.config, OpCreate)
+	return &GoodsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Goods entities.
+func (c *GoodsClient) CreateBulk(builders ...*GoodsCreate) *GoodsCreateBulk {
+	return &GoodsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Goods.
+func (c *GoodsClient) Update() *GoodsUpdate {
+	mutation := newGoodsMutation(c.config, OpUpdate)
+	return &GoodsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *GoodsClient) UpdateOne(_go *Goods) *GoodsUpdateOne {
+	mutation := newGoodsMutation(c.config, OpUpdateOne, withGoods(_go))
+	return &GoodsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *GoodsClient) UpdateOneID(id int) *GoodsUpdateOne {
+	mutation := newGoodsMutation(c.config, OpUpdateOne, withGoodsID(id))
+	return &GoodsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Goods.
+func (c *GoodsClient) Delete() *GoodsDelete {
+	mutation := newGoodsMutation(c.config, OpDelete)
+	return &GoodsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *GoodsClient) DeleteOne(_go *Goods) *GoodsDeleteOne {
+	return c.DeleteOneID(_go.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *GoodsClient) DeleteOneID(id int) *GoodsDeleteOne {
+	builder := c.Delete().Where(goods.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &GoodsDeleteOne{builder}
+}
+
+// Query returns a query builder for Goods.
+func (c *GoodsClient) Query() *GoodsQuery {
+	return &GoodsQuery{config: c.config}
+}
+
+// Get returns a Goods entity by its id.
+func (c *GoodsClient) Get(ctx context.Context, id int) (*Goods, error) {
+	return c.Query().Where(goods.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *GoodsClient) GetX(ctx context.Context, id int) *Goods {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *GoodsClient) Hooks() []Hook {
+	return c.hooks.Goods
+}
+
 // GroupClient is a client for the Group schema.
 type GroupClient struct {
 	config
@@ -727,6 +857,11 @@ func (c *GroupClient) Use(hooks ...Hook) {
 func (c *GroupClient) Create() *GroupCreate {
 	mutation := newGroupMutation(c.config, OpCreate)
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Group entities.
+func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
+	return &GroupCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Group.
@@ -766,7 +901,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	return &GroupDeleteOne{builder}
 }
 
-// Create returns a query builder for Group.
+// Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
 }
@@ -778,11 +913,11 @@ func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
-	gr, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return obj
 }
 
 // QueryFiles queries the files edge of a Group.
@@ -876,6 +1011,11 @@ func (c *GroupInfoClient) Create() *GroupInfoCreate {
 	return &GroupInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of GroupInfo entities.
+func (c *GroupInfoClient) CreateBulk(builders ...*GroupInfoCreate) *GroupInfoCreateBulk {
+	return &GroupInfoCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for GroupInfo.
 func (c *GroupInfoClient) Update() *GroupInfoUpdate {
 	mutation := newGroupInfoMutation(c.config, OpUpdate)
@@ -913,7 +1053,7 @@ func (c *GroupInfoClient) DeleteOneID(id int) *GroupInfoDeleteOne {
 	return &GroupInfoDeleteOne{builder}
 }
 
-// Create returns a query builder for GroupInfo.
+// Query returns a query builder for GroupInfo.
 func (c *GroupInfoClient) Query() *GroupInfoQuery {
 	return &GroupInfoQuery{config: c.config}
 }
@@ -925,11 +1065,11 @@ func (c *GroupInfoClient) Get(ctx context.Context, id int) (*GroupInfo, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupInfoClient) GetX(ctx context.Context, id int) *GroupInfo {
-	gi, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gi
+	return obj
 }
 
 // QueryGroups queries the groups edge of a GroupInfo.
@@ -975,6 +1115,11 @@ func (c *ItemClient) Create() *ItemCreate {
 	return &ItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Item entities.
+func (c *ItemClient) CreateBulk(builders ...*ItemCreate) *ItemCreateBulk {
+	return &ItemCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Item.
 func (c *ItemClient) Update() *ItemUpdate {
 	mutation := newItemMutation(c.config, OpUpdate)
@@ -1012,7 +1157,7 @@ func (c *ItemClient) DeleteOneID(id int) *ItemDeleteOne {
 	return &ItemDeleteOne{builder}
 }
 
-// Create returns a query builder for Item.
+// Query returns a query builder for Item.
 func (c *ItemClient) Query() *ItemQuery {
 	return &ItemQuery{config: c.config}
 }
@@ -1024,11 +1169,11 @@ func (c *ItemClient) Get(ctx context.Context, id int) (*Item, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *ItemClient) GetX(ctx context.Context, id int) *Item {
-	i, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return obj
 }
 
 // Hooks returns the client hooks.
@@ -1056,6 +1201,11 @@ func (c *NodeClient) Use(hooks ...Hook) {
 func (c *NodeClient) Create() *NodeCreate {
 	mutation := newNodeMutation(c.config, OpCreate)
 	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Node entities.
+func (c *NodeClient) CreateBulk(builders ...*NodeCreate) *NodeCreateBulk {
+	return &NodeCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Node.
@@ -1095,7 +1245,7 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	return &NodeDeleteOne{builder}
 }
 
-// Create returns a query builder for Node.
+// Query returns a query builder for Node.
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{config: c.config}
 }
@@ -1107,11 +1257,11 @@ func (c *NodeClient) Get(ctx context.Context, id int) (*Node, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
-	n, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return n
+	return obj
 }
 
 // QueryPrev queries the prev edge of a Node.
@@ -1173,6 +1323,11 @@ func (c *PetClient) Create() *PetCreate {
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Pet entities.
+func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
+	return &PetCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Pet.
 func (c *PetClient) Update() *PetUpdate {
 	mutation := newPetMutation(c.config, OpUpdate)
@@ -1210,7 +1365,7 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	return &PetDeleteOne{builder}
 }
 
-// Create returns a query builder for Pet.
+// Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{config: c.config}
 }
@@ -1222,11 +1377,11 @@ func (c *PetClient) Get(ctx context.Context, id int) (*Pet, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
-	pe, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return obj
 }
 
 // QueryTeam queries the team edge of a Pet.
@@ -1288,6 +1443,11 @@ func (c *SpecClient) Create() *SpecCreate {
 	return &SpecCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Spec entities.
+func (c *SpecClient) CreateBulk(builders ...*SpecCreate) *SpecCreateBulk {
+	return &SpecCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Spec.
 func (c *SpecClient) Update() *SpecUpdate {
 	mutation := newSpecMutation(c.config, OpUpdate)
@@ -1325,7 +1485,7 @@ func (c *SpecClient) DeleteOneID(id int) *SpecDeleteOne {
 	return &SpecDeleteOne{builder}
 }
 
-// Create returns a query builder for Spec.
+// Query returns a query builder for Spec.
 func (c *SpecClient) Query() *SpecQuery {
 	return &SpecQuery{config: c.config}
 }
@@ -1337,11 +1497,11 @@ func (c *SpecClient) Get(ctx context.Context, id int) (*Spec, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *SpecClient) GetX(ctx context.Context, id int) *Spec {
-	s, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return obj
 }
 
 // QueryCard queries the card edge of a Spec.
@@ -1365,6 +1525,94 @@ func (c *SpecClient) Hooks() []Hook {
 	return c.hooks.Spec
 }
 
+// TaskClient is a client for the Task schema.
+type TaskClient struct {
+	config
+}
+
+// NewTaskClient returns a client for the Task from the given config.
+func NewTaskClient(c config) *TaskClient {
+	return &TaskClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `task.Hooks(f(g(h())))`.
+func (c *TaskClient) Use(hooks ...Hook) {
+	c.hooks.Task = append(c.hooks.Task, hooks...)
+}
+
+// Create returns a create builder for Task.
+func (c *TaskClient) Create() *TaskCreate {
+	mutation := newTaskMutation(c.config, OpCreate)
+	return &TaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Task entities.
+func (c *TaskClient) CreateBulk(builders ...*TaskCreate) *TaskCreateBulk {
+	return &TaskCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Task.
+func (c *TaskClient) Update() *TaskUpdate {
+	mutation := newTaskMutation(c.config, OpUpdate)
+	return &TaskUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TaskClient) UpdateOne(t *Task) *TaskUpdateOne {
+	mutation := newTaskMutation(c.config, OpUpdateOne, withTask(t))
+	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TaskClient) UpdateOneID(id int) *TaskUpdateOne {
+	mutation := newTaskMutation(c.config, OpUpdateOne, withTaskID(id))
+	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Task.
+func (c *TaskClient) Delete() *TaskDelete {
+	mutation := newTaskMutation(c.config, OpDelete)
+	return &TaskDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TaskClient) DeleteOne(t *Task) *TaskDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
+	builder := c.Delete().Where(task.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TaskDeleteOne{builder}
+}
+
+// Query returns a query builder for Task.
+func (c *TaskClient) Query() *TaskQuery {
+	return &TaskQuery{config: c.config}
+}
+
+// Get returns a Task entity by its id.
+func (c *TaskClient) Get(ctx context.Context, id int) (*Task, error) {
+	return c.Query().Where(task.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TaskClient) GetX(ctx context.Context, id int) *Task {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TaskClient) Hooks() []Hook {
+	return c.hooks.Task
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -1385,6 +1633,11 @@ func (c *UserClient) Use(hooks ...Hook) {
 func (c *UserClient) Create() *UserCreate {
 	mutation := newUserMutation(c.config, OpCreate)
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for User.
@@ -1424,7 +1677,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }
@@ -1436,11 +1689,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryCard queries the card edge of a User.

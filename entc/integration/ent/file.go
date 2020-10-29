@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/user"
 )
 
 // File is the model entity for the File schema.
@@ -29,6 +29,8 @@ type File struct {
 	User *string `json:"user,omitempty"`
 	// Group holds the value of the "group" field.
 	Group string `json:"group,omitempty"`
+	// Op holds the value of the "op" field.
+	Op bool `json:"op,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges           FileEdges `json:"edges"`
@@ -95,6 +97,7 @@ func (*File) scanValues() []interface{} {
 		&sql.NullString{}, // name
 		&sql.NullString{}, // user
 		&sql.NullString{}, // group
+		&sql.NullBool{},   // op
 	}
 }
 
@@ -140,7 +143,12 @@ func (f *File) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		f.Group = value.String
 	}
-	values = values[4:]
+	if value, ok := values[4].(*sql.NullBool); !ok {
+		return fmt.Errorf("unexpected type %T for field op", values[4])
+	} else if value.Valid {
+		f.Op = value.Bool
+	}
+	values = values[5:]
 	if len(values) == len(file.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_type_files", value)
@@ -212,6 +220,8 @@ func (f *File) String() string {
 	}
 	builder.WriteString(", group=")
 	builder.WriteString(f.Group)
+	builder.WriteString(", op=")
+	builder.WriteString(fmt.Sprintf("%v", f.Op))
 	builder.WriteByte(')')
 	return builder.String()
 }

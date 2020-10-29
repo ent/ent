@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,10 +11,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
+	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
+	"github.com/facebook/ent/examples/edgeindex/ent/street"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -41,8 +42,10 @@ type CityMutation struct {
 	clearedFields  map[string]struct{}
 	streets        map[int]struct{}
 	removedstreets map[int]struct{}
+	clearedstreets bool
 	done           bool
 	oldValue       func(context.Context) (*City, error)
+	predicates     []predicate.City
 }
 
 var _ ent.Mutation = (*CityMutation)(nil)
@@ -171,6 +174,16 @@ func (m *CityMutation) AddStreetIDs(ids ...int) {
 	}
 }
 
+// ClearStreets clears the streets edge to Street.
+func (m *CityMutation) ClearStreets() {
+	m.clearedstreets = true
+}
+
+// StreetsCleared returns if the edge streets was cleared.
+func (m *CityMutation) StreetsCleared() bool {
+	return m.clearedstreets
+}
+
 // RemoveStreetIDs removes the streets edge to Street by ids.
 func (m *CityMutation) RemoveStreetIDs(ids ...int) {
 	if m.removedstreets == nil {
@@ -200,6 +213,7 @@ func (m *CityMutation) StreetsIDs() (ids []int) {
 // ResetStreets reset all changes of the "streets" edge.
 func (m *CityMutation) ResetStreets() {
 	m.streets = nil
+	m.clearedstreets = false
 	m.removedstreets = nil
 }
 
@@ -367,6 +381,9 @@ func (m *CityMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *CityMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedstreets {
+		edges = append(edges, city.EdgeStreets)
+	}
 	return edges
 }
 
@@ -374,6 +391,8 @@ func (m *CityMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *CityMutation) EdgeCleared(name string) bool {
 	switch name {
+	case city.EdgeStreets:
+		return m.clearedstreets
 	}
 	return false
 }
@@ -411,6 +430,7 @@ type StreetMutation struct {
 	clearedcity   bool
 	done          bool
 	oldValue      func(context.Context) (*Street, error)
+	predicates    []predicate.Street
 }
 
 var _ ent.Mutation = (*StreetMutation)(nil)

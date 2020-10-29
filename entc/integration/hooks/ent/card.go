@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/hooks/ent/card"
+	"github.com/facebook/ent/entc/integration/hooks/ent/user"
 )
 
 // Card is the model entity for the Card schema.
@@ -27,6 +27,8 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// InHook holds the value of the "in_hook" field.
+	InHook string `json:"in_hook,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
 	Edges      CardEdges `json:"edges"`
@@ -63,6 +65,7 @@ func (*Card) scanValues() []interface{} {
 		&sql.NullString{}, // number
 		&sql.NullString{}, // name
 		&sql.NullTime{},   // created_at
+		&sql.NullString{}, // in_hook
 	}
 }
 
@@ -100,7 +103,12 @@ func (c *Card) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		c.CreatedAt = value.Time
 	}
-	values = values[3:]
+	if value, ok := values[3].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field in_hook", values[3])
+	} else if value.Valid {
+		c.InHook = value.String
+	}
+	values = values[4:]
 	if len(values) == len(card.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_cards", value)
@@ -146,6 +154,8 @@ func (c *Card) String() string {
 	builder.WriteString(c.Name)
 	builder.WriteString(", created_at=")
 	builder.WriteString(c.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", in_hook=")
+	builder.WriteString(c.InHook)
 	builder.WriteByte(')')
 	return builder.String()
 }

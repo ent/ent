@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/customid/ent/blob"
+	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 	"github.com/google/uuid"
 )
 
 // BlobUpdate is the builder for updating Blob entities.
 type BlobUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *BlobMutation
-	predicates []predicate.Blob
+	hooks    []Hook
+	mutation *BlobMutation
 }
 
 // Where adds a new predicate for the builder.
 func (bu *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
-	bu.predicates = append(bu.predicates, ps...)
+	bu.mutation.predicates = append(bu.mutation.predicates, ps...)
 	return bu
 }
 
@@ -77,9 +76,15 @@ func (bu *BlobUpdate) Mutation() *BlobMutation {
 	return bu.mutation
 }
 
-// ClearParent clears the parent edge to Blob.
+// ClearParent clears the "parent" edge to type Blob.
 func (bu *BlobUpdate) ClearParent() *BlobUpdate {
 	bu.mutation.ClearParent()
+	return bu
+}
+
+// ClearLinks clears all "links" edges to type Blob.
+func (bu *BlobUpdate) ClearLinks() *BlobUpdate {
+	bu.mutation.ClearLinks()
 	return bu
 }
 
@@ -100,7 +105,6 @@ func (bu *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -161,7 +165,7 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := bu.predicates; len(ps) > 0 {
+	if ps := bu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -210,7 +214,23 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := bu.mutation.RemovedLinksIDs(); len(nodes) > 0 {
+	if bu.mutation.LinksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedLinksIDs(); len(nodes) > 0 && !bu.mutation.LinksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -311,9 +331,15 @@ func (buo *BlobUpdateOne) Mutation() *BlobMutation {
 	return buo.mutation
 }
 
-// ClearParent clears the parent edge to Blob.
+// ClearParent clears the "parent" edge to type Blob.
 func (buo *BlobUpdateOne) ClearParent() *BlobUpdateOne {
 	buo.mutation.ClearParent()
+	return buo
+}
+
+// ClearLinks clears all "links" edges to type Blob.
+func (buo *BlobUpdateOne) ClearLinks() *BlobUpdateOne {
+	buo.mutation.ClearLinks()
 	return buo
 }
 
@@ -334,7 +360,6 @@ func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
-
 	var (
 		err  error
 		node *Blob
@@ -364,11 +389,11 @@ func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (buo *BlobUpdateOne) SaveX(ctx context.Context) *Blob {
-	b, err := buo.Save(ctx)
+	node, err := buo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return b
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -384,7 +409,7 @@ func (buo *BlobUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
+func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   blob.Table,
@@ -442,7 +467,23 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := buo.mutation.RemovedLinksIDs(); len(nodes) > 0 {
+	if buo.mutation.LinksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   blob.LinksTable,
+			Columns: blob.LinksPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: blob.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedLinksIDs(); len(nodes) > 0 && !buo.mutation.LinksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -480,9 +521,9 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	b = &Blob{config: buo.config}
-	_spec.Assign = b.assignValues
-	_spec.ScanValues = b.scanValues()
+	_node = &Blob{config: buo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, buo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blob.Label}
@@ -491,5 +532,5 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (b *Blob, err error) {
 		}
 		return nil, err
 	}
-	return b, nil
+	return _node, nil
 }

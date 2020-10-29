@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 )
 
 // Pet is the model entity for the Pet schema.
@@ -75,7 +75,6 @@ func (pe *Pet) assignValues(values ...interface{}) error {
 	}
 	pe.ID = int(value.Int64)
 	values = values[1:]
-	values = values[0:]
 	if len(values) == len(pet.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)

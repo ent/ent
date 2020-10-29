@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,12 +10,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/node"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
 )
 
 // NodeCreate is the builder for creating a Node entity.
@@ -89,12 +89,18 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 		node *Node
 	)
 	if len(nc.hooks) == 0 {
+		if err = nc.check(); err != nil {
+			return nil, err
+		}
 		node, err = nc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*NodeMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = nc.check(); err != nil {
+				return nil, err
 			}
 			nc.mutation = mutation
 			node, err = nc.gremlinSave(ctx)
@@ -118,6 +124,11 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 		panic(err)
 	}
 	return v
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (nc *NodeCreate) check() error {
+	return nil
 }
 
 func (nc *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
@@ -168,4 +179,10 @@ func (nc *NodeCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// NodeCreateBulk is the builder for creating a bulk of Node entities.
+type NodeCreateBulk struct {
+	config
+	builders []*NodeCreate
 }

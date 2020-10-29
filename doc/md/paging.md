@@ -17,7 +17,7 @@ users, err := client.User.
 
 ## Offset
 
-`Offset` sets the first vertex to return from the query. 
+`Offset` sets the first node to return from the query. 
 
 ```go
 users, err := client.User.
@@ -28,7 +28,8 @@ users, err := client.User.
 
 ## Ordering
 
-`Order` returns the entities sorted by the values of one or more fields.
+`Order` returns the entities sorted by the values of one or more fields. Note that, an error
+is returned if the given fields are not valid columns or foreign-keys.
 
 ```go
 users, err := client.User.Query().

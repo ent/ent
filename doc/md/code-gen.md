@@ -9,7 +9,7 @@ title: Introduction
 `entc` run the following command:
 
 ```bash
-go get github.com/facebookincubator/ent/cmd/entc
+go get github.com/facebook/ent/cmd/entc
 ``` 
 
 ## Initialize A New Schema
@@ -59,7 +59,7 @@ go mod init <project>
 And then, re-run the following command in order to add `ent` to your `go.mod` file:
 
 ```console
-go get github.com/facebookincubator/ent/cmd/entc
+go get github.com/facebook/ent/cmd/entc
 ```
 
 Add a `generate.go` file to your project under `<project>/ent`:
@@ -67,7 +67,7 @@ Add a `generate.go` file to your project under `<project>/ent`:
 ```go
 package ent
 
-//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema
+//go:generate go run github.com/facebook/ent/cmd/entc generate ./schema
 ```
 
 Finally, you can run `go generate ./ent` from the root directory of your project
@@ -88,10 +88,11 @@ Examples:
   entc generate github.com/a8m/x
 
 Flags:
+      --feature strings       extend codegen with additional features
       --header string         override codegen header
   -h, --help                  help for generate
       --idtype [int string]   type of the id field (default int)
-      --storage strings       list of storage drivers to support (default [sql])
+      --storage string        storage driver to support in codegen (default "sql")
       --target string         target directory for codegen
       --template strings      external templates to execute
 ```
@@ -111,8 +112,7 @@ as follows:
 entc generate --template <dir-path> --template glob="path/to/*.tmpl" ./ent/schema
 ```
 
-Example of a custom template provides a `Node` API for GraphQL - 
-[Github](https://github.com/facebookincubator/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
+More information and examples can be found in the [external templates doc](templates.md).
 
 ## Use `entc` As A Package
 
@@ -124,9 +124,9 @@ package main
 import (
 	"log"
 
-	"github.com/facebookincubator/ent/entc"
-	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc"
+	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/schema/field"
 )
 
 func main() {
@@ -140,7 +140,7 @@ func main() {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/entcpkg).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/entcpkg).
 
 
 ## Schema Description
@@ -180,4 +180,53 @@ User:
 	+------+------+---------+---------+----------+--------+----------+
 	| pets | Pet  | false   |         | O2M      | false  | true     |
 	+------+------+---------+---------+----------+--------+----------+
+```
+
+## Code Generation Hooks
+
+The `entc` package provides an option to add a list of hooks (middlewares) to the code-generation phase.
+This option is ideal for adding custom validators for the schema, or for generating additional assets
+using the graph schema.
+
+```go
+// +build ignore
+
+package main
+
+import (
+	"fmt"
+	"log"
+	"reflect"
+
+	"github.com/facebook/ent/entc"
+	"github.com/facebook/ent/entc/gen"
+)
+
+func main() {
+	err := entc.Generate("./schema", &gen.Config{
+		Hooks: []gen.Hook{
+			EnsureStructTag("json"),
+		},
+	})
+	if err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
+}
+
+// EnsureStructTag ensures all fields in the graph have a specific tag name.
+func EnsureStructTag(name string) gen.Hook {
+	return func(next gen.Generator) gen.Generator {
+		return gen.GenerateFunc(func(g *gen.Graph) error {
+			for _, node := range g.Nodes {
+				for _, field := range node.Fields {
+					tag := reflect.StructTag(field.StructTag)
+					if _, ok := tag.Lookup(name); !ok {
+						return fmt.Errorf("struct tag %q is missing for field %s.%s", name, node.Name, f.Name)
+					}
+				}
+			}
+			return next.Generate(g)
+		})
+	}
+}
 ```

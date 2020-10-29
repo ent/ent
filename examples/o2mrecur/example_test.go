@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent"
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
+	"github.com/facebook/ent/examples/o2mrecur/ent"
+	"github.com/facebook/ent/examples/o2mrecur/ent/node"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -53,7 +53,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	//       3     5
 	//
 
-	// Unlike `Create`, `CreateX` panics if an error occurs.
+	// Unlike `Save`, `SaveX` panics if an error occurs.
 	n1 := client.Node.
 		Create().
 		SetValue(1).

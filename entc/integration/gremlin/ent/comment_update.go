@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,26 +10,25 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/comment"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/comment"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CommentMutation
-	predicates []predicate.Comment
+	hooks    []Hook
+	mutation *CommentMutation
 }
 
 // Where adds a new predicate for the builder.
 func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
@@ -161,7 +160,7 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(comment.Label)
-	for _, p := range cu.predicates {
+	for _, p := range cu.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -324,11 +323,11 @@ func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.

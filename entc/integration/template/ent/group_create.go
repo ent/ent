@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,9 +11,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/template/ent/group"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/template/ent/group"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -36,20 +36,23 @@ func (gc *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	if _, ok := gc.mutation.MaxUsers(); !ok {
-		return nil, &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
-	}
 	var (
 		err  error
 		node *Group
 	)
 	if len(gc.hooks) == 0 {
+		if err = gc.check(); err != nil {
+			return nil, err
+		}
 		node, err = gc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GroupMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gc.check(); err != nil {
+				return nil, err
 			}
 			gc.mutation = mutation
 			node, err = gc.sqlSave(ctx)
@@ -75,9 +78,30 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 	return v
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (gc *GroupCreate) check() error {
+	if _, ok := gc.mutation.MaxUsers(); !ok {
+		return &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
+	}
+	return nil
+}
+
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
+	_node, _spec := gc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
+	return _node, nil
+}
+
+func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	var (
-		gr    = &Group{config: gc.config}
+		_node = &Group{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: group.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -92,15 +116,73 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 			Value:  value,
 			Column: group.FieldMaxUsers,
 		})
-		gr.MaxUsers = value
+		_node.MaxUsers = value
 	}
-	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+	return _node, _spec
+}
+
+// GroupCreateBulk is the builder for creating a bulk of Group entities.
+type GroupCreateBulk struct {
+	config
+	builders []*GroupCreate
+}
+
+// Save creates the Group entities in the database.
+func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(gcb.builders))
+	nodes := make([]*Group, len(gcb.builders))
+	mutators := make([]Mutator, len(gcb.builders))
+	for i := range gcb.builders {
+		func(i int, root context.Context) {
+			builder := gcb.builders[i]
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*GroupMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, gcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, gcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
+	}
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, gcb.builders[0].mutation); err != nil {
+			return nil, err
 		}
-		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	gr.ID = int(id)
-	return gr, nil
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
+	v, err := gcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

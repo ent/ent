@@ -9,63 +9,66 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/index"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
 )
 
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
-	Name    string      `json:"name,omitempty"`
-	Config  ent.Config  `json:"config,omitempty"`
-	Edges   []*Edge     `json:"edges,omitempty"`
-	Fields  []*Field    `json:"fields,omitempty"`
-	Indexes []*Index    `json:"indexes,omitempty"`
-	Hooks   []*Position `json:"hooks,omitempty"`
-	Policy  bool        `json:"policy,omitempty"`
+	Name        string                 `json:"name,omitempty"`
+	Config      ent.Config             `json:"config,omitempty"`
+	Edges       []*Edge                `json:"edges,omitempty"`
+	Fields      []*Field               `json:"fields,omitempty"`
+	Indexes     []*Index               `json:"indexes,omitempty"`
+	Hooks       []*Position            `json:"hooks,omitempty"`
+	Policy      []*Position            `json:"policy,omitempty"`
+	Annotations map[string]interface{} `json:"annotations,omitempty"`
 }
 
-// Position describes a field position in the schema.
+// Position describes a position in the schema.
 type Position struct {
-	Index      int  // Field index in the field list.
-	MixedIn    bool // Indicates if the field was mixed-in.
+	Index      int  // Index in the field/hook list.
+	MixedIn    bool // Indicates if the schema object was mixed-in.
 	MixinIndex int  // Mixin index in the mixin list.
 }
 
 // Field represents an ent.Field that was loaded from a complied user package.
 type Field struct {
-	Name          string            `json:"name,omitempty"`
-	Info          *field.TypeInfo   `json:"type,omitempty"`
-	Tag           string            `json:"tag,omitempty"`
-	Size          *int64            `json:"size,omitempty"`
-	Enums         []string          `json:"enums,omitempty"`
-	Unique        bool              `json:"unique,omitempty"`
-	Nillable      bool              `json:"nillable,omitempty"`
-	Optional      bool              `json:"optional,omitempty"`
-	Default       bool              `json:"default,omitempty"`
-	DefaultValue  interface{}       `json:"default_value,omitempty"`
-	UpdateDefault bool              `json:"update_default,omitempty"`
-	Immutable     bool              `json:"immutable,omitempty"`
-	Validators    int               `json:"validators,omitempty"`
-	StorageKey    string            `json:"storage_key,omitempty"`
-	Position      *Position         `json:"position,omitempty"`
-	Sensitive     bool              `json:"sensitive,omitempty"`
-	Increment     bool              `json:"increment,omitempty"`
-	SchemaType    map[string]string `json:"schema_type,omitempty"`
+	Name          string                  `json:"name,omitempty"`
+	Info          *field.TypeInfo         `json:"type,omitempty"`
+	Tag           string                  `json:"tag,omitempty"`
+	Size          *int64                  `json:"size,omitempty"`
+	Enums         []struct{ N, V string } `json:"enums,omitempty"`
+	Unique        bool                    `json:"unique,omitempty"`
+	Nillable      bool                    `json:"nillable,omitempty"`
+	Optional      bool                    `json:"optional,omitempty"`
+	Default       bool                    `json:"default,omitempty"`
+	DefaultValue  interface{}             `json:"default_value,omitempty"`
+	UpdateDefault bool                    `json:"update_default,omitempty"`
+	Immutable     bool                    `json:"immutable,omitempty"`
+	Validators    int                     `json:"validators,omitempty"`
+	StorageKey    string                  `json:"storage_key,omitempty"`
+	Position      *Position               `json:"position,omitempty"`
+	Sensitive     bool                    `json:"sensitive,omitempty"`
+	SchemaType    map[string]string       `json:"schema_type,omitempty"`
+	Increment     bool                    `json:"increment,omitempty"`
+	Annotations   map[string]interface{}  `json:"annotations,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.
 type Edge struct {
-	Name       string           `json:"name,omitempty"`
-	Type       string           `json:"type,omitempty"`
-	Tag        string           `json:"tag,omitempty"`
-	RefName    string           `json:"ref_name,omitempty"`
-	Ref        *Edge            `json:"ref,omitempty"`
-	Unique     bool             `json:"unique,omitempty"`
-	Inverse    bool             `json:"inverse,omitempty"`
-	Required   bool             `json:"required,omitempty"`
-	StorageKey *edge.StorageKey `json:"storage_key,omitempty"`
+	Name        string                 `json:"name,omitempty"`
+	Type        string                 `json:"type,omitempty"`
+	Tag         string                 `json:"tag,omitempty"`
+	RefName     string                 `json:"ref_name,omitempty"`
+	Ref         *Edge                  `json:"ref,omitempty"`
+	Unique      bool                   `json:"unique,omitempty"`
+	Inverse     bool                   `json:"inverse,omitempty"`
+	Required    bool                   `json:"required,omitempty"`
+	StorageKey  *edge.StorageKey       `json:"storage_key,omitempty"`
+	Annotations map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // Index represents an ent.Index that was loaded from a complied user package.
@@ -79,14 +82,18 @@ type Index struct {
 // NewEdge creates an loaded edge from edge descriptor.
 func NewEdge(ed *edge.Descriptor) *Edge {
 	ne := &Edge{
-		Tag:        ed.Tag,
-		Type:       ed.Type,
-		Name:       ed.Name,
-		Unique:     ed.Unique,
-		Inverse:    ed.Inverse,
-		Required:   ed.Required,
-		RefName:    ed.RefName,
-		StorageKey: ed.StorageKey,
+		Tag:         ed.Tag,
+		Type:        ed.Type,
+		Name:        ed.Name,
+		Unique:      ed.Unique,
+		Inverse:     ed.Inverse,
+		Required:    ed.Required,
+		RefName:     ed.RefName,
+		StorageKey:  ed.StorageKey,
+		Annotations: make(map[string]interface{}),
+	}
+	for _, at := range ed.Annotations {
+		ne.Annotations[at.Name()] = at
 	}
 	if ref := ed.Ref; ref != nil {
 		ne.Ref = NewEdge(ref)
@@ -116,6 +123,10 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Sensitive:     fd.Sensitive,
 		Increment:     fd.Increment,
 		SchemaType:    fd.SchemaType,
+		Annotations:   make(map[string]interface{}),
+	}
+	for _, at := range fd.Annotations {
+		sf.Annotations[at.Name()] = at
 	}
 	if sf.Info == nil {
 		return nil, fmt.Errorf("missing type info for field %q", sf.Name)
@@ -145,11 +156,16 @@ func NewIndex(idx *index.Descriptor) *Index {
 // that can be decoded into the Schema object object.
 func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	s := &Schema{
-		Config: schema.Config(),
-		Name:   indirect(reflect.TypeOf(schema)).Name(),
+		Config:      schema.Config(),
+		Name:        indirect(reflect.TypeOf(schema)).Name(),
+		Annotations: make(map[string]interface{}),
 	}
 	if err := s.loadMixin(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+	}
+	// Schema annotations override mixed-in annotations.
+	for _, at := range schema.Annotations() {
+		s.Annotations[at.Name()] = at
 	}
 	if err := s.loadFields(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
@@ -240,6 +256,19 @@ func (s *Schema) loadMixin(schema ent.Interface) error {
 				MixinIndex: i,
 			})
 		}
+		policy, err := safePolicy(mx)
+		if err != nil {
+			return fmt.Errorf("mixin %q: %v", name, err)
+		}
+		if policy != nil {
+			s.Policy = append(s.Policy, &Position{
+				MixedIn:    true,
+				MixinIndex: i,
+			})
+		}
+		for _, at := range mx.Annotations() {
+			s.Annotations[at.Name()] = at
+		}
 	}
 	return nil
 }
@@ -280,7 +309,9 @@ func (s *Schema) loadPolicy(schema ent.Interface) error {
 	if err != nil {
 		return err
 	}
-	s.Policy = policy != nil
+	if policy != nil {
+		s.Policy = append(s.Policy, &Position{})
+	}
 	return nil
 }
 
@@ -357,7 +388,7 @@ func safeHooks(schema interface{ Hooks() []ent.Hook }) (hooks []ent.Hook, err er
 }
 
 // safePolicy wraps the schema.Policy method with recover to ensure no panics in marshaling.
-func safePolicy(schema ent.Interface) (policy ent.Policy, err error) {
+func safePolicy(schema interface{ Policy() ent.Policy }) (policy ent.Policy, err error) {
 	defer func() {
 		if v := recover(); v != nil {
 			err = fmt.Errorf("schema.Policy panics: %v", v)

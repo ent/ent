@@ -16,14 +16,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/node"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/entc/integration/gremlin/ent"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 
 	"github.com/stretchr/testify/require"
 )
@@ -459,8 +459,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.NotNil(client.Group.Query().OnlyX(ctx))
 
 	t.Log("get only ids")
-	require.NotEmpty(client.User.Query().OnlyXID(ctx))
-	require.NotEmpty(client.Group.Query().OnlyXID(ctx))
+	require.NotEmpty(client.User.Query().OnlyIDX(ctx))
+	require.NotEmpty(client.Group.Query().OnlyIDX(ctx))
 
 	t.Log("query spouse edge")
 	require.Zero(client.User.Query().Where(user.HasSpouse()).CountX(ctx))
@@ -544,14 +544,14 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Len(client.GroupInfo.Query().Where(groupinfo.Or(groupinfo.Desc("group info"), groupinfo.HasGroupsWith(group.HasUsersWith(user.Name("alex"))))).AllX(ctx), 1)
 
 	t.Log("query with ordering")
-	u1 := client.User.Query().Order(ent.Asc(user.FieldName)).FirstXID(ctx)
-	u2 := client.User.Query().Order(ent.Desc(user.FieldName)).FirstXID(ctx)
+	u1 := client.User.Query().Order(ent.Asc(user.FieldName)).FirstIDX(ctx)
+	u2 := client.User.Query().Order(ent.Desc(user.FieldName)).FirstIDX(ctx)
 	require.NotEqual(u1, u2)
-	u1 = client.User.Query().Order(ent.Asc(user.FieldLast), ent.Asc(user.FieldAge)).FirstXID(ctx)
-	u2 = client.User.Query().Order(ent.Asc(user.FieldLast), ent.Desc(user.FieldAge)).FirstXID(ctx)
+	u1 = client.User.Query().Order(ent.Asc(user.FieldLast), ent.Asc(user.FieldAge)).FirstIDX(ctx)
+	u2 = client.User.Query().Order(ent.Asc(user.FieldLast), ent.Desc(user.FieldAge)).FirstIDX(ctx)
 	require.NotEqual(u1, u2)
-	u1 = client.User.Query().Order(ent.Asc(user.FieldName, user.FieldAge)).FirstXID(ctx)
-	u2 = client.User.Query().Order(ent.Asc(user.FieldName, user.FieldAge)).FirstXID(ctx)
+	u1 = client.User.Query().Order(ent.Asc(user.FieldName, user.FieldAge)).FirstIDX(ctx)
+	u2 = client.User.Query().Order(ent.Asc(user.FieldName, user.FieldAge)).FirstIDX(ctx)
 	require.Equal(u1, u2)
 
 	t.Log("query path")
@@ -1049,8 +1049,8 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("node points to itself (circular linked-list with 1 node)")
 	head.Update().SetNext(head).SaveX(ctx)
-	require.Equal(head.ID, head.QueryPrev().OnlyXID(ctx))
-	require.Equal(head.ID, head.QueryNext().OnlyXID(ctx))
+	require.Equal(head.ID, head.QueryPrev().OnlyIDX(ctx))
+	require.Equal(head.ID, head.QueryNext().OnlyIDX(ctx))
 	head.Update().ClearNext().SaveX(ctx)
 	require.Zero(head.QueryPrev().CountX(ctx))
 	require.Zero(head.QueryNext().CountX(ctx))

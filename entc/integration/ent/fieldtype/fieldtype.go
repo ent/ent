@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -8,6 +8,8 @@ package fieldtype
 
 import (
 	"fmt"
+
+	"github.com/facebook/ent/entc/integration/ent/role"
 )
 
 const (
@@ -103,6 +105,8 @@ const (
 	FieldSchemaFloat32 = "schema_float32"
 	// FieldNullFloat holds the string denoting the null_float field in the database.
 	FieldNullFloat = "null_float"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
 
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
@@ -155,6 +159,7 @@ var Columns = []string{
 	FieldSchemaFloat,
 	FieldSchemaFloat32,
 	FieldNullFloat,
+	FieldRole,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the FieldType type.
@@ -162,9 +167,28 @@ var ForeignKeys = []string{
 	"file_field",
 }
 
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
+	return false
+}
+
 var (
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	ValidateOptionalInt32Validator func(int32) error
+	// NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
+	NdirValidator func(string) error
+	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
+	LinkValidator func(string) error
 )
 
 // State defines the type for the state enum field.
@@ -180,7 +204,7 @@ func (s State) String() string {
 	return string(s)
 }
 
-// StateValidator is a validator for the "s" field enum values. It is called by the builders before save.
+// StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
 	case StateOn, StateOff:
@@ -189,3 +213,22 @@ func StateValidator(s State) error {
 		return fmt.Errorf("fieldtype: invalid enum value for state field: %q", s)
 	}
 }
+
+const DefaultRole role.Role = "READ"
+
+// RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
+func RoleValidator(r role.Role) error {
+	switch r {
+	case "ADMIN", "OWNER", "USER", "READ", "WRITE":
+		return nil
+	default:
+		return fmt.Errorf("fieldtype: invalid enum value for role field: %q", r)
+	}
+}
+
+// Ptr returns a new pointer to the enum value.
+func (s State) Ptr() *State {
+	return &s
+}
+
+// comment from another template.

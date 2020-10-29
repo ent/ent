@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,11 +11,13 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/media"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -29,6 +31,7 @@ const (
 	// Node types.
 	TypeCar   = "Car"
 	TypeGroup = "Group"
+	TypeMedia = "Media"
 	TypePet   = "Pet"
 	TypeUser  = "User"
 )
@@ -45,6 +48,7 @@ type CarMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Car, error)
+	predicates    []predicate.Car
 }
 
 var _ ent.Mutation = (*CarMutation)(nil)
@@ -342,6 +346,7 @@ type GroupMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Group, error)
+	predicates    []predicate.Group
 }
 
 var _ ent.Mutation = (*GroupMutation)(nil)
@@ -562,6 +567,396 @@ func (m *GroupMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Group edge %s", name)
 }
 
+// MediaMutation represents an operation that mutate the MediaSlice
+// nodes in the graph.
+type MediaMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	source        *string
+	source_uri    *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Media, error)
+	predicates    []predicate.Media
+}
+
+var _ ent.Mutation = (*MediaMutation)(nil)
+
+// mediaOption allows to manage the mutation configuration using functional options.
+type mediaOption func(*MediaMutation)
+
+// newMediaMutation creates new mutation for $n.Name.
+func newMediaMutation(c config, op Op, opts ...mediaOption) *MediaMutation {
+	m := &MediaMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMedia,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMediaID sets the id field of the mutation.
+func withMediaID(id int) mediaOption {
+	return func(m *MediaMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Media
+		)
+		m.oldValue = func(ctx context.Context) (*Media, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Media.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMedia sets the old Media of the mutation.
+func withMedia(node *Media) mediaOption {
+	return func(m *MediaMutation) {
+		m.oldValue = func(context.Context) (*Media, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MediaMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MediaMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("entv2: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *MediaMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetSource sets the source field.
+func (m *MediaMutation) SetSource(s string) {
+	m.source = &s
+}
+
+// Source returns the source value in the mutation.
+func (m *MediaMutation) Source() (r string, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old source value of the Media.
+// If the Media object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *MediaMutation) OldSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSource is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// ClearSource clears the value of source.
+func (m *MediaMutation) ClearSource() {
+	m.source = nil
+	m.clearedFields[media.FieldSource] = struct{}{}
+}
+
+// SourceCleared returns if the field source was cleared in this mutation.
+func (m *MediaMutation) SourceCleared() bool {
+	_, ok := m.clearedFields[media.FieldSource]
+	return ok
+}
+
+// ResetSource reset all changes of the "source" field.
+func (m *MediaMutation) ResetSource() {
+	m.source = nil
+	delete(m.clearedFields, media.FieldSource)
+}
+
+// SetSourceURI sets the source_uri field.
+func (m *MediaMutation) SetSourceURI(s string) {
+	m.source_uri = &s
+}
+
+// SourceURI returns the source_uri value in the mutation.
+func (m *MediaMutation) SourceURI() (r string, exists bool) {
+	v := m.source_uri
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSourceURI returns the old source_uri value of the Media.
+// If the Media object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *MediaMutation) OldSourceURI(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSourceURI is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSourceURI requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSourceURI: %w", err)
+	}
+	return oldValue.SourceURI, nil
+}
+
+// ClearSourceURI clears the value of source_uri.
+func (m *MediaMutation) ClearSourceURI() {
+	m.source_uri = nil
+	m.clearedFields[media.FieldSourceURI] = struct{}{}
+}
+
+// SourceURICleared returns if the field source_uri was cleared in this mutation.
+func (m *MediaMutation) SourceURICleared() bool {
+	_, ok := m.clearedFields[media.FieldSourceURI]
+	return ok
+}
+
+// ResetSourceURI reset all changes of the "source_uri" field.
+func (m *MediaMutation) ResetSourceURI() {
+	m.source_uri = nil
+	delete(m.clearedFields, media.FieldSourceURI)
+}
+
+// Op returns the operation name.
+func (m *MediaMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Media).
+func (m *MediaMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *MediaMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.source != nil {
+		fields = append(fields, media.FieldSource)
+	}
+	if m.source_uri != nil {
+		fields = append(fields, media.FieldSourceURI)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *MediaMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case media.FieldSource:
+		return m.Source()
+	case media.FieldSourceURI:
+		return m.SourceURI()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *MediaMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case media.FieldSource:
+		return m.OldSource(ctx)
+	case media.FieldSourceURI:
+		return m.OldSourceURI(ctx)
+	}
+	return nil, fmt.Errorf("unknown Media field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *MediaMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case media.FieldSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case media.FieldSourceURI:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSourceURI(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Media field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *MediaMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *MediaMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *MediaMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Media numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *MediaMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(media.FieldSource) {
+		fields = append(fields, media.FieldSource)
+	}
+	if m.FieldCleared(media.FieldSourceURI) {
+		fields = append(fields, media.FieldSourceURI)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *MediaMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MediaMutation) ClearField(name string) error {
+	switch name {
+	case media.FieldSource:
+		m.ClearSource()
+		return nil
+	case media.FieldSourceURI:
+		m.ClearSourceURI()
+		return nil
+	}
+	return fmt.Errorf("unknown Media nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *MediaMutation) ResetField(name string) error {
+	switch name {
+	case media.FieldSource:
+		m.ResetSource()
+		return nil
+	case media.FieldSourceURI:
+		m.ResetSourceURI()
+		return nil
+	}
+	return fmt.Errorf("unknown Media field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *MediaMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *MediaMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *MediaMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *MediaMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *MediaMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *MediaMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *MediaMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Media unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *MediaMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Media edge %s", name)
+}
+
 // PetMutation represents an operation that mutate the Pets
 // nodes in the graph.
 type PetMutation struct {
@@ -574,6 +969,7 @@ type PetMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Pet, error)
+	predicates    []predicate.Pet
 }
 
 var _ ent.Mutation = (*PetMutation)(nil)
@@ -868,6 +1264,8 @@ type UserMutation struct {
 	op             Op
 	typ            string
 	id             *int
+	mixed_string   *string
+	mixed_enum     *user.MixedEnum
 	age            *int
 	addage         *int
 	name           *string
@@ -878,15 +1276,20 @@ type UserMutation struct {
 	new_name       *string
 	blob           *[]byte
 	state          *user.State
+	status         *user.Status
+	workplace      *string
 	clearedFields  map[string]struct{}
 	car            map[int]struct{}
 	removedcar     map[int]struct{}
+	clearedcar     bool
 	pets           *int
 	clearedpets    bool
 	friends        map[int]struct{}
 	removedfriends map[int]struct{}
+	clearedfriends bool
 	done           bool
 	oldValue       func(context.Context) (*User, error)
+	predicates     []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -972,6 +1375,80 @@ func (m *UserMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// SetMixedString sets the mixed_string field.
+func (m *UserMutation) SetMixedString(s string) {
+	m.mixed_string = &s
+}
+
+// MixedString returns the mixed_string value in the mutation.
+func (m *UserMutation) MixedString() (r string, exists bool) {
+	v := m.mixed_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMixedString returns the old mixed_string value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldMixedString(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldMixedString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldMixedString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMixedString: %w", err)
+	}
+	return oldValue.MixedString, nil
+}
+
+// ResetMixedString reset all changes of the "mixed_string" field.
+func (m *UserMutation) ResetMixedString() {
+	m.mixed_string = nil
+}
+
+// SetMixedEnum sets the mixed_enum field.
+func (m *UserMutation) SetMixedEnum(ue user.MixedEnum) {
+	m.mixed_enum = &ue
+}
+
+// MixedEnum returns the mixed_enum value in the mutation.
+func (m *UserMutation) MixedEnum() (r user.MixedEnum, exists bool) {
+	v := m.mixed_enum
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMixedEnum returns the old mixed_enum value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldMixedEnum(ctx context.Context) (v user.MixedEnum, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldMixedEnum is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldMixedEnum requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMixedEnum: %w", err)
+	}
+	return oldValue.MixedEnum, nil
+}
+
+// ResetMixedEnum reset all changes of the "mixed_enum" field.
+func (m *UserMutation) ResetMixedEnum() {
+	m.mixed_enum = nil
 }
 
 // SetAge sets the age field.
@@ -1379,6 +1856,106 @@ func (m *UserMutation) ResetState() {
 	delete(m.clearedFields, user.FieldState)
 }
 
+// SetStatus sets the status field.
+func (m *UserMutation) SetStatus(u user.Status) {
+	m.status = &u
+}
+
+// Status returns the status value in the mutation.
+func (m *UserMutation) Status() (r user.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old status value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldStatus(ctx context.Context) (v user.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ClearStatus clears the value of status.
+func (m *UserMutation) ClearStatus() {
+	m.status = nil
+	m.clearedFields[user.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the field status was cleared in this mutation.
+func (m *UserMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[user.FieldStatus]
+	return ok
+}
+
+// ResetStatus reset all changes of the "status" field.
+func (m *UserMutation) ResetStatus() {
+	m.status = nil
+	delete(m.clearedFields, user.FieldStatus)
+}
+
+// SetWorkplace sets the workplace field.
+func (m *UserMutation) SetWorkplace(s string) {
+	m.workplace = &s
+}
+
+// Workplace returns the workplace value in the mutation.
+func (m *UserMutation) Workplace() (r string, exists bool) {
+	v := m.workplace
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWorkplace returns the old workplace value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldWorkplace(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldWorkplace is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldWorkplace requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWorkplace: %w", err)
+	}
+	return oldValue.Workplace, nil
+}
+
+// ClearWorkplace clears the value of workplace.
+func (m *UserMutation) ClearWorkplace() {
+	m.workplace = nil
+	m.clearedFields[user.FieldWorkplace] = struct{}{}
+}
+
+// WorkplaceCleared returns if the field workplace was cleared in this mutation.
+func (m *UserMutation) WorkplaceCleared() bool {
+	_, ok := m.clearedFields[user.FieldWorkplace]
+	return ok
+}
+
+// ResetWorkplace reset all changes of the "workplace" field.
+func (m *UserMutation) ResetWorkplace() {
+	m.workplace = nil
+	delete(m.clearedFields, user.FieldWorkplace)
+}
+
 // AddCarIDs adds the car edge to Car by ids.
 func (m *UserMutation) AddCarIDs(ids ...int) {
 	if m.car == nil {
@@ -1387,6 +1964,16 @@ func (m *UserMutation) AddCarIDs(ids ...int) {
 	for i := range ids {
 		m.car[ids[i]] = struct{}{}
 	}
+}
+
+// ClearCar clears the car edge to Car.
+func (m *UserMutation) ClearCar() {
+	m.clearedcar = true
+}
+
+// CarCleared returns if the edge car was cleared.
+func (m *UserMutation) CarCleared() bool {
+	return m.clearedcar
 }
 
 // RemoveCarIDs removes the car edge to Car by ids.
@@ -1418,6 +2005,7 @@ func (m *UserMutation) CarIDs() (ids []int) {
 // ResetCar reset all changes of the "car" edge.
 func (m *UserMutation) ResetCar() {
 	m.car = nil
+	m.clearedcar = false
 	m.removedcar = nil
 }
 
@@ -1470,6 +2058,16 @@ func (m *UserMutation) AddFriendIDs(ids ...int) {
 	}
 }
 
+// ClearFriends clears the friends edge to User.
+func (m *UserMutation) ClearFriends() {
+	m.clearedfriends = true
+}
+
+// FriendsCleared returns if the edge friends was cleared.
+func (m *UserMutation) FriendsCleared() bool {
+	return m.clearedfriends
+}
+
 // RemoveFriendIDs removes the friends edge to User by ids.
 func (m *UserMutation) RemoveFriendIDs(ids ...int) {
 	if m.removedfriends == nil {
@@ -1499,6 +2097,7 @@ func (m *UserMutation) FriendsIDs() (ids []int) {
 // ResetFriends reset all changes of the "friends" edge.
 func (m *UserMutation) ResetFriends() {
 	m.friends = nil
+	m.clearedfriends = false
 	m.removedfriends = nil
 }
 
@@ -1516,7 +2115,13 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 13)
+	if m.mixed_string != nil {
+		fields = append(fields, user.FieldMixedString)
+	}
+	if m.mixed_enum != nil {
+		fields = append(fields, user.FieldMixedEnum)
+	}
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
 	}
@@ -1544,6 +2149,12 @@ func (m *UserMutation) Fields() []string {
 	if m.state != nil {
 		fields = append(fields, user.FieldState)
 	}
+	if m.status != nil {
+		fields = append(fields, user.FieldStatus)
+	}
+	if m.workplace != nil {
+		fields = append(fields, user.FieldWorkplace)
+	}
 	return fields
 }
 
@@ -1552,6 +2163,10 @@ func (m *UserMutation) Fields() []string {
 // not set, or was not define in the schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case user.FieldMixedString:
+		return m.MixedString()
+	case user.FieldMixedEnum:
+		return m.MixedEnum()
 	case user.FieldAge:
 		return m.Age()
 	case user.FieldName:
@@ -1570,6 +2185,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Blob()
 	case user.FieldState:
 		return m.State()
+	case user.FieldStatus:
+		return m.Status()
+	case user.FieldWorkplace:
+		return m.Workplace()
 	}
 	return nil, false
 }
@@ -1579,6 +2198,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // or the query to the database was failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case user.FieldMixedString:
+		return m.OldMixedString(ctx)
+	case user.FieldMixedEnum:
+		return m.OldMixedEnum(ctx)
 	case user.FieldAge:
 		return m.OldAge(ctx)
 	case user.FieldName:
@@ -1597,6 +2220,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldBlob(ctx)
 	case user.FieldState:
 		return m.OldState(ctx)
+	case user.FieldStatus:
+		return m.OldStatus(ctx)
+	case user.FieldWorkplace:
+		return m.OldWorkplace(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -1606,6 +2233,20 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type mismatch the field type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldMixedString:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMixedString(v)
+		return nil
+	case user.FieldMixedEnum:
+		v, ok := value.(user.MixedEnum)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMixedEnum(v)
+		return nil
 	case user.FieldAge:
 		v, ok := value.(int)
 		if !ok {
@@ -1669,6 +2310,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetState(v)
 		return nil
+	case user.FieldStatus:
+		v, ok := value.(user.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case user.FieldWorkplace:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWorkplace(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -1726,6 +2381,12 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldState) {
 		fields = append(fields, user.FieldState)
 	}
+	if m.FieldCleared(user.FieldStatus) {
+		fields = append(fields, user.FieldStatus)
+	}
+	if m.FieldCleared(user.FieldWorkplace) {
+		fields = append(fields, user.FieldWorkplace)
+	}
 	return fields
 }
 
@@ -1752,6 +2413,12 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldState:
 		m.ClearState()
 		return nil
+	case user.FieldStatus:
+		m.ClearStatus()
+		return nil
+	case user.FieldWorkplace:
+		m.ClearWorkplace()
+		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
@@ -1761,6 +2428,12 @@ func (m *UserMutation) ClearField(name string) error {
 // defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
+	case user.FieldMixedString:
+		m.ResetMixedString()
+		return nil
+	case user.FieldMixedEnum:
+		m.ResetMixedEnum()
+		return nil
 	case user.FieldAge:
 		m.ResetAge()
 		return nil
@@ -1787,6 +2460,12 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldState:
 		m.ResetState()
+		return nil
+	case user.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case user.FieldWorkplace:
+		m.ResetWorkplace()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -1869,8 +2548,14 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 3)
+	if m.clearedcar {
+		edges = append(edges, user.EdgeCar)
+	}
 	if m.clearedpets {
 		edges = append(edges, user.EdgePets)
+	}
+	if m.clearedfriends {
+		edges = append(edges, user.EdgeFriends)
 	}
 	return edges
 }
@@ -1879,8 +2564,12 @@ func (m *UserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgeCar:
+		return m.clearedcar
 	case user.EdgePets:
 		return m.clearedpets
+	case user.EdgeFriends:
+		return m.clearedfriends
 	}
 	return false
 }

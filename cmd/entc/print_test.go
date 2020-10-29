@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/stretchr/testify/assert"
 )

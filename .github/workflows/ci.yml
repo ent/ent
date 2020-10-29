@@ -3,6 +3,8 @@ on:
   push:
     paths-ignore:
       - 'doc/**'
+    tags-ignore:
+      - '*.*'
   pull_request:
     paths-ignore:
       - 'doc/**'
@@ -13,15 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run linters
-        uses: golangci/golangci-lint-action@v1
+        uses: golangci/golangci-lint-action@v2.3.0
         with:
-          version: v1.27
+          version: v1.28
 
   unit:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ['1.14', '1.13']
+        go: ['1.15', '1.14']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -169,7 +171,7 @@ jobs:
             ${{ runner.os }}-go-
       - name: Run integration tests
         working-directory: entc/integration
-        run: go test -race -count=2 ./...
+        run: go test -race -count=2 -tags='json1' ./...
 
   migration:
     runs-on: ubuntu-latest
@@ -274,9 +276,9 @@ jobs:
         run: git checkout origin/master
       - name: Run integration on origin/master
         working-directory: entc/integration
-        run: go test -race -count=2 ./...
+        run: go test -race -count=2 -tags='json1' ./...
       - name: Checkout previous HEAD
         run: git checkout -
       - name: Run integration on HEAD
         working-directory: entc/integration
-        run: go test -race -count=2 ./...
+        run: go test -race -count=2 -tags='json1' ./...

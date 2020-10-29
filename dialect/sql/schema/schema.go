@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 )
 
 const (
@@ -100,7 +100,7 @@ func (t *Table) column(name string) (*Column, bool) {
 // index returns a table index by its name.
 func (t *Table) index(name string) (*Index, bool) {
 	for _, idx := range t.Indexes {
-		if idx.Name == name {
+		if name == idx.Name || name == idx.realname {
 			return idx, true
 		}
 		// Same as below, there are cases where the index name
@@ -165,12 +165,19 @@ func (c *Column) PrimaryKey() bool { return c.Key == PrimaryKey }
 func (c *Column) ConvertibleTo(d *Column) bool {
 	switch {
 	case c.Type == d.Type:
-		return c.Size <= d.Size
+		if c.Size != 0 && d.Size != 0 {
+			// Types match and have a size constraint.
+			return c.Size <= d.Size
+		}
+		return true
 	case c.IntType() && d.IntType() || c.UintType() && d.UintType():
 		return c.Type <= d.Type
 	case c.UintType() && d.IntType():
 		// uintX can not be converted to intY, when X > Y.
 		return c.Type-field.TypeUint8 <= d.Type-field.TypeInt8
+	case c.Type == field.TypeString && d.Type == field.TypeEnum ||
+		c.Type == field.TypeEnum && d.Type == field.TypeString:
+		return true
 	}
 	return c.FloatType() && d.FloatType()
 }
@@ -212,7 +219,7 @@ func (c *Column) ScanDefault(value string) error {
 			return fmt.Errorf("scanning bool value for column %q: %v", c.Name, err)
 		}
 		c.Default = v.Bool
-	case c.Type == field.TypeString:
+	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
 			return fmt.Errorf("scanning string value for column %q: %v", c.Name, err)
@@ -225,7 +232,7 @@ func (c *Column) ScanDefault(value string) error {
 		}
 		c.Default = v.String
 	default:
-		return fmt.Errorf("unsupported type: %v", c.Type)
+		return fmt.Errorf("unsupported default type: %v", c.Type)
 	}
 	return nil
 }
@@ -242,7 +249,7 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 			attr += strconv.FormatBool(v)
 		case string:
 			// Escape single quote by replacing each with 2.
-			attr += fmt.Sprintf("'%s'", strings.Replace(v, "'", "''", -1))
+			attr += fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
 		default:
 			attr += fmt.Sprint(v)
 		}
@@ -253,7 +260,7 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 // supportDefault reports if the column type supports default value.
 func (c Column) supportDefault() bool {
 	switch {
-	case c.Type == field.TypeString:
+	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		return c.Size < 1<<16 // not a text.
 	case c.Type.Numeric(), c.Type == field.TypeBool:
 		return true
@@ -354,7 +361,7 @@ func (r ReferenceOption) ConstName() string {
 	if r == NoAction {
 		return ""
 	}
-	return strings.Replace(strings.Title(strings.ToLower(string(r))), " ", "", -1)
+	return strings.ReplaceAll(strings.Title(strings.ToLower(string(r))), " ", "")
 }
 
 // Index definition for table index.

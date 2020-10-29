@@ -6,3 +6,7 @@
 		StaticField string `json:"boring,omitempty"`
 	{{- end }}
 {{ end }}
+
+{{ define "client/fields/additional/node" }}
+    TemplateField struct{}
+{{ end }}

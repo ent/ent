@@ -7,8 +7,8 @@ package gen
 import (
 	"testing"
 
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -49,7 +49,7 @@ func TestType(t *testing.T) {
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{"A", "A"}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []struct{ N, V string }{{V: "v"}, {V: "v"}}},
 		},
 	})
 	require.Error(err, "duplicate enums")
@@ -57,7 +57,7 @@ func TestType(t *testing.T) {
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
 		Fields: []*load.Field{
-			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []string{""}},
+			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []struct{ N, V string }{{}}},
 		},
 	})
 	require.Error(err, "empty value for enums")
@@ -133,6 +133,23 @@ func TestType_Receiver(t *testing.T) {
 	for _, tt := range tests {
 		typ := &Type{Name: tt.name, Config: &Config{Package: "entc/gen"}}
 		require.Equal(t, tt.receiver, typ.Receiver())
+	}
+}
+
+func TestField_EnumName(t *testing.T) {
+	tests := []struct {
+		name string
+		enum string
+	}{
+		{"GIF", "TypeGIF"},
+		{"SVG", "TypeSVG"},
+		{"PNG", "TypePNG"},
+		{"MP4", "TypeMP4"},
+		{"unknown", "TypeUnknown"},
+		{"user_data", "TypeUserData"},
+	}
+	for _, tt := range tests {
+		require.Equal(t, tt.enum, Field{Name: "Type"}.EnumName(tt.name))
 	}
 }
 

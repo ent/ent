@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,14 +9,15 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // FieldTypeQuery is the builder for querying FieldType entities.
@@ -58,23 +59,23 @@ func (ftq *FieldTypeQuery) Order(o ...OrderFunc) *FieldTypeQuery {
 
 // First returns the first FieldType entity in the query. Returns *NotFoundError when no fieldtype was found.
 func (ftq *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
-	fts, err := ftq.Limit(1).All(ctx)
+	nodes, err := ftq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(fts) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{fieldtype.Label}
 	}
-	return fts[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (ftq *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
-	ft, err := ftq.First(ctx)
+	node, err := ftq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // FirstID returns the first FieldType id in the query. Returns *NotFoundError when no id was found.
@@ -90,8 +91,8 @@ func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (ftq *FieldTypeQuery) FirstXID(ctx context.Context) string {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (ftq *FieldTypeQuery) FirstIDX(ctx context.Context) string {
 	id, err := ftq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -101,13 +102,13 @@ func (ftq *FieldTypeQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only FieldType entity in the query, returns an error if not exactly one entity was returned.
 func (ftq *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
-	fts, err := ftq.Limit(2).All(ctx)
+	nodes, err := ftq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(fts) {
+	switch len(nodes) {
 	case 1:
-		return fts[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{fieldtype.Label}
 	default:
@@ -117,11 +118,11 @@ func (ftq *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (ftq *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
-	ft, err := ftq.Only(ctx)
+	node, err := ftq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // OnlyID returns the only FieldType id in the query, returns an error if not exactly one id was returned.
@@ -141,8 +142,8 @@ func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (ftq *FieldTypeQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (ftq *FieldTypeQuery) OnlyIDX(ctx context.Context) string {
 	id, err := ftq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -160,11 +161,11 @@ func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
-	fts, err := ftq.All(ctx)
+	nodes, err := ftq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return fts
+	return nodes
 }
 
 // IDs executes the query and returns a list of FieldType ids.
@@ -222,6 +223,9 @@ func (ftq *FieldTypeQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
+	if ftq == nil {
+		return nil
+	}
 	return &FieldTypeQuery{
 		config:     ftq.config,
 		limit:      ftq.limit,
@@ -411,6 +415,32 @@ func (ftgb *FieldTypeGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FieldTypeGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ftgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{fieldtype.Label}
+	default:
+		err = fmt.Errorf("ent: FieldTypeGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ftgb *FieldTypeGroupBy) StringX(ctx context.Context) string {
+	v, err := ftgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (ftgb *FieldTypeGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ftgb.fields) > 1 {
@@ -426,6 +456,32 @@ func (ftgb *FieldTypeGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ftgb *FieldTypeGroupBy) IntsX(ctx context.Context) []int {
 	v, err := ftgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FieldTypeGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ftgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{fieldtype.Label}
+	default:
+		err = fmt.Errorf("ent: FieldTypeGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ftgb *FieldTypeGroupBy) IntX(ctx context.Context) int {
+	v, err := ftgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -453,6 +509,32 @@ func (ftgb *FieldTypeGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FieldTypeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ftgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{fieldtype.Label}
+	default:
+		err = fmt.Errorf("ent: FieldTypeGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ftgb *FieldTypeGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := ftgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (ftgb *FieldTypeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ftgb.fields) > 1 {
@@ -468,6 +550,32 @@ func (ftgb *FieldTypeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (ftgb *FieldTypeGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := ftgb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (ftgb *FieldTypeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ftgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{fieldtype.Label}
+	default:
+		err = fmt.Errorf("ent: FieldTypeGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ftgb *FieldTypeGroupBy) BoolX(ctx context.Context) bool {
+	v, err := ftgb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -558,6 +666,32 @@ func (fts *FieldTypeSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (fts *FieldTypeSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = fts.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{fieldtype.Label}
+	default:
+		err = fmt.Errorf("ent: FieldTypeSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (fts *FieldTypeSelect) StringX(ctx context.Context) string {
+	v, err := fts.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (fts *FieldTypeSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(fts.fields) > 1 {
@@ -573,6 +707,32 @@ func (fts *FieldTypeSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (fts *FieldTypeSelect) IntsX(ctx context.Context) []int {
 	v, err := fts.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (fts *FieldTypeSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = fts.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{fieldtype.Label}
+	default:
+		err = fmt.Errorf("ent: FieldTypeSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (fts *FieldTypeSelect) IntX(ctx context.Context) int {
+	v, err := fts.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -600,6 +760,32 @@ func (fts *FieldTypeSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (fts *FieldTypeSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = fts.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{fieldtype.Label}
+	default:
+		err = fmt.Errorf("ent: FieldTypeSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (fts *FieldTypeSelect) Float64X(ctx context.Context) float64 {
+	v, err := fts.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (fts *FieldTypeSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(fts.fields) > 1 {
@@ -615,6 +801,32 @@ func (fts *FieldTypeSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (fts *FieldTypeSelect) BoolsX(ctx context.Context) []bool {
 	v, err := fts.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (fts *FieldTypeSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = fts.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{fieldtype.Label}
+	default:
+		err = fmt.Errorf("ent: FieldTypeSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (fts *FieldTypeSelect) BoolX(ctx context.Context) bool {
+	v, err := fts.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

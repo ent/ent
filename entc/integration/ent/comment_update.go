@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/comment"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/comment"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CommentUpdate is the builder for updating Comment entities.
 type CommentUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CommentMutation
-	predicates []predicate.Comment
+	hooks    []Hook
+	mutation *CommentMutation
 }
 
 // Where adds a new predicate for the builder.
 func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
@@ -151,7 +150,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := cu.predicates; len(ps) > 0 {
+	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -313,11 +312,11 @@ func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -333,7 +332,7 @@ func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error) {
+func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   comment.Table,
@@ -397,9 +396,9 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 			Column: comment.FieldNillableInt,
 		})
 	}
-	c = &Comment{config: cuo.config}
-	_spec.Assign = c.assignValues
-	_spec.ScanValues = c.scanValues()
+	_node = &Comment{config: cuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
@@ -408,5 +407,5 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (c *Comment, err error
 		}
 		return nil, err
 	}
-	return c, nil
+	return _node, nil
 }

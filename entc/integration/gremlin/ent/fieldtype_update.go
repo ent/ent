@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -14,26 +14,26 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.
 type FieldTypeUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *FieldTypeMutation
-	predicates []predicate.FieldType
+	hooks    []Hook
+	mutation *FieldTypeMutation
 }
 
 // Where adds a new predicate for the builder.
 func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
-	ftu.predicates = append(ftu.predicates, ps...)
+	ftu.mutation.predicates = append(ftu.mutation.predicates, ps...)
 	return ftu
 }
 
@@ -980,6 +980,20 @@ func (ftu *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetRole sets the role field.
+func (ftu *FieldTypeUpdate) SetRole(r role.Role) *FieldTypeUpdate {
+	ftu.mutation.SetRole(r)
+	return ftu
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
+	if r != nil {
+		ftu.SetRole(*r)
+	}
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -987,27 +1001,23 @@ func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
-	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
-		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return 0, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
-		}
-	}
-	if v, ok := ftu.mutation.State(); ok {
-		if err := fieldtype.StateValidator(v); err != nil {
-			return 0, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
-		}
-	}
 	var (
 		err      error
 		affected int
 	)
 	if len(ftu.hooks) == 0 {
+		if err = ftu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = ftu.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FieldTypeMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ftu.check(); err != nil {
+				return 0, err
 			}
 			ftu.mutation = mutation
 			affected, err = ftu.gremlinSave(ctx)
@@ -1046,6 +1056,36 @@ func (ftu *FieldTypeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ftu *FieldTypeUpdate) check() error {
+	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
+		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
+			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.State(); ok {
+		if err := fieldtype.StateValidator(v); err != nil {
+			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Ndir(); ok {
+		if err := fieldtype.NdirValidator(string(v)); err != nil {
+			return &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Link(); ok {
+		if err := fieldtype.LinkValidator(v.String()); err != nil {
+			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (ftu *FieldTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := ftu.gremlin().Query()
@@ -1060,7 +1100,7 @@ func (ftu *FieldTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(fieldtype.Label)
-	for _, p := range ftu.predicates {
+	for _, p := range ftu.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -1284,6 +1324,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftu.mutation.NullFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
+	}
+	if value, ok := ftu.mutation.Role(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
@@ -2361,6 +2404,20 @@ func (ftuo *FieldTypeUpdateOne) ClearNullFloat() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetRole sets the role field.
+func (ftuo *FieldTypeUpdateOne) SetRole(r role.Role) *FieldTypeUpdateOne {
+	ftuo.mutation.SetRole(r)
+	return ftuo
+}
+
+// SetNillableRole sets the role field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOne {
+	if r != nil {
+		ftuo.SetRole(*r)
+	}
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -2368,27 +2425,23 @@ func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 
 // Save executes the query and returns the updated entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
-	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
-		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return nil, &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
-		}
-	}
-	if v, ok := ftuo.mutation.State(); ok {
-		if err := fieldtype.StateValidator(v); err != nil {
-			return nil, &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
-		}
-	}
 	var (
 		err  error
 		node *FieldType
 	)
 	if len(ftuo.hooks) == 0 {
+		if err = ftuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = ftuo.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FieldTypeMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ftuo.check(); err != nil {
+				return nil, err
 			}
 			ftuo.mutation = mutation
 			node, err = ftuo.gremlinSave(ctx)
@@ -2407,11 +2460,11 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (ftuo *FieldTypeUpdateOne) SaveX(ctx context.Context) *FieldType {
-	ft, err := ftuo.Save(ctx)
+	node, err := ftuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return ft
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -2425,6 +2478,36 @@ func (ftuo *FieldTypeUpdateOne) ExecX(ctx context.Context) {
 	if err := ftuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ftuo *FieldTypeUpdateOne) check() error {
+	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
+		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
+			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.State(); ok {
+		if err := fieldtype.StateValidator(v); err != nil {
+			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Ndir(); ok {
+		if err := fieldtype.NdirValidator(string(v)); err != nil {
+			return &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Link(); ok {
+		if err := fieldtype.LinkValidator(v.String()); err != nil {
+			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Role(); ok {
+		if err := fieldtype.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (ftuo *FieldTypeUpdateOne) gremlinSave(ctx context.Context) (*FieldType, error) {
@@ -2670,6 +2753,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value, ok := ftuo.mutation.NullFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
+	}
+	if value, ok := ftuo.mutation.Role(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {

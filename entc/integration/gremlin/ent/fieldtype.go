@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -14,9 +14,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/entc/integration/ent/schema"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
 )
 
 // FieldType is the model entity for the FieldType schema.
@@ -112,6 +113,8 @@ type FieldType struct {
 	SchemaFloat32 schema.Float32 `json:"schema_float32,omitempty"`
 	// NullFloat holds the value of the "null_float" field.
 	NullFloat sql.NullFloat64 `json:"null_float,omitempty"`
+	// Role holds the value of the "role" field.
+	Role role.Role `json:"role,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -166,6 +169,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		SchemaFloat           schema.Float64  `json:"schema_float,omitempty"`
 		SchemaFloat32         schema.Float32  `json:"schema_float32,omitempty"`
 		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
+		Role                  role.Role       `json:"role,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -215,6 +219,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.SchemaFloat = scanft.SchemaFloat
 	ft.SchemaFloat32 = scanft.SchemaFloat32
 	ft.NullFloat = scanft.NullFloat
+	ft.Role = scanft.Role
 	return nil
 }
 
@@ -347,6 +352,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat32))
 	builder.WriteString(", null_float=")
 	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
+	builder.WriteString(", role=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Role))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -406,6 +413,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		SchemaFloat           schema.Float64  `json:"schema_float,omitempty"`
 		SchemaFloat32         schema.Float32  `json:"schema_float32,omitempty"`
 		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
+		Role                  role.Role       `json:"role,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -457,6 +465,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			SchemaFloat:           v.SchemaFloat,
 			SchemaFloat32:         v.SchemaFloat32,
 			NullFloat:             v.NullFloat,
+			Role:                  v.Role,
 		})
 	}
 	return nil

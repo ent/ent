@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/car"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/customid/ent/car"
+	"github.com/facebook/ent/entc/integration/customid/ent/pet"
+	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CarUpdate is the builder for updating Car entities.
 type CarUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CarMutation
-	predicates []predicate.Car
+	hooks    []Hook
+	mutation *CarMutation
 }
 
 // Where adds a new predicate for the builder.
 func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
@@ -116,7 +115,7 @@ func (cu *CarUpdate) Mutation() *CarMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the owner edge to Pet.
+// ClearOwner clears the "owner" edge to type Pet.
 func (cu *CarUpdate) ClearOwner() *CarUpdate {
 	cu.mutation.ClearOwner()
 	return cu
@@ -124,28 +123,23 @@ func (cu *CarUpdate) ClearOwner() *CarUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
-	if v, ok := cu.mutation.BeforeID(); ok {
-		if err := car.BeforeIDValidator(v); err != nil {
-			return 0, &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.AfterID(); ok {
-		if err := car.AfterIDValidator(v); err != nil {
-			return 0, &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
-		}
-	}
-
 	var (
 		err      error
 		affected int
 	)
 	if len(cu.hooks) == 0 {
+		if err = cu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = cu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CarMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cu.check(); err != nil {
+				return 0, err
 			}
 			cu.mutation = mutation
 			affected, err = cu.sqlSave(ctx)
@@ -184,6 +178,21 @@ func (cu *CarUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (cu *CarUpdate) check() error {
+	if v, ok := cu.mutation.BeforeID(); ok {
+		if err := car.BeforeIDValidator(v); err != nil {
+			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+		}
+	}
+	if v, ok := cu.mutation.AfterID(); ok {
+		if err := car.AfterIDValidator(v); err != nil {
+			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -195,7 +204,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := cu.predicates; len(ps) > 0 {
+	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -386,7 +395,7 @@ func (cuo *CarUpdateOne) Mutation() *CarMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the owner edge to Pet.
+// ClearOwner clears the "owner" edge to type Pet.
 func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo
@@ -394,28 +403,23 @@ func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	if v, ok := cuo.mutation.BeforeID(); ok {
-		if err := car.BeforeIDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.AfterID(); ok {
-		if err := car.AfterIDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
-		}
-	}
-
 	var (
 		err  error
 		node *Car
 	)
 	if len(cuo.hooks) == 0 {
+		if err = cuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = cuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CarMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cuo.check(); err != nil {
+				return nil, err
 			}
 			cuo.mutation = mutation
 			node, err = cuo.sqlSave(ctx)
@@ -434,11 +438,11 @@ func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CarUpdateOne) SaveX(ctx context.Context) *Car {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -454,7 +458,22 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
+// check runs all checks and user-defined validators on the builder.
+func (cuo *CarUpdateOne) check() error {
+	if v, ok := cuo.mutation.BeforeID(); ok {
+		if err := car.BeforeIDValidator(v); err != nil {
+			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+		}
+	}
+	if v, ok := cuo.mutation.AfterID(); ok {
+		if err := car.AfterIDValidator(v); err != nil {
+			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+		}
+	}
+	return nil
+}
+
+func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   car.Table,
@@ -552,9 +571,9 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	c = &Car{config: cuo.config}
-	_spec.Assign = c.assignValues
-	_spec.ScanValues = c.scanValues()
+	_node = &Car{config: cuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
@@ -563,5 +582,5 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (c *Car, err error) {
 		}
 		return nil, err
 	}
-	return c, nil
+	return _node, nil
 }

@@ -38,9 +38,19 @@ const (
 	{{ xtemplate $tmpl $ }}
 {{ end }}
 
-{{ if or $.HasDefault $.HasValidators $.NumHooks $.HasPolicy }}
+{{ $tmpl = printf "dialect/%s/meta/functions" $.Storage }}
+{{ if hasTemplate $tmpl }}
+    {{ xtemplate $tmpl $ }}
+{{ end }}
+
+{{/* Has at least one field (not enum) with default value */}}
+{{ $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+{{ $hasDefault := false }}{{ range $f := $fields }}{{ if and $f.Default (not $f.IsEnum) }}{{ $hasDefault = true }}{{ end }}{{ end }}
+
+{{/* Generate global variables for hooks, validators and policy checkers */}}
+{{ if or $hasDefault $.HasValidators $.NumHooks $.NumPolicy }}
     {{- $numHooks := $.NumHooks }}
-    {{- if $.HasPolicy }}
+    {{- if $.NumPolicy }}
         {{- $numHooks = add $numHooks 1 }}
     {{- end }}
 	{{- if $numHooks }}
@@ -55,7 +65,7 @@ const (
 		{{- if $numHooks }}
 			Hooks [{{ $numHooks }}]ent.Hook
 		{{- end }}
-		{{- if $.HasPolicy }}
+		{{- if $.NumPolicy }}
 			Policy ent.Policy
 		{{- end }}
 		{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
@@ -72,7 +82,7 @@ const (
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := $f.Validator }}
-				{{- $type :=  printf "func (%s) error" $f.Type }}
+				{{- $type :=  printf "func (%s) error" $f.Type.Type }}
 				// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
 				{{ $name }} {{ $type }}
 			{{- end }}
@@ -81,52 +91,63 @@ const (
 {{ end }}
 
 {{/* define custom type for enum fields */}}
-{{ range $f := $.Fields -}}
-	{{ if $f.IsEnum }}
+{{ range $f := $.EnumFields }}
+	{{ $enum := $f.Type }}
+	{{ $receiver := receiver $f.BuilderField }}
+	{{ if $f.HasGoType }}
+		{{ if $f.Default }}
+			const {{ $f.DefaultName }} {{ $enum }} = "{{ $f.DefaultValue }}"
+		{{ end }}
+	{{ else }}
 		{{/* omit the package name from the type. */}}
-		{{ $enum := trimPackage $f.Type.String $.Package }}
+		{{ $enum = trimPackage $f.Type.String $.Package }}
 		// {{ $enum }} defines the type for the {{ $f.Name }} enum field.
 		type {{ $enum }} string
 
 		{{- if $f.Default }}
 			{{- /*  find the enum that holds the default value. */ -}}
-			{{- range $_, $e := $f.Enums }}
-				{{- if eq $e $f.DefaultValue }}
-					{{- $name := $f.EnumName $e }}
-					// {{ $name }} is the default {{ $enum }}.
-					const {{ $f.DefaultName }} = {{ $name }}
+			{{- range $e := $f.Enums }}
+				{{- if eq $e.Value $f.DefaultValue }}
+					// {{ $e.Name }} is the default {{ $enum }}.
+					const {{ $f.DefaultName }} = {{ $e.Name }}
 				{{- end }}
 			{{- end }}
 		{{- end }}
 
 		// {{ $enum }} values.
 		const (
-			{{- range $_, $e := $f.Enums }}
-				{{ $f.EnumName $e }} {{ $enum }} = "{{ $e }}"
+			{{- range $e := $f.Enums }}
+				{{ $e.Name }} {{ $enum }} = "{{ $e.Value }}"
 			{{-  end }}
 		)
 
-		func (s {{ $enum }}) String() string {
-			return string(s)
-		}
-
-		{{ $name := $f.Validator -}}
-		{{ $arg := receiver $f.BuilderField }}
-		// {{ $name }} is a validator for the "{{ $arg }}" field enum values. It is called by the builders before save.
-		func {{ $name }}({{ $arg }} {{ $enum }}) error {
-			switch {{ $arg }} {
-				case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ $f.StructField }}{{ pascal $e }}{{ end }}:
-					return nil
-				default:
-					return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $arg }})
-			}
+		func ({{ $receiver }} {{ $enum }}) String() string {
+			return string({{ $receiver }})
 		}
 	{{ end }}
+
+
+	{{ $name := $f.Validator }}
+	// {{ $name }} is a validator for the "{{ $f.Name }}" field enum values. It is called by the builders before save.
+	func {{ $name }}({{ $receiver }} {{ $enum }}) error {
+		switch {{ $receiver }} {
+			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ if $f.HasGoType }}"{{ $e.Value }}"{{ else }}{{ $e.Name }}{{ end }}{{ end }}:
+				return nil
+			default:
+				return fmt.Errorf("{{ $.Package }}: invalid enum value for {{ $f.Name }} field: %q", {{ $receiver }})
+		}
+	}
 {{ end }}
 
 {{ template "meta/additional" $ }}
 
+{{ with $tmpls := matchTemplate "meta/additional/*" }}
+	{{ range $tmpl := $tmpls }}
+        {{ xtemplate $tmpl $ }}
+	{{ end }}
 {{ end }}
 
-{{/* A template that can be overrided in order to add additional code for the type package. */}}
+{{ end }}
+
+{{/* A template that can be overridden in order to add additional code for the type package. */}}
 {{ define "meta/additional" }}{{ end }}

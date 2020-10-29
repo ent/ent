@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -7,9 +7,9 @@
 package user
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
 )
 
 // ID filters vertices based on their identifier.
@@ -95,6 +95,13 @@ func IDLTE(id int) predicate.User {
 	})
 }
 
+// MixedString applies equality check predicate on the "mixed_string" field. It's identical to MixedStringEQ.
+func MixedString(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMixedString), v))
+	})
+}
+
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
 func Age(v int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -148,6 +155,172 @@ func NewName(v string) predicate.User {
 func Blob(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldBlob), v))
+	})
+}
+
+// Workplace applies equality check predicate on the "workplace" field. It's identical to WorkplaceEQ.
+func Workplace(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWorkplace), v))
+	})
+}
+
+// MixedStringEQ applies the EQ predicate on the "mixed_string" field.
+func MixedStringEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringNEQ applies the NEQ predicate on the "mixed_string" field.
+func MixedStringNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringIn applies the In predicate on the "mixed_string" field.
+func MixedStringIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldMixedString), v...))
+	})
+}
+
+// MixedStringNotIn applies the NotIn predicate on the "mixed_string" field.
+func MixedStringNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldMixedString), v...))
+	})
+}
+
+// MixedStringGT applies the GT predicate on the "mixed_string" field.
+func MixedStringGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringGTE applies the GTE predicate on the "mixed_string" field.
+func MixedStringGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringLT applies the LT predicate on the "mixed_string" field.
+func MixedStringLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringLTE applies the LTE predicate on the "mixed_string" field.
+func MixedStringLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringContains applies the Contains predicate on the "mixed_string" field.
+func MixedStringContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringHasPrefix applies the HasPrefix predicate on the "mixed_string" field.
+func MixedStringHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringHasSuffix applies the HasSuffix predicate on the "mixed_string" field.
+func MixedStringHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringEqualFold applies the EqualFold predicate on the "mixed_string" field.
+func MixedStringEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedStringContainsFold applies the ContainsFold predicate on the "mixed_string" field.
+func MixedStringContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldMixedString), v))
+	})
+}
+
+// MixedEnumEQ applies the EQ predicate on the "mixed_enum" field.
+func MixedEnumEQ(v MixedEnum) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldMixedEnum), v))
+	})
+}
+
+// MixedEnumNEQ applies the NEQ predicate on the "mixed_enum" field.
+func MixedEnumNEQ(v MixedEnum) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldMixedEnum), v))
+	})
+}
+
+// MixedEnumIn applies the In predicate on the "mixed_enum" field.
+func MixedEnumIn(vs ...MixedEnum) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldMixedEnum), v...))
+	})
+}
+
+// MixedEnumNotIn applies the NotIn predicate on the "mixed_enum" field.
+func MixedEnumNotIn(vs ...MixedEnum) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldMixedEnum), v...))
 	})
 }
 
@@ -1038,12 +1211,199 @@ func StateNotNil() predicate.User {
 	})
 }
 
+// StatusEQ applies the EQ predicate on the "status" field.
+func StatusEQ(v Status) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStatus), v))
+	})
+}
+
+// StatusNEQ applies the NEQ predicate on the "status" field.
+func StatusNEQ(v Status) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStatus), v))
+	})
+}
+
+// StatusIn applies the In predicate on the "status" field.
+func StatusIn(vs ...Status) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStatus), v...))
+	})
+}
+
+// StatusNotIn applies the NotIn predicate on the "status" field.
+func StatusNotIn(vs ...Status) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStatus), v...))
+	})
+}
+
+// StatusIsNil applies the IsNil predicate on the "status" field.
+func StatusIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStatus)))
+	})
+}
+
+// StatusNotNil applies the NotNil predicate on the "status" field.
+func StatusNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStatus)))
+	})
+}
+
+// WorkplaceEQ applies the EQ predicate on the "workplace" field.
+func WorkplaceEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceNEQ applies the NEQ predicate on the "workplace" field.
+func WorkplaceNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceIn applies the In predicate on the "workplace" field.
+func WorkplaceIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldWorkplace), v...))
+	})
+}
+
+// WorkplaceNotIn applies the NotIn predicate on the "workplace" field.
+func WorkplaceNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldWorkplace), v...))
+	})
+}
+
+// WorkplaceGT applies the GT predicate on the "workplace" field.
+func WorkplaceGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceGTE applies the GTE predicate on the "workplace" field.
+func WorkplaceGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceLT applies the LT predicate on the "workplace" field.
+func WorkplaceLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceLTE applies the LTE predicate on the "workplace" field.
+func WorkplaceLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceContains applies the Contains predicate on the "workplace" field.
+func WorkplaceContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceHasPrefix applies the HasPrefix predicate on the "workplace" field.
+func WorkplaceHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceHasSuffix applies the HasSuffix predicate on the "workplace" field.
+func WorkplaceHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceIsNil applies the IsNil predicate on the "workplace" field.
+func WorkplaceIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldWorkplace)))
+	})
+}
+
+// WorkplaceNotNil applies the NotNil predicate on the "workplace" field.
+func WorkplaceNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldWorkplace)))
+	})
+}
+
+// WorkplaceEqualFold applies the EqualFold predicate on the "workplace" field.
+func WorkplaceEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldWorkplace), v))
+	})
+}
+
+// WorkplaceContainsFold applies the ContainsFold predicate on the "workplace" field.
+func WorkplaceContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldWorkplace), v))
+	})
+}
+
 // HasCar applies the HasEdge predicate on the "car" edge.
 func HasCar() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CarTable, FieldID),
+			sqlgraph.To(CarTable, CarFieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, CarTable, CarColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1055,7 +1415,7 @@ func HasCarWith(preds ...predicate.Car) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CarInverseTable, FieldID),
+			sqlgraph.To(CarInverseTable, CarFieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, CarTable, CarColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
@@ -1071,7 +1431,7 @@ func HasPets() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PetsTable, FieldID),
+			sqlgraph.To(PetsTable, PetFieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, PetsTable, PetsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1083,7 +1443,7 @@ func HasPetsWith(preds ...predicate.Pet) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(PetsInverseTable, FieldID),
+			sqlgraph.To(PetsInverseTable, PetFieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, PetsTable, PetsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

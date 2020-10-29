@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/hooks/ent/user"
 )
 
 // User is the model entity for the User schema.
@@ -23,6 +23,8 @@ type User struct {
 	Version int `json:"version,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Worth holds the value of the "worth" field.
+	Worth uint `json:"worth,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges            UserEdges `json:"edges"`
@@ -80,6 +82,7 @@ func (*User) scanValues() []interface{} {
 		&sql.NullInt64{},  // id
 		&sql.NullInt64{},  // version
 		&sql.NullString{}, // name
+		&sql.NullInt64{},  // worth
 	}
 }
 
@@ -112,7 +115,12 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.Name = value.String
 	}
-	values = values[2:]
+	if value, ok := values[2].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field worth", values[2])
+	} else if value.Valid {
+		u.Worth = uint(value.Int64)
+	}
+	values = values[3:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_best_friend", value)
@@ -166,6 +174,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Version))
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
+	builder.WriteString(", worth=")
+	builder.WriteString(fmt.Sprintf("%v", u.Worth))
 	builder.WriteByte(')')
 	return builder.String()
 }

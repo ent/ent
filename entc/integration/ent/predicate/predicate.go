@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -7,7 +7,7 @@
 package predicate
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql"
 )
 
 // Card is the predicate function for card builders.
@@ -24,6 +24,9 @@ type File func(*sql.Selector)
 
 // FileType is the predicate function for filetype builders.
 type FileType func(*sql.Selector)
+
+// Goods is the predicate function for goods builders.
+type Goods func(*sql.Selector)
 
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
@@ -42,6 +45,9 @@ type Pet func(*sql.Selector)
 
 // Spec is the predicate function for spec builders.
 type Spec func(*sql.Selector)
+
+// Task is the predicate function for task builders.
+type Task func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

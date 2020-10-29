@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,14 +12,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -118,38 +118,24 @@ func (cc *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	if _, ok := cc.mutation.CreateTime(); !ok {
-		v := card.DefaultCreateTime()
-		cc.mutation.SetCreateTime(v)
-	}
-	if _, ok := cc.mutation.UpdateTime(); !ok {
-		v := card.DefaultUpdateTime()
-		cc.mutation.SetUpdateTime(v)
-	}
-	if _, ok := cc.mutation.Number(); !ok {
-		return nil, &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
-	}
-	if v, ok := cc.mutation.Number(); ok {
-		if err := card.NumberValidator(v); err != nil {
-			return nil, &ValidationError{Name: "number", err: fmt.Errorf("ent: validator failed for field \"number\": %w", err)}
-		}
-	}
-	if v, ok := cc.mutation.Name(); ok {
-		if err := card.NameValidator(v); err != nil {
-			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
-		}
-	}
 	var (
 		err  error
 		node *Card
 	)
+	cc.defaults()
 	if len(cc.hooks) == 0 {
+		if err = cc.check(); err != nil {
+			return nil, err
+		}
 		node, err = cc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CardMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cc.check(); err != nil {
+				return nil, err
 			}
 			cc.mutation = mutation
 			node, err = cc.gremlinSave(ctx)
@@ -173,6 +159,42 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 		panic(err)
 	}
 	return v
+}
+
+// defaults sets the default values of the builder before save.
+func (cc *CardCreate) defaults() {
+	if _, ok := cc.mutation.CreateTime(); !ok {
+		v := card.DefaultCreateTime()
+		cc.mutation.SetCreateTime(v)
+	}
+	if _, ok := cc.mutation.UpdateTime(); !ok {
+		v := card.DefaultUpdateTime()
+		cc.mutation.SetUpdateTime(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cc *CardCreate) check() error {
+	if _, ok := cc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New("ent: missing required field \"create_time\"")}
+	}
+	if _, ok := cc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New("ent: missing required field \"update_time\"")}
+	}
+	if _, ok := cc.mutation.Number(); !ok {
+		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
+	}
+	if v, ok := cc.mutation.Number(); ok {
+		if err := card.NumberValidator(v); err != nil {
+			return &ValidationError{Name: "number", err: fmt.Errorf("ent: validator failed for field \"number\": %w", err)}
+		}
+	}
+	if v, ok := cc.mutation.Name(); ok {
+		if err := card.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (cc *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
@@ -228,4 +250,10 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// CardCreateBulk is the builder for creating a bulk of Card entities.
+type CardCreateBulk struct {
+	config
+	builders []*CardCreate
 }

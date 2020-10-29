@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -7,8 +7,8 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/schema/field"
 )
 
 var (
@@ -43,6 +43,26 @@ var (
 		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// MediaColumns holds the columns for the "media" table.
+	MediaColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "source", Type: field.TypeString, Nullable: true},
+		{Name: "source_uri", Type: field.TypeString, Nullable: true},
+	}
+	// MediaTable holds the schema information for the "media" table.
+	MediaTable = &schema.Table{
+		Name:        "media",
+		Columns:     MediaColumns,
+		PrimaryKey:  []*schema.Column{MediaColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "media_source_source_uri",
+				Unique:  true,
+				Columns: []*schema.Column{MediaColumns[1], MediaColumns[2]},
+			},
+		},
+	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -66,15 +86,19 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "oid", Type: field.TypeInt, Increment: true},
+		{Name: "mixed_string", Type: field.TypeString, Default: "default"},
+		{Name: "mixed_enum", Type: field.TypeEnum, Enums: []string{"on", "off"}, Default: "on"},
 		{Name: "age", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
-		{Name: "nickname", Type: field.TypeString},
+		{Name: "nickname", Type: field.TypeString, Size: 255},
 		{Name: "phone", Type: field.TypeString, Default: "unknown"},
 		{Name: "buffer", Type: field.TypeBytes, Nullable: true},
 		{Name: "title", Type: field.TypeString, Default: "SWE"},
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}},
+		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"done", "pending"}},
+		{Name: "workplace", Type: field.TypeString, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -86,7 +110,7 @@ var (
 			{
 				Name:    "user_phone_age",
 				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[4], UsersColumns[1]},
+				Columns: []*schema.Column{UsersColumns[6], UsersColumns[3]},
 			},
 		},
 	}
@@ -121,6 +145,7 @@ var (
 	Tables = []*schema.Table{
 		CarsTable,
 		GroupsTable,
+		MediaTable,
 		PetsTable,
 		UsersTable,
 		FriendsTable,

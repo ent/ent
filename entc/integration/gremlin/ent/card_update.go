@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,28 +10,27 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // CardUpdate is the builder for updating Card entities.
 type CardUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CardMutation
-	predicates []predicate.Card
+	hooks    []Hook
+	mutation *CardMutation
 }
 
 // Where adds a new predicate for the builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
@@ -94,9 +93,15 @@ func (cu *CardUpdate) Mutation() *CardMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.mutation.ClearOwner()
+	return cu
+}
+
+// ClearSpec clears all "spec" edges to type Spec.
+func (cu *CardUpdate) ClearSpec() *CardUpdate {
+	cu.mutation.ClearSpec()
 	return cu
 }
 
@@ -117,27 +122,24 @@ func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
-	if _, ok := cu.mutation.UpdateTime(); !ok {
-		v := card.UpdateDefaultUpdateTime()
-		cu.mutation.SetUpdateTime(v)
-	}
-	if v, ok := cu.mutation.Name(); ok {
-		if err := card.NameValidator(v); err != nil {
-			return 0, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
-		}
-	}
-
 	var (
 		err      error
 		affected int
 	)
+	cu.defaults()
 	if len(cu.hooks) == 0 {
+		if err = cu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = cu.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CardMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cu.check(); err != nil {
+				return 0, err
 			}
 			cu.mutation = mutation
 			affected, err = cu.gremlinSave(ctx)
@@ -176,6 +178,24 @@ func (cu *CardUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (cu *CardUpdate) defaults() {
+	if _, ok := cu.mutation.UpdateTime(); !ok {
+		v := card.UpdateDefaultUpdateTime()
+		cu.mutation.SetUpdateTime(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cu *CardUpdate) check() error {
+	if v, ok := cu.mutation.Name(); ok {
+		if err := card.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (cu *CardUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := cu.gremlin().Query()
@@ -195,7 +215,7 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(card.Label)
-	for _, p := range cu.predicates {
+	for _, p := range cu.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -316,9 +336,15 @@ func (cuo *CardUpdateOne) Mutation() *CardMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.mutation.ClearOwner()
+	return cuo
+}
+
+// ClearSpec clears all "spec" edges to type Spec.
+func (cuo *CardUpdateOne) ClearSpec() *CardUpdateOne {
+	cuo.mutation.ClearSpec()
 	return cuo
 }
 
@@ -339,27 +365,24 @@ func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-	if _, ok := cuo.mutation.UpdateTime(); !ok {
-		v := card.UpdateDefaultUpdateTime()
-		cuo.mutation.SetUpdateTime(v)
-	}
-	if v, ok := cuo.mutation.Name(); ok {
-		if err := card.NameValidator(v); err != nil {
-			return nil, &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
-		}
-	}
-
 	var (
 		err  error
 		node *Card
 	)
+	cuo.defaults()
 	if len(cuo.hooks) == 0 {
+		if err = cuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = cuo.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CardMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cuo.check(); err != nil {
+				return nil, err
 			}
 			cuo.mutation = mutation
 			node, err = cuo.gremlinSave(ctx)
@@ -378,11 +401,11 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (cuo *CardUpdateOne) SaveX(ctx context.Context) *Card {
-	c, err := cuo.Save(ctx)
+	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -396,6 +419,24 @@ func (cuo *CardUpdateOne) ExecX(ctx context.Context) {
 	if err := cuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cuo *CardUpdateOne) defaults() {
+	if _, ok := cuo.mutation.UpdateTime(); !ok {
+		v := card.UpdateDefaultUpdateTime()
+		cuo.mutation.SetUpdateTime(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (cuo *CardUpdateOne) check() error {
+	if v, ok := cuo.mutation.Name(); ok {
+		if err := card.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (cuo *CardUpdateOne) gremlinSave(ctx context.Context) (*Card, error) {

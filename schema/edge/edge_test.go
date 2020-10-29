@@ -7,10 +7,12 @@ package edge_test
 import (
 	"testing"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema"
+	"github.com/facebook/ent/schema/edge"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEdge(t *testing.T) {
@@ -83,4 +85,31 @@ func TestEdge(t *testing.T) {
 	assert.Equal("followers", from.Tag)
 	assert.Equal("following", from.Ref.Tag)
 	assert.Equal(edge.StorageKey{Table: "user_followers", Columns: []string{"following_id", "followers_id"}}, *from.Ref.StorageKey)
+}
+
+type GQL struct {
+	Field string
+}
+
+func (GQL) Name() string {
+	return "GQL"
+}
+
+func TestAnnotations(t *testing.T) {
+	type User struct{ ent.Schema }
+	to := edge.To("user", User.Type).
+		Annotations(GQL{Field: "to"}).
+		Descriptor()
+	require.Equal(t, []schema.Annotation{GQL{Field: "to"}}, to.Annotations)
+	from := edge.From("user", User.Type).
+		Annotations(GQL{Field: "from"}).
+		Descriptor()
+	require.Equal(t, []schema.Annotation{GQL{Field: "from"}}, from.Annotations)
+	bidi := edge.To("following", User.Type).
+		Annotations(GQL{Field: "to"}).
+		From("followers").
+		Annotations(GQL{Field: "from"}).
+		Descriptor()
+	require.Equal(t, []schema.Annotation{GQL{Field: "from"}}, bidi.Annotations)
+	require.Equal(t, []schema.Annotation{GQL{Field: "to"}}, bidi.Ref.Annotations)
 }

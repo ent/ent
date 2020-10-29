@@ -10,9 +10,9 @@ import (
 	"math"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
@@ -119,6 +119,56 @@ func TestSQLite_Create(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.tableExists("pets", false)
 				mock.ExpectExec(escape("CREATE TABLE `pets`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` integer NULL, FOREIGN KEY(`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE)")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "create new table with foreign key disabled",
+			options: []MigrateOption{
+				WithForeignKeys(false),
+			},
+			tables: func() []*Table {
+				var (
+					c1 = []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "created_at", Type: field.TypeTime},
+					}
+					c2 = []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString},
+						{Name: "owner_id", Type: field.TypeInt, Nullable: true},
+					}
+					t1 = &Table{
+						Name:       "users",
+						Columns:    c1,
+						PrimaryKey: c1[0:1],
+					}
+					t2 = &Table{
+						Name:       "pets",
+						Columns:    c2,
+						PrimaryKey: c2[0:1],
+						ForeignKeys: []*ForeignKey{
+							{
+								Symbol:     "pets_owner",
+								Columns:    c2[2:],
+								RefTable:   t1,
+								RefColumns: c1[0:1],
+								OnDelete:   Cascade,
+							},
+						},
+					}
+				)
+				return []*Table{t1, t2}
+			}(),
+			before: func(mock sqliteMock) {
+				mock.start()
+				mock.tableExists("users", false)
+				mock.ExpectExec(escape("CREATE TABLE `users`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` datetime NOT NULL)")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.tableExists("pets", false)
+				mock.ExpectExec(escape("CREATE TABLE `pets`(`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` integer NULL)")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

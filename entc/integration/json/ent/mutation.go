@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -14,9 +14,11 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/facebookincubator/ent/entc/integration/json/ent/user"
+	"github.com/facebook/ent/entc/integration/json/ent/predicate"
+	"github.com/facebook/ent/entc/integration/json/ent/schema"
+	"github.com/facebook/ent/entc/integration/json/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -38,6 +40,7 @@ type UserMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	t             **schema.T
 	url           **url.URL
 	raw           *json.RawMessage
 	dirs          *[]http.Dir
@@ -47,6 +50,7 @@ type UserMutation struct {
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -126,6 +130,56 @@ func (m *UserMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// SetT sets the t field.
+func (m *UserMutation) SetT(s *schema.T) {
+	m.t = &s
+}
+
+// T returns the t value in the mutation.
+func (m *UserMutation) T() (r *schema.T, exists bool) {
+	v := m.t
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldT returns the old t value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldT(ctx context.Context) (v *schema.T, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldT is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldT requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldT: %w", err)
+	}
+	return oldValue.T, nil
+}
+
+// ClearT clears the value of t.
+func (m *UserMutation) ClearT() {
+	m.t = nil
+	m.clearedFields[user.FieldT] = struct{}{}
+}
+
+// TCleared returns if the field t was cleared in this mutation.
+func (m *UserMutation) TCleared() bool {
+	_, ok := m.clearedFields[user.FieldT]
+	return ok
+}
+
+// ResetT reset all changes of the "t" field.
+func (m *UserMutation) ResetT() {
+	m.t = nil
+	delete(m.clearedFields, user.FieldT)
 }
 
 // SetURL sets the url field.
@@ -442,7 +496,10 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
+	if m.t != nil {
+		fields = append(fields, user.FieldT)
+	}
 	if m.url != nil {
 		fields = append(fields, user.FieldURL)
 	}
@@ -469,6 +526,8 @@ func (m *UserMutation) Fields() []string {
 // not set, or was not define in the schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case user.FieldT:
+		return m.T()
 	case user.FieldURL:
 		return m.URL()
 	case user.FieldRaw:
@@ -490,6 +549,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 // or the query to the database was failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case user.FieldT:
+		return m.OldT(ctx)
 	case user.FieldURL:
 		return m.OldURL(ctx)
 	case user.FieldRaw:
@@ -511,6 +572,13 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type mismatch the field type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldT:
+		v, ok := value.(*schema.T)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetT(v)
+		return nil
 	case user.FieldURL:
 		v, ok := value.(*url.URL)
 		if !ok {
@@ -583,6 +651,9 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(user.FieldT) {
+		fields = append(fields, user.FieldT)
+	}
 	if m.FieldCleared(user.FieldURL) {
 		fields = append(fields, user.FieldURL)
 	}
@@ -615,6 +686,9 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
+	case user.FieldT:
+		m.ClearT()
+		return nil
 	case user.FieldURL:
 		m.ClearURL()
 		return nil
@@ -642,6 +716,9 @@ func (m *UserMutation) ClearField(name string) error {
 // defined in the schema.
 func (m *UserMutation) ResetField(name string) error {
 	switch name {
+	case user.FieldT:
+		m.ResetT()
+		return nil
 	case user.FieldURL:
 		m.ResetURL()
 		return nil

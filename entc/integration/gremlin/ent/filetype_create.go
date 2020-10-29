@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,12 +11,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
 )
 
 // FileTypeCreate is the builder for creating a FileType entity.
@@ -29,6 +29,34 @@ type FileTypeCreate struct {
 // SetName sets the name field.
 func (ftc *FileTypeCreate) SetName(s string) *FileTypeCreate {
 	ftc.mutation.SetName(s)
+	return ftc
+}
+
+// SetType sets the type field.
+func (ftc *FileTypeCreate) SetType(f filetype.Type) *FileTypeCreate {
+	ftc.mutation.SetType(f)
+	return ftc
+}
+
+// SetNillableType sets the type field if the given value is not nil.
+func (ftc *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
+	if f != nil {
+		ftc.SetType(*f)
+	}
+	return ftc
+}
+
+// SetState sets the state field.
+func (ftc *FileTypeCreate) SetState(f filetype.State) *FileTypeCreate {
+	ftc.mutation.SetState(f)
+	return ftc
+}
+
+// SetNillableState sets the state field if the given value is not nil.
+func (ftc *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
+	if f != nil {
+		ftc.SetState(*f)
+	}
 	return ftc
 }
 
@@ -54,20 +82,24 @@ func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
 
 // Save creates the FileType in the database.
 func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	if _, ok := ftc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
 	var (
 		err  error
 		node *FileType
 	)
+	ftc.defaults()
 	if len(ftc.hooks) == 0 {
+		if err = ftc.check(); err != nil {
+			return nil, err
+		}
 		node, err = ftc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileTypeMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ftc.check(); err != nil {
+				return nil, err
 			}
 			ftc.mutation = mutation
 			node, err = ftc.gremlinSave(ctx)
@@ -91,6 +123,42 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 		panic(err)
 	}
 	return v
+}
+
+// defaults sets the default values of the builder before save.
+func (ftc *FileTypeCreate) defaults() {
+	if _, ok := ftc.mutation.GetType(); !ok {
+		v := filetype.DefaultType
+		ftc.mutation.SetType(v)
+	}
+	if _, ok := ftc.mutation.State(); !ok {
+		v := filetype.DefaultState
+		ftc.mutation.SetState(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (ftc *FileTypeCreate) check() error {
+	if _, ok := ftc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := ftc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New("ent: missing required field \"type\"")}
+	}
+	if v, ok := ftc.mutation.GetType(); ok {
+		if err := filetype.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.State(); !ok {
+		return &ValidationError{Name: "state", err: errors.New("ent: missing required field \"state\"")}
+	}
+	if v, ok := ftc.mutation.State(); ok {
+		if err := filetype.StateValidator(v); err != nil {
+			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+		}
+	}
+	return nil
 }
 
 func (ftc *FileTypeCreate) gremlinSave(ctx context.Context) (*FileType, error) {
@@ -123,6 +191,12 @@ func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {
 		})
 		v.Property(dsl.Single, filetype.FieldName, value)
 	}
+	if value, ok := ftc.mutation.GetType(); ok {
+		v.Property(dsl.Single, filetype.FieldType, value)
+	}
+	if value, ok := ftc.mutation.State(); ok {
+		v.Property(dsl.Single, filetype.FieldState, value)
+	}
 	for _, id := range ftc.mutation.FilesIDs() {
 		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
@@ -138,4 +212,10 @@ func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// FileTypeCreateBulk is the builder for creating a bulk of FileType entities.
+type FileTypeCreateBulk struct {
+	config
+	builders []*FileTypeCreate
 }

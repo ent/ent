@@ -8,9 +8,10 @@ package ent
 import (
 	"context"
 
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/index"
+	"github.com/facebook/ent/schema"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
 )
 
 type (
@@ -45,6 +46,16 @@ type (
 		// Indexes returns the indexes of the schema.
 		Indexes() []Index
 		// Config returns an optional config for the schema.
+		//
+		// Deprecated: the Config method predates the Annotations method and it
+		// is planned be removed in v0.5.0. New code should use Annotations instead.
+		//
+		//	func (T) Annotations() []schema.Annotation {
+		//		return []schema.Annotation{
+		//			entsql.Annotation{Table: "Name"},
+		//		}
+		//	}
+		//
 		Config() Config
 		// Mixin returns an optional list of Mixin to extends
 		// the schema.
@@ -54,6 +65,9 @@ type (
 		Hooks() []Hook
 		// Policy returns the privacy policy of the schema.
 		Policy() Policy
+		// Annotations returns a list of schema annotations to be used by
+		// codegen extensions.
+		Annotations() []schema.Annotation
 	}
 
 	// A Field interface returns a field descriptor for vertex fields/properties.
@@ -105,6 +119,15 @@ type (
 	//		}
 	//	}
 	//
+	// Deprecated: the Config object predates the schema.Annotation method and it
+	// is planned be removed in v0.5.0. New code should use Annotations instead.
+	//
+	//	func (T) Annotations() []schema.Annotation {
+	//		return []schema.Annotation{
+	//			entsql.Annotation{Table: "Name"},
+	//		}
+	//	}
+	//
 	Config struct {
 		// A Table is an optional table name defined for the schema.
 		Table string
@@ -146,6 +169,12 @@ type (
 		// Hooks returns a slice of hooks to add to the schema.
 		// Note that mixin hooks are executed before schema hooks.
 		Hooks() []Hook
+		// Policy returns a privacy policy to add to the schema.
+		// Note that mixin policy are executed before schema policy.
+		Policy() Policy
+		// Annotations returns a list of schema annotations to add
+		// to the schema annotations.
+		Annotations() []schema.Annotation
 	}
 
 	// The Policy type defines the write privacy policy of an entity.
@@ -197,6 +226,9 @@ func (Schema) Hooks() []Hook { return nil }
 
 // Policy of the schema.
 func (Schema) Policy() Policy { return nil }
+
+// Annotations of the schema.
+func (Schema) Annotations() []schema.Annotation { return nil }
 
 type (
 	// Value represents a value returned by ent.
@@ -281,14 +313,10 @@ type (
 		// defined in the schema.
 		ResetEdge(name string) error
 
-		// In order to not break users code, we release the codegen part
-		// first, and uncomment the new method after a minor version release.
-		//
 		// OldField returns the old value of the field from the database.
 		// An error is returned if the mutation operation is not UpdateOne,
 		// or the query to the database was failed.
-		//
-		// OldField(ctx context.Context, name string) (Value, error)
+		OldField(ctx context.Context, name string) (Value, error)
 	}
 
 	// Mutator is the interface that wraps the Mutate method.

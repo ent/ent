@@ -8,10 +8,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/entc/integration/config/ent"
-	"github.com/facebookincubator/ent/entc/integration/config/ent/migrate"
-	"github.com/facebookincubator/ent/entc/integration/config/ent/schema"
+	"github.com/facebook/ent/dialect/entsql"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/config/ent"
+	"github.com/facebook/ent/entc/integration/config/ent/migrate"
+	"github.com/facebook/ent/entc/integration/config/ent/schema"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
@@ -26,11 +27,11 @@ func TestSchemaConfig(t *testing.T) {
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 	client.User.Create().SaveX(ctx)
 
-	// check that the table was created with the given custom name.
-	table := schema.User{}.Config().Table
+	// Check that the table was created with the given custom name.
+	table := schema.User{}.Annotations()[0].(entsql.Annotation).Table
 	query, args := sql.Select().Count().
 		From(sql.Table("sqlite_master")).
-		Where(sql.EQ("type", "table").And().EQ("name", table)).
+		Where(sql.And(sql.EQ("type", "table"), sql.EQ("name", table))).
 		Query()
 	rows := &sql.Rows{}
 	require.NoError(t, drv.Query(ctx, query, args, rows))

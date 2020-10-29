@@ -5,15 +5,36 @@
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/edge"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/index"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/edge"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
+	"github.com/facebook/ent/schema/mixin"
 )
+
+type Mixin struct {
+	mixin.Schema
+}
+
+func (m Mixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("mixed_string").
+			Default("default"),
+		field.Enum("mixed_enum").
+			Values("on", "off").
+			Default("on"),
+	}
+}
 
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
+}
+
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		Mixin{},
+	}
 }
 
 // Fields of the User.
@@ -27,7 +48,8 @@ func (User) Fields() []ent.Field {
 		// extending name field to longtext.
 		field.Text("name"),
 		// changing nickname from unique no non-unique.
-		field.String("nickname"),
+		field.String("nickname").
+			MaxLen(255),
 		// adding new columns (must be either optional, or with a default value).
 		field.String("phone").
 			Default("unknown"),
@@ -51,6 +73,13 @@ func (User) Fields() []ent.Field {
 		field.Enum("state").
 			Optional().
 			Values("logged_in", "logged_out", "online"),
+		// convert string to enum.
+		field.Enum("status").
+			Optional().
+			Values("done", "pending"),
+		// remove the max-length constraint from varchar.
+		field.String("workplace").
+			Optional(),
 		// deleting the `address` column.
 	}
 }

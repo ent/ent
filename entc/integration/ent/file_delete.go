@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FileDelete is the builder for deleting a File entity.
 type FileDelete struct {
 	config
-	hooks      []Hook
-	mutation   *FileMutation
-	predicates []predicate.File
+	hooks    []Hook
+	mutation *FileMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
-	fd.predicates = append(fd.predicates, ps...)
+	fd.mutation.predicates = append(fd.mutation.predicates, ps...)
 	return fd
 }
 
@@ -79,7 +78,7 @@ func (fd *FileDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := fd.predicates; len(ps) > 0 {
+	if ps := fd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

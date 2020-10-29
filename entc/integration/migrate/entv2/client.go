@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,16 +11,17 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/migrate"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/migrate"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/car"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/user"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/group"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/media"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -32,6 +33,8 @@ type Client struct {
 	Car *CarClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// Media is the client for interacting with the Media builders.
+	Media *MediaClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
@@ -51,6 +54,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Car = NewCarClient(c.config)
 	c.Group = NewGroupClient(c.config)
+	c.Media = NewMediaClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -71,7 +75,8 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client.
+// Tx returns a new transactional client. The provided context
+// is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("entv2: cannot start a transaction within a transaction")
@@ -82,9 +87,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
+		ctx:    ctx,
 		config: cfg,
 		Car:    NewCarClient(cfg),
 		Group:  NewGroupClient(cfg),
+		Media:  NewMediaClient(cfg),
 		Pet:    NewPetClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
@@ -104,6 +111,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config: cfg,
 		Car:    NewCarClient(cfg),
 		Group:  NewGroupClient(cfg),
+		Media:  NewMediaClient(cfg),
 		Pet:    NewPetClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
@@ -136,6 +144,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Car.Use(hooks...)
 	c.Group.Use(hooks...)
+	c.Media.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -160,6 +169,11 @@ func (c *CarClient) Use(hooks ...Hook) {
 func (c *CarClient) Create() *CarCreate {
 	mutation := newCarMutation(c.config, OpCreate)
 	return &CarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Car entities.
+func (c *CarClient) CreateBulk(builders ...*CarCreate) *CarCreateBulk {
+	return &CarCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Car.
@@ -199,7 +213,7 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 	return &CarDeleteOne{builder}
 }
 
-// Create returns a query builder for Car.
+// Query returns a query builder for Car.
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{config: c.config}
 }
@@ -211,11 +225,11 @@ func (c *CarClient) Get(ctx context.Context, id int) (*Car, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CarClient) GetX(ctx context.Context, id int) *Car {
-	ca, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ca
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Car.
@@ -261,6 +275,11 @@ func (c *GroupClient) Create() *GroupCreate {
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Group entities.
+func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
+	return &GroupCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Group.
 func (c *GroupClient) Update() *GroupUpdate {
 	mutation := newGroupMutation(c.config, OpUpdate)
@@ -298,7 +317,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	return &GroupDeleteOne{builder}
 }
 
-// Create returns a query builder for Group.
+// Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
 }
@@ -310,16 +329,104 @@ func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
-	gr, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return obj
 }
 
 // Hooks returns the client hooks.
 func (c *GroupClient) Hooks() []Hook {
 	return c.hooks.Group
+}
+
+// MediaClient is a client for the Media schema.
+type MediaClient struct {
+	config
+}
+
+// NewMediaClient returns a client for the Media from the given config.
+func NewMediaClient(c config) *MediaClient {
+	return &MediaClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `media.Hooks(f(g(h())))`.
+func (c *MediaClient) Use(hooks ...Hook) {
+	c.hooks.Media = append(c.hooks.Media, hooks...)
+}
+
+// Create returns a create builder for Media.
+func (c *MediaClient) Create() *MediaCreate {
+	mutation := newMediaMutation(c.config, OpCreate)
+	return &MediaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Media entities.
+func (c *MediaClient) CreateBulk(builders ...*MediaCreate) *MediaCreateBulk {
+	return &MediaCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Media.
+func (c *MediaClient) Update() *MediaUpdate {
+	mutation := newMediaMutation(c.config, OpUpdate)
+	return &MediaUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MediaClient) UpdateOne(m *Media) *MediaUpdateOne {
+	mutation := newMediaMutation(c.config, OpUpdateOne, withMedia(m))
+	return &MediaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MediaClient) UpdateOneID(id int) *MediaUpdateOne {
+	mutation := newMediaMutation(c.config, OpUpdateOne, withMediaID(id))
+	return &MediaUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Media.
+func (c *MediaClient) Delete() *MediaDelete {
+	mutation := newMediaMutation(c.config, OpDelete)
+	return &MediaDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MediaClient) DeleteOne(m *Media) *MediaDeleteOne {
+	return c.DeleteOneID(m.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MediaClient) DeleteOneID(id int) *MediaDeleteOne {
+	builder := c.Delete().Where(media.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MediaDeleteOne{builder}
+}
+
+// Query returns a query builder for Media.
+func (c *MediaClient) Query() *MediaQuery {
+	return &MediaQuery{config: c.config}
+}
+
+// Get returns a Media entity by its id.
+func (c *MediaClient) Get(ctx context.Context, id int) (*Media, error) {
+	return c.Query().Where(media.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MediaClient) GetX(ctx context.Context, id int) *Media {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MediaClient) Hooks() []Hook {
+	return c.hooks.Media
 }
 
 // PetClient is a client for the Pet schema.
@@ -342,6 +449,11 @@ func (c *PetClient) Use(hooks ...Hook) {
 func (c *PetClient) Create() *PetCreate {
 	mutation := newPetMutation(c.config, OpCreate)
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Pet entities.
+func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
+	return &PetCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Pet.
@@ -381,7 +493,7 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	return &PetDeleteOne{builder}
 }
 
-// Create returns a query builder for Pet.
+// Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{config: c.config}
 }
@@ -393,11 +505,11 @@ func (c *PetClient) Get(ctx context.Context, id int) (*Pet, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
-	pe, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Pet.
@@ -443,6 +555,11 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
 	mutation := newUserMutation(c.config, OpUpdate)
@@ -480,7 +597,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }
@@ -492,11 +609,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryCar queries the car edge of a User.

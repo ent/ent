@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/entc/integration/customid/ent"
+	"github.com/facebook/ent/entc/integration/customid/ent/pet"
+	"github.com/facebook/ent/entc/integration/customid/ent/user"
 	"github.com/go-sql-driver/mysql"
 
 	"github.com/google/uuid"
@@ -101,12 +101,15 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, 2, lnk.QueryLinks().CountX(ctx))
 	require.Equal(t, lnk.ID, chd.QueryLinks().OnlyX(ctx).ID)
 	require.Equal(t, lnk.ID, blb.QueryLinks().OnlyX(ctx).ID)
+	require.Len(t, client.Blob.Query().IDsX(ctx), 3)
 
 	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
-	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyXID(ctx))
-	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyXID(ctx))
+	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyIDX(ctx))
+	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyIDX(ctx))
 	xabi := client.Pet.Create().SetID("xabi").AddFriends(pedro).SetBestFriend(pedro).SaveX(ctx)
 	require.Equal(t, "xabi", xabi.ID)
+	pedro = client.Pet.Query().Where(pet.HasOwnerWith(user.ID(a8m.ID))).OnlyX(ctx)
+	require.Equal(t, "pedro", pedro.ID)
 
 	pets := client.Pet.Query().WithFriends().WithBestFriend().Order(ent.Asc(pet.FieldID)).AllX(ctx)
 	require.Len(t, pets, 2)

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/spec"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
 )
 
 // SpecUpdate is the builder for updating Spec entities.
 type SpecUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *SpecMutation
-	predicates []predicate.Spec
+	hooks    []Hook
+	mutation *SpecMutation
 }
 
 // Where adds a new predicate for the builder.
 func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	su.predicates = append(su.predicates, ps...)
+	su.mutation.predicates = append(su.mutation.predicates, ps...)
 	return su
 }
 
@@ -52,6 +51,12 @@ func (su *SpecUpdate) Mutation() *SpecMutation {
 	return su.mutation
 }
 
+// ClearCard clears all "card" edges to type Card.
+func (su *SpecUpdate) ClearCard() *SpecUpdate {
+	su.mutation.ClearCard()
+	return su
+}
+
 // RemoveCardIDs removes the card edge to Card by ids.
 func (su *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
 	su.mutation.RemoveCardIDs(ids...)
@@ -69,7 +74,6 @@ func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -133,7 +137,7 @@ func (su *SpecUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (su *SpecUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(spec.Label)
-	for _, p := range su.predicates {
+	for _, p := range su.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -181,6 +185,12 @@ func (suo *SpecUpdateOne) Mutation() *SpecMutation {
 	return suo.mutation
 }
 
+// ClearCard clears all "card" edges to type Card.
+func (suo *SpecUpdateOne) ClearCard() *SpecUpdateOne {
+	suo.mutation.ClearCard()
+	return suo
+}
+
 // RemoveCardIDs removes the card edge to Card by ids.
 func (suo *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
 	suo.mutation.RemoveCardIDs(ids...)
@@ -198,7 +208,6 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
-
 	var (
 		err  error
 		node *Spec
@@ -228,11 +237,11 @@ func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (suo *SpecUpdateOne) SaveX(ctx context.Context) *Spec {
-	s, err := suo.Save(ctx)
+	node, err := suo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // Exec executes the query on the entity.

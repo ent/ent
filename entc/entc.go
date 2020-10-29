@@ -7,16 +7,18 @@
 package entc
 
 import (
+	"errors"
 	"fmt"
 	"go/token"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
-	"text/template"
 
-	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/entc/load"
+	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/entc/internal"
+	"github.com/facebook/ent/entc/load"
+
+	"golang.org/x/tools/go/packages"
 )
 
 // LoadGraph loads the schema package from the given schema path,
@@ -78,14 +80,7 @@ func Generate(schemaPath string, cfg *gen.Config, options ...Option) (err error)
 			_ = undo()
 		}
 	}()
-	graph, err := LoadGraph(schemaPath, cfg)
-	if err != nil {
-		return err
-	}
-	if err := normalizePkg(cfg); err != nil {
-		return err
-	}
-	return graph.Gen()
+	return generate(schemaPath, cfg)
 }
 
 func normalizePkg(c *gen.Config) error {
@@ -115,48 +110,85 @@ func Storage(typ string) Option {
 	}
 }
 
+// FeatureNames enables sets of features by their names.
+func FeatureNames(names ...string) Option {
+	return func(cfg *gen.Config) error {
+		for _, name := range names {
+			for _, feat := range gen.AllFeatures {
+				if name == feat.Name {
+					cfg.Features = append(cfg.Features, feat)
+				}
+			}
+		}
+		return nil
+	}
+}
+
 // TemplateFiles parses the named files and associates the resulting templates
 // with codegen templates.
 func TemplateFiles(filenames ...string) Option {
-	return templateOption(func(cfg *gen.Config) (err error) {
-		cfg.Template, err = cfg.Template.ParseFiles(filenames...)
-		return
+	return templateOption(func(t *gen.Template) (*gen.Template, error) {
+		return t.ParseFiles(filenames...)
 	})
 }
 
 // TemplateGlob parses the template definitions from the files identified
 // by the pattern and associates the resulting templates with codegen templates.
 func TemplateGlob(pattern string) Option {
-	return templateOption(func(cfg *gen.Config) (err error) {
-		cfg.Template, err = cfg.Template.ParseGlob(pattern)
-		return
+	return templateOption(func(t *gen.Template) (*gen.Template, error) {
+		return t.ParseGlob(pattern)
 	})
 }
 
 // TemplateDir parses the template definitions from the files in the directory
 // and associates the resulting templates with codegen templates.
 func TemplateDir(path string) Option {
-	return templateOption(func(cfg *gen.Config) error {
-		return filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return fmt.Errorf("load template: %v", err)
-			}
-			if info.IsDir() {
-				return nil
-			}
-			cfg.Template, err = cfg.Template.ParseFiles(path)
-			return err
-		})
+	return templateOption(func(t *gen.Template) (*gen.Template, error) {
+		return t.ParseDir(path)
 	})
 }
 
 // templateOption ensures the template instantiate
 // once for config and execute the given Option.
-func templateOption(next Option) Option {
+func templateOption(next func(t *gen.Template) (*gen.Template, error)) Option {
 	return func(cfg *gen.Config) (err error) {
-		if cfg.Template == nil {
-			cfg.Template = template.New("external").Funcs(gen.Funcs)
+		tmpl, err := next(gen.NewTemplate("external"))
+		if err != nil {
+			return err
 		}
-		return next(cfg)
+		cfg.Templates = append(cfg.Templates, tmpl)
+		return nil
 	}
+}
+
+// generate loads the given schema and run codegen.
+func generate(schemaPath string, cfg *gen.Config) error {
+	graph, err := LoadGraph(schemaPath, cfg)
+	if err != nil {
+		if err := mayRecover(err, schemaPath, cfg); err != nil {
+			return err
+		}
+		if graph, err = LoadGraph(schemaPath, cfg); err != nil {
+			return err
+		}
+	}
+	if err := normalizePkg(cfg); err != nil {
+		return err
+	}
+	return graph.Gen()
+}
+
+func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
+	if enabled, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); !enabled {
+		return err
+	}
+	if errors.As(err, &packages.Error{}) || !internal.IsBuildError(err) {
+		return err
+	}
+	// If the build error comes from the schema package.
+	if err := internal.CheckDir(schemaPath); err != nil {
+		return fmt.Errorf("schema failure: %w", err)
+	}
+	target := filepath.Join(cfg.Target, "internal/schema.go")
+	return (&internal.Snapshot{Path: target, Config: cfg}).Restore()
 }

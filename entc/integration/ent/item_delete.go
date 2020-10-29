@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/item"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/item"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	id.predicates = append(id.predicates, ps...)
+	id.mutation.predicates = append(id.mutation.predicates, ps...)
 	return id
 }
 
@@ -79,7 +78,7 @@ func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := id.predicates; len(ps) > 0 {
+	if ps := id.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupInfoMutation
-	predicates []predicate.GroupInfo
+	hooks    []Hook
+	mutation *GroupInfoMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
-	gid.predicates = append(gid.predicates, ps...)
+	gid.mutation.predicates = append(gid.mutation.predicates, ps...)
 	return gid
 }
 
@@ -81,7 +80,7 @@ func (gid *GroupInfoDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (gid *GroupInfoDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(groupinfo.Label)
-	for _, p := range gid.predicates {
+	for _, p := range gid.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

@@ -21,11 +21,11 @@ There are 5 types of mutations:
 Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
 the same generated `UserMutation` object.
 
-However, all builder types implement the generic <a target="_blank" href="https://godoc.org/github.com/facebookincubator/ent#Mutation">`ent.Mutation`<a> interface.
+However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent?tab=doc#Mutation">`ent.Mutation`<a> interface.
  
 ## Hooks
 
-Hooks are functions that get an <a target="_blank" href="https://godoc.org/github.com/facebookincubator/ent#Mutator">`ent.Mutator`<a> and return a mutator back.
+Hooks are functions that get an <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent?tab=doc#Mutator">`ent.Mutator`<a> and return a mutator back.
 They function as middleware between mutators. It's similar to the popular HTTP middleware pattern.
 
 ```go
@@ -115,22 +115,26 @@ There are ~2 ways to do this:
 ```go
 // Option 1: use type assertion.
 client.Use(func(next ent.Mutator) ent.Mutator {
-	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-		if ns, ok := m.(interface{ SetName(string) }); ok {
-		    ns.SetName("Ariel Mashraki")
-		}
-		return next.Mutate(ctx, m)
+    type NameSetter interface {
+        SetName(value string)
+    }
+    return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+        // A schema with a "name" field must implement the NameSetter interface. 
+        if ns, ok := m.(NameSetter); ok {
+            ns.SetName("Ariel Mashraki")
+        }
+        return next.Mutate(ctx, m)
     })
 })
 
 // Option 2: use the generic ent.Mutation interface.
 client.Use(func(next ent.Mutator) ent.Mutator {
 	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-		if err := m.SetField("name", "Ariel Mashraki"); err != nil {
+        if err := m.SetField("name", "Ariel Mashraki"); err != nil {
             // An error is returned, if the field is not defined in
 			// the schema, or if the type mismatch the field type.
         }
-		return next.Mutate(ctx, m)
+        return next.Mutate(ctx, m)
     })
 })
 ```
@@ -151,7 +155,7 @@ import (
     gen "<project>/ent"
     "<project>/ent/hook"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 // Card holds the schema definition for the CreditCard entity.
@@ -172,7 +176,7 @@ func (Card) Hooks() []ent.Hook {
 					return next.Mutate(ctx, m)
 				})
 			},
-            // Limit the hook only for these operations.
+			// Limit the hook only for these operations.
 			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
 		),
 		// Second hook.
@@ -202,3 +206,44 @@ executes `f(g(h(...)))` on mutations.
 Also note, that **runtime hooks** are called before **schema hooks**. That is, if `g`,
 and `h` were defined in the schema, and `f` was registered using `client.Use(...)`,
 they will be executed as follows: `f(g(h(...)))`. 
+
+## Hook helpers
+
+The generated hooks package provides several helpers that can help you control when a hook will
+be executed.
+
+```go
+package schema
+
+import (
+	"context"
+	"fmt"
+
+	"<project>/ent/hook"
+
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/mixin"
+)
+
+
+type SomeMixin struct {
+	mixin.Schema
+}
+
+func (SomeMixin) Hooks() []ent.Hook {
+    return []ent.Hook{
+        // Execute "HookA" only for the UpdateOne and DeleteOne operations.
+        hook.On(HookA(), ent.OpUpdateOne|ent.OpDeleteOne),
+        // Don't execute "HookB" on Create operation.
+        hook.Unless(HookB(), ent.OpCreate),
+        // Execute "HookC" only if the ent.Mutation is changing the "status" field,
+        // and clearing the "dirty" field.
+        hook.If(HookC(), hook.And(hook.HasFields("status"), hook.HasClearedFields("dirty"))),
+    }
+}
+```
+
+## Transaction Hooks
+
+Hooks can also be registered on active transactions, and will be executed on `Tx.Commit` or `Tx.Rollback`.
+For more information, read about it in the [transactions page](transactions.md#hooks). 

@@ -5,7 +5,7 @@ title: Fields
 
 ## Quick Summary
 
-Fields (or properties) in the schema are the attributes of the vertex. For example, a `User`
+Fields (or properties) in the schema are the attributes of the node. For example, a `User`
 with 4 fields: `age`, `name`, `username` and `created_at`:
 
 ![re-fields-properties](https://entgo.io/assets/er_fields_properties.png)
@@ -18,8 +18,8 @@ package schema
 import (
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 // User schema.
@@ -50,9 +50,10 @@ The following types are currently supported by the framework:
 - `bool`
 - `string`
 - `time.Time`
-- `[]byte` (only supported by SQL dialects).
-- `JSON` (only supported by SQL dialects).
-- `Enum` (only supported by SQL dialects).
+- `[]byte` (SQL only).
+- `JSON` (SQL only).
+- `Enum` (SQL only).
+- `UUID` (SQL only).
 
 <br/>
 
@@ -63,8 +64,9 @@ import (
 	"time"
 	"net/url"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/google/uuid"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 // User schema.
@@ -92,6 +94,8 @@ func (User) Fields() []ent.Field {
 		field.Enum("state").
 			Values("on", "off").
 			Optional(),
+		field.UUID("uuid", uuid.UUID{}).
+			Default(uuid.New),
 	}
 }
 ```
@@ -158,9 +162,9 @@ there is an option to override the default behavior using the `SchemaType` metho
 package schema
 
 import (
-    "github.com/facebookincubator/ent"
-    "github.com/facebookincubator/ent/dialect"
-    "github.com/facebookincubator/ent/schema/field"
+    "github.com/facebook/ent"
+    "github.com/facebook/ent/dialect"
+    "github.com/facebook/ent/schema/field"
 )
 
 // Card schema.
@@ -186,7 +190,7 @@ and for time fields, the type is `time.Time`. The `GoType` method provides an op
 default ent type with a custom one.
 
 The custom type must be either a type that is convertible to the Go basic type, or a type that implements the
-[ValueScanner](https://godoc.org/github.com/facebookincubator/ent/schema/field#ValueScanner) interface.
+[ValueScanner](https://pkg.go.dev/github.com/facebook/ent/schema/field?tab=doc#ValueScanner) interface.
 
 
 ```go
@@ -195,9 +199,9 @@ package schema
 import (
     "database/sql"
 
-    "github.com/facebookincubator/ent"
-    "github.com/facebookincubator/ent/dialect"
-    "github.com/facebookincubator/ent/schema/field"
+    "github.com/facebook/ent"
+    "github.com/facebook/ent/dialect"
+    "github.com/facebook/ent/schema/field"
 )
 
 // Amount is a custom Go type that's convertible to the basic float64 type.
@@ -255,8 +259,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 
@@ -280,6 +284,25 @@ func (Group) Fields() []ent.Field {
 }
 ```
 
+Here is another example for writing a reusable validator:
+
+```go
+// MaxRuneCount validates the rune length of a string by using the unicode/utf8 package.
+func MaxRuneCount(maxLen int) func(s string) error {
+	return func(s string) error {
+		if utf8.RuneCountInString(s) > maxLen {
+			return errors.New("value is more than the max length")
+		}
+		return nil
+	}
+}
+
+field.String("name").
+	Validate(MaxRuneCount(10))
+field.String("nickname").
+	Validate(MaxRuneCount(20))
+```
+
 ## Built-in Validators
 
 The framework provides a few built-in validators for each type:
@@ -296,6 +319,7 @@ The framework provides a few built-in validators for each type:
   - `MinLen(i)`
   - `MaxLen(i)`
   - `Match(regexp.Regexp)`
+  - `NotEmpty`
 
 ## Optional
 
@@ -505,3 +529,29 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
+
+## Annotations
+
+`Annotations` is used to attach arbitrary metadata to the field object in code generation.
+Template extensions can retrieve this metadata and use it inside their templates.
+
+Note that the metadata object must be serializable to a JSON raw value (e.g. struct, map or slice).
+
+```go
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the user.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("creation_date").
+			Annotations(entgql.Annotation{
+				OrderField: "CREATED_AT",
+			}),
+	}
+}
+```
+
+Read more about annotations and their usage in templates in the [template doc](templates.md#annotations).

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,9 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/examples/m2mbidi/ent/user"
+	"github.com/facebook/ent/examples/m2mbidi/ent/predicate"
+	"github.com/facebook/ent/examples/m2mbidi/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -41,8 +42,10 @@ type UserMutation struct {
 	clearedFields  map[string]struct{}
 	friends        map[int]struct{}
 	removedfriends map[int]struct{}
+	clearedfriends bool
 	done           bool
 	oldValue       func(context.Context) (*User, error)
+	predicates     []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -228,6 +231,16 @@ func (m *UserMutation) AddFriendIDs(ids ...int) {
 	}
 }
 
+// ClearFriends clears the friends edge to User.
+func (m *UserMutation) ClearFriends() {
+	m.clearedfriends = true
+}
+
+// FriendsCleared returns if the edge friends was cleared.
+func (m *UserMutation) FriendsCleared() bool {
+	return m.clearedfriends
+}
+
 // RemoveFriendIDs removes the friends edge to User by ids.
 func (m *UserMutation) RemoveFriendIDs(ids ...int) {
 	if m.removedfriends == nil {
@@ -257,6 +270,7 @@ func (m *UserMutation) FriendsIDs() (ids []int) {
 // ResetFriends reset all changes of the "friends" edge.
 func (m *UserMutation) ResetFriends() {
 	m.friends = nil
+	m.clearedfriends = false
 	m.removedfriends = nil
 }
 
@@ -456,6 +470,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedfriends {
+		edges = append(edges, user.EdgeFriends)
+	}
 	return edges
 }
 
@@ -463,6 +480,8 @@ func (m *UserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgeFriends:
+		return m.clearedfriends
 	}
 	return false
 }

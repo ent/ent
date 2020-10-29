@@ -26,14 +26,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		{{- with $.Edges }}
 			loadedTypes = [{{ len . }}]bool{
 				{{- range $e := . }}
-					{{ $receiver }}.with{{ pascal $e.Name }} != nil,
+					{{ $receiver }}.{{ $e.EagerLoadField }} != nil,
 				{{- end }}
 			}
 		{{- end }}
 	)
 	{{- with $.ForeignKeys }}
 			{{- with $.FKEdges }}
-				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.with{{ pascal $e.Name }} != nil{{ end }} {
+				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.{{ $e.EagerLoadField }} != nil{{ end }} {
 					withFKs = true
 				}
 			{{- end }}
@@ -118,7 +118,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	if ps := {{ $receiver }}.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, {{ $.Package }}.ValidColumn)
 			}
 		}
 	}
@@ -137,7 +137,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range {{ $receiver }}.order {
-		p(selector)
+		p(selector, {{ $.Package }}.ValidColumn)
 	}
 	if offset := {{ $receiver }}.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -157,8 +157,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
+	selector := {{ $receiver }}.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return nil, err
+	}
 	step := sqlgraph.NewStep(
-		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, {{ $receiver }}.sqlQuery()),
+		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, selector),
 		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
 		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
 			{{- if $e.M2M -}}
@@ -195,13 +199,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 {{ define "dialect/sql/query/eagerloading" }}
 	{{- $e := $.Scope.Edge }}
 	{{- $receiver := $.Scope.Rec }}
-	if query := {{ $receiver }}.with{{ pascal $e.Name }}; query != nil {
+	if query := {{ $receiver }}.{{ $e.EagerLoadField }}; query != nil {
 		{{- if $e.M2M }}
 			fks := make([]driver.Value, 0, len(nodes))
 			ids := make(map[{{ $.ID.Type }}]*{{ $.Name }}, len(nodes))
 			for _, node := range nodes {
 				ids[node.ID] = node
 				fks = append(fks, node.ID)
+				node.Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
 			}
 			var (
 				edgeids []{{ $e.Type.ID.Type }}
@@ -287,6 +292,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			for i := range nodes {
 				fks = append(fks, nodes[i].ID)
 				nodeids[nodes[i].ID] = nodes[i]
+				{{- if $e.O2M }}
+					nodes[i].Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
+				{{- end }}
 			}
 			query.withFKs = true
 			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {

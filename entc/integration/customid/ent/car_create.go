@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/car"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/customid/ent/car"
+	"github.com/facebook/ent/entc/integration/customid/ent/pet"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CarCreate is the builder for creating a Car entity.
@@ -90,35 +90,23 @@ func (cc *CarCreate) Mutation() *CarMutation {
 
 // Save creates the Car in the database.
 func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
-	if v, ok := cc.mutation.BeforeID(); ok {
-		if err := car.BeforeIDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
-		}
-	}
-	if v, ok := cc.mutation.AfterID(); ok {
-		if err := car.AfterIDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
-		}
-	}
-	if _, ok := cc.mutation.Model(); !ok {
-		return nil, &ValidationError{Name: "model", err: errors.New("ent: missing required field \"model\"")}
-	}
-	if v, ok := cc.mutation.ID(); ok {
-		if err := car.IDValidator(v); err != nil {
-			return nil, &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
-		}
-	}
 	var (
 		err  error
 		node *Car
 	)
 	if len(cc.hooks) == 0 {
+		if err = cc.check(); err != nil {
+			return nil, err
+		}
 		node, err = cc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*CarMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cc.check(); err != nil {
+				return nil, err
 			}
 			cc.mutation = mutation
 			node, err = cc.sqlSave(ctx)
@@ -144,9 +132,47 @@ func (cc *CarCreate) SaveX(ctx context.Context) *Car {
 	return v
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (cc *CarCreate) check() error {
+	if v, ok := cc.mutation.BeforeID(); ok {
+		if err := car.BeforeIDValidator(v); err != nil {
+			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+		}
+	}
+	if v, ok := cc.mutation.AfterID(); ok {
+		if err := car.AfterIDValidator(v); err != nil {
+			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+		}
+	}
+	if _, ok := cc.mutation.Model(); !ok {
+		return &ValidationError{Name: "model", err: errors.New("ent: missing required field \"model\"")}
+	}
+	if v, ok := cc.mutation.ID(); ok {
+		if err := car.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
+	_node, _spec := cc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	if _node.ID == 0 {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int(id)
+	}
+	return _node, nil
+}
+
+func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	var (
-		c     = &Car{config: cc.config}
+		_node = &Car{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: car.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -156,7 +182,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		}
 	)
 	if id, ok := cc.mutation.ID(); ok {
-		c.ID = id
+		_node.ID = id
 		_spec.ID.Value = id
 	}
 	if value, ok := cc.mutation.BeforeID(); ok {
@@ -165,7 +191,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			Value:  value,
 			Column: car.FieldBeforeID,
 		})
-		c.BeforeID = value
+		_node.BeforeID = value
 	}
 	if value, ok := cc.mutation.AfterID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -173,7 +199,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			Value:  value,
 			Column: car.FieldAfterID,
 		})
-		c.AfterID = value
+		_node.AfterID = value
 	}
 	if value, ok := cc.mutation.Model(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -181,7 +207,7 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			Value:  value,
 			Column: car.FieldModel,
 		})
-		c.Model = value
+		_node.Model = value
 	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -202,15 +228,73 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+	return _node, _spec
+}
+
+// CarCreateBulk is the builder for creating a bulk of Car entities.
+type CarCreateBulk struct {
+	config
+	builders []*CarCreate
+}
+
+// Save creates the Car entities in the database.
+func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
+	nodes := make([]*Car, len(ccb.builders))
+	mutators := make([]Mutator, len(ccb.builders))
+	for i := range ccb.builders {
+		func(i int, root context.Context) {
+			builder := ccb.builders[i]
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*CarMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				if nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
+	}
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+			return nil, err
 		}
-		return nil, err
 	}
-	if c.ID == 0 {
-		id := _spec.ID.Value.(int64)
-		c.ID = int(id)
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (ccb *CarCreateBulk) SaveX(ctx context.Context) []*Car {
+	v, err := ccb.Save(ctx)
+	if err != nil {
+		panic(err)
 	}
-	return c, nil
+	return v
 }

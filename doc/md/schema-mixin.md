@@ -18,6 +18,12 @@ type Mixin interface {
 	// Hooks returns a slice of hooks to add to the schema.
 	// Note that mixin hooks are executed before schema hooks.
 	Hooks() []Hook
+	// Policy returns a privacy policy to add to the schema.
+	// Note that mixin policy are executed before schema policy.
+	Policy() Policy
+	// Annotations returns a list of schema annotations to add
+	// to the schema annotations.
+	Annotations() []schema.Annotation
 }
 ```
 
@@ -31,9 +37,9 @@ package schema
 import (
 	"time"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
-	"github.com/facebookincubator/ent/schema/mixin"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/mixin"
 )
 
 // -------------------------------------------------
@@ -127,8 +133,8 @@ In order to use them, add the `mixin.Time` mixin to your schema as follows:
 package schema
 
 import (
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/mixin"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/mixin"
 )
 
 type Pet struct {

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/examples/entcpkg/ent/user"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/examples/entcpkg/ent/user"
 )
 
 // User is the model entity for the User schema.
@@ -19,6 +19,9 @@ type User struct {
 	config
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+
+	// StaticField defined by templates (titled STATICFIELD).
+	StaticField string `json:"static_field,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.

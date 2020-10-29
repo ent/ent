@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,11 +12,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebookincubator/ent/examples/start/ent/car"
-	"github.com/facebookincubator/ent/examples/start/ent/group"
-	"github.com/facebookincubator/ent/examples/start/ent/user"
+	"github.com/facebook/ent/examples/start/ent/car"
+	"github.com/facebook/ent/examples/start/ent/group"
+	"github.com/facebook/ent/examples/start/ent/predicate"
+	"github.com/facebook/ent/examples/start/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -47,6 +48,7 @@ type CarMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Car, error)
+	predicates    []predicate.Car
 }
 
 var _ ent.Mutation = (*CarMutation)(nil)
@@ -461,8 +463,10 @@ type GroupMutation struct {
 	clearedFields map[string]struct{}
 	users         map[int]struct{}
 	removedusers  map[int]struct{}
+	clearedusers  bool
 	done          bool
 	oldValue      func(context.Context) (*Group, error)
+	predicates    []predicate.Group
 }
 
 var _ ent.Mutation = (*GroupMutation)(nil)
@@ -591,6 +595,16 @@ func (m *GroupMutation) AddUserIDs(ids ...int) {
 	}
 }
 
+// ClearUsers clears the users edge to User.
+func (m *GroupMutation) ClearUsers() {
+	m.clearedusers = true
+}
+
+// UsersCleared returns if the edge users was cleared.
+func (m *GroupMutation) UsersCleared() bool {
+	return m.clearedusers
+}
+
 // RemoveUserIDs removes the users edge to User by ids.
 func (m *GroupMutation) RemoveUserIDs(ids ...int) {
 	if m.removedusers == nil {
@@ -620,6 +634,7 @@ func (m *GroupMutation) UsersIDs() (ids []int) {
 // ResetUsers reset all changes of the "users" edge.
 func (m *GroupMutation) ResetUsers() {
 	m.users = nil
+	m.clearedusers = false
 	m.removedusers = nil
 }
 
@@ -787,6 +802,9 @@ func (m *GroupMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *GroupMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedusers {
+		edges = append(edges, group.EdgeUsers)
+	}
 	return edges
 }
 
@@ -794,6 +812,8 @@ func (m *GroupMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *GroupMutation) EdgeCleared(name string) bool {
 	switch name {
+	case group.EdgeUsers:
+		return m.clearedusers
 	}
 	return false
 }
@@ -831,10 +851,13 @@ type UserMutation struct {
 	clearedFields map[string]struct{}
 	cars          map[int]struct{}
 	removedcars   map[int]struct{}
+	clearedcars   bool
 	groups        map[int]struct{}
 	removedgroups map[int]struct{}
+	clearedgroups bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -1020,6 +1043,16 @@ func (m *UserMutation) AddCarIDs(ids ...int) {
 	}
 }
 
+// ClearCars clears the cars edge to Car.
+func (m *UserMutation) ClearCars() {
+	m.clearedcars = true
+}
+
+// CarsCleared returns if the edge cars was cleared.
+func (m *UserMutation) CarsCleared() bool {
+	return m.clearedcars
+}
+
 // RemoveCarIDs removes the cars edge to Car by ids.
 func (m *UserMutation) RemoveCarIDs(ids ...int) {
 	if m.removedcars == nil {
@@ -1049,6 +1082,7 @@ func (m *UserMutation) CarsIDs() (ids []int) {
 // ResetCars reset all changes of the "cars" edge.
 func (m *UserMutation) ResetCars() {
 	m.cars = nil
+	m.clearedcars = false
 	m.removedcars = nil
 }
 
@@ -1060,6 +1094,16 @@ func (m *UserMutation) AddGroupIDs(ids ...int) {
 	for i := range ids {
 		m.groups[ids[i]] = struct{}{}
 	}
+}
+
+// ClearGroups clears the groups edge to Group.
+func (m *UserMutation) ClearGroups() {
+	m.clearedgroups = true
+}
+
+// GroupsCleared returns if the edge groups was cleared.
+func (m *UserMutation) GroupsCleared() bool {
+	return m.clearedgroups
 }
 
 // RemoveGroupIDs removes the groups edge to Group by ids.
@@ -1091,6 +1135,7 @@ func (m *UserMutation) GroupsIDs() (ids []int) {
 // ResetGroups reset all changes of the "groups" edge.
 func (m *UserMutation) ResetGroups() {
 	m.groups = nil
+	m.clearedgroups = false
 	m.removedgroups = nil
 }
 
@@ -1308,6 +1353,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
+	if m.clearedcars {
+		edges = append(edges, user.EdgeCars)
+	}
+	if m.clearedgroups {
+		edges = append(edges, user.EdgeGroups)
+	}
 	return edges
 }
 
@@ -1315,6 +1366,10 @@ func (m *UserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgeCars:
+		return m.clearedcars
+	case user.EdgeGroups:
+		return m.clearedgroups
 	}
 	return false
 }

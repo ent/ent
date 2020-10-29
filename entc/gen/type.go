@@ -6,6 +6,7 @@ package gen
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"go/token"
 	"go/types"
@@ -16,10 +17,11 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/entc/load"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/entsql"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/field"
 )
 
 // The following types and their exported methods used by the codegen
@@ -44,6 +46,9 @@ type (
 		// ForeignKeys are the foreign-keys that resides in the type table.
 		ForeignKeys []*ForeignKey
 		foreignKeys map[string]struct{}
+		// Annotations that were defined for the field in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
+		Annotations map[string]interface{}
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -62,6 +67,8 @@ type (
 		Nillable bool
 		// Default indicates if this field has a default value for creation.
 		Default bool
+		// Enums information for enum fields.
+		Enums []Enum
 		// UpdateDefault indicates if this field has a default value for update.
 		UpdateDefault bool
 		// Immutable indicates is this field cannot be updated.
@@ -77,6 +84,9 @@ type (
 		// UserDefined indicates that this field was defined by the loaded schema.
 		// Unlike default id field, which is defined by the generator.
 		UserDefined bool
+		// Annotations that were defined for the field in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
+		Annotations map[string]interface{}
 	}
 
 	// Edge of a graph between two types.
@@ -107,6 +117,9 @@ type (
 		//	edge.To("spouse", User.Type).Unique()   // one 2 one.
 		//
 		Bidi bool
+		// Annotations that were defined for the edge in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
+		Annotations map[string]interface{}
 	}
 
 	// Relation holds the relational database information for edges.
@@ -143,19 +156,31 @@ type (
 		// Edge that is associated with this foreign-key.
 		Edge *Edge
 	}
+	// Enum holds the enum information for schema enums in codegen.
+	Enum struct {
+		// Name is the Go name of the enum.
+		Name string
+		// Value in the schema.
+		Value string
+	}
 )
 
 // NewType creates a new type and its fields from the given schema.
 func NewType(c *Config, schema *load.Schema) (*Type, error) {
+	idType := c.IDType
+	if idType == nil {
+		idType = defaultIDType
+	}
 	typ := &Type{
 		Config: c,
 		ID: &Field{
 			Name:      "id",
-			Type:      c.IDType,
+			Type:      idType,
 			StructTag: structTag("id", ""),
 		},
 		schema:      schema,
 		Name:        schema.Name,
+		Annotations: schema.Annotations,
 		Fields:      make([]*Field, 0, len(schema.Fields)),
 		fields:      make(map[string]*Field, len(schema.Fields)),
 		foreignKeys: make(map[string]struct{}),
@@ -164,9 +189,6 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		return nil, err
 	}
 	for _, f := range schema.Fields {
-		if err := typ.checkField(f); err != nil {
-			return nil, err
-		}
 		tf := &Field{
 			def:           f,
 			Name:          f.Name,
@@ -182,6 +204,10 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			Validators:    f.Validators,
 			Increment:     f.Increment,
 			UserDefined:   true,
+			Annotations:   f.Annotations,
+		}
+		if err := typ.checkField(tf, f); err != nil {
+			return nil, err
 		}
 		// User defined id field.
 		if tf.Name == typ.ID.Name {
@@ -201,10 +227,25 @@ func (t Type) Label() string {
 
 // Table returns SQL table name of the node/type.
 func (t Type) Table() string {
+	if table := t.EntSQL().Table; table != "" {
+		return table
+	}
 	if t.schema != nil && t.schema.Config.Table != "" {
 		return t.schema.Config.Table
 	}
 	return snake(rules.Pluralize(t.Name))
+}
+
+// EntSQL returns the EntSQL annotation if exists, or an empty one.
+func (t Type) EntSQL() entsql.Annotation {
+	annotate := entsql.Annotation{}
+	if t.Annotations == nil || t.Annotations[annotate.Name()] == nil {
+		return annotate
+	}
+	if buf, err := json.Marshal(t.Annotations[annotate.Name()]); err == nil {
+		_ = json.Unmarshal(buf, &annotate)
+	}
+	return annotate
 }
 
 // Package returns the package name of this node.
@@ -218,11 +259,11 @@ func (t Type) Receiver() string {
 	return receiver(t.Name)
 }
 
-// HasAssoc returns true if this type has an assoc edge with the given name.
-// faster than map access for most cases.
+// HasAssoc returns true if this type has an assoc-edge (non-inverse)
+// with the given name. faster than map access for most cases.
 func (t Type) HasAssoc(name string) (*Edge, bool) {
 	for _, e := range t.Edges {
-		if name == e.Name {
+		if name == e.Name && !e.IsInverse() {
 			return e, true
 		}
 	}
@@ -287,6 +328,21 @@ func (t Type) HasNumeric() bool {
 	return false
 }
 
+// HasUpdateCheckers reports if this type has any checkers to run on update(one).
+func (t Type) HasUpdateCheckers() bool {
+	for _, f := range t.Fields {
+		if (f.Validators > 0 || f.IsEnum()) && !f.Immutable {
+			return true
+		}
+	}
+	for _, e := range t.Edges {
+		if e.Unique && !e.Optional {
+			return true
+		}
+	}
+	return false
+}
+
 // FKEdges returns all edges that reside on the type table as foreign-keys.
 func (t Type) FKEdges() (edges []*Edge) {
 	for _, e := range t.Edges {
@@ -300,7 +356,7 @@ func (t Type) FKEdges() (edges []*Edge) {
 // RuntimeMixin returns schema mixin that needs to be loaded at
 // runtime. For example, for default values, validators or hooks.
 func (t Type) RuntimeMixin() bool {
-	return len(t.MixedInFields()) > 0 || len(t.MixedInHooks()) > 0
+	return len(t.MixedInFields()) > 0 || len(t.MixedInHooks()) > 0 || len(t.MixedInPolicies()) > 0
 }
 
 // MixedInFields returns the indices of mixin holds runtime code.
@@ -325,6 +381,20 @@ func (t Type) MixedInHooks() []int {
 	}
 	idx := make(map[int]struct{})
 	for _, h := range t.schema.Hooks {
+		if h.MixedIn {
+			idx[h.MixinIndex] = struct{}{}
+		}
+	}
+	return sortedKeys(idx)
+}
+
+// MixedInPolicies returns the indices of mixin with policies.
+func (t Type) MixedInPolicies() []int {
+	if t.schema == nil {
+		return nil
+	}
+	idx := make(map[int]struct{})
+	for _, h := range t.schema.Policy {
 		if h.MixedIn {
 			idx[h.MixinIndex] = struct{}{}
 		}
@@ -364,6 +434,17 @@ func (t Type) MutableFields() []*Field {
 	var fields []*Field
 	for _, f := range t.Fields {
 		if !f.Immutable {
+			fields = append(fields, f)
+		}
+	}
+	return fields
+}
+
+// EnumFields returns the types's enum fields.
+func (t Type) EnumFields() []*Field {
+	var fields []*Field
+	for _, f := range t.Fields {
+		if f.IsEnum() {
 			fields = append(fields, f)
 		}
 	}
@@ -493,9 +574,44 @@ func (t *Type) addFK(fk *ForeignKey) {
 	t.ForeignKeys = append(t.ForeignKeys, fk)
 }
 
-// QueryName returns the struct name of the query builder for this type.
+// QueryName returns the struct name denoting the query-builder for this type.
 func (t Type) QueryName() string {
 	return pascal(t.Name) + "Query"
+}
+
+// FilterName returns the struct name denoting the filter-builder for this type.
+func (t Type) FilterName() string {
+	return pascal(t.Name) + "Filter"
+}
+
+// CreateName returns the struct name denoting the create-builder for this type.
+func (t Type) CreateName() string {
+	return pascal(t.Name) + "Create"
+}
+
+// CreateBulk returns the struct name denoting the create-bulk-builder for this type.
+func (t Type) CreateBulkName() string {
+	return pascal(t.Name) + "CreateBulk"
+}
+
+// UpdateName returns the struct name denoting the update-builder for this type.
+func (t Type) UpdateName() string {
+	return pascal(t.Name) + "Update"
+}
+
+// UpdateOneName returns the struct name denoting the update-one-builder for this type.
+func (t Type) UpdateOneName() string {
+	return pascal(t.Name) + "UpdateOne"
+}
+
+// DeleteName returns the struct name denoting the delete-builder for this type.
+func (t Type) DeleteName() string {
+	return pascal(t.Name) + "Delete"
+}
+
+// DeleteOneName returns the struct name denoting the delete-one-builder for this type.
+func (t Type) DeleteOneName() string {
+	return pascal(t.Name) + "DeleteOne"
 }
 
 // MutationName returns the struct name of the mutation builder for this type.
@@ -535,12 +651,34 @@ func (t Type) HookPositions() []*load.Position {
 	return nil
 }
 
-// HasPolicy returns whether a privacy policy was declared in the type schema.
-func (t Type) HasPolicy() bool {
+// NumHooks returns the number of privacy-policy declared in the type schema.
+func (t Type) NumPolicy() int {
+	if t.schema != nil {
+		return len(t.schema.Policy)
+	}
+	return 0
+}
+
+// PolicyPositions returns the position information of privacy policy declared in the type schema.
+func (t Type) PolicyPositions() []*load.Position {
 	if t.schema != nil {
 		return t.schema.Policy
 	}
-	return false
+	return nil
+}
+
+// RelatedTypes returns all the types (nodes) that
+// are related (with edges) to this type.
+func (t Type) RelatedTypes() []*Type {
+	seen := make(map[string]struct{})
+	related := make([]*Type, 0, len(t.Edges))
+	for _, e := range t.Edges {
+		if _, ok := seen[e.Type.Name]; !ok {
+			related = append(related, e.Type)
+			seen[e.Type.Name] = struct{}{}
+		}
+	}
+	return related
 }
 
 // check checks the schema type.
@@ -559,7 +697,7 @@ func (t *Type) check() error {
 }
 
 // checkField checks the schema field.
-func (t *Type) checkField(f *load.Field) (err error) {
+func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 	switch {
 	case f.Name == "":
 		err = fmt.Errorf("field name cannot be empty")
@@ -567,17 +705,19 @@ func (t *Type) checkField(f *load.Field) (err error) {
 		err = fmt.Errorf("invalid type for field %s", f.Name)
 	case f.Nillable && !f.Optional:
 		err = fmt.Errorf("nillable field %q must be optional", f.Name)
-	case f.Unique && f.Default:
+	case f.Unique && f.Default && f.Info.Type != field.TypeUUID:
 		err = fmt.Errorf("unique field %q cannot have default value", f.Name)
 	case t.fields[f.Name] != nil:
 		err = fmt.Errorf("field %q redeclared for type %q", f.Name, t.Name)
 	case f.Sensitive && f.Tag != "":
 		err = fmt.Errorf("sensitive field %q cannot have struct tags", f.Name)
 	case f.Info.Type == field.TypeEnum:
-		if err = checkEnums(f); err == nil {
+		if tf.Enums, err = tf.enums(f); err == nil && !tf.HasGoType() {
 			// Enum types should be named as follows: typepkg.Field.
 			f.Info.Ident = fmt.Sprintf("%s.%s", t.Package(), pascal(f.Name))
 		}
+	case tf.Validators > 0 && !tf.ConvertedToBasic():
+		err = fmt.Errorf("GoType %q for field %q must be converted to basic Go type for validators", tf.Type, f.Name)
 	}
 	return err
 }
@@ -607,16 +747,29 @@ func (f Field) StructField() string {
 }
 
 // Enums returns the enum values of a field.
-func (f Field) Enums() []string {
-	if f.IsEnum() {
-		return f.def.Enums
+func (f Field) EnumNames() []string {
+	names := make([]string, 0, len(f.def.Enums))
+	for _, e := range f.Enums {
+		names = append(names, e.Name)
 	}
-	return nil
+	return names
 }
 
-// EnumName returns the constant name of the enum value.
+// EnumValues returns the values of the enum field.
+func (f Field) EnumValues() []string {
+	values := make([]string, 0, len(f.def.Enums))
+	for _, e := range f.Enums {
+		values = append(values, e.Value)
+	}
+	return values
+}
+
+// EnumName returns the constant name for the enum.
 func (f Field) EnumName(enum string) string {
-	return pascal(f.Name) + pascal(enum)
+	if !token.IsExported(enum) {
+		enum = pascal(enum)
+	}
+	return pascal(f.Name) + enum
 }
 
 // Validator returns the validator name.
@@ -662,6 +815,12 @@ func (f Field) MutationReset() string {
 	}
 	return name
 }
+
+// IsBool returns true if the field is a bool field.
+func (f Field) IsBool() bool { return f.Type != nil && f.Type.Type == field.TypeBool }
+
+// IsBytes returns true if the field is a bytes field.
+func (f Field) IsBytes() bool { return f.Type != nil && f.Type.Type == field.TypeBytes }
 
 // IsTime returns true if the field is a timestamp field.
 func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.TypeTime }
@@ -715,7 +874,7 @@ func (f Field) NullTypeField(rec string) string {
 	case field.TypeEnum:
 		expr = fmt.Sprintf("%s(%s.String)", f.Type, rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
-		expr = fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String()))
+		expr = f.goType(fmt.Sprintf("%s.%s", rec, strings.Title(f.Type.Type.String())))
 	case field.TypeTime:
 		expr = fmt.Sprintf("%s.Time", rec)
 	case field.TypeFloat32:
@@ -724,7 +883,7 @@ func (f Field) NullTypeField(rec string) string {
 		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
 		expr = fmt.Sprintf("%s(%s.Int64)", f.Type, rec)
 	}
-	return f.goType(expr)
+	return expr
 }
 
 // Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
@@ -734,8 +893,8 @@ func (f Field) Column() *schema.Column {
 		Type:     f.Type.Type,
 		Unique:   f.Unique,
 		Nullable: f.Optional,
-		Enums:    f.Enums(),
 		Size:     f.size(),
+		Enums:    f.EnumValues(),
 	}
 	switch {
 	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):
@@ -805,7 +964,7 @@ func (f Field) HasGoType() bool {
 // ConvertedToBasic indicates if the Go type of the field
 // can be converted to basic type (string, int, etc).
 func (f Field) ConvertedToBasic() bool {
-	return !f.HasGoType() || f.BasicType("") != ""
+	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
 var (
@@ -817,9 +976,9 @@ var (
 // BasicType returns a Go expression for the given identifier
 // to convert it to a basic type. For example:
 //
-//	v (http.Dir)			=> string(v)
-//	v (fmt.Stringer)		=> v.String()
-//	v (database/sql.NullString)	=> v.String
+//	v (http.Dir)		=> string(v)
+//	v (fmt.Stringer)	=> v.String()
+//	v (sql.NullString)	=> v.String
 //
 func (f Field) BasicType(ident string) (expr string) {
 	if !f.HasGoType() {
@@ -827,6 +986,8 @@ func (f Field) BasicType(ident string) (expr string) {
 	}
 	t, rt := f.Type, f.Type.RType
 	switch t.Type {
+	case field.TypeEnum:
+		expr = ident
 	case field.TypeBool:
 		switch {
 		case rt.Kind == reflect.Bool:
@@ -869,6 +1030,33 @@ func (f Field) goType(ident string) string {
 		return ident
 	}
 	return fmt.Sprintf("%s(%s)", f.Type, ident)
+}
+
+func (f Field) enums(lf *load.Field) ([]Enum, error) {
+	if len(lf.Enums) == 0 {
+		return nil, fmt.Errorf("missing values for enum field %q", f.Name)
+	}
+	enums := make([]Enum, 0, len(lf.Enums))
+	values := make(map[string]bool, len(lf.Enums))
+	for i := range lf.Enums {
+		switch name, value := lf.Enums[i].N, lf.Enums[i].V; {
+		case value == "":
+			return nil, fmt.Errorf("%q field value cannot be empty", f.Name)
+		case values[value]:
+			return nil, fmt.Errorf("duplicate values %q for enum field %q", value, f.Name)
+		case strings.IndexFunc(value, unicode.IsSpace) != -1:
+			return nil, fmt.Errorf("enum value %q cannot contain spaces", value)
+		default:
+			values[value] = true
+			enums = append(enums, Enum{Name: f.EnumName(name), Value: value})
+		}
+	}
+	if value := lf.DefaultValue; value != nil {
+		if value, ok := value.(string); !ok || !values[value] {
+			return nil, fmt.Errorf("invalid default value for enum field %q", f.Name)
+		}
+	}
+	return enums, nil
 }
 
 // Label returns the Gremlin label name of the edge.
@@ -937,6 +1125,11 @@ func (e Edge) BuilderField() string {
 	return builderField(e.Name)
 }
 
+// EagerLoadField returns the struct field (of query builder) for storing the eager-loading info.
+func (e Edge) EagerLoadField() string {
+	return "with" + pascal(e.Name)
+}
+
 // StructField returns the struct member of the edge in the model.
 func (e Edge) StructField() string {
 	return pascal(e.Name)
@@ -967,6 +1160,29 @@ func (e Edge) MutationReset() string {
 	name := "Reset" + pascal(e.Name)
 	if _, ok := mutMethods[name]; ok {
 		name += "Edge"
+	}
+	return name
+}
+
+// MutationClear returns the method name for clearing the edge value.
+// The default name is "Clear<EdgeName>". If the the method conflicts
+// with the mutation methods, suffix the method with "Edge".
+func (e Edge) MutationClear() string {
+	name := "Clear" + pascal(e.Name)
+	if _, ok := mutMethods[name]; ok {
+		name += "Edge"
+	}
+	return name
+}
+
+// MutationCleared returns the method name for indicating if the edge
+// was cleared in the mutation. The default name is "<EdgeName>Cleared".
+// If the the method conflicts with the mutation methods, add "Edge" the
+// after the edge name.
+func (e Edge) MutationCleared() string {
+	name := pascal(e.Name) + "Cleared"
+	if _, ok := mutMethods[name]; ok {
+		return pascal(e.Name) + "EdgeCleared"
 	}
 	return name
 }
@@ -1040,31 +1256,6 @@ func (r Rel) String() string {
 	return s
 }
 
-func checkEnums(f *load.Field) error {
-	if len(f.Enums) == 0 {
-		return fmt.Errorf("missing values for enum field %q", f.Name)
-	}
-	values := make(map[string]bool, len(f.Enums))
-	for _, e := range f.Enums {
-		switch {
-		case e == "":
-			return fmt.Errorf("%q field value cannot be empty", f.Name)
-		case values[e]:
-			return fmt.Errorf("duplicate values %q for enum field %q", e, f.Name)
-		case strings.IndexFunc(e, unicode.IsSpace) != -1:
-			return fmt.Errorf("enum value %q cannot contain spaces", e)
-		default:
-			values[e] = true
-		}
-	}
-	if value := f.DefaultValue; value != nil {
-		if value, ok := value.(string); !ok || !values[value] {
-			return fmt.Errorf("invalid default value for enum field %q", f.Name)
-		}
-	}
-	return nil
-}
-
 func structTag(name, tag string) string {
 	t := fmt.Sprintf(`json:"%s,omitempty"`, name)
 	if tag == "" {
@@ -1080,36 +1271,56 @@ func structTag(name, tag string) string {
 // and ensures it doesn't conflict with Go keywords and other
 // builder fields and it's not exported.
 func builderField(name string) string {
-	if token.Lookup(name).IsKeyword() || name == "config" || strings.ToUpper(name[:1]) == name[:1] {
+	_, ok := privateField[name]
+	if ok || token.Lookup(name).IsKeyword() || strings.ToUpper(name[:1]) == name[:1] {
 		return "_" + name
 	}
 	return name
 }
 
-// global identifiers used by the generated package.
-var globalIdent = names(
-	"AggregateFunc",
-	"As",
-	"Asc",
-	"Count",
-	"Debug",
-	"Desc",
-	"Driver",
-	"Hook",
-	"Log",
-	"MutateFunc",
-	"Mutation",
-	"Mutator",
-	"Op",
-	"Option",
-	"OrderFunc",
-	"Max",
-	"Mean",
-	"Min",
-	"Sum",
-	"Policy",
-	"Query",
-	"Value",
+var (
+	// global identifiers used by the generated package.
+	globalIdent = names(
+		"AggregateFunc",
+		"As",
+		"Asc",
+		"Client",
+		"Count",
+		"Debug",
+		"Desc",
+		"Driver",
+		"Hook",
+		"Log",
+		"MutateFunc",
+		"Mutation",
+		"Mutator",
+		"Op",
+		"Option",
+		"OrderFunc",
+		"Max",
+		"Mean",
+		"Min",
+		"Sum",
+		"Policy",
+		"Query",
+		"Value",
+	)
+	// private fields used by the different builders.
+	privateField = names(
+		"config",
+		"done",
+		"hooks",
+		"limit",
+		"mutation",
+		"offset",
+		"oldValue",
+		"order",
+		"op",
+		"path",
+		"predicates",
+		"typ",
+		"unique",
+	)
 )
 
 func names(ids ...string) map[string]struct{} {

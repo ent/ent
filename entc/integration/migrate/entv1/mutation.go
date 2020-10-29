@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,10 +11,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/car"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv1/user"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/predicate"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -42,6 +43,7 @@ type CarMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Car, error)
+	predicates    []predicate.Car
 }
 
 var _ ent.Mutation = (*CarMutation)(nil)
@@ -344,17 +346,21 @@ type UserMutation struct {
 	renamed         *string
 	blob            *[]byte
 	state           *user.State
+	status          *string
+	workplace       *string
 	clearedFields   map[string]struct{}
 	parent          *int
 	clearedparent   bool
 	children        map[int]struct{}
 	removedchildren map[int]struct{}
+	clearedchildren bool
 	spouse          *int
 	clearedspouse   bool
 	car             *int
 	clearedcar      bool
 	done            bool
 	oldValue        func(context.Context) (*User, error)
+	predicates      []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -773,6 +779,106 @@ func (m *UserMutation) ResetState() {
 	delete(m.clearedFields, user.FieldState)
 }
 
+// SetStatus sets the status field.
+func (m *UserMutation) SetStatus(s string) {
+	m.status = &s
+}
+
+// Status returns the status value in the mutation.
+func (m *UserMutation) Status() (r string, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old status value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldStatus(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStatus is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ClearStatus clears the value of status.
+func (m *UserMutation) ClearStatus() {
+	m.status = nil
+	m.clearedFields[user.FieldStatus] = struct{}{}
+}
+
+// StatusCleared returns if the field status was cleared in this mutation.
+func (m *UserMutation) StatusCleared() bool {
+	_, ok := m.clearedFields[user.FieldStatus]
+	return ok
+}
+
+// ResetStatus reset all changes of the "status" field.
+func (m *UserMutation) ResetStatus() {
+	m.status = nil
+	delete(m.clearedFields, user.FieldStatus)
+}
+
+// SetWorkplace sets the workplace field.
+func (m *UserMutation) SetWorkplace(s string) {
+	m.workplace = &s
+}
+
+// Workplace returns the workplace value in the mutation.
+func (m *UserMutation) Workplace() (r string, exists bool) {
+	v := m.workplace
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWorkplace returns the old workplace value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldWorkplace(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldWorkplace is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldWorkplace requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWorkplace: %w", err)
+	}
+	return oldValue.Workplace, nil
+}
+
+// ClearWorkplace clears the value of workplace.
+func (m *UserMutation) ClearWorkplace() {
+	m.workplace = nil
+	m.clearedFields[user.FieldWorkplace] = struct{}{}
+}
+
+// WorkplaceCleared returns if the field workplace was cleared in this mutation.
+func (m *UserMutation) WorkplaceCleared() bool {
+	_, ok := m.clearedFields[user.FieldWorkplace]
+	return ok
+}
+
+// ResetWorkplace reset all changes of the "workplace" field.
+func (m *UserMutation) ResetWorkplace() {
+	m.workplace = nil
+	delete(m.clearedFields, user.FieldWorkplace)
+}
+
 // SetParentID sets the parent edge to User by id.
 func (m *UserMutation) SetParentID(id int) {
 	m.parent = &id
@@ -822,6 +928,16 @@ func (m *UserMutation) AddChildIDs(ids ...int) {
 	}
 }
 
+// ClearChildren clears the children edge to User.
+func (m *UserMutation) ClearChildren() {
+	m.clearedchildren = true
+}
+
+// ChildrenCleared returns if the edge children was cleared.
+func (m *UserMutation) ChildrenCleared() bool {
+	return m.clearedchildren
+}
+
 // RemoveChildIDs removes the children edge to User by ids.
 func (m *UserMutation) RemoveChildIDs(ids ...int) {
 	if m.removedchildren == nil {
@@ -851,6 +967,7 @@ func (m *UserMutation) ChildrenIDs() (ids []int) {
 // ResetChildren reset all changes of the "children" edge.
 func (m *UserMutation) ResetChildren() {
 	m.children = nil
+	m.clearedchildren = false
 	m.removedchildren = nil
 }
 
@@ -946,7 +1063,7 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 9)
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
 	}
@@ -967,6 +1084,12 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.state != nil {
 		fields = append(fields, user.FieldState)
+	}
+	if m.status != nil {
+		fields = append(fields, user.FieldStatus)
+	}
+	if m.workplace != nil {
+		fields = append(fields, user.FieldWorkplace)
 	}
 	return fields
 }
@@ -990,6 +1113,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Blob()
 	case user.FieldState:
 		return m.State()
+	case user.FieldStatus:
+		return m.Status()
+	case user.FieldWorkplace:
+		return m.Workplace()
 	}
 	return nil, false
 }
@@ -1013,6 +1140,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldBlob(ctx)
 	case user.FieldState:
 		return m.OldState(ctx)
+	case user.FieldStatus:
+		return m.OldStatus(ctx)
+	case user.FieldWorkplace:
+		return m.OldWorkplace(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -1071,6 +1202,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetState(v)
 		return nil
+	case user.FieldStatus:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case user.FieldWorkplace:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWorkplace(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -1128,6 +1273,12 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldState) {
 		fields = append(fields, user.FieldState)
 	}
+	if m.FieldCleared(user.FieldStatus) {
+		fields = append(fields, user.FieldStatus)
+	}
+	if m.FieldCleared(user.FieldWorkplace) {
+		fields = append(fields, user.FieldWorkplace)
+	}
 	return fields
 }
 
@@ -1153,6 +1304,12 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldState:
 		m.ClearState()
+		return nil
+	case user.FieldStatus:
+		m.ClearStatus()
+		return nil
+	case user.FieldWorkplace:
+		m.ClearWorkplace()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -1183,6 +1340,12 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldState:
 		m.ResetState()
+		return nil
+	case user.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case user.FieldWorkplace:
+		m.ResetWorkplace()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -1264,6 +1427,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedparent {
 		edges = append(edges, user.EdgeParent)
 	}
+	if m.clearedchildren {
+		edges = append(edges, user.EdgeChildren)
+	}
 	if m.clearedspouse {
 		edges = append(edges, user.EdgeSpouse)
 	}
@@ -1279,6 +1445,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeParent:
 		return m.clearedparent
+	case user.EdgeChildren:
+		return m.clearedchildren
 	case user.EdgeSpouse:
 		return m.clearedspouse
 	case user.EdgeCar:

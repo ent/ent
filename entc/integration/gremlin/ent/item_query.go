@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,14 +9,15 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/item"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/item"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // ItemQuery is the builder for querying Item entities.
@@ -58,23 +59,23 @@ func (iq *ItemQuery) Order(o ...OrderFunc) *ItemQuery {
 
 // First returns the first Item entity in the query. Returns *NotFoundError when no item was found.
 func (iq *ItemQuery) First(ctx context.Context) (*Item, error) {
-	is, err := iq.Limit(1).All(ctx)
+	nodes, err := iq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(is) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{item.Label}
 	}
-	return is[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
-	i, err := iq.First(ctx)
+	node, err := iq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return i
+	return node
 }
 
 // FirstID returns the first Item id in the query. Returns *NotFoundError when no id was found.
@@ -90,8 +91,8 @@ func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (iq *ItemQuery) FirstXID(ctx context.Context) string {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (iq *ItemQuery) FirstIDX(ctx context.Context) string {
 	id, err := iq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -101,13 +102,13 @@ func (iq *ItemQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Item entity in the query, returns an error if not exactly one entity was returned.
 func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
-	is, err := iq.Limit(2).All(ctx)
+	nodes, err := iq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(is) {
+	switch len(nodes) {
 	case 1:
-		return is[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{item.Label}
 	default:
@@ -117,11 +118,11 @@ func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
-	i, err := iq.Only(ctx)
+	node, err := iq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return i
+	return node
 }
 
 // OnlyID returns the only Item id in the query, returns an error if not exactly one id was returned.
@@ -141,8 +142,8 @@ func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (iq *ItemQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (iq *ItemQuery) OnlyIDX(ctx context.Context) string {
 	id, err := iq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -160,11 +161,11 @@ func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
-	is, err := iq.All(ctx)
+	nodes, err := iq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return is
+	return nodes
 }
 
 // IDs executes the query and returns a list of Item ids.
@@ -222,6 +223,9 @@ func (iq *ItemQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (iq *ItemQuery) Clone() *ItemQuery {
+	if iq == nil {
+		return nil
+	}
 	return &ItemQuery{
 		config:     iq.config,
 		limit:      iq.limit,
@@ -387,6 +391,32 @@ func (igb *ItemGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (igb *ItemGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = igb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{item.Label}
+	default:
+		err = fmt.Errorf("ent: ItemGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (igb *ItemGroupBy) StringX(ctx context.Context) string {
+	v, err := igb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (igb *ItemGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(igb.fields) > 1 {
@@ -402,6 +432,32 @@ func (igb *ItemGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (igb *ItemGroupBy) IntsX(ctx context.Context) []int {
 	v, err := igb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (igb *ItemGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = igb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{item.Label}
+	default:
+		err = fmt.Errorf("ent: ItemGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (igb *ItemGroupBy) IntX(ctx context.Context) int {
+	v, err := igb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -429,6 +485,32 @@ func (igb *ItemGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (igb *ItemGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = igb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{item.Label}
+	default:
+		err = fmt.Errorf("ent: ItemGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (igb *ItemGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := igb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (igb *ItemGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(igb.fields) > 1 {
@@ -444,6 +526,32 @@ func (igb *ItemGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (igb *ItemGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := igb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (igb *ItemGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = igb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{item.Label}
+	default:
+		err = fmt.Errorf("ent: ItemGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (igb *ItemGroupBy) BoolX(ctx context.Context) bool {
+	v, err := igb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -534,6 +642,32 @@ func (is *ItemSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (is *ItemSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = is.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{item.Label}
+	default:
+		err = fmt.Errorf("ent: ItemSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (is *ItemSelect) StringX(ctx context.Context) string {
+	v, err := is.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(is.fields) > 1 {
@@ -549,6 +683,32 @@ func (is *ItemSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (is *ItemSelect) IntsX(ctx context.Context) []int {
 	v, err := is.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (is *ItemSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = is.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{item.Label}
+	default:
+		err = fmt.Errorf("ent: ItemSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (is *ItemSelect) IntX(ctx context.Context) int {
+	v, err := is.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -576,6 +736,32 @@ func (is *ItemSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (is *ItemSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = is.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{item.Label}
+	default:
+		err = fmt.Errorf("ent: ItemSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (is *ItemSelect) Float64X(ctx context.Context) float64 {
+	v, err := is.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(is.fields) > 1 {
@@ -591,6 +777,32 @@ func (is *ItemSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (is *ItemSelect) BoolsX(ctx context.Context) []bool {
 	v, err := is.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (is *ItemSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = is.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{item.Label}
+	default:
+		err = fmt.Errorf("ent: ItemSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (is *ItemSelect) BoolX(ctx context.Context) bool {
+	v, err := is.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

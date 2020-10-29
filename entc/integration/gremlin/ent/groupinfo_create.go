@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,13 +11,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/groupinfo"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
@@ -69,24 +69,24 @@ func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
 
 // Save creates the GroupInfo in the database.
 func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	if _, ok := gic.mutation.Desc(); !ok {
-		return nil, &ValidationError{Name: "desc", err: errors.New("ent: missing required field \"desc\"")}
-	}
-	if _, ok := gic.mutation.MaxUsers(); !ok {
-		v := groupinfo.DefaultMaxUsers
-		gic.mutation.SetMaxUsers(v)
-	}
 	var (
 		err  error
 		node *GroupInfo
 	)
+	gic.defaults()
 	if len(gic.hooks) == 0 {
+		if err = gic.check(); err != nil {
+			return nil, err
+		}
 		node, err = gic.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*GroupInfoMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = gic.check(); err != nil {
+				return nil, err
 			}
 			gic.mutation = mutation
 			node, err = gic.gremlinSave(ctx)
@@ -110,6 +110,25 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 		panic(err)
 	}
 	return v
+}
+
+// defaults sets the default values of the builder before save.
+func (gic *GroupInfoCreate) defaults() {
+	if _, ok := gic.mutation.MaxUsers(); !ok {
+		v := groupinfo.DefaultMaxUsers
+		gic.mutation.SetMaxUsers(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (gic *GroupInfoCreate) check() error {
+	if _, ok := gic.mutation.Desc(); !ok {
+		return &ValidationError{Name: "desc", err: errors.New("ent: missing required field \"desc\"")}
+	}
+	if _, ok := gic.mutation.MaxUsers(); !ok {
+		return &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
+	}
+	return nil
 }
 
 func (gic *GroupInfoCreate) gremlinSave(ctx context.Context) (*GroupInfo, error) {
@@ -156,4 +175,10 @@ func (gic *GroupInfoCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// GroupInfoCreateBulk is the builder for creating a bulk of GroupInfo entities.
+type GroupInfoCreateBulk struct {
+	config
+	builders []*GroupInfoCreate
 }

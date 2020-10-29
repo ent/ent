@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -7,8 +7,8 @@
 package migrate
 
 import (
-	"github.com/facebookincubator/ent/dialect/sql/schema"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/schema/field"
 )
 
 var (
@@ -18,6 +18,7 @@ var (
 		{Name: "number", Type: field.TypeString, Default: "unknown"},
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "in_hook", Type: field.TypeString},
 		{Name: "user_cards", Type: field.TypeInt, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
@@ -28,7 +29,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "cards_users_cards",
-				Columns: []*schema.Column{CardsColumns[4]},
+				Columns: []*schema.Column{CardsColumns[5]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -40,6 +41,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "version", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
+		{Name: "worth", Type: field.TypeUint, Nullable: true},
 		{Name: "user_best_friend", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -50,7 +52,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "users_users_best_friend",
-				Columns: []*schema.Column{UsersColumns[3]},
+				Columns: []*schema.Column{UsersColumns[4]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,

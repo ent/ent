@@ -7,7 +7,7 @@ package graph
 import (
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
 )
 
 // Vertex represents a graph vertex.

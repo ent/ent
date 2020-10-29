@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FileTypeDelete is the builder for deleting a FileType entity.
 type FileTypeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *FileTypeMutation
-	predicates []predicate.FileType
+	hooks    []Hook
+	mutation *FileTypeMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
-	ftd.predicates = append(ftd.predicates, ps...)
+	ftd.mutation.predicates = append(ftd.mutation.predicates, ps...)
 	return ftd
 }
 
@@ -79,7 +78,7 @@ func (ftd *FileTypeDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := ftd.predicates; len(ps) > 0 {
+	if ps := ftd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

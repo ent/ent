@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,14 +9,15 @@ package ent
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/comment"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/comment"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // CommentQuery is the builder for querying Comment entities.
@@ -58,23 +59,23 @@ func (cq *CommentQuery) Order(o ...OrderFunc) *CommentQuery {
 
 // First returns the first Comment entity in the query. Returns *NotFoundError when no comment was found.
 func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
-	cs, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(cs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{comment.Label}
 	}
-	return cs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
-	c, err := cq.First(ctx)
+	node, err := cq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // FirstID returns the first Comment id in the query. Returns *NotFoundError when no id was found.
@@ -90,8 +91,8 @@ func (cq *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (cq *CommentQuery) FirstXID(ctx context.Context) string {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (cq *CommentQuery) FirstIDX(ctx context.Context) string {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -101,13 +102,13 @@ func (cq *CommentQuery) FirstXID(ctx context.Context) string {
 
 // Only returns the only Comment entity in the query, returns an error if not exactly one entity was returned.
 func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
-	cs, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(cs) {
+	switch len(nodes) {
 	case 1:
-		return cs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{comment.Label}
 	default:
@@ -117,11 +118,11 @@ func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
-	c, err := cq.Only(ctx)
+	node, err := cq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // OnlyID returns the only Comment id in the query, returns an error if not exactly one id was returned.
@@ -141,8 +142,8 @@ func (cq *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (cq *CommentQuery) OnlyXID(ctx context.Context) string {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (cq *CommentQuery) OnlyIDX(ctx context.Context) string {
 	id, err := cq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -160,11 +161,11 @@ func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
-	cs, err := cq.All(ctx)
+	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return cs
+	return nodes
 }
 
 // IDs executes the query and returns a list of Comment ids.
@@ -222,6 +223,9 @@ func (cq *CommentQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *CommentQuery) Clone() *CommentQuery {
+	if cq == nil {
+		return nil
+	}
 	return &CommentQuery{
 		config:     cq.config,
 		limit:      cq.limit,
@@ -411,6 +415,32 @@ func (cgb *CommentGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (cgb *CommentGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = cgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{comment.Label}
+	default:
+		err = fmt.Errorf("ent: CommentGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (cgb *CommentGroupBy) StringX(ctx context.Context) string {
+	v, err := cgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (cgb *CommentGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
@@ -426,6 +456,32 @@ func (cgb *CommentGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (cgb *CommentGroupBy) IntsX(ctx context.Context) []int {
 	v, err := cgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (cgb *CommentGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = cgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{comment.Label}
+	default:
+		err = fmt.Errorf("ent: CommentGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (cgb *CommentGroupBy) IntX(ctx context.Context) int {
+	v, err := cgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -453,6 +509,32 @@ func (cgb *CommentGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (cgb *CommentGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = cgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{comment.Label}
+	default:
+		err = fmt.Errorf("ent: CommentGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (cgb *CommentGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := cgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (cgb *CommentGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
@@ -468,6 +550,32 @@ func (cgb *CommentGroupBy) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (cgb *CommentGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := cgb.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (cgb *CommentGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = cgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{comment.Label}
+	default:
+		err = fmt.Errorf("ent: CommentGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (cgb *CommentGroupBy) BoolX(ctx context.Context) bool {
+	v, err := cgb.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -558,6 +666,32 @@ func (cs *CommentSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (cs *CommentSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = cs.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{comment.Label}
+	default:
+		err = fmt.Errorf("ent: CommentSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (cs *CommentSelect) StringX(ctx context.Context) string {
+	v, err := cs.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
@@ -573,6 +707,32 @@ func (cs *CommentSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (cs *CommentSelect) IntsX(ctx context.Context) []int {
 	v, err := cs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (cs *CommentSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = cs.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{comment.Label}
+	default:
+		err = fmt.Errorf("ent: CommentSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (cs *CommentSelect) IntX(ctx context.Context) int {
+	v, err := cs.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -600,6 +760,32 @@ func (cs *CommentSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (cs *CommentSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = cs.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{comment.Label}
+	default:
+		err = fmt.Errorf("ent: CommentSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (cs *CommentSelect) Float64X(ctx context.Context) float64 {
+	v, err := cs.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
@@ -615,6 +801,32 @@ func (cs *CommentSelect) Bools(ctx context.Context) ([]bool, error) {
 // BoolsX is like Bools, but panics if an error occurs.
 func (cs *CommentSelect) BoolsX(ctx context.Context) []bool {
 	v, err := cs.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (cs *CommentSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = cs.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{comment.Label}
+	default:
+		err = fmt.Errorf("ent: CommentSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (cs *CommentSelect) BoolX(ctx context.Context) bool {
+	v, err := cs.Bool(ctx)
 	if err != nil {
 		panic(err)
 	}

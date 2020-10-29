@@ -20,7 +20,7 @@ import (
 	_ "{{ $.Config.Package }}/runtime"
 
 	{{ if $.SupportMigrate }}
-		"github.com/facebookincubator/ent/dialect/sql/schema"
+		"github.com/facebook/ent/dialect/sql/schema"
 	{{ end }}
 )
 

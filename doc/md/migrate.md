@@ -72,7 +72,7 @@ if err != nil {
 ## Universal IDs
 
 By default, SQL primary-keys start from 1 for each table; which means that multiple entities of different types
-can share the same ID. Unlike AWS Neptune, where vertex IDs are UUIDs.
+can share the same ID. Unlike AWS Neptune, where node IDs are UUIDs.
 
 This does not work well if you work with [GraphQL](https://graphql.org/learn/schema/#scalar-types), which requires
 the object ID to be unique.
@@ -143,7 +143,7 @@ func main() {
 }
 ```
 
-**Write changes to file**
+**Write changes to a file**
 ```go
 package main
 
@@ -172,5 +172,45 @@ func main() {
 	if err := client.Schema.WriteTo(ctx, f); err != nil {
 		log.Fatalf("failed printing schema changes: %v", err)
 	}
+}
+```
+
+## Foreign Keys
+
+By default, `ent` uses foreign-keys when defining relationships (edges) to enforce correctness and consistency on the
+database side.
+
+However, `ent` also provide an option to disable this functionality using the `WithForeignKeys` option.
+You should note that setting this option to `false`, will tell the migration to not create foreign-keys in the
+schema DDL and the edges validation and clearing must be handled manually by the developer.
+
+We expect to provide a set of hooks for implementing the foreign-key constraints in the application level in the near future.
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "<project>/ent"
+    "<project>/ent/migrate"
+)
+
+func main() {
+    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalf("failed connecting to mysql: %v", err)
+    }
+    defer client.Close()
+    ctx := context.Background()
+    // Run migration.
+    err = client.Schema.Create(
+        ctx,
+        migrate.WithForeignKeys(false), // Disable foreign keys.
+    )
+    if err != nil {
+        log.Fatalf("failed creating schema resources: %v", err)
+    }
 }
 ```

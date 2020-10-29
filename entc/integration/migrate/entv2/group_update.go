@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/group"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/group"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *GroupMutation
-	predicates []predicate.Group
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
 // Where adds a new predicate for the builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	gu.predicates = append(gu.predicates, ps...)
+	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
 	return gu
 }
 
@@ -98,7 +97,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := gu.predicates; len(ps) > 0 {
+	if ps := gu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -159,11 +158,11 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	gr, err := guo.Save(ctx)
+	node, err := guo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -179,7 +178,7 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
+func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
@@ -195,9 +194,9 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
 	}
 	_spec.Node.ID.Value = id
-	gr = &Group{config: guo.config}
-	_spec.Assign = gr.assignValues
-	_spec.ScanValues = gr.scanValues()
+	_node = &Group{config: guo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
@@ -206,5 +205,5 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (gr *Group, err error) {
 		}
 		return nil, err
 	}
-	return gr, nil
+	return _node, nil
 }

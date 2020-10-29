@@ -16,7 +16,7 @@ import (
     "time"
 
     "<your_project>/ent"
-    "github.com/facebookincubator/ent/dialect/sql"
+    "github.com/facebook/ent/dialect/sql"
 )
 
 func Open() (*ent.Client, error) {
@@ -43,7 +43,7 @@ import (
     "time"
 
     "<your_project>/ent"
-    entsql "github.com/facebookincubator/ent/dialect/sql"
+    entsql "github.com/facebook/ent/dialect/sql"
 )
 
 func Open() (*ent.Client, error) {
@@ -71,10 +71,10 @@ import (
 	"database/sql/driver"
 
 	"<project>/ent"
-	
+
 	"contrib.go.opencensus.io/integrations/ocsql"
 	"github.com/go-sql-driver/mysql"
-	entsql "github.com/facebookincubator/ent/dialect/sql"
+	entsql "github.com/facebook/ent/dialect/sql"
 )
 
 type connector struct {
@@ -101,5 +101,51 @@ func Open(dsn string) *ent.Client {
 	// Create an ent.Driver from `db`.
     drv := entsql.OpenDB("mysql", db)
     return ent.NewClient(ent.Driver(drv))
+}
+```
+
+
+## Use pgx with PostgreSQL
+
+```go
+package main
+
+import (
+	"context"
+	"database/sql"
+	"log"
+
+	"<project>/ent"
+
+	"github.com/facebook/ent/dialect"
+	entsql "github.com/facebook/ent/dialect/sql"
+	_ "github.com/jackc/pgx/v4/stdlib"
+)
+
+// Open new connection
+func Open(databaseUrl string) *ent.Client {
+	db, err := sql.Open("pgx", databaseUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create an ent.Driver from `db`.
+	drv := entsql.OpenDB(dialect.Postgres, db)
+	return ent.NewClient(ent.Driver(drv))
+}
+
+func main() {
+	client := Open("postgresql://user:password@127.0.0.1/database")
+
+	// Your code. For example:
+	ctx := context.Background()
+	if err := client.Schema.Create(ctx); err != nil {
+		log.Fatal(err)
+	}
+	users, err := client.User.Query().All(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(users)
 }
 ```

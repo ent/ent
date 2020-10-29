@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema/field"
 )
 
 // User holds the schema definition for the User entity.
@@ -21,6 +21,8 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.JSON("t", &T{}).
+			Optional(),
 		field.JSON("url", &url.URL{}).
 			Optional(),
 		field.JSON("raw", json.RawMessage{}).
@@ -34,4 +36,14 @@ func (User) Fields() []ent.Field {
 		field.Strings("strings").
 			Optional(),
 	}
+}
+
+type T struct {
+	I  int      `json:"i,omitempty"`
+	F  float64  `json:"f,omitempty"`
+	B  bool     `json:"b,omitempty"`
+	S  string   `json:"s,omitempty"`
+	T  *T       `json:"t,omitempty"`
+	Li []int    `json:"li,omitempty"`
+	Ls []string `json:"ls,omitempty"`
 }

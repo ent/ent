@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/examples/m2mrecur/ent/user"
+	"github.com/facebook/ent/examples/m2mrecur/ent/user"
 
-	"github.com/facebookincubator/ent/examples/m2mrecur/ent"
+	"github.com/facebook/ent/examples/m2mrecur/ent"
 
 	_ "github.com/mattn/go-sqlite3"
 )

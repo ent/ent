@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // CardDelete is the builder for deleting a Card entity.
 type CardDelete struct {
 	config
-	hooks      []Hook
-	mutation   *CardMutation
-	predicates []predicate.Card
+	hooks    []Hook
+	mutation *CardMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (cd *CardDelete) Where(ps ...predicate.Card) *CardDelete {
-	cd.predicates = append(cd.predicates, ps...)
+	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd
 }
 
@@ -81,7 +80,7 @@ func (cd *CardDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (cd *CardDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(card.Label)
-	for _, p := range cd.predicates {
+	for _, p := range cd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

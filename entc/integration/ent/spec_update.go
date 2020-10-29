@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/card"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/spec"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/entc/integration/ent/spec"
+	"github.com/facebook/ent/schema/field"
 )
 
 // SpecUpdate is the builder for updating Spec entities.
 type SpecUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *SpecMutation
-	predicates []predicate.Spec
+	hooks    []Hook
+	mutation *SpecMutation
 }
 
 // Where adds a new predicate for the builder.
 func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	su.predicates = append(su.predicates, ps...)
+	su.mutation.predicates = append(su.mutation.predicates, ps...)
 	return su
 }
 
@@ -52,6 +51,12 @@ func (su *SpecUpdate) Mutation() *SpecMutation {
 	return su.mutation
 }
 
+// ClearCard clears all "card" edges to type Card.
+func (su *SpecUpdate) ClearCard() *SpecUpdate {
+	su.mutation.ClearCard()
+	return su
+}
+
 // RemoveCardIDs removes the card edge to Card by ids.
 func (su *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.RemoveCardIDs(ids...)
@@ -69,7 +74,6 @@ func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -130,14 +134,30 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := su.predicates; len(ps) > 0 {
+	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if nodes := su.mutation.RemovedCardIDs(); len(nodes) > 0 {
+	if su.mutation.CardCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   spec.CardTable,
+			Columns: spec.CardPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: card.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.RemovedCardIDs(); len(nodes) > 0 && !su.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -213,6 +233,12 @@ func (suo *SpecUpdateOne) Mutation() *SpecMutation {
 	return suo.mutation
 }
 
+// ClearCard clears all "card" edges to type Card.
+func (suo *SpecUpdateOne) ClearCard() *SpecUpdateOne {
+	suo.mutation.ClearCard()
+	return suo
+}
+
 // RemoveCardIDs removes the card edge to Card by ids.
 func (suo *SpecUpdateOne) RemoveCardIDs(ids ...int) *SpecUpdateOne {
 	suo.mutation.RemoveCardIDs(ids...)
@@ -230,7 +256,6 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
-
 	var (
 		err  error
 		node *Spec
@@ -260,11 +285,11 @@ func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (suo *SpecUpdateOne) SaveX(ctx context.Context) *Spec {
-	s, err := suo.Save(ctx)
+	node, err := suo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -280,7 +305,7 @@ func (suo *SpecUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
+func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   spec.Table,
@@ -296,7 +321,23 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Spec.ID for update")}
 	}
 	_spec.Node.ID.Value = id
-	if nodes := suo.mutation.RemovedCardIDs(); len(nodes) > 0 {
+	if suo.mutation.CardCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   spec.CardTable,
+			Columns: spec.CardPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: card.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.RemovedCardIDs(); len(nodes) > 0 && !suo.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -334,9 +375,9 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	s = &Spec{config: suo.config}
-	_spec.Assign = s.assignValues
-	_spec.ScanValues = s.scanValues()
+	_node = &Spec{config: suo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, suo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{spec.Label}
@@ -345,5 +386,5 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (s *Spec, err error) {
 		}
 		return nil, err
 	}
-	return s, nil
+	return _node, nil
 }

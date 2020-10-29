@@ -9,7 +9,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin"
 
 	"github.com/stretchr/testify/mock"
 	"go.opencensus.io/trace"

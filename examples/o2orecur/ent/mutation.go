@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,9 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/examples/o2orecur/ent/node"
+	"github.com/facebook/ent/examples/o2orecur/ent/node"
+	"github.com/facebook/ent/examples/o2orecur/ent/predicate"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -44,6 +45,7 @@ type NodeMutation struct {
 	clearednext   bool
 	done          bool
 	oldValue      func(context.Context) (*Node, error)
+	predicates    []predicate.Node
 }
 
 var _ ent.Mutation = (*NodeMutation)(nil)

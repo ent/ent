@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupMutation
-	predicates []predicate.Group
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.predicates = append(gd.predicates, ps...)
+	gd.mutation.predicates = append(gd.mutation.predicates, ps...)
 	return gd
 }
 
@@ -81,7 +80,7 @@ func (gd *GroupDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (gd *GroupDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(group.Label)
-	for _, p := range gd.predicates {
+	for _, p := range gd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

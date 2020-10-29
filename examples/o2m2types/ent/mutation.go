@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,10 +11,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/examples/o2m2types/ent/pet"
-	"github.com/facebookincubator/ent/examples/o2m2types/ent/user"
+	"github.com/facebook/ent/examples/o2m2types/ent/pet"
+	"github.com/facebook/ent/examples/o2m2types/ent/predicate"
+	"github.com/facebook/ent/examples/o2m2types/ent/user"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -43,6 +44,7 @@ type PetMutation struct {
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*Pet, error)
+	predicates    []predicate.Pet
 }
 
 var _ ent.Mutation = (*PetMutation)(nil)
@@ -405,8 +407,10 @@ type UserMutation struct {
 	clearedFields map[string]struct{}
 	pets          map[int]struct{}
 	removedpets   map[int]struct{}
+	clearedpets   bool
 	done          bool
 	oldValue      func(context.Context) (*User, error)
+	predicates    []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -592,6 +596,16 @@ func (m *UserMutation) AddPetIDs(ids ...int) {
 	}
 }
 
+// ClearPets clears the pets edge to Pet.
+func (m *UserMutation) ClearPets() {
+	m.clearedpets = true
+}
+
+// PetsCleared returns if the edge pets was cleared.
+func (m *UserMutation) PetsCleared() bool {
+	return m.clearedpets
+}
+
 // RemovePetIDs removes the pets edge to Pet by ids.
 func (m *UserMutation) RemovePetIDs(ids ...int) {
 	if m.removedpets == nil {
@@ -621,6 +635,7 @@ func (m *UserMutation) PetsIDs() (ids []int) {
 // ResetPets reset all changes of the "pets" edge.
 func (m *UserMutation) ResetPets() {
 	m.pets = nil
+	m.clearedpets = false
 	m.removedpets = nil
 }
 
@@ -820,6 +835,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.clearedpets {
+		edges = append(edges, user.EdgePets)
+	}
 	return edges
 }
 
@@ -827,6 +845,8 @@ func (m *UserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
+	case user.EdgePets:
+		return m.clearedpets
 	}
 	return false
 }

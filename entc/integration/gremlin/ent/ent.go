@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebookincubator/ent"
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/encoding/graphson"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 )
 
 // ent aliases to avoid import conflict in user's code.
@@ -31,7 +31,7 @@ type (
 	MutateFunc = ent.MutateFunc
 )
 
-// OrderFunc applies an ordering on either graph traversal or sql selector.
+// OrderFunc applies an ordering on the graph traversal.
 type OrderFunc func(*dsl.Traversal)
 
 // Asc applies the given fields in ASC order.

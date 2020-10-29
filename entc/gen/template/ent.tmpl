@@ -11,19 +11,26 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
+import (
+	{{- range $path := $.SiblingImports }}
+		"{{ $path }}"
+	{{- end }}
+)
+
 // {{ $.Name }} is the model entity for the {{ $.Name }} schema.
 type {{ $.Name }} struct {
 	config {{ template "model/omittags" $ }}
 	// ID of the ent.
-	ID {{ $.ID.Type }} `{{ $.ID.StructTag }}`
-	{{- range $_, $f := $.Fields }}
+	ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
+	{{- range $f := $.Fields }}
+		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
 		// {{ $f.StructField }} holds the value of the "{{ $f.Name }}" field.
-    	{{ $f.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $f.StructTag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
+		{{ $f.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $tag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
 	{{- end }}
 	{{- with $.Edges }}
 		// Edges holds the relations/edges for other nodes in the graph.
 		// The values are being populated by the {{ $.Name }}Query when eager-loading is set.
-		Edges {{ $.Name }}Edges `json:"edges"`
+		Edges {{ $.Name }}Edges {{ template "model/edgetags" $ }}
 	{{- end -}}
 	{{- /* Additional fields to add by the storage driver. */}}
 	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}
@@ -70,10 +77,10 @@ type {{ $.Name }}Edges struct {
 
 {{ $receiver := $.Receiver }}
 
-{{ range $_, $e := $.Edges }}
+{{ range $e := $.Edges }}
 	{{ $func := print "Query" $e.StructField }}
 	// {{ $func }} queries the {{ $e.Name }} edge of the {{ $.Name }}.
-	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.Name}}Query {
+	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.QueryName }} {
 		return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).{{ $func }}({{ $receiver }})
 	}
 {{ end }}
@@ -81,7 +88,7 @@ type {{ $.Name }}Edges struct {
 // Update returns a builder for updating this {{ $.Name }}.
 // Note that, you need to call {{ $.Name }}.Unwrap() before calling this method, if this {{ $.Name }}
 // was returned from a transaction, and the transaction was committed or rolled back.
-func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.Name }}UpdateOne {
+func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
 	return (&{{ $.Name }}Client{config: {{ $receiver }}.config}).UpdateOne({{ $receiver }})
 }
 
@@ -148,6 +155,9 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	}
 }
 {{ end }}
+
+{{/* A template for generating the tag of the Edges struct-field. */}}
+{{ define "model/edgetags" }}{{ with $.Annotations.Edges.StructTag }}`{{ . }}`{{ else }}`json:"edges"`{{ end }}{{ end }}
 
 {{/* A template for omitting struct-tags. */}}
 {{ define "model/omittags" }}{{ with $.TagTypes }}`{{ range $i, $t := . }}{{ if ne $i 0 }} {{ end }}{{ $t }}:"-"{{ end }}`{{ end }}{{ end }}

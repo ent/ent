@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
+	"github.com/facebook/ent/examples/edgeindex/ent/street"
+	"github.com/facebook/ent/schema/field"
 )
 
 // StreetUpdate is the builder for updating Street entities.
 type StreetUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *StreetMutation
-	predicates []predicate.Street
+	hooks    []Hook
+	mutation *StreetMutation
 }
 
 // Where adds a new predicate for the builder.
 func (su *StreetUpdate) Where(ps ...predicate.Street) *StreetUpdate {
-	su.predicates = append(su.predicates, ps...)
+	su.mutation.predicates = append(su.mutation.predicates, ps...)
 	return su
 }
 
@@ -62,7 +61,7 @@ func (su *StreetUpdate) Mutation() *StreetMutation {
 	return su.mutation
 }
 
-// ClearCity clears the city edge to City.
+// ClearCity clears the "city" edge to type City.
 func (su *StreetUpdate) ClearCity() *StreetUpdate {
 	su.mutation.ClearCity()
 	return su
@@ -70,7 +69,6 @@ func (su *StreetUpdate) ClearCity() *StreetUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (su *StreetUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -131,7 +129,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := su.predicates; len(ps) > 0 {
+	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -228,7 +226,7 @@ func (suo *StreetUpdateOne) Mutation() *StreetMutation {
 	return suo.mutation
 }
 
-// ClearCity clears the city edge to City.
+// ClearCity clears the "city" edge to type City.
 func (suo *StreetUpdateOne) ClearCity() *StreetUpdateOne {
 	suo.mutation.ClearCity()
 	return suo
@@ -236,7 +234,6 @@ func (suo *StreetUpdateOne) ClearCity() *StreetUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (suo *StreetUpdateOne) Save(ctx context.Context) (*Street, error) {
-
 	var (
 		err  error
 		node *Street
@@ -266,11 +263,11 @@ func (suo *StreetUpdateOne) Save(ctx context.Context) (*Street, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (suo *StreetUpdateOne) SaveX(ctx context.Context) *Street {
-	s, err := suo.Save(ctx)
+	node, err := suo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -286,7 +283,7 @@ func (suo *StreetUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) {
+func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   street.Table,
@@ -344,9 +341,9 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	s = &Street{config: suo.config}
-	_spec.Assign = s.assignValues
-	_spec.ScanValues = s.scanValues()
+	_node = &Street{config: suo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, suo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{street.Label}
@@ -355,5 +352,5 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (s *Street, err error) 
 		}
 		return nil, err
 	}
-	return s, nil
+	return _node, nil
 }

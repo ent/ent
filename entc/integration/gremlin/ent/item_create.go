@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,10 +10,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/item"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/item"
 )
 
 // ItemCreate is the builder for creating a Item entity.
@@ -35,12 +35,18 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 		node *Item
 	)
 	if len(ic.hooks) == 0 {
+		if err = ic.check(); err != nil {
+			return nil, err
+		}
 		node, err = ic.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ItemMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = ic.check(); err != nil {
+				return nil, err
 			}
 			ic.mutation = mutation
 			node, err = ic.gremlinSave(ctx)
@@ -66,6 +72,11 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 	return v
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ic *ItemCreate) check() error {
+	return nil
+}
+
 func (ic *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
 	res := &gremlin.Response{}
 	query, bindings := ic.gremlin().Query()
@@ -85,4 +96,10 @@ func (ic *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
 func (ic *ItemCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(item.Label)
 	return v.ValueMap(true)
+}
+
+// ItemCreateBulk is the builder for creating a bulk of Item entities.
+type ItemCreateBulk struct {
+	config
+	builders []*ItemCreate
 }

@@ -12,7 +12,10 @@ import (
 	"math"
 	"reflect"
 	"regexp"
+	"sort"
 	"time"
+
+	"github.com/facebook/ent/schema"
 )
 
 // String returns a new Field with type string.
@@ -78,6 +81,7 @@ func JSON(name string, typ interface{}) *jsonBuilder {
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
 		info.Nillable = true
+		info.PkgPath = pkgPath(t)
 	}
 	return &jsonBuilder{&Descriptor{
 		Name: name,
@@ -266,6 +270,19 @@ func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.String("dir").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *stringBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -347,6 +364,19 @@ func (b *timeBuilder) GoType(typ interface{}) *timeBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Time("deleted_at").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *timeBuilder) Annotations(annotations ...schema.Annotation) *timeBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -425,6 +455,19 @@ func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Bool("deleted").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *boolBuilder) Annotations(annotations ...schema.Annotation) *boolBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *boolBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -462,7 +505,7 @@ func (b *bytesBuilder) Immutable() *bytesBuilder {
 }
 
 // Comment sets the comment of the field.
-func (b *bytesBuilder) Comment(c string) *bytesBuilder {
+func (b *bytesBuilder) Comment(string) *bytesBuilder {
 	return b
 }
 
@@ -497,9 +540,17 @@ func (b *bytesBuilder) GoType(typ interface{}) *bytesBuilder {
 	return b
 }
 
-// Descriptor implements the ent.Field interface by returning its descriptor.
-func (b *bytesBuilder) Descriptor() *Descriptor {
-	return b.desc
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Bytes("ip").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *bytesBuilder) Annotations(annotations ...schema.Annotation) *bytesBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
 }
 
 // SchemaType overrides the default database type with a custom
@@ -514,6 +565,11 @@ func (b *bytesBuilder) Descriptor() *Descriptor {
 func (b *bytesBuilder) SchemaType(types map[string]string) *bytesBuilder {
 	b.desc.SchemaType = types
 	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *bytesBuilder) Descriptor() *Descriptor {
+	return b.desc
 }
 
 // jsonBuilder is the builder for json fields.
@@ -566,6 +622,19 @@ func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.JSON("json").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *jsonBuilder) Annotations(annotations ...schema.Annotation) *jsonBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *jsonBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -576,9 +645,59 @@ type enumBuilder struct {
 	desc *Descriptor
 }
 
-// Value sets the numeric value of the enum. Defaults to its index in the declaration.
+// Values adds given values to the enum values.
+//
+//	field.Enum("priority").
+//		Values("low", "mid", "high")
+//
 func (b *enumBuilder) Values(values ...string) *enumBuilder {
-	b.desc.Enums = values
+	for _, v := range values {
+		b.desc.Enums = append(b.desc.Enums, struct{ N, V string }{N: v, V: v})
+	}
+	return b
+}
+
+// NamedValues adds the given name, value pairs to the enum value.
+// The "name" defines the Go identifier of the enum, and the value
+// defines the actual value in the database.
+//
+// NamedValues returns an error if given an odd number of arguments.
+//
+//	field.Enum("priority").
+//		NamedValues(
+//			"LOW", "low",
+//			"MID", "mid",
+//			"HIGH", "high",
+//		)
+//
+func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
+	if len(namevalue)%2 == 1 {
+		b.desc.err = fmt.Errorf("Enum.NamedValues: odd argument count")
+		return b
+	}
+	for i := 0; i < len(namevalue); i += 2 {
+		b.desc.Enums = append(b.desc.Enums, struct{ N, V string }{N: namevalue[i], V: namevalue[i+1]})
+	}
+	return b
+}
+
+// ValueMap adds the given values in the map to the enum value.
+// The key in the map is the Go identifier and the value in the
+// map is the actual enum value.
+//
+// If keys in not titled, ent codegen will change it to be exported.
+//
+// Deprecated: the ValueMap method predates the NamedValues method and it
+// is planned be removed in v0.5.0. New code should use NamedValues instead.
+func (b *enumBuilder) ValueMap(values map[string]string) *enumBuilder {
+	enums := make([]struct{ N, V string }, 0, len(values))
+	for k, v := range values {
+		enums = append(enums, struct{ N, V string }{N: k, V: v})
+	}
+	sort.Slice(enums, func(i, j int) bool {
+		return enums[i].V < enums[j].V
+	})
+	b.desc.Enums = append(b.desc.Enums, enums...)
 	return b
 }
 
@@ -639,6 +758,35 @@ func (b *enumBuilder) SchemaType(types map[string]string) *enumBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Enum("enum").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *enumBuilder) Annotations(annotations ...schema.Annotation) *enumBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// EnumValues defines the interface for getting the enum values.
+type EnumValues interface {
+	Values() []string
+}
+
+// GoType overrides the default Go type with a custom one.
+//
+//	field.Enum("enum").
+//		GoType(role.Enum("role"))
+//
+func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
+	b.Values(ev.Values()...)
+	b.desc.goType(ev, stringType)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *enumBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -660,6 +808,12 @@ func (b *uuidBuilder) StorageKey(key string) *uuidBuilder {
 // Unlike edges, fields are required by default.
 func (b *uuidBuilder) Optional() *uuidBuilder {
 	b.desc.Optional = true
+	return b
+}
+
+// Unique makes the field unique within all vertices of this type.
+func (b *uuidBuilder) Unique() *uuidBuilder {
+	b.desc.Unique = true
 	return b
 }
 
@@ -709,6 +863,19 @@ func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
 	return b
 }
 
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.UUID("id", uuid.New()).
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *uuidBuilder) Annotations(annotations ...schema.Annotation) *uuidBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uuidBuilder) Descriptor() *Descriptor {
 	return b.desc
@@ -716,22 +883,23 @@ func (b *uuidBuilder) Descriptor() *Descriptor {
 
 // A Descriptor for field configuration.
 type Descriptor struct {
-	Tag           string            // struct tag.
-	Size          int               // varchar size.
-	Name          string            // field name.
-	Info          *TypeInfo         // field type info.
-	Unique        bool              // unique index of field.
-	Nillable      bool              // nillable struct field.
-	Optional      bool              // nullable field in database.
-	Immutable     bool              // create-only field.
-	Default       interface{}       // default value on create.
-	UpdateDefault interface{}       // default value on update.
-	Validators    []interface{}     // validator functions.
-	StorageKey    string            // sql column or gremlin property.
-	Enums         []string          // enum values.
-	Sensitive     bool              // sensitive info string field.
-	Increment     bool              // auto increment int filed.
-	SchemaType    map[string]string // override the schema type.
+	Tag           string                  // struct tag.
+	Size          int                     // varchar size.
+	Name          string                  // field name.
+	Info          *TypeInfo               // field type info.
+	Unique        bool                    // unique index of field.
+	Nillable      bool                    // nillable struct field.
+	Optional      bool                    // nullable field in database.
+	Immutable     bool                    // create-only field.
+	Default       interface{}             // default value on create.
+	UpdateDefault interface{}             // default value on update.
+	Validators    []interface{}           // validator functions.
+	StorageKey    string                  // sql column or gremlin property.
+	Enums         []struct{ N, V string } // enum values.
+	Sensitive     bool                    // sensitive info string field.
+	SchemaType    map[string]string       // override the schema type.
+	Increment     bool                    // auto increment int filed.
+	Annotations   []schema.Annotation     // field annotations.
 	err           error
 }
 
@@ -802,4 +970,16 @@ func indirect(t reflect.Type) reflect.Type {
 		t = t.Elem()
 	}
 	return t
+}
+
+func pkgPath(t reflect.Type) string {
+	pkg := t.PkgPath()
+	if pkg != "" {
+		return pkg
+	}
+	switch t.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+		return pkgPath(t.Elem())
+	}
+	return pkg
 }

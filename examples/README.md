@@ -222,7 +222,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/traversal).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).
 
 
 ## Relationship
@@ -304,7 +304,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2o2types).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2o2types).
 
 ## O2O Same Type
 
@@ -400,7 +400,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2o2recur).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2o2recur).
 
 ## O2O Bidirectional
 
@@ -474,7 +474,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2obidi).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2obidi).
 
 ## O2M Two Types
 
@@ -555,7 +555,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	return nil
 }
 ```
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2m2types).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2m2types).
 
 ## O2M Same Type
 
@@ -615,7 +615,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	//        /   \
 	//       3     5
 	//
-	// Unlike `Create`, `CreateX` panics if an error occurs.
+	// Unlike `Save`, `SaveX` panics if an error occurs.
 	n1 := client.Node.
 		Create().
 		SetValue(1).
@@ -664,7 +664,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/o2mrecur).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2mrecur).
 
 ## M2M Two Types
 
@@ -756,7 +756,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2m2types).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2m2types).
 
 ## M2M Same Type
 
@@ -849,7 +849,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2mrecur).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2mrecur).
 
 
 ## M2M Bidirectional
@@ -912,7 +912,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/m2mbidi).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2mbidi).
 
 ## Indexes
 
@@ -1020,5 +1020,5 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebookincubator/ent/tree/master/examples/edgeindex).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/edgeindex).
 

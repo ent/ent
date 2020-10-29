@@ -24,7 +24,7 @@ commands:
 jobs:
   lint:
     docker:
-    - image: golangci/golangci-lint:v1.26-alpine
+    - image: golangci/golangci-lint:v1.28-alpine
     steps:
       - checkout
       - *mktestdir
@@ -35,7 +35,7 @@ jobs:
   unit:
     executor:
       name: go/default
-      tag: '1.14'
+      tag: '1.15'
     steps:
     - checkout
     - *mktestdir
@@ -138,7 +138,7 @@ jobs:
       - run:
           name: Run integration tests
           working_directory: entc/integration
-          command: gotestsum -f short-verbose --junitfile ~/test-results/integration.xml -- -race -count=2 ./...
+          command: gotestsum -f short-verbose --junitfile ~/test-results/integration.xml -- -race -count=2 -tags='json1' ./...
       - *storetestdir
 
   migration:

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/city"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/predicate"
-	"github.com/facebookincubator/ent/examples/edgeindex/ent/street"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
+	"github.com/facebook/ent/examples/edgeindex/ent/street"
+	"github.com/facebook/ent/schema/field"
 )
 
 // StreetQuery is the builder for querying Street entities.
@@ -67,8 +67,12 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := sq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(street.Table, street.FieldID, sq.sqlQuery()),
+			sqlgraph.From(street.Table, street.FieldID, selector),
 			sqlgraph.To(city.Table, city.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, street.CityTable, street.CityColumn),
 		)
@@ -80,23 +84,23 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 
 // First returns the first Street entity in the query. Returns *NotFoundError when no street was found.
 func (sq *StreetQuery) First(ctx context.Context) (*Street, error) {
-	sSlice, err := sq.Limit(1).All(ctx)
+	nodes, err := sq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(sSlice) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{street.Label}
 	}
-	return sSlice[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (sq *StreetQuery) FirstX(ctx context.Context) *Street {
-	s, err := sq.First(ctx)
+	node, err := sq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // FirstID returns the first Street id in the query. Returns *NotFoundError when no id was found.
@@ -112,8 +116,8 @@ func (sq *StreetQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (sq *StreetQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (sq *StreetQuery) FirstIDX(ctx context.Context) int {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -123,13 +127,13 @@ func (sq *StreetQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Street entity in the query, returns an error if not exactly one entity was returned.
 func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
-	sSlice, err := sq.Limit(2).All(ctx)
+	nodes, err := sq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(sSlice) {
+	switch len(nodes) {
 	case 1:
-		return sSlice[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{street.Label}
 	default:
@@ -139,11 +143,11 @@ func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (sq *StreetQuery) OnlyX(ctx context.Context) *Street {
-	s, err := sq.Only(ctx)
+	node, err := sq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return s
+	return node
 }
 
 // OnlyID returns the only Street id in the query, returns an error if not exactly one id was returned.
@@ -163,8 +167,8 @@ func (sq *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (sq *StreetQuery) OnlyXID(ctx context.Context) int {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (sq *StreetQuery) OnlyIDX(ctx context.Context) int {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -182,11 +186,11 @@ func (sq *StreetQuery) All(ctx context.Context) ([]*Street, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (sq *StreetQuery) AllX(ctx context.Context) []*Street {
-	sSlice, err := sq.All(ctx)
+	nodes, err := sq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return sSlice
+	return nodes
 }
 
 // IDs executes the query and returns a list of Street ids.
@@ -244,6 +248,9 @@ func (sq *StreetQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (sq *StreetQuery) Clone() *StreetQuery {
+	if sq == nil {
+		return nil
+	}
 	return &StreetQuery{
 		config:     sq.config,
 		limit:      sq.limit,
@@ -251,6 +258,7 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 		order:      append([]OrderFunc{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Street{}, sq.predicates...),
+		withCity:   sq.withCity.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
@@ -439,7 +447,7 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := sq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, street.ValidColumn)
 			}
 		}
 	}
@@ -458,7 +466,7 @@ func (sq *StreetQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range sq.order {
-		p(selector)
+		p(selector, street.ValidColumn)
 	}
 	if offset := sq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -525,6 +533,32 @@ func (sgb *StreetGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (sgb *StreetGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = sgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{street.Label}
+	default:
+		err = fmt.Errorf("ent: StreetGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (sgb *StreetGroupBy) StringX(ctx context.Context) string {
+	v, err := sgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (sgb *StreetGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(sgb.fields) > 1 {
@@ -540,6 +574,32 @@ func (sgb *StreetGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (sgb *StreetGroupBy) IntsX(ctx context.Context) []int {
 	v, err := sgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (sgb *StreetGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = sgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{street.Label}
+	default:
+		err = fmt.Errorf("ent: StreetGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (sgb *StreetGroupBy) IntX(ctx context.Context) int {
+	v, err := sgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -567,6 +627,32 @@ func (sgb *StreetGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (sgb *StreetGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = sgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{street.Label}
+	default:
+		err = fmt.Errorf("ent: StreetGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (sgb *StreetGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := sgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (sgb *StreetGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(sgb.fields) > 1 {
@@ -588,9 +674,44 @@ func (sgb *StreetGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (sgb *StreetGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = sgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{street.Label}
+	default:
+		err = fmt.Errorf("ent: StreetGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (sgb *StreetGroupBy) BoolX(ctx context.Context) bool {
+	v, err := sgb.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (sgb *StreetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range sgb.fields {
+		if !street.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
+	selector := sgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := sgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := sgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -603,7 +724,7 @@ func (sgb *StreetGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 	columns = append(columns, sgb.fields...)
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, street.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(sgb.fields...)
 }
@@ -655,6 +776,32 @@ func (ss *StreetSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (ss *StreetSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = ss.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{street.Label}
+	default:
+		err = fmt.Errorf("ent: StreetSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (ss *StreetSelect) StringX(ctx context.Context) string {
+	v, err := ss.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (ss *StreetSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ss.fields) > 1 {
@@ -670,6 +817,32 @@ func (ss *StreetSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (ss *StreetSelect) IntsX(ctx context.Context) []int {
 	v, err := ss.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (ss *StreetSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = ss.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{street.Label}
+	default:
+		err = fmt.Errorf("ent: StreetSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (ss *StreetSelect) IntX(ctx context.Context) int {
+	v, err := ss.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -697,6 +870,32 @@ func (ss *StreetSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (ss *StreetSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = ss.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{street.Label}
+	default:
+		err = fmt.Errorf("ent: StreetSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (ss *StreetSelect) Float64X(ctx context.Context) float64 {
+	v, err := ss.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (ss *StreetSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ss.fields) > 1 {
@@ -718,7 +917,38 @@ func (ss *StreetSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (ss *StreetSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = ss.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{street.Label}
+	default:
+		err = fmt.Errorf("ent: StreetSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (ss *StreetSelect) BoolX(ctx context.Context) bool {
+	v, err := ss.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (ss *StreetSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range ss.fields {
+		if !street.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := ss.sqlQuery().Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

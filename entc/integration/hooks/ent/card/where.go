@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,9 +9,9 @@ package card
 import (
 	"time"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/hooks/ent/predicate"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/hooks/ent/predicate"
 )
 
 // ID filters vertices based on their identifier.
@@ -115,6 +115,13 @@ func Name(v string) predicate.Card {
 func CreatedAt(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldCreatedAt), v))
+	})
+}
+
+// InHook applies equality check predicate on the "in_hook" field. It's identical to InHookEQ.
+func InHook(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldInHook), v))
 	})
 }
 
@@ -427,6 +434,117 @@ func CreatedAtLT(v time.Time) predicate.Card {
 func CreatedAtLTE(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldCreatedAt), v))
+	})
+}
+
+// InHookEQ applies the EQ predicate on the "in_hook" field.
+func InHookEQ(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldInHook), v))
+	})
+}
+
+// InHookNEQ applies the NEQ predicate on the "in_hook" field.
+func InHookNEQ(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldInHook), v))
+	})
+}
+
+// InHookIn applies the In predicate on the "in_hook" field.
+func InHookIn(vs ...string) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldInHook), v...))
+	})
+}
+
+// InHookNotIn applies the NotIn predicate on the "in_hook" field.
+func InHookNotIn(vs ...string) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldInHook), v...))
+	})
+}
+
+// InHookGT applies the GT predicate on the "in_hook" field.
+func InHookGT(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldInHook), v))
+	})
+}
+
+// InHookGTE applies the GTE predicate on the "in_hook" field.
+func InHookGTE(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldInHook), v))
+	})
+}
+
+// InHookLT applies the LT predicate on the "in_hook" field.
+func InHookLT(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldInHook), v))
+	})
+}
+
+// InHookLTE applies the LTE predicate on the "in_hook" field.
+func InHookLTE(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldInHook), v))
+	})
+}
+
+// InHookContains applies the Contains predicate on the "in_hook" field.
+func InHookContains(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldInHook), v))
+	})
+}
+
+// InHookHasPrefix applies the HasPrefix predicate on the "in_hook" field.
+func InHookHasPrefix(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldInHook), v))
+	})
+}
+
+// InHookHasSuffix applies the HasSuffix predicate on the "in_hook" field.
+func InHookHasSuffix(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldInHook), v))
+	})
+}
+
+// InHookEqualFold applies the EqualFold predicate on the "in_hook" field.
+func InHookEqualFold(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldInHook), v))
+	})
+}
+
+// InHookContainsFold applies the ContainsFold predicate on the "in_hook" field.
+func InHookContainsFold(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldInHook), v))
 	})
 }
 

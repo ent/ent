@@ -16,9 +16,9 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/facebookincubator/ent/entc"
-	"github.com/facebookincubator/ent/entc/gen"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/entc"
+	"github.com/facebook/ent/entc/gen"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/spf13/cobra"
 )
@@ -75,6 +75,7 @@ func main() {
 			var (
 				cfg       gen.Config
 				storage   string
+				features  []string
 				templates []string
 				idtype    = idType(field.TypeInt)
 				cmd       = &cobra.Command{
@@ -86,7 +87,10 @@ func main() {
 					),
 					Args: cobra.ExactArgs(1),
 					Run: func(cmd *cobra.Command, path []string) {
-						opts := []entc.Option{entc.Storage(storage)}
+						opts := []entc.Option{
+							entc.Storage(storage),
+							entc.FeatureNames(features...),
+						}
 						for _, tmpl := range templates {
 							typ := "dir"
 							if parts := strings.SplitN(tmpl, "=", 2); len(parts) > 1 {
@@ -123,6 +127,7 @@ func main() {
 			cmd.Flags().StringVar(&storage, "storage", "sql", "storage driver to support in codegen")
 			cmd.Flags().StringVar(&cfg.Header, "header", "", "override codegen header")
 			cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
+			cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
 			cmd.Flags().StringSliceVarP(&templates, "template", "", nil, "external templates to execute")
 			return cmd
 		}(),
@@ -207,7 +212,7 @@ func createDir(target string) error {
 var tmpl = template.Must(template.New("schema").
 	Parse(`package schema
 
-import "github.com/facebookincubator/ent"
+import "github.com/facebook/ent"
 
 // {{ . }} holds the schema definition for the {{ . }} entity.
 type {{ . }} struct {
@@ -229,7 +234,7 @@ const (
 	// default schema package path.
 	defaultSchema = "ent/schema"
 	// ent/generate.go file used for "go generate" command.
-	genFile = "package ent\n\n//go:generate go run github.com/facebookincubator/ent/cmd/entc generate ./schema\n"
+	genFile = "package ent\n\n//go:generate go run github.com/facebook/ent/cmd/entc generate ./schema\n"
 )
 
 // examples formats the given examples to the cli.

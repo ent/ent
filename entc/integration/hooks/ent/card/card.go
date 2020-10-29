@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -9,7 +9,7 @@ package card
 import (
 	"time"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -23,6 +23,8 @@ const (
 	FieldName = "name"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldInHook holds the string denoting the in_hook field in the database.
+	FieldInHook = "in_hook"
 
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldNumber,
 	FieldName,
 	FieldCreatedAt,
+	FieldInHook,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Card type.
@@ -51,11 +54,26 @@ var ForeignKeys = []string{
 	"user_cards",
 }
 
+// ValidColumn reports if the column name is valid (part of the table columns).
+func ValidColumn(column string) bool {
+	for i := range Columns {
+		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
+	return false
+}
+
 // Note that the variables below are initialized by the runtime
 // package on the initialization of the application. Therefore,
 // it should be imported in the main as follows:
 //
-//	import _ "github.com/facebookincubator/ent/entc/integration/hooks/ent/runtime"
+//	import _ "github.com/facebook/ent/entc/integration/hooks/ent/runtime"
 //
 var (
 	Hooks [3]ent.Hook

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,12 +11,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -70,6 +70,20 @@ func (fc *FileCreate) SetGroup(s string) *FileCreate {
 func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 	if s != nil {
 		fc.SetGroup(*s)
+	}
+	return fc
+}
+
+// SetOp sets the op field.
+func (fc *FileCreate) SetOp(b bool) *FileCreate {
+	fc.mutation.SetOp(b)
+	return fc
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
+	if b != nil {
+		fc.SetOp(*b)
 	}
 	return fc
 }
@@ -134,29 +148,24 @@ func (fc *FileCreate) Mutation() *FileMutation {
 
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
-	if _, ok := fc.mutation.Size(); !ok {
-		v := file.DefaultSize
-		fc.mutation.SetSize(v)
-	}
-	if v, ok := fc.mutation.Size(); ok {
-		if err := file.SizeValidator(v); err != nil {
-			return nil, &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
-		}
-	}
-	if _, ok := fc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
 	var (
 		err  error
 		node *File
 	)
+	fc.defaults()
 	if len(fc.hooks) == 0 {
+		if err = fc.check(); err != nil {
+			return nil, err
+		}
 		node, err = fc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fc.check(); err != nil {
+				return nil, err
 			}
 			fc.mutation = mutation
 			node, err = fc.sqlSave(ctx)
@@ -182,9 +191,46 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (fc *FileCreate) defaults() {
+	if _, ok := fc.mutation.Size(); !ok {
+		v := file.DefaultSize
+		fc.mutation.SetSize(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (fc *FileCreate) check() error {
+	if _, ok := fc.mutation.Size(); !ok {
+		return &ValidationError{Name: "size", err: errors.New("ent: missing required field \"size\"")}
+	}
+	if v, ok := fc.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
+			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+		}
+	}
+	if _, ok := fc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	return nil
+}
+
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
+	_node, _spec := fc.createSpec()
+	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
+		if cerr, ok := isSQLConstraintError(err); ok {
+			err = cerr
+		}
+		return nil, err
+	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
+	return _node, nil
+}
+
+func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	var (
-		f     = &File{config: fc.config}
+		_node = &File{config: fc.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: file.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -199,7 +245,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			Value:  value,
 			Column: file.FieldSize,
 		})
-		f.Size = value
+		_node.Size = value
 	}
 	if value, ok := fc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -207,7 +253,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			Value:  value,
 			Column: file.FieldName,
 		})
-		f.Name = value
+		_node.Name = value
 	}
 	if value, ok := fc.mutation.User(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -215,7 +261,7 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			Value:  value,
 			Column: file.FieldUser,
 		})
-		f.User = &value
+		_node.User = &value
 	}
 	if value, ok := fc.mutation.Group(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -223,7 +269,15 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 			Value:  value,
 			Column: file.FieldGroup,
 		})
-		f.Group = value
+		_node.Group = value
+	}
+	if value, ok := fc.mutation.GetOp(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: file.FieldOp,
+		})
+		_node.Op = value
 	}
 	if nodes := fc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -282,13 +336,72 @@ func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
-		}
-		return nil, err
+	return _node, _spec
+}
+
+// FileCreateBulk is the builder for creating a bulk of File entities.
+type FileCreateBulk struct {
+	config
+	builders []*FileCreate
+}
+
+// Save creates the File entities in the database.
+func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
+	specs := make([]*sqlgraph.CreateSpec, len(fcb.builders))
+	nodes := make([]*File, len(fcb.builders))
+	mutators := make([]Mutator, len(fcb.builders))
+	for i := range fcb.builders {
+		func(i int, root context.Context) {
+			builder := fcb.builders[i]
+			builder.defaults()
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*FileMutation)
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, fcb.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, fcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				id := specs[i].ID.Value.(int64)
+				nodes[i].ID = int(id)
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
 	}
-	id := _spec.ID.Value.(int64)
-	f.ID = int(id)
-	return f, nil
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, fcb.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func (fcb *FileCreateBulk) SaveX(ctx context.Context) []*File {
+	v, err := fcb.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }

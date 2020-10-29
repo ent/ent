@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/examples/start/ent/car"
-	"github.com/facebookincubator/ent/examples/start/ent/predicate"
-	"github.com/facebookincubator/ent/examples/start/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/start/ent/car"
+	"github.com/facebook/ent/examples/start/ent/predicate"
+	"github.com/facebook/ent/examples/start/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // CarQuery is the builder for querying Car entities.
@@ -67,8 +67,12 @@ func (cq *CarQuery) QueryOwner() *UserQuery {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
+		selector := cq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(car.Table, car.FieldID, cq.sqlQuery()),
+			sqlgraph.From(car.Table, car.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, car.OwnerTable, car.OwnerColumn),
 		)
@@ -80,23 +84,23 @@ func (cq *CarQuery) QueryOwner() *UserQuery {
 
 // First returns the first Car entity in the query. Returns *NotFoundError when no car was found.
 func (cq *CarQuery) First(ctx context.Context) (*Car, error) {
-	cs, err := cq.Limit(1).All(ctx)
+	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if len(cs) == 0 {
+	if len(nodes) == 0 {
 		return nil, &NotFoundError{car.Label}
 	}
-	return cs[0], nil
+	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
 func (cq *CarQuery) FirstX(ctx context.Context) *Car {
-	c, err := cq.First(ctx)
+	node, err := cq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // FirstID returns the first Car id in the query. Returns *NotFoundError when no id was found.
@@ -112,8 +116,8 @@ func (cq *CarQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (cq *CarQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (cq *CarQuery) FirstIDX(ctx context.Context) int {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -123,13 +127,13 @@ func (cq *CarQuery) FirstXID(ctx context.Context) int {
 
 // Only returns the only Car entity in the query, returns an error if not exactly one entity was returned.
 func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
-	cs, err := cq.Limit(2).All(ctx)
+	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	switch len(cs) {
+	switch len(nodes) {
 	case 1:
-		return cs[0], nil
+		return nodes[0], nil
 	case 0:
 		return nil, &NotFoundError{car.Label}
 	default:
@@ -139,11 +143,11 @@ func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (cq *CarQuery) OnlyX(ctx context.Context) *Car {
-	c, err := cq.Only(ctx)
+	node, err := cq.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return node
 }
 
 // OnlyID returns the only Car id in the query, returns an error if not exactly one id was returned.
@@ -163,8 +167,8 @@ func (cq *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
 	return
 }
 
-// OnlyXID is like OnlyID, but panics if an error occurs.
-func (cq *CarQuery) OnlyXID(ctx context.Context) int {
+// OnlyIDX is like OnlyID, but panics if an error occurs.
+func (cq *CarQuery) OnlyIDX(ctx context.Context) int {
 	id, err := cq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -182,11 +186,11 @@ func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (cq *CarQuery) AllX(ctx context.Context) []*Car {
-	cs, err := cq.All(ctx)
+	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return cs
+	return nodes
 }
 
 // IDs executes the query and returns a list of Car ids.
@@ -244,6 +248,9 @@ func (cq *CarQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *CarQuery) Clone() *CarQuery {
+	if cq == nil {
+		return nil
+	}
 	return &CarQuery{
 		config:     cq.config,
 		limit:      cq.limit,
@@ -251,6 +258,7 @@ func (cq *CarQuery) Clone() *CarQuery {
 		order:      append([]OrderFunc{}, cq.order...),
 		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Car{}, cq.predicates...),
+		withOwner:  cq.withOwner.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -439,7 +447,7 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := cq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector)
+				ps[i](selector, car.ValidColumn)
 			}
 		}
 	}
@@ -458,7 +466,7 @@ func (cq *CarQuery) sqlQuery() *sql.Selector {
 		p(selector)
 	}
 	for _, p := range cq.order {
-		p(selector)
+		p(selector, car.ValidColumn)
 	}
 	if offset := cq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -525,6 +533,32 @@ func (cgb *CarGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+func (cgb *CarGroupBy) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = cgb.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{car.Label}
+	default:
+		err = fmt.Errorf("ent: CarGroupBy.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (cgb *CarGroupBy) StringX(ctx context.Context) string {
+	v, err := cgb.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
 func (cgb *CarGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
@@ -540,6 +574,32 @@ func (cgb *CarGroupBy) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (cgb *CarGroupBy) IntsX(ctx context.Context) []int {
 	v, err := cgb.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+func (cgb *CarGroupBy) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = cgb.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{car.Label}
+	default:
+		err = fmt.Errorf("ent: CarGroupBy.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (cgb *CarGroupBy) IntX(ctx context.Context) int {
+	v, err := cgb.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -567,6 +627,32 @@ func (cgb *CarGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+func (cgb *CarGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = cgb.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{car.Label}
+	default:
+		err = fmt.Errorf("ent: CarGroupBy.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (cgb *CarGroupBy) Float64X(ctx context.Context) float64 {
+	v, err := cgb.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
 func (cgb *CarGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
@@ -588,9 +674,44 @@ func (cgb *CarGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+func (cgb *CarGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = cgb.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{car.Label}
+	default:
+		err = fmt.Errorf("ent: CarGroupBy.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (cgb *CarGroupBy) BoolX(ctx context.Context) bool {
+	v, err := cgb.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (cgb *CarGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range cgb.fields {
+		if !car.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
+		}
+	}
+	selector := cgb.sqlQuery()
+	if err := selector.Err(); err != nil {
+		return err
+	}
 	rows := &sql.Rows{}
-	query, args := cgb.sqlQuery().Query()
+	query, args := selector.Query()
 	if err := cgb.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -603,7 +724,7 @@ func (cgb *CarGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 	columns = append(columns, cgb.fields...)
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn(selector))
+		columns = append(columns, fn(selector, car.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }
@@ -655,6 +776,32 @@ func (cs *CarSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
+// String returns a single string from selector. It is only allowed when selecting one field.
+func (cs *CarSelect) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = cs.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{car.Label}
+	default:
+		err = fmt.Errorf("ent: CarSelect.Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (cs *CarSelect) StringX(ctx context.Context) string {
+	v, err := cs.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Ints returns list of ints from selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
@@ -670,6 +817,32 @@ func (cs *CarSelect) Ints(ctx context.Context) ([]int, error) {
 // IntsX is like Ints, but panics if an error occurs.
 func (cs *CarSelect) IntsX(ctx context.Context) []int {
 	v, err := cs.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from selector. It is only allowed when selecting one field.
+func (cs *CarSelect) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = cs.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{car.Label}
+	default:
+		err = fmt.Errorf("ent: CarSelect.Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (cs *CarSelect) IntX(ctx context.Context) int {
+	v, err := cs.Int(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -697,6 +870,32 @@ func (cs *CarSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
+// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+func (cs *CarSelect) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = cs.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{car.Label}
+	default:
+		err = fmt.Errorf("ent: CarSelect.Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (cs *CarSelect) Float64X(ctx context.Context) float64 {
+	v, err := cs.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 // Bools returns list of bools from selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
@@ -718,7 +917,38 @@ func (cs *CarSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
+// Bool returns a single bool from selector. It is only allowed when selecting one field.
+func (cs *CarSelect) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = cs.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{car.Label}
+	default:
+		err = fmt.Errorf("ent: CarSelect.Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (cs *CarSelect) BoolX(ctx context.Context) bool {
+	v, err := cs.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func (cs *CarSelect) sqlScan(ctx context.Context, v interface{}) error {
+	for _, f := range cs.fields {
+		if !car.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
+		}
+	}
 	rows := &sql.Rows{}
 	query, args := cs.sqlQuery().Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

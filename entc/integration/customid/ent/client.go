@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,18 +11,18 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/migrate"
+	"github.com/facebook/ent/entc/integration/customid/ent/migrate"
 	"github.com/google/uuid"
 
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/blob"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/car"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/customid/ent/user"
+	"github.com/facebook/ent/entc/integration/customid/ent/blob"
+	"github.com/facebook/ent/entc/integration/customid/ent/car"
+	"github.com/facebook/ent/entc/integration/customid/ent/group"
+	"github.com/facebook/ent/entc/integration/customid/ent/pet"
+	"github.com/facebook/ent/entc/integration/customid/ent/user"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -76,7 +76,8 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 	}
 }
 
-// Tx returns a new transactional client.
+// Tx returns a new transactional client. The provided context
+// is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
@@ -87,6 +88,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
+		ctx:    ctx,
 		config: cfg,
 		Blob:   NewBlobClient(cfg),
 		Car:    NewCarClient(cfg),
@@ -170,6 +172,11 @@ func (c *BlobClient) Create() *BlobCreate {
 	return &BlobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Blob entities.
+func (c *BlobClient) CreateBulk(builders ...*BlobCreate) *BlobCreateBulk {
+	return &BlobCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Blob.
 func (c *BlobClient) Update() *BlobUpdate {
 	mutation := newBlobMutation(c.config, OpUpdate)
@@ -207,7 +214,7 @@ func (c *BlobClient) DeleteOneID(id uuid.UUID) *BlobDeleteOne {
 	return &BlobDeleteOne{builder}
 }
 
-// Create returns a query builder for Blob.
+// Query returns a query builder for Blob.
 func (c *BlobClient) Query() *BlobQuery {
 	return &BlobQuery{config: c.config}
 }
@@ -219,11 +226,11 @@ func (c *BlobClient) Get(ctx context.Context, id uuid.UUID) (*Blob, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *BlobClient) GetX(ctx context.Context, id uuid.UUID) *Blob {
-	b, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return b
+	return obj
 }
 
 // QueryParent queries the parent edge of a Blob.
@@ -285,6 +292,11 @@ func (c *CarClient) Create() *CarCreate {
 	return &CarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Car entities.
+func (c *CarClient) CreateBulk(builders ...*CarCreate) *CarCreateBulk {
+	return &CarCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Car.
 func (c *CarClient) Update() *CarUpdate {
 	mutation := newCarMutation(c.config, OpUpdate)
@@ -322,7 +334,7 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 	return &CarDeleteOne{builder}
 }
 
-// Create returns a query builder for Car.
+// Query returns a query builder for Car.
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{config: c.config}
 }
@@ -334,11 +346,11 @@ func (c *CarClient) Get(ctx context.Context, id int) (*Car, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *CarClient) GetX(ctx context.Context, id int) *Car {
-	ca, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return ca
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Car.
@@ -384,6 +396,11 @@ func (c *GroupClient) Create() *GroupCreate {
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Group entities.
+func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
+	return &GroupCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Group.
 func (c *GroupClient) Update() *GroupUpdate {
 	mutation := newGroupMutation(c.config, OpUpdate)
@@ -421,7 +438,7 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	return &GroupDeleteOne{builder}
 }
 
-// Create returns a query builder for Group.
+// Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{config: c.config}
 }
@@ -433,11 +450,11 @@ func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
-	gr, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return gr
+	return obj
 }
 
 // QueryUsers queries the users edge of a Group.
@@ -483,6 +500,11 @@ func (c *PetClient) Create() *PetCreate {
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of Pet entities.
+func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
+	return &PetCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for Pet.
 func (c *PetClient) Update() *PetUpdate {
 	mutation := newPetMutation(c.config, OpUpdate)
@@ -520,7 +542,7 @@ func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
 	return &PetDeleteOne{builder}
 }
 
-// Create returns a query builder for Pet.
+// Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{config: c.config}
 }
@@ -532,11 +554,11 @@ func (c *PetClient) Get(ctx context.Context, id string) (*Pet, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
-	pe, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return pe
+	return obj
 }
 
 // QueryOwner queries the owner edge of a Pet.
@@ -630,6 +652,11 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
+// BulkCreate returns a builder for creating a bulk of User entities.
+func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
+	return &UserCreateBulk{config: c.config, builders: builders}
+}
+
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
 	mutation := newUserMutation(c.config, OpUpdate)
@@ -667,7 +694,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	return &UserDeleteOne{builder}
 }
 
-// Create returns a query builder for User.
+// Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{config: c.config}
 }
@@ -679,11 +706,11 @@ func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
 
 // GetX is like Get, but panics if an error occurs.
 func (c *UserClient) GetX(ctx context.Context, id int) *User {
-	u, err := c.Get(ctx, id)
+	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
 	}
-	return u
+	return obj
 }
 
 // QueryGroups queries the groups edge of a User.

@@ -4,7 +4,7 @@
 
 package g
 
-import "github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
+import "github.com/facebook/ent/dialect/gremlin/graph/dsl"
 
 // V is the api for calling g.V().
 func V(args ...interface{}) *dsl.Traversal { return dsl.NewTraversal().V(args...) }

@@ -10,40 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
-	var (
-		{{ $.Receiver }} = &{{ $.Name }}{config: {{ $receiver }}.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: {{ $.Package }}.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type: field.{{ $.ID.Type.ConstName }},
-				Column: {{ $.Package }}.{{ $.ID.Constant }},
-			},
-		}
-	)
-	{{- if $.ID.UserDefined }}
-		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
-			{{ $.Receiver }}.ID = id
-			_spec.ID.Value = id
-		}
-	{{- end }}
-	{{- range $_, $f := $.Fields }}
-		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-			_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-				Type: field.{{ $f.Type.ConstName }},
-				Value: value,
-				Column: {{ $.Package }}.{{ $f.Constant }},
-			})
-			{{ $.Receiver }}.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
-		}
-	{{- end }}
-	{{- range $_, $e := $.Edges }}
-		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
-			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
-				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
-			{{- end }}
-			_spec.Edges = append(_spec.Edges, edge)
-		}
-	{{- end }}
+	_node, _spec := {{ $receiver }}.createSpec()
 	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
@@ -54,15 +21,131 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
 	{{- else }}
 		{{- if $.ID.UserDefined }}
-			if {{ $.Receiver }}.ID == 0 {
+			if _node.ID == 0 {
 		{{- end }}
 			id := _spec.ID.Value.(int64)
-			{{ $.Receiver }}.ID = {{ $.ID.Type }}(id)
+			_node.ID = {{ $.ID.Type }}(id)
 		{{- if $.ID.UserDefined }}
 			}
 		{{- end }}
 	{{- end }}
-	return {{ $.Receiver }}, nil
+	return _node, nil
 }
 
+func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.CreateSpec) {
+	var (
+		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
+		_spec = &sqlgraph.CreateSpec{
+			Table: {{ $.Package }}.Table,
+			ID: &sqlgraph.FieldSpec{
+				Type: field.{{ $.ID.Type.ConstName }},
+				Column: {{ $.Package }}.{{ $.ID.Constant }},
+			},
+		}
+	)
+	{{- if $.ID.UserDefined }}
+		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
+			_node.ID = id
+			_spec.ID.Value = id
+		}
+	{{- end }}
+	{{- range $f := $.Fields }}
+		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+			_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+				Type: field.{{ $f.Type.ConstName }},
+				Value: value,
+				Column: {{ $.Package }}.{{ $f.Constant }},
+			})
+			_node.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
+		}
+	{{- end }}
+	{{- range $e := $.Edges }}
+		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
+			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
+				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
+			{{- end }}
+			_spec.Edges = append(_spec.Edges, edge)
+		}
+	{{- end }}
+	return _node, _spec
+}
+
+{{ end }}
+
+{{ define "dialect/sql/create_bulk" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+// Save creates the {{ $.Name }} entities in the database.
+func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }}, error) {
+	specs := make([]*sqlgraph.CreateSpec, len({{ $receiver }}.builders))
+	nodes := make([]*{{ $.Name }}, len({{ $receiver }}.builders))
+	mutators := make([]Mutator, len({{ $receiver }}.builders))
+	for i := range {{ $receiver }}.builders {
+		func(i int, root context.Context) {
+			builder := {{ $receiver }}.builders[i]
+			{{- if $.HasDefault }}
+				builder.defaults()
+			{{- end }}
+			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+				mutation, ok := m.(*{{ $.MutationName }})
+				if !ok {
+					return nil, fmt.Errorf("unexpected mutation type %T", m)
+				}
+				if err := builder.check(); err != nil {
+					return nil, err
+				}
+				builder.mutation = mutation
+				nodes[i], specs[i] = builder.createSpec()
+				var err error
+				if i < len(mutators)-1 {
+					_, err = mutators[i+1].Mutate(root, {{ $receiver }}.builders[i+1].mutation)
+				} else {
+					// Invoke the actual operation on the latest mutation in the chain.
+					if err = sqlgraph.BatchCreate(ctx, {{ $receiver }}.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+						if cerr, ok := isSQLConstraintError(err); ok {
+							err = cerr
+						}
+					}
+				}
+				mutation.done = true
+				if err != nil {
+					return nil, err
+				}
+				{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+					{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
+				{{- else }}
+					{{- if $.ID.UserDefined }}
+						if nodes[i].ID == 0 {
+					{{- end }}
+						id := specs[i].ID.Value.(int64)
+						nodes[i].ID = {{ $.ID.Type }}(id)
+					{{- if $.ID.UserDefined }}
+						}
+					{{- end }}
+				{{- end }}
+				return nodes[i], nil
+			})
+			for i := len(builder.hooks) - 1; i >= 0; i-- {
+				mut = builder.hooks[i](mut)
+			}
+			mutators[i] = mut
+		}(i, ctx)
+	}
+	if len(mutators) > 0 {
+		if _, err := mutators[0].Mutate(ctx, {{ $receiver }}.builders[0].mutation); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// SaveX calls Save and panics if Save returns an error.
+func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) []*{{ $.Name }} {
+	v, err := {{ $receiver }}.Save(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
 {{ end }}

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,9 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebookincubator/ent/examples/o2mrecur/ent/node"
+	"github.com/facebook/ent/examples/o2mrecur/ent/node"
+	"github.com/facebook/ent/examples/o2mrecur/ent/predicate"
 
-	"github.com/facebookincubator/ent"
+	"github.com/facebook/ent"
 )
 
 const (
@@ -42,8 +43,10 @@ type NodeMutation struct {
 	clearedparent   bool
 	children        map[int]struct{}
 	removedchildren map[int]struct{}
+	clearedchildren bool
 	done            bool
 	oldValue        func(context.Context) (*Node, error)
+	predicates      []predicate.Node
 }
 
 var _ ent.Mutation = (*NodeMutation)(nil)
@@ -231,6 +234,16 @@ func (m *NodeMutation) AddChildIDs(ids ...int) {
 	}
 }
 
+// ClearChildren clears the children edge to Node.
+func (m *NodeMutation) ClearChildren() {
+	m.clearedchildren = true
+}
+
+// ChildrenCleared returns if the edge children was cleared.
+func (m *NodeMutation) ChildrenCleared() bool {
+	return m.clearedchildren
+}
+
 // RemoveChildIDs removes the children edge to Node by ids.
 func (m *NodeMutation) RemoveChildIDs(ids ...int) {
 	if m.removedchildren == nil {
@@ -260,6 +273,7 @@ func (m *NodeMutation) ChildrenIDs() (ids []int) {
 // ResetChildren reset all changes of the "children" edge.
 func (m *NodeMutation) ResetChildren() {
 	m.children = nil
+	m.clearedchildren = false
 	m.removedchildren = nil
 }
 
@@ -452,6 +466,9 @@ func (m *NodeMutation) ClearedEdges() []string {
 	if m.clearedparent {
 		edges = append(edges, node.EdgeParent)
 	}
+	if m.clearedchildren {
+		edges = append(edges, node.EdgeChildren)
+	}
 	return edges
 }
 
@@ -461,6 +478,8 @@ func (m *NodeMutation) EdgeCleared(name string) bool {
 	switch name {
 	case node.EdgeParent:
 		return m.clearedparent
+	case node.EdgeChildren:
+		return m.clearedchildren
 	}
 	return false
 }

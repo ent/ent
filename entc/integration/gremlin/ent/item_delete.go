@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/item"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/item"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	id.predicates = append(id.predicates, ps...)
+	id.mutation.predicates = append(id.mutation.predicates, ps...)
 	return id
 }
 
@@ -81,7 +80,7 @@ func (id *ItemDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (id *ItemDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(item.Label)
-	for _, p := range id.predicates {
+	for _, p := range id.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

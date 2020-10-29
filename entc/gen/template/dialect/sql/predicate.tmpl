@@ -59,10 +59,11 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/edge/has" -}}
 	{{- $e := $.Scope.Edge -}}
+	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end -}}
 	func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, {{ $.ID.Constant }}),
-			sqlgraph.To({{ $e.TableConstant }}, {{ $.ID.Constant }}),
+			sqlgraph.To({{ $e.TableConstant }}, {{ $refid }}),
 			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
 				{{- if $e.M2M -}}
 					{{ $e.PKConstant }}...
@@ -77,10 +78,11 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
+	{{- $refid := $.ID.Constant }}{{ if ne $e.Type.ID.StorageKey $.ID.StorageKey }}{{ $refid = print $e.Type.Name "FieldID" }}{{ end -}}
 	func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, {{ $.ID.Constant }}),
-			sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $.ID.Constant }}),
+			sqlgraph.To({{ if ne $.Table $e.Type.Table }}{{ $e.InverseTableConstant }}{{ else }}Table{{ end }}, {{ $refid }}),
 			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $e.TableConstant }},
 				{{- if $e.M2M -}}
 					{{ $e.PKConstant }}...

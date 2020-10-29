@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -67,7 +67,7 @@ func TestInt(t *testing.T) {
 	fd = field.Int("active").GoType(Count(0)).Descriptor()
 	assert.NoError(t, fd.Err())
 	assert.Equal(t, "field_test.Count", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Count", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -104,7 +104,7 @@ func TestFloat(t *testing.T) {
 	fd = field.Float("active").GoType(Count(0)).Descriptor()
 	assert.NoError(t, fd.Err())
 	assert.Equal(t, "field_test.Count", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Count", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -137,7 +137,7 @@ func TestBool(t *testing.T) {
 	fd = field.Bool("active").GoType(Status(false)).Descriptor()
 	assert.NoError(t, fd.Err())
 	assert.Equal(t, "field_test.Status", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Status", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -231,7 +231,7 @@ func TestString(t *testing.T) {
 	}
 	fd = field.String("nullable_url").GoType(&tURL{}).Descriptor()
 	assert.Equal(t, "field_test.tURL", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.tURL", fd.Info.String())
 	assert.True(t, fd.Info.ValueScanner())
 	assert.True(t, fd.Info.Stringer())
@@ -269,7 +269,7 @@ func TestTime(t *testing.T) {
 	fd = field.Time("deleted_at").GoType(Time{}).Descriptor()
 	assert.NoError(t, fd.Err())
 	assert.Equal(t, "field_test.Time", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebookincubator/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Time", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -317,6 +317,17 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, "strings", fd.Name)
 	assert.Equal(t, field.TypeJSON, fd.Info.Type)
 	assert.Equal(t, "[]string", fd.Info.String())
+
+	fd = field.JSON("values", &url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("values", []url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("values", []*url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("values", map[string]url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("values", map[string]*url.Values{}).Descriptor()
+	assert.Equal(t, "net/url", fd.Info.PkgPath)
 }
 
 func TestField_Tag(t *testing.T) {
@@ -324,6 +335,12 @@ func TestField_Tag(t *testing.T) {
 		StructTag(`json:"expired,omitempty"`).
 		Descriptor()
 	assert.Equal(t, `json:"expired,omitempty"`, fd.Tag)
+}
+
+type Role string
+
+func (Role) Values() []string {
+	return []string{"admin", "owner"}
 }
 
 func TestField_Enums(t *testing.T) {
@@ -336,15 +353,46 @@ func TestField_Enums(t *testing.T) {
 		Default("user").
 		Descriptor()
 	assert.Equal(t, "role", fd.Name)
-	assert.Equal(t, []string{"user", "admin", "master"}, fd.Enums)
+	assert.Equal(t, "user", fd.Enums[0].V)
+	assert.Equal(t, "admin", fd.Enums[1].V)
+	assert.Equal(t, "master", fd.Enums[2].V)
 	assert.Equal(t, "user", fd.Default)
+
+	fd = field.Enum("role").
+		NamedValues("USER", "user").
+		Default("user").
+		Descriptor()
+	assert.Equal(t, "role", fd.Name)
+	assert.Equal(t, "USER", fd.Enums[0].N)
+	assert.Equal(t, "user", fd.Enums[0].V)
+	assert.Equal(t, "user", fd.Default)
+
+	fd = field.Enum("role").
+		ValueMap(map[string]string{"USER": "user"}).
+		Default("user").
+		Descriptor()
+	assert.Equal(t, "role", fd.Name)
+	assert.Equal(t, "USER", fd.Enums[0].N)
+	assert.Equal(t, "user", fd.Enums[0].V)
+
+	fd = field.Enum("role").GoType(Role("")).Descriptor()
+	assert.NoError(t, fd.Err())
+	assert.Equal(t, "field_test.Role", fd.Info.Ident)
+	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "field_test.Role", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.ValueScanner())
+	assert.Equal(t, "admin", fd.Enums[0].V)
+	assert.Equal(t, "owner", fd.Enums[1].V)
 }
 
 func TestField_UUID(t *testing.T) {
 	fd := field.UUID("id", uuid.UUID{}).
+		Unique().
 		Default(uuid.New).
 		Descriptor()
 	assert.Equal(t, "id", fd.Name)
+	assert.True(t, fd.Unique)
 	assert.Equal(t, "uuid.UUID", fd.Info.String())
 	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
 	assert.NotNil(t, fd.Default)

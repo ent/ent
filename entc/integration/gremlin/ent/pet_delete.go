@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	config
-	hooks      []Hook
-	mutation   *PetMutation
-	predicates []predicate.Pet
+	hooks    []Hook
+	mutation *PetMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
-	pd.predicates = append(pd.predicates, ps...)
+	pd.mutation.predicates = append(pd.mutation.predicates, ps...)
 	return pd
 }
 
@@ -81,7 +80,7 @@ func (pd *PetDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (pd *PetDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(pet.Label)
-	for _, p := range pd.predicates {
+	for _, p := range pd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

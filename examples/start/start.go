@@ -10,10 +10,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/facebookincubator/ent/examples/start/ent"
-	"github.com/facebookincubator/ent/examples/start/ent/car"
-	"github.com/facebookincubator/ent/examples/start/ent/group"
-	"github.com/facebookincubator/ent/examples/start/ent/user"
+	"github.com/facebook/ent/examples/start/ent"
+	"github.com/facebook/ent/examples/start/ent/car"
+	"github.com/facebook/ent/examples/start/ent/group"
+	"github.com/facebook/ent/examples/start/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 )

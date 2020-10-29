@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -11,14 +11,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/user"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -72,6 +72,20 @@ func (fc *FileCreate) SetGroup(s string) *FileCreate {
 func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 	if s != nil {
 		fc.SetGroup(*s)
+	}
+	return fc
+}
+
+// SetOp sets the op field.
+func (fc *FileCreate) SetOp(b bool) *FileCreate {
+	fc.mutation.SetOp(b)
+	return fc
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
+	if b != nil {
+		fc.SetOp(*b)
 	}
 	return fc
 }
@@ -136,29 +150,24 @@ func (fc *FileCreate) Mutation() *FileMutation {
 
 // Save creates the File in the database.
 func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
-	if _, ok := fc.mutation.Size(); !ok {
-		v := file.DefaultSize
-		fc.mutation.SetSize(v)
-	}
-	if v, ok := fc.mutation.Size(); ok {
-		if err := file.SizeValidator(v); err != nil {
-			return nil, &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
-		}
-	}
-	if _, ok := fc.mutation.Name(); !ok {
-		return nil, &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
-	}
 	var (
 		err  error
 		node *File
 	)
+	fc.defaults()
 	if len(fc.hooks) == 0 {
+		if err = fc.check(); err != nil {
+			return nil, err
+		}
 		node, err = fc.gremlinSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fc.check(); err != nil {
+				return nil, err
 			}
 			fc.mutation = mutation
 			node, err = fc.gremlinSave(ctx)
@@ -182,6 +191,30 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 		panic(err)
 	}
 	return v
+}
+
+// defaults sets the default values of the builder before save.
+func (fc *FileCreate) defaults() {
+	if _, ok := fc.mutation.Size(); !ok {
+		v := file.DefaultSize
+		fc.mutation.SetSize(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (fc *FileCreate) check() error {
+	if _, ok := fc.mutation.Size(); !ok {
+		return &ValidationError{Name: "size", err: errors.New("ent: missing required field \"size\"")}
+	}
+	if v, ok := fc.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
+			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+		}
+	}
+	if _, ok := fc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	return nil
 }
 
 func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
@@ -219,6 +252,9 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 	if value, ok := fc.mutation.Group(); ok {
 		v.Property(dsl.Single, file.FieldGroup, value)
 	}
+	if value, ok := fc.mutation.GetOp(); ok {
+		v.Property(dsl.Single, file.FieldOp, value)
+	}
 	for _, id := range fc.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
@@ -240,4 +276,10 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 		tr = cr.pred.Coalesce(cr.test, tr)
 	}
 	return tr
+}
+
+// FileCreateBulk is the builder for creating a bulk of File entities.
+type FileCreateBulk struct {
+	config
+	builders []*FileCreate
 }

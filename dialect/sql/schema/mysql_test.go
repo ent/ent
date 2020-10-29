@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facebookincubator/ent/dialect"
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/schema/field"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
@@ -139,6 +139,56 @@ func TestMySQL_Create(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.fkExists("pets_owner", false)
 				mock.ExpectExec(escape("ALTER TABLE `pets` ADD CONSTRAINT `pets_owner` FOREIGN KEY(`owner_id`) REFERENCES `users`(`id`) ON DELETE CASCADE")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "create new table with foreign key diabled",
+			options: []MigrateOption{
+				WithForeignKeys(false),
+			},
+			tables: func() []*Table {
+				var (
+					c1 = []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "created_at", Type: field.TypeTime},
+					}
+					c2 = []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString},
+						{Name: "owner_id", Type: field.TypeInt, Nullable: true},
+					}
+					t1 = &Table{
+						Name:       "users",
+						Columns:    c1,
+						PrimaryKey: c1[0:1],
+					}
+					t2 = &Table{
+						Name:       "pets",
+						Columns:    c2,
+						PrimaryKey: c2[0:1],
+						ForeignKeys: []*ForeignKey{
+							{
+								Symbol:     "pets_owner",
+								Columns:    c2[2:],
+								RefTable:   t1,
+								RefColumns: c1[0:1],
+								OnDelete:   Cascade,
+							},
+						},
+					}
+				)
+				return []*Table{t1, t2}
+			}(),
+			before: func(mock mysqlMock) {
+				mock.start("5.7.23")
+				mock.tableExists("users", false)
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `created_at` timestamp NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.tableExists("pets", false)
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NOT NULL, `owner_id` bigint NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -699,11 +749,6 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("PRIMARY", "id", "0", "1").
 						AddRow("old_index", "old", "0", "1").
 						AddRow("parent_id", "parent_id", "0", "1"))
-				mock.fkExists("parent_id", true)
-				mock.ExpectQuery(escape("SELECT `column_name` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS t1 JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS t2 ON `t1`.`constraint_name` = `t2`.`constraint_name` WHERE (`t2`.`constraint_type` = 'FOREIGN KEY') AND (`t2`.`table_schema` = (SELECT DATABASE())) AND (`t1`.`table_schema` = (SELECT DATABASE())) AND (`t2`.`constraint_name` = ?)")).
-					WithArgs("parent_id").
-					WillReturnRows(sqlmock.NewRows([]string{"COLUMN_NAME"}).
-						AddRow("parent_id"))
 				// drop the unique index.
 				mock.ExpectExec(escape("DROP INDEX `old_index` ON `users`")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
@@ -833,7 +878,6 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", "0", "1"))
-				mock.fkExists("user_spouse_____________________390ed76f91d3c57cd3516e7690f621dc", false)
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `spouse_id` bigint NULL")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.fkExists("user_spouse_____________________390ed76f91d3c57cd3516e7690f621dc", false)
@@ -853,7 +897,7 @@ func TestMySQL_Create(t *testing.T) {
 				mock.start("5.7.23")
 				mock.tableExists("ent_types", false)
 				// create ent_types table.
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `ent_types`(`id` bigint AUTO_INCREMENT NOT NULL, `type` varchar(255) UNIQUE NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `ent_types`(`id` bigint unsigned AUTO_INCREMENT NOT NULL, `type` varchar(255) UNIQUE NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.tableExists("users", false)
 				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebookincubator/ent/entc/integration/migrate/entv2/predicate"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
+	"github.com/facebook/ent/schema/field"
 )
 
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	config
-	hooks      []Hook
-	mutation   *PetMutation
-	predicates []predicate.Pet
+	hooks    []Hook
+	mutation *PetMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
-	pd.predicates = append(pd.predicates, ps...)
+	pd.mutation.predicates = append(pd.mutation.predicates, ps...)
 	return pd
 }
 
@@ -79,7 +78,7 @@ func (pd *PetDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := pd.predicates; len(ps) > 0 {
+	if ps := pd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

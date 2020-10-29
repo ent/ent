@@ -7,6 +7,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
+{{ $mutation := print $receiver ".mutation" }}
 
 func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
@@ -18,7 +19,7 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 			},
 		},
 	}
-	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
+	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

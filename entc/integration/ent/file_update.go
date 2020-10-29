@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,27 +10,26 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/sql"
-	"github.com/facebookincubator/ent/dialect/sql/sqlgraph"
-	"github.com/facebookincubator/ent/entc/integration/ent/fieldtype"
-	"github.com/facebookincubator/ent/entc/integration/ent/file"
-	"github.com/facebookincubator/ent/entc/integration/ent/filetype"
-	"github.com/facebookincubator/ent/entc/integration/ent/predicate"
-	"github.com/facebookincubator/ent/entc/integration/ent/user"
-	"github.com/facebookincubator/ent/schema/field"
+	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
+	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"github.com/facebook/ent/entc/integration/ent/user"
+	"github.com/facebook/ent/schema/field"
 )
 
 // FileUpdate is the builder for updating File entities.
 type FileUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *FileMutation
-	predicates []predicate.File
+	hooks    []Hook
+	mutation *FileMutation
 }
 
 // Where adds a new predicate for the builder.
 func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
-	fu.predicates = append(fu.predicates, ps...)
+	fu.mutation.predicates = append(fu.mutation.predicates, ps...)
 	return fu
 }
 
@@ -101,6 +100,26 @@ func (fu *FileUpdate) ClearGroup() *FileUpdate {
 	return fu
 }
 
+// SetOp sets the op field.
+func (fu *FileUpdate) SetOp(b bool) *FileUpdate {
+	fu.mutation.SetOp(b)
+	return fu
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fu *FileUpdate) SetNillableOp(b *bool) *FileUpdate {
+	if b != nil {
+		fu.SetOp(*b)
+	}
+	return fu
+}
+
+// ClearOp clears the value of op.
+func (fu *FileUpdate) ClearOp() *FileUpdate {
+	fu.mutation.ClearOp()
+	return fu
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (fu *FileUpdate) SetOwnerID(id int) *FileUpdate {
 	fu.mutation.SetOwnerID(id)
@@ -159,15 +178,21 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
 	fu.mutation.ClearOwner()
 	return fu
 }
 
-// ClearType clears the type edge to FileType.
+// ClearType clears the "type" edge to type FileType.
 func (fu *FileUpdate) ClearType() *FileUpdate {
 	fu.mutation.ClearType()
+	return fu
+}
+
+// ClearFieldEdge clears all "field" edges to type FieldType.
+func (fu *FileUpdate) ClearFieldEdge() *FileUpdate {
+	fu.mutation.ClearFieldEdge()
 	return fu
 }
 
@@ -188,23 +213,23 @@ func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
-	if v, ok := fu.mutation.Size(); ok {
-		if err := file.SizeValidator(v); err != nil {
-			return 0, &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
-		}
-	}
-
 	var (
 		err      error
 		affected int
 	)
 	if len(fu.hooks) == 0 {
+		if err = fu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = fu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fu.check(); err != nil {
+				return 0, err
 			}
 			fu.mutation = mutation
 			affected, err = fu.sqlSave(ctx)
@@ -243,6 +268,16 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (fu *FileUpdate) check() error {
+	if v, ok := fu.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
+			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+		}
+	}
+	return nil
+}
+
 func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -254,7 +289,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := fu.predicates; len(ps) > 0 {
+	if ps := fu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -306,6 +341,19 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: file.FieldGroup,
+		})
+	}
+	if value, ok := fu.mutation.GetOp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: file.FieldOp,
+		})
+	}
+	if fu.mutation.OpCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: file.FieldOp,
 		})
 	}
 	if fu.mutation.OwnerCleared() {
@@ -378,7 +426,23 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := fu.mutation.RemovedFieldIDs(); len(nodes) > 0 {
+	if fu.mutation.FieldEdgeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.RemovedFieldIDs(); len(nodes) > 0 && !fu.mutation.FieldEdgeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -501,6 +565,26 @@ func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
 	return fuo
 }
 
+// SetOp sets the op field.
+func (fuo *FileUpdateOne) SetOp(b bool) *FileUpdateOne {
+	fuo.mutation.SetOp(b)
+	return fuo
+}
+
+// SetNillableOp sets the op field if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
+	if b != nil {
+		fuo.SetOp(*b)
+	}
+	return fuo
+}
+
+// ClearOp clears the value of op.
+func (fuo *FileUpdateOne) ClearOp() *FileUpdateOne {
+	fuo.mutation.ClearOp()
+	return fuo
+}
+
 // SetOwnerID sets the owner edge to User by id.
 func (fuo *FileUpdateOne) SetOwnerID(id int) *FileUpdateOne {
 	fuo.mutation.SetOwnerID(id)
@@ -559,15 +643,21 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
 }
 
-// ClearOwner clears the owner edge to User.
+// ClearOwner clears the "owner" edge to type User.
 func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 	fuo.mutation.ClearOwner()
 	return fuo
 }
 
-// ClearType clears the type edge to FileType.
+// ClearType clears the "type" edge to type FileType.
 func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
 	fuo.mutation.ClearType()
+	return fuo
+}
+
+// ClearFieldEdge clears all "field" edges to type FieldType.
+func (fuo *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
+	fuo.mutation.ClearFieldEdge()
 	return fuo
 }
 
@@ -588,23 +678,23 @@ func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
-	if v, ok := fuo.mutation.Size(); ok {
-		if err := file.SizeValidator(v); err != nil {
-			return nil, &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
-		}
-	}
-
 	var (
 		err  error
 		node *File
 	)
 	if len(fuo.hooks) == 0 {
+		if err = fuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = fuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*FileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = fuo.check(); err != nil {
+				return nil, err
 			}
 			fuo.mutation = mutation
 			node, err = fuo.sqlSave(ctx)
@@ -623,11 +713,11 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (fuo *FileUpdateOne) SaveX(ctx context.Context) *File {
-	f, err := fuo.Save(ctx)
+	node, err := fuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return f
+	return node
 }
 
 // Exec executes the query on the entity.
@@ -643,7 +733,17 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
+// check runs all checks and user-defined validators on the builder.
+func (fuo *FileUpdateOne) check() error {
+	if v, ok := fuo.mutation.Size(); ok {
+		if err := file.SizeValidator(v); err != nil {
+			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+		}
+	}
+	return nil
+}
+
+func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   file.Table,
@@ -704,6 +804,19 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: file.FieldGroup,
+		})
+	}
+	if value, ok := fuo.mutation.GetOp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: file.FieldOp,
+		})
+	}
+	if fuo.mutation.OpCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: file.FieldOp,
 		})
 	}
 	if fuo.mutation.OwnerCleared() {
@@ -776,7 +889,23 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if nodes := fuo.mutation.RemovedFieldIDs(); len(nodes) > 0 {
+	if fuo.mutation.FieldEdgeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.RemovedFieldIDs(); len(nodes) > 0 && !fuo.mutation.FieldEdgeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -814,9 +943,9 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	f = &File{config: fuo.config}
-	_spec.Assign = f.assignValues
-	_spec.ScanValues = f.scanValues()
+	_node = &File{config: fuo.config}
+	_spec.Assign = _node.assignValues
+	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, fuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
@@ -825,5 +954,5 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (f *File, err error) {
 		}
 		return nil, err
 	}
-	return f, nil
+	return _node, nil
 }

@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/node"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *NodeMutation
-	predicates []predicate.Node
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
-	nd.predicates = append(nd.predicates, ps...)
+	nd.mutation.predicates = append(nd.mutation.predicates, ps...)
 	return nd
 }
 
@@ -81,7 +80,7 @@ func (nd *NodeDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (nd *NodeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(node.Label)
-	for _, p := range nd.predicates {
+	for _, p := range nd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

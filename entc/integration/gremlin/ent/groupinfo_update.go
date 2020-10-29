@@ -1,4 +1,4 @@
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+// Copyright 2019-present Facebook Inc. All rights reserved.
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
@@ -10,27 +10,26 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebookincubator/ent/dialect/gremlin"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebookincubator/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/groupinfo"
-	"github.com/facebookincubator/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/facebook/ent/dialect/gremlin"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
 type GroupInfoUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *GroupInfoMutation
-	predicates []predicate.GroupInfo
+	hooks    []Hook
+	mutation *GroupInfoMutation
 }
 
 // Where adds a new predicate for the builder.
 func (giu *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
-	giu.predicates = append(giu.predicates, ps...)
+	giu.mutation.predicates = append(giu.mutation.predicates, ps...)
 	return giu
 }
 
@@ -81,6 +80,12 @@ func (giu *GroupInfoUpdate) Mutation() *GroupInfoMutation {
 	return giu.mutation
 }
 
+// ClearGroups clears all "groups" edges to type Group.
+func (giu *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
+	giu.mutation.ClearGroups()
+	return giu
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (giu *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
 	giu.mutation.RemoveGroupIDs(ids...)
@@ -98,7 +103,6 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
-
 	var (
 		err      error
 		affected int
@@ -167,7 +171,7 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(groupinfo.Label)
-	for _, p := range giu.predicates {
+	for _, p := range giu.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -265,6 +269,12 @@ func (giuo *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
 	return giuo.mutation
 }
 
+// ClearGroups clears all "groups" edges to type Group.
+func (giuo *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
+	giuo.mutation.ClearGroups()
+	return giuo
+}
+
 // RemoveGroupIDs removes the groups edge to Group by ids.
 func (giuo *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
 	giuo.mutation.RemoveGroupIDs(ids...)
@@ -282,7 +292,6 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 
 // Save executes the query and returns the updated entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
-
 	var (
 		err  error
 		node *GroupInfo
@@ -312,11 +321,11 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (giuo *GroupInfoUpdateOne) SaveX(ctx context.Context) *GroupInfo {
-	gi, err := giuo.Save(ctx)
+	node, err := giuo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return gi
+	return node
 }
 
 // Exec executes the query on the entity.
