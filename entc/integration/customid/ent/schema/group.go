@@ -20,7 +20,7 @@ func (Group) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
 			StructTag(`json:"oid,omitempty"`).
-			Increment(),
+			Increment(true),
 	}
 }
 

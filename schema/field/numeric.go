@@ -219,8 +219,8 @@ func (b *intBuilder) StorageKey(key string) *intBuilder {
 }
 
 // Increment sets auto increment of the field.
-func (b *intBuilder) Increment() *intBuilder {
-	b.desc.Increment = true
+func (b *intBuilder) Increment(t bool) *intBuilder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -365,8 +365,8 @@ func (b *uintBuilder) StorageKey(key string) *uintBuilder {
 }
 
 // Increment sets auto increment of the field.
-func (b *uintBuilder) Increment() *uintBuilder {
-	b.desc.Increment = true
+func (b *uintBuilder) Increment(t bool) *uintBuilder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -521,8 +521,8 @@ func (b *int8Builder) StorageKey(key string) *int8Builder {
 }
 
 // Increment sets auto increment of the field.
-func (b *int8Builder) Increment() *int8Builder {
-	b.desc.Increment = true
+func (b *int8Builder) Increment(t bool) *int8Builder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -677,8 +677,8 @@ func (b *int16Builder) StorageKey(key string) *int16Builder {
 }
 
 // Increment sets auto increment of the field.
-func (b *int16Builder) Increment() *int16Builder {
-	b.desc.Increment = true
+func (b *int16Builder) Increment(t bool) *int16Builder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -833,8 +833,8 @@ func (b *int32Builder) StorageKey(key string) *int32Builder {
 }
 
 // Increment sets auto increment of the field.
-func (b *int32Builder) Increment() *int32Builder {
-	b.desc.Increment = true
+func (b *int32Builder) Increment(t bool) *int32Builder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -989,8 +989,8 @@ func (b *int64Builder) StorageKey(key string) *int64Builder {
 }
 
 // Increment sets auto increment of the field.
-func (b *int64Builder) Increment() *int64Builder {
-	b.desc.Increment = true
+func (b *int64Builder) Increment(t bool) *int64Builder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -1135,8 +1135,8 @@ func (b *uint8Builder) StorageKey(key string) *uint8Builder {
 }
 
 // Increment sets auto increment of the field.
-func (b *uint8Builder) Increment() *uint8Builder {
-	b.desc.Increment = true
+func (b *uint8Builder) Increment(t bool) *uint8Builder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -1281,8 +1281,8 @@ func (b *uint16Builder) StorageKey(key string) *uint16Builder {
 }
 
 // Increment sets auto increment of the field.
-func (b *uint16Builder) Increment() *uint16Builder {
-	b.desc.Increment = true
+func (b *uint16Builder) Increment(t bool) *uint16Builder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -1427,8 +1427,8 @@ func (b *uint32Builder) StorageKey(key string) *uint32Builder {
 }
 
 // Increment sets auto increment of the field.
-func (b *uint32Builder) Increment() *uint32Builder {
-	b.desc.Increment = true
+func (b *uint32Builder) Increment(t bool) *uint32Builder {
+	b.desc.Increment = t
 	return b
 }
 
@@ -1573,8 +1573,8 @@ func (b *uint64Builder) StorageKey(key string) *uint64Builder {
 }
 
 // Increment sets auto increment of the field.
-func (b *uint64Builder) Increment() *uint64Builder {
-	b.desc.Increment = true
+func (b *uint64Builder) Increment(t bool) *uint64Builder {
+	b.desc.Increment = t
 	return b
 }
 

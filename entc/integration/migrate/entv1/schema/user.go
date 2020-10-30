@@ -21,7 +21,7 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
 			StorageKey("oid").
-			Increment(),
+			Increment(true),
 		field.Int32("age"),
 		field.String("name").
 			MaxLen(10),

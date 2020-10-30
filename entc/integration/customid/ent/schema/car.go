@@ -23,7 +23,7 @@ func (IDMixin) Fields() []ent.Field {
 		field.Int("id").
 			Positive().
 			Immutable().
-			Increment(),
+			Increment(true),
 		field.Float("after_id").
 			Optional().
 			Negative(),

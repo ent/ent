@@ -153,8 +153,8 @@ func (b *{{ $builder }}) StorageKey(key string) *{{ $builder }} {
 }
 
 // Increment sets auto increment of the field.
-func (b *{{ $builder }}) Increment() *{{ $builder }} {
-	b.desc.Increment = true
+func (b *{{ $builder }}) Increment(t bool) *{{ $builder }} {
+	b.desc.Increment = t
 	return b
 }
 

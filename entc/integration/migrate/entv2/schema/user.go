@@ -42,7 +42,7 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
 			StorageKey("oid").
-			Increment(),
+			Increment(true),
 		// changing the type of the field.
 		field.Int("age"),
 		// extending name field to longtext.

@@ -177,6 +177,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 			Name:      "id",
 			Type:      idType,
 			StructTag: structTag("id", ""),
+			Increment: true,
 		},
 		schema:      schema,
 		Name:        schema.Name,

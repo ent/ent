@@ -19,7 +19,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").
-			Increment().
+			Increment(true).
 			StorageKey("oid"),
 	}
 }
