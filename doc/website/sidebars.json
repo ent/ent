@@ -31,7 +31,8 @@
       "templates",
       "graphql",
       "sql-integration",
-      "testing"
+      "testing",
+      "faq"
     ]
   }
 }
