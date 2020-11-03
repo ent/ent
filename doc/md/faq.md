@@ -8,7 +8,8 @@ sidebar_label: FAQ
 
 [How to create an entity from a struct `T`?](#how-to-create-an-entity-from-a-struct-t)  
 [How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator)  
-[How to write an audit-log extension?](#how-to-write-an-audit-log-extension)
+[How to write an audit-log extension?](#how-to-write-an-audit-log-extension)  
+[How to write custom predicates?](#how-to-write-custom-predicates)
 
 ## Answers
 
@@ -155,3 +156,26 @@ func AuditHook(next ent.Mutator) ent.Mutator {
 	})
 }
 ```
+
+#### How to write custom predicates?
+
+Users can provide custom predicates to apply on the query before it's executed. For example:
+
+```go
+pets := client.Pet.
+	Query().
+	Where(predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.InInts(pet.OwnerColumn, 1, 2, 3))
+	})).
+	AllX(ctx)
+
+users := client.User.
+	Query().
+	Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sqljson.ValueContains(user.FieldTags, "tag"))
+	})).
+	AllX(ctx)
+```
+
+For more examples, go to the [predicates](predicates.md#custom-predicates) page, or search in the repository
+issue-tracker for more advance examples like [issue-842](https://github.com/facebook/ent/issues/842#issuecomment-707896368).
