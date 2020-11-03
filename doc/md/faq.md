@@ -9,7 +9,8 @@ sidebar_label: FAQ
 [How to create an entity from a struct `T`?](#how-to-create-an-entity-from-a-struct-t)  
 [How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator)  
 [How to write an audit-log extension?](#how-to-write-an-audit-log-extension)  
-[How to write custom predicates?](#how-to-write-custom-predicates)
+[How to write custom predicates?](#how-to-write-custom-predicates)  
+[How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets)
 
 ## Answers
 
@@ -179,3 +180,28 @@ users := client.User.
 
 For more examples, go to the [predicates](predicates.md#custom-predicates) page, or search in the repository
 issue-tracker for more advance examples like [issue-842](https://github.com/facebook/ent/issues/842#issuecomment-707896368).
+
+#### How to add custom predicates to the codegen assets?
+
+The [template](templates.md) option enables the capability for extending or overriding the default codegen assets.
+In order to generate a type-safe predicate for the [example above](#how-to-write-custom-predicates), use the template
+option for doing it as follows:
+
+```gotemplate
+{{/* A template that adds the "<F>Glob" predicate for all string fields. */}}
+{{ define "where/additional/strings" }}
+    {{ range $f := $.Fields }}
+        {{ if $f.IsString }}
+            {{ $func := print $f.StructField "Glob" }}
+            // {{ $func }} applies the Glob predicate on the {{ quote $f.Name }} field.
+            func {{ $func }}(pattern string) predicate.{{ $.Name }} {
+                return predicate.{{ $.Name }}(func(s *sql.Selector) {
+                    s.Where(sql.P(func(b *sql.Builder) {
+                        b.Ident(s.C({{ $f.Constant }})).WriteString(" glob" ).Arg(pattern)
+                    }))
+                })
+            }
+        {{ end }}
+    {{ end }}
+{{ end }}
+```
