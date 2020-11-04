@@ -162,5 +162,5 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 {{/* A template for omitting struct-tags. */}}
 {{ define "model/omittags" }}{{ with $.TagTypes }}`{{ range $i, $t := . }}{{ if ne $i 0 }} {{ end }}{{ $t }}:"-"{{ end }}`{{ end }}{{ end }}
 
-{{/* A template that can be overrided in order to add additional fields to the each type.*/}}
+{{/* A template that can be overridden in order to add additional fields to the each type.*/}}
 {{ define "model/fields/additional" }}{{end}}
