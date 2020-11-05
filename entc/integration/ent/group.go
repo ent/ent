@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/facebook/ent/dialect/sql"
@@ -200,26 +199,7 @@ func (gr *Group) Unwrap() *Group {
 	return gr
 }
 
-// String implements the fmt.Stringer.
-func (gr *Group) String() string {
-	var builder strings.Builder
-	builder.WriteString("Group(")
-	builder.WriteString(fmt.Sprintf("id=%v", gr.ID))
-	builder.WriteString(", active=")
-	builder.WriteString(fmt.Sprintf("%v", gr.Active))
-	builder.WriteString(", expire=")
-	builder.WriteString(gr.Expire.Format(time.ANSIC))
-	if v := gr.Type; v != nil {
-		builder.WriteString(", type=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", max_users=")
-	builder.WriteString(fmt.Sprintf("%v", gr.MaxUsers))
-	builder.WriteString(", name=")
-	builder.WriteString(gr.Name)
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // Groups is a parsable slice of Group.
 type Groups []*Group

@@ -7,9 +7,6 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/facebook/ent/dialect/gremlin"
 )
 
@@ -66,22 +63,7 @@ func (c *Comment) Unwrap() *Comment {
 	return c
 }
 
-// String implements the fmt.Stringer.
-func (c *Comment) String() string {
-	var builder strings.Builder
-	builder.WriteString("Comment(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", unique_int=")
-	builder.WriteString(fmt.Sprintf("%v", c.UniqueInt))
-	builder.WriteString(", unique_float=")
-	builder.WriteString(fmt.Sprintf("%v", c.UniqueFloat))
-	if v := c.NillableInt; v != nil {
-		builder.WriteString(", nillable_int=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // Comments is a parsable slice of Comment.
 type Comments []*Comment

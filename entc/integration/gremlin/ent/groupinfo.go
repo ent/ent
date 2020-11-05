@@ -7,9 +7,6 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/facebook/ent/dialect/gremlin"
 )
 
@@ -88,18 +85,7 @@ func (gi *GroupInfo) Unwrap() *GroupInfo {
 	return gi
 }
 
-// String implements the fmt.Stringer.
-func (gi *GroupInfo) String() string {
-	var builder strings.Builder
-	builder.WriteString("GroupInfo(")
-	builder.WriteString(fmt.Sprintf("id=%v", gi.ID))
-	builder.WriteString(", desc=")
-	builder.WriteString(gi.Desc)
-	builder.WriteString(", max_users=")
-	builder.WriteString(fmt.Sprintf("%v", gi.MaxUsers))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // GroupInfos is a parsable slice of GroupInfo.
 type GroupInfos []*GroupInfo

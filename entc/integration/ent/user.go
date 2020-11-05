@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/card"
@@ -374,31 +373,7 @@ func (u *User) Unwrap() *User {
 	return u
 }
 
-// String implements the fmt.Stringer.
-func (u *User) String() string {
-	var builder strings.Builder
-	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
-	builder.WriteString(", optional_int=")
-	builder.WriteString(fmt.Sprintf("%v", u.OptionalInt))
-	builder.WriteString(", age=")
-	builder.WriteString(fmt.Sprintf("%v", u.Age))
-	builder.WriteString(", name=")
-	builder.WriteString(u.Name)
-	builder.WriteString(", last=")
-	builder.WriteString(u.Last)
-	builder.WriteString(", nickname=")
-	builder.WriteString(u.Nickname)
-	builder.WriteString(", phone=")
-	builder.WriteString(u.Phone)
-	builder.WriteString(", password=<sensitive>")
-	builder.WriteString(", role=")
-	builder.WriteString(fmt.Sprintf("%v", u.Role))
-	builder.WriteString(", SSOCert=")
-	builder.WriteString(u.SSOCert)
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // Users is a parsable slice of User.
 type Users []*User

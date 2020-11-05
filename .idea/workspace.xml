@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="290f2bb1-9c28-4385-8659-0807a0b789b3" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/entc/gen/internal/bindata.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/gen/internal/bindata.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/gen/template.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/gen/template.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/gen/template/ent.tmpl" beforeDir="false" afterPath="$PROJECT_DIR$/entc/gen/template/ent.tmpl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/card.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/card.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/comment.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/fieldtype.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/fieldtype.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/file.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/file.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/filetype.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/filetype.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/goods.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/goods.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/group.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/group.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/groupinfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/groupinfo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/item.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/item.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/node.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/node.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/pet.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/pet.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/spec.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/spec.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/task.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/task.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/ent/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/ent/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/card.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/card.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/comment.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/fieldtype.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/fieldtype.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/file.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/file.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/filetype.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/filetype.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/goods.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/goods.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/group.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/group.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/groupinfo.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/groupinfo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/item.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/item.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/node.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/node.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/pet.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/pet.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/spec.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/spec.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/task.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/task.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/entc/integration/gremlin/ent/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/entc/integration/gremlin/ent/user.go" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" path="/usr/lib/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="false" />
+  </component>
+  <component name="ProjectId" id="1jJfEQIR0gfMKHiPq0CtcJYEMt0" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.sdk.automatically.set" value="true" />
+    <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/entc/integration/ent/template" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="preferences.fileTypes" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/entc/integration/ent/template" />
+      <recent name="$PROJECT_DIR$/cmd" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/cmd" />
+    </key>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="456" y="175" key="SettingsEditor" timestamp="1604580803277">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="456" y="175" key="SettingsEditor/0.0.1920.1080@0.0.1920.1080" timestamp="1604580803277" />
+    <state width="498" height="445" key="SwitcherDM" timestamp="1604583327934">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state width="498" height="445" key="SwitcherDM/0.0.1920.1080@0.0.1920.1080" timestamp="1604583327934" />
+    <state x="566" y="153" width="778" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1604583289009">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="566" y="153" width="778" height="771" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.1920.1080@0.0.1920.1080" timestamp="1604583289009" />
+    <state x="669" y="273" width="582" height="534" key="find.popup" timestamp="1604315414317">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="669" y="273" width="582" height="534" key="find.popup/0.0.1920.1080@0.0.1920.1080" timestamp="1604315414317" />
+    <state width="300" height="36" key="javadoc.popup.new" timestamp="1604581897813">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state width="300" height="36" key="javadoc.popup.new/0.0.1920.1080@0.0.1920.1080" timestamp="1604581897813" />
+    <state x="623" y="239" width="672" height="678" key="search.everywhere.popup" timestamp="1604582708927">
+      <screen x="0" y="0" width="1920" height="1080" />
+    </state>
+    <state x="623" y="239" width="672" height="678" key="search.everywhere.popup/0.0.1920.1080@0.0.1920.1080" timestamp="1604582708927" />
+  </component>
+</project>

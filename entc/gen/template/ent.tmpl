@@ -103,6 +103,26 @@ func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
 	return {{ $receiver }}
 }
 
+{{ template "model/stringer" $ }}
+
+{{ $slice := plural $.Name }}
+// {{ $slice }} is a parsable slice of {{ $.Name }}.
+type {{ $slice }} []*{{ $.Name }}
+
+{{ with extend $ "Slice" $slice }}
+	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
+	{{ xtemplate $tmpl . }}
+{{ end }}
+
+func ({{ $receiver }} {{ $slice }}) config(cfg config) {
+	for _i := range {{ $receiver }} {
+		{{ $receiver }}[_i].config = cfg
+	}
+}
+{{ end }}
+
+{{ define "model/stringer" }}
+{{ $receiver := $.Receiver }}
 // String implements the fmt.Stringer.
 func ({{ $receiver }} *{{ $.Name }}) String() string {
 	var builder strings.Builder
@@ -138,21 +158,6 @@ func ({{ $receiver }} *{{ $.Name }}) String() string {
 	{{- end }}
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-{{ $slice := plural $.Name }}
-// {{ $slice }} is a parsable slice of {{ $.Name }}.
-type {{ $slice }} []*{{ $.Name }}
-
-{{ with extend $ "Slice" $slice }}
-	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
-	{{ xtemplate $tmpl . }}
-{{ end }}
-
-func ({{ $receiver }} {{ $slice }}) config(cfg config) {
-	for _i := range {{ $receiver }} {
-		{{ $receiver }}[_i].config = cfg
-	}
 }
 {{ end }}
 

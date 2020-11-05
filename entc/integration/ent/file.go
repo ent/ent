@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/file"
@@ -205,26 +204,7 @@ func (f *File) Unwrap() *File {
 	return f
 }
 
-// String implements the fmt.Stringer.
-func (f *File) String() string {
-	var builder strings.Builder
-	builder.WriteString("File(")
-	builder.WriteString(fmt.Sprintf("id=%v", f.ID))
-	builder.WriteString(", size=")
-	builder.WriteString(fmt.Sprintf("%v", f.Size))
-	builder.WriteString(", name=")
-	builder.WriteString(f.Name)
-	if v := f.User; v != nil {
-		builder.WriteString(", user=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", group=")
-	builder.WriteString(f.Group)
-	builder.WriteString(", op=")
-	builder.WriteString(fmt.Sprintf("%v", f.Op))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // Files is a parsable slice of File.
 type Files []*File

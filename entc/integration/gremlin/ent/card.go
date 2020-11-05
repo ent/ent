@@ -7,8 +7,6 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/facebook/ent/dialect/gremlin"
@@ -122,22 +120,7 @@ func (c *Card) Unwrap() *Card {
 	return c
 }
 
-// String implements the fmt.Stringer.
-func (c *Card) String() string {
-	var builder strings.Builder
-	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", create_time=")
-	builder.WriteString(c.CreateTime.Format(time.ANSIC))
-	builder.WriteString(", update_time=")
-	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
-	builder.WriteString(", number=")
-	builder.WriteString(c.Number)
-	builder.WriteString(", name=")
-	builder.WriteString(c.Name)
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // Cards is a parsable slice of Card.
 type Cards []*Card

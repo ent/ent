@@ -8,10 +8,8 @@ package ent
 
 import (
 	"database/sql"
-	"fmt"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/facebook/ent/dialect/gremlin"
@@ -241,122 +239,7 @@ func (ft *FieldType) Unwrap() *FieldType {
 	return ft
 }
 
-// String implements the fmt.Stringer.
-func (ft *FieldType) String() string {
-	var builder strings.Builder
-	builder.WriteString("FieldType(")
-	builder.WriteString(fmt.Sprintf("id=%v", ft.ID))
-	builder.WriteString(", int=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int))
-	builder.WriteString(", int8=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int8))
-	builder.WriteString(", int16=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int16))
-	builder.WriteString(", int32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int32))
-	builder.WriteString(", int64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int64))
-	builder.WriteString(", optional_int=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt))
-	builder.WriteString(", optional_int8=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt8))
-	builder.WriteString(", optional_int16=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt16))
-	builder.WriteString(", optional_int32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt32))
-	builder.WriteString(", optional_int64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt64))
-	if v := ft.NillableInt; v != nil {
-		builder.WriteString(", nillable_int=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	if v := ft.NillableInt8; v != nil {
-		builder.WriteString(", nillable_int8=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	if v := ft.NillableInt16; v != nil {
-		builder.WriteString(", nillable_int16=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	if v := ft.NillableInt32; v != nil {
-		builder.WriteString(", nillable_int32=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	if v := ft.NillableInt64; v != nil {
-		builder.WriteString(", nillable_int64=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", validate_optional_int32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.ValidateOptionalInt32))
-	builder.WriteString(", optional_uint=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint))
-	builder.WriteString(", optional_uint8=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint8))
-	builder.WriteString(", optional_uint16=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint16))
-	builder.WriteString(", optional_uint32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint32))
-	builder.WriteString(", optional_uint64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint64))
-	builder.WriteString(", state=")
-	builder.WriteString(fmt.Sprintf("%v", ft.State))
-	builder.WriteString(", optional_float=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
-	builder.WriteString(", optional_float32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
-	builder.WriteString(", datetime=")
-	builder.WriteString(ft.Datetime.Format(time.ANSIC))
-	builder.WriteString(", decimal=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
-	builder.WriteString(", dir=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Dir))
-	if v := ft.Ndir; v != nil {
-		builder.WriteString(", ndir=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", str=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Str))
-	if v := ft.NullStr; v != nil {
-		builder.WriteString(", null_str=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", link=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Link))
-	if v := ft.NullLink; v != nil {
-		builder.WriteString(", null_link=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", active=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Active))
-	if v := ft.NullActive; v != nil {
-		builder.WriteString(", null_active=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", deleted=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Deleted))
-	builder.WriteString(", deleted_at=")
-	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
-	builder.WriteString(", ip=")
-	builder.WriteString(fmt.Sprintf("%v", ft.IP))
-	builder.WriteString(", null_int64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.NullInt64))
-	builder.WriteString(", schema_int=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt))
-	builder.WriteString(", schema_int8=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt8))
-	builder.WriteString(", schema_int64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt64))
-	builder.WriteString(", schema_float=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat))
-	builder.WriteString(", schema_float32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat32))
-	builder.WriteString(", null_float=")
-	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
-	builder.WriteString(", role=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Role))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // FieldTypes is a parsable slice of FieldType.
 type FieldTypes []*FieldType

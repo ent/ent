@@ -7,9 +7,6 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/facebook/ent/dialect/gremlin"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 )
@@ -59,16 +56,7 @@ func (t *Task) Unwrap() *Task {
 	return t
 }
 
-// String implements the fmt.Stringer.
-func (t *Task) String() string {
-	var builder strings.Builder
-	builder.WriteString("Task(")
-	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
-	builder.WriteString(", priority=")
-	builder.WriteString(fmt.Sprintf("%v", t.Priority))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // Tasks is a parsable slice of Task.
 type Tasks []*Task

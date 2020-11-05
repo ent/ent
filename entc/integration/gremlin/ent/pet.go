@@ -7,9 +7,6 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/facebook/ent/dialect/gremlin"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
@@ -111,16 +108,7 @@ func (pe *Pet) Unwrap() *Pet {
 	return pe
 }
 
-// String implements the fmt.Stringer.
-func (pe *Pet) String() string {
-	var builder strings.Builder
-	builder.WriteString("Pet(")
-	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
-	builder.WriteString(", name=")
-	builder.WriteString(pe.Name)
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // Pets is a parsable slice of Pet.
 type Pets []*Pet

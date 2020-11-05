@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/goods"
@@ -61,14 +60,7 @@ func (_go *Goods) Unwrap() *Goods {
 	return _go
 }
 
-// String implements the fmt.Stringer.
-func (_go *Goods) String() string {
-	var builder strings.Builder
-	builder.WriteString("Goods(")
-	builder.WriteString(fmt.Sprintf("id=%v", _go.ID))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // GoodsSlice is a parsable slice of Goods.
 type GoodsSlice []*Goods

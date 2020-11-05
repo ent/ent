@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/filetype"
@@ -111,20 +110,7 @@ func (ft *FileType) Unwrap() *FileType {
 	return ft
 }
 
-// String implements the fmt.Stringer.
-func (ft *FileType) String() string {
-	var builder strings.Builder
-	builder.WriteString("FileType(")
-	builder.WriteString(fmt.Sprintf("id=%v", ft.ID))
-	builder.WriteString(", name=")
-	builder.WriteString(ft.Name)
-	builder.WriteString(", type=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Type))
-	builder.WriteString(", state=")
-	builder.WriteString(fmt.Sprintf("%v", ft.State))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // FileTypes is a parsable slice of FileType.
 type FileTypes []*FileType

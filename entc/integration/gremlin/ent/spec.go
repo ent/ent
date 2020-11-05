@@ -7,9 +7,6 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/facebook/ent/dialect/gremlin"
 )
 
@@ -80,14 +77,7 @@ func (s *Spec) Unwrap() *Spec {
 	return s
 }
 
-// String implements the fmt.Stringer.
-func (s *Spec) String() string {
-	var builder strings.Builder
-	builder.WriteString("Spec(")
-	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer (no stringer in this case)
 
 // Specs is a parsable slice of Spec.
 type Specs []*Spec
