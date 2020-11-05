@@ -8,7 +8,6 @@ package ent
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/facebook/ent/dialect/sql"
@@ -128,20 +127,7 @@ func (pe *Pet) Unwrap() *Pet {
 	return pe
 }
 
-// String implements the fmt.Stringer.
-func (pe *Pet) String() string {
-	var builder strings.Builder
-	builder.WriteString("Pet(")
-	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
-	builder.WriteString(", age=")
-	builder.WriteString(fmt.Sprintf("%v", pe.Age))
-	if v := pe.LicensedAt; v != nil {
-		builder.WriteString(", licensed_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
-	builder.WriteByte(')')
-	return builder.String()
-}
+// custom stringer implementation (in this case none)
 
 // Pets is a parsable slice of Pet.
 type Pets []*Pet
