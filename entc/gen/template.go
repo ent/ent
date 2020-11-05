@@ -61,9 +61,6 @@ var (
 		{
 			Name:   "model",
 			Format: pkgf("%s.go"),
-			ExtendPatterns: []string{
-				"model/stringer",
-			},
 		},
 		{
 			Name:   "where",
