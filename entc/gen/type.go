@@ -545,7 +545,7 @@ func (t *Type) resolveFKs() error {
 		fk := &ForeignKey{
 			Edge: e,
 			Field: &Field{
-				Name:        e.Rel.Column(),
+				Name:        builderField(e.Rel.Column()),
 				Type:        refid.Type,
 				Nillable:    true,
 				Optional:    true,
@@ -1130,7 +1130,7 @@ func (e Edge) StructField() string {
 // StructFKField returns the struct member for holding the edge
 // foreign-key in the model.
 func (e Edge) StructFKField() string {
-	return e.Rel.Column()
+	return builderField(e.Rel.Column())
 }
 
 // OwnFK indicates if the foreign-key of this edge is owned by the edge
