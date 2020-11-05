@@ -103,42 +103,7 @@ func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
 	return {{ $receiver }}
 }
 
-// String implements the fmt.Stringer.
-func ({{ $receiver }} *{{ $.Name }}) String() string {
-	var builder strings.Builder
-	builder.WriteString("{{ $.Name }}(")
-	builder.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
-	{{- range $i, $f := $.Fields }}
-		{{- if $f.Sensitive }}
-			builder.WriteString(", {{ $f.Name }}=<sensitive>")
-		{{- else }}
-			{{- $sf := printf "%s.%s" $receiver $f.StructField }}
-			{{- if $f.Nillable }}
-				if v := {{ $sf }}; v != nil {
-					builder.WriteString(", {{ $f.Name }}=")
-					{{- if and $f.IsTime (not $f.HasGoType) }}
-						builder.WriteString(v.Format(time.ANSIC))
-					{{- else if and $f.IsString (not $f.HasGoType) }}
-						builder.WriteString(*v)
-					{{- else }}
-						builder.WriteString(fmt.Sprintf("%v", *v))
-					{{- end }}
-				}
-			{{- else }}
-				builder.WriteString(", {{ $f.Name }}=")
-				{{- if and $f.IsTime (not $f.HasGoType) }}
-					builder.WriteString({{ $sf }}.Format(time.ANSIC))
-				{{- else if and $f.IsString (not $f.HasGoType) }}
-					builder.WriteString({{ $sf }})
-				{{- else }}
-					builder.WriteString(fmt.Sprintf("%v", {{ $sf }}))
-				{{- end }}
-			{{- end }}
-		{{- end }}
-	{{- end }}
-	builder.WriteByte(')')
-	return builder.String()
-}
+{{ template "model/stringer" $ }}
 
 {{ $slice := plural $.Name }}
 // {{ $slice }} is a parsable slice of {{ $.Name }}.
@@ -154,6 +119,48 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 		{{ $receiver }}[_i].config = cfg
 	}
 }
+{{ end }}
+
+{{/* A template to generate a fmt.Stringer implementation. */}}
+{{ define "model/stringer" }}
+	{{ $receiver := $.Receiver }}
+
+	// String implements the fmt.Stringer.
+	func ({{ $receiver }} *{{ $.Name }}) String() string {
+		var builder strings.Builder
+		builder.WriteString("{{ $.Name }}(")
+		builder.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
+		{{- range $i, $f := $.Fields }}
+			{{- if $f.Sensitive }}
+				builder.WriteString(", {{ $f.Name }}=<sensitive>")
+			{{- else }}
+				{{- $sf := printf "%s.%s" $receiver $f.StructField }}
+				{{- if $f.Nillable }}
+					if v := {{ $sf }}; v != nil {
+						builder.WriteString(", {{ $f.Name }}=")
+						{{- if and $f.IsTime (not $f.HasGoType) }}
+							builder.WriteString(v.Format(time.ANSIC))
+						{{- else if and $f.IsString (not $f.HasGoType) }}
+							builder.WriteString(*v)
+						{{- else }}
+							builder.WriteString(fmt.Sprintf("%v", *v))
+						{{- end }}
+					}
+				{{- else }}
+					builder.WriteString(", {{ $f.Name }}=")
+					{{- if and $f.IsTime (not $f.HasGoType) }}
+						builder.WriteString({{ $sf }}.Format(time.ANSIC))
+					{{- else if and $f.IsString (not $f.HasGoType) }}
+						builder.WriteString({{ $sf }})
+					{{- else }}
+						builder.WriteString(fmt.Sprintf("%v", {{ $sf }}))
+					{{- end }}
+				{{- end }}
+			{{- end }}
+		{{- end }}
+		builder.WriteByte(')')
+		return builder.String()
+	}
 {{ end }}
 
 {{/* A template for generating the tag of the Edges struct-field. */}}
