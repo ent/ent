@@ -44,7 +44,7 @@ in the LICENSE file in the root directory of this source tree.
 		// ForeignKeys holds the SQL foreign-keys that are owned by the {{ $.Name }} type.
 		var ForeignKeys = []string{
 			{{- range $fk := . }}
-				"{{ $fk.Field.Name }}",
+				"{{ $fk.Edge.Rel.Column }}",
 			{{- end }}
 		}
 	{{ end }}
