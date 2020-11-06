@@ -95,6 +95,7 @@ type TableBuilder struct {
 	exists      bool      // check existence.
 	charset     string    // table charset.
 	collation   string    // table collation.
+	options     string    // table options.
 	columns     []Querier // table columns.
 	primary     []string  // primary key.
 	constraints []Querier // foreign keys and indices.
@@ -172,6 +173,12 @@ func (t *TableBuilder) Collate(s string) *TableBuilder {
 	return t
 }
 
+// Options appends additional options to to the statement (MySQL only).
+func (t *TableBuilder) Options(s string) *TableBuilder {
+	t.options = s
+	return t
+}
+
 // Query returns query representation of a `CREATE TABLE` statement.
 //
 // CREATE TABLE [IF NOT EXISTS] name
@@ -201,6 +208,9 @@ func (t *TableBuilder) Query() (string, []interface{}) {
 	}
 	if t.collation != "" {
 		t.WriteString(" COLLATE " + t.collation)
+	}
+	if t.options != "" {
+		t.WriteString(" " + t.options)
 	}
 	return t.String(), t.args
 }
