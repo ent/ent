@@ -59,8 +59,9 @@ func TestBuilder(t *testing.T) {
 				).
 				PrimaryKey("id").
 				Charset("utf8mb4").
-				Collate("utf8mb4_general_ci"),
-			wantQuery: "CREATE TABLE `users`(`id` int auto_increment, `name` varchar(255), PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci",
+				Collate("utf8mb4_general_ci").
+				Options("ENGINE=InnoDB"),
+			wantQuery: "CREATE TABLE `users`(`id` int auto_increment, `name` varchar(255), PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ENGINE=InnoDB",
 		},
 		{
 			input: CreateTable("users").
