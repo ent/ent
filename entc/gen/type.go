@@ -919,7 +919,7 @@ func (f Field) size() int64 {
 func (f Field) PK() *schema.Column {
 	c := &schema.Column{
 		Name:      f.StorageKey(),
-		Type:      field.TypeInt,
+		Type:      f.Type.Type,
 		Key:       schema.PrimaryKey,
 		Increment: true,
 	}
