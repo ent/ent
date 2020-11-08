@@ -173,9 +173,17 @@ func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder {
 	for _, pk := range t.PrimaryKey {
 		b.PrimaryKey(pk.Name)
 	}
-	// Default charset / collation on MySQL table.
-	// columns can be override using the Charset / Collate fields.
+	// Charset and collation config on MySQL table.
+	// These options can be overridden by the entsql annotation.
 	b.Charset("utf8mb4").Collate("utf8mb4_bin")
+	if t.Annotation != nil {
+		if charset := t.Annotation.Charset; charset != "" {
+			b.Charset(charset)
+		}
+		if collate := t.Annotation.Collation; collate != "" {
+			b.Collate(collate)
+		}
+	}
 	return b
 }
 

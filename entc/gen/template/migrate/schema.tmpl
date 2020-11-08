@@ -15,8 +15,9 @@ import (
 		"{{ $.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
 
-	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/schema/field"
 )
 
 var (
@@ -95,6 +96,9 @@ var (
 						},
 					{{- end }}
 				},
+			{{- end }}
+			{{- with $ant := $t.Annotation }}
+				Annotation: &entsql.Annotation{ {{ dumpFields $ant }} },
 			{{- end }}
 		}
 	{{- end }}

@@ -8,11 +8,30 @@ import (
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/schema"
+	"github.com/facebook/ent/schema/mixin"
 )
+
+type Mixin struct {
+	mixin.Schema
+}
+
+// Annotations of the Mixin schema.
+func (Mixin) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Charset: "utf8mb4"},
+	}
+}
 
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
+}
+
+// Mixin of the User schema.
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		Mixin{},
+	}
 }
 
 // Annotations of the User schema.
