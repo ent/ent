@@ -32,6 +32,7 @@ var (
 		"appends":       reflect.AppendSlice,
 		"order":         order,
 		"camel":         camel,
+		"dumpFields":    dumpFields,
 		"snake":         snake,
 		"pascal":        pascal,
 		"extend":        extend,
@@ -403,6 +404,24 @@ func toString(v interface{}) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+// dumpFields dumps the struct fields into a Go format.
+func dumpFields(v interface{}) string {
+	rv := indirect(reflect.ValueOf(v))
+	rt := rv.Type()
+	fields := make([]string, 0, rv.NumField())
+	for i := 0; i < rv.NumField(); i++ {
+		f := rt.Field(i)
+		if f.PkgPath != "" {
+			continue
+		}
+		fv := rv.Field(i)
+		if !fv.IsZero() {
+			fields = append(fields, fmt.Sprintf("%s: %#v", f.Name, fv.String()))
+		}
+	}
+	return strings.Join(fields, ", ")
 }
 
 // dict creates a dictionary from a list of pairs.

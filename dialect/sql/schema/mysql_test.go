@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/schema/field"
 
@@ -59,12 +60,16 @@ func TestMySQL_Create(t *testing.T) {
 						{Name: "datetime", Type: field.TypeTime, SchemaType: map[string]string{dialect.MySQL: "datetime"}, Nullable: true},
 						{Name: "decimal", Type: field.TypeFloat32, SchemaType: map[string]string{dialect.MySQL: "decimal(6,2)"}},
 					},
+					Annotation: &entsql.Annotation{
+						Charset:   "utf8",
+						Collation: "utf8_general_ci",
+					},
 				},
 			},
 			before: func(mock mysqlMock) {
 				mock.start("5.7.8")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `datetime` datetime NULL, `decimal` decimal(6,2) NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `datetime` datetime NULL, `decimal` decimal(6,2) NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8 COLLATE utf8_general_ci")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
