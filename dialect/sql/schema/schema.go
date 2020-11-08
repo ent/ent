@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/schema/field"
 )
@@ -33,6 +34,7 @@ type Table struct {
 	Indexes     []*Index
 	PrimaryKey  []*Column
 	ForeignKeys []*ForeignKey
+	Annotation  *entsql.Annotation
 }
 
 // NewTable returns a new table with the given name.
@@ -60,6 +62,12 @@ func (t *Table) AddForeignKey(fk *ForeignKey) *Table {
 func (t *Table) AddColumn(c *Column) *Table {
 	t.columns[c.Name] = c
 	t.Columns = append(t.Columns, c)
+	return t
+}
+
+// SetAnnotation the entsql.Annotation on the table.
+func (t *Table) SetAnnotation(ant *entsql.Annotation) *Table {
+	t.Annotation = ant
 	return t
 }
 

@@ -224,8 +224,8 @@ func (t Type) Label() string {
 
 // Table returns SQL table name of the node/type.
 func (t Type) Table() string {
-	if table := t.EntSQL().Table; table != "" {
-		return table
+	if ant := t.EntSQL(); ant != nil && ant.Table != "" {
+		return ant.Table
 	}
 	if t.schema != nil && t.schema.Config.Table != "" {
 		return t.schema.Config.Table
@@ -234,13 +234,22 @@ func (t Type) Table() string {
 }
 
 // EntSQL returns the EntSQL annotation if exists, or an empty one.
-func (t Type) EntSQL() entsql.Annotation {
-	annotate := entsql.Annotation{}
+func (t Type) EntSQL() *entsql.Annotation {
+	annotate := &entsql.Annotation{}
 	if t.Annotations == nil || t.Annotations[annotate.Name()] == nil {
-		return annotate
+		return nil
 	}
-	if buf, err := json.Marshal(t.Annotations[annotate.Name()]); err == nil {
-		_ = json.Unmarshal(buf, &annotate)
+	switch raw := t.Annotations[annotate.Name()].(type) {
+	case []interface{}:
+		for i := range raw {
+			if buf, err := json.Marshal(raw[i]); err == nil {
+				_ = json.Unmarshal(buf, &annotate)
+			}
+		}
+	default:
+		if buf, err := json.Marshal(t.Annotations[annotate.Name()]); err == nil {
+			_ = json.Unmarshal(buf, &annotate)
+		}
 	}
 	return annotate
 }
