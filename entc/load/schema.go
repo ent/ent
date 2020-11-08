@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 	"github.com/facebook/ent/schema/index"
@@ -163,7 +164,7 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	}
 	// Schema annotations override mixed-in annotations.
 	for _, at := range schema.Annotations() {
-		s.Annotations[at.Name()] = at
+		s.addAnnotation(at)
 	}
 	if err := s.loadFields(schema); err != nil {
 		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
@@ -265,7 +266,7 @@ func (s *Schema) loadMixin(schema ent.Interface) error {
 			})
 		}
 		for _, at := range mx.Annotations() {
-			s.Annotations[at.Name()] = at
+			s.addAnnotation(at)
 		}
 	}
 	return nil
@@ -311,6 +312,24 @@ func (s *Schema) loadPolicy(schema ent.Interface) error {
 		s.Policy = append(s.Policy, &Position{})
 	}
 	return nil
+}
+
+// annotations holds a list of annotations.
+type annotations []schema.Annotation
+
+func (s *Schema) addAnnotation(an schema.Annotation) {
+	if _, ok := s.Annotations[an.Name()]; !ok {
+		s.Annotations[an.Name()] = an
+		return
+	}
+	switch ant := s.Annotations[an.Name()].(type) {
+	case annotations:
+		s.Annotations[an.Name()] = append(ant, an)
+	case schema.Annotation:
+		s.Annotations[an.Name()] = annotations{ant, an}
+	default:
+		panic(fmt.Sprintf("unexpected schema type %T", an))
+	}
 }
 
 func (f *Field) defaults() error {

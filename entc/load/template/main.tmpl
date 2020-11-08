@@ -13,15 +13,13 @@ import (
 	"bytes"
 	{{ template "imports" }}
 
-	{{ printf "%q" .Package }}
+	entschema {{ printf "%q" .Package }}
 )
 
-{{ $base := base .Package}}
-
 var schemas = []ent.Interface{
-	{{ range $_, $name := .Names }}
-		{{- $base }}.{{- printf "%s{}" $name }},
-	{{ end -}}
+	{{- range $_, $name := .Names }}
+		entschema.{{- printf "%s{}" $name }},
+	{{- end }}
 }
 
 func main() {
