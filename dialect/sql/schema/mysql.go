@@ -183,6 +183,9 @@ func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder {
 		if collate := t.Annotation.Collation; collate != "" {
 			b.Collate(collate)
 		}
+		if opts := t.Annotation.Options; opts != "" {
+			b.Options(opts)
+		}
 	}
 	return b
 }
