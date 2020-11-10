@@ -238,7 +238,7 @@ func (gu *GroupUpdate) ClearInfo() *GroupUpdate {
 	return gu
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error

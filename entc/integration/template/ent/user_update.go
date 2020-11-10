@@ -114,7 +114,7 @@ func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 	return uu.RemoveFriendIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error

@@ -107,7 +107,7 @@ func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 	return ftu.RemoveFileIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
