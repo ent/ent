@@ -101,7 +101,7 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 	return giu.RemoveGroupIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error

@@ -35,7 +35,7 @@ func (gu *GoodsUpdate) Mutation() *GoodsMutation {
 	return gu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GoodsUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
