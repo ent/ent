@@ -1102,14 +1102,9 @@ func TestUpdateNodes(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				// Get all node ids first.
-				mock.ExpectQuery(escape("SELECT `id` FROM `users`")).
-					WillReturnRows(sqlmock.NewRows([]string{"id"}).
-						AddRow(1).
-						AddRow(2))
 				// Apply field changes.
-				mock.ExpectExec(escape("UPDATE `users` SET `age` = ?, `name` = ? WHERE `id` IN (?, ?)")).
-					WithArgs(30, "Ariel", 1, 2).
+				mock.ExpectExec(escape("UPDATE `users` SET `age` = ?, `name` = ?")).
+					WithArgs(30, "Ariel").
 					WillReturnResult(sqlmock.NewResult(0, 2))
 				mock.ExpectCommit()
 			},
@@ -1134,14 +1129,9 @@ func TestUpdateNodes(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				// Get all node ids first.
-				mock.ExpectQuery(escape("SELECT `id` FROM `users` WHERE `name` = ?")).
-					WithArgs("a8m").
-					WillReturnRows(sqlmock.NewRows([]string{"id"}).
-						AddRow(1))
 				// Clear fields.
-				mock.ExpectExec(escape("UPDATE `users` SET `age` = NULL, `name` = NULL WHERE `id` = ?")).
-					WithArgs(1).
+				mock.ExpectExec(escape("UPDATE `users` SET `age` = NULL, `name` = NULL WHERE `name` = ?")).
+					WithArgs("a8m").
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -1167,17 +1157,13 @@ func TestUpdateNodes(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				// Get all node ids first.
-				mock.ExpectQuery(escape("SELECT `id` FROM `users`")).
-					WillReturnRows(sqlmock.NewRows([]string{"id"}).
-						AddRow(1))
 				// Clear "car" and "workplace" foreign_keys and add "card" and a "parent".
-				mock.ExpectExec(escape("UPDATE `users` SET `workplace_id` = NULL, `car_id` = NULL, `parent_id` = ?, `card_id` = ? WHERE `id` = ?")).
-					WithArgs(4, 3, 1).
-					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape("UPDATE `users` SET `workplace_id` = NULL, `car_id` = NULL, `parent_id` = ?, `card_id` = ?")).
+					WithArgs(4, 3).
+					WillReturnResult(sqlmock.NewResult(0, 3))
 				mock.ExpectCommit()
 			},
-			wantAffected: 1,
+			wantAffected: 3,
 		},
 		{
 			name: "m2m_one",
@@ -1406,5 +1392,5 @@ func escape(query string) string {
 		rows[i] = strings.TrimPrefix(rows[i], " ")
 	}
 	query = strings.Join(rows, " ")
-	return regexp.QuoteMeta(query)
+	return strings.TrimSpace(regexp.QuoteMeta(query)) + "$"
 }
