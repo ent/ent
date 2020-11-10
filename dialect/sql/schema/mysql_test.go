@@ -63,13 +63,14 @@ func TestMySQL_Create(t *testing.T) {
 					Annotation: &entsql.Annotation{
 						Charset:   "utf8",
 						Collation: "utf8_general_ci",
+						Options:   "ENGINE = INNODB",
 					},
 				},
 			},
 			before: func(mock mysqlMock) {
 				mock.start("5.7.8")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `datetime` datetime NULL, `decimal` decimal(6,2) NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8 COLLATE utf8_general_ci")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `datetime` datetime NULL, `decimal` decimal(6,2) NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE = INNODB")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

@@ -34,6 +34,14 @@ type Annotation struct {
 	//	}
 	//
 	Collation string `json:"collation,omitempty"`
+
+	// Options defines the additional table options. For example:
+	//
+	//	entsql.Annotation{
+	//		Options: "ENGINE = INNODB",
+	//	}
+	//
+	Options string `json:"options,omitempty"`
 }
 
 // Name describes the annotation name.
