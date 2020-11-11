@@ -27,7 +27,7 @@ in the LICENSE file in the root directory of this source tree.
 				v[i] = {{ $arg }}[i]
 			}
 		{{- end }}
-		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}), {{ if $op.Variadic }}v...{{ else }}id{{ end }}))
+		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}){{ if not $op.Niladic }},{{ if $op.Variadic }}v...{{ else }}id{{ end }}{{ end }}))
 	}
 {{- end }}
 
