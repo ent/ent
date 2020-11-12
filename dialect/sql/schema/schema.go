@@ -145,20 +145,21 @@ func (t *Table) fk(symbol string) (*ForeignKey, bool) {
 
 // Column schema definition for SQL dialects.
 type Column struct {
-	Name       string            // column name.
-	Type       field.Type        // column type.
-	SchemaType map[string]string // optional schema type per dialect.
-	Attr       string            // extra attributes.
-	Size       int64             // max size parameter for string, blob, etc.
-	Key        string            // key definition (PRI, UNI or MUL).
-	Unique     bool              // column with unique constraint.
-	Increment  bool              // auto increment attribute.
-	Nullable   bool              // null or not null attribute.
-	Default    interface{}       // default value.
-	Enums      []string          // enum values.
-	typ        string            // row column type (used for Rows.Scan).
-	indexes    Indexes           // linked indexes.
-	foreign    *ForeignKey       // linked foreign-key.
+	Name       string             // column name.
+	Type       field.Type         // column type.
+	SchemaType map[string]string  // optional schema type per dialect.
+	Attr       string             // extra attributes.
+	Size       int64              // max size parameter for string, blob, etc.
+	Key        string             // key definition (PRI, UNI or MUL).
+	Unique     bool               // column with unique constraint.
+	Increment  bool               // auto increment attribute.
+	Nullable   bool               // null or not null attribute.
+	Default    interface{}        // default value.
+	Enums      []string           // enum values.
+	Annotation *entsql.Annotation // column annotation.
+	typ        string             // row column type (used for Rows.Scan).
+	indexes    Indexes            // linked indexes.
+	foreign    *ForeignKey        // linked foreign-key.
 }
 
 // UniqueKey returns boolean indicates if this column is a unique key.
