@@ -233,25 +233,9 @@ func (t Type) Table() string {
 	return snake(rules.Pluralize(t.Name))
 }
 
-// EntSQL returns the EntSQL annotation if exists, or an empty one.
+// EntSQL returns the EntSQL annotation if exists.
 func (t Type) EntSQL() *entsql.Annotation {
-	annotate := &entsql.Annotation{}
-	if t.Annotations == nil || t.Annotations[annotate.Name()] == nil {
-		return nil
-	}
-	switch raw := t.Annotations[annotate.Name()].(type) {
-	case []interface{}:
-		for i := range raw {
-			if buf, err := json.Marshal(raw[i]); err == nil {
-				_ = json.Unmarshal(buf, &annotate)
-			}
-		}
-	default:
-		if buf, err := json.Marshal(t.Annotations[annotate.Name()]); err == nil {
-			_ = json.Unmarshal(buf, &annotate)
-		}
-	}
-	return annotate
+	return entsqlAnnotate(t.Annotations)
 }
 
 // Package returns the package name of this node.
@@ -781,6 +765,11 @@ func (f Field) EnumName(enum string) string {
 // Validator returns the validator name.
 func (f Field) Validator() string { return pascal(f.Name) + "Validator" }
 
+// EntSQL returns the EntSQL annotation if exists.
+func (f Field) EntSQL() *entsql.Annotation {
+	return entsqlAnnotate(f.Annotations)
+}
+
 // mutMethods returns the method names of mutation interface.
 var mutMethods = func() map[string]struct{} {
 	t := reflect.TypeOf(new(ent.Mutation)).Elem()
@@ -1277,6 +1266,27 @@ func builderField(name string) string {
 		return "_" + name
 	}
 	return name
+}
+
+// entsqlAnnotate extracts the entsql annotation from a loaded annotation format.
+func entsqlAnnotate(annotation map[string]interface{}) *entsql.Annotation {
+	annotate := &entsql.Annotation{}
+	if annotation == nil || annotation[annotate.Name()] == nil {
+		return nil
+	}
+	switch raw := annotation[annotate.Name()].(type) {
+	case []interface{}:
+		for i := range raw {
+			if buf, err := json.Marshal(raw[i]); err == nil {
+				_ = json.Unmarshal(buf, &annotate)
+			}
+		}
+	default:
+		if buf, err := json.Marshal(annotation[annotate.Name()]); err == nil {
+			_ = json.Unmarshal(buf, &annotate)
+		}
+	}
+	return annotate
 }
 
 var (
