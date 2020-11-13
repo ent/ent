@@ -418,13 +418,7 @@ func dumpFields(v interface{}) string {
 		}
 		fv := rv.Field(i)
 		if !fv.IsZero() {
-			var v interface{}
-			if fv.Kind() == reflect.Int64 {
-				v = fv.Int()
-			} else {
-				v = fv.String()
-			}
-			fields = append(fields, fmt.Sprintf("%s: %#v", f.Name, v))
+			fields = append(fields, fmt.Sprintf("%s: %#v", f.Name, fv.Interface()))
 		}
 	}
 	return strings.Join(fields, ", ")

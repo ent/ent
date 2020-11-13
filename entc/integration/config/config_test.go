@@ -40,4 +40,8 @@ func TestSchemaConfig(t *testing.T) {
 	var n int
 	require.NoError(t, rows.Scan(&n), "scanning count")
 	require.Equalf(t, 1, n, "expecting table %q to be exist", table)
+
+	// Check that the table was created with the given custom name.
+	size := schema.User{}.Fields()[0].Descriptor().Annotations[0].(entsql.Annotation).Size
+	require.Equal(t, size, migrate.Tables[0].Columns[1].Size)
 }
