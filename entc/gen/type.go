@@ -907,6 +907,9 @@ func (f Field) Column() *schema.Column {
 
 // size returns the the field size defined in the schema.
 func (f Field) size() int64 {
+	if ant := f.EntSQL(); ant != nil && ant.Size != 0 {
+		return ant.Size
+	}
 	if f.def != nil && f.def.Size != nil {
 		return *f.def.Size
 	}
