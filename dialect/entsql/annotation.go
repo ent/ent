@@ -43,7 +43,7 @@ type Annotation struct {
 	//
 	Options string `json:"options,omitempty"`
 
-	// Size define the column size in the generated schema. for example:
+	// Size defines the column size in the generated schema. For example:
 	//
 	//	entsql.Annotation{
 	//		Size: 128,

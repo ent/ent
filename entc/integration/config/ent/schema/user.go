@@ -8,6 +8,7 @@ import (
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/schema"
+	"github.com/facebook/ent/schema/field"
 	"github.com/facebook/ent/schema/mixin"
 )
 
@@ -27,6 +28,17 @@ type User struct {
 	ent.Schema
 }
 
+// Fields of the User schema.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Optional().
+			Annotations(entsql.Annotation{
+				Size: 128,
+			}),
+	}
+}
+
 // Mixin of the User schema.
 func (User) Mixin() []ent.Mixin {
 	return []ent.Mixin{
@@ -39,7 +51,6 @@ func (User) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entsql.Annotation{
 			Table: "Users",
-			Size:  128,
 		},
 	}
 }
