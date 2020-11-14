@@ -42,7 +42,7 @@ func (pu *PersonUpdate) Mutation() *PersonMutation {
 	return pu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PersonUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
