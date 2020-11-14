@@ -374,12 +374,15 @@ func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 	return ops
 }
 
-const nativeEnumsQuery = `SELECT pg_type.typname,
-       pg_enum.enumlabel
+const nativeEnumsQuery = `
+SELECT 
+	pg_type.typname,
+    pg_enum.enumlabel
 FROM pg_type
-         JOIN
-     pg_enum ON pg_enum.enumtypid = pg_type.oid
-         INNER JOIN pg_namespace on pg_namespace.oid = pg_type.typnamespace
+JOIN pg_enum 
+	ON pg_enum.enumtypid = pg_type.oid
+INNER JOIN pg_namespace 
+	ON pg_namespace.oid = pg_type.typnamespace
 WHERE pg_namespace.nspname = current_schema()
 ORDER BY pg_type.typname, pg_enum.enumlabel`
 
@@ -435,7 +438,7 @@ func (d *Postgres) enumChanges(ctx context.Context, tx dialect.Tx, tables ...*Ta
 			actualEnum.Diff = actualEnum.Values.diff(expectedEnum.Values)
 
 			if !actualEnum.Diff.equal() {
-				changes.modify = append(changes.modify, actualEnum)
+				changes.modify = append(changes.modify, expectedEnum)
 			}
 		} else {
 			// Add new enum
@@ -445,7 +448,7 @@ func (d *Postgres) enumChanges(ctx context.Context, tx dialect.Tx, tables ...*Ta
 
 	// Find enums to delete
 	for enumName, v := range actualEnums {
-		if _, ok := actualEnums[enumName]; !ok {
+		if _, ok := expectedEnums[enumName]; !ok {
 			changes.drop = append(changes.drop, v)
 		}
 	}
@@ -527,7 +530,7 @@ func (d *Postgres) alterEnums(ctx context.Context, tx dialect.Tx, nativeEnums []
 	}
 
 	typeTempName := func(name string) string {
-		return fmt.Sprintf(" %s_entmigrate", name)
+		return fmt.Sprintf("%s_entmigrate", name)
 	}
 
 	// Step 1. Rename types to be modified to <type>_entmigrate
@@ -553,7 +556,7 @@ func (d *Postgres) alterEnums(ctx context.Context, tx dialect.Tx, nativeEnums []
 			b := sql.Dialect(dialect.Postgres).AlterTable(c.tableName)
 
 			// TODO: batch these?
-			q, args := b.ModifyColumn(sql.Column(c.colName).Type(typeName).Attr(fmt.Sprintf(" using %s::text::%s", c.colName, typeName))).Query()
+			q, args := b.ModifyColumn(sql.Column(c.colName).Type(typeName).Attr(fmt.Sprintf("using %s::text::%s", c.colName, typeName))).Query()
 			err = tx.Exec(ctx, q, args, nil)
 
 			if err != nil {
