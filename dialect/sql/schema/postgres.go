@@ -241,7 +241,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Size = maxCharSize + 1
 	case "character", "character varying":
 		c.Type = field.TypeString
-	case "date", "time", "timestamp", "timestamp with time zone":
+	case "date", "time", "timestamp", "timestamp with time zone", "timestamp without time zone":
 		c.Type = field.TypeTime
 	case "bytea":
 		c.Type = field.TypeBytes
