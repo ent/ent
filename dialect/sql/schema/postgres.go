@@ -251,7 +251,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeUUID
 	}
 	switch {
-	case !defaults.Valid || c.Type == field.TypeTime:
+	case !defaults.Valid || c.Type == field.TypeTime || seqfunc(defaults.String):
 		return nil
 	case strings.Contains(defaults.String, "::"):
 		parts := strings.Split(defaults.String, "::")
@@ -446,4 +446,14 @@ func (d *Postgres) alterColumns(table string, add, modify, drop []*Column) sql.Q
 		return nil
 	}
 	return sql.Queries{b}
+}
+
+// seqfunc reports if the given string is a sequence function.
+func seqfunc(defaults string) bool {
+	for _, fn := range [...]string{"currval", "lastval", "setval", "nextval"} {
+		if strings.HasPrefix(defaults, fn+"(") && strings.HasSuffix(defaults, ")") {
+			return true
+		}
+	}
+	return false
 }
