@@ -159,7 +159,7 @@ func Int64ToString(v int64) predicate.User {
 }
 
 // Uint64ToString applies equality check predicate on the "uint64_to_string" field. It's identical to Uint64ToStringEQ.
-func Uint64ToString(v int64) predicate.User {
+func Uint64ToString(v uint64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldUint64ToString), v))
 	})
@@ -1206,21 +1206,21 @@ func Int64ToStringNotNil() predicate.User {
 }
 
 // Uint64ToStringEQ applies the EQ predicate on the "uint64_to_string" field.
-func Uint64ToStringEQ(v int64) predicate.User {
+func Uint64ToStringEQ(v uint64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldUint64ToString), v))
 	})
 }
 
 // Uint64ToStringNEQ applies the NEQ predicate on the "uint64_to_string" field.
-func Uint64ToStringNEQ(v int64) predicate.User {
+func Uint64ToStringNEQ(v uint64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldUint64ToString), v))
 	})
 }
 
 // Uint64ToStringIn applies the In predicate on the "uint64_to_string" field.
-func Uint64ToStringIn(vs ...int64) predicate.User {
+func Uint64ToStringIn(vs ...uint64) predicate.User {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1237,7 +1237,7 @@ func Uint64ToStringIn(vs ...int64) predicate.User {
 }
 
 // Uint64ToStringNotIn applies the NotIn predicate on the "uint64_to_string" field.
-func Uint64ToStringNotIn(vs ...int64) predicate.User {
+func Uint64ToStringNotIn(vs ...uint64) predicate.User {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -1254,28 +1254,28 @@ func Uint64ToStringNotIn(vs ...int64) predicate.User {
 }
 
 // Uint64ToStringGT applies the GT predicate on the "uint64_to_string" field.
-func Uint64ToStringGT(v int64) predicate.User {
+func Uint64ToStringGT(v uint64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldUint64ToString), v))
 	})
 }
 
 // Uint64ToStringGTE applies the GTE predicate on the "uint64_to_string" field.
-func Uint64ToStringGTE(v int64) predicate.User {
+func Uint64ToStringGTE(v uint64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldUint64ToString), v))
 	})
 }
 
 // Uint64ToStringLT applies the LT predicate on the "uint64_to_string" field.
-func Uint64ToStringLT(v int64) predicate.User {
+func Uint64ToStringLT(v uint64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldUint64ToString), v))
 	})
 }
 
 // Uint64ToStringLTE applies the LTE predicate on the "uint64_to_string" field.
-func Uint64ToStringLTE(v int64) predicate.User {
+func Uint64ToStringLTE(v uint64) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUint64ToString), v))
 	})

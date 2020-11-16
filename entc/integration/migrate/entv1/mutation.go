@@ -350,8 +350,8 @@ type UserMutation struct {
 	workplace           *string
 	int64_to_string     *int64
 	addint64_to_string  *int64
-	uint64_to_string    *int64
-	adduint64_to_string *int64
+	uint64_to_string    *uint64
+	adduint64_to_string *uint64
 	clearedFields       map[string]struct{}
 	parent              *int
 	clearedparent       bool
@@ -955,13 +955,13 @@ func (m *UserMutation) ResetInt64ToString() {
 }
 
 // SetUint64ToString sets the uint64_to_string field.
-func (m *UserMutation) SetUint64ToString(i int64) {
-	m.uint64_to_string = &i
+func (m *UserMutation) SetUint64ToString(u uint64) {
+	m.uint64_to_string = &u
 	m.adduint64_to_string = nil
 }
 
 // Uint64ToString returns the uint64_to_string value in the mutation.
-func (m *UserMutation) Uint64ToString() (r int64, exists bool) {
+func (m *UserMutation) Uint64ToString() (r uint64, exists bool) {
 	v := m.uint64_to_string
 	if v == nil {
 		return
@@ -973,7 +973,7 @@ func (m *UserMutation) Uint64ToString() (r int64, exists bool) {
 // If the User object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *UserMutation) OldUint64ToString(ctx context.Context) (v int64, err error) {
+func (m *UserMutation) OldUint64ToString(ctx context.Context) (v uint64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldUint64ToString is allowed only on UpdateOne operations")
 	}
@@ -987,17 +987,17 @@ func (m *UserMutation) OldUint64ToString(ctx context.Context) (v int64, err erro
 	return oldValue.Uint64ToString, nil
 }
 
-// AddUint64ToString adds i to uint64_to_string.
-func (m *UserMutation) AddUint64ToString(i int64) {
+// AddUint64ToString adds u to uint64_to_string.
+func (m *UserMutation) AddUint64ToString(u uint64) {
 	if m.adduint64_to_string != nil {
-		*m.adduint64_to_string += i
+		*m.adduint64_to_string += u
 	} else {
-		m.adduint64_to_string = &i
+		m.adduint64_to_string = &u
 	}
 }
 
 // AddedUint64ToString returns the value that was added to the uint64_to_string field in this mutation.
-func (m *UserMutation) AddedUint64ToString() (r int64, exists bool) {
+func (m *UserMutation) AddedUint64ToString() (r uint64, exists bool) {
 	v := m.adduint64_to_string
 	if v == nil {
 		return
@@ -1384,7 +1384,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetInt64ToString(v)
 		return nil
 	case user.FieldUint64ToString:
-		v, ok := value.(int64)
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1445,7 +1445,7 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		m.AddInt64ToString(v)
 		return nil
 	case user.FieldUint64ToString:
-		v, ok := value.(int64)
+		v, ok := value.(uint64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

@@ -133,15 +133,15 @@ func (uc *UserCreate) SetNillableInt64ToString(i *int64) *UserCreate {
 }
 
 // SetUint64ToString sets the uint64_to_string field.
-func (uc *UserCreate) SetUint64ToString(i int64) *UserCreate {
-	uc.mutation.SetUint64ToString(i)
+func (uc *UserCreate) SetUint64ToString(u uint64) *UserCreate {
+	uc.mutation.SetUint64ToString(u)
 	return uc
 }
 
 // SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
-func (uc *UserCreate) SetNillableUint64ToString(i *int64) *UserCreate {
-	if i != nil {
-		uc.SetUint64ToString(*i)
+func (uc *UserCreate) SetNillableUint64ToString(u *uint64) *UserCreate {
+	if u != nil {
+		uc.SetUint64ToString(*u)
 	}
 	return uc
 }
@@ -419,7 +419,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := uc.mutation.Uint64ToString(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: user.FieldUint64ToString,
 		})

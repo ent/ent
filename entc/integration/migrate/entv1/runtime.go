@@ -28,5 +28,5 @@ func init() {
 	// userDescUint64ToString is the schema descriptor for uint64_to_string field.
 	userDescUint64ToString := userFields[11].Descriptor()
 	// user.Uint64ToStringValidator is a validator for the "uint64_to_string" field. It is called by the builders before save.
-	user.Uint64ToStringValidator = userDescUint64ToString.Validators[0].(func(int64) error)
+	user.Uint64ToStringValidator = userDescUint64ToString.Validators[0].(func(uint64) error)
 }

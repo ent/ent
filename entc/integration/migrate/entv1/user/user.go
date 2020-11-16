@@ -115,7 +115,7 @@ var (
 	// WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.
 	WorkplaceValidator func(string) error
 	// Uint64ToStringValidator is a validator for the "uint64_to_string" field. It is called by the builders before save.
-	Uint64ToStringValidator func(int64) error
+	Uint64ToStringValidator func(uint64) error
 )
 
 // State defines the type for the state enum field.

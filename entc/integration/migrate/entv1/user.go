@@ -41,7 +41,7 @@ type User struct {
 	// Int64ToString holds the value of the "int64_to_string" field.
 	Int64ToString int64 `json:"int64_to_string,omitempty"`
 	// Uint64ToString holds the value of the "uint64_to_string" field.
-	Uint64ToString int64 `json:"uint64_to_string,omitempty"`
+	Uint64ToString uint64 `json:"uint64_to_string,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges         UserEdges `json:"edges"`
@@ -206,7 +206,7 @@ func (u *User) assignValues(values ...interface{}) error {
 	if value, ok := values[10].(*sql.NullInt64); !ok {
 		return fmt.Errorf("unexpected type %T for field uint64_to_string", values[10])
 	} else if value.Valid {
-		u.Uint64ToString = value.Int64
+		u.Uint64ToString = uint64(value.Int64)
 	}
 	values = values[11:]
 	if len(values) == len(user.ForeignKeys) {

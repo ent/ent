@@ -45,7 +45,7 @@ var (
 		{Name: "status", Type: field.TypeString, Nullable: true},
 		{Name: "workplace", Type: field.TypeString, Nullable: true, Size: 30},
 		{Name: "int64_to_string", Type: field.TypeInt64, Nullable: true},
-		{Name: "uint64_to_string", Type: field.TypeInt64, Nullable: true},
+		{Name: "uint64_to_string", Type: field.TypeUint64, Nullable: true},
 		{Name: "user_children", Type: field.TypeInt, Nullable: true},
 		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},
 	}

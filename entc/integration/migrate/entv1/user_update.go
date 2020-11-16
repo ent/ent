@@ -196,23 +196,23 @@ func (uu *UserUpdate) ClearInt64ToString() *UserUpdate {
 }
 
 // SetUint64ToString sets the uint64_to_string field.
-func (uu *UserUpdate) SetUint64ToString(i int64) *UserUpdate {
+func (uu *UserUpdate) SetUint64ToString(u uint64) *UserUpdate {
 	uu.mutation.ResetUint64ToString()
-	uu.mutation.SetUint64ToString(i)
+	uu.mutation.SetUint64ToString(u)
 	return uu
 }
 
 // SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
-func (uu *UserUpdate) SetNillableUint64ToString(i *int64) *UserUpdate {
-	if i != nil {
-		uu.SetUint64ToString(*i)
+func (uu *UserUpdate) SetNillableUint64ToString(u *uint64) *UserUpdate {
+	if u != nil {
+		uu.SetUint64ToString(*u)
 	}
 	return uu
 }
 
-// AddUint64ToString adds i to uint64_to_string.
-func (uu *UserUpdate) AddUint64ToString(i int64) *UserUpdate {
-	uu.mutation.AddUint64ToString(i)
+// AddUint64ToString adds u to uint64_to_string.
+func (uu *UserUpdate) AddUint64ToString(u uint64) *UserUpdate {
+	uu.mutation.AddUint64ToString(u)
 	return uu
 }
 
@@ -566,21 +566,21 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.Uint64ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: user.FieldUint64ToString,
 		})
 	}
 	if value, ok := uu.mutation.AddedUint64ToString(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: user.FieldUint64ToString,
 		})
 	}
 	if uu.mutation.Uint64ToStringCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Column: user.FieldUint64ToString,
 		})
 	}
@@ -926,23 +926,23 @@ func (uuo *UserUpdateOne) ClearInt64ToString() *UserUpdateOne {
 }
 
 // SetUint64ToString sets the uint64_to_string field.
-func (uuo *UserUpdateOne) SetUint64ToString(i int64) *UserUpdateOne {
+func (uuo *UserUpdateOne) SetUint64ToString(u uint64) *UserUpdateOne {
 	uuo.mutation.ResetUint64ToString()
-	uuo.mutation.SetUint64ToString(i)
+	uuo.mutation.SetUint64ToString(u)
 	return uuo
 }
 
 // SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableUint64ToString(i *int64) *UserUpdateOne {
-	if i != nil {
-		uuo.SetUint64ToString(*i)
+func (uuo *UserUpdateOne) SetNillableUint64ToString(u *uint64) *UserUpdateOne {
+	if u != nil {
+		uuo.SetUint64ToString(*u)
 	}
 	return uuo
 }
 
-// AddUint64ToString adds i to uint64_to_string.
-func (uuo *UserUpdateOne) AddUint64ToString(i int64) *UserUpdateOne {
-	uuo.mutation.AddUint64ToString(i)
+// AddUint64ToString adds u to uint64_to_string.
+func (uuo *UserUpdateOne) AddUint64ToString(u uint64) *UserUpdateOne {
+	uuo.mutation.AddUint64ToString(u)
 	return uuo
 }
 
@@ -1294,21 +1294,21 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.Uint64ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: user.FieldUint64ToString,
 		})
 	}
 	if value, ok := uuo.mutation.AddedUint64ToString(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Value:  value,
 			Column: user.FieldUint64ToString,
 		})
 	}
 	if uuo.mutation.Uint64ToStringCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
+			Type:   field.TypeUint64,
 			Column: user.FieldUint64ToString,
 		})
 	}
