@@ -118,6 +118,34 @@ func (uc *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
 	return uc
 }
 
+// SetInt64ToString sets the int64_to_string field.
+func (uc *UserCreate) SetInt64ToString(i int64) *UserCreate {
+	uc.mutation.SetInt64ToString(i)
+	return uc
+}
+
+// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+func (uc *UserCreate) SetNillableInt64ToString(i *int64) *UserCreate {
+	if i != nil {
+		uc.SetInt64ToString(*i)
+	}
+	return uc
+}
+
+// SetUint64ToString sets the uint64_to_string field.
+func (uc *UserCreate) SetUint64ToString(i int64) *UserCreate {
+	uc.mutation.SetUint64ToString(i)
+	return uc
+}
+
+// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+func (uc *UserCreate) SetNillableUint64ToString(i *int64) *UserCreate {
+	if i != nil {
+		uc.SetUint64ToString(*i)
+	}
+	return uc
+}
+
 // SetID sets the id field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -271,6 +299,11 @@ func (uc *UserCreate) check() error {
 			return &ValidationError{Name: "workplace", err: fmt.Errorf("entv1: validator failed for field \"workplace\": %w", err)}
 		}
 	}
+	if v, ok := uc.mutation.Uint64ToString(); ok {
+		if err := user.Uint64ToStringValidator(v); err != nil {
+			return &ValidationError{Name: "uint64_to_string", err: fmt.Errorf("entv1: validator failed for field \"uint64_to_string\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -375,6 +408,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldWorkplace,
 		})
 		_node.Workplace = value
+	}
+	if value, ok := uc.mutation.Int64ToString(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldInt64ToString,
+		})
+		_node.Int64ToString = value
+	}
+	if value, ok := uc.mutation.Uint64ToString(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUint64ToString,
+		})
+		_node.Uint64ToString = value
 	}
 	if nodes := uc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

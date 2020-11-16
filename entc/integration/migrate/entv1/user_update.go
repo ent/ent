@@ -168,6 +168,60 @@ func (uu *UserUpdate) ClearWorkplace() *UserUpdate {
 	return uu
 }
 
+// SetInt64ToString sets the int64_to_string field.
+func (uu *UserUpdate) SetInt64ToString(i int64) *UserUpdate {
+	uu.mutation.ResetInt64ToString()
+	uu.mutation.SetInt64ToString(i)
+	return uu
+}
+
+// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+func (uu *UserUpdate) SetNillableInt64ToString(i *int64) *UserUpdate {
+	if i != nil {
+		uu.SetInt64ToString(*i)
+	}
+	return uu
+}
+
+// AddInt64ToString adds i to int64_to_string.
+func (uu *UserUpdate) AddInt64ToString(i int64) *UserUpdate {
+	uu.mutation.AddInt64ToString(i)
+	return uu
+}
+
+// ClearInt64ToString clears the value of int64_to_string.
+func (uu *UserUpdate) ClearInt64ToString() *UserUpdate {
+	uu.mutation.ClearInt64ToString()
+	return uu
+}
+
+// SetUint64ToString sets the uint64_to_string field.
+func (uu *UserUpdate) SetUint64ToString(i int64) *UserUpdate {
+	uu.mutation.ResetUint64ToString()
+	uu.mutation.SetUint64ToString(i)
+	return uu
+}
+
+// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+func (uu *UserUpdate) SetNillableUint64ToString(i *int64) *UserUpdate {
+	if i != nil {
+		uu.SetUint64ToString(*i)
+	}
+	return uu
+}
+
+// AddUint64ToString adds i to uint64_to_string.
+func (uu *UserUpdate) AddUint64ToString(i int64) *UserUpdate {
+	uu.mutation.AddUint64ToString(i)
+	return uu
+}
+
+// ClearUint64ToString clears the value of uint64_to_string.
+func (uu *UserUpdate) ClearUint64ToString() *UserUpdate {
+	uu.mutation.ClearUint64ToString()
+	return uu
+}
+
 // SetParentID sets the parent edge to User by id.
 func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
 	uu.mutation.SetParentID(id)
@@ -358,6 +412,11 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "workplace", err: fmt.Errorf("entv1: validator failed for field \"workplace\": %w", err)}
 		}
 	}
+	if v, ok := uu.mutation.Uint64ToString(); ok {
+		if err := user.Uint64ToStringValidator(v); err != nil {
+			return &ValidationError{Name: "uint64_to_string", err: fmt.Errorf("entv1: validator failed for field \"uint64_to_string\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -483,6 +542,46 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldWorkplace,
+		})
+	}
+	if value, ok := uu.mutation.Int64ToString(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldInt64ToString,
+		})
+	}
+	if value, ok := uu.mutation.AddedInt64ToString(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldInt64ToString,
+		})
+	}
+	if uu.mutation.Int64ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: user.FieldInt64ToString,
+		})
+	}
+	if value, ok := uu.mutation.Uint64ToString(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUint64ToString,
+		})
+	}
+	if value, ok := uu.mutation.AddedUint64ToString(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUint64ToString,
+		})
+	}
+	if uu.mutation.Uint64ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: user.FieldUint64ToString,
 		})
 	}
 	if uu.mutation.ParentCleared() {
@@ -799,6 +898,60 @@ func (uuo *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
 	return uuo
 }
 
+// SetInt64ToString sets the int64_to_string field.
+func (uuo *UserUpdateOne) SetInt64ToString(i int64) *UserUpdateOne {
+	uuo.mutation.ResetInt64ToString()
+	uuo.mutation.SetInt64ToString(i)
+	return uuo
+}
+
+// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableInt64ToString(i *int64) *UserUpdateOne {
+	if i != nil {
+		uuo.SetInt64ToString(*i)
+	}
+	return uuo
+}
+
+// AddInt64ToString adds i to int64_to_string.
+func (uuo *UserUpdateOne) AddInt64ToString(i int64) *UserUpdateOne {
+	uuo.mutation.AddInt64ToString(i)
+	return uuo
+}
+
+// ClearInt64ToString clears the value of int64_to_string.
+func (uuo *UserUpdateOne) ClearInt64ToString() *UserUpdateOne {
+	uuo.mutation.ClearInt64ToString()
+	return uuo
+}
+
+// SetUint64ToString sets the uint64_to_string field.
+func (uuo *UserUpdateOne) SetUint64ToString(i int64) *UserUpdateOne {
+	uuo.mutation.ResetUint64ToString()
+	uuo.mutation.SetUint64ToString(i)
+	return uuo
+}
+
+// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableUint64ToString(i *int64) *UserUpdateOne {
+	if i != nil {
+		uuo.SetUint64ToString(*i)
+	}
+	return uuo
+}
+
+// AddUint64ToString adds i to uint64_to_string.
+func (uuo *UserUpdateOne) AddUint64ToString(i int64) *UserUpdateOne {
+	uuo.mutation.AddUint64ToString(i)
+	return uuo
+}
+
+// ClearUint64ToString clears the value of uint64_to_string.
+func (uuo *UserUpdateOne) ClearUint64ToString() *UserUpdateOne {
+	uuo.mutation.ClearUint64ToString()
+	return uuo
+}
+
 // SetParentID sets the parent edge to User by id.
 func (uuo *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
 	uuo.mutation.SetParentID(id)
@@ -989,6 +1142,11 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "workplace", err: fmt.Errorf("entv1: validator failed for field \"workplace\": %w", err)}
 		}
 	}
+	if v, ok := uuo.mutation.Uint64ToString(); ok {
+		if err := user.Uint64ToStringValidator(v); err != nil {
+			return &ValidationError{Name: "uint64_to_string", err: fmt.Errorf("entv1: validator failed for field \"uint64_to_string\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -1112,6 +1270,46 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldWorkplace,
+		})
+	}
+	if value, ok := uuo.mutation.Int64ToString(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldInt64ToString,
+		})
+	}
+	if value, ok := uuo.mutation.AddedInt64ToString(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldInt64ToString,
+		})
+	}
+	if uuo.mutation.Int64ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: user.FieldInt64ToString,
+		})
+	}
+	if value, ok := uuo.mutation.Uint64ToString(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUint64ToString,
+		})
+	}
+	if value, ok := uuo.mutation.AddedUint64ToString(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUint64ToString,
+		})
+	}
+	if uuo.mutation.Uint64ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Column: user.FieldUint64ToString,
 		})
 	}
 	if uuo.mutation.ParentCleared() {

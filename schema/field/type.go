@@ -51,6 +51,16 @@ func (t Type) Numeric() bool {
 	return t >= TypeInt8 && t < endTypes
 }
 
+// Float reports if the given type is a float type.
+func (t Type) Float() bool {
+	return t == TypeFloat32 || t == TypeFloat64
+}
+
+// Integer reports if the given type is an integral type.
+func (t Type) Integer() bool {
+	return t.Numeric() && !t.Float()
+}
+
 // Valid reports if the given type if known type.
 func (t Type) Valid() bool {
 	return t > TypeInvalid && t < endTypes

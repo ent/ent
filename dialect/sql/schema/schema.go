@@ -186,6 +186,9 @@ func (c *Column) ConvertibleTo(d *Column) bool {
 	case c.Type == field.TypeString && d.Type == field.TypeEnum ||
 		c.Type == field.TypeEnum && d.Type == field.TypeString:
 		return true
+	// Allow conversions to arbitrary length strings
+	case c.Type.Integer() && d.Type == field.TypeString && d.Size == 0:
+		return true
 	}
 	return c.FloatType() && d.FloatType()
 }

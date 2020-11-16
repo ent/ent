@@ -33,6 +33,10 @@ const (
 	FieldStatus = "status"
 	// FieldWorkplace holds the string denoting the workplace field in the database.
 	FieldWorkplace = "workplace"
+	// FieldInt64ToString holds the string denoting the int64_to_string field in the database.
+	FieldInt64ToString = "int64_to_string"
+	// FieldUint64ToString holds the string denoting the uint64_to_string field in the database.
+	FieldUint64ToString = "uint64_to_string"
 
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
@@ -80,6 +84,8 @@ var Columns = []string{
 	FieldState,
 	FieldStatus,
 	FieldWorkplace,
+	FieldInt64ToString,
+	FieldUint64ToString,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
@@ -108,6 +114,8 @@ var (
 	NameValidator func(string) error
 	// WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.
 	WorkplaceValidator func(string) error
+	// Uint64ToStringValidator is a validator for the "uint64_to_string" field. It is called by the builders before save.
+	Uint64ToStringValidator func(int64) error
 )
 
 // State defines the type for the state enum field.

@@ -40,7 +40,8 @@ func TestColumn_ConvertibleTo(t *testing.T) {
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint8}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint16}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint32}))
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
+	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
+	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 1}))
 
 	c1 = &Column{Type: field.TypeInt}
 	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeInt}))
@@ -51,7 +52,8 @@ func TestColumn_ConvertibleTo(t *testing.T) {
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint8}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint16}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint32}))
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
+	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
+	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 1}))
 }
 
 func TestColumn_ScanDefault(t *testing.T) {

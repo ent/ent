@@ -44,6 +44,8 @@ var (
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out"}},
 		{Name: "status", Type: field.TypeString, Nullable: true},
 		{Name: "workplace", Type: field.TypeString, Nullable: true, Size: 30},
+		{Name: "int64_to_string", Type: field.TypeInt64, Nullable: true},
+		{Name: "uint64_to_string", Type: field.TypeInt64, Nullable: true},
 		{Name: "user_children", Type: field.TypeInt, Nullable: true},
 		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -55,14 +57,14 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "users_users_children",
-				Columns: []*schema.Column{UsersColumns[10]},
+				Columns: []*schema.Column{UsersColumns[12]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "users_users_spouse",
-				Columns: []*schema.Column{UsersColumns[11]},
+				Columns: []*schema.Column{UsersColumns[13]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,

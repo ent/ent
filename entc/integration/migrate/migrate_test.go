@@ -56,6 +56,8 @@ func TestPostgres(t *testing.T) {
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
+			err = root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result))
+			require.NoError(t, err)
 			err = root.Exec(ctx, "CREATE DATABASE migrate", []interface{}{}, new(sql.Result))
 			require.NoError(t, err, "creating database")
 			defer root.Exec(ctx, "DROP DATABASE migrate", []interface{}{}, new(sql.Result))

@@ -165,6 +165,20 @@ func Workplace(v string) predicate.User {
 	})
 }
 
+// Int64ToString applies equality check predicate on the "int64_to_string" field. It's identical to Int64ToStringEQ.
+func Int64ToString(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Uint64ToString applies equality check predicate on the "uint64_to_string" field. It's identical to Uint64ToStringEQ.
+func Uint64ToString(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUint64ToString), v))
+	})
+}
+
 // MixedStringEQ applies the EQ predicate on the "mixed_string" field.
 func MixedStringEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1395,6 +1409,256 @@ func WorkplaceEqualFold(v string) predicate.User {
 func WorkplaceContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldWorkplace), v))
+	})
+}
+
+// Int64ToStringEQ applies the EQ predicate on the "int64_to_string" field.
+func Int64ToStringEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringNEQ applies the NEQ predicate on the "int64_to_string" field.
+func Int64ToStringNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringIn applies the In predicate on the "int64_to_string" field.
+func Int64ToStringIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldInt64ToString), v...))
+	})
+}
+
+// Int64ToStringNotIn applies the NotIn predicate on the "int64_to_string" field.
+func Int64ToStringNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldInt64ToString), v...))
+	})
+}
+
+// Int64ToStringGT applies the GT predicate on the "int64_to_string" field.
+func Int64ToStringGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringGTE applies the GTE predicate on the "int64_to_string" field.
+func Int64ToStringGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringLT applies the LT predicate on the "int64_to_string" field.
+func Int64ToStringLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringLTE applies the LTE predicate on the "int64_to_string" field.
+func Int64ToStringLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringContains applies the Contains predicate on the "int64_to_string" field.
+func Int64ToStringContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringHasPrefix applies the HasPrefix predicate on the "int64_to_string" field.
+func Int64ToStringHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringHasSuffix applies the HasSuffix predicate on the "int64_to_string" field.
+func Int64ToStringHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringIsNil applies the IsNil predicate on the "int64_to_string" field.
+func Int64ToStringIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldInt64ToString)))
+	})
+}
+
+// Int64ToStringNotNil applies the NotNil predicate on the "int64_to_string" field.
+func Int64ToStringNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldInt64ToString)))
+	})
+}
+
+// Int64ToStringEqualFold applies the EqualFold predicate on the "int64_to_string" field.
+func Int64ToStringEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringContainsFold applies the ContainsFold predicate on the "int64_to_string" field.
+func Int64ToStringContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Uint64ToStringEQ applies the EQ predicate on the "uint64_to_string" field.
+func Uint64ToStringEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringNEQ applies the NEQ predicate on the "uint64_to_string" field.
+func Uint64ToStringNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringIn applies the In predicate on the "uint64_to_string" field.
+func Uint64ToStringIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUint64ToString), v...))
+	})
+}
+
+// Uint64ToStringNotIn applies the NotIn predicate on the "uint64_to_string" field.
+func Uint64ToStringNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUint64ToString), v...))
+	})
+}
+
+// Uint64ToStringGT applies the GT predicate on the "uint64_to_string" field.
+func Uint64ToStringGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringGTE applies the GTE predicate on the "uint64_to_string" field.
+func Uint64ToStringGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringLT applies the LT predicate on the "uint64_to_string" field.
+func Uint64ToStringLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringLTE applies the LTE predicate on the "uint64_to_string" field.
+func Uint64ToStringLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringContains applies the Contains predicate on the "uint64_to_string" field.
+func Uint64ToStringContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringHasPrefix applies the HasPrefix predicate on the "uint64_to_string" field.
+func Uint64ToStringHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringHasSuffix applies the HasSuffix predicate on the "uint64_to_string" field.
+func Uint64ToStringHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringIsNil applies the IsNil predicate on the "uint64_to_string" field.
+func Uint64ToStringIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUint64ToString)))
+	})
+}
+
+// Uint64ToStringNotNil applies the NotNil predicate on the "uint64_to_string" field.
+func Uint64ToStringNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUint64ToString)))
+	})
+}
+
+// Uint64ToStringEqualFold applies the EqualFold predicate on the "uint64_to_string" field.
+func Uint64ToStringEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringContainsFold applies the ContainsFold predicate on the "uint64_to_string" field.
+func Uint64ToStringContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldUint64ToString), v))
 	})
 }
 
