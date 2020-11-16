@@ -7,6 +7,7 @@
 package entv2
 
 import (
+	"github.com/facebook/ent/entc/integration/migrate/entv2/conversion"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/schema"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
 )
@@ -15,6 +16,40 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	conversionFields := schema.Conversion{}.Fields()
+	_ = conversionFields
+	// conversionDescInt8ToString is the schema descriptor for int8_to_string field.
+	conversionDescInt8ToString := conversionFields[1].Descriptor()
+	// conversion.Int8ToStringValidator is a validator for the "int8_to_string" field. It is called by the builders before save.
+	conversion.Int8ToStringValidator = conversionDescInt8ToString.Validators[0].(func(string) error)
+	// conversionDescUint8ToString is the schema descriptor for uint8_to_string field.
+	conversionDescUint8ToString := conversionFields[2].Descriptor()
+	// conversion.Uint8ToStringValidator is a validator for the "uint8_to_string" field. It is called by the builders before save.
+	conversion.Uint8ToStringValidator = conversionDescUint8ToString.Validators[0].(func(string) error)
+	// conversionDescInt16ToString is the schema descriptor for int16_to_string field.
+	conversionDescInt16ToString := conversionFields[3].Descriptor()
+	// conversion.Int16ToStringValidator is a validator for the "int16_to_string" field. It is called by the builders before save.
+	conversion.Int16ToStringValidator = conversionDescInt16ToString.Validators[0].(func(string) error)
+	// conversionDescUint16ToString is the schema descriptor for uint16_to_string field.
+	conversionDescUint16ToString := conversionFields[4].Descriptor()
+	// conversion.Uint16ToStringValidator is a validator for the "uint16_to_string" field. It is called by the builders before save.
+	conversion.Uint16ToStringValidator = conversionDescUint16ToString.Validators[0].(func(string) error)
+	// conversionDescInt32ToString is the schema descriptor for int32_to_string field.
+	conversionDescInt32ToString := conversionFields[5].Descriptor()
+	// conversion.Int32ToStringValidator is a validator for the "int32_to_string" field. It is called by the builders before save.
+	conversion.Int32ToStringValidator = conversionDescInt32ToString.Validators[0].(func(string) error)
+	// conversionDescUint32ToString is the schema descriptor for uint32_to_string field.
+	conversionDescUint32ToString := conversionFields[6].Descriptor()
+	// conversion.Uint32ToStringValidator is a validator for the "uint32_to_string" field. It is called by the builders before save.
+	conversion.Uint32ToStringValidator = conversionDescUint32ToString.Validators[0].(func(string) error)
+	// conversionDescInt64ToString is the schema descriptor for int64_to_string field.
+	conversionDescInt64ToString := conversionFields[7].Descriptor()
+	// conversion.Int64ToStringValidator is a validator for the "int64_to_string" field. It is called by the builders before save.
+	conversion.Int64ToStringValidator = conversionDescInt64ToString.Validators[0].(func(string) error)
+	// conversionDescUint64ToString is the schema descriptor for uint64_to_string field.
+	conversionDescUint64ToString := conversionFields[8].Descriptor()
+	// conversion.Uint64ToStringValidator is a validator for the "uint64_to_string" field. It is called by the builders before save.
+	conversion.Uint64ToStringValidator = conversionDescUint64ToString.Validators[0].(func(string) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	userFields := schema.User{}.Fields()

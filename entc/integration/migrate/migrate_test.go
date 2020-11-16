@@ -7,6 +7,9 @@ package migrate
 import (
 	"context"
 	"fmt"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/conversion"
+	"math"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -41,7 +44,7 @@ func TestMySQL(t *testing.T) {
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
-			V1ToV2(t, clientv1, clientv2)
+			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 		})
 	}
 }
@@ -68,7 +71,7 @@ func TestPostgres(t *testing.T) {
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
-			V1ToV2(t, clientv1, clientv2)
+			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 		})
 	}
 }
@@ -82,12 +85,23 @@ func TestSQLite(t *testing.T) {
 	client := entv2.NewClient(entv2.Driver(drv))
 	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), migratev2.WithDropIndex(true))
 
-	SanityV2(t, client)
+	SanityV2(t, drv.Dialect(), client)
 	idRange(t, client.Car.Create().SaveX(ctx).ID, 0, 1<<32)
-	idRange(t, client.Group.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, client.Media.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
-	idRange(t, client.Pet.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
-	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 4<<32-1, 5<<32)
+	idRange(t, client.Conversion.Create().
+		SetName("idRange").
+		SetInt8ToString("").
+		SetUint8ToString("").
+		SetInt16ToString("").
+		SetUint16ToString("").
+		SetInt32ToString("").
+		SetUint32ToString("").
+		SetInt64ToString("").
+		SetUint64ToString("").
+		SaveX(ctx).ID, 1<<32-1, 2<<32)
+	idRange(t, client.Group.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, client.Media.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, client.Pet.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
+	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 5<<32-1, 6<<32)
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -97,25 +111,36 @@ func TestSQLite(t *testing.T) {
 	ContainsFold(t, client)
 }
 
-func V1ToV2(t *testing.T, clientv1 *entv1.Client, clientv2 *entv2.Client) {
+func V1ToV2(t *testing.T, dbDialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
 	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
-	SanityV1(t, clientv1)
+	SanityV1(t, dbDialect, clientv1)
 
 	// Run migration and execute queries on v2.
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)))
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), "should not create additional resources on multiple runs")
-	SanityV2(t, clientv2)
+	SanityV2(t, dbDialect, clientv2)
 
 	idRange(t, clientv2.Car.Create().SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, clientv2.Conversion.Create().
+		SetName("idRange").
+		SetInt8ToString("").
+		SetUint8ToString("").
+		SetInt16ToString("").
+		SetUint16ToString("").
+		SetInt32ToString("").
+		SetUint32ToString("").
+		SetInt64ToString("").
+		SetUint64ToString("").
+		SaveX(ctx).ID, 1<<32-1, 2<<32)
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
-	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
-	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
-	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
+	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
+	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
 
 	// SQL specific predicates.
 	EqualFold(t, clientv2)
@@ -126,7 +151,7 @@ func V1ToV2(t *testing.T, clientv1 *entv1.Client, clientv2 *entv2.Client) {
 	require.True(t, exist, "expect renamed column to have previous values")
 }
 
-func SanityV1(t *testing.T, client *entv1.Client) {
+func SanityV1(t *testing.T, dbDialect string, client *entv1.Client) {
 	ctx := context.Background()
 	u := client.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetRenamed("renamed").SaveX(ctx)
 	require.EqualValues(t, 1, u.Age)
@@ -149,9 +174,63 @@ func SanityV1(t *testing.T, client *entv1.Client) {
 	// Invalid enum value.
 	_, err = client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetState("unknown").Save(ctx)
 	require.Error(t, err)
+
+	// Conversions
+	client.Conversion.Create().
+		SetName("zero").
+		SetInt8ToString(0).
+		SetUint8ToString(0).
+		SetInt16ToString(0).
+		SetUint16ToString(0).
+		SetInt32ToString(0).
+		SetUint32ToString(0).
+		SetInt64ToString(0).
+		SetUint64ToString(0).
+		SaveX(ctx)
+
+	client.Conversion.Create().
+		SetName("min").
+		SetInt8ToString(math.MinInt8).
+		SetUint8ToString(0).
+		SetInt16ToString(math.MinInt16).
+		SetUint16ToString(0).
+		SetInt32ToString(math.MinInt32).
+		SetUint32ToString(0).
+		SetInt64ToString(math.MinInt64).
+		SetUint64ToString(0).
+		SaveX(ctx)
+
+	if dbDialect == dialect.Postgres {
+		// Postgres does not support unsigned types
+		client.Conversion.Create().
+			SetName("max").
+			SetInt8ToString(math.MaxInt8).
+			SetUint8ToString(math.MaxInt8).
+			SetInt16ToString(math.MaxInt16).
+			SetUint16ToString(math.MaxInt16).
+			SetInt32ToString(math.MaxInt32).
+			SetUint32ToString(math.MaxInt32).
+			SetUint32ToString(math.MaxInt32).
+			SetInt64ToString(math.MaxInt64).
+			// https://github.com/golang/go/issues/20238 :(
+			SetUint64ToString(math.MaxInt64).
+			SaveX(ctx)
+	} else {
+		client.Conversion.Create().
+			SetName("max").
+			SetInt8ToString(math.MaxInt8).
+			SetUint8ToString(math.MaxUint8).
+			SetInt16ToString(math.MaxInt16).
+			SetUint16ToString(math.MaxUint16).
+			SetInt32ToString(math.MaxInt32).
+			SetUint32ToString(math.MaxUint32).
+			SetInt64ToString(math.MaxInt64).
+			SetUint64ToString(math.MaxUint64).
+			SaveX(ctx)
+	}
 }
 
-func SanityV2(t *testing.T, client *entv2.Client) {
+func SanityV2(t *testing.T, dbDialect string, client *entv2.Client) {
 	ctx := context.Background()
 	u := client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetPhone("100").SetBuffer([]byte("{}")).SetState(user.StateLoggedOut).SaveX(ctx)
 	require.Equal(t, 1, u.Age)
@@ -185,6 +264,51 @@ func SanityV2(t *testing.T, client *entv2.Client) {
 	u, err = u.Update().SetBlob(make([]byte, 256)).SetState(user.StateLoggedOut).Save(ctx)
 	require.NoError(t, err, "data type blob was extended in v2")
 	require.Equal(t, make([]byte, 256), u.Blob)
+
+	if dbDialect != dialect.SQLite {
+		// Conversions
+		zero := client.Conversion.Query().Where(conversion.Name("zero")).OnlyX(ctx)
+		require.Equal(t, strconv.Itoa(0), zero.Int8ToString)
+		require.Equal(t, strconv.Itoa(0), zero.Uint8ToString)
+		require.Equal(t, strconv.Itoa(0), zero.Int16ToString)
+		require.Equal(t, strconv.Itoa(0), zero.Uint16ToString)
+		require.Equal(t, strconv.Itoa(0), zero.Int32ToString)
+		require.Equal(t, strconv.Itoa(0), zero.Uint32ToString)
+		require.Equal(t, strconv.Itoa(0), zero.Int64ToString)
+		require.Equal(t, strconv.Itoa(0), zero.Uint64ToString)
+
+		min := client.Conversion.Query().Where(conversion.Name("min")).OnlyX(ctx)
+		require.Equal(t, strconv.Itoa(math.MinInt8), min.Int8ToString)
+		require.Equal(t, strconv.Itoa(0), min.Uint8ToString)
+		require.Equal(t, strconv.Itoa(math.MinInt16), min.Int16ToString)
+		require.Equal(t, strconv.Itoa(0), min.Uint16ToString)
+		require.Equal(t, strconv.Itoa(math.MinInt32), min.Int32ToString)
+		require.Equal(t, strconv.Itoa(0), min.Uint32ToString)
+		require.Equal(t, strconv.Itoa(math.MinInt64), min.Int64ToString)
+		require.Equal(t, strconv.Itoa(0), min.Uint64ToString)
+
+		max := client.Conversion.Query().Where(conversion.Name("max")).OnlyX(ctx)
+
+		if dbDialect == dialect.Postgres {
+			require.Equal(t, strconv.Itoa(math.MaxInt8), max.Int8ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt8), max.Uint8ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt16), max.Int16ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt16), max.Uint16ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt32), max.Int32ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt32), max.Uint32ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt64), max.Int64ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt64), max.Uint64ToString)
+		} else {
+			require.Equal(t, strconv.Itoa(math.MaxInt8), max.Int8ToString)
+			require.Equal(t, strconv.Itoa(math.MaxUint8), max.Uint8ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt16), max.Int16ToString)
+			require.Equal(t, strconv.Itoa(math.MaxUint16), max.Uint16ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt32), max.Int32ToString)
+			require.Equal(t, strconv.Itoa(math.MaxUint32), max.Uint32ToString)
+			require.Equal(t, strconv.Itoa(math.MaxInt64), max.Int64ToString)
+			require.Equal(t, fmt.Sprintf("%d", uint64(math.MaxUint64)), max.Uint64ToString)
+		}
+	}
 }
 
 func EqualFold(t *testing.T, client *entv2.Client) {

@@ -80,12 +80,6 @@ func (User) Fields() []ent.Field {
 		field.String("workplace").
 			Optional(),
 		// deleting the `address` column.
-		// Change int64 to string.
-		field.String("int64_to_string").
-			Optional(),
-		// Change uint64 to string.
-		field.String("uint64_to_string").
-			Optional(),
 	}
 }
 

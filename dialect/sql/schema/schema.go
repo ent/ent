@@ -7,6 +7,7 @@ package schema
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -186,11 +187,43 @@ func (c *Column) ConvertibleTo(d *Column) bool {
 	case c.Type == field.TypeString && d.Type == field.TypeEnum ||
 		c.Type == field.TypeEnum && d.Type == field.TypeString:
 		return true
-	// Allow conversions to arbitrary length strings
-	case c.Type.Integer() && d.Type == field.TypeString && d.Size == 0:
+	case c.Type.Integer() && d.Type == field.TypeString && NumericConvertibleToString(c.Type, d.Size):
 		return true
 	}
 	return c.FloatType() && d.FloatType()
+}
+
+func NumericConvertibleToString(numericType field.Type, stringSize int64) bool {
+	// string without limit
+	if stringSize == 0 {
+		return true
+	}
+
+	switch numericType {
+	case field.TypeInt8:
+		return stringSize >= digitsRequired(math.MinInt8)
+	case field.TypeUint8:
+		return stringSize >= digitsRequired(math.MaxUint8)
+	case field.TypeInt16:
+		return stringSize >= digitsRequired(math.MinInt16)
+	case field.TypeUint16:
+		return stringSize >= digitsRequired(math.MaxUint16)
+	case field.TypeInt32:
+		return stringSize >= digitsRequired(math.MinInt32)
+	case field.TypeUint32:
+		return stringSize >= digitsRequired(math.MaxUint32)
+	case field.TypeInt64:
+		return stringSize >= digitsRequired(math.MinInt64)
+	case field.TypeUint64:
+		// MaxInt64 overflows int64
+		return stringSize >= int64(len(fmt.Sprintf("%d", math.MaxInt64)))
+	}
+
+	return false
+}
+
+func digitsRequired(minOrMax int64) int64 {
+	return int64(len(fmt.Sprintf("%d", minOrMax)))
 }
 
 // IntType reports whether the column is an int type (int8 ... int64).

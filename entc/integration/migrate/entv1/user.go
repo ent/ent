@@ -38,10 +38,6 @@ type User struct {
 	Status string `json:"status,omitempty"`
 	// Workplace holds the value of the "workplace" field.
 	Workplace string `json:"workplace,omitempty"`
-	// Int64ToString holds the value of the "int64_to_string" field.
-	Int64ToString int64 `json:"int64_to_string,omitempty"`
-	// Uint64ToString holds the value of the "uint64_to_string" field.
-	Uint64ToString uint64 `json:"uint64_to_string,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges         UserEdges `json:"edges"`
@@ -128,8 +124,6 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // state
 		&sql.NullString{}, // status
 		&sql.NullString{}, // workplace
-		&sql.NullInt64{},  // int64_to_string
-		&sql.NullInt64{},  // uint64_to_string
 	}
 }
 
@@ -198,17 +192,7 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.Workplace = value.String
 	}
-	if value, ok := values[9].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field int64_to_string", values[9])
-	} else if value.Valid {
-		u.Int64ToString = value.Int64
-	}
-	if value, ok := values[10].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field uint64_to_string", values[10])
-	} else if value.Valid {
-		u.Uint64ToString = uint64(value.Int64)
-	}
-	values = values[11:]
+	values = values[9:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_children", value)
@@ -287,10 +271,6 @@ func (u *User) String() string {
 	builder.WriteString(u.Status)
 	builder.WriteString(", workplace=")
 	builder.WriteString(u.Workplace)
-	builder.WriteString(", int64_to_string=")
-	builder.WriteString(fmt.Sprintf("%v", u.Int64ToString))
-	builder.WriteString(", uint64_to_string=")
-	builder.WriteString(fmt.Sprintf("%v", u.Uint64ToString))
 	builder.WriteByte(')')
 	return builder.String()
 }

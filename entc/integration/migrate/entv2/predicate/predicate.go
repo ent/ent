@@ -13,6 +13,9 @@ import (
 // Car is the predicate function for car builders.
 type Car func(*sql.Selector)
 
+// Conversion is the predicate function for conversion builders.
+type Conversion func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 

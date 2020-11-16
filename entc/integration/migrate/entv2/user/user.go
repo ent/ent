@@ -41,10 +41,6 @@ const (
 	FieldStatus = "status"
 	// FieldWorkplace holds the string denoting the workplace field in the database.
 	FieldWorkplace = "workplace"
-	// FieldInt64ToString holds the string denoting the int64_to_string field in the database.
-	FieldInt64ToString = "int64_to_string"
-	// FieldUint64ToString holds the string denoting the uint64_to_string field in the database.
-	FieldUint64ToString = "uint64_to_string"
 
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
@@ -93,8 +89,6 @@ var Columns = []string{
 	FieldState,
 	FieldStatus,
 	FieldWorkplace,
-	FieldInt64ToString,
-	FieldUint64ToString,
 }
 
 var (
