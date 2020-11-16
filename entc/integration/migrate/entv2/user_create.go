@@ -167,6 +167,34 @@ func (uc *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
 	return uc
 }
 
+// SetInt64ToString sets the int64_to_string field.
+func (uc *UserCreate) SetInt64ToString(s string) *UserCreate {
+	uc.mutation.SetInt64ToString(s)
+	return uc
+}
+
+// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+func (uc *UserCreate) SetNillableInt64ToString(s *string) *UserCreate {
+	if s != nil {
+		uc.SetInt64ToString(*s)
+	}
+	return uc
+}
+
+// SetUint64ToString sets the uint64_to_string field.
+func (uc *UserCreate) SetUint64ToString(s string) *UserCreate {
+	uc.mutation.SetUint64ToString(s)
+	return uc
+}
+
+// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+func (uc *UserCreate) SetNillableUint64ToString(s *string) *UserCreate {
+	if s != nil {
+		uc.SetUint64ToString(*s)
+	}
+	return uc
+}
+
 // SetID sets the id field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -471,6 +499,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldWorkplace,
 		})
 		_node.Workplace = value
+	}
+	if value, ok := uc.mutation.Int64ToString(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldInt64ToString,
+		})
+		_node.Int64ToString = value
+	}
+	if value, ok := uc.mutation.Uint64ToString(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldUint64ToString,
+		})
+		_node.Uint64ToString = value
 	}
 	if nodes := uc.mutation.CarIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

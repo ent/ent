@@ -335,32 +335,36 @@ func (m *CarMutation) ResetEdge(name string) error {
 // nodes in the graph.
 type UserMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	age             *int32
-	addage          *int32
-	name            *string
-	nickname        *string
-	address         *string
-	renamed         *string
-	blob            *[]byte
-	state           *user.State
-	status          *string
-	workplace       *string
-	clearedFields   map[string]struct{}
-	parent          *int
-	clearedparent   bool
-	children        map[int]struct{}
-	removedchildren map[int]struct{}
-	clearedchildren bool
-	spouse          *int
-	clearedspouse   bool
-	car             *int
-	clearedcar      bool
-	done            bool
-	oldValue        func(context.Context) (*User, error)
-	predicates      []predicate.User
+	op                  Op
+	typ                 string
+	id                  *int
+	age                 *int32
+	addage              *int32
+	name                *string
+	nickname            *string
+	address             *string
+	renamed             *string
+	blob                *[]byte
+	state               *user.State
+	status              *string
+	workplace           *string
+	int64_to_string     *int64
+	addint64_to_string  *int64
+	uint64_to_string    *uint64
+	adduint64_to_string *uint64
+	clearedFields       map[string]struct{}
+	parent              *int
+	clearedparent       bool
+	children            map[int]struct{}
+	removedchildren     map[int]struct{}
+	clearedchildren     bool
+	spouse              *int
+	clearedspouse       bool
+	car                 *int
+	clearedcar          bool
+	done                bool
+	oldValue            func(context.Context) (*User, error)
+	predicates          []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -879,6 +883,148 @@ func (m *UserMutation) ResetWorkplace() {
 	delete(m.clearedFields, user.FieldWorkplace)
 }
 
+// SetInt64ToString sets the int64_to_string field.
+func (m *UserMutation) SetInt64ToString(i int64) {
+	m.int64_to_string = &i
+	m.addint64_to_string = nil
+}
+
+// Int64ToString returns the int64_to_string value in the mutation.
+func (m *UserMutation) Int64ToString() (r int64, exists bool) {
+	v := m.int64_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInt64ToString returns the old int64_to_string value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldInt64ToString(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldInt64ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldInt64ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInt64ToString: %w", err)
+	}
+	return oldValue.Int64ToString, nil
+}
+
+// AddInt64ToString adds i to int64_to_string.
+func (m *UserMutation) AddInt64ToString(i int64) {
+	if m.addint64_to_string != nil {
+		*m.addint64_to_string += i
+	} else {
+		m.addint64_to_string = &i
+	}
+}
+
+// AddedInt64ToString returns the value that was added to the int64_to_string field in this mutation.
+func (m *UserMutation) AddedInt64ToString() (r int64, exists bool) {
+	v := m.addint64_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearInt64ToString clears the value of int64_to_string.
+func (m *UserMutation) ClearInt64ToString() {
+	m.int64_to_string = nil
+	m.addint64_to_string = nil
+	m.clearedFields[user.FieldInt64ToString] = struct{}{}
+}
+
+// Int64ToStringCleared returns if the field int64_to_string was cleared in this mutation.
+func (m *UserMutation) Int64ToStringCleared() bool {
+	_, ok := m.clearedFields[user.FieldInt64ToString]
+	return ok
+}
+
+// ResetInt64ToString reset all changes of the "int64_to_string" field.
+func (m *UserMutation) ResetInt64ToString() {
+	m.int64_to_string = nil
+	m.addint64_to_string = nil
+	delete(m.clearedFields, user.FieldInt64ToString)
+}
+
+// SetUint64ToString sets the uint64_to_string field.
+func (m *UserMutation) SetUint64ToString(u uint64) {
+	m.uint64_to_string = &u
+	m.adduint64_to_string = nil
+}
+
+// Uint64ToString returns the uint64_to_string value in the mutation.
+func (m *UserMutation) Uint64ToString() (r uint64, exists bool) {
+	v := m.uint64_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUint64ToString returns the old uint64_to_string value of the User.
+// If the User object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *UserMutation) OldUint64ToString(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUint64ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUint64ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUint64ToString: %w", err)
+	}
+	return oldValue.Uint64ToString, nil
+}
+
+// AddUint64ToString adds u to uint64_to_string.
+func (m *UserMutation) AddUint64ToString(u uint64) {
+	if m.adduint64_to_string != nil {
+		*m.adduint64_to_string += u
+	} else {
+		m.adduint64_to_string = &u
+	}
+}
+
+// AddedUint64ToString returns the value that was added to the uint64_to_string field in this mutation.
+func (m *UserMutation) AddedUint64ToString() (r uint64, exists bool) {
+	v := m.adduint64_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUint64ToString clears the value of uint64_to_string.
+func (m *UserMutation) ClearUint64ToString() {
+	m.uint64_to_string = nil
+	m.adduint64_to_string = nil
+	m.clearedFields[user.FieldUint64ToString] = struct{}{}
+}
+
+// Uint64ToStringCleared returns if the field uint64_to_string was cleared in this mutation.
+func (m *UserMutation) Uint64ToStringCleared() bool {
+	_, ok := m.clearedFields[user.FieldUint64ToString]
+	return ok
+}
+
+// ResetUint64ToString reset all changes of the "uint64_to_string" field.
+func (m *UserMutation) ResetUint64ToString() {
+	m.uint64_to_string = nil
+	m.adduint64_to_string = nil
+	delete(m.clearedFields, user.FieldUint64ToString)
+}
+
 // SetParentID sets the parent edge to User by id.
 func (m *UserMutation) SetParentID(id int) {
 	m.parent = &id
@@ -1063,7 +1209,7 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 11)
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
 	}
@@ -1091,6 +1237,12 @@ func (m *UserMutation) Fields() []string {
 	if m.workplace != nil {
 		fields = append(fields, user.FieldWorkplace)
 	}
+	if m.int64_to_string != nil {
+		fields = append(fields, user.FieldInt64ToString)
+	}
+	if m.uint64_to_string != nil {
+		fields = append(fields, user.FieldUint64ToString)
+	}
 	return fields
 }
 
@@ -1117,6 +1269,10 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case user.FieldWorkplace:
 		return m.Workplace()
+	case user.FieldInt64ToString:
+		return m.Int64ToString()
+	case user.FieldUint64ToString:
+		return m.Uint64ToString()
 	}
 	return nil, false
 }
@@ -1144,6 +1300,10 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStatus(ctx)
 	case user.FieldWorkplace:
 		return m.OldWorkplace(ctx)
+	case user.FieldInt64ToString:
+		return m.OldInt64ToString(ctx)
+	case user.FieldUint64ToString:
+		return m.OldUint64ToString(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -1216,6 +1376,20 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetWorkplace(v)
 		return nil
+	case user.FieldInt64ToString:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInt64ToString(v)
+		return nil
+	case user.FieldUint64ToString:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUint64ToString(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -1227,6 +1401,12 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addage != nil {
 		fields = append(fields, user.FieldAge)
 	}
+	if m.addint64_to_string != nil {
+		fields = append(fields, user.FieldInt64ToString)
+	}
+	if m.adduint64_to_string != nil {
+		fields = append(fields, user.FieldUint64ToString)
+	}
 	return fields
 }
 
@@ -1237,6 +1417,10 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldAge:
 		return m.AddedAge()
+	case user.FieldInt64ToString:
+		return m.AddedInt64ToString()
+	case user.FieldUint64ToString:
+		return m.AddedUint64ToString()
 	}
 	return nil, false
 }
@@ -1252,6 +1436,20 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAge(v)
+		return nil
+	case user.FieldInt64ToString:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddInt64ToString(v)
+		return nil
+	case user.FieldUint64ToString:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUint64ToString(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
@@ -1278,6 +1476,12 @@ func (m *UserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(user.FieldWorkplace) {
 		fields = append(fields, user.FieldWorkplace)
+	}
+	if m.FieldCleared(user.FieldInt64ToString) {
+		fields = append(fields, user.FieldInt64ToString)
+	}
+	if m.FieldCleared(user.FieldUint64ToString) {
+		fields = append(fields, user.FieldUint64ToString)
 	}
 	return fields
 }
@@ -1310,6 +1514,12 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldWorkplace:
 		m.ClearWorkplace()
+		return nil
+	case user.FieldInt64ToString:
+		m.ClearInt64ToString()
+		return nil
+	case user.FieldUint64ToString:
+		m.ClearUint64ToString()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -1346,6 +1556,12 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldWorkplace:
 		m.ResetWorkplace()
+		return nil
+	case user.FieldInt64ToString:
+		m.ResetInt64ToString()
+		return nil
+	case user.FieldUint64ToString:
+		m.ResetUint64ToString()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

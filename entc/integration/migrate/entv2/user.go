@@ -46,6 +46,10 @@ type User struct {
 	Status user.Status `json:"status,omitempty"`
 	// Workplace holds the value of the "workplace" field.
 	Workplace string `json:"workplace,omitempty"`
+	// Int64ToString holds the value of the "int64_to_string" field.
+	Int64ToString string `json:"int64_to_string,omitempty"`
+	// Uint64ToString holds the value of the "uint64_to_string" field.
+	Uint64ToString string `json:"uint64_to_string,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -113,6 +117,8 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // state
 		&sql.NullString{}, // status
 		&sql.NullString{}, // workplace
+		&sql.NullString{}, // int64_to_string
+		&sql.NullString{}, // uint64_to_string
 	}
 }
 
@@ -193,6 +199,16 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.Workplace = value.String
 	}
+	if value, ok := values[13].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field int64_to_string", values[13])
+	} else if value.Valid {
+		u.Int64ToString = value.String
+	}
+	if value, ok := values[14].(*sql.NullString); !ok {
+		return fmt.Errorf("unexpected type %T for field uint64_to_string", values[14])
+	} else if value.Valid {
+		u.Uint64ToString = value.String
+	}
 	return nil
 }
 
@@ -260,6 +276,10 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Status))
 	builder.WriteString(", workplace=")
 	builder.WriteString(u.Workplace)
+	builder.WriteString(", int64_to_string=")
+	builder.WriteString(u.Int64ToString)
+	builder.WriteString(", uint64_to_string=")
+	builder.WriteString(u.Uint64ToString)
 	builder.WriteByte(')')
 	return builder.String()
 }

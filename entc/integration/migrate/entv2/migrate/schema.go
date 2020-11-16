@@ -99,6 +99,8 @@ var (
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}},
 		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"done", "pending"}},
 		{Name: "workplace", Type: field.TypeString, Nullable: true},
+		{Name: "int64_to_string", Type: field.TypeString, Nullable: true},
+		{Name: "uint64_to_string", Type: field.TypeString, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
