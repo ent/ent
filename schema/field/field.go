@@ -208,6 +208,12 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 	return b
 }
 
+// DefaultFunc sets the default value generating function of the field.
+func (b *stringBuilder) DefaultFunc(fn func() string) *stringBuilder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *stringBuilder) Nillable() *stringBuilder {

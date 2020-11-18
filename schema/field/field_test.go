@@ -192,9 +192,23 @@ func TestBytes(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
+	fd := field.String("name").Default("Ent").Descriptor()
+	assert.Equal(t, "name", fd.Name)
+	assert.Equal(t, field.TypeString, fd.Info.Type)
+	assert.NotNil(t, fd.Default)
+	assert.Equal(t, "Ent", fd.Default)
+
+	fd = field.String("name").DefaultFunc(func() string {
+		return "Ent"
+	}).Descriptor()
+	assert.Equal(t, "name", fd.Name)
+	assert.Equal(t, field.TypeString, fd.Info.Type)
+	assert.NotNil(t, fd.Default)
+	assert.Equal(t, "Ent", fd.Default)
+
 	re := regexp.MustCompile("[a-zA-Z0-9]")
 	f := field.String("name").Unique().Match(re).Validate(func(string) error { return nil }).Sensitive()
-	fd := f.Descriptor()
+	fd = f.Descriptor()
 	assert.Equal(t, field.TypeString, fd.Info.Type)
 	assert.Equal(t, "name", fd.Name)
 	assert.True(t, fd.Unique)
