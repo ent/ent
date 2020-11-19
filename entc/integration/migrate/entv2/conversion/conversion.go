@@ -57,22 +57,3 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
-
-var (
-	// Int8ToStringValidator is a validator for the "int8_to_string" field. It is called by the builders before save.
-	Int8ToStringValidator func(string) error
-	// Uint8ToStringValidator is a validator for the "uint8_to_string" field. It is called by the builders before save.
-	Uint8ToStringValidator func(string) error
-	// Int16ToStringValidator is a validator for the "int16_to_string" field. It is called by the builders before save.
-	Int16ToStringValidator func(string) error
-	// Uint16ToStringValidator is a validator for the "uint16_to_string" field. It is called by the builders before save.
-	Uint16ToStringValidator func(string) error
-	// Int32ToStringValidator is a validator for the "int32_to_string" field. It is called by the builders before save.
-	Int32ToStringValidator func(string) error
-	// Uint32ToStringValidator is a validator for the "uint32_to_string" field. It is called by the builders before save.
-	Uint32ToStringValidator func(string) error
-	// Int64ToStringValidator is a validator for the "int64_to_string" field. It is called by the builders before save.
-	Int64ToStringValidator func(string) error
-	// Uint64ToStringValidator is a validator for the "uint64_to_string" field. It is called by the builders before save.
-	Uint64ToStringValidator func(string) error
-)

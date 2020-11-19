@@ -134,66 +134,26 @@ func (cc *ConversionCreate) check() error {
 	if _, ok := cc.mutation.Int8ToString(); !ok {
 		return &ValidationError{Name: "int8_to_string", err: errors.New("entv2: missing required field \"int8_to_string\"")}
 	}
-	if v, ok := cc.mutation.Int8ToString(); ok {
-		if err := conversion.Int8ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int8_to_string", err: fmt.Errorf("entv2: validator failed for field \"int8_to_string\": %w", err)}
-		}
-	}
 	if _, ok := cc.mutation.Uint8ToString(); !ok {
 		return &ValidationError{Name: "uint8_to_string", err: errors.New("entv2: missing required field \"uint8_to_string\"")}
-	}
-	if v, ok := cc.mutation.Uint8ToString(); ok {
-		if err := conversion.Uint8ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint8_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint8_to_string\": %w", err)}
-		}
 	}
 	if _, ok := cc.mutation.Int16ToString(); !ok {
 		return &ValidationError{Name: "int16_to_string", err: errors.New("entv2: missing required field \"int16_to_string\"")}
 	}
-	if v, ok := cc.mutation.Int16ToString(); ok {
-		if err := conversion.Int16ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int16_to_string", err: fmt.Errorf("entv2: validator failed for field \"int16_to_string\": %w", err)}
-		}
-	}
 	if _, ok := cc.mutation.Uint16ToString(); !ok {
 		return &ValidationError{Name: "uint16_to_string", err: errors.New("entv2: missing required field \"uint16_to_string\"")}
-	}
-	if v, ok := cc.mutation.Uint16ToString(); ok {
-		if err := conversion.Uint16ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint16_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint16_to_string\": %w", err)}
-		}
 	}
 	if _, ok := cc.mutation.Int32ToString(); !ok {
 		return &ValidationError{Name: "int32_to_string", err: errors.New("entv2: missing required field \"int32_to_string\"")}
 	}
-	if v, ok := cc.mutation.Int32ToString(); ok {
-		if err := conversion.Int32ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int32_to_string", err: fmt.Errorf("entv2: validator failed for field \"int32_to_string\": %w", err)}
-		}
-	}
 	if _, ok := cc.mutation.Uint32ToString(); !ok {
 		return &ValidationError{Name: "uint32_to_string", err: errors.New("entv2: missing required field \"uint32_to_string\"")}
-	}
-	if v, ok := cc.mutation.Uint32ToString(); ok {
-		if err := conversion.Uint32ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint32_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint32_to_string\": %w", err)}
-		}
 	}
 	if _, ok := cc.mutation.Int64ToString(); !ok {
 		return &ValidationError{Name: "int64_to_string", err: errors.New("entv2: missing required field \"int64_to_string\"")}
 	}
-	if v, ok := cc.mutation.Int64ToString(); ok {
-		if err := conversion.Int64ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int64_to_string", err: fmt.Errorf("entv2: validator failed for field \"int64_to_string\": %w", err)}
-		}
-	}
 	if _, ok := cc.mutation.Uint64ToString(); !ok {
 		return &ValidationError{Name: "uint64_to_string", err: errors.New("entv2: missing required field \"uint64_to_string\"")}
-	}
-	if v, ok := cc.mutation.Uint64ToString(); ok {
-		if err := conversion.Uint64ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint64_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint64_to_string\": %w", err)}
-		}
 	}
 	return nil
 }

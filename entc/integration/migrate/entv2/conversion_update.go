@@ -96,18 +96,12 @@ func (cu *ConversionUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(cu.hooks) == 0 {
-		if err = cu.check(); err != nil {
-			return 0, err
-		}
 		affected, err = cu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ConversionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cu.check(); err != nil {
-				return 0, err
 			}
 			cu.mutation = mutation
 			affected, err = cu.sqlSave(ctx)
@@ -144,51 +138,6 @@ func (cu *ConversionUpdate) ExecX(ctx context.Context) {
 	if err := cu.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (cu *ConversionUpdate) check() error {
-	if v, ok := cu.mutation.Int8ToString(); ok {
-		if err := conversion.Int8ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int8_to_string", err: fmt.Errorf("entv2: validator failed for field \"int8_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Uint8ToString(); ok {
-		if err := conversion.Uint8ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint8_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint8_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Int16ToString(); ok {
-		if err := conversion.Int16ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int16_to_string", err: fmt.Errorf("entv2: validator failed for field \"int16_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Uint16ToString(); ok {
-		if err := conversion.Uint16ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint16_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint16_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Int32ToString(); ok {
-		if err := conversion.Int32ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int32_to_string", err: fmt.Errorf("entv2: validator failed for field \"int32_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Uint32ToString(); ok {
-		if err := conversion.Uint32ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint32_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint32_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Int64ToString(); ok {
-		if err := conversion.Int64ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int64_to_string", err: fmt.Errorf("entv2: validator failed for field \"int64_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cu.mutation.Uint64ToString(); ok {
-		if err := conversion.Uint64ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint64_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint64_to_string\": %w", err)}
-		}
-	}
-	return nil
 }
 
 func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -356,18 +305,12 @@ func (cuo *ConversionUpdateOne) Save(ctx context.Context) (*Conversion, error) {
 		node *Conversion
 	)
 	if len(cuo.hooks) == 0 {
-		if err = cuo.check(); err != nil {
-			return nil, err
-		}
 		node, err = cuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ConversionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cuo.check(); err != nil {
-				return nil, err
 			}
 			cuo.mutation = mutation
 			node, err = cuo.sqlSave(ctx)
@@ -404,51 +347,6 @@ func (cuo *ConversionUpdateOne) ExecX(ctx context.Context) {
 	if err := cuo.Exec(ctx); err != nil {
 		panic(err)
 	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (cuo *ConversionUpdateOne) check() error {
-	if v, ok := cuo.mutation.Int8ToString(); ok {
-		if err := conversion.Int8ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int8_to_string", err: fmt.Errorf("entv2: validator failed for field \"int8_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Uint8ToString(); ok {
-		if err := conversion.Uint8ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint8_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint8_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Int16ToString(); ok {
-		if err := conversion.Int16ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int16_to_string", err: fmt.Errorf("entv2: validator failed for field \"int16_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Uint16ToString(); ok {
-		if err := conversion.Uint16ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint16_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint16_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Int32ToString(); ok {
-		if err := conversion.Int32ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int32_to_string", err: fmt.Errorf("entv2: validator failed for field \"int32_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Uint32ToString(); ok {
-		if err := conversion.Uint32ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint32_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint32_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Int64ToString(); ok {
-		if err := conversion.Int64ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "int64_to_string", err: fmt.Errorf("entv2: validator failed for field \"int64_to_string\": %w", err)}
-		}
-	}
-	if v, ok := cuo.mutation.Uint64ToString(); ok {
-		if err := conversion.Uint64ToStringValidator(v); err != nil {
-			return &ValidationError{Name: "uint64_to_string", err: fmt.Errorf("entv2: validator failed for field \"uint64_to_string\": %w", err)}
-		}
-	}
-	return nil
 }
 
 func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion, err error) {
