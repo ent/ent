@@ -249,6 +249,8 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeJSON
 	case "uuid":
 		c.Type = field.TypeUUID
+	case "cidr", "inet", "macaddr", "macaddr8":
+		c.Type = field.TypeOther
 	}
 	switch {
 	case !defaults.Valid || c.Type == field.TypeTime || seqfunc(defaults.String):
@@ -310,6 +312,8 @@ func (d *Postgres) cType(c *Column) (t string) {
 		// Currently, the support for enums is weak (application level only.
 		// like SQLite). Dialect needs to create and maintain its enum type.
 		t = "varchar"
+	case field.TypeOther:
+		t = c.typ
 	default:
 		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
 	}

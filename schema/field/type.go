@@ -23,6 +23,7 @@ const (
 	TypeBytes
 	TypeEnum
 	TypeString
+	TypeOther
 	TypeInt8
 	TypeInt16
 	TypeInt32
