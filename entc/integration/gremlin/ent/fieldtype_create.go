@@ -548,6 +548,12 @@ func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	return ftc
 }
 
+// SetMAC sets the mac field.
+func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
+	ftc.mutation.SetMAC(s)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -806,6 +812,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
+	}
+	if value, ok := ftc.mutation.MAC(); ok {
+		v.Property(dsl.Single, fieldtype.FieldMAC, value)
 	}
 	return v.ValueMap(true)
 }

@@ -107,6 +107,8 @@ const (
 	FieldNullFloat = "null_float"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
+	// FieldMAC holds the string denoting the mac field in the database.
+	FieldMAC = "mac"
 )
 
 var (
