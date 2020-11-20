@@ -994,6 +994,18 @@ func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
 	return ftu
 }
 
+// SetMAC sets the mac field.
+func (ftu *FieldTypeUpdate) SetMAC(s schema.MAC) *FieldTypeUpdate {
+	ftu.mutation.SetMAC(s)
+	return ftu
+}
+
+// ClearMAC clears the value of mac.
+func (ftu *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
+	ftu.mutation.ClearMAC()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1328,6 +1340,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
+	if value, ok := ftu.mutation.MAC(); ok {
+		v.Property(dsl.Single, fieldtype.FieldMAC, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1445,6 +1460,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.NullFloatCleared() {
 		properties = append(properties, fieldtype.FieldNullFloat)
+	}
+	if ftu.mutation.MACCleared() {
+		properties = append(properties, fieldtype.FieldMAC)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -2418,6 +2436,18 @@ func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOn
 	return ftuo
 }
 
+// SetMAC sets the mac field.
+func (ftuo *FieldTypeUpdateOne) SetMAC(s schema.MAC) *FieldTypeUpdateOne {
+	ftuo.mutation.SetMAC(s)
+	return ftuo
+}
+
+// ClearMAC clears the value of mac.
+func (ftuo *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearMAC()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -2757,6 +2787,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
+	if value, ok := ftuo.mutation.MAC(); ok {
+		v.Property(dsl.Single, fieldtype.FieldMAC, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -2874,6 +2907,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.NullFloatCleared() {
 		properties = append(properties, fieldtype.FieldNullFloat)
+	}
+	if ftuo.mutation.MACCleared() {
+		properties = append(properties, fieldtype.FieldMAC)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
