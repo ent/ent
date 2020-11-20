@@ -247,3 +247,8 @@ func (SomeMixin) Hooks() []ent.Hook {
 
 Hooks can also be registered on active transactions, and will be executed on `Tx.Commit` or `Tx.Rollback`.
 For more information, read about it in the [transactions page](transactions.md#hooks). 
+
+## Codegen Hooks
+
+The `entc` package provides an option to add a list of hooks (middlewares) to the code-generation phase.
+For more information, read about it in the [codegen page](code-gen.md#code-generation-hooks). 
