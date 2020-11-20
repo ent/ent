@@ -204,7 +204,7 @@ func TestString(t *testing.T) {
 	assert.Equal(t, "name", fd.Name)
 	assert.Equal(t, field.TypeString, fd.Info.Type)
 	assert.NotNil(t, fd.Default)
-	assert.Equal(t, "Ent", fd.Default)
+	assert.Equal(t, "Ent", fd.Default.(func() string)())
 
 	re := regexp.MustCompile("[a-zA-Z0-9]")
 	f := field.String("name").Unique().Match(re).Validate(func(string) error { return nil }).Sensitive()
