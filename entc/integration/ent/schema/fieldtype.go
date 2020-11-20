@@ -130,6 +130,12 @@ func (FieldType) Fields() []ent.Field {
 		field.Enum("role").
 			Default(string(role.Read)).
 			GoType(role.Role("role")),
+		field.String("mac").
+			Optional().
+			GoType(&MAC{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "macaddr",
+			}),
 	}
 }
 
@@ -166,4 +172,27 @@ func (l Link) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return l.String(), nil
+}
+
+type MAC struct {
+	net.HardwareAddr
+}
+
+// Scan implements the Scanner interface.
+func (m *MAC) Scan(value interface{}) (err error) {
+	switch v := value.(type) {
+	case nil:
+	case []byte:
+		m.HardwareAddr, err = net.ParseMAC(string(v))
+	case string:
+		m.HardwareAddr, err = net.ParseMAC(v)
+	default:
+		err = fmt.Errorf("unexpcted type %T", v)
+	}
+	return
+}
+
+// Value implements the driver Valuer interface.
+func (m MAC) Value() (driver.Value, error) {
+	return m.HardwareAddr.String(), nil
 }
