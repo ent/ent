@@ -547,6 +547,12 @@ func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	return ftc
 }
 
+// SetMAC sets the mac field.
+func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
+	ftc.mutation.SetMAC(s)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -1036,6 +1042,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldRole,
 		})
 		_node.Role = value
+	}
+	if value, ok := ftc.mutation.MAC(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldMAC,
+		})
+		_node.MAC = value
 	}
 	return _node, _spec
 }
