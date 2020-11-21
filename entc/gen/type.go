@@ -707,7 +707,7 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 			f.Info.Ident = fmt.Sprintf("%s.%s", t.Package(), pascal(f.Name))
 		}
 	case tf.Validators > 0 && !tf.ConvertedToBasic():
-		err = fmt.Errorf("GoType %q for field %q must be converted to basic Go type for validators", tf.Type, f.Name)
+		err = fmt.Errorf("GoType %q for field %q must be converted to the basic %q type for validators", tf.Type, f.Name, tf.Type.Type)
 	}
 	return err
 }
