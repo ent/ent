@@ -165,7 +165,7 @@ func (l *Link) Scan(value interface{}) (err error) {
 	case string:
 		l.URL, err = url.Parse(v)
 	default:
-		err = fmt.Errorf("unexpcted type %T", v)
+		err = fmt.Errorf("unexpected type %T", v)
 	}
 	return
 }
@@ -191,7 +191,7 @@ func (m *MAC) Scan(value interface{}) (err error) {
 	case string:
 		m.HardwareAddr, err = net.ParseMAC(v)
 	default:
-		err = fmt.Errorf("unexpcted type %T", v)
+		err = fmt.Errorf("unexpected type %T", v)
 	}
 	return
 }
