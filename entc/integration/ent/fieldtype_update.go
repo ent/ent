@@ -1093,6 +1093,11 @@ func (ftu *FieldTypeUpdate) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
+	if v, ok := ftu.mutation.MAC(); ok {
+		if err := fieldtype.MACValidator(v.String()); err != nil {
+			return &ValidationError{Name: "mac", err: fmt.Errorf("ent: validator failed for field \"mac\": %w", err)}
+		}
+	}
 	return nil
 }
 
@@ -2953,6 +2958,11 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 	if v, ok := ftuo.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.MAC(); ok {
+		if err := fieldtype.MACValidator(v.String()); err != nil {
+			return &ValidationError{Name: "mac", err: fmt.Errorf("ent: validator failed for field \"mac\": %w", err)}
 		}
 	}
 	return nil
