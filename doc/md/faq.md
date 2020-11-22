@@ -10,7 +10,8 @@ sidebar_label: FAQ
 [How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator)  
 [How to write an audit-log extension?](#how-to-write-an-audit-log-extension)  
 [How to write custom predicates?](#how-to-write-custom-predicates)  
-[How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets)
+[How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets)  
+[How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql)
 
 ## Answers
 
@@ -205,3 +206,51 @@ option for doing it as follows:
     {{ end }}
 {{ end }}
 ```
+
+#### How to define a network address field in PostgreSQL?
+
+The [GoType](http://localhost:3000/docs/schema-fields#go-type) and the [SchemaType](http://localhost:3000/docs/schema-fields#database-type)
+options allow users to define database-specific fields. For example, in order to define a
+ [`macaddr`](https://www.postgresql.org/docs/13/datatype-net-types.html#DATATYPE-MACADDR) field, use the following configuration:
+
+```go
+func (T) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("mac").
+			GoType(&MAC{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "macaddr",
+			}).
+			Validate(func(s string) error {
+				_, err := net.ParseMAC(s)
+				return err
+			}),
+	}
+}
+
+// MAC represents a physical hardware address.
+type MAC struct {
+	net.HardwareAddr
+}
+
+// Scan implements the Scanner interface.
+func (m *MAC) Scan(value interface{}) (err error) {
+	switch v := value.(type) {
+	case nil:
+	case []byte:
+		m.HardwareAddr, err = net.ParseMAC(string(v))
+	case string:
+		m.HardwareAddr, err = net.ParseMAC(v)
+	default:
+		err = fmt.Errorf("unexpected type %T", v)
+	}
+	return
+}
+
+// Value implements the driver Valuer interface.
+func (m MAC) Value() (driver.Value, error) {
+	return m.HardwareAddr.String(), nil
+}
+```
+Note that, if the database doesn't support the `macaddr` type (e.g. SQLite on testing), the field fallback to its
+native type (i.e. `string`).
