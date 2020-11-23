@@ -254,3 +254,54 @@ func (m MAC) Value() (driver.Value, error) {
 ```
 Note that, if the database doesn't support the `macaddr` type (e.g. SQLite on testing), the field fallback to its
 native type (i.e. `string`).
+
+`inet` example:
+
+```go
+func (T) Fields() []ent.Field {
+    return []ent.Field{
+        field.String("ip").
+            GoType(&Inet{}).SchemaType(map[string]string{
+            dialect.Postgres: "inet",
+        }).Validate(func(s string) error {
+            ip := net.ParseIP(s)
+            if ip == nil {
+                return errors.New("invalid ip")
+            }
+            return nil
+        }),
+    }
+}
+
+// Inet represents a single IP address
+type Inet struct {
+    net.IP
+}
+
+// Scan implements the Scanner interface
+func (i *Inet) Scan(value interface{}) (err error) {
+    switch v := value.(type) {
+    case nil:
+    case []byte:
+        i.IP = net.ParseIP(string(v))
+
+        if i.IP == nil {
+            err = errors.New("invalid ip")
+        }
+    case string:
+        i.IP = net.ParseIP(v)
+
+        if i.IP == nil {
+            err = errors.New("invalid ip")
+        }
+    default:
+        err = fmt.Errorf("unexpected type %T", v)
+    }
+    return
+}
+
+// Value implements the driver Valuer interface
+func (i Inet) Value() (driver.Value, error) {
+    return i.IP.String(), nil
+}
+```
