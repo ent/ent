@@ -1301,6 +1301,7 @@ type FieldTypeMutation struct {
 	addschema_float32          *schema.Float32
 	null_float                 *sql.NullFloat64
 	role                       *role.Role
+	mac                        *schema.MAC
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -4162,6 +4163,56 @@ func (m *FieldTypeMutation) ResetRole() {
 	m.role = nil
 }
 
+// SetMAC sets the mac field.
+func (m *FieldTypeMutation) SetMAC(s schema.MAC) {
+	m.mac = &s
+}
+
+// MAC returns the mac value in the mutation.
+func (m *FieldTypeMutation) MAC() (r schema.MAC, exists bool) {
+	v := m.mac
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMAC returns the old mac value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldMAC(ctx context.Context) (v schema.MAC, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldMAC is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldMAC requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMAC: %w", err)
+	}
+	return oldValue.MAC, nil
+}
+
+// ClearMAC clears the value of mac.
+func (m *FieldTypeMutation) ClearMAC() {
+	m.mac = nil
+	m.clearedFields[fieldtype.FieldMAC] = struct{}{}
+}
+
+// MACCleared returns if the field mac was cleared in this mutation.
+func (m *FieldTypeMutation) MACCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldMAC]
+	return ok
+}
+
+// ResetMAC reset all changes of the "mac" field.
+func (m *FieldTypeMutation) ResetMAC() {
+	m.mac = nil
+	delete(m.clearedFields, fieldtype.FieldMAC)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -4176,7 +4227,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 45)
+	fields := make([]string, 0, 46)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4312,6 +4363,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.role != nil {
 		fields = append(fields, fieldtype.FieldRole)
 	}
+	if m.mac != nil {
+		fields = append(fields, fieldtype.FieldMAC)
+	}
 	return fields
 }
 
@@ -4410,6 +4464,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.NullFloat()
 	case fieldtype.FieldRole:
 		return m.Role()
+	case fieldtype.FieldMAC:
+		return m.MAC()
 	}
 	return nil, false
 }
@@ -4509,6 +4565,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldNullFloat(ctx)
 	case fieldtype.FieldRole:
 		return m.OldRole(ctx)
+	case fieldtype.FieldMAC:
+		return m.OldMAC(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4832,6 +4890,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRole(v)
+		return nil
+	case fieldtype.FieldMAC:
+		v, ok := value.(schema.MAC)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMAC(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -5331,6 +5396,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldNullFloat) {
 		fields = append(fields, fieldtype.FieldNullFloat)
 	}
+	if m.FieldCleared(fieldtype.FieldMAC) {
+		fields = append(fields, fieldtype.FieldMAC)
+	}
 	return fields
 }
 
@@ -5461,6 +5529,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldNullFloat:
 		m.ClearNullFloat()
+		return nil
+	case fieldtype.FieldMAC:
+		m.ClearMAC()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -5605,6 +5676,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldRole:
 		m.ResetRole()
+		return nil
+	case fieldtype.FieldMAC:
+		m.ResetMAC()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)

@@ -59,6 +59,10 @@ func init() {
 	fieldtypeDescLink := fieldtypeFields[30].Descriptor()
 	// fieldtype.LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	fieldtype.LinkValidator = fieldtypeDescLink.Validators[0].(func(string) error)
+	// fieldtypeDescMAC is the schema descriptor for mac field.
+	fieldtypeDescMAC := fieldtypeFields[45].Descriptor()
+	// fieldtype.MACValidator is a validator for the "mac" field. It is called by the builders before save.
+	fieldtype.MACValidator = fieldtypeDescMAC.Validators[0].(func(string) error)
 	fileFields := schema.File{}.Fields()
 	_ = fileFields
 	// fileDescSize is the schema descriptor for size field.

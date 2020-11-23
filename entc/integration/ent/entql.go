@@ -121,6 +121,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldSchemaFloat32:         {Type: field.TypeFloat32, Column: fieldtype.FieldSchemaFloat32},
 			fieldtype.FieldNullFloat:             {Type: field.TypeFloat64, Column: fieldtype.FieldNullFloat},
 			fieldtype.FieldRole:                  {Type: field.TypeEnum, Column: fieldtype.FieldRole},
+			fieldtype.FieldMAC:                   {Type: field.TypeString, Column: fieldtype.FieldMAC},
 		},
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
@@ -1026,6 +1027,11 @@ func (f *FieldTypeFilter) WhereNullFloat(p entql.Float64P) {
 // WhereRole applies the entql string predicate on the role field.
 func (f *FieldTypeFilter) WhereRole(p entql.StringP) {
 	f.Where(p.Field(fieldtype.FieldRole))
+}
+
+// WhereMAC applies the entql string predicate on the mac field.
+func (f *FieldTypeFilter) WhereMAC(p entql.StringP) {
+	f.Where(p.Field(fieldtype.FieldMAC))
 }
 
 // addPredicate implements the predicateAdder interface.

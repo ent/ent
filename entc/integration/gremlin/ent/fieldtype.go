@@ -115,6 +115,8 @@ type FieldType struct {
 	NullFloat sql.NullFloat64 `json:"null_float,omitempty"`
 	// Role holds the value of the "role" field.
 	Role role.Role `json:"role,omitempty"`
+	// MAC holds the value of the "mac" field.
+	MAC schema.MAC `json:"mac,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -170,6 +172,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		SchemaFloat32         schema.Float32  `json:"schema_float32,omitempty"`
 		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
 		Role                  role.Role       `json:"role,omitempty"`
+		MAC                   schema.MAC      `json:"mac,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -220,6 +223,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.SchemaFloat32 = scanft.SchemaFloat32
 	ft.NullFloat = scanft.NullFloat
 	ft.Role = scanft.Role
+	ft.MAC = scanft.MAC
 	return nil
 }
 
@@ -354,6 +358,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
+	builder.WriteString(", mac=")
+	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -414,6 +420,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		SchemaFloat32         schema.Float32  `json:"schema_float32,omitempty"`
 		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
 		Role                  role.Role       `json:"role,omitempty"`
+		MAC                   schema.MAC      `json:"mac,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -466,6 +473,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			SchemaFloat32:         v.SchemaFloat32,
 			NullFloat:             v.NullFloat,
 			Role:                  v.Role,
+			MAC:                   v.MAC,
 		})
 	}
 	return nil

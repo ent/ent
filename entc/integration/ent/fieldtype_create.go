@@ -547,6 +547,12 @@ func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	return ftc
 }
 
+// SetMAC sets the mac field.
+func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
+	ftc.mutation.SetMAC(s)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -648,6 +654,11 @@ func (ftc *FieldTypeCreate) check() error {
 	if v, ok := ftc.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.MAC(); ok {
+		if err := fieldtype.MACValidator(v.String()); err != nil {
+			return &ValidationError{Name: "mac", err: fmt.Errorf("ent: validator failed for field \"mac\": %w", err)}
 		}
 	}
 	return nil
@@ -1036,6 +1047,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldRole,
 		})
 		_node.Role = value
+	}
+	if value, ok := ftc.mutation.MAC(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldMAC,
+		})
+		_node.MAC = value
 	}
 	return _node, _spec
 }

@@ -50,9 +50,7 @@ func TestMySQL(t *testing.T) {
 }
 
 func TestPostgres(t *testing.T) {
-	// Version 12 is disabled here due to segfault on migration. It will be re-enabled on its next release.
-	// More info can be found here: https://www.postgresql.org/message-id/23031.1572362774%40sss.pgh.pa.us
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433} {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433, "13": 5434} {
 		t.Run(version, func(t *testing.T) {
 			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable", port)
 			root, err := sql.Open(dialect.Postgres, dsn)

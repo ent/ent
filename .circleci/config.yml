@@ -88,6 +88,11 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         command: -p 5433
+      - image: circleci/postgres:13.1
+        environment:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        command: -p 5434
       - image: entgo/gremlin-server
         entrypoint: /opt/gremlin-server/bin/gremlin-server.sh
         command: conf/gremlin-server.yaml

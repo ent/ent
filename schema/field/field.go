@@ -945,6 +945,9 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		}
 	default:
 		d.err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
+		if pt := reflect.PtrTo(t); pt.Implements(valueScannerType) {
+			d.err = fmt.Errorf("%s. Use %s instead", d.err, pt)
+		}
 	}
 	d.Info = info
 }

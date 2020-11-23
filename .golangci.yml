@@ -7,7 +7,7 @@ linters-settings:
   dupl:
     threshold: 100
   funlen:
-    lines: 110
+    lines: 120
     statements: 80
   goheader:
     template: |-

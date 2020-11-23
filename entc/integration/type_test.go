@@ -7,6 +7,7 @@ package integration
 import (
 	"context"
 	"math"
+	"net"
 	"net/http"
 	"net/url"
 	"testing"
@@ -82,6 +83,8 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal("str", ft.NullStr.String)
 	require.Equal("localhost", ft.Link.String())
 	require.Equal("localhost", ft.NullLink.String())
+	mac, err := net.ParseMAC("3b:b3:6b:3c:10:79")
+	require.NoError(err)
 
 	ft = ft.Update().
 		SetInt(1).
@@ -108,6 +111,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetSchemaInt(64).
 		SetSchemaInt8(8).
 		SetSchemaInt64(64).
+		SetMAC(schema.MAC{HardwareAddr: mac}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -130,6 +134,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(schema.Int(64), ft.SchemaInt)
 	require.Equal(schema.Int8(8), ft.SchemaInt8)
 	require.Equal(schema.Int64(64), ft.SchemaInt64)
+	require.Equal(mac.String(), ft.MAC.String())
 
 	_, err = client.Task.CreateBulk(
 		client.Task.Create().SetPriority(schema.PriorityLow),
