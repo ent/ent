@@ -260,16 +260,17 @@ native type (i.e. `string`).
 ```go
 func (T) Fields() []ent.Field {
     return []ent.Field{
-        field.String("ip").
-            GoType(&Inet{}).SchemaType(map[string]string{
-            dialect.Postgres: "inet",
-        }).Validate(func(s string) error {
-            ip := net.ParseIP(s)
-            if ip == nil {
-                return errors.New("invalid ip")
-            }
-            return nil
-        }),
+		field.String("ip").
+			GoType(&Inet{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "inet",
+			}).
+			Validate(func(s string) error {
+				if net.ParseIP(s) == nil {
+					return fmt.Errorf("invalid value for ip %q", s)
+				}
+				return nil
+			}),
     }
 }
 
@@ -283,16 +284,12 @@ func (i *Inet) Scan(value interface{}) (err error) {
     switch v := value.(type) {
     case nil:
     case []byte:
-        i.IP = net.ParseIP(string(v))
-
-        if i.IP == nil {
-            err = errors.New("invalid ip")
+        if i.IP = net.ParseIP(string(v)); i.IP == nil {
+            err = fmt.Errorf("invalid value for ip %q", s)
         }
     case string:
-        i.IP = net.ParseIP(v)
-
-        if i.IP == nil {
-            err = errors.New("invalid ip")
+        if i.IP = net.ParseIP(v); i.IP == nil {
+            err = fmt.Errorf("invalid value for ip %q", s)
         }
     default:
         err = fmt.Errorf("unexpected type %T", v)
