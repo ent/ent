@@ -5,7 +5,6 @@
 package schema
 
 import (
-	"math"
 	"testing"
 
 	"github.com/facebook/ent/schema/field"
@@ -43,38 +42,6 @@ func TestColumn_ConvertibleTo(t *testing.T) {
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint32}))
 	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 1}))
-
-	c1 = &Column{Type: field.TypeInt8}
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 3}))
-	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 4}))
-
-	c1 = &Column{Type: field.TypeUint8}
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 2}))
-	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 3}))
-
-	c1 = &Column{Type: field.TypeInt16}
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 5}))
-	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 6}))
-
-	c1 = &Column{Type: field.TypeUint16}
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 4}))
-	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 5}))
-
-	c1 = &Column{Type: field.TypeInt32}
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 10}))
-	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 11}))
-
-	c1 = &Column{Type: field.TypeUint32}
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 9}))
-	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 10}))
-
-	c1 = &Column{Type: field.TypeInt64}
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 19}))
-	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 20}))
-
-	c1 = &Column{Type: field.TypeUint64}
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 18}))
-	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 19}))
 
 	c1 = &Column{Type: field.TypeInt}
 	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeInt}))
@@ -127,12 +94,4 @@ func TestColumn_ScanDefault(t *testing.T) {
 	require.NoError(t, c1.ScanDefault("false"))
 	require.Equal(t, false, c1.Default)
 	require.Error(t, c1.ScanDefault("foo"))
-}
-
-func Test_digitsRequired(t *testing.T) {
-	require.Equal(t, int64(3), digitsRequired(math.MaxInt8))
-	require.Equal(t, int64(4), digitsRequired(math.MinInt8))
-	require.Equal(t, int64(3), digitsRequired(math.MaxUint8))
-	require.Equal(t, int64(5), digitsRequired(math.MaxInt16))
-	require.Equal(t, int64(6), digitsRequired(math.MinInt16))
 }
