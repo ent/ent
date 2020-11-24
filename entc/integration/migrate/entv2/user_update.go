@@ -217,46 +217,6 @@ func (uu *UserUpdate) ClearWorkplace() *UserUpdate {
 	return uu
 }
 
-// SetInt64ToString sets the int64_to_string field.
-func (uu *UserUpdate) SetInt64ToString(s string) *UserUpdate {
-	uu.mutation.SetInt64ToString(s)
-	return uu
-}
-
-// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
-func (uu *UserUpdate) SetNillableInt64ToString(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetInt64ToString(*s)
-	}
-	return uu
-}
-
-// ClearInt64ToString clears the value of int64_to_string.
-func (uu *UserUpdate) ClearInt64ToString() *UserUpdate {
-	uu.mutation.ClearInt64ToString()
-	return uu
-}
-
-// SetUint64ToString sets the uint64_to_string field.
-func (uu *UserUpdate) SetUint64ToString(s string) *UserUpdate {
-	uu.mutation.SetUint64ToString(s)
-	return uu
-}
-
-// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
-func (uu *UserUpdate) SetNillableUint64ToString(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetUint64ToString(*s)
-	}
-	return uu
-}
-
-// ClearUint64ToString clears the value of uint64_to_string.
-func (uu *UserUpdate) ClearUint64ToString() *UserUpdate {
-	uu.mutation.ClearUint64ToString()
-	return uu
-}
-
 // AddCarIDs adds the car edge to Car by ids.
 func (uu *UserUpdate) AddCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddCarIDs(ids...)
@@ -591,32 +551,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldWorkplace,
-		})
-	}
-	if value, ok := uu.mutation.Int64ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldInt64ToString,
-		})
-	}
-	if uu.mutation.Int64ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldInt64ToString,
-		})
-	}
-	if value, ok := uu.mutation.Uint64ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUint64ToString,
-		})
-	}
-	if uu.mutation.Uint64ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldUint64ToString,
 		})
 	}
 	if uu.mutation.CarCleared() {
@@ -965,46 +899,6 @@ func (uuo *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
 	return uuo
 }
 
-// SetInt64ToString sets the int64_to_string field.
-func (uuo *UserUpdateOne) SetInt64ToString(s string) *UserUpdateOne {
-	uuo.mutation.SetInt64ToString(s)
-	return uuo
-}
-
-// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableInt64ToString(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetInt64ToString(*s)
-	}
-	return uuo
-}
-
-// ClearInt64ToString clears the value of int64_to_string.
-func (uuo *UserUpdateOne) ClearInt64ToString() *UserUpdateOne {
-	uuo.mutation.ClearInt64ToString()
-	return uuo
-}
-
-// SetUint64ToString sets the uint64_to_string field.
-func (uuo *UserUpdateOne) SetUint64ToString(s string) *UserUpdateOne {
-	uuo.mutation.SetUint64ToString(s)
-	return uuo
-}
-
-// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableUint64ToString(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetUint64ToString(*s)
-	}
-	return uuo
-}
-
-// ClearUint64ToString clears the value of uint64_to_string.
-func (uuo *UserUpdateOne) ClearUint64ToString() *UserUpdateOne {
-	uuo.mutation.ClearUint64ToString()
-	return uuo
-}
-
 // AddCarIDs adds the car edge to Car by ids.
 func (uuo *UserUpdateOne) AddCarIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddCarIDs(ids...)
@@ -1337,32 +1231,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldWorkplace,
-		})
-	}
-	if value, ok := uuo.mutation.Int64ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldInt64ToString,
-		})
-	}
-	if uuo.mutation.Int64ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldInt64ToString,
-		})
-	}
-	if value, ok := uuo.mutation.Uint64ToString(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: user.FieldUint64ToString,
-		})
-	}
-	if uuo.mutation.Uint64ToStringCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: user.FieldUint64ToString,
 		})
 	}
 	if uuo.mutation.CarCleared() {

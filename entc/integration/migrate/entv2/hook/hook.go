@@ -26,6 +26,19 @@ func (f CarFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Value, err
 	return f(ctx, mv)
 }
 
+// The ConversionFunc type is an adapter to allow the use of ordinary
+// function as Conversion mutator.
+type ConversionFunc func(context.Context, *entv2.ConversionMutation) (entv2.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ConversionFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
+	mv, ok := m.(*entv2.ConversionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv2.ConversionMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The GroupFunc type is an adapter to allow the use of ordinary
 // function as Group mutator.
 type GroupFunc func(context.Context, *entv2.GroupMutation) (entv2.Value, error)

@@ -41,11 +41,6 @@ func (User) Fields() []ent.Field {
 		field.String("workplace").
 			MaxLen(30).
 			Optional(),
-		field.Int64("int64_to_string").
-			Optional(),
-		field.Uint64("uint64_to_string").
-			Positive().
-			Optional(),
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/facebook/ent/entc/integration/migrate/entv1/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/conversion"
 	"github.com/facebook/ent/entc/integration/migrate/entv1/predicate"
 	"github.com/facebook/ent/entc/integration/migrate/entv1/user"
 
@@ -27,8 +28,9 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCar  = "Car"
-	TypeUser = "User"
+	TypeCar        = "Car"
+	TypeConversion = "Conversion"
+	TypeUser       = "User"
 )
 
 // CarMutation represents an operation that mutate the Cars
@@ -331,40 +333,1200 @@ func (m *CarMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Car edge %s", name)
 }
 
-// UserMutation represents an operation that mutate the Users
+// ConversionMutation represents an operation that mutate the Conversions
 // nodes in the graph.
-type UserMutation struct {
+type ConversionMutation struct {
 	config
 	op                  Op
 	typ                 string
 	id                  *int
-	age                 *int32
-	addage              *int32
 	name                *string
-	nickname            *string
-	address             *string
-	renamed             *string
-	blob                *[]byte
-	state               *user.State
-	status              *string
-	workplace           *string
+	int8_to_string      *int8
+	addint8_to_string   *int8
+	uint8_to_string     *uint8
+	adduint8_to_string  *uint8
+	int16_to_string     *int16
+	addint16_to_string  *int16
+	uint16_to_string    *uint16
+	adduint16_to_string *uint16
+	int32_to_string     *int32
+	addint32_to_string  *int32
+	uint32_to_string    *uint32
+	adduint32_to_string *uint32
 	int64_to_string     *int64
 	addint64_to_string  *int64
 	uint64_to_string    *uint64
 	adduint64_to_string *uint64
 	clearedFields       map[string]struct{}
-	parent              *int
-	clearedparent       bool
-	children            map[int]struct{}
-	removedchildren     map[int]struct{}
-	clearedchildren     bool
-	spouse              *int
-	clearedspouse       bool
-	car                 *int
-	clearedcar          bool
 	done                bool
-	oldValue            func(context.Context) (*User, error)
-	predicates          []predicate.User
+	oldValue            func(context.Context) (*Conversion, error)
+	predicates          []predicate.Conversion
+}
+
+var _ ent.Mutation = (*ConversionMutation)(nil)
+
+// conversionOption allows to manage the mutation configuration using functional options.
+type conversionOption func(*ConversionMutation)
+
+// newConversionMutation creates new mutation for $n.Name.
+func newConversionMutation(c config, op Op, opts ...conversionOption) *ConversionMutation {
+	m := &ConversionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeConversion,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withConversionID sets the id field of the mutation.
+func withConversionID(id int) conversionOption {
+	return func(m *ConversionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Conversion
+		)
+		m.oldValue = func(ctx context.Context) (*Conversion, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Conversion.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withConversion sets the old Conversion of the mutation.
+func withConversion(node *Conversion) conversionOption {
+	return func(m *ConversionMutation) {
+		m.oldValue = func(context.Context) (*Conversion, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ConversionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ConversionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("entv1: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *ConversionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetName sets the name field.
+func (m *ConversionMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the name value in the mutation.
+func (m *ConversionMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old name value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName reset all changes of the "name" field.
+func (m *ConversionMutation) ResetName() {
+	m.name = nil
+}
+
+// SetInt8ToString sets the int8_to_string field.
+func (m *ConversionMutation) SetInt8ToString(i int8) {
+	m.int8_to_string = &i
+	m.addint8_to_string = nil
+}
+
+// Int8ToString returns the int8_to_string value in the mutation.
+func (m *ConversionMutation) Int8ToString() (r int8, exists bool) {
+	v := m.int8_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInt8ToString returns the old int8_to_string value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldInt8ToString(ctx context.Context) (v int8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldInt8ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldInt8ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInt8ToString: %w", err)
+	}
+	return oldValue.Int8ToString, nil
+}
+
+// AddInt8ToString adds i to int8_to_string.
+func (m *ConversionMutation) AddInt8ToString(i int8) {
+	if m.addint8_to_string != nil {
+		*m.addint8_to_string += i
+	} else {
+		m.addint8_to_string = &i
+	}
+}
+
+// AddedInt8ToString returns the value that was added to the int8_to_string field in this mutation.
+func (m *ConversionMutation) AddedInt8ToString() (r int8, exists bool) {
+	v := m.addint8_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearInt8ToString clears the value of int8_to_string.
+func (m *ConversionMutation) ClearInt8ToString() {
+	m.int8_to_string = nil
+	m.addint8_to_string = nil
+	m.clearedFields[conversion.FieldInt8ToString] = struct{}{}
+}
+
+// Int8ToStringCleared returns if the field int8_to_string was cleared in this mutation.
+func (m *ConversionMutation) Int8ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldInt8ToString]
+	return ok
+}
+
+// ResetInt8ToString reset all changes of the "int8_to_string" field.
+func (m *ConversionMutation) ResetInt8ToString() {
+	m.int8_to_string = nil
+	m.addint8_to_string = nil
+	delete(m.clearedFields, conversion.FieldInt8ToString)
+}
+
+// SetUint8ToString sets the uint8_to_string field.
+func (m *ConversionMutation) SetUint8ToString(u uint8) {
+	m.uint8_to_string = &u
+	m.adduint8_to_string = nil
+}
+
+// Uint8ToString returns the uint8_to_string value in the mutation.
+func (m *ConversionMutation) Uint8ToString() (r uint8, exists bool) {
+	v := m.uint8_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUint8ToString returns the old uint8_to_string value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldUint8ToString(ctx context.Context) (v uint8, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUint8ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUint8ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUint8ToString: %w", err)
+	}
+	return oldValue.Uint8ToString, nil
+}
+
+// AddUint8ToString adds u to uint8_to_string.
+func (m *ConversionMutation) AddUint8ToString(u uint8) {
+	if m.adduint8_to_string != nil {
+		*m.adduint8_to_string += u
+	} else {
+		m.adduint8_to_string = &u
+	}
+}
+
+// AddedUint8ToString returns the value that was added to the uint8_to_string field in this mutation.
+func (m *ConversionMutation) AddedUint8ToString() (r uint8, exists bool) {
+	v := m.adduint8_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUint8ToString clears the value of uint8_to_string.
+func (m *ConversionMutation) ClearUint8ToString() {
+	m.uint8_to_string = nil
+	m.adduint8_to_string = nil
+	m.clearedFields[conversion.FieldUint8ToString] = struct{}{}
+}
+
+// Uint8ToStringCleared returns if the field uint8_to_string was cleared in this mutation.
+func (m *ConversionMutation) Uint8ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldUint8ToString]
+	return ok
+}
+
+// ResetUint8ToString reset all changes of the "uint8_to_string" field.
+func (m *ConversionMutation) ResetUint8ToString() {
+	m.uint8_to_string = nil
+	m.adduint8_to_string = nil
+	delete(m.clearedFields, conversion.FieldUint8ToString)
+}
+
+// SetInt16ToString sets the int16_to_string field.
+func (m *ConversionMutation) SetInt16ToString(i int16) {
+	m.int16_to_string = &i
+	m.addint16_to_string = nil
+}
+
+// Int16ToString returns the int16_to_string value in the mutation.
+func (m *ConversionMutation) Int16ToString() (r int16, exists bool) {
+	v := m.int16_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInt16ToString returns the old int16_to_string value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldInt16ToString(ctx context.Context) (v int16, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldInt16ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldInt16ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInt16ToString: %w", err)
+	}
+	return oldValue.Int16ToString, nil
+}
+
+// AddInt16ToString adds i to int16_to_string.
+func (m *ConversionMutation) AddInt16ToString(i int16) {
+	if m.addint16_to_string != nil {
+		*m.addint16_to_string += i
+	} else {
+		m.addint16_to_string = &i
+	}
+}
+
+// AddedInt16ToString returns the value that was added to the int16_to_string field in this mutation.
+func (m *ConversionMutation) AddedInt16ToString() (r int16, exists bool) {
+	v := m.addint16_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearInt16ToString clears the value of int16_to_string.
+func (m *ConversionMutation) ClearInt16ToString() {
+	m.int16_to_string = nil
+	m.addint16_to_string = nil
+	m.clearedFields[conversion.FieldInt16ToString] = struct{}{}
+}
+
+// Int16ToStringCleared returns if the field int16_to_string was cleared in this mutation.
+func (m *ConversionMutation) Int16ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldInt16ToString]
+	return ok
+}
+
+// ResetInt16ToString reset all changes of the "int16_to_string" field.
+func (m *ConversionMutation) ResetInt16ToString() {
+	m.int16_to_string = nil
+	m.addint16_to_string = nil
+	delete(m.clearedFields, conversion.FieldInt16ToString)
+}
+
+// SetUint16ToString sets the uint16_to_string field.
+func (m *ConversionMutation) SetUint16ToString(u uint16) {
+	m.uint16_to_string = &u
+	m.adduint16_to_string = nil
+}
+
+// Uint16ToString returns the uint16_to_string value in the mutation.
+func (m *ConversionMutation) Uint16ToString() (r uint16, exists bool) {
+	v := m.uint16_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUint16ToString returns the old uint16_to_string value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldUint16ToString(ctx context.Context) (v uint16, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUint16ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUint16ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUint16ToString: %w", err)
+	}
+	return oldValue.Uint16ToString, nil
+}
+
+// AddUint16ToString adds u to uint16_to_string.
+func (m *ConversionMutation) AddUint16ToString(u uint16) {
+	if m.adduint16_to_string != nil {
+		*m.adduint16_to_string += u
+	} else {
+		m.adduint16_to_string = &u
+	}
+}
+
+// AddedUint16ToString returns the value that was added to the uint16_to_string field in this mutation.
+func (m *ConversionMutation) AddedUint16ToString() (r uint16, exists bool) {
+	v := m.adduint16_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUint16ToString clears the value of uint16_to_string.
+func (m *ConversionMutation) ClearUint16ToString() {
+	m.uint16_to_string = nil
+	m.adduint16_to_string = nil
+	m.clearedFields[conversion.FieldUint16ToString] = struct{}{}
+}
+
+// Uint16ToStringCleared returns if the field uint16_to_string was cleared in this mutation.
+func (m *ConversionMutation) Uint16ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldUint16ToString]
+	return ok
+}
+
+// ResetUint16ToString reset all changes of the "uint16_to_string" field.
+func (m *ConversionMutation) ResetUint16ToString() {
+	m.uint16_to_string = nil
+	m.adduint16_to_string = nil
+	delete(m.clearedFields, conversion.FieldUint16ToString)
+}
+
+// SetInt32ToString sets the int32_to_string field.
+func (m *ConversionMutation) SetInt32ToString(i int32) {
+	m.int32_to_string = &i
+	m.addint32_to_string = nil
+}
+
+// Int32ToString returns the int32_to_string value in the mutation.
+func (m *ConversionMutation) Int32ToString() (r int32, exists bool) {
+	v := m.int32_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInt32ToString returns the old int32_to_string value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldInt32ToString(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldInt32ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldInt32ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInt32ToString: %w", err)
+	}
+	return oldValue.Int32ToString, nil
+}
+
+// AddInt32ToString adds i to int32_to_string.
+func (m *ConversionMutation) AddInt32ToString(i int32) {
+	if m.addint32_to_string != nil {
+		*m.addint32_to_string += i
+	} else {
+		m.addint32_to_string = &i
+	}
+}
+
+// AddedInt32ToString returns the value that was added to the int32_to_string field in this mutation.
+func (m *ConversionMutation) AddedInt32ToString() (r int32, exists bool) {
+	v := m.addint32_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearInt32ToString clears the value of int32_to_string.
+func (m *ConversionMutation) ClearInt32ToString() {
+	m.int32_to_string = nil
+	m.addint32_to_string = nil
+	m.clearedFields[conversion.FieldInt32ToString] = struct{}{}
+}
+
+// Int32ToStringCleared returns if the field int32_to_string was cleared in this mutation.
+func (m *ConversionMutation) Int32ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldInt32ToString]
+	return ok
+}
+
+// ResetInt32ToString reset all changes of the "int32_to_string" field.
+func (m *ConversionMutation) ResetInt32ToString() {
+	m.int32_to_string = nil
+	m.addint32_to_string = nil
+	delete(m.clearedFields, conversion.FieldInt32ToString)
+}
+
+// SetUint32ToString sets the uint32_to_string field.
+func (m *ConversionMutation) SetUint32ToString(u uint32) {
+	m.uint32_to_string = &u
+	m.adduint32_to_string = nil
+}
+
+// Uint32ToString returns the uint32_to_string value in the mutation.
+func (m *ConversionMutation) Uint32ToString() (r uint32, exists bool) {
+	v := m.uint32_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUint32ToString returns the old uint32_to_string value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldUint32ToString(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUint32ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUint32ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUint32ToString: %w", err)
+	}
+	return oldValue.Uint32ToString, nil
+}
+
+// AddUint32ToString adds u to uint32_to_string.
+func (m *ConversionMutation) AddUint32ToString(u uint32) {
+	if m.adduint32_to_string != nil {
+		*m.adduint32_to_string += u
+	} else {
+		m.adduint32_to_string = &u
+	}
+}
+
+// AddedUint32ToString returns the value that was added to the uint32_to_string field in this mutation.
+func (m *ConversionMutation) AddedUint32ToString() (r uint32, exists bool) {
+	v := m.adduint32_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUint32ToString clears the value of uint32_to_string.
+func (m *ConversionMutation) ClearUint32ToString() {
+	m.uint32_to_string = nil
+	m.adduint32_to_string = nil
+	m.clearedFields[conversion.FieldUint32ToString] = struct{}{}
+}
+
+// Uint32ToStringCleared returns if the field uint32_to_string was cleared in this mutation.
+func (m *ConversionMutation) Uint32ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldUint32ToString]
+	return ok
+}
+
+// ResetUint32ToString reset all changes of the "uint32_to_string" field.
+func (m *ConversionMutation) ResetUint32ToString() {
+	m.uint32_to_string = nil
+	m.adduint32_to_string = nil
+	delete(m.clearedFields, conversion.FieldUint32ToString)
+}
+
+// SetInt64ToString sets the int64_to_string field.
+func (m *ConversionMutation) SetInt64ToString(i int64) {
+	m.int64_to_string = &i
+	m.addint64_to_string = nil
+}
+
+// Int64ToString returns the int64_to_string value in the mutation.
+func (m *ConversionMutation) Int64ToString() (r int64, exists bool) {
+	v := m.int64_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInt64ToString returns the old int64_to_string value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldInt64ToString(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldInt64ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldInt64ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInt64ToString: %w", err)
+	}
+	return oldValue.Int64ToString, nil
+}
+
+// AddInt64ToString adds i to int64_to_string.
+func (m *ConversionMutation) AddInt64ToString(i int64) {
+	if m.addint64_to_string != nil {
+		*m.addint64_to_string += i
+	} else {
+		m.addint64_to_string = &i
+	}
+}
+
+// AddedInt64ToString returns the value that was added to the int64_to_string field in this mutation.
+func (m *ConversionMutation) AddedInt64ToString() (r int64, exists bool) {
+	v := m.addint64_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearInt64ToString clears the value of int64_to_string.
+func (m *ConversionMutation) ClearInt64ToString() {
+	m.int64_to_string = nil
+	m.addint64_to_string = nil
+	m.clearedFields[conversion.FieldInt64ToString] = struct{}{}
+}
+
+// Int64ToStringCleared returns if the field int64_to_string was cleared in this mutation.
+func (m *ConversionMutation) Int64ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldInt64ToString]
+	return ok
+}
+
+// ResetInt64ToString reset all changes of the "int64_to_string" field.
+func (m *ConversionMutation) ResetInt64ToString() {
+	m.int64_to_string = nil
+	m.addint64_to_string = nil
+	delete(m.clearedFields, conversion.FieldInt64ToString)
+}
+
+// SetUint64ToString sets the uint64_to_string field.
+func (m *ConversionMutation) SetUint64ToString(u uint64) {
+	m.uint64_to_string = &u
+	m.adduint64_to_string = nil
+}
+
+// Uint64ToString returns the uint64_to_string value in the mutation.
+func (m *ConversionMutation) Uint64ToString() (r uint64, exists bool) {
+	v := m.uint64_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUint64ToString returns the old uint64_to_string value of the Conversion.
+// If the Conversion object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *ConversionMutation) OldUint64ToString(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUint64ToString is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUint64ToString requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUint64ToString: %w", err)
+	}
+	return oldValue.Uint64ToString, nil
+}
+
+// AddUint64ToString adds u to uint64_to_string.
+func (m *ConversionMutation) AddUint64ToString(u uint64) {
+	if m.adduint64_to_string != nil {
+		*m.adduint64_to_string += u
+	} else {
+		m.adduint64_to_string = &u
+	}
+}
+
+// AddedUint64ToString returns the value that was added to the uint64_to_string field in this mutation.
+func (m *ConversionMutation) AddedUint64ToString() (r uint64, exists bool) {
+	v := m.adduint64_to_string
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearUint64ToString clears the value of uint64_to_string.
+func (m *ConversionMutation) ClearUint64ToString() {
+	m.uint64_to_string = nil
+	m.adduint64_to_string = nil
+	m.clearedFields[conversion.FieldUint64ToString] = struct{}{}
+}
+
+// Uint64ToStringCleared returns if the field uint64_to_string was cleared in this mutation.
+func (m *ConversionMutation) Uint64ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldUint64ToString]
+	return ok
+}
+
+// ResetUint64ToString reset all changes of the "uint64_to_string" field.
+func (m *ConversionMutation) ResetUint64ToString() {
+	m.uint64_to_string = nil
+	m.adduint64_to_string = nil
+	delete(m.clearedFields, conversion.FieldUint64ToString)
+}
+
+// Op returns the operation name.
+func (m *ConversionMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Conversion).
+func (m *ConversionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *ConversionMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.name != nil {
+		fields = append(fields, conversion.FieldName)
+	}
+	if m.int8_to_string != nil {
+		fields = append(fields, conversion.FieldInt8ToString)
+	}
+	if m.uint8_to_string != nil {
+		fields = append(fields, conversion.FieldUint8ToString)
+	}
+	if m.int16_to_string != nil {
+		fields = append(fields, conversion.FieldInt16ToString)
+	}
+	if m.uint16_to_string != nil {
+		fields = append(fields, conversion.FieldUint16ToString)
+	}
+	if m.int32_to_string != nil {
+		fields = append(fields, conversion.FieldInt32ToString)
+	}
+	if m.uint32_to_string != nil {
+		fields = append(fields, conversion.FieldUint32ToString)
+	}
+	if m.int64_to_string != nil {
+		fields = append(fields, conversion.FieldInt64ToString)
+	}
+	if m.uint64_to_string != nil {
+		fields = append(fields, conversion.FieldUint64ToString)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *ConversionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case conversion.FieldName:
+		return m.Name()
+	case conversion.FieldInt8ToString:
+		return m.Int8ToString()
+	case conversion.FieldUint8ToString:
+		return m.Uint8ToString()
+	case conversion.FieldInt16ToString:
+		return m.Int16ToString()
+	case conversion.FieldUint16ToString:
+		return m.Uint16ToString()
+	case conversion.FieldInt32ToString:
+		return m.Int32ToString()
+	case conversion.FieldUint32ToString:
+		return m.Uint32ToString()
+	case conversion.FieldInt64ToString:
+		return m.Int64ToString()
+	case conversion.FieldUint64ToString:
+		return m.Uint64ToString()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *ConversionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case conversion.FieldName:
+		return m.OldName(ctx)
+	case conversion.FieldInt8ToString:
+		return m.OldInt8ToString(ctx)
+	case conversion.FieldUint8ToString:
+		return m.OldUint8ToString(ctx)
+	case conversion.FieldInt16ToString:
+		return m.OldInt16ToString(ctx)
+	case conversion.FieldUint16ToString:
+		return m.OldUint16ToString(ctx)
+	case conversion.FieldInt32ToString:
+		return m.OldInt32ToString(ctx)
+	case conversion.FieldUint32ToString:
+		return m.OldUint32ToString(ctx)
+	case conversion.FieldInt64ToString:
+		return m.OldInt64ToString(ctx)
+	case conversion.FieldUint64ToString:
+		return m.OldUint64ToString(ctx)
+	}
+	return nil, fmt.Errorf("unknown Conversion field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *ConversionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case conversion.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case conversion.FieldInt8ToString:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInt8ToString(v)
+		return nil
+	case conversion.FieldUint8ToString:
+		v, ok := value.(uint8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUint8ToString(v)
+		return nil
+	case conversion.FieldInt16ToString:
+		v, ok := value.(int16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInt16ToString(v)
+		return nil
+	case conversion.FieldUint16ToString:
+		v, ok := value.(uint16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUint16ToString(v)
+		return nil
+	case conversion.FieldInt32ToString:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInt32ToString(v)
+		return nil
+	case conversion.FieldUint32ToString:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUint32ToString(v)
+		return nil
+	case conversion.FieldInt64ToString:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInt64ToString(v)
+		return nil
+	case conversion.FieldUint64ToString:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUint64ToString(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Conversion field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *ConversionMutation) AddedFields() []string {
+	var fields []string
+	if m.addint8_to_string != nil {
+		fields = append(fields, conversion.FieldInt8ToString)
+	}
+	if m.adduint8_to_string != nil {
+		fields = append(fields, conversion.FieldUint8ToString)
+	}
+	if m.addint16_to_string != nil {
+		fields = append(fields, conversion.FieldInt16ToString)
+	}
+	if m.adduint16_to_string != nil {
+		fields = append(fields, conversion.FieldUint16ToString)
+	}
+	if m.addint32_to_string != nil {
+		fields = append(fields, conversion.FieldInt32ToString)
+	}
+	if m.adduint32_to_string != nil {
+		fields = append(fields, conversion.FieldUint32ToString)
+	}
+	if m.addint64_to_string != nil {
+		fields = append(fields, conversion.FieldInt64ToString)
+	}
+	if m.adduint64_to_string != nil {
+		fields = append(fields, conversion.FieldUint64ToString)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *ConversionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case conversion.FieldInt8ToString:
+		return m.AddedInt8ToString()
+	case conversion.FieldUint8ToString:
+		return m.AddedUint8ToString()
+	case conversion.FieldInt16ToString:
+		return m.AddedInt16ToString()
+	case conversion.FieldUint16ToString:
+		return m.AddedUint16ToString()
+	case conversion.FieldInt32ToString:
+		return m.AddedInt32ToString()
+	case conversion.FieldUint32ToString:
+		return m.AddedUint32ToString()
+	case conversion.FieldInt64ToString:
+		return m.AddedInt64ToString()
+	case conversion.FieldUint64ToString:
+		return m.AddedUint64ToString()
+	}
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *ConversionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case conversion.FieldInt8ToString:
+		v, ok := value.(int8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddInt8ToString(v)
+		return nil
+	case conversion.FieldUint8ToString:
+		v, ok := value.(uint8)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUint8ToString(v)
+		return nil
+	case conversion.FieldInt16ToString:
+		v, ok := value.(int16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddInt16ToString(v)
+		return nil
+	case conversion.FieldUint16ToString:
+		v, ok := value.(uint16)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUint16ToString(v)
+		return nil
+	case conversion.FieldInt32ToString:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddInt32ToString(v)
+		return nil
+	case conversion.FieldUint32ToString:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUint32ToString(v)
+		return nil
+	case conversion.FieldInt64ToString:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddInt64ToString(v)
+		return nil
+	case conversion.FieldUint64ToString:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUint64ToString(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Conversion numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *ConversionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(conversion.FieldInt8ToString) {
+		fields = append(fields, conversion.FieldInt8ToString)
+	}
+	if m.FieldCleared(conversion.FieldUint8ToString) {
+		fields = append(fields, conversion.FieldUint8ToString)
+	}
+	if m.FieldCleared(conversion.FieldInt16ToString) {
+		fields = append(fields, conversion.FieldInt16ToString)
+	}
+	if m.FieldCleared(conversion.FieldUint16ToString) {
+		fields = append(fields, conversion.FieldUint16ToString)
+	}
+	if m.FieldCleared(conversion.FieldInt32ToString) {
+		fields = append(fields, conversion.FieldInt32ToString)
+	}
+	if m.FieldCleared(conversion.FieldUint32ToString) {
+		fields = append(fields, conversion.FieldUint32ToString)
+	}
+	if m.FieldCleared(conversion.FieldInt64ToString) {
+		fields = append(fields, conversion.FieldInt64ToString)
+	}
+	if m.FieldCleared(conversion.FieldUint64ToString) {
+		fields = append(fields, conversion.FieldUint64ToString)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *ConversionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ConversionMutation) ClearField(name string) error {
+	switch name {
+	case conversion.FieldInt8ToString:
+		m.ClearInt8ToString()
+		return nil
+	case conversion.FieldUint8ToString:
+		m.ClearUint8ToString()
+		return nil
+	case conversion.FieldInt16ToString:
+		m.ClearInt16ToString()
+		return nil
+	case conversion.FieldUint16ToString:
+		m.ClearUint16ToString()
+		return nil
+	case conversion.FieldInt32ToString:
+		m.ClearInt32ToString()
+		return nil
+	case conversion.FieldUint32ToString:
+		m.ClearUint32ToString()
+		return nil
+	case conversion.FieldInt64ToString:
+		m.ClearInt64ToString()
+		return nil
+	case conversion.FieldUint64ToString:
+		m.ClearUint64ToString()
+		return nil
+	}
+	return fmt.Errorf("unknown Conversion nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *ConversionMutation) ResetField(name string) error {
+	switch name {
+	case conversion.FieldName:
+		m.ResetName()
+		return nil
+	case conversion.FieldInt8ToString:
+		m.ResetInt8ToString()
+		return nil
+	case conversion.FieldUint8ToString:
+		m.ResetUint8ToString()
+		return nil
+	case conversion.FieldInt16ToString:
+		m.ResetInt16ToString()
+		return nil
+	case conversion.FieldUint16ToString:
+		m.ResetUint16ToString()
+		return nil
+	case conversion.FieldInt32ToString:
+		m.ResetInt32ToString()
+		return nil
+	case conversion.FieldUint32ToString:
+		m.ResetUint32ToString()
+		return nil
+	case conversion.FieldInt64ToString:
+		m.ResetInt64ToString()
+		return nil
+	case conversion.FieldUint64ToString:
+		m.ResetUint64ToString()
+		return nil
+	}
+	return fmt.Errorf("unknown Conversion field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *ConversionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *ConversionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *ConversionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *ConversionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *ConversionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *ConversionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *ConversionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Conversion unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *ConversionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Conversion edge %s", name)
+}
+
+// UserMutation represents an operation that mutate the Users
+// nodes in the graph.
+type UserMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	age             *int32
+	addage          *int32
+	name            *string
+	nickname        *string
+	address         *string
+	renamed         *string
+	blob            *[]byte
+	state           *user.State
+	status          *string
+	workplace       *string
+	clearedFields   map[string]struct{}
+	parent          *int
+	clearedparent   bool
+	children        map[int]struct{}
+	removedchildren map[int]struct{}
+	clearedchildren bool
+	spouse          *int
+	clearedspouse   bool
+	car             *int
+	clearedcar      bool
+	done            bool
+	oldValue        func(context.Context) (*User, error)
+	predicates      []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -883,148 +2045,6 @@ func (m *UserMutation) ResetWorkplace() {
 	delete(m.clearedFields, user.FieldWorkplace)
 }
 
-// SetInt64ToString sets the int64_to_string field.
-func (m *UserMutation) SetInt64ToString(i int64) {
-	m.int64_to_string = &i
-	m.addint64_to_string = nil
-}
-
-// Int64ToString returns the int64_to_string value in the mutation.
-func (m *UserMutation) Int64ToString() (r int64, exists bool) {
-	v := m.int64_to_string
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldInt64ToString returns the old int64_to_string value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *UserMutation) OldInt64ToString(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldInt64ToString is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldInt64ToString requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldInt64ToString: %w", err)
-	}
-	return oldValue.Int64ToString, nil
-}
-
-// AddInt64ToString adds i to int64_to_string.
-func (m *UserMutation) AddInt64ToString(i int64) {
-	if m.addint64_to_string != nil {
-		*m.addint64_to_string += i
-	} else {
-		m.addint64_to_string = &i
-	}
-}
-
-// AddedInt64ToString returns the value that was added to the int64_to_string field in this mutation.
-func (m *UserMutation) AddedInt64ToString() (r int64, exists bool) {
-	v := m.addint64_to_string
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearInt64ToString clears the value of int64_to_string.
-func (m *UserMutation) ClearInt64ToString() {
-	m.int64_to_string = nil
-	m.addint64_to_string = nil
-	m.clearedFields[user.FieldInt64ToString] = struct{}{}
-}
-
-// Int64ToStringCleared returns if the field int64_to_string was cleared in this mutation.
-func (m *UserMutation) Int64ToStringCleared() bool {
-	_, ok := m.clearedFields[user.FieldInt64ToString]
-	return ok
-}
-
-// ResetInt64ToString reset all changes of the "int64_to_string" field.
-func (m *UserMutation) ResetInt64ToString() {
-	m.int64_to_string = nil
-	m.addint64_to_string = nil
-	delete(m.clearedFields, user.FieldInt64ToString)
-}
-
-// SetUint64ToString sets the uint64_to_string field.
-func (m *UserMutation) SetUint64ToString(u uint64) {
-	m.uint64_to_string = &u
-	m.adduint64_to_string = nil
-}
-
-// Uint64ToString returns the uint64_to_string value in the mutation.
-func (m *UserMutation) Uint64ToString() (r uint64, exists bool) {
-	v := m.uint64_to_string
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUint64ToString returns the old uint64_to_string value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *UserMutation) OldUint64ToString(ctx context.Context) (v uint64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUint64ToString is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUint64ToString requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUint64ToString: %w", err)
-	}
-	return oldValue.Uint64ToString, nil
-}
-
-// AddUint64ToString adds u to uint64_to_string.
-func (m *UserMutation) AddUint64ToString(u uint64) {
-	if m.adduint64_to_string != nil {
-		*m.adduint64_to_string += u
-	} else {
-		m.adduint64_to_string = &u
-	}
-}
-
-// AddedUint64ToString returns the value that was added to the uint64_to_string field in this mutation.
-func (m *UserMutation) AddedUint64ToString() (r uint64, exists bool) {
-	v := m.adduint64_to_string
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearUint64ToString clears the value of uint64_to_string.
-func (m *UserMutation) ClearUint64ToString() {
-	m.uint64_to_string = nil
-	m.adduint64_to_string = nil
-	m.clearedFields[user.FieldUint64ToString] = struct{}{}
-}
-
-// Uint64ToStringCleared returns if the field uint64_to_string was cleared in this mutation.
-func (m *UserMutation) Uint64ToStringCleared() bool {
-	_, ok := m.clearedFields[user.FieldUint64ToString]
-	return ok
-}
-
-// ResetUint64ToString reset all changes of the "uint64_to_string" field.
-func (m *UserMutation) ResetUint64ToString() {
-	m.uint64_to_string = nil
-	m.adduint64_to_string = nil
-	delete(m.clearedFields, user.FieldUint64ToString)
-}
-
 // SetParentID sets the parent edge to User by id.
 func (m *UserMutation) SetParentID(id int) {
 	m.parent = &id
@@ -1209,7 +2229,7 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 9)
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
 	}
@@ -1237,12 +2257,6 @@ func (m *UserMutation) Fields() []string {
 	if m.workplace != nil {
 		fields = append(fields, user.FieldWorkplace)
 	}
-	if m.int64_to_string != nil {
-		fields = append(fields, user.FieldInt64ToString)
-	}
-	if m.uint64_to_string != nil {
-		fields = append(fields, user.FieldUint64ToString)
-	}
 	return fields
 }
 
@@ -1269,10 +2283,6 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case user.FieldWorkplace:
 		return m.Workplace()
-	case user.FieldInt64ToString:
-		return m.Int64ToString()
-	case user.FieldUint64ToString:
-		return m.Uint64ToString()
 	}
 	return nil, false
 }
@@ -1300,10 +2310,6 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStatus(ctx)
 	case user.FieldWorkplace:
 		return m.OldWorkplace(ctx)
-	case user.FieldInt64ToString:
-		return m.OldInt64ToString(ctx)
-	case user.FieldUint64ToString:
-		return m.OldUint64ToString(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -1376,20 +2382,6 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetWorkplace(v)
 		return nil
-	case user.FieldInt64ToString:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetInt64ToString(v)
-		return nil
-	case user.FieldUint64ToString:
-		v, ok := value.(uint64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUint64ToString(v)
-		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -1401,12 +2393,6 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addage != nil {
 		fields = append(fields, user.FieldAge)
 	}
-	if m.addint64_to_string != nil {
-		fields = append(fields, user.FieldInt64ToString)
-	}
-	if m.adduint64_to_string != nil {
-		fields = append(fields, user.FieldUint64ToString)
-	}
 	return fields
 }
 
@@ -1417,10 +2403,6 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldAge:
 		return m.AddedAge()
-	case user.FieldInt64ToString:
-		return m.AddedInt64ToString()
-	case user.FieldUint64ToString:
-		return m.AddedUint64ToString()
 	}
 	return nil, false
 }
@@ -1436,20 +2418,6 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAge(v)
-		return nil
-	case user.FieldInt64ToString:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddInt64ToString(v)
-		return nil
-	case user.FieldUint64ToString:
-		v, ok := value.(uint64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddUint64ToString(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
@@ -1476,12 +2444,6 @@ func (m *UserMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(user.FieldWorkplace) {
 		fields = append(fields, user.FieldWorkplace)
-	}
-	if m.FieldCleared(user.FieldInt64ToString) {
-		fields = append(fields, user.FieldInt64ToString)
-	}
-	if m.FieldCleared(user.FieldUint64ToString) {
-		fields = append(fields, user.FieldUint64ToString)
 	}
 	return fields
 }
@@ -1514,12 +2476,6 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldWorkplace:
 		m.ClearWorkplace()
-		return nil
-	case user.FieldInt64ToString:
-		m.ClearInt64ToString()
-		return nil
-	case user.FieldUint64ToString:
-		m.ClearUint64ToString()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -1556,12 +2512,6 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldWorkplace:
 		m.ResetWorkplace()
-		return nil
-	case user.FieldInt64ToString:
-		m.ResetInt64ToString()
-		return nil
-	case user.FieldUint64ToString:
-		m.ResetUint64ToString()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

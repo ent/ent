@@ -32,6 +32,26 @@ var (
 			},
 		},
 	}
+	// ConversionsColumns holds the columns for the "conversions" table.
+	ConversionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "int8_to_string", Type: field.TypeInt8, Nullable: true},
+		{Name: "uint8_to_string", Type: field.TypeUint8, Nullable: true},
+		{Name: "int16_to_string", Type: field.TypeInt16, Nullable: true},
+		{Name: "uint16_to_string", Type: field.TypeUint16, Nullable: true},
+		{Name: "int32_to_string", Type: field.TypeInt32, Nullable: true},
+		{Name: "uint32_to_string", Type: field.TypeUint32, Nullable: true},
+		{Name: "int64_to_string", Type: field.TypeInt64, Nullable: true},
+		{Name: "uint64_to_string", Type: field.TypeUint64, Nullable: true},
+	}
+	// ConversionsTable holds the schema information for the "conversions" table.
+	ConversionsTable = &schema.Table{
+		Name:        "conversions",
+		Columns:     ConversionsColumns,
+		PrimaryKey:  []*schema.Column{ConversionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "oid", Type: field.TypeInt, Increment: true},
@@ -44,8 +64,6 @@ var (
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out"}},
 		{Name: "status", Type: field.TypeString, Nullable: true},
 		{Name: "workplace", Type: field.TypeString, Nullable: true, Size: 30},
-		{Name: "int64_to_string", Type: field.TypeInt64, Nullable: true},
-		{Name: "uint64_to_string", Type: field.TypeUint64, Nullable: true},
 		{Name: "user_children", Type: field.TypeInt, Nullable: true},
 		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -57,14 +75,14 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "users_users_children",
-				Columns: []*schema.Column{UsersColumns[12]},
+				Columns: []*schema.Column{UsersColumns[10]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "users_users_spouse",
-				Columns: []*schema.Column{UsersColumns[13]},
+				Columns: []*schema.Column{UsersColumns[11]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -81,6 +99,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CarsTable,
+		ConversionsTable,
 		UsersTable,
 	}
 )

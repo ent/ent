@@ -14,6 +14,7 @@ import (
 	"github.com/facebook/ent/entc/integration/migrate/entv1/migrate"
 
 	"github.com/facebook/ent/entc/integration/migrate/entv1/car"
+	"github.com/facebook/ent/entc/integration/migrate/entv1/conversion"
 	"github.com/facebook/ent/entc/integration/migrate/entv1/user"
 
 	"github.com/facebook/ent/dialect"
@@ -28,6 +29,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
+	// Conversion is the client for interacting with the Conversion builders.
+	Conversion *ConversionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -44,6 +47,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Car = NewCarClient(c.config)
+	c.Conversion = NewConversionClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -75,10 +79,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Car:    NewCarClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:        ctx,
+		config:     cfg,
+		Car:        NewCarClient(cfg),
+		Conversion: NewConversionClient(cfg),
+		User:       NewUserClient(cfg),
 	}, nil
 }
 
@@ -93,9 +98,10 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	}
 	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		config: cfg,
-		Car:    NewCarClient(cfg),
-		User:   NewUserClient(cfg),
+		config:     cfg,
+		Car:        NewCarClient(cfg),
+		Conversion: NewConversionClient(cfg),
+		User:       NewUserClient(cfg),
 	}, nil
 }
 
@@ -125,6 +131,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Car.Use(hooks...)
+	c.Conversion.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -230,6 +237,94 @@ func (c *CarClient) QueryOwner(ca *Car) *UserQuery {
 // Hooks returns the client hooks.
 func (c *CarClient) Hooks() []Hook {
 	return c.hooks.Car
+}
+
+// ConversionClient is a client for the Conversion schema.
+type ConversionClient struct {
+	config
+}
+
+// NewConversionClient returns a client for the Conversion from the given config.
+func NewConversionClient(c config) *ConversionClient {
+	return &ConversionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `conversion.Hooks(f(g(h())))`.
+func (c *ConversionClient) Use(hooks ...Hook) {
+	c.hooks.Conversion = append(c.hooks.Conversion, hooks...)
+}
+
+// Create returns a create builder for Conversion.
+func (c *ConversionClient) Create() *ConversionCreate {
+	mutation := newConversionMutation(c.config, OpCreate)
+	return &ConversionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Conversion entities.
+func (c *ConversionClient) CreateBulk(builders ...*ConversionCreate) *ConversionCreateBulk {
+	return &ConversionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Conversion.
+func (c *ConversionClient) Update() *ConversionUpdate {
+	mutation := newConversionMutation(c.config, OpUpdate)
+	return &ConversionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ConversionClient) UpdateOne(co *Conversion) *ConversionUpdateOne {
+	mutation := newConversionMutation(c.config, OpUpdateOne, withConversion(co))
+	return &ConversionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ConversionClient) UpdateOneID(id int) *ConversionUpdateOne {
+	mutation := newConversionMutation(c.config, OpUpdateOne, withConversionID(id))
+	return &ConversionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Conversion.
+func (c *ConversionClient) Delete() *ConversionDelete {
+	mutation := newConversionMutation(c.config, OpDelete)
+	return &ConversionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ConversionClient) DeleteOne(co *Conversion) *ConversionDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ConversionClient) DeleteOneID(id int) *ConversionDeleteOne {
+	builder := c.Delete().Where(conversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ConversionDeleteOne{builder}
+}
+
+// Query returns a query builder for Conversion.
+func (c *ConversionClient) Query() *ConversionQuery {
+	return &ConversionQuery{config: c.config}
+}
+
+// Get returns a Conversion entity by its id.
+func (c *ConversionClient) Get(ctx context.Context, id int) (*Conversion, error) {
+	return c.Query().Where(conversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ConversionClient) GetX(ctx context.Context, id int) *Conversion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ConversionClient) Hooks() []Hook {
+	return c.hooks.Conversion
 }
 
 // UserClient is a client for the User schema.
