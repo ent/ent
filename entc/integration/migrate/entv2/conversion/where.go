@@ -254,6 +254,20 @@ func NameHasSuffix(v string) predicate.Conversion {
 	})
 }
 
+// NameIsNil applies the IsNil predicate on the "name" field.
+func NameIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldName)))
+	})
+}
+
+// NameNotNil applies the NotNil predicate on the "name" field.
+func NameNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldName)))
+	})
+}
+
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -362,6 +376,20 @@ func Int8ToStringHasPrefix(v string) predicate.Conversion {
 func Int8ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldInt8ToString), v))
+	})
+}
+
+// Int8ToStringIsNil applies the IsNil predicate on the "int8_to_string" field.
+func Int8ToStringIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldInt8ToString)))
+	})
+}
+
+// Int8ToStringNotNil applies the NotNil predicate on the "int8_to_string" field.
+func Int8ToStringNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldInt8ToString)))
 	})
 }
 
@@ -476,6 +504,20 @@ func Uint8ToStringHasSuffix(v string) predicate.Conversion {
 	})
 }
 
+// Uint8ToStringIsNil applies the IsNil predicate on the "uint8_to_string" field.
+func Uint8ToStringIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUint8ToString)))
+	})
+}
+
+// Uint8ToStringNotNil applies the NotNil predicate on the "uint8_to_string" field.
+func Uint8ToStringNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUint8ToString)))
+	})
+}
+
 // Uint8ToStringEqualFold applies the EqualFold predicate on the "uint8_to_string" field.
 func Uint8ToStringEqualFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -584,6 +626,20 @@ func Int16ToStringHasPrefix(v string) predicate.Conversion {
 func Int16ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldInt16ToString), v))
+	})
+}
+
+// Int16ToStringIsNil applies the IsNil predicate on the "int16_to_string" field.
+func Int16ToStringIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldInt16ToString)))
+	})
+}
+
+// Int16ToStringNotNil applies the NotNil predicate on the "int16_to_string" field.
+func Int16ToStringNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldInt16ToString)))
 	})
 }
 
@@ -698,6 +754,20 @@ func Uint16ToStringHasSuffix(v string) predicate.Conversion {
 	})
 }
 
+// Uint16ToStringIsNil applies the IsNil predicate on the "uint16_to_string" field.
+func Uint16ToStringIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUint16ToString)))
+	})
+}
+
+// Uint16ToStringNotNil applies the NotNil predicate on the "uint16_to_string" field.
+func Uint16ToStringNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUint16ToString)))
+	})
+}
+
 // Uint16ToStringEqualFold applies the EqualFold predicate on the "uint16_to_string" field.
 func Uint16ToStringEqualFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -806,6 +876,20 @@ func Int32ToStringHasPrefix(v string) predicate.Conversion {
 func Int32ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldInt32ToString), v))
+	})
+}
+
+// Int32ToStringIsNil applies the IsNil predicate on the "int32_to_string" field.
+func Int32ToStringIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldInt32ToString)))
+	})
+}
+
+// Int32ToStringNotNil applies the NotNil predicate on the "int32_to_string" field.
+func Int32ToStringNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldInt32ToString)))
 	})
 }
 
@@ -920,6 +1004,20 @@ func Uint32ToStringHasSuffix(v string) predicate.Conversion {
 	})
 }
 
+// Uint32ToStringIsNil applies the IsNil predicate on the "uint32_to_string" field.
+func Uint32ToStringIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUint32ToString)))
+	})
+}
+
+// Uint32ToStringNotNil applies the NotNil predicate on the "uint32_to_string" field.
+func Uint32ToStringNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUint32ToString)))
+	})
+}
+
 // Uint32ToStringEqualFold applies the EqualFold predicate on the "uint32_to_string" field.
 func Uint32ToStringEqualFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -1031,6 +1129,20 @@ func Int64ToStringHasSuffix(v string) predicate.Conversion {
 	})
 }
 
+// Int64ToStringIsNil applies the IsNil predicate on the "int64_to_string" field.
+func Int64ToStringIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldInt64ToString)))
+	})
+}
+
+// Int64ToStringNotNil applies the NotNil predicate on the "int64_to_string" field.
+func Int64ToStringNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldInt64ToString)))
+	})
+}
+
 // Int64ToStringEqualFold applies the EqualFold predicate on the "int64_to_string" field.
 func Int64ToStringEqualFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -1139,6 +1251,20 @@ func Uint64ToStringHasPrefix(v string) predicate.Conversion {
 func Uint64ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringIsNil applies the IsNil predicate on the "uint64_to_string" field.
+func Uint64ToStringIsNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUint64ToString)))
+	})
+}
+
+// Uint64ToStringNotNil applies the NotNil predicate on the "uint64_to_string" field.
+func Uint64ToStringNotNil() predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUint64ToString)))
 	})
 }
 

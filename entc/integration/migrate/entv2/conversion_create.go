@@ -8,7 +8,6 @@ package entv2
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
@@ -29,9 +28,25 @@ func (cc *ConversionCreate) SetName(s string) *ConversionCreate {
 	return cc
 }
 
+// SetNillableName sets the name field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableName(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetName(*s)
+	}
+	return cc
+}
+
 // SetInt8ToString sets the int8_to_string field.
 func (cc *ConversionCreate) SetInt8ToString(s string) *ConversionCreate {
 	cc.mutation.SetInt8ToString(s)
+	return cc
+}
+
+// SetNillableInt8ToString sets the int8_to_string field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableInt8ToString(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetInt8ToString(*s)
+	}
 	return cc
 }
 
@@ -41,9 +56,25 @@ func (cc *ConversionCreate) SetUint8ToString(s string) *ConversionCreate {
 	return cc
 }
 
+// SetNillableUint8ToString sets the uint8_to_string field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableUint8ToString(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetUint8ToString(*s)
+	}
+	return cc
+}
+
 // SetInt16ToString sets the int16_to_string field.
 func (cc *ConversionCreate) SetInt16ToString(s string) *ConversionCreate {
 	cc.mutation.SetInt16ToString(s)
+	return cc
+}
+
+// SetNillableInt16ToString sets the int16_to_string field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableInt16ToString(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetInt16ToString(*s)
+	}
 	return cc
 }
 
@@ -53,9 +84,25 @@ func (cc *ConversionCreate) SetUint16ToString(s string) *ConversionCreate {
 	return cc
 }
 
+// SetNillableUint16ToString sets the uint16_to_string field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableUint16ToString(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetUint16ToString(*s)
+	}
+	return cc
+}
+
 // SetInt32ToString sets the int32_to_string field.
 func (cc *ConversionCreate) SetInt32ToString(s string) *ConversionCreate {
 	cc.mutation.SetInt32ToString(s)
+	return cc
+}
+
+// SetNillableInt32ToString sets the int32_to_string field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableInt32ToString(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetInt32ToString(*s)
+	}
 	return cc
 }
 
@@ -65,15 +112,39 @@ func (cc *ConversionCreate) SetUint32ToString(s string) *ConversionCreate {
 	return cc
 }
 
+// SetNillableUint32ToString sets the uint32_to_string field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableUint32ToString(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetUint32ToString(*s)
+	}
+	return cc
+}
+
 // SetInt64ToString sets the int64_to_string field.
 func (cc *ConversionCreate) SetInt64ToString(s string) *ConversionCreate {
 	cc.mutation.SetInt64ToString(s)
 	return cc
 }
 
+// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableInt64ToString(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetInt64ToString(*s)
+	}
+	return cc
+}
+
 // SetUint64ToString sets the uint64_to_string field.
 func (cc *ConversionCreate) SetUint64ToString(s string) *ConversionCreate {
 	cc.mutation.SetUint64ToString(s)
+	return cc
+}
+
+// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableUint64ToString(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetUint64ToString(*s)
+	}
 	return cc
 }
 
@@ -128,33 +199,6 @@ func (cc *ConversionCreate) SaveX(ctx context.Context) *Conversion {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *ConversionCreate) check() error {
-	if _, ok := cc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("entv2: missing required field \"name\"")}
-	}
-	if _, ok := cc.mutation.Int8ToString(); !ok {
-		return &ValidationError{Name: "int8_to_string", err: errors.New("entv2: missing required field \"int8_to_string\"")}
-	}
-	if _, ok := cc.mutation.Uint8ToString(); !ok {
-		return &ValidationError{Name: "uint8_to_string", err: errors.New("entv2: missing required field \"uint8_to_string\"")}
-	}
-	if _, ok := cc.mutation.Int16ToString(); !ok {
-		return &ValidationError{Name: "int16_to_string", err: errors.New("entv2: missing required field \"int16_to_string\"")}
-	}
-	if _, ok := cc.mutation.Uint16ToString(); !ok {
-		return &ValidationError{Name: "uint16_to_string", err: errors.New("entv2: missing required field \"uint16_to_string\"")}
-	}
-	if _, ok := cc.mutation.Int32ToString(); !ok {
-		return &ValidationError{Name: "int32_to_string", err: errors.New("entv2: missing required field \"int32_to_string\"")}
-	}
-	if _, ok := cc.mutation.Uint32ToString(); !ok {
-		return &ValidationError{Name: "uint32_to_string", err: errors.New("entv2: missing required field \"uint32_to_string\"")}
-	}
-	if _, ok := cc.mutation.Int64ToString(); !ok {
-		return &ValidationError{Name: "int64_to_string", err: errors.New("entv2: missing required field \"int64_to_string\"")}
-	}
-	if _, ok := cc.mutation.Uint64ToString(); !ok {
-		return &ValidationError{Name: "uint64_to_string", err: errors.New("entv2: missing required field \"uint64_to_string\"")}
-	}
 	return nil
 }
 

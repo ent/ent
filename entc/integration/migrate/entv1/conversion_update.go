@@ -36,6 +36,20 @@ func (cu *ConversionUpdate) SetName(s string) *ConversionUpdate {
 	return cu
 }
 
+// SetNillableName sets the name field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableName(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetName(*s)
+	}
+	return cu
+}
+
+// ClearName clears the value of name.
+func (cu *ConversionUpdate) ClearName() *ConversionUpdate {
+	cu.mutation.ClearName()
+	return cu
+}
+
 // SetInt8ToString sets the int8_to_string field.
 func (cu *ConversionUpdate) SetInt8ToString(i int8) *ConversionUpdate {
 	cu.mutation.ResetInt8ToString()
@@ -333,6 +347,12 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: conversion.FieldName,
 		})
 	}
+	if cu.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldName,
+		})
+	}
 	if value, ok := cu.mutation.Int8ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt8,
@@ -514,6 +534,20 @@ type ConversionUpdateOne struct {
 // SetName sets the name field.
 func (cuo *ConversionUpdateOne) SetName(s string) *ConversionUpdateOne {
 	cuo.mutation.SetName(s)
+	return cuo
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableName(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetName(*s)
+	}
+	return cuo
+}
+
+// ClearName clears the value of name.
+func (cuo *ConversionUpdateOne) ClearName() *ConversionUpdateOne {
+	cuo.mutation.ClearName()
 	return cuo
 }
 
@@ -809,6 +843,12 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldName,
+		})
+	}
+	if cuo.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldName,
 		})
 	}
