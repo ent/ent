@@ -474,9 +474,22 @@ func (m *ConversionMutation) OldName(ctx context.Context) (v string, err error) 
 	return oldValue.Name, nil
 }
 
+// ClearName clears the value of name.
+func (m *ConversionMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[conversion.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the field name was cleared in this mutation.
+func (m *ConversionMutation) NameCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldName]
+	return ok
+}
+
 // ResetName reset all changes of the "name" field.
 func (m *ConversionMutation) ResetName() {
 	m.name = nil
+	delete(m.clearedFields, conversion.FieldName)
 }
 
 // SetInt8ToString sets the int8_to_string field.
@@ -1343,6 +1356,9 @@ func (m *ConversionMutation) AddField(name string, value ent.Value) error {
 // during this mutation.
 func (m *ConversionMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(conversion.FieldName) {
+		fields = append(fields, conversion.FieldName)
+	}
 	if m.FieldCleared(conversion.FieldInt8ToString) {
 		fields = append(fields, conversion.FieldInt8ToString)
 	}
@@ -1381,6 +1397,9 @@ func (m *ConversionMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ConversionMutation) ClearField(name string) error {
 	switch name {
+	case conversion.FieldName:
+		m.ClearName()
+		return nil
 	case conversion.FieldInt8ToString:
 		m.ClearInt8ToString()
 		return nil

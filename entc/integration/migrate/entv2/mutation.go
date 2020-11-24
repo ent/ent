@@ -471,9 +471,22 @@ func (m *ConversionMutation) OldName(ctx context.Context) (v string, err error) 
 	return oldValue.Name, nil
 }
 
+// ClearName clears the value of name.
+func (m *ConversionMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[conversion.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the field name was cleared in this mutation.
+func (m *ConversionMutation) NameCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldName]
+	return ok
+}
+
 // ResetName reset all changes of the "name" field.
 func (m *ConversionMutation) ResetName() {
 	m.name = nil
+	delete(m.clearedFields, conversion.FieldName)
 }
 
 // SetInt8ToString sets the int8_to_string field.
@@ -508,9 +521,22 @@ func (m *ConversionMutation) OldInt8ToString(ctx context.Context) (v string, err
 	return oldValue.Int8ToString, nil
 }
 
+// ClearInt8ToString clears the value of int8_to_string.
+func (m *ConversionMutation) ClearInt8ToString() {
+	m.int8_to_string = nil
+	m.clearedFields[conversion.FieldInt8ToString] = struct{}{}
+}
+
+// Int8ToStringCleared returns if the field int8_to_string was cleared in this mutation.
+func (m *ConversionMutation) Int8ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldInt8ToString]
+	return ok
+}
+
 // ResetInt8ToString reset all changes of the "int8_to_string" field.
 func (m *ConversionMutation) ResetInt8ToString() {
 	m.int8_to_string = nil
+	delete(m.clearedFields, conversion.FieldInt8ToString)
 }
 
 // SetUint8ToString sets the uint8_to_string field.
@@ -545,9 +571,22 @@ func (m *ConversionMutation) OldUint8ToString(ctx context.Context) (v string, er
 	return oldValue.Uint8ToString, nil
 }
 
+// ClearUint8ToString clears the value of uint8_to_string.
+func (m *ConversionMutation) ClearUint8ToString() {
+	m.uint8_to_string = nil
+	m.clearedFields[conversion.FieldUint8ToString] = struct{}{}
+}
+
+// Uint8ToStringCleared returns if the field uint8_to_string was cleared in this mutation.
+func (m *ConversionMutation) Uint8ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldUint8ToString]
+	return ok
+}
+
 // ResetUint8ToString reset all changes of the "uint8_to_string" field.
 func (m *ConversionMutation) ResetUint8ToString() {
 	m.uint8_to_string = nil
+	delete(m.clearedFields, conversion.FieldUint8ToString)
 }
 
 // SetInt16ToString sets the int16_to_string field.
@@ -582,9 +621,22 @@ func (m *ConversionMutation) OldInt16ToString(ctx context.Context) (v string, er
 	return oldValue.Int16ToString, nil
 }
 
+// ClearInt16ToString clears the value of int16_to_string.
+func (m *ConversionMutation) ClearInt16ToString() {
+	m.int16_to_string = nil
+	m.clearedFields[conversion.FieldInt16ToString] = struct{}{}
+}
+
+// Int16ToStringCleared returns if the field int16_to_string was cleared in this mutation.
+func (m *ConversionMutation) Int16ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldInt16ToString]
+	return ok
+}
+
 // ResetInt16ToString reset all changes of the "int16_to_string" field.
 func (m *ConversionMutation) ResetInt16ToString() {
 	m.int16_to_string = nil
+	delete(m.clearedFields, conversion.FieldInt16ToString)
 }
 
 // SetUint16ToString sets the uint16_to_string field.
@@ -619,9 +671,22 @@ func (m *ConversionMutation) OldUint16ToString(ctx context.Context) (v string, e
 	return oldValue.Uint16ToString, nil
 }
 
+// ClearUint16ToString clears the value of uint16_to_string.
+func (m *ConversionMutation) ClearUint16ToString() {
+	m.uint16_to_string = nil
+	m.clearedFields[conversion.FieldUint16ToString] = struct{}{}
+}
+
+// Uint16ToStringCleared returns if the field uint16_to_string was cleared in this mutation.
+func (m *ConversionMutation) Uint16ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldUint16ToString]
+	return ok
+}
+
 // ResetUint16ToString reset all changes of the "uint16_to_string" field.
 func (m *ConversionMutation) ResetUint16ToString() {
 	m.uint16_to_string = nil
+	delete(m.clearedFields, conversion.FieldUint16ToString)
 }
 
 // SetInt32ToString sets the int32_to_string field.
@@ -656,9 +721,22 @@ func (m *ConversionMutation) OldInt32ToString(ctx context.Context) (v string, er
 	return oldValue.Int32ToString, nil
 }
 
+// ClearInt32ToString clears the value of int32_to_string.
+func (m *ConversionMutation) ClearInt32ToString() {
+	m.int32_to_string = nil
+	m.clearedFields[conversion.FieldInt32ToString] = struct{}{}
+}
+
+// Int32ToStringCleared returns if the field int32_to_string was cleared in this mutation.
+func (m *ConversionMutation) Int32ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldInt32ToString]
+	return ok
+}
+
 // ResetInt32ToString reset all changes of the "int32_to_string" field.
 func (m *ConversionMutation) ResetInt32ToString() {
 	m.int32_to_string = nil
+	delete(m.clearedFields, conversion.FieldInt32ToString)
 }
 
 // SetUint32ToString sets the uint32_to_string field.
@@ -693,9 +771,22 @@ func (m *ConversionMutation) OldUint32ToString(ctx context.Context) (v string, e
 	return oldValue.Uint32ToString, nil
 }
 
+// ClearUint32ToString clears the value of uint32_to_string.
+func (m *ConversionMutation) ClearUint32ToString() {
+	m.uint32_to_string = nil
+	m.clearedFields[conversion.FieldUint32ToString] = struct{}{}
+}
+
+// Uint32ToStringCleared returns if the field uint32_to_string was cleared in this mutation.
+func (m *ConversionMutation) Uint32ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldUint32ToString]
+	return ok
+}
+
 // ResetUint32ToString reset all changes of the "uint32_to_string" field.
 func (m *ConversionMutation) ResetUint32ToString() {
 	m.uint32_to_string = nil
+	delete(m.clearedFields, conversion.FieldUint32ToString)
 }
 
 // SetInt64ToString sets the int64_to_string field.
@@ -730,9 +821,22 @@ func (m *ConversionMutation) OldInt64ToString(ctx context.Context) (v string, er
 	return oldValue.Int64ToString, nil
 }
 
+// ClearInt64ToString clears the value of int64_to_string.
+func (m *ConversionMutation) ClearInt64ToString() {
+	m.int64_to_string = nil
+	m.clearedFields[conversion.FieldInt64ToString] = struct{}{}
+}
+
+// Int64ToStringCleared returns if the field int64_to_string was cleared in this mutation.
+func (m *ConversionMutation) Int64ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldInt64ToString]
+	return ok
+}
+
 // ResetInt64ToString reset all changes of the "int64_to_string" field.
 func (m *ConversionMutation) ResetInt64ToString() {
 	m.int64_to_string = nil
+	delete(m.clearedFields, conversion.FieldInt64ToString)
 }
 
 // SetUint64ToString sets the uint64_to_string field.
@@ -767,9 +871,22 @@ func (m *ConversionMutation) OldUint64ToString(ctx context.Context) (v string, e
 	return oldValue.Uint64ToString, nil
 }
 
+// ClearUint64ToString clears the value of uint64_to_string.
+func (m *ConversionMutation) ClearUint64ToString() {
+	m.uint64_to_string = nil
+	m.clearedFields[conversion.FieldUint64ToString] = struct{}{}
+}
+
+// Uint64ToStringCleared returns if the field uint64_to_string was cleared in this mutation.
+func (m *ConversionMutation) Uint64ToStringCleared() bool {
+	_, ok := m.clearedFields[conversion.FieldUint64ToString]
+	return ok
+}
+
 // ResetUint64ToString reset all changes of the "uint64_to_string" field.
 func (m *ConversionMutation) ResetUint64ToString() {
 	m.uint64_to_string = nil
+	delete(m.clearedFields, conversion.FieldUint64ToString)
 }
 
 // Op returns the operation name.
@@ -968,7 +1085,35 @@ func (m *ConversionMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
 func (m *ConversionMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(conversion.FieldName) {
+		fields = append(fields, conversion.FieldName)
+	}
+	if m.FieldCleared(conversion.FieldInt8ToString) {
+		fields = append(fields, conversion.FieldInt8ToString)
+	}
+	if m.FieldCleared(conversion.FieldUint8ToString) {
+		fields = append(fields, conversion.FieldUint8ToString)
+	}
+	if m.FieldCleared(conversion.FieldInt16ToString) {
+		fields = append(fields, conversion.FieldInt16ToString)
+	}
+	if m.FieldCleared(conversion.FieldUint16ToString) {
+		fields = append(fields, conversion.FieldUint16ToString)
+	}
+	if m.FieldCleared(conversion.FieldInt32ToString) {
+		fields = append(fields, conversion.FieldInt32ToString)
+	}
+	if m.FieldCleared(conversion.FieldUint32ToString) {
+		fields = append(fields, conversion.FieldUint32ToString)
+	}
+	if m.FieldCleared(conversion.FieldInt64ToString) {
+		fields = append(fields, conversion.FieldInt64ToString)
+	}
+	if m.FieldCleared(conversion.FieldUint64ToString) {
+		fields = append(fields, conversion.FieldUint64ToString)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
@@ -981,6 +1126,35 @@ func (m *ConversionMutation) FieldCleared(name string) bool {
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ConversionMutation) ClearField(name string) error {
+	switch name {
+	case conversion.FieldName:
+		m.ClearName()
+		return nil
+	case conversion.FieldInt8ToString:
+		m.ClearInt8ToString()
+		return nil
+	case conversion.FieldUint8ToString:
+		m.ClearUint8ToString()
+		return nil
+	case conversion.FieldInt16ToString:
+		m.ClearInt16ToString()
+		return nil
+	case conversion.FieldUint16ToString:
+		m.ClearUint16ToString()
+		return nil
+	case conversion.FieldInt32ToString:
+		m.ClearInt32ToString()
+		return nil
+	case conversion.FieldUint32ToString:
+		m.ClearUint32ToString()
+		return nil
+	case conversion.FieldInt64ToString:
+		m.ClearInt64ToString()
+		return nil
+	case conversion.FieldUint64ToString:
+		m.ClearUint64ToString()
+		return nil
+	}
 	return fmt.Errorf("unknown Conversion nullable field %s", name)
 }
 

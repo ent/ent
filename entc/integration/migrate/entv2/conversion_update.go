@@ -36,9 +36,37 @@ func (cu *ConversionUpdate) SetName(s string) *ConversionUpdate {
 	return cu
 }
 
+// SetNillableName sets the name field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableName(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetName(*s)
+	}
+	return cu
+}
+
+// ClearName clears the value of name.
+func (cu *ConversionUpdate) ClearName() *ConversionUpdate {
+	cu.mutation.ClearName()
+	return cu
+}
+
 // SetInt8ToString sets the int8_to_string field.
 func (cu *ConversionUpdate) SetInt8ToString(s string) *ConversionUpdate {
 	cu.mutation.SetInt8ToString(s)
+	return cu
+}
+
+// SetNillableInt8ToString sets the int8_to_string field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableInt8ToString(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetInt8ToString(*s)
+	}
+	return cu
+}
+
+// ClearInt8ToString clears the value of int8_to_string.
+func (cu *ConversionUpdate) ClearInt8ToString() *ConversionUpdate {
+	cu.mutation.ClearInt8ToString()
 	return cu
 }
 
@@ -48,9 +76,37 @@ func (cu *ConversionUpdate) SetUint8ToString(s string) *ConversionUpdate {
 	return cu
 }
 
+// SetNillableUint8ToString sets the uint8_to_string field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableUint8ToString(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetUint8ToString(*s)
+	}
+	return cu
+}
+
+// ClearUint8ToString clears the value of uint8_to_string.
+func (cu *ConversionUpdate) ClearUint8ToString() *ConversionUpdate {
+	cu.mutation.ClearUint8ToString()
+	return cu
+}
+
 // SetInt16ToString sets the int16_to_string field.
 func (cu *ConversionUpdate) SetInt16ToString(s string) *ConversionUpdate {
 	cu.mutation.SetInt16ToString(s)
+	return cu
+}
+
+// SetNillableInt16ToString sets the int16_to_string field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableInt16ToString(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetInt16ToString(*s)
+	}
+	return cu
+}
+
+// ClearInt16ToString clears the value of int16_to_string.
+func (cu *ConversionUpdate) ClearInt16ToString() *ConversionUpdate {
+	cu.mutation.ClearInt16ToString()
 	return cu
 }
 
@@ -60,9 +116,37 @@ func (cu *ConversionUpdate) SetUint16ToString(s string) *ConversionUpdate {
 	return cu
 }
 
+// SetNillableUint16ToString sets the uint16_to_string field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableUint16ToString(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetUint16ToString(*s)
+	}
+	return cu
+}
+
+// ClearUint16ToString clears the value of uint16_to_string.
+func (cu *ConversionUpdate) ClearUint16ToString() *ConversionUpdate {
+	cu.mutation.ClearUint16ToString()
+	return cu
+}
+
 // SetInt32ToString sets the int32_to_string field.
 func (cu *ConversionUpdate) SetInt32ToString(s string) *ConversionUpdate {
 	cu.mutation.SetInt32ToString(s)
+	return cu
+}
+
+// SetNillableInt32ToString sets the int32_to_string field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableInt32ToString(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetInt32ToString(*s)
+	}
+	return cu
+}
+
+// ClearInt32ToString clears the value of int32_to_string.
+func (cu *ConversionUpdate) ClearInt32ToString() *ConversionUpdate {
+	cu.mutation.ClearInt32ToString()
 	return cu
 }
 
@@ -72,15 +156,57 @@ func (cu *ConversionUpdate) SetUint32ToString(s string) *ConversionUpdate {
 	return cu
 }
 
+// SetNillableUint32ToString sets the uint32_to_string field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableUint32ToString(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetUint32ToString(*s)
+	}
+	return cu
+}
+
+// ClearUint32ToString clears the value of uint32_to_string.
+func (cu *ConversionUpdate) ClearUint32ToString() *ConversionUpdate {
+	cu.mutation.ClearUint32ToString()
+	return cu
+}
+
 // SetInt64ToString sets the int64_to_string field.
 func (cu *ConversionUpdate) SetInt64ToString(s string) *ConversionUpdate {
 	cu.mutation.SetInt64ToString(s)
 	return cu
 }
 
+// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableInt64ToString(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetInt64ToString(*s)
+	}
+	return cu
+}
+
+// ClearInt64ToString clears the value of int64_to_string.
+func (cu *ConversionUpdate) ClearInt64ToString() *ConversionUpdate {
+	cu.mutation.ClearInt64ToString()
+	return cu
+}
+
 // SetUint64ToString sets the uint64_to_string field.
 func (cu *ConversionUpdate) SetUint64ToString(s string) *ConversionUpdate {
 	cu.mutation.SetUint64ToString(s)
+	return cu
+}
+
+// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+func (cu *ConversionUpdate) SetNillableUint64ToString(s *string) *ConversionUpdate {
+	if s != nil {
+		cu.SetUint64ToString(*s)
+	}
+	return cu
+}
+
+// ClearUint64ToString clears the value of uint64_to_string.
+func (cu *ConversionUpdate) ClearUint64ToString() *ConversionUpdate {
+	cu.mutation.ClearUint64ToString()
 	return cu
 }
 
@@ -165,10 +291,22 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: conversion.FieldName,
 		})
 	}
+	if cu.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldName,
+		})
+	}
 	if value, ok := cu.mutation.Int8ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldInt8ToString,
+		})
+	}
+	if cu.mutation.Int8ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldInt8ToString,
 		})
 	}
@@ -179,10 +317,22 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: conversion.FieldUint8ToString,
 		})
 	}
+	if cu.mutation.Uint8ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldUint8ToString,
+		})
+	}
 	if value, ok := cu.mutation.Int16ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldInt16ToString,
+		})
+	}
+	if cu.mutation.Int16ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldInt16ToString,
 		})
 	}
@@ -193,10 +343,22 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: conversion.FieldUint16ToString,
 		})
 	}
+	if cu.mutation.Uint16ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldUint16ToString,
+		})
+	}
 	if value, ok := cu.mutation.Int32ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldInt32ToString,
+		})
+	}
+	if cu.mutation.Int32ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldInt32ToString,
 		})
 	}
@@ -207,6 +369,12 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: conversion.FieldUint32ToString,
 		})
 	}
+	if cu.mutation.Uint32ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldUint32ToString,
+		})
+	}
 	if value, ok := cu.mutation.Int64ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -214,10 +382,22 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: conversion.FieldInt64ToString,
 		})
 	}
+	if cu.mutation.Int64ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldInt64ToString,
+		})
+	}
 	if value, ok := cu.mutation.Uint64ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldUint64ToString,
+		})
+	}
+	if cu.mutation.Uint64ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldUint64ToString,
 		})
 	}
@@ -245,9 +425,37 @@ func (cuo *ConversionUpdateOne) SetName(s string) *ConversionUpdateOne {
 	return cuo
 }
 
+// SetNillableName sets the name field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableName(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetName(*s)
+	}
+	return cuo
+}
+
+// ClearName clears the value of name.
+func (cuo *ConversionUpdateOne) ClearName() *ConversionUpdateOne {
+	cuo.mutation.ClearName()
+	return cuo
+}
+
 // SetInt8ToString sets the int8_to_string field.
 func (cuo *ConversionUpdateOne) SetInt8ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetInt8ToString(s)
+	return cuo
+}
+
+// SetNillableInt8ToString sets the int8_to_string field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableInt8ToString(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetInt8ToString(*s)
+	}
+	return cuo
+}
+
+// ClearInt8ToString clears the value of int8_to_string.
+func (cuo *ConversionUpdateOne) ClearInt8ToString() *ConversionUpdateOne {
+	cuo.mutation.ClearInt8ToString()
 	return cuo
 }
 
@@ -257,9 +465,37 @@ func (cuo *ConversionUpdateOne) SetUint8ToString(s string) *ConversionUpdateOne 
 	return cuo
 }
 
+// SetNillableUint8ToString sets the uint8_to_string field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableUint8ToString(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetUint8ToString(*s)
+	}
+	return cuo
+}
+
+// ClearUint8ToString clears the value of uint8_to_string.
+func (cuo *ConversionUpdateOne) ClearUint8ToString() *ConversionUpdateOne {
+	cuo.mutation.ClearUint8ToString()
+	return cuo
+}
+
 // SetInt16ToString sets the int16_to_string field.
 func (cuo *ConversionUpdateOne) SetInt16ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetInt16ToString(s)
+	return cuo
+}
+
+// SetNillableInt16ToString sets the int16_to_string field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableInt16ToString(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetInt16ToString(*s)
+	}
+	return cuo
+}
+
+// ClearInt16ToString clears the value of int16_to_string.
+func (cuo *ConversionUpdateOne) ClearInt16ToString() *ConversionUpdateOne {
+	cuo.mutation.ClearInt16ToString()
 	return cuo
 }
 
@@ -269,9 +505,37 @@ func (cuo *ConversionUpdateOne) SetUint16ToString(s string) *ConversionUpdateOne
 	return cuo
 }
 
+// SetNillableUint16ToString sets the uint16_to_string field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableUint16ToString(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetUint16ToString(*s)
+	}
+	return cuo
+}
+
+// ClearUint16ToString clears the value of uint16_to_string.
+func (cuo *ConversionUpdateOne) ClearUint16ToString() *ConversionUpdateOne {
+	cuo.mutation.ClearUint16ToString()
+	return cuo
+}
+
 // SetInt32ToString sets the int32_to_string field.
 func (cuo *ConversionUpdateOne) SetInt32ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetInt32ToString(s)
+	return cuo
+}
+
+// SetNillableInt32ToString sets the int32_to_string field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableInt32ToString(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetInt32ToString(*s)
+	}
+	return cuo
+}
+
+// ClearInt32ToString clears the value of int32_to_string.
+func (cuo *ConversionUpdateOne) ClearInt32ToString() *ConversionUpdateOne {
+	cuo.mutation.ClearInt32ToString()
 	return cuo
 }
 
@@ -281,15 +545,57 @@ func (cuo *ConversionUpdateOne) SetUint32ToString(s string) *ConversionUpdateOne
 	return cuo
 }
 
+// SetNillableUint32ToString sets the uint32_to_string field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableUint32ToString(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetUint32ToString(*s)
+	}
+	return cuo
+}
+
+// ClearUint32ToString clears the value of uint32_to_string.
+func (cuo *ConversionUpdateOne) ClearUint32ToString() *ConversionUpdateOne {
+	cuo.mutation.ClearUint32ToString()
+	return cuo
+}
+
 // SetInt64ToString sets the int64_to_string field.
 func (cuo *ConversionUpdateOne) SetInt64ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetInt64ToString(s)
 	return cuo
 }
 
+// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableInt64ToString(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetInt64ToString(*s)
+	}
+	return cuo
+}
+
+// ClearInt64ToString clears the value of int64_to_string.
+func (cuo *ConversionUpdateOne) ClearInt64ToString() *ConversionUpdateOne {
+	cuo.mutation.ClearInt64ToString()
+	return cuo
+}
+
 // SetUint64ToString sets the uint64_to_string field.
 func (cuo *ConversionUpdateOne) SetUint64ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetUint64ToString(s)
+	return cuo
+}
+
+// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+func (cuo *ConversionUpdateOne) SetNillableUint64ToString(s *string) *ConversionUpdateOne {
+	if s != nil {
+		cuo.SetUint64ToString(*s)
+	}
+	return cuo
+}
+
+// ClearUint64ToString clears the value of uint64_to_string.
+func (cuo *ConversionUpdateOne) ClearUint64ToString() *ConversionUpdateOne {
+	cuo.mutation.ClearUint64ToString()
 	return cuo
 }
 
@@ -372,10 +678,22 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 			Column: conversion.FieldName,
 		})
 	}
+	if cuo.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldName,
+		})
+	}
 	if value, ok := cuo.mutation.Int8ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldInt8ToString,
+		})
+	}
+	if cuo.mutation.Int8ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldInt8ToString,
 		})
 	}
@@ -386,10 +704,22 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 			Column: conversion.FieldUint8ToString,
 		})
 	}
+	if cuo.mutation.Uint8ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldUint8ToString,
+		})
+	}
 	if value, ok := cuo.mutation.Int16ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldInt16ToString,
+		})
+	}
+	if cuo.mutation.Int16ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldInt16ToString,
 		})
 	}
@@ -400,10 +730,22 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 			Column: conversion.FieldUint16ToString,
 		})
 	}
+	if cuo.mutation.Uint16ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldUint16ToString,
+		})
+	}
 	if value, ok := cuo.mutation.Int32ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldInt32ToString,
+		})
+	}
+	if cuo.mutation.Int32ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldInt32ToString,
 		})
 	}
@@ -414,6 +756,12 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 			Column: conversion.FieldUint32ToString,
 		})
 	}
+	if cuo.mutation.Uint32ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldUint32ToString,
+		})
+	}
 	if value, ok := cuo.mutation.Int64ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -421,10 +769,22 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 			Column: conversion.FieldInt64ToString,
 		})
 	}
+	if cuo.mutation.Int64ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: conversion.FieldInt64ToString,
+		})
+	}
 	if value, ok := cuo.mutation.Uint64ToString(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: conversion.FieldUint64ToString,
+		})
+	}
+	if cuo.mutation.Uint64ToStringCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: conversion.FieldUint64ToString,
 		})
 	}

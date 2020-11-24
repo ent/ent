@@ -8,7 +8,6 @@ package entv1
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
@@ -26,6 +25,14 @@ type ConversionCreate struct {
 // SetName sets the name field.
 func (cc *ConversionCreate) SetName(s string) *ConversionCreate {
 	cc.mutation.SetName(s)
+	return cc
+}
+
+// SetNillableName sets the name field if the given value is not nil.
+func (cc *ConversionCreate) SetNillableName(s *string) *ConversionCreate {
+	if s != nil {
+		cc.SetName(*s)
+	}
 	return cc
 }
 
@@ -192,9 +199,6 @@ func (cc *ConversionCreate) SaveX(ctx context.Context) *Conversion {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *ConversionCreate) check() error {
-	if _, ok := cc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("entv1: missing required field \"name\"")}
-	}
 	return nil
 }
 
