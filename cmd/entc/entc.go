@@ -29,8 +29,8 @@ func main() {
 	cmd.AddCommand(
 		func() *cobra.Command {
 			var (
-				target string
-				cmd    = &cobra.Command{
+				target, entity string
+				cmd            = &cobra.Command{
 					Use:   "init [flags] [schemas]",
 					Short: "initialize an environment with zero or more schemas",
 					Example: examples(
@@ -46,13 +46,14 @@ func main() {
 						return nil
 					},
 					Run: func(cmd *cobra.Command, names []string) {
-						if err := initEnv(target, names); err != nil {
+						if err := initEnv(target, entity, names); err != nil {
 							log.Fatalln(err)
 						}
 					},
 				}
 			)
 			cmd.Flags().StringVar(&target, "target", defaultSchema, "target directory for schemas")
+			cmd.Flags().StringVar(&entity, "entity", "", "target directory for entities")
 			return cmd
 		}(),
 		&cobra.Command{
@@ -174,8 +175,8 @@ func (idType) String() string {
 }
 
 // initEnv initialize an environment for ent codegen.
-func initEnv(target string, names []string) error {
-	if err := createDir(target); err != nil {
+func initEnv(schema string, entity string, names []string) error {
+	if err := createDir(schema, entity); err != nil {
 		return err
 	}
 	for _, name := range names {
@@ -183,25 +184,62 @@ func initEnv(target string, names []string) error {
 		if err := tmpl.Execute(b, name); err != nil {
 			log.Fatalln(err)
 		}
-		target := filepath.Join(target, strings.ToLower(name+".go"))
-		if err := ioutil.WriteFile(target, b.Bytes(), 0644); err != nil {
+		schema := filepath.Join(schema, strings.ToLower(name+".go"))
+		if err := ioutil.WriteFile(schema, b.Bytes(), 0644); err != nil {
 			log.Fatalln(err)
 		}
 	}
 	return nil
 }
 
-func createDir(target string) error {
-	_, err := os.Stat(target)
+func createDir(schema, entity string) error {
+	_, err := os.Stat(schema)
 	if err == nil || !os.IsNotExist(err) {
 		return err
 	}
-	if err := os.MkdirAll(target, os.ModePerm); err != nil {
+
+	if entity == "" {
+		entity = defaultEntity
+		if strings.Contains(schema, "/") {
+			if schmDir := filepath.Dir(schema); schmDir != "." {
+				entity = schmDir
+			}
+		}
+	}
+
+	if relPath, err := filepath.Rel(entity, schema); err == nil && relPath == "." {
+		return errors.New("schemas and entities can't be generated in the same path. see: entc help init")
+	}
+
+	if err := os.MkdirAll(schema, os.ModePerm); err != nil {
 		return fmt.Errorf("creating schema directory: %w", err)
 	}
-	if target != defaultSchema {
+
+	_, err = os.Stat(entity)
+	if err != nil && !os.IsNotExist(err) && !os.IsExist(err) {
+		return err
+	}
+
+	if err := os.MkdirAll(entity, os.ModePerm); err != nil {
+		return fmt.Errorf("creating entity directory: %w", err)
+	}
+
+	if entity != defaultEntity {
+		relPath, err := filepath.Rel(entity, schema)
+		if err != nil {
+			return fmt.Errorf("getting schema relative path to entity path: %w", err)
+		}
+		if filepath.Dir(relPath) == "." {
+			relPath = "./" + relPath
+		}
+
+		gf := []byte(fmt.Sprintf(genFileTemplate, filepath.Base(entity), relPath))
+		if err := ioutil.WriteFile(filepath.Join(entity, "generate.go"), gf, 0644); err != nil {
+			return fmt.Errorf("creating generate.go file: %w", err)
+		}
 		return nil
 	}
+
 	if err := ioutil.WriteFile("ent/generate.go", []byte(genFile), 0644); err != nil {
 		return fmt.Errorf("creating generate.go file: %w", err)
 	}
@@ -231,10 +269,14 @@ func ({{ . }}) Edges() []ent.Edge {
 `))
 
 const (
+	// default entities package path.
+	defaultEntity = "ent"
 	// default schema package path.
 	defaultSchema = "ent/schema"
 	// ent/generate.go file used for "go generate" command.
 	genFile = "package ent\n\n//go:generate go run github.com/facebook/ent/cmd/entc generate ./schema\n"
+	// ent/generate.go file template used for "go generate" command.
+	genFileTemplate = "package %s\n\n//go:generate go run github.com/facebook/ent/cmd/entc generate --target . %s\n"
 )
 
 // examples formats the given examples to the cli.
