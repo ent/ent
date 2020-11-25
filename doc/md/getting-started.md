@@ -24,6 +24,7 @@ go get github.com/facebook/ent/cmd/entc
 ```
 
 After installing `entc` (the code generator for `ent`), you should have it in your `PATH`.
+If you don't find it your path, you can also run: `go run github.com/facebook/ent/cmd/entc <command>`
 
 ## Setup A Go Environment
 
