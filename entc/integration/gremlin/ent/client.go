@@ -212,7 +212,7 @@ func (c *CardClient) Create() *CardCreate {
 	return &CardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Card entities.
+// CreateBulk returns a builder for creating a bulk of Card entities.
 func (c *CardClient) CreateBulk(builders ...*CardCreate) *CardCreateBulk {
 	return &CardCreateBulk{config: c.config, builders: builders}
 }
@@ -322,7 +322,7 @@ func (c *CommentClient) Create() *CommentCreate {
 	return &CommentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Comment entities.
+// CreateBulk returns a builder for creating a bulk of Comment entities.
 func (c *CommentClient) CreateBulk(builders ...*CommentCreate) *CommentCreateBulk {
 	return &CommentCreateBulk{config: c.config, builders: builders}
 }
@@ -410,7 +410,7 @@ func (c *FieldTypeClient) Create() *FieldTypeCreate {
 	return &FieldTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of FieldType entities.
+// CreateBulk returns a builder for creating a bulk of FieldType entities.
 func (c *FieldTypeClient) CreateBulk(builders ...*FieldTypeCreate) *FieldTypeCreateBulk {
 	return &FieldTypeCreateBulk{config: c.config, builders: builders}
 }
@@ -498,7 +498,7 @@ func (c *FileClient) Create() *FileCreate {
 	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of File entities.
+// CreateBulk returns a builder for creating a bulk of File entities.
 func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
 	return &FileCreateBulk{config: c.config, builders: builders}
 }
@@ -619,7 +619,7 @@ func (c *FileTypeClient) Create() *FileTypeCreate {
 	return &FileTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of FileType entities.
+// CreateBulk returns a builder for creating a bulk of FileType entities.
 func (c *FileTypeClient) CreateBulk(builders ...*FileTypeCreate) *FileTypeCreateBulk {
 	return &FileTypeCreateBulk{config: c.config, builders: builders}
 }
@@ -718,7 +718,7 @@ func (c *GoodsClient) Create() *GoodsCreate {
 	return &GoodsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Goods entities.
+// CreateBulk returns a builder for creating a bulk of Goods entities.
 func (c *GoodsClient) CreateBulk(builders ...*GoodsCreate) *GoodsCreateBulk {
 	return &GoodsCreateBulk{config: c.config, builders: builders}
 }
@@ -806,7 +806,7 @@ func (c *GroupClient) Create() *GroupCreate {
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Group entities.
+// CreateBulk returns a builder for creating a bulk of Group entities.
 func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
 	return &GroupCreateBulk{config: c.config, builders: builders}
 }
@@ -938,7 +938,7 @@ func (c *GroupInfoClient) Create() *GroupInfoCreate {
 	return &GroupInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of GroupInfo entities.
+// CreateBulk returns a builder for creating a bulk of GroupInfo entities.
 func (c *GroupInfoClient) CreateBulk(builders ...*GroupInfoCreate) *GroupInfoCreateBulk {
 	return &GroupInfoCreateBulk{config: c.config, builders: builders}
 }
@@ -1037,7 +1037,7 @@ func (c *ItemClient) Create() *ItemCreate {
 	return &ItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Item entities.
+// CreateBulk returns a builder for creating a bulk of Item entities.
 func (c *ItemClient) CreateBulk(builders ...*ItemCreate) *ItemCreateBulk {
 	return &ItemCreateBulk{config: c.config, builders: builders}
 }
@@ -1125,7 +1125,7 @@ func (c *NodeClient) Create() *NodeCreate {
 	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Node entities.
+// CreateBulk returns a builder for creating a bulk of Node entities.
 func (c *NodeClient) CreateBulk(builders ...*NodeCreate) *NodeCreateBulk {
 	return &NodeCreateBulk{config: c.config, builders: builders}
 }
@@ -1235,7 +1235,7 @@ func (c *PetClient) Create() *PetCreate {
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Pet entities.
+// CreateBulk returns a builder for creating a bulk of Pet entities.
 func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
 	return &PetCreateBulk{config: c.config, builders: builders}
 }
@@ -1345,7 +1345,7 @@ func (c *SpecClient) Create() *SpecCreate {
 	return &SpecCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Spec entities.
+// CreateBulk returns a builder for creating a bulk of Spec entities.
 func (c *SpecClient) CreateBulk(builders ...*SpecCreate) *SpecCreateBulk {
 	return &SpecCreateBulk{config: c.config, builders: builders}
 }
@@ -1444,7 +1444,7 @@ func (c *TaskClient) Create() *TaskCreate {
 	return &TaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Task entities.
+// CreateBulk returns a builder for creating a bulk of Task entities.
 func (c *TaskClient) CreateBulk(builders ...*TaskCreate) *TaskCreateBulk {
 	return &TaskCreateBulk{config: c.config, builders: builders}
 }
@@ -1532,7 +1532,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }
