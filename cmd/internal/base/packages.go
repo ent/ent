@@ -2,7 +2,7 @@
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
-package main
+package base
 
 import (
 	"fmt"
@@ -13,13 +13,13 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// DefaultConfig for loading Go packages.
+// DefaultConfig for loading Go base.
 var DefaultConfig = &packages.Config{Mode: packages.NeedName}
 
 // PkgPath returns the Go package name for given target path.
 // Even if the existing path is not exist yet in the filesystem.
 //
-// If packages.Config is nil, DefaultConfig will be used to load packages.
+// If base.Config is nil, DefaultConfig will be used to load base.
 func PkgPath(config *packages.Config, target string) (string, error) {
 	if config == nil {
 		config = DefaultConfig

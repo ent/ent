@@ -2,7 +2,7 @@
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
-package main
+package printer
 
 import (
 	"fmt"
@@ -16,16 +16,21 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-// printer is a table printer for ent graphs.
-type printer struct {
+// A Config controls the output of Fprint.
+type Config struct {
 	io.Writer
 }
 
 // Print prints a table description of the graph to the given writer.
-func (p printer) Print(g *gen.Graph) {
+func (p Config) Print(g *gen.Graph) {
 	for _, n := range g.Nodes {
 		p.node(n)
 	}
+}
+
+// Fprint executes "pretty-printer" on the given writer.
+func Fprint(w io.Writer, g *gen.Graph) {
+	Config{Writer: w}.Print(g)
 }
 
 // node returns description of a type. The format of the description is:
@@ -35,7 +40,7 @@ func (p printer) Print(g *gen.Graph) {
 //
 //			<Edges Table>
 //
-func (p printer) node(t *gen.Type) {
+func (p Config) node(t *gen.Type) {
 	var (
 		b      strings.Builder
 		table  = tablewriter.NewWriter(&b)

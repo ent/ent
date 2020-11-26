@@ -2,7 +2,7 @@
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
-package main
+package printer
 
 import (
 	"strings"
@@ -171,8 +171,7 @@ Group:
 	}
 	for _, tt := range tests {
 		b := &strings.Builder{}
-		p := printer{b}
-		p.Print(tt.input)
+		Fprint(b, tt.input)
 		assert.Equal(t, tt.out, "\n"+b.String())
 	}
 }
