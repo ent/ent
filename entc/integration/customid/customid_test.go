@@ -132,4 +132,19 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, "Chevrolet Camaro", bee.Model)
 	require.NotNil(t, bee.Edges.Owner)
 	require.Equal(t, pedro.ID, bee.Edges.Owner.ID)
+
+	pets = client.Pet.CreateBulk(
+		client.Pet.Create().SetID("luna").SetOwner(a8m),
+		client.Pet.Create().SetID("layla").SetOwner(a8m),
+	).SaveX(ctx)
+	require.Equal(t, "luna", pets[0].ID)
+	require.Equal(t, "layla", pets[1].ID)
+
+	u1, u2 := uuid.New(), uuid.New()
+	blobs := client.Blob.CreateBulk(
+		client.Blob.Create().SetID(u1),
+		client.Blob.Create().SetID(u2),
+	).SaveX(ctx)
+	require.Equal(t, u1, blobs[0].ID)
+	require.Equal(t, u2, blobs[1].ID)
 }
