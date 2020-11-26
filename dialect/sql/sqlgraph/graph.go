@@ -1180,7 +1180,7 @@ func insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *sql.Inser
 }
 
 // insertLastIDs invokes the batch insert query on the transaction and returns the LastInsertID of all entities.
-func insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) (ids []int64, err error) {
+func insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) (ids []driver.Value, err error) {
 	query, args := insert.Query()
 	// PostgreSQL does not support the LastInsertId() method of sql.Result
 	// on Exec, and should be extracted manually using the `RETURNING` clause.
@@ -1205,7 +1205,7 @@ func insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.Inse
 	if err != nil {
 		return nil, err
 	}
-	ids = make([]int64, 0, affected)
+	ids = make([]driver.Value, 0, affected)
 	switch insert.Dialect() {
 	case dialect.SQLite:
 		id -= affected - 1
