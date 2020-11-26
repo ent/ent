@@ -157,7 +157,7 @@ func (c *TaskClient) Create() *TaskCreate {
 	return &TaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Task entities.
+// CreateBulk returns a builder for creating a bulk of Task entities.
 func (c *TaskClient) CreateBulk(builders ...*TaskCreate) *TaskCreateBulk {
 	return &TaskCreateBulk{config: c.config, builders: builders}
 }
@@ -278,7 +278,7 @@ func (c *TeamClient) Create() *TeamCreate {
 	return &TeamCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Team entities.
+// CreateBulk returns a builder for creating a bulk of Team entities.
 func (c *TeamClient) CreateBulk(builders ...*TeamCreate) *TeamCreateBulk {
 	return &TeamCreateBulk{config: c.config, builders: builders}
 }
@@ -399,7 +399,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }

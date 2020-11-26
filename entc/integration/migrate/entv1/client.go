@@ -157,7 +157,7 @@ func (c *CarClient) Create() *CarCreate {
 	return &CarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Car entities.
+// CreateBulk returns a builder for creating a bulk of Car entities.
 func (c *CarClient) CreateBulk(builders ...*CarCreate) *CarCreateBulk {
 	return &CarCreateBulk{config: c.config, builders: builders}
 }
@@ -261,7 +261,7 @@ func (c *ConversionClient) Create() *ConversionCreate {
 	return &ConversionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Conversion entities.
+// CreateBulk returns a builder for creating a bulk of Conversion entities.
 func (c *ConversionClient) CreateBulk(builders ...*ConversionCreate) *ConversionCreateBulk {
 	return &ConversionCreateBulk{config: c.config, builders: builders}
 }
@@ -349,7 +349,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }

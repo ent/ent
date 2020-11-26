@@ -156,7 +156,7 @@ func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
 	return &{{ $n.CreateName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of {{ $n.Name }} entities.
+// CreateBulk returns a builder for creating a bulk of {{ $n.Name }} entities.
 func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.CreateName }}) *{{ $n.CreateBulkName }} {
 	return &{{ $n.CreateBulkName }}{config: c.config, builders: builders}
 }

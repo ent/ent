@@ -143,7 +143,7 @@ func (c *NodeClient) Create() *NodeCreate {
 	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Node entities.
+// CreateBulk returns a builder for creating a bulk of Node entities.
 func (c *NodeClient) CreateBulk(builders ...*NodeCreate) *NodeCreateBulk {
 	return &NodeCreateBulk{config: c.config, builders: builders}
 }

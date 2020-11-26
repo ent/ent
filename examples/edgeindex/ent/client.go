@@ -150,7 +150,7 @@ func (c *CityClient) Create() *CityCreate {
 	return &CityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of City entities.
+// CreateBulk returns a builder for creating a bulk of City entities.
 func (c *CityClient) CreateBulk(builders ...*CityCreate) *CityCreateBulk {
 	return &CityCreateBulk{config: c.config, builders: builders}
 }
@@ -254,7 +254,7 @@ func (c *StreetClient) Create() *StreetCreate {
 	return &StreetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Street entities.
+// CreateBulk returns a builder for creating a bulk of Street entities.
 func (c *StreetClient) CreateBulk(builders ...*StreetCreate) *StreetCreateBulk {
 	return &StreetCreateBulk{config: c.config, builders: builders}
 }

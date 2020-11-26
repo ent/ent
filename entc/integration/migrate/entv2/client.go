@@ -178,7 +178,7 @@ func (c *CarClient) Create() *CarCreate {
 	return &CarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Car entities.
+// CreateBulk returns a builder for creating a bulk of Car entities.
 func (c *CarClient) CreateBulk(builders ...*CarCreate) *CarCreateBulk {
 	return &CarCreateBulk{config: c.config, builders: builders}
 }
@@ -282,7 +282,7 @@ func (c *ConversionClient) Create() *ConversionCreate {
 	return &ConversionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Conversion entities.
+// CreateBulk returns a builder for creating a bulk of Conversion entities.
 func (c *ConversionClient) CreateBulk(builders ...*ConversionCreate) *ConversionCreateBulk {
 	return &ConversionCreateBulk{config: c.config, builders: builders}
 }
@@ -370,7 +370,7 @@ func (c *GroupClient) Create() *GroupCreate {
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Group entities.
+// CreateBulk returns a builder for creating a bulk of Group entities.
 func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
 	return &GroupCreateBulk{config: c.config, builders: builders}
 }
@@ -458,7 +458,7 @@ func (c *MediaClient) Create() *MediaCreate {
 	return &MediaCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Media entities.
+// CreateBulk returns a builder for creating a bulk of Media entities.
 func (c *MediaClient) CreateBulk(builders ...*MediaCreate) *MediaCreateBulk {
 	return &MediaCreateBulk{config: c.config, builders: builders}
 }
@@ -546,7 +546,7 @@ func (c *PetClient) Create() *PetCreate {
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Pet entities.
+// CreateBulk returns a builder for creating a bulk of Pet entities.
 func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
 	return &PetCreateBulk{config: c.config, builders: builders}
 }
@@ -650,7 +650,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }
