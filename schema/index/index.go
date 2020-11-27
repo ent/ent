@@ -68,7 +68,7 @@ func (b *Builder) Fields(fields ...string) *Builder {
 	return b
 }
 
-// FromEdges sets the fields index to be unique under the set of edges (sub-graph). For example:
+// Edges sets the fields index to be unique under the set of edges (sub-graph). For example:
 //
 //	func (T) Indexes() []ent.Index {
 //

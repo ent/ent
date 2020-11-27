@@ -174,22 +174,22 @@ type StorageKey struct {
 // StorageOption allows for setting the storage configuration using functional options.
 type StorageOption func(*StorageKey)
 
-// The Table option sets the table name of M2M edges.
+// Table sets the table name option for M2M edges.
 func Table(name string) StorageOption {
 	return func(key *StorageKey) {
 		key.Table = name
 	}
 }
 
-// The Column option sets the foreign-key column name for O2O, O2M and M2O
-// edges. Note that, for M2M edges (2 columns), use the edge.Columns option.
+// Column sets the foreign-key column name option for O2O, O2M and M2O edges.
+// Note that, for M2M edges (2 columns), use the edge.Columns option.
 func Column(name string) StorageOption {
 	return func(key *StorageKey) {
 		key.Columns = []string{name}
 	}
 }
 
-// The Columns option sets the foreign-key column names for M2M edges.
+// Columns sets the foreign-key column names option for M2M edges.
 // The 1st column defines the name of the "To" edge, and the 2nd defines
 // the name of the "From" edge (inverse edge).
 // Note that, for O2O, O2M and M2O edges, use the edge.Column option.
