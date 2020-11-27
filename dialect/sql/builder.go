@@ -2020,6 +2020,7 @@ func (b *Builder) Err() error {
 // An Op represents a predicate operator.
 type Op int
 
+// Predicate operators
 const (
 	OpEQ      Op = iota // logical and.
 	OpNEQ               // <>
