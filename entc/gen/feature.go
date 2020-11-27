@@ -57,20 +57,20 @@ type FeatureStage int
 const (
 	_ FeatureStage = iota
 
-	// An Experimental feature is one that is in development,
-	// and it's actively tested in the integration environment.
+	// Experimental features are in development, and actively being tested in the
+	// integration environment.
 	Experimental
 
-	// An Alpha feature is one that its initial development was
-	// finished, it's tested on the infra of the ent team, but
-	// we expect breaking-changes to its API.
+	// Alpha features are features whose initial development was finished, tested
+	// on the infra of the ent team, but we expect breaking-changes to their APIs.
 	Alpha
 
-	// A Beta feature is an Alpha feature that was added to the entgo.io
-	// documentation, and no breaking-changes are expected for it.
+	// Beta features are Alpha features that were added to the entgo.io
+	// documentation, and no breaking-changes are expected for them.
 	Beta
 
-	// A Stable feature is a Beta feature that was running a while on ent infra.
+	// Stable features are Beta features that were running for a while on ent
+	// infra.
 	Stable
 )
 

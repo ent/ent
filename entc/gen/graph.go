@@ -494,7 +494,7 @@ type Snapshot struct {
 	Features []string
 }
 
-// MarshalSchema returns a JSON string represents the graph schema in loadable format.
+// SchemaSnapshot returns a JSON string represents the graph schema in loadable format.
 func (g *Graph) SchemaSnapshot() (string, error) {
 	schemas := make([]*load.Schema, len(g.Nodes))
 	for i := range g.Nodes {

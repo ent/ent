@@ -579,7 +579,7 @@ func (t Type) CreateName() string {
 	return pascal(t.Name) + "Create"
 }
 
-// CreateBulk returns the struct name denoting the create-bulk-builder for this type.
+// CreateBulkName returns the struct name denoting the create-bulk-builder for this type.
 func (t Type) CreateBulkName() string {
 	return pascal(t.Name) + "CreateBulk"
 }
@@ -641,7 +641,7 @@ func (t Type) HookPositions() []*load.Position {
 	return nil
 }
 
-// NumHooks returns the number of privacy-policy declared in the type schema.
+// NumPolicy returns the number of privacy-policy declared in the type schema.
 func (t Type) NumPolicy() int {
 	if t.schema != nil {
 		return len(t.schema.Policy)
@@ -736,7 +736,7 @@ func (f Field) StructField() string {
 	return pascal(f.Name)
 }
 
-// Enums returns the enum values of a field.
+// EnumNames returns the enum values of a field.
 func (f Field) EnumNames() []string {
 	names := make([]string, 0, len(f.def.Enums))
 	for _, e := range f.Enums {
@@ -1081,7 +1081,7 @@ func (e Edge) O2O() bool { return e.Rel.Type == O2O }
 // IsInverse returns if this edge is an inverse edge.
 func (e Edge) IsInverse() bool { return e.Inverse != "" }
 
-// Constant returns the constant name of the edge for the gremlin dialect.
+// LabelConstant returns the constant name of the edge for the gremlin dialect.
 // If the edge is inverse, it returns the constant name of the owner-edge (assoc-edge).
 func (e Edge) LabelConstant() string {
 	name := e.Name
@@ -1091,7 +1091,7 @@ func (e Edge) LabelConstant() string {
 	return pascal(name) + "Label"
 }
 
-// InverseConstant returns the inverse constant name of the edge.
+// InverseLabelConstant returns the inverse constant name of the edge.
 func (e Edge) InverseLabelConstant() string { return pascal(e.Name) + "InverseLabel" }
 
 // TableConstant returns the constant name of the relation table.

@@ -41,7 +41,7 @@ type (
 	}
 )
 
-// AddEdge adds an edge to the graph. It fails, if one of the node
+// AddE adds an edge to the graph. It fails, if one of the node
 // types is missing.
 //
 //	g.AddE("pets", spec, "user", "pet")
