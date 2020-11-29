@@ -441,7 +441,7 @@ func (User) Fields() []ent.Field {
 
 ## Additional Struct Fields
 
-By default, `entc` generates the entity model with fields that are configured in the `schema.Fields` method.
+By default, `ent` generates the entity model with fields that are configured in the `schema.Fields` method.
 For example, given this schema configuration:
 
 ```go

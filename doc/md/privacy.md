@@ -68,7 +68,7 @@ In order to enable the privacy option in your code generation, enable the `priva
 ```go
 package ent
   
-//go:generate go run github.com/facebook/ent/cmd/entc generate --feature privacy ./schema
+//go:generate go run github.com/facebook/ent/cmd/ent generate --feature privacy ./schema
 ```
 
 2\. If you are using the configuration from the GraphQL documentation, add the feature flag as follows:

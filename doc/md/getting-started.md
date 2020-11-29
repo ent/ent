@@ -20,11 +20,11 @@ and maintain applications with large data-models and sticks with the following p
 ## Installation
 
 ```console
-go get github.com/facebook/ent/cmd/entc
+go get github.com/facebook/ent/cmd/ent
 ```
 
-After installing `entc` (the code generator for `ent`), you should have it in your `PATH`.
-If you don't find it your path, you can also run: `go run github.com/facebook/ent/cmd/entc <command>`
+After installing `ent` codegen tool, you should have it in your `PATH`.
+If you don't find it your path, you can also run: `go run github.com/facebook/ent/cmd/ent <command>`
 
 ## Setup A Go Environment
 
@@ -40,7 +40,7 @@ go mod init <project>
 Go to the root directory of your project, and run:
 
 ```console
-entc init User
+ent init User
 ```
 The command above will generate the schema for `User` under `<project>/ent/schema/` directory:
 
@@ -169,7 +169,7 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 
 ## Query Your Entities
 
-`entc` generates a package for each entity schema that contains its predicates, default values, validators
+`ent` generates a package for each entity schema that contains its predicates, default values, validators
 and additional information about storage elements (column names, primary keys, etc).
 
 ```go
@@ -201,11 +201,11 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 
 ## Add Your First Edge (Relation)
 In this part of the tutorial, we want to declare an edge (relation) to another entity in the schema.  
-Let's create 2 additional entities named `Car` and `Group` with a few fields. We use `entc`
+Let's create 2 additional entities named `Car` and `Group` with a few fields. We use `ent` CLI
 to generate the initial schemas:
 
 ```console
-entc init Car Group
+go run github.com/facebook/ent/cmd/ent init Car Group
 ```
 
 And then we add the rest of the fields manually:
@@ -437,7 +437,7 @@ relationship named `groups`. Let's define this relationship in our schemas:
 	 }
 	```
 
-We run `entc` on the schema directory to re-generate the assets.
+We run `ent` on the schema directory to re-generate the assets.
 ```console
 go generate ./ent
 ```
