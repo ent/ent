@@ -1382,9 +1382,10 @@ type TableView interface {
 // SelectTable is a table selector.
 type SelectTable struct {
 	Builder
-	quote bool
-	name  string
-	as    string
+	as     string
+	name   string
+	schema string
+	quote  bool
 }
 
 // Table returns a new table selector.
@@ -1394,6 +1395,12 @@ type SelectTable struct {
 //
 func Table(name string) *SelectTable {
 	return &SelectTable{quote: true, name: name}
+}
+
+// Schema sets the schema name of the table.
+func (s *SelectTable) Schema(name string) *SelectTable {
+	s.schema = name
+	return s
 }
 
 // As adds the AS clause to the table selector.
@@ -1409,9 +1416,10 @@ func (s *SelectTable) C(column string) string {
 		name = s.as
 	}
 	b := &Builder{dialect: s.dialect}
-	b.Ident(name)
-	b.WriteByte('.')
-	b.Ident(column)
+	if s.schema != "" && s.as == "" {
+		b.Ident(s.schema).WriteByte('.')
+	}
+	b.Ident(name).WriteByte('.').Ident(column)
 	return b.String()
 }
 
@@ -1438,6 +1446,9 @@ func (s *SelectTable) ref() string {
 		return s.name
 	}
 	b := &Builder{dialect: s.dialect}
+	if s.schema != "" {
+		b.Ident(s.schema).WriteByte('.')
+	}
 	b.Ident(s.name)
 	if s.as != "" {
 		b.WriteString(" AS ")
