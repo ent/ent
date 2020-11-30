@@ -680,8 +680,8 @@ func TestBuilder(t *testing.T) {
 				return Select(t1.C("id"), As(Count("`*`"), "group_count")).
 					From(t1).
 					LeftJoin(t2).
-					OnP(P(func(builder *Builder) {
-						builder.Ident(t1.C("id")).WriteOp(OpEQ).Ident(t2.C("user_id"))
+					OnP(P(func(b *Builder) {
+						b.Ident(t1.C("id")).WriteOp(OpEQ).Ident(t2.C("user_id"))
 					})).
 					GroupBy(t1.C("id")).Clone()
 			}(),
@@ -1270,6 +1270,19 @@ WHERE
 				})),
 			wantQuery: `SELECT * FROM "test" WHERE nlevel("path") > $1`,
 			wantArgs:  []interface{}{1},
+		},
+		{
+			input: func() Querier {
+				t1, t2 := Table("users").Schema("s1"), Table("pets").Schema("s2")
+				return Select("*").
+					From(t1).Join(t2).
+					OnP(P(func(b *Builder) {
+						b.Ident(t1.C("id")).WriteOp(OpEQ).Ident(t2.C("owner_id"))
+					})).
+					Where(EQ(t2.C("name"), "pedro"))
+			}(),
+			wantQuery: "SELECT * FROM `s1`.`users` JOIN `s2`.`pets` AS `t0` ON `s1`.`users`.`id` = `t0`.`owner_id` WHERE `t0`.`name` = ?",
+			wantArgs:  []interface{}{"pedro"},
 		},
 	}
 	for i, tt := range tests {
