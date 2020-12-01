@@ -6,7 +6,10 @@
 
 package entql
 
-import "time"
+import (
+	"database/sql/driver"
+	"time"
+)
 
 //go:generate go run internal/gen.go
 
@@ -1578,6 +1581,76 @@ func StringAnd(x, y StringP, z ...StringP) StringP {
 // StringNot returns a predicate that represents the logical negation of the given predicate.
 func StringNot(x StringP) StringP {
 	expr := &stringP{}
+	expr.done = func(name string) {
+		expr.P = Not(x.Field(name))
+	}
+	return expr
+}
+
+// ValueP is the interface for predicates of type [16]byte (`type P[[16]byte]`).
+type ValueP interface {
+	Fielder
+	value()
+}
+
+// valueP implements the ValueP interface.
+type valueP struct {
+	P
+	done func(string)
+}
+
+func (p *valueP) Field(name string) P {
+	p.done(name)
+	return p.P
+}
+
+func (*valueP) value() {}
+
+// ValueEQ applies the EQ operation on the given value.
+func ValueEQ(v driver.Valuer) ValueP {
+	field := &Field{}
+	value := &Value{V: v}
+	done := func(name string) { field.Name = name }
+	return &valueP{P: EQ(field, value), done: done}
+}
+
+// ValueNEQ applies the NEQ operation on the given value.
+func ValueNEQ(v driver.Valuer) ValueP {
+	field := &Field{}
+	value := &Value{V: v}
+	done := func(name string) { field.Name = name }
+	return &valueP{P: NEQ(field, value), done: done}
+}
+
+// ValueOr returns a composed predicate that represents the logical OR predicate.
+func ValueOr(x, y ValueP, z ...ValueP) ValueP {
+	expr := &valueP{}
+	expr.done = func(name string) {
+		zs := make([]P, len(z))
+		for i := range z {
+			zs[i] = z[i].Field(name)
+		}
+		expr.P = Or(x.Field(name), y.Field(name), zs...)
+	}
+	return expr
+}
+
+// ValueAnd returns a composed predicate that represents the logical AND predicate.
+func ValueAnd(x, y ValueP, z ...ValueP) ValueP {
+	expr := &valueP{}
+	expr.done = func(name string) {
+		zs := make([]P, len(z))
+		for i := range z {
+			zs[i] = z[i].Field(name)
+		}
+		expr.P = And(x.Field(name), y.Field(name), zs...)
+	}
+	return expr
+}
+
+// ValueNot returns a predicate that represents the logical negation of the given predicate.
+func ValueNot(x ValueP) ValueP {
+	expr := &valueP{}
 	expr.done = func(name string) {
 		expr.P = Not(x.Field(name))
 	}

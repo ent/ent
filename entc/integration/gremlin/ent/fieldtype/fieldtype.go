@@ -109,6 +109,8 @@ const (
 	FieldRole = "role"
 	// FieldMAC holds the string denoting the mac field in the database.
 	FieldMAC = "mac"
+	// FieldUUID holds the string denoting the uuid field in the database.
+	FieldUUID = "uuid"
 )
 
 var (

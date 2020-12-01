@@ -30,6 +30,7 @@ import (
 	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/task"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"github.com/google/uuid"
 
 	"github.com/facebook/ent"
 )
@@ -1302,6 +1303,7 @@ type FieldTypeMutation struct {
 	null_float                 *sql.NullFloat64
 	role                       *role.Role
 	mac                        *schema.MAC
+	uuid                       *uuid.UUID
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -4213,6 +4215,56 @@ func (m *FieldTypeMutation) ResetMAC() {
 	delete(m.clearedFields, fieldtype.FieldMAC)
 }
 
+// SetUUID sets the uuid field.
+func (m *FieldTypeMutation) SetUUID(u uuid.UUID) {
+	m.uuid = &u
+}
+
+// UUID returns the uuid value in the mutation.
+func (m *FieldTypeMutation) UUID() (r uuid.UUID, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old uuid value of the FieldType.
+// If the FieldType object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *FieldTypeMutation) OldUUID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUUID is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ClearUUID clears the value of uuid.
+func (m *FieldTypeMutation) ClearUUID() {
+	m.uuid = nil
+	m.clearedFields[fieldtype.FieldUUID] = struct{}{}
+}
+
+// UUIDCleared returns if the field uuid was cleared in this mutation.
+func (m *FieldTypeMutation) UUIDCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldUUID]
+	return ok
+}
+
+// ResetUUID reset all changes of the "uuid" field.
+func (m *FieldTypeMutation) ResetUUID() {
+	m.uuid = nil
+	delete(m.clearedFields, fieldtype.FieldUUID)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -4227,7 +4279,7 @@ func (m *FieldTypeMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 46)
+	fields := make([]string, 0, 47)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4366,6 +4418,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.mac != nil {
 		fields = append(fields, fieldtype.FieldMAC)
 	}
+	if m.uuid != nil {
+		fields = append(fields, fieldtype.FieldUUID)
+	}
 	return fields
 }
 
@@ -4466,6 +4521,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Role()
 	case fieldtype.FieldMAC:
 		return m.MAC()
+	case fieldtype.FieldUUID:
+		return m.UUID()
 	}
 	return nil, false
 }
@@ -4567,6 +4624,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldRole(ctx)
 	case fieldtype.FieldMAC:
 		return m.OldMAC(ctx)
+	case fieldtype.FieldUUID:
+		return m.OldUUID(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -4897,6 +4956,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMAC(v)
+		return nil
+	case fieldtype.FieldUUID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -5399,6 +5465,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldMAC) {
 		fields = append(fields, fieldtype.FieldMAC)
 	}
+	if m.FieldCleared(fieldtype.FieldUUID) {
+		fields = append(fields, fieldtype.FieldUUID)
+	}
 	return fields
 }
 
@@ -5532,6 +5601,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldMAC:
 		m.ClearMAC()
+		return nil
+	case fieldtype.FieldUUID:
+		m.ClearUUID()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -5679,6 +5751,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldMAC:
 		m.ResetMAC()
+		return nil
+	case fieldtype.FieldUUID:
+		m.ResetUUID()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -9387,6 +9462,7 @@ type PetMutation struct {
 	typ           string
 	id            *string
 	name          *string
+	uuid          *uuid.UUID
 	clearedFields map[string]struct{}
 	team          *string
 	clearedteam   bool
@@ -9513,6 +9589,56 @@ func (m *PetMutation) ResetName() {
 	m.name = nil
 }
 
+// SetUUID sets the uuid field.
+func (m *PetMutation) SetUUID(u uuid.UUID) {
+	m.uuid = &u
+}
+
+// UUID returns the uuid value in the mutation.
+func (m *PetMutation) UUID() (r uuid.UUID, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old uuid value of the Pet.
+// If the Pet object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *PetMutation) OldUUID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUUID is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ClearUUID clears the value of uuid.
+func (m *PetMutation) ClearUUID() {
+	m.uuid = nil
+	m.clearedFields[pet.FieldUUID] = struct{}{}
+}
+
+// UUIDCleared returns if the field uuid was cleared in this mutation.
+func (m *PetMutation) UUIDCleared() bool {
+	_, ok := m.clearedFields[pet.FieldUUID]
+	return ok
+}
+
+// ResetUUID reset all changes of the "uuid" field.
+func (m *PetMutation) ResetUUID() {
+	m.uuid = nil
+	delete(m.clearedFields, pet.FieldUUID)
+}
+
 // SetTeamID sets the team edge to User by id.
 func (m *PetMutation) SetTeamID(id string) {
 	m.team = &id
@@ -9605,9 +9731,12 @@ func (m *PetMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.name != nil {
 		fields = append(fields, pet.FieldName)
+	}
+	if m.uuid != nil {
+		fields = append(fields, pet.FieldUUID)
 	}
 	return fields
 }
@@ -9619,6 +9748,8 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case pet.FieldName:
 		return m.Name()
+	case pet.FieldUUID:
+		return m.UUID()
 	}
 	return nil, false
 }
@@ -9630,6 +9761,8 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 	switch name {
 	case pet.FieldName:
 		return m.OldName(ctx)
+	case pet.FieldUUID:
+		return m.OldUUID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Pet field %s", name)
 }
@@ -9645,6 +9778,13 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case pet.FieldUUID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)
@@ -9675,7 +9815,11 @@ func (m *PetMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
 func (m *PetMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(pet.FieldUUID) {
+		fields = append(fields, pet.FieldUUID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicates if this field was
@@ -9688,6 +9832,11 @@ func (m *PetMutation) FieldCleared(name string) bool {
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PetMutation) ClearField(name string) error {
+	switch name {
+	case pet.FieldUUID:
+		m.ClearUUID()
+		return nil
+	}
 	return fmt.Errorf("unknown Pet nullable field %s", name)
 }
 
@@ -9698,6 +9847,9 @@ func (m *PetMutation) ResetField(name string) error {
 	switch name {
 	case pet.FieldName:
 		m.ResetName()
+		return nil
+	case pet.FieldUUID:
+		m.ResetUUID()
 		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)

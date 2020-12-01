@@ -8,6 +8,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
+
 	"github.com/facebook/ent/entc/integration/ent"
 	"github.com/facebook/ent/entc/integration/ent/pet"
 	"github.com/facebook/ent/entc/integration/ent/user"
@@ -36,8 +38,9 @@ func EntQL(t *testing.T, client *ent.Client) {
 	)
 	require.Equal(nati.ID, uq.OnlyIDX(ctx))
 
-	xabi := client.Pet.Create().SetName("xabi").SetOwner(a8m).SaveX(ctx)
-	luna := client.Pet.Create().SetName("luna").SetOwner(nati).SaveX(ctx)
+	u1, u2 := uuid.New(), uuid.New()
+	xabi := client.Pet.Create().SetName("xabi").SetOwner(a8m).SetUUID(u1).SaveX(ctx)
+	luna := client.Pet.Create().SetName("luna").SetOwner(nati).SetUUID(u2).SaveX(ctx)
 	uq = client.User.Query()
 	uq.Filter().Where(
 		entql.And(
@@ -55,10 +58,17 @@ func EntQL(t *testing.T, client *ent.Client) {
 	)
 	require.Equal(nati.ID, uq.OnlyIDX(ctx))
 
+	pq := client.Pet.Query()
+	pq.Filter().WhereUUID(entql.ValueEQ(u1))
+	require.Equal(xabi.ID, pq.OnlyIDX(ctx))
+	pq = client.Pet.Query()
+	pq.Filter().WhereUUID(entql.ValueEQ(u2))
+	require.Equal(luna.ID, pq.OnlyIDX(ctx))
+
 	uq = client.User.Query()
 	uq.Filter().WhereName(entql.StringEQ("a8m"))
 	require.Equal(a8m.ID, uq.OnlyIDX(ctx))
-	pq := client.Pet.Query()
+	pq = client.Pet.Query()
 	pq.Filter().WhereName(entql.StringOr(entql.StringEQ("xabi"), entql.StringEQ("luna")))
 	require.Equal([]int{luna.ID, xabi.ID}, pq.Order(ent.Asc(pet.FieldName)).IDsX(ctx))
 

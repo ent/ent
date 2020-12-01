@@ -16,6 +16,7 @@ import (
 	"github.com/facebook/ent/entc/integration/privacy/ent/team"
 	"github.com/facebook/ent/entc/integration/privacy/ent/user"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -56,6 +57,12 @@ func (tc *TaskCreate) SetNillableStatus(t *task.Status) *TaskCreate {
 	if t != nil {
 		tc.SetStatus(*t)
 	}
+	return tc
+}
+
+// SetUUID sets the uuid field.
+func (tc *TaskCreate) SetUUID(u uuid.UUID) *TaskCreate {
+	tc.mutation.SetUUID(u)
 	return tc
 }
 
@@ -219,6 +226,14 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 			Column: task.FieldStatus,
 		})
 		_node.Status = value
+	}
+	if value, ok := tc.mutation.UUID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: task.FieldUUID,
+		})
+		_node.UUID = value
 	}
 	if nodes := tc.mutation.TeamsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

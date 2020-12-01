@@ -18,6 +18,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/google/uuid"
 )
 
 // FieldType is the model entity for the FieldType schema.
@@ -117,6 +118,8 @@ type FieldType struct {
 	Role role.Role `json:"role,omitempty"`
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
+	// UUID holds the value of the "uuid" field.
+	UUID uuid.UUID `json:"uuid,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -173,6 +176,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
 		Role                  role.Role       `json:"role,omitempty"`
 		MAC                   schema.MAC      `json:"mac,omitempty"`
+		UUID                  uuid.UUID       `json:"uuid,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -224,6 +228,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.NullFloat = scanft.NullFloat
 	ft.Role = scanft.Role
 	ft.MAC = scanft.MAC
+	ft.UUID = scanft.UUID
 	return nil
 }
 
@@ -360,6 +365,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
 	builder.WriteString(", mac=")
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
+	builder.WriteString(", uuid=")
+	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -421,6 +428,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		NullFloat             sql.NullFloat64 `json:"null_float,omitempty"`
 		Role                  role.Role       `json:"role,omitempty"`
 		MAC                   schema.MAC      `json:"mac,omitempty"`
+		UUID                  uuid.UUID       `json:"uuid,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -474,6 +482,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			NullFloat:             v.NullFloat,
 			Role:                  v.Role,
 			MAC:                   v.MAC,
+			UUID:                  v.UUID,
 		})
 	}
 	return nil

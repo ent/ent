@@ -13,6 +13,7 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/privacy/ent/task"
 	"github.com/facebook/ent/entc/integration/privacy/ent/user"
+	"github.com/google/uuid"
 )
 
 // Task is the model entity for the Task schema.
@@ -26,6 +27,8 @@ type Task struct {
 	Description string `json:"description,omitempty"`
 	// Status holds the value of the "status" field.
 	Status task.Status `json:"status,omitempty"`
+	// UUID holds the value of the "uuid" field.
+	UUID uuid.UUID `json:"uuid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TaskQuery when eager-loading is set.
 	Edges      TaskEdges `json:"edges"`
@@ -73,6 +76,7 @@ func (*Task) scanValues() []interface{} {
 		&sql.NullString{}, // title
 		&sql.NullString{}, // description
 		&sql.NullString{}, // status
+		&uuid.UUID{},      // uuid
 	}
 }
 
@@ -110,7 +114,12 @@ func (t *Task) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		t.Status = task.Status(value.String)
 	}
-	values = values[3:]
+	if value, ok := values[3].(*uuid.UUID); !ok {
+		return fmt.Errorf("unexpected type %T for field uuid", values[3])
+	} else if value != nil {
+		t.UUID = *value
+	}
+	values = values[4:]
 	if len(values) == len(task.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field user_tasks", value)
@@ -161,6 +170,8 @@ func (t *Task) String() string {
 	builder.WriteString(t.Description)
 	builder.WriteString(", status=")
 	builder.WriteString(fmt.Sprintf("%v", t.Status))
+	builder.WriteString(", uuid=")
+	builder.WriteString(fmt.Sprintf("%v", t.UUID))
 	builder.WriteByte(')')
 	return builder.String()
 }

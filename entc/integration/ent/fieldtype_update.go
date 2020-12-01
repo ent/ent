@@ -20,6 +20,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.
@@ -1004,6 +1005,18 @@ func (ftu *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetUUID sets the uuid field.
+func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
+	ftu.mutation.SetUUID(u)
+	return ftu
+}
+
+// ClearUUID clears the value of uuid.
+func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
+	ftu.mutation.ClearUUID()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1882,6 +1895,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldMAC,
+		})
+	}
+	if value, ok := ftu.mutation.UUID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: fieldtype.FieldUUID,
+		})
+	}
+	if ftu.mutation.UUIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Column: fieldtype.FieldUUID,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -2871,6 +2897,18 @@ func (ftuo *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetUUID sets the uuid field.
+func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
+	ftuo.mutation.SetUUID(u)
+	return ftuo
+}
+
+// ClearUUID clears the value of uuid.
+func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearUUID()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -3747,6 +3785,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldMAC,
+		})
+	}
+	if value, ok := ftuo.mutation.UUID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: fieldtype.FieldUUID,
+		})
+	}
+	if ftuo.mutation.UUIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Column: fieldtype.FieldUUID,
 		})
 	}
 	_node = &FieldType{config: ftuo.config}
