@@ -18,6 +18,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"github.com/google/uuid"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -30,6 +31,12 @@ type PetCreate struct {
 // SetName sets the name field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
 	pc.mutation.SetName(s)
+	return pc
+}
+
+// SetUUID sets the uuid field.
+func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
+	pc.mutation.SetUUID(u)
 	return pc
 }
 
@@ -153,6 +160,9 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(pet.Label)
 	if value, ok := pc.mutation.Name(); ok {
 		v.Property(dsl.Single, pet.FieldName, value)
+	}
+	if value, ok := pc.mutation.UUID(); ok {
+		v.Property(dsl.Single, pet.FieldUUID, value)
 	}
 	for _, id := range pc.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()

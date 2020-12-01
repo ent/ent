@@ -23,6 +23,8 @@ const (
 	FieldDescription = "description"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldUUID holds the string denoting the uuid field in the database.
+	FieldUUID = "uuid"
 
 	// EdgeTeams holds the string denoting the teams edge name in mutations.
 	EdgeTeams = "teams"
@@ -51,6 +53,7 @@ var Columns = []string{
 	FieldTitle,
 	FieldDescription,
 	FieldStatus,
+	FieldUUID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Task type.

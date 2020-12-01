@@ -7,7 +7,10 @@
 
 package entql
 
-import "time"
+import (
+	"database/sql/driver"
+	"time"
+)
 
 //go:generate go run internal/gen.go
 
@@ -44,7 +47,7 @@ func (*{{ $builder }}) {{ ident $t }}() {}
 
 {{ range $op := ops $t }}
 	// {{ $titled }}{{ $op }} applies the {{ $op }} operation on the given value.
-	func {{ $titled }}{{ $op }}(v {{ $t }}) {{ $iface }} {
+	func {{ $titled }}{{ $op }}(v {{ type $t }}) {{ $iface }} {
 		field := &Field{}
 		value := &Value{V: v}
 		done := func(name string) { field.Name = name }

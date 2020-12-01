@@ -21,6 +21,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/google/uuid"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
@@ -554,6 +555,12 @@ func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
 	return ftc
 }
 
+// SetUUID sets the uuid field.
+func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
+	ftc.mutation.SetUUID(u)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -820,6 +827,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
+	}
+	if value, ok := ftc.mutation.UUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
 	return v.ValueMap(true)
 }

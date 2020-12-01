@@ -99,6 +99,7 @@ var (
 		{Name: "null_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE"}, Default: "READ"},
 		{Name: "mac", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "macaddr"}},
+		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
@@ -109,7 +110,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "field_types_files_field",
-				Columns: []*schema.Column{FieldTypesColumns[47]},
+				Columns: []*schema.Column{FieldTypesColumns[48]},
 
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -283,6 +284,7 @@ var (
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
+		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -294,14 +296,14 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "pets_users_pets",
-				Columns: []*schema.Column{PetsColumns[2]},
+				Columns: []*schema.Column{PetsColumns[3]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:  "pets_users_team",
-				Columns: []*schema.Column{PetsColumns[3]},
+				Columns: []*schema.Column{PetsColumns[4]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -311,7 +313,7 @@ var (
 			{
 				Name:    "pet_name_user_pets",
 				Unique:  false,
-				Columns: []*schema.Column{PetsColumns[1], PetsColumns[2]},
+				Columns: []*schema.Column{PetsColumns[1], PetsColumns[3]},
 			},
 		},
 	}

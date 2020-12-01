@@ -13,6 +13,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldUUID holds the string denoting the uuid field in the database.
+	FieldUUID = "uuid"
 
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
@@ -41,6 +43,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldUUID,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.

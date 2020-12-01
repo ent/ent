@@ -17,6 +17,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/google/uuid"
 )
 
 // FieldType is the model entity for the FieldType schema.
@@ -115,7 +116,9 @@ type FieldType struct {
 	// Role holds the value of the "role" field.
 	Role role.Role `json:"role,omitempty"`
 	// MAC holds the value of the "mac" field.
-	MAC        schema.MAC `json:"mac,omitempty"`
+	MAC schema.MAC `json:"mac,omitempty"`
+	// UUID holds the value of the "uuid" field.
+	UUID       uuid.UUID `json:"uuid,omitempty"`
 	file_field *int
 }
 
@@ -169,6 +172,7 @@ func (*FieldType) scanValues() []interface{} {
 		&sql.NullFloat64{}, // null_float
 		&sql.NullString{},  // role
 		&schema.MAC{},      // mac
+		&uuid.UUID{},       // uuid
 	}
 }
 
@@ -428,7 +432,12 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	} else if value != nil {
 		ft.MAC = *value
 	}
-	values = values[46:]
+	if value, ok := values[46].(*uuid.UUID); !ok {
+		return fmt.Errorf("unexpected type %T for field uuid", values[46])
+	} else if value != nil {
+		ft.UUID = *value
+	}
+	values = values[47:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -573,6 +582,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
 	builder.WriteString(", mac=")
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
+	builder.WriteString(", uuid=")
+	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/pet"
 	"github.com/facebook/ent/entc/integration/ent/user"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -27,6 +28,12 @@ type PetCreate struct {
 // SetName sets the name field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
 	pc.mutation.SetName(s)
+	return pc
+}
+
+// SetUUID sets the uuid field.
+func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
+	pc.mutation.SetUUID(u)
 	return pc
 }
 
@@ -156,6 +163,14 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 			Column: pet.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := pc.mutation.UUID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: pet.FieldUUID,
+		})
+		_node.UUID = value
 	}
 	if nodes := pc.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -20,6 +20,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.
@@ -553,6 +554,12 @@ func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
 	return ftc
 }
 
+// SetUUID sets the uuid field.
+func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
+	ftc.mutation.SetUUID(u)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -1055,6 +1062,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldMAC,
 		})
 		_node.MAC = value
+	}
+	if value, ok := ftc.mutation.UUID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: fieldtype.FieldUUID,
+		})
+		_node.UUID = value
 	}
 	return _node, _spec
 }

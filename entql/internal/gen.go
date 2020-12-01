@@ -26,6 +26,7 @@ func main() {
 			"ops":   ops,
 			"title": strings.Title,
 			"ident": ident,
+			"type":  typ,
 		}).
 		Parse(string(buf)))
 	b := &bytes.Buffer{}
@@ -49,6 +50,7 @@ func main() {
 			field.TypeFloat32,
 			field.TypeFloat64,
 			field.TypeString,
+			field.TypeUUID,
 		},
 	}); err != nil {
 		log.Fatal("executing template:", err)
@@ -63,7 +65,7 @@ func main() {
 
 func ops(t field.Type) []string {
 	switch t {
-	case field.TypeBool, field.TypeBytes:
+	case field.TypeBool, field.TypeBytes, field.TypeUUID:
 		return []string{"EQ", "NEQ"}
 	default:
 		return []string{"EQ", "NEQ", "LT", "LTE", "GT", "GTE"}
@@ -72,11 +74,20 @@ func ops(t field.Type) []string {
 
 func ident(t field.Type) string {
 	switch t {
-	case field.TypeTime:
-		return "time"
 	case field.TypeBytes:
 		return "bytes"
+	case field.TypeTime:
+		return "time"
+	case field.TypeUUID:
+		return "value"
 	default:
 		return t.String()
 	}
+}
+
+func typ(t field.Type) string {
+	if t == field.TypeUUID {
+		return "driver.Valuer"
+	}
+	return t.String()
 }
