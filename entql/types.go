@@ -156,6 +156,76 @@ func BytesNot(x BytesP) BytesP {
 	return expr
 }
 
+// UuidP is the interface for predicates of type [16]byte (`type P[[16]byte]`).
+type UuidP interface {
+	Fielder
+	uuid()
+}
+
+// uuidP implements the UuidP interface.
+type uuidP struct {
+	P
+	done func(string)
+}
+
+func (p *uuidP) Field(name string) P {
+	p.done(name)
+	return p.P
+}
+
+func (*uuidP) uuid() {}
+
+// UuidEQ applies the EQ operation on the given value.
+func UuidEQ(v [16]byte) UuidP {
+	field := &Field{}
+	value := &Value{V: v}
+	done := func(name string) { field.Name = name }
+	return &uuidP{P: EQ(field, value), done: done}
+}
+
+// UuidNEQ applies the NEQ operation on the given value.
+func UuidNEQ(v [16]byte) UuidP {
+	field := &Field{}
+	value := &Value{V: v}
+	done := func(name string) { field.Name = name }
+	return &uuidP{P: NEQ(field, value), done: done}
+}
+
+// UuidOr returns a composed predicate that represents the logical OR predicate.
+func UuidOr(x, y UuidP, z ...UuidP) UuidP {
+	expr := &uuidP{}
+	expr.done = func(name string) {
+		zs := make([]P, len(z))
+		for i := range z {
+			zs[i] = z[i].Field(name)
+		}
+		expr.P = Or(x.Field(name), y.Field(name), zs...)
+	}
+	return expr
+}
+
+// UuidAnd returns a composed predicate that represents the logical AND predicate.
+func UuidAnd(x, y UuidP, z ...UuidP) UuidP {
+	expr := &uuidP{}
+	expr.done = func(name string) {
+		zs := make([]P, len(z))
+		for i := range z {
+			zs[i] = z[i].Field(name)
+		}
+		expr.P = And(x.Field(name), y.Field(name), zs...)
+	}
+	return expr
+}
+
+// UuidNot returns a predicate that represents the logical negation of the given predicate.
+func UuidNot(x UuidP) UuidP {
+	expr := &uuidP{}
+	expr.done = func(name string) {
+		expr.P = Not(x.Field(name))
+	}
+	return expr
+}
+
 // TimeP is the interface for predicates of type time.Time (`type P[time.Time]`).
 type TimeP interface {
 	Fielder

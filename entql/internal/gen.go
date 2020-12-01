@@ -35,6 +35,7 @@ func main() {
 		Types: []field.Type{
 			field.TypeBool,
 			field.TypeBytes,
+			field.TypeUUID,
 			field.TypeTime,
 			field.TypeUint,
 			field.TypeUint8,
@@ -63,7 +64,7 @@ func main() {
 
 func ops(t field.Type) []string {
 	switch t {
-	case field.TypeBool, field.TypeBytes:
+	case field.TypeBool, field.TypeBytes, field.TypeUUID:
 		return []string{"EQ", "NEQ"}
 	default:
 		return []string{"EQ", "NEQ", "LT", "LTE", "GT", "GTE"}
@@ -76,6 +77,8 @@ func ident(t field.Type) string {
 		return "time"
 	case field.TypeBytes:
 		return "bytes"
+	case field.TypeUUID:
+		return "uuid"
 	default:
 		return t.String()
 	}
