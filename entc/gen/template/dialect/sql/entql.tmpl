@@ -109,6 +109,7 @@ type predicateAdder interface {
 
 	{{ $type := $n.ID.Type.Type.String }}
 	{{ $iface := print (pascal $type) "P" }}
+	{{ if $n.ID.IsUUID }}{{ $iface = "ValueP" }}{{ end }}
 	// WhereID applies the entql {{ $type }} predicate on the id field.
 	func (f *{{ $filter }}) WhereID(p entql.{{ $iface }}) {
 		f.Where(p.Field({{ $n.Package }}.{{ $n.ID.Constant }}))
