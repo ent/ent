@@ -150,7 +150,7 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
-			name: "create new table with foreign key diabled",
+			name: "create new table with foreign key disabled",
 			options: []MigrateOption{
 				WithForeignKeys(false),
 			},
@@ -1029,6 +1029,44 @@ func TestMySQL_Create(t *testing.T) {
 				// restore the auto-increment counter.
 				mock.ExpectExec(escape("ALTER TABLE `users` AUTO_INCREMENT = 4294967296")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		// MariaDB specific tests.
+		{
+			name: "mariadb/json columns",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "json", Type: field.TypeJSON, Nullable: true},
+						{Name: "longtext", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock mysqlMock) {
+				mock.start("10.5.8-MariaDB-1:10.5.8+maria~focal")
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM INFORMATION_SCHEMA.COLUMNS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+						AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "").
+						AddRow("json", "longtext", "YES", "YES", "NULL", "", "utf8mb4", "utf8mb4_bin").
+						AddRow("longtext", "longtext", "YES", "YES", "NULL", "", "utf8mb4", "utf8mb4_bin"))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM INFORMATION_SCHEMA.STATISTICS WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", "0", "1"))
+				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME`, `CHECK_CLAUSE` FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE `CONSTRAINT_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? AND `CONSTRAINT_NAME` IN (?, ?)")).
+					WithArgs("users", "json", "longtext").
+					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME", "CHECK_CLAUSE"}).
+						AddRow("json", "json_valid(`json`)"))
 				mock.ExpectCommit()
 			},
 		},

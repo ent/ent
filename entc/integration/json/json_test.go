@@ -56,6 +56,32 @@ func TestMySQL(t *testing.T) {
 	}
 }
 
+func TestMaria(t *testing.T) {
+	db, err := sql.Open("mysql", "root:pass@tcp(localhost:4306)/")
+	require.NoError(t, err)
+	defer db.Close()
+	ctx := context.Background()
+	err = db.Exec(ctx, "CREATE DATABASE IF NOT EXISTS json", []interface{}{}, nil)
+	require.NoError(t, err, "creating database")
+	defer db.Exec(ctx, "DROP DATABASE IF EXISTS json", []interface{}{}, nil)
+	client, err := ent.Open("mysql", "root:pass@tcp(localhost:4306)/json")
+	require.NoError(t, err, "connecting to json database")
+	err = client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true))
+	require.NoError(t, err)
+	// We run the migration twice to check that migration handles
+	// the JSON columns, since MariaDB stores them as longtext.
+	err = client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true))
+	require.NoError(t, err)
+
+	URL(t, client)
+	Dirs(t, client)
+	Ints(t, client)
+	Floats(t, client)
+	Strings(t, client)
+	RawMessage(t, client)
+	Predicates(t, client)
+}
+
 func TestPostgres(t *testing.T) {
 	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433, "13": 5434} {
 		t.Run(version, func(t *testing.T) {
