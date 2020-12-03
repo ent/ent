@@ -73,6 +73,10 @@ jobs:
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3308
+      - image: circleci/mariadb
+        environment:
+          <<: *mysql_env
+          MYSQL_TCP_PORT: 4306
       - image: circleci/postgres:10.0
         environment:
           POSTGRES_DB: test
@@ -105,6 +109,7 @@ jobs:
             -wait tcp://localhost:3306
             -wait tcp://localhost:3307
             -wait tcp://localhost:3308
+            -wait tcp://localhost:4306
             -wait tcp://localhost:5430
             -wait tcp://localhost:5431
             -wait tcp://localhost:5433
