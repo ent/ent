@@ -6,6 +6,7 @@ package schema
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 	"sort"
@@ -101,6 +102,11 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	// Add and link indexes to table columns.
 	for _, idx := range indexes {
 		t.AddIndex(idx.Name, idx.Unique, idx.columns)
+	}
+	if d.mariadb() {
+		if err := d.normalizeJSON(ctx, tx, t); err != nil {
+			return nil, err
+		}
 	}
 	return t, nil
 }
@@ -519,6 +525,57 @@ func (d *MySQL) alterColumns(table string, add, modify, drop []*Column) sql.Quer
 		return nil
 	}
 	return sql.Queries{b}
+}
+
+// normalizeJSON normalize MariaDB longtext columns to type JSON.
+func (d *MySQL) normalizeJSON(ctx context.Context, tx dialect.Tx, t *Table) error {
+	var (
+		names   []driver.Value
+		columns = make(map[string]*Column)
+	)
+	for _, c := range t.Columns {
+		if c.typ == "longtext" {
+			columns[c.Name] = c
+			names = append(names, c.Name)
+		}
+	}
+	if len(names) == 0 {
+		return nil
+	}
+	rows := &sql.Rows{}
+	query, args := sql.Select("CONSTRAINT_NAME", "CHECK_CLAUSE").
+		From(sql.Table("INFORMATION_SCHEMA.CHECK_CONSTRAINTS").Unquote()).
+		Where(sql.And(
+			sql.EQ("CONSTRAINT_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+			sql.EQ("TABLE_NAME", t.Name),
+			sql.InValues("CONSTRAINT_NAME", names...),
+		)).
+		Query()
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return fmt.Errorf("mysql: query table constraints %v", err)
+	}
+	// Call Close in cases of failures (Close is idempotent).
+	defer rows.Close()
+	for rows.Next() {
+		var name, check string
+		if err := rows.Scan(&name, &check); err != nil {
+			return fmt.Errorf("mysql: scan table constraints")
+		}
+		c, ok := columns[name]
+		if !ok || !strings.HasPrefix(check, "json_valid") {
+			continue
+		}
+		c.Type = field.TypeJSON
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	return rows.Close()
+}
+
+// mariadb reports if the migration runs on MariaDB.
+func (d *MySQL) mariadb() bool {
+	return strings.Contains(d.version, "MariaDB")
 }
 
 // parseColumn returns column parts, size and signed-info from a MySQL type.
