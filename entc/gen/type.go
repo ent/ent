@@ -492,7 +492,7 @@ func (t *Type) AddIndex(idx *load.Index) error {
 				return fmt.Errorf("unknown index field %q", name)
 			}
 		}
-		if f.def != nil && f.def.Size != nil && *f.def.Size > schema.DefaultStringLen {
+		if f.def.Size != nil && *f.def.Size > schema.DefaultStringLen {
 			return fmt.Errorf("field %q exceeds the index size limit (%d)", name, schema.DefaultStringLen)
 		}
 		index.Columns = append(index.Columns, f.StorageKey())
