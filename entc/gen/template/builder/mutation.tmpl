@@ -72,7 +72,7 @@ var _ ent.Mutation = (*{{ $mutation }})(nil)
 // {{ $mutationOption }} allows to manage the mutation configuration using functional options.
 type {{ $mutationOption }} func(*{{ $mutation }})
 
-// new{{ $mutation }} creates new mutation for $n.Name.
+// new{{ $mutation }} creates new mutation for {{ $n.Name }}.
 func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mutation }} {
 	m := &{{ $mutation }}{
 		config:        c,

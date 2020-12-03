@@ -58,7 +58,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,

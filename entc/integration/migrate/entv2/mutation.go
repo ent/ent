@@ -58,7 +58,7 @@ var _ ent.Mutation = (*CarMutation)(nil)
 // carOption allows to manage the mutation configuration using functional options.
 type carOption func(*CarMutation)
 
-// newCarMutation creates new mutation for $n.Name.
+// newCarMutation creates new mutation for Car.
 func newCarMutation(c config, op Op, opts ...carOption) *CarMutation {
 	m := &CarMutation{
 		config:        c,
@@ -365,7 +365,7 @@ var _ ent.Mutation = (*ConversionMutation)(nil)
 // conversionOption allows to manage the mutation configuration using functional options.
 type conversionOption func(*ConversionMutation)
 
-// newConversionMutation creates new mutation for $n.Name.
+// newConversionMutation creates new mutation for Conversion.
 func newConversionMutation(c config, op Op, opts ...conversionOption) *ConversionMutation {
 	m := &ConversionMutation{
 		config:        c,
@@ -1264,7 +1264,7 @@ var _ ent.Mutation = (*GroupMutation)(nil)
 // groupOption allows to manage the mutation configuration using functional options.
 type groupOption func(*GroupMutation)
 
-// newGroupMutation creates new mutation for $n.Name.
+// newGroupMutation creates new mutation for Group.
 func newGroupMutation(c config, op Op, opts ...groupOption) *GroupMutation {
 	m := &GroupMutation{
 		config:        c,
@@ -1497,7 +1497,7 @@ var _ ent.Mutation = (*MediaMutation)(nil)
 // mediaOption allows to manage the mutation configuration using functional options.
 type mediaOption func(*MediaMutation)
 
-// newMediaMutation creates new mutation for $n.Name.
+// newMediaMutation creates new mutation for Media.
 func newMediaMutation(c config, op Op, opts ...mediaOption) *MediaMutation {
 	m := &MediaMutation{
 		config:        c,
@@ -1887,7 +1887,7 @@ var _ ent.Mutation = (*PetMutation)(nil)
 // petOption allows to manage the mutation configuration using functional options.
 type petOption func(*PetMutation)
 
-// newPetMutation creates new mutation for $n.Name.
+// newPetMutation creates new mutation for Pet.
 func newPetMutation(c config, op Op, opts ...petOption) *PetMutation {
 	m := &PetMutation{
 		config:        c,
@@ -2207,7 +2207,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,

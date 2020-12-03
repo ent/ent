@@ -57,7 +57,7 @@ var _ ent.Mutation = (*GroupMutation)(nil)
 // groupOption allows to manage the mutation configuration using functional options.
 type groupOption func(*GroupMutation)
 
-// newGroupMutation creates new mutation for $n.Name.
+// newGroupMutation creates new mutation for Group.
 func newGroupMutation(c config, op Op, opts ...groupOption) *GroupMutation {
 	m := &GroupMutation{
 		config:        c,
@@ -497,7 +497,7 @@ var _ ent.Mutation = (*TenantMutation)(nil)
 // tenantOption allows to manage the mutation configuration using functional options.
 type tenantOption func(*TenantMutation)
 
-// newTenantMutation creates new mutation for $n.Name.
+// newTenantMutation creates new mutation for Tenant.
 func newTenantMutation(c config, op Op, opts ...tenantOption) *TenantMutation {
 	m := &TenantMutation{
 		config:        c,
@@ -796,7 +796,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,
