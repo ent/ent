@@ -61,7 +61,7 @@ var _ ent.Mutation = (*TaskMutation)(nil)
 // taskOption allows to manage the mutation configuration using functional options.
 type taskOption func(*TaskMutation)
 
-// newTaskMutation creates new mutation for $n.Name.
+// newTaskMutation creates new mutation for Task.
 func newTaskMutation(c config, op Op, opts ...taskOption) *TaskMutation {
 	m := &TaskMutation{
 		config:        c,
@@ -710,7 +710,7 @@ var _ ent.Mutation = (*TeamMutation)(nil)
 // teamOption allows to manage the mutation configuration using functional options.
 type teamOption func(*TeamMutation)
 
-// newTeamMutation creates new mutation for $n.Name.
+// newTeamMutation creates new mutation for Team.
 func newTeamMutation(c config, op Op, opts ...teamOption) *TeamMutation {
 	m := &TeamMutation{
 		config:        c,
@@ -1180,7 +1180,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,

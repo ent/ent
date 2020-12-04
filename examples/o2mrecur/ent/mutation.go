@@ -54,7 +54,7 @@ var _ ent.Mutation = (*NodeMutation)(nil)
 // nodeOption allows to manage the mutation configuration using functional options.
 type nodeOption func(*NodeMutation)
 
-// newNodeMutation creates new mutation for $n.Name.
+// newNodeMutation creates new mutation for Node.
 func newNodeMutation(c config, op Op, opts ...nodeOption) *NodeMutation {
 	m := &NodeMutation{
 		config:        c,

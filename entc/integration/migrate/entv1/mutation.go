@@ -53,7 +53,7 @@ var _ ent.Mutation = (*CarMutation)(nil)
 // carOption allows to manage the mutation configuration using functional options.
 type carOption func(*CarMutation)
 
-// newCarMutation creates new mutation for $n.Name.
+// newCarMutation creates new mutation for Car.
 func newCarMutation(c config, op Op, opts ...carOption) *CarMutation {
 	m := &CarMutation{
 		config:        c,
@@ -368,7 +368,7 @@ var _ ent.Mutation = (*ConversionMutation)(nil)
 // conversionOption allows to manage the mutation configuration using functional options.
 type conversionOption func(*ConversionMutation)
 
-// newConversionMutation creates new mutation for $n.Name.
+// newConversionMutation creates new mutation for Conversion.
 func newConversionMutation(c config, op Op, opts ...conversionOption) *ConversionMutation {
 	m := &ConversionMutation{
 		config:        c,
@@ -1553,7 +1553,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,

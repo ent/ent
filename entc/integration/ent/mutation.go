@@ -87,7 +87,7 @@ var _ ent.Mutation = (*CardMutation)(nil)
 // cardOption allows to manage the mutation configuration using functional options.
 type cardOption func(*CardMutation)
 
-// newCardMutation creates new mutation for $n.Name.
+// newCardMutation creates new mutation for Card.
 func newCardMutation(c config, op Op, opts ...cardOption) *CardMutation {
 	m := &CardMutation{
 		config:        c,
@@ -716,7 +716,7 @@ var _ ent.Mutation = (*CommentMutation)(nil)
 // commentOption allows to manage the mutation configuration using functional options.
 type commentOption func(*CommentMutation)
 
-// newCommentMutation creates new mutation for $n.Name.
+// newCommentMutation creates new mutation for Comment.
 func newCommentMutation(c config, op Op, opts ...commentOption) *CommentMutation {
 	m := &CommentMutation{
 		config:        c,
@@ -1315,7 +1315,7 @@ var _ ent.Mutation = (*FieldTypeMutation)(nil)
 // fieldtypeOption allows to manage the mutation configuration using functional options.
 type fieldtypeOption func(*FieldTypeMutation)
 
-// newFieldTypeMutation creates new mutation for $n.Name.
+// newFieldTypeMutation creates new mutation for FieldType.
 func newFieldTypeMutation(c config, op Op, opts ...fieldtypeOption) *FieldTypeMutation {
 	m := &FieldTypeMutation{
 		config:        c,
@@ -5842,7 +5842,7 @@ var _ ent.Mutation = (*FileMutation)(nil)
 // fileOption allows to manage the mutation configuration using functional options.
 type fileOption func(*FileMutation)
 
-// newFileMutation creates new mutation for $n.Name.
+// newFileMutation creates new mutation for File.
 func newFileMutation(c config, op Op, opts ...fileOption) *FileMutation {
 	m := &FileMutation{
 		config:        c,
@@ -6655,7 +6655,7 @@ var _ ent.Mutation = (*FileTypeMutation)(nil)
 // filetypeOption allows to manage the mutation configuration using functional options.
 type filetypeOption func(*FileTypeMutation)
 
-// newFileTypeMutation creates new mutation for $n.Name.
+// newFileTypeMutation creates new mutation for FileType.
 func newFileTypeMutation(c config, op Op, opts ...filetypeOption) *FileTypeMutation {
 	m := &FileTypeMutation{
 		config:        c,
@@ -7145,7 +7145,7 @@ var _ ent.Mutation = (*GoodsMutation)(nil)
 // goodsOption allows to manage the mutation configuration using functional options.
 type goodsOption func(*GoodsMutation)
 
-// newGoodsMutation creates new mutation for $n.Name.
+// newGoodsMutation creates new mutation for Goods.
 func newGoodsMutation(c config, op Op, opts ...goodsOption) *GoodsMutation {
 	m := &GoodsMutation{
 		config:        c,
@@ -7393,7 +7393,7 @@ var _ ent.Mutation = (*GroupMutation)(nil)
 // groupOption allows to manage the mutation configuration using functional options.
 type groupOption func(*GroupMutation)
 
-// newGroupMutation creates new mutation for $n.Name.
+// newGroupMutation creates new mutation for Group.
 func newGroupMutation(c config, op Op, opts ...groupOption) *GroupMutation {
 	m := &GroupMutation{
 		config:        c,
@@ -8289,7 +8289,7 @@ var _ ent.Mutation = (*GroupInfoMutation)(nil)
 // groupinfoOption allows to manage the mutation configuration using functional options.
 type groupinfoOption func(*GroupInfoMutation)
 
-// newGroupInfoMutation creates new mutation for $n.Name.
+// newGroupInfoMutation creates new mutation for GroupInfo.
 func newGroupInfoMutation(c config, op Op, opts ...groupinfoOption) *GroupInfoMutation {
 	m := &GroupInfoMutation{
 		config:        c,
@@ -8760,7 +8760,7 @@ var _ ent.Mutation = (*ItemMutation)(nil)
 // itemOption allows to manage the mutation configuration using functional options.
 type itemOption func(*ItemMutation)
 
-// newItemMutation creates new mutation for $n.Name.
+// newItemMutation creates new mutation for Item.
 func newItemMutation(c config, op Op, opts ...itemOption) *ItemMutation {
 	m := &ItemMutation{
 		config:        c,
@@ -8997,7 +8997,7 @@ var _ ent.Mutation = (*NodeMutation)(nil)
 // nodeOption allows to manage the mutation configuration using functional options.
 type nodeOption func(*NodeMutation)
 
-// newNodeMutation creates new mutation for $n.Name.
+// newNodeMutation creates new mutation for Node.
 func newNodeMutation(c config, op Op, opts ...nodeOption) *NodeMutation {
 	m := &NodeMutation{
 		config:        c,
@@ -9478,7 +9478,7 @@ var _ ent.Mutation = (*PetMutation)(nil)
 // petOption allows to manage the mutation configuration using functional options.
 type petOption func(*PetMutation)
 
-// newPetMutation creates new mutation for $n.Name.
+// newPetMutation creates new mutation for Pet.
 func newPetMutation(c config, op Op, opts ...petOption) *PetMutation {
 	m := &PetMutation{
 		config:        c,
@@ -9974,7 +9974,7 @@ var _ ent.Mutation = (*SpecMutation)(nil)
 // specOption allows to manage the mutation configuration using functional options.
 type specOption func(*SpecMutation)
 
-// newSpecMutation creates new mutation for $n.Name.
+// newSpecMutation creates new mutation for Spec.
 func newSpecMutation(c config, op Op, opts ...specOption) *SpecMutation {
 	m := &SpecMutation{
 		config:        c,
@@ -10296,7 +10296,7 @@ var _ ent.Mutation = (*TaskMutation)(nil)
 // taskOption allows to manage the mutation configuration using functional options.
 type taskOption func(*TaskMutation)
 
-// newTaskMutation creates new mutation for $n.Name.
+// newTaskMutation creates new mutation for Task.
 func newTaskMutation(c config, op Op, opts ...taskOption) *TaskMutation {
 	m := &TaskMutation{
 		config:        c,
@@ -10664,7 +10664,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,
