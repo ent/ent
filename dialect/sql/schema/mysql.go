@@ -604,7 +604,7 @@ func parseColumn(typ string) (parts []string, size int64, unsigned bool, err err
 
 // fkNames returns the foreign-key names of a column.
 func fkNames(ctx context.Context, tx dialect.Tx, table, column string) ([]string, error) {
-	query, args := sql.Select("CONSTRAINT_NAME").From(sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE").Unquote()).
+	query, args := sql.Select("CONSTRAINT_NAME").From(sql.Table("KEY_COLUMN_USAGE").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_NAME", table),
 			sql.EQ("COLUMN_NAME", column),

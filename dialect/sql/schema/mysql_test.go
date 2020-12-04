@@ -709,7 +709,7 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("PRIMARY", "id", "0", "1").
 						AddRow("age", "age", "0", "1"))
 				// check if a foreign-key needs to be dropped.
-				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
+				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE` WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
 					WithArgs("users", "age").
 					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME"}))
 				// drop the unique index.
@@ -791,7 +791,7 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("PRIMARY", "id", "0", "1").
 						AddRow("parent_id", "parent_id", "0", "1"))
 				// check if a foreign-key needs to be dropped.
-				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
+				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE` WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
 					WithArgs("users", "parent_id").
 					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME"}).AddRow("users_parent_id"))
 				mock.ExpectExec(escape("ALTER TABLE `users` DROP FOREIGN KEY `users_parent_id`")).
@@ -834,7 +834,7 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("PRIMARY", "id", "0", "1").
 						AddRow("parent_id", "parent_id", "0", "1"))
 				// check if there's a foreign-key that is associated with this index.
-				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
+				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM `INFORMATION_SCHEMA`.`KEY_COLUMN_USAGE` WHERE `TABLE_NAME` = ? AND `COLUMN_NAME` = ? AND `POSITION_IN_UNIQUE_CONSTRAINT` IS NOT NULL AND `TABLE_SCHEMA` = (SELECT DATABASE())")).
 					WithArgs("users", "parent_id").
 					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME"}).AddRow("users_parent_id"))
 				// create a new index, to replace the old one (that needs to be dropped).
