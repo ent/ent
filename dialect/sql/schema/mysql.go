@@ -46,7 +46,7 @@ func (d *MySQL) init(ctx context.Context, tx dialect.Tx) error {
 }
 
 func (d *MySQL) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
-	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
+	query, args := sql.Select(sql.Count("*")).From(sql.Table("TABLES").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", name),
@@ -55,7 +55,7 @@ func (d *MySQL) tableExist(ctx context.Context, tx dialect.Tx, name string) (boo
 }
 
 func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
-	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
+	query, args := sql.Select(sql.Count("*")).From(sql.Table("TABLE_CONSTRAINTS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("CONSTRAINT_TYPE", "FOREIGN KEY"),
@@ -68,7 +68,7 @@ func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, 
 func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name").
-		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
+		From(sql.Table("COLUMNS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", name)),
@@ -115,7 +115,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Index, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("index_name", "column_name", "non_unique", "seq_in_index").
-		From(sql.Table("INFORMATION_SCHEMA.STATISTICS").Unquote()).
+		From(sql.Table("STATISTICS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", name),
@@ -143,7 +143,7 @@ func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expect
 	}
 	rows := &sql.Rows{}
 	query, args := sql.Select("AUTO_INCREMENT").
-		From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
+		From(sql.Table("TABLES").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", t.Name),
@@ -544,7 +544,7 @@ func (d *MySQL) normalizeJSON(ctx context.Context, tx dialect.Tx, t *Table) erro
 	}
 	rows := &sql.Rows{}
 	query, args := sql.Select("CONSTRAINT_NAME", "CHECK_CLAUSE").
-		From(sql.Table("INFORMATION_SCHEMA.CHECK_CONSTRAINTS").Unquote()).
+		From(sql.Table("CHECK_CONSTRAINTS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("CONSTRAINT_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", t.Name),
