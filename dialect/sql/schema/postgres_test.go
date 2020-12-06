@@ -192,7 +192,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "nextval('users_colname_seq'::regclass)"))
@@ -229,7 +229,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -270,7 +270,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -304,7 +304,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -336,7 +336,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -367,7 +367,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -398,7 +398,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -428,7 +428,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -458,7 +458,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -488,7 +488,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -518,7 +518,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -548,7 +548,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -557,7 +557,7 @@ func TestPostgres_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0).
 						AddRow("users_age_key", "age", "f", "t", 0))
-				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
+				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM "information_schema"."table_constraints" WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
 					WithArgs("UNIQUE", "users_age_key").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
 				mock.ExpectExec(escape(`ALTER TABLE "users" DROP CONSTRAINT "users_age_key"`)).
@@ -602,7 +602,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -612,7 +612,7 @@ func TestPostgres_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0).
 						AddRow("user_score", "score", "f", "f", 0))
-				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
+				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM "information_schema"."table_constraints" WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
 					WithArgs("UNIQUE", "user_score").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).
 						AddRow(0))
@@ -623,7 +623,7 @@ func TestPostgres_Create(t *testing.T) {
 				mock.ExpectExec(escape(`CREATE UNIQUE INDEX "user_score" ON "users"("score")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.tableExists("equipment", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("equipment").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "NO", "NULL").
@@ -664,7 +664,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", true)
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "YES", "NULL").
@@ -730,7 +730,7 @@ func TestPostgres_Create(t *testing.T) {
 				// query users table.
 				mock.tableExists("users", true)
 				// users table has no changes.
-				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM INFORMATION_SCHEMA.COLUMNS WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default"}).
 						AddRow("id", "bigint", "YES", "NULL"))
@@ -812,7 +812,7 @@ func (m pgMock) tableExists(table string, exists bool) {
 	if exists {
 		count = 1
 	}
-	m.ExpectQuery(escape(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+	m.ExpectQuery(escape(`SELECT COUNT(*) FROM "information_schema"."tables" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 		WithArgs(table).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(count))
 }
@@ -822,7 +822,7 @@ func (m pgMock) fkExists(fk string, exists bool) {
 	if exists {
 		count = 1
 	}
-	m.ExpectQuery(escape(`SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
+	m.ExpectQuery(escape(`SELECT COUNT(*) FROM "information_schema"."table_constraints" WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
 		WithArgs("FOREIGN KEY", fk).
 		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(count))
 }
