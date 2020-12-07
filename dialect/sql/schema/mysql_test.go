@@ -264,7 +264,6 @@ func TestMySQL_Create(t *testing.T) {
 						{Name: "name", Type: field.TypeString, Nullable: true},
 						{Name: "enums1", Type: field.TypeEnum, Enums: []string{"a", "b"}}, // add enum.
 						{Name: "enums2", Type: field.TypeEnum, Enums: []string{"a"}},      // remove enum.
-						{Name: "enums3", Type: field.TypeEnum, Enums: []string{"a", "b"}}, // order does not effect.
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -280,8 +279,7 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
 						AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "").
 						AddRow("enums1", "enum('a')", "YES", "NO", "NULL", "", "", "").
-						AddRow("enums2", "enum('b', 'a')", "NO", "YES", "NULL", "", "", "").
-						AddRow("enums3", "enum('b', 'a')", "NO", "YES", "NULL", "", "", ""))
+						AddRow("enums2", "enum('b', 'a')", "NO", "YES", "NULL", "", "", ""))
 				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
