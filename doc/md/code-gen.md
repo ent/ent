@@ -230,3 +230,9 @@ func EnsureStructTag(name string) gen.Hook {
 	}
 }
 ```
+
+## Feature Flags
+
+The `entc` package provides a collection of code-generation features that be added or removed using flags.
+
+For more information, please see the [features-flags page](features.md).
