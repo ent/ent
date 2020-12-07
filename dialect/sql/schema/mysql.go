@@ -9,7 +9,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -263,7 +262,6 @@ func (d *MySQL) cType(c *Column) (t string) {
 		for i, e := range c.Enums {
 			values[i] = fmt.Sprintf("'%s'", e)
 		}
-		sort.Strings(values)
 		t = fmt.Sprintf("enum(%s)", strings.Join(values, ", "))
 	case field.TypeUUID:
 		t = "char(36) binary"
