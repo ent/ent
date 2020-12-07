@@ -81,7 +81,7 @@ func (s *Snapshot) parseSnapshot(buf []byte) (*gen.Snapshot, error) {
 		return local, nil
 	}
 	// In case of merge-conflict, we merge the 2 schemas.
-	line, err = trim(matches[0])
+	line, err = trim(matches[1])
 	if err != nil {
 		return nil, err
 	}
