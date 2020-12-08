@@ -59,62 +59,70 @@ func (e CardEdges) OwnerOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Card) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // number
-		&sql.NullString{}, // name
-		&sql.NullTime{},   // created_at
-		&sql.NullString{}, // in_hook
+func (*Card) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case card.FieldID:
+			values[i] = &sql.NullInt64{}
+		case card.FieldNumber, card.FieldName, card.FieldInHook:
+			values[i] = &sql.NullString{}
+		case card.FieldCreatedAt:
+			values[i] = &sql.NullTime{}
+		case card.ForeignKeys[0]: // user_cards
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Card", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Card) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // user_cards
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
-func (c *Card) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(card.Columns); m < n {
+func (c *Card) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	c.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field number", values[0])
-	} else if value.Valid {
-		c.Number = value.String
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[1])
-	} else if value.Valid {
-		c.Name = value.String
-	}
-	if value, ok := values[2].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field created_at", values[2])
-	} else if value.Valid {
-		c.CreatedAt = value.Time
-	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field in_hook", values[3])
-	} else if value.Valid {
-		c.InHook = value.String
-	}
-	values = values[4:]
-	if len(values) == len(card.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_cards", value)
-		} else if value.Valid {
-			c.user_cards = new(int)
-			*c.user_cards = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case card.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			c.ID = int(value.Int64)
+		case card.FieldNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field number", values[i])
+			} else if value.Valid {
+				c.Number = value.String
+			}
+		case card.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				c.Name = value.String
+			}
+		case card.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				c.CreatedAt = value.Time
+			}
+		case card.FieldInHook:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field in_hook", values[i])
+			} else if value.Valid {
+				c.InHook = value.String
+			}
+		case card.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_cards", value)
+			} else if value.Valid {
+				c.user_cards = new(int)
+				*c.user_cards = int(value.Int64)
+			}
 		}
 	}
 	return nil

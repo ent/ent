@@ -7,74 +7,84 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/decode/one" }}
 {{ $receiver := $.Receiver }}
 
-// scanValues returns the types for scanning values from sql.Rows.
-func (*{{ $.Name }}) scanValues() []interface{} {
-	return []interface{} {
-		&{{ if not $.ID.UserDefined }}sql.NullInt64{{ else }}{{ $.ID.NullType }}{{ end }}{}, // {{ $.ID.Name }}
-		{{- range $_, $f := $.Fields }}
-			&{{ $f.NullType }}{}, // {{ $f.Name }}
-		{{- end }}
-	}
-}
+{{ $idnulltype := $.ID.NullType }}{{ if not $.ID.UserDefined }}{{ $idnulltype = "sql.NullInt64" }}{{ end }}
+{{ $ctypes := dict $idnulltype (list $.ID.Constant) }}
+{{ range $f := $.Fields }}
+	{{ $names := list }}
+	{{ if hasKey $ctypes $f.NullType }}
+		{{ $names = get $ctypes $f.NullType }}
+	{{ end }}
+	{{ $names = append $names $f.Constant }}
+	{{ $ctypes = set $ctypes $f.NullType $names }}
+{{ end }}
 
-{{- with $.ForeignKeys }}
-	// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-	func (*{{ $.Name }}) fkValues() []interface{} {
-		return []interface{} {
-			{{- range $fk := . }}
-				{{- $f := $fk.Field }}
-				&{{ if not $f.UserDefined }}sql.NullInt64{{ else }}{{ $f.NullType }}{{ end }}{}, // {{ $f.Name }}
+// scanValues returns the types for scanning values from sql.Rows.
+func (*{{ $.Name }}) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+			{{- range $type, $columns := $ctypes }}
+				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }}{{ $.Package }}.{{ $c }}{{ end }}:
+					values[i] = &{{ $type }}{}
 			{{- end }}
+			{{- range $i, $fk := $.ForeignKeys }}
+				{{- $f := $fk.Field }}
+				case {{ $.Package }}.ForeignKeys[{{ $i }}]: // {{ $f.Name }}
+					values[i] = &{{ if not $f.UserDefined }}sql.NullInt64{{ else }}{{ $f.NullType }}{{ end }}{}
+			{{- end }}
+			default:
+				return nil, fmt.Errorf("unexpected column %q for type {{ $.Name }}", columns[i])
 		}
 	}
-{{- end }}
+	return values, nil
+}
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the {{ $.Name }} fields.
-func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
-		if m, n := len(values), len({{ $.Package }}.Columns); m < n {
-			return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-		}
-		{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
-			{{- with extend $ "Idx" 0 "Field" $.ID "Rec" $receiver }}
-				{{ template "dialect/sql/decode/field" . }}
-			{{- end }}
-		{{- else }}
-			value, ok := values[0].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
-		{{- end }}
-		values = values[1:]
-		{{- range $i, $f := $.Fields }}
-			{{- with extend $ "Idx" $i "Field" $f "Rec" $receiver }}
-				{{ template "dialect/sql/decode/field" . }}
-			{{- end }}
-		{{- end }}
-		{{- with $.ForeignKeys }}
-			{{- with $.Fields }}
-				values = values[{{ len . }}:]
-			{{- end }}
-			if len(values) == len({{ $.Package }}.ForeignKeys) {
-				{{- range $i, $fk := . }}
-					{{- $f := $fk.Field }}
-					{{- if and $f.UserDefined (or $f.IsString $f.IsUUID) }}
-						{{- with extend $ "Idx" $i "Field" $f "Rec" $receiver "StructField" $f.Name }}
-							{{ template "dialect/sql/decode/field" . }}
-						{{- end }}
-					{{- else }}
-						if value, ok := values[{{ $i }}].(*sql.NullInt64); !ok {
-							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
-						} else if value.Valid {
-							{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
-							*{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
-						}
-					{{- end }}
+func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	{{- $idx := "i" }}{{ if eq $idx $receiver }}{{ $idx = "j" }}{{ end }}
+	for {{ $idx }} := range columns {
+		switch columns[{{ $idx }}] {
+		case {{ $.Package }}.{{ $.ID.Constant }}:
+			{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+				{{- with extend $ "Idx" $idx "Field" $.ID "Rec" $receiver }}
+					{{ template "dialect/sql/decode/field" . }}
 				{{- end }}
-			}
+			{{- else }}
+				value, ok := values[{{ $idx }}].(*sql.NullInt64)
+				if !ok {
+					return fmt.Errorf("unexpected type %T for field id", value)
+				}
+				{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
+			{{- end }}
+		{{- range  $f := $.Fields }}
+			case {{ $.Package }}.{{ $f.Constant }}:
+				{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver }}
+					{{ template "dialect/sql/decode/field" . }}
+				{{- end }}
 		{{- end }}
-		return nil
+		{{- range $i, $fk := $.ForeignKeys }}
+			{{- $f := $fk.Field }}
+			case {{ $.Package }}.ForeignKeys[{{ $i }}]:
+				{{- if and $f.UserDefined (or $f.IsString $f.IsUUID) }}
+					{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver "StructField" $f.Name }}
+						{{ template "dialect/sql/decode/field" . }}
+					{{- end }}
+				{{- else }}
+					if value, ok := values[{{ $idx }}].(*sql.NullInt64); !ok {
+						return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
+					} else if value.Valid {
+						{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
+						*{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
+					}
+				{{- end }}
+		{{- end }}
+		}
+	}
+	return nil
 }
 {{ end }}
 

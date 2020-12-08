@@ -28,42 +28,55 @@ type Comment struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Comment) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},   // id
-		&sql.NullInt64{},   // unique_int
-		&sql.NullFloat64{}, // unique_float
-		&sql.NullInt64{},   // nillable_int
+func (*Comment) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case comment.FieldUniqueFloat:
+			values[i] = &sql.NullFloat64{}
+		case comment.FieldID, comment.FieldUniqueInt, comment.FieldNillableInt:
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Comment fields.
-func (c *Comment) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(comment.Columns); m < n {
+func (c *Comment) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	c.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field unique_int", values[0])
-	} else if value.Valid {
-		c.UniqueInt = int(value.Int64)
-	}
-	if value, ok := values[1].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field unique_float", values[1])
-	} else if value.Valid {
-		c.UniqueFloat = value.Float64
-	}
-	if value, ok := values[2].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field nillable_int", values[2])
-	} else if value.Valid {
-		c.NillableInt = new(int)
-		*c.NillableInt = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case comment.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			c.ID = int(value.Int64)
+		case comment.FieldUniqueInt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field unique_int", values[i])
+			} else if value.Valid {
+				c.UniqueInt = int(value.Int64)
+			}
+		case comment.FieldUniqueFloat:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field unique_float", values[i])
+			} else if value.Valid {
+				c.UniqueFloat = value.Float64
+			}
+		case comment.FieldNillableInt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field nillable_int", values[i])
+			} else if value.Valid {
+				c.NillableInt = new(int)
+				*c.NillableInt = int(value.Int64)
+			}
+		}
 	}
 	return nil
 }

@@ -90,83 +90,95 @@ func (e FileEdges) FieldOrErr() ([]*FieldType, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*File) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullInt64{},  // size
-		&sql.NullString{}, // name
-		&sql.NullString{}, // user
-		&sql.NullString{}, // group
-		&sql.NullBool{},   // op
+func (*File) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case file.FieldOp:
+			values[i] = &sql.NullBool{}
+		case file.FieldID, file.FieldSize:
+			values[i] = &sql.NullInt64{}
+		case file.FieldName, file.FieldUser, file.FieldGroup:
+			values[i] = &sql.NullString{}
+		case file.ForeignKeys[0]: // file_type_files
+			values[i] = &sql.NullInt64{}
+		case file.ForeignKeys[1]: // group_files
+			values[i] = &sql.NullInt64{}
+		case file.ForeignKeys[2]: // user_files
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*File) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // file_type_files
-		&sql.NullInt64{}, // group_files
-		&sql.NullInt64{}, // user_files
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the File fields.
-func (f *File) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(file.Columns); m < n {
+func (f *File) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	f.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field size", values[0])
-	} else if value.Valid {
-		f.Size = int(value.Int64)
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[1])
-	} else if value.Valid {
-		f.Name = value.String
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field user", values[2])
-	} else if value.Valid {
-		f.User = new(string)
-		*f.User = value.String
-	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field group", values[3])
-	} else if value.Valid {
-		f.Group = value.String
-	}
-	if value, ok := values[4].(*sql.NullBool); !ok {
-		return fmt.Errorf("unexpected type %T for field op", values[4])
-	} else if value.Valid {
-		f.Op = value.Bool
-	}
-	values = values[5:]
-	if len(values) == len(file.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field file_type_files", value)
-		} else if value.Valid {
-			f.file_type_files = new(int)
-			*f.file_type_files = int(value.Int64)
-		}
-		if value, ok := values[1].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field group_files", value)
-		} else if value.Valid {
-			f.group_files = new(int)
-			*f.group_files = int(value.Int64)
-		}
-		if value, ok := values[2].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_files", value)
-		} else if value.Valid {
-			f.user_files = new(int)
-			*f.user_files = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case file.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			f.ID = int(value.Int64)
+		case file.FieldSize:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field size", values[i])
+			} else if value.Valid {
+				f.Size = int(value.Int64)
+			}
+		case file.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				f.Name = value.String
+			}
+		case file.FieldUser:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field user", values[i])
+			} else if value.Valid {
+				f.User = new(string)
+				*f.User = value.String
+			}
+		case file.FieldGroup:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field group", values[i])
+			} else if value.Valid {
+				f.Group = value.String
+			}
+		case file.FieldOp:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field op", values[i])
+			} else if value.Valid {
+				f.Op = value.Bool
+			}
+		case file.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field file_type_files", value)
+			} else if value.Valid {
+				f.file_type_files = new(int)
+				*f.file_type_files = int(value.Int64)
+			}
+		case file.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field group_files", value)
+			} else if value.Valid {
+				f.group_files = new(int)
+				*f.group_files = int(value.Int64)
+			}
+		case file.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_files", value)
+			} else if value.Valid {
+				f.user_files = new(int)
+				*f.user_files = int(value.Int64)
+			}
 		}
 	}
 	return nil

@@ -54,51 +54,57 @@ func (e PetEdges) OwnerOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Pet) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
-		&sql.NullInt64{}, // age
-		&sql.NullTime{},  // licensed_at
+func (*Pet) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case pet.FieldID, pet.FieldAge:
+			values[i] = &sql.NullInt64{}
+		case pet.FieldLicensedAt:
+			values[i] = &sql.NullTime{}
+		case pet.ForeignKeys[0]: // user_pets
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Pet", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Pet) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // user_pets
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Pet fields.
-func (pe *Pet) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(pet.Columns); m < n {
+func (pe *Pet) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	pe.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field age", values[0])
-	} else if value.Valid {
-		pe.Age = int(value.Int64)
-	}
-	if value, ok := values[1].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field licensed_at", values[1])
-	} else if value.Valid {
-		pe.LicensedAt = new(time.Time)
-		*pe.LicensedAt = value.Time
-	}
-	values = values[2:]
-	if len(values) == len(pet.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
-		} else if value.Valid {
-			pe.user_pets = new(int)
-			*pe.user_pets = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case pet.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			pe.ID = int(value.Int64)
+		case pet.FieldAge:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field age", values[i])
+			} else if value.Valid {
+				pe.Age = int(value.Int64)
+			}
+		case pet.FieldLicensedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field licensed_at", values[i])
+			} else if value.Valid {
+				pe.LicensedAt = new(time.Time)
+				*pe.LicensedAt = value.Time
+			}
+		case pet.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
+			} else if value.Valid {
+				pe.user_pets = new(int)
+				*pe.user_pets = int(value.Int64)
+			}
 		}
 	}
 	return nil

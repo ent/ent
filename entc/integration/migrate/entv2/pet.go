@@ -50,37 +50,42 @@ func (e PetEdges) OwnerOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Pet) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
+func (*Pet) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case pet.FieldID:
+			values[i] = &sql.NullInt64{}
+		case pet.ForeignKeys[0]: // owner_id
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Pet", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Pet) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // owner_id
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Pet fields.
-func (pe *Pet) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(pet.Columns); m < n {
+func (pe *Pet) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	pe.ID = int(value.Int64)
-	values = values[1:]
-	if len(values) == len(pet.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
-		} else if value.Valid {
-			pe.owner_id = new(int)
-			*pe.owner_id = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case pet.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			pe.ID = int(value.Int64)
+		case pet.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
+			} else if value.Valid {
+				pe.owner_id = new(int)
+				*pe.owner_id = int(value.Int64)
+			}
 		}
 	}
 	return nil

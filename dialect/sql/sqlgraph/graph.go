@@ -390,8 +390,8 @@ type (
 		Fields    FieldMut
 		Predicate func(*sql.Selector)
 
-		ScanValues []interface{}
-		Assign     func(...interface{}) error
+		ScanValues func(columns []string) ([]interface{}, error)
+		Assign     func(columns []string, values []interface{}) error
 	}
 )
 
@@ -480,8 +480,8 @@ type QuerySpec struct {
 	Order     func(*sql.Selector)
 	Predicate func(*sql.Selector)
 
-	ScanValues func() []interface{}
-	Assign     func(...interface{}) error
+	ScanValues func(columns []string) ([]interface{}, error)
+	Assign     func(columns []string, values []interface{}) error
 }
 
 // QueryNodes queries the nodes in the graph query and scans them to the given values.
@@ -556,12 +556,19 @@ func (q *query) nodes(ctx context.Context, drv dialect.Driver) error {
 		return err
 	}
 	defer rows.Close()
+	columns, err := rows.Columns()
+	if err != nil {
+		return err
+	}
 	for rows.Next() {
-		values := q.ScanValues()
+		values, err := q.ScanValues(columns)
+		if err != nil {
+			return err
+		}
 		if err := rows.Scan(values...); err != nil {
 			return err
 		}
-		if err := q.Assign(values...); err != nil {
+		if err := q.Assign(columns, values); err != nil {
 			return err
 		}
 	}
@@ -786,16 +793,27 @@ func (u *updater) setTableColumns(update *sql.UpdateBuilder, addEdges, clearEdge
 
 func (u *updater) scan(rows *sql.Rows) error {
 	defer rows.Close()
+	columns, err := rows.Columns()
+	if err != nil {
+		return err
+	}
 	if !rows.Next() {
 		if err := rows.Err(); err != nil {
 			return err
 		}
 		return &NotFoundError{table: u.Node.Table, id: u.Node.ID.Value}
 	}
-	if err := rows.Scan(u.ScanValues...); err != nil {
+	values, err := u.ScanValues(columns)
+	if err != nil {
+		return err
+	}
+	if err := rows.Scan(values...); err != nil {
 		return fmt.Errorf("failed scanning rows: %v", err)
 	}
-	return u.Assign(u.ScanValues...)
+	if err := u.Assign(columns, values); err != nil {
+		return err
+	}
+	return nil
 }
 
 type creator struct {

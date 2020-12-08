@@ -73,62 +73,70 @@ func (e CardEdges) SpecOrErr() ([]*Spec, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Card) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullTime{},   // create_time
-		&sql.NullTime{},   // update_time
-		&sql.NullString{}, // number
-		&sql.NullString{}, // name
+func (*Card) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case card.FieldID:
+			values[i] = &sql.NullInt64{}
+		case card.FieldNumber, card.FieldName:
+			values[i] = &sql.NullString{}
+		case card.FieldCreateTime, card.FieldUpdateTime:
+			values[i] = &sql.NullTime{}
+		case card.ForeignKeys[0]: // user_card
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Card", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Card) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // user_card
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
-func (c *Card) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(card.Columns); m < n {
+func (c *Card) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	c.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field create_time", values[0])
-	} else if value.Valid {
-		c.CreateTime = value.Time
-	}
-	if value, ok := values[1].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field update_time", values[1])
-	} else if value.Valid {
-		c.UpdateTime = value.Time
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field number", values[2])
-	} else if value.Valid {
-		c.Number = value.String
-	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[3])
-	} else if value.Valid {
-		c.Name = value.String
-	}
-	values = values[4:]
-	if len(values) == len(card.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_card", value)
-		} else if value.Valid {
-			c.user_card = new(int)
-			*c.user_card = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case card.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			c.ID = int(value.Int64)
+		case card.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				c.CreateTime = value.Time
+			}
+		case card.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				c.UpdateTime = value.Time
+			}
+		case card.FieldNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field number", values[i])
+			} else if value.Valid {
+				c.Number = value.String
+			}
+		case card.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				c.Name = value.String
+			}
+		case card.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_card", value)
+			} else if value.Valid {
+				c.user_card = new(int)
+				*c.user_card = int(value.Int64)
+			}
 		}
 	}
 	return nil

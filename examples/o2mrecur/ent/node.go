@@ -62,44 +62,48 @@ func (e NodeEdges) ChildrenOrErr() ([]*Node, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Node) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
-		&sql.NullInt64{}, // value
+func (*Node) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case node.FieldID, node.FieldValue:
+			values[i] = &sql.NullInt64{}
+		case node.ForeignKeys[0]: // node_children
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Node", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Node) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // node_children
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Node fields.
-func (n *Node) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(node.Columns); m < n {
+func (n *Node) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	n.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field value", values[0])
-	} else if value.Valid {
-		n.Value = int(value.Int64)
-	}
-	values = values[1:]
-	if len(values) == len(node.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field node_children", value)
-		} else if value.Valid {
-			n.node_children = new(int)
-			*n.node_children = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case node.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			n.ID = int(value.Int64)
+		case node.FieldValue:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field value", values[i])
+			} else if value.Valid {
+				n.Value = int(value.Int64)
+			}
+		case node.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field node_children", value)
+			} else if value.Valid {
+				n.node_children = new(int)
+				*n.node_children = int(value.Int64)
+			}
 		}
 	}
 	return nil
