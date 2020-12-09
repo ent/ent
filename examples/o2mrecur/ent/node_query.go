@@ -26,7 +26,6 @@ type NodeQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Node
 	// eager-loading edges.
 	withParent   *NodeQuery
@@ -279,7 +278,6 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		limit:        nq.limit,
 		offset:       nq.offset,
 		order:        append([]OrderFunc{}, nq.order...),
-		unique:       append([]string{}, nq.unique...),
 		predicates:   append([]predicate.Node{}, nq.predicates...),
 		withParent:   nq.withParent.Clone(),
 		withChildren: nq.withChildren.Clone(),

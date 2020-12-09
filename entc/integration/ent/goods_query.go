@@ -25,7 +25,6 @@ type GoodsQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Goods
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -230,7 +229,6 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 		limit:      gq.limit,
 		offset:     gq.offset,
 		order:      append([]OrderFunc{}, gq.order...),
-		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Goods{}, gq.predicates...),
 		// clone intermediate query.
 		sql:  gq.sql.Clone(),

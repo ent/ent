@@ -26,7 +26,6 @@ type StreetQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Street
 	// eager-loading edges.
 	withCity *CityQuery
@@ -256,7 +255,6 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 		limit:      sq.limit,
 		offset:     sq.offset,
 		order:      append([]OrderFunc{}, sq.order...),
-		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Street{}, sq.predicates...),
 		withCity:   sq.withCity.Clone(),
 		// clone intermediate query.

@@ -27,7 +27,6 @@ type GroupQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Group
 	// eager-loading edges.
 	withFiles   *FileQuery
@@ -293,7 +292,6 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		limit:       gq.limit,
 		offset:      gq.offset,
 		order:       append([]OrderFunc{}, gq.order...),
-		unique:      append([]string{}, gq.unique...),
 		predicates:  append([]predicate.Group{}, gq.predicates...),
 		withFiles:   gq.withFiles.Clone(),
 		withBlocked: gq.withBlocked.Clone(),
@@ -465,9 +463,7 @@ func (gq *GroupQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := gq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 

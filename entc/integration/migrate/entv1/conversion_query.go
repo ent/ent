@@ -25,7 +25,6 @@ type ConversionQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Conversion
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -230,7 +229,6 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 		limit:      cq.limit,
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Conversion{}, cq.predicates...),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),

@@ -26,7 +26,6 @@ type CommentQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Comment
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -231,7 +230,6 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		limit:      cq.limit,
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Comment{}, cq.predicates...),
 		// clone intermediate query.
 		gremlin: cq.gremlin.Clone(),
@@ -355,9 +353,7 @@ func (cq *CommentQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := cq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 

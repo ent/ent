@@ -25,7 +25,6 @@ type FieldTypeQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.FieldType
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
@@ -231,7 +230,6 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		limit:      ftq.limit,
 		offset:     ftq.offset,
 		order:      append([]OrderFunc{}, ftq.order...),
-		unique:     append([]string{}, ftq.unique...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
 		sql:  ftq.sql.Clone(),

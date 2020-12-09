@@ -28,7 +28,6 @@ type GroupQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Group
 	// eager-loading edges.
 	withTenant *TenantQuery
@@ -281,7 +280,6 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		limit:      gq.limit,
 		offset:     gq.offset,
 		order:      append([]OrderFunc{}, gq.order...),
-		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		withTenant: gq.withTenant.Clone(),
 		withUsers:  gq.withUsers.Clone(),
