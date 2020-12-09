@@ -26,7 +26,6 @@ type GoodsQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Goods
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -231,7 +230,6 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 		limit:      gq.limit,
 		offset:     gq.offset,
 		order:      append([]OrderFunc{}, gq.order...),
-		unique:     append([]string{}, gq.unique...),
 		predicates: append([]predicate.Goods{}, gq.predicates...),
 		// clone intermediate query.
 		gremlin: gq.gremlin.Clone(),
@@ -331,9 +329,7 @@ func (gq *GoodsQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := gq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 

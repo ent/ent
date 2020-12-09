@@ -26,7 +26,6 @@ type SpecQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Spec
 	// eager-loading edges.
 	withCard *CardQuery
@@ -247,7 +246,6 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 		limit:      sq.limit,
 		offset:     sq.offset,
 		order:      append([]OrderFunc{}, sq.order...),
-		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Spec{}, sq.predicates...),
 		withCard:   sq.withCard.Clone(),
 		// clone intermediate query.
@@ -359,9 +357,7 @@ func (sq *SpecQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := sq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 

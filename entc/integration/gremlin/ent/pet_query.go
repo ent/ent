@@ -27,7 +27,6 @@ type PetQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Pet
 	// eager-loading edges.
 	withTeam  *UserQuery
@@ -263,7 +262,6 @@ func (pq *PetQuery) Clone() *PetQuery {
 		limit:      pq.limit,
 		offset:     pq.offset,
 		order:      append([]OrderFunc{}, pq.order...),
-		unique:     append([]string{}, pq.unique...),
 		predicates: append([]predicate.Pet{}, pq.predicates...),
 		withTeam:   pq.withTeam.Clone(),
 		withOwner:  pq.withOwner.Clone(),
@@ -411,9 +409,7 @@ func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := pq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 

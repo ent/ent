@@ -27,7 +27,6 @@ type UserQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.User
 	// eager-loading edges.
 	withCards      *CardQuery
@@ -303,7 +302,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		limit:          uq.limit,
 		offset:         uq.offset,
 		order:          append([]OrderFunc{}, uq.order...),
-		unique:         append([]string{}, uq.unique...),
 		predicates:     append([]predicate.User{}, uq.predicates...),
 		withCards:      uq.withCards.Clone(),
 		withFriends:    uq.withFriends.Clone(),

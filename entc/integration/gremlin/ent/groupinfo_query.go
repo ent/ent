@@ -27,7 +27,6 @@ type GroupInfoQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.GroupInfo
 	// eager-loading edges.
 	withGroups *GroupQuery
@@ -248,7 +247,6 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		limit:      giq.limit,
 		offset:     giq.offset,
 		order:      append([]OrderFunc{}, giq.order...),
-		unique:     append([]string{}, giq.unique...),
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
 		withGroups: giq.withGroups.Clone(),
 		// clone intermediate query.
@@ -384,9 +382,7 @@ func (giq *GroupInfoQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := giq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 
