@@ -763,7 +763,9 @@ func (f Field) EnumName(enum string) string {
 }
 
 // Validator returns the validator name.
-func (f Field) Validator() string { return pascal(f.Name) + "Validator" }
+func (f Field) Validator() string {
+	return pascal(f.Name) + "Validator"
+}
 
 // EntSQL returns the EntSQL annotation if exists.
 func (f Field) EntSQL() *entsql.Annotation {
@@ -1334,6 +1336,7 @@ var (
 		"predicates",
 		"typ",
 		"unique",
+		"withFKs",
 	)
 )
 
