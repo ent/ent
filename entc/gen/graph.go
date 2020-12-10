@@ -231,6 +231,8 @@ func (g *Graph) addEdges(schema *load.Schema) {
 	for _, e := range schema.Edges {
 		typ, ok := g.typ(e.Type)
 		expect(ok, "type %q does not exist for edge", e.Type)
+		_, ok = t.fields[e.Name]
+		expect(!ok, "%s schema can't contain field and edge with the same name %q", schema.Name, e.Name)
 		_, ok = seen[e.Name]
 		expect(!ok, "%s schema contains multiple %q edges", schema.Name, e.Name)
 		seen[e.Name] = struct{}{}
