@@ -18,6 +18,11 @@ title: Predicates
   - IN, NOT IN
   - Contains, HasPrefix, HasSuffix
   - ContainsFold, EqualFold (**SQL** specific)
+- **JSON**
+  - =, !=
+  - =, !=, >, <, >=, <= on nested values (JSON path).
+  - Contains on nested values (JSON path).
+  - HasKey, Len<P>
 - **Optional** fields:
   - IsNil, NotNil
 
