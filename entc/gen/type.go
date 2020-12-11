@@ -1148,6 +1148,16 @@ func (e Edge) OwnFK() bool {
 	return false
 }
 
+// MutationSet returns the method name for setting the edge id.
+func (e Edge) MutationSet() string {
+	return "Set" + pascal(e.Name) + "ID"
+}
+
+// MutationAdd returns the method name for adding edge ids.
+func (e Edge) MutationAdd() string {
+	return "Add" + pascal(rules.Singularize(e.Name)) + "IDs"
+}
+
 // MutationReset returns the method name for resetting the edge value.
 // The default name is "Reset<EdgeName>". If the the method conflicts
 // with the mutation methods, suffix the method with "Edge".
