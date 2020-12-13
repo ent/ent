@@ -47,6 +47,18 @@ func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	return uu
 }
 
+// SetFoods sets the foods field.
+func (uu *UserUpdate) SetFoods(s []string) *UserUpdate {
+	uu.mutation.SetFoods(s)
+	return uu
+}
+
+// ClearFoods clears the value of foods.
+func (uu *UserUpdate) ClearFoods() *UserUpdate {
+	uu.mutation.ClearFoods()
+	return uu
+}
+
 // SetTenantID sets the tenant edge to Tenant by id.
 func (uu *UserUpdate) SetTenantID(id int) *UserUpdate {
 	uu.mutation.SetTenantID(id)
@@ -195,6 +207,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldName,
 		})
 	}
+	if value, ok := uu.mutation.Foods(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldFoods,
+		})
+	}
+	if uu.mutation.FoodsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldFoods,
+		})
+	}
 	if uu.mutation.TenantCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -313,6 +338,18 @@ func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetName(*s)
 	}
+	return uuo
+}
+
+// SetFoods sets the foods field.
+func (uuo *UserUpdateOne) SetFoods(s []string) *UserUpdateOne {
+	uuo.mutation.SetFoods(s)
+	return uuo
+}
+
+// ClearFoods clears the value of foods.
+func (uuo *UserUpdateOne) ClearFoods() *UserUpdateOne {
+	uuo.mutation.ClearFoods()
 	return uuo
 }
 
@@ -460,6 +497,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: user.FieldName,
+		})
+	}
+	if value, ok := uuo.mutation.Foods(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldFoods,
+		})
+	}
+	if uuo.mutation.FoodsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: user.FieldFoods,
 		})
 	}
 	if uuo.mutation.TenantCleared() {

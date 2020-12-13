@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -22,6 +23,8 @@ type User struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Foods holds the value of the "foods" field.
+	Foods []string `json:"foods,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges       UserEdges `json:"edges"`
@@ -147,6 +150,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
+	builder.WriteString(", foods=")
+	builder.WriteString(fmt.Sprintf("%v", u.Foods))
 	builder.WriteByte(')')
 	return builder.String()
 }

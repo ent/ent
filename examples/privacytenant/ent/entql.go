@@ -60,7 +60,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "User",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			user.FieldName: {Type: field.TypeString, Column: user.FieldName},
+			user.FieldName:  {Type: field.TypeString, Column: user.FieldName},
+			user.FieldFoods: {Type: field.TypeJSON, Column: user.FieldFoods},
 		},
 	}
 	graph.MustAddE(
@@ -278,6 +279,11 @@ func (f *UserFilter) WhereID(p entql.IntP) {
 // WhereName applies the entql string predicate on the name field.
 func (f *UserFilter) WhereName(p entql.StringP) {
 	f.Where(p.Field(user.FieldName))
+}
+
+// WhereFoods applies the entql json.RawMessage predicate on the foods field.
+func (f *UserFilter) WhereFoods(p entql.JsonP) {
+	f.Where(p.Field(user.FieldFoods))
 }
 
 // WhereHasTenant applies a predicate to check if query has an edge tenant.
