@@ -436,6 +436,10 @@ func TestTypeConstName(t *testing.T) {
 	assert.Equal(t, "TypeJSON", typ.ConstName())
 	typ = field.TypeInt
 	assert.Equal(t, "TypeInt", typ.ConstName())
+	typ = field.TypeInt64
+	assert.Equal(t, "TypeInt64", typ.ConstName())
+	typ = field.TypeOther
+	assert.Equal(t, "TypeOther", typ.ConstName())
 	typ = 21
 	assert.Equal(t, "invalid", typ.ConstName())
 }
