@@ -58,7 +58,7 @@ func (Annotation) Name() string {
 }
 
 // Merge implements the schema.Merger interface.
-func (a *Annotation) Merge(other schema.Annotation) {
+func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	var ant Annotation
 	switch other := other.(type) {
 	case Annotation:
@@ -68,7 +68,7 @@ func (a *Annotation) Merge(other schema.Annotation) {
 			ant = *other
 		}
 	default:
-		return
+		return a
 	}
 	if t := ant.Table; t != "" {
 		a.Table = t
@@ -85,6 +85,7 @@ func (a *Annotation) Merge(other schema.Annotation) {
 	if s := ant.Size; s != 0 {
 		a.Size = s
 	}
+	return a
 }
 
 var (
