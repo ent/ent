@@ -895,8 +895,7 @@ func (f Field) NullTypeField(rec string) string {
 	return expr
 }
 
-// Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field, unless stated
-// otherwise.
+// Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
 func (f Field) Column() *schema.Column {
 	c := &schema.Column{
 		Name:     f.StorageKey(),
