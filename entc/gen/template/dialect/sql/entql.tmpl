@@ -117,9 +117,8 @@ type predicateAdder interface {
 
 	{{ range $f := $n.Fields }}
 		{{ $type := $f.Type.Type.String }}
-		{{ $iface := $type.EntQLInterfaceName }}
 		// Where{{ $f.StructField }} applies the entql {{ $type }} predicate on the {{ $f.Name }} field.
-		func (f *{{ $filter }}) Where{{ $f.StructField }}(p entql.{{ $iface }}) {
+		func (f *{{ $filter }}) Where{{ $f.StructField }}(p {{ $f.EntQLInterfaceName }}) {
 			f.Where(p.Field({{ $n.Package }}.{{ $f.Constant }}))
 		}
 	{{ end }}
