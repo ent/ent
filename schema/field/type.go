@@ -168,6 +168,7 @@ var (
 		TypeTime:  "TypeTime",
 		TypeEnum:  "TypeEnum",
 		TypeBytes: "TypeBytes",
+		TypeOther: "TypeOther",
 	}
 )
 
