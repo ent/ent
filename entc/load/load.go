@@ -95,7 +95,9 @@ var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
 
 // load loads the schemas info.
 func (c *Config) load() (string, error) {
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadSyntax}, c.Path, entInterface.PkgPath())
+	pkgs, err := packages.Load(&packages.Config{
+		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo,
+	}, c.Path, entInterface.PkgPath())
 	if err != nil {
 		return "", fmt.Errorf("loading package: %w", err)
 	}
