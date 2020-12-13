@@ -51,6 +51,7 @@ func main() {
 			field.TypeFloat64,
 			field.TypeString,
 			field.TypeUUID,
+			field.TypeJSON,
 		},
 	}); err != nil {
 		log.Fatal("executing template:", err)
@@ -78,6 +79,8 @@ func ident(t field.Type) string {
 		return "bytes"
 	case field.TypeTime:
 		return "time"
+	case field.TypeJSON:
+		return "json"
 	case field.TypeUUID:
 		return "value"
 	default:
@@ -88,6 +91,8 @@ func ident(t field.Type) string {
 func typ(t field.Type) string {
 	if t == field.TypeUUID {
 		return "driver.Valuer"
+	} else if t == field.TypeJSON {
+		return "json.RawMessage"
 	}
 	return t.String()
 }
