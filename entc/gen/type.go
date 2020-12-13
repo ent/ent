@@ -1289,17 +1289,8 @@ func entsqlAnnotate(annotation map[string]interface{}) *entsql.Annotation {
 	if annotation == nil || annotation[annotate.Name()] == nil {
 		return nil
 	}
-	switch raw := annotation[annotate.Name()].(type) {
-	case []interface{}:
-		for i := range raw {
-			if buf, err := json.Marshal(raw[i]); err == nil {
-				_ = json.Unmarshal(buf, &annotate)
-			}
-		}
-	default:
-		if buf, err := json.Marshal(annotation[annotate.Name()]); err == nil {
-			_ = json.Unmarshal(buf, &annotate)
-		}
+	if buf, err := json.Marshal(annotation[annotate.Name()]); err == nil {
+		_ = json.Unmarshal(buf, &annotate)
 	}
 	return annotate
 }

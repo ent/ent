@@ -20,5 +20,5 @@ type Annotation interface {
 // A common use case is where the same Annotation type is defined both in
 // mixin.Schema and ent.Schema.
 type Merger interface {
-	Merge(Annotation)
+	Merge(Annotation) Annotation
 }
