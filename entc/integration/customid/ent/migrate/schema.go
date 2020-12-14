@@ -83,7 +83,7 @@ var (
 			{
 				Name:    "mixinid_id",
 				Unique:  false,
-				Columns: []*schema.Column{},
+				Columns: []*schema.Column{MixinIdsColumns[0]},
 			},
 		},
 	}
