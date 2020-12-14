@@ -135,6 +135,7 @@ var (
 		EagerLoading,
 		Mutation,
 		CreateBulk,
+		Issue1,
 	}
 )
 
