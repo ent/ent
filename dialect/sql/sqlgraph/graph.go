@@ -705,8 +705,10 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 			return int(affected), nil
 		}
 	}
-	if err := u.setExternalEdges(ctx, ids, addEdges, clearEdges); err != nil {
-		return 0, err
+	if len(ids) > 0 {
+		if err := u.setExternalEdges(ctx, ids, addEdges, clearEdges); err != nil {
+			return 0, err
+		}
 	}
 	return len(ids), nil
 }
