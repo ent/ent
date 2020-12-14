@@ -1,3 +1,7 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 package schema
 
 import (
@@ -21,30 +25,30 @@ func (BaseMixin) Fields() []ent.Field {
 	}
 }
 
-// MixinId holds the schema definition for the MixinId entity.
-type MixinId struct {
+// MixinID holds the schema definition for the MixinID entity.
+type MixinID struct {
 	ent.Schema
 }
 
-// Fields of the MixinId.
-func (MixinId) Fields() []ent.Field {
+// Fields of the MixinID.
+func (MixinID) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("testField"),
 	}
 }
 
-// Edges of the MixinId.
-func (MixinId) Edges() []ent.Edge {
+// Edges of the MixinID.
+func (MixinID) Edges() []ent.Edge {
 	return nil
 }
 
-func (MixinId) Indexes() []ent.Index {
+func (MixinID) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id"),
 	}
 }
 
-func (MixinId) Mixin() []ent.Mixin {
+func (MixinID) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		BaseMixin{},
 	}

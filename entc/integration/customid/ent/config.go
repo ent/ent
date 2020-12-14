@@ -31,7 +31,7 @@ type hooks struct {
 	Blob    []ent.Hook
 	Car     []ent.Hook
 	Group   []ent.Hook
-	MixinId []ent.Hook
+	MixinID []ent.Hook
 	Pet     []ent.Hook
 	User    []ent.Hook
 }

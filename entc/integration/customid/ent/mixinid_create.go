@@ -17,41 +17,41 @@ import (
 	"github.com/google/uuid"
 )
 
-// MixinIdCreate is the builder for creating a MixinId entity.
-type MixinIdCreate struct {
+// MixinIDCreate is the builder for creating a MixinID entity.
+type MixinIDCreate struct {
 	config
-	mutation *MixinIdMutation
+	mutation *MixinIDMutation
 	hooks    []Hook
 }
 
 // SetSomeOtherField sets the someOtherField field.
-func (mic *MixinIdCreate) SetSomeOtherField(s string) *MixinIdCreate {
+func (mic *MixinIDCreate) SetSomeOtherField(s string) *MixinIDCreate {
 	mic.mutation.SetSomeOtherField(s)
 	return mic
 }
 
 // SetTestField sets the testField field.
-func (mic *MixinIdCreate) SetTestField(s string) *MixinIdCreate {
+func (mic *MixinIDCreate) SetTestField(s string) *MixinIDCreate {
 	mic.mutation.SetTestField(s)
 	return mic
 }
 
 // SetID sets the id field.
-func (mic *MixinIdCreate) SetID(u uuid.UUID) *MixinIdCreate {
+func (mic *MixinIDCreate) SetID(u uuid.UUID) *MixinIDCreate {
 	mic.mutation.SetID(u)
 	return mic
 }
 
-// Mutation returns the MixinIdMutation object of the builder.
-func (mic *MixinIdCreate) Mutation() *MixinIdMutation {
+// Mutation returns the MixinIDMutation object of the builder.
+func (mic *MixinIDCreate) Mutation() *MixinIDMutation {
 	return mic.mutation
 }
 
-// Save creates the MixinId in the database.
-func (mic *MixinIdCreate) Save(ctx context.Context) (*MixinId, error) {
+// Save creates the MixinID in the database.
+func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 	var (
 		err  error
-		node *MixinId
+		node *MixinID
 	)
 	mic.defaults()
 	if len(mic.hooks) == 0 {
@@ -61,7 +61,7 @@ func (mic *MixinIdCreate) Save(ctx context.Context) (*MixinId, error) {
 		node, err = mic.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*MixinIdMutation)
+			mutation, ok := m.(*MixinIDMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -84,7 +84,7 @@ func (mic *MixinIdCreate) Save(ctx context.Context) (*MixinId, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (mic *MixinIdCreate) SaveX(ctx context.Context) *MixinId {
+func (mic *MixinIDCreate) SaveX(ctx context.Context) *MixinID {
 	v, err := mic.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -93,7 +93,7 @@ func (mic *MixinIdCreate) SaveX(ctx context.Context) *MixinId {
 }
 
 // defaults sets the default values of the builder before save.
-func (mic *MixinIdCreate) defaults() {
+func (mic *MixinIDCreate) defaults() {
 	if _, ok := mic.mutation.ID(); !ok {
 		v := mixinid.DefaultID()
 		mic.mutation.SetID(v)
@@ -101,7 +101,7 @@ func (mic *MixinIdCreate) defaults() {
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (mic *MixinIdCreate) check() error {
+func (mic *MixinIDCreate) check() error {
 	if _, ok := mic.mutation.SomeOtherField(); !ok {
 		return &ValidationError{Name: "someOtherField", err: errors.New("ent: missing required field \"someOtherField\"")}
 	}
@@ -111,7 +111,7 @@ func (mic *MixinIdCreate) check() error {
 	return nil
 }
 
-func (mic *MixinIdCreate) sqlSave(ctx context.Context) (*MixinId, error) {
+func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 	_node, _spec := mic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mic.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -122,9 +122,9 @@ func (mic *MixinIdCreate) sqlSave(ctx context.Context) (*MixinId, error) {
 	return _node, nil
 }
 
-func (mic *MixinIdCreate) createSpec() (*MixinId, *sqlgraph.CreateSpec) {
+func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 	var (
-		_node = &MixinId{config: mic.config}
+		_node = &MixinID{config: mic.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: mixinid.Table,
 			ID: &sqlgraph.FieldSpec{
@@ -156,23 +156,23 @@ func (mic *MixinIdCreate) createSpec() (*MixinId, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// MixinIdCreateBulk is the builder for creating a bulk of MixinId entities.
-type MixinIdCreateBulk struct {
+// MixinIDCreateBulk is the builder for creating a bulk of MixinID entities.
+type MixinIDCreateBulk struct {
 	config
-	builders []*MixinIdCreate
+	builders []*MixinIDCreate
 }
 
-// Save creates the MixinId entities in the database.
-func (micb *MixinIdCreateBulk) Save(ctx context.Context) ([]*MixinId, error) {
+// Save creates the MixinID entities in the database.
+func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(micb.builders))
-	nodes := make([]*MixinId, len(micb.builders))
+	nodes := make([]*MixinID, len(micb.builders))
 	mutators := make([]Mutator, len(micb.builders))
 	for i := range micb.builders {
 		func(i int, root context.Context) {
 			builder := micb.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*MixinIdMutation)
+				mutation, ok := m.(*MixinIDMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -213,7 +213,7 @@ func (micb *MixinIdCreateBulk) Save(ctx context.Context) ([]*MixinId, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (micb *MixinIdCreateBulk) SaveX(ctx context.Context) []*MixinId {
+func (micb *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
 	v, err := micb.Save(ctx)
 	if err != nil {
 		panic(err)

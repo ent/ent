@@ -45,9 +45,9 @@ func init() {
 	carDescID := carMixinFields0[1].Descriptor()
 	// car.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	car.IDValidator = carDescID.Validators[0].(func(int) error)
-	mixinidMixin := schema.MixinId{}.Mixin()
+	mixinidMixin := schema.MixinID{}.Mixin()
 	mixinidMixinFields0 := mixinidMixin[0].Fields()
-	mixinidFields := schema.MixinId{}.Fields()
+	mixinidFields := schema.MixinID{}.Fields()
 	_ = mixinidFields
 	// mixinidDescID is the schema descriptor for id field.
 	mixinidDescID := mixinidMixinFields0[0].Descriptor()

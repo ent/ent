@@ -52,15 +52,15 @@ func (f GroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return f(ctx, mv)
 }
 
-// The MixinIdFunc type is an adapter to allow the use of ordinary
-// function as MixinId mutator.
-type MixinIdFunc func(context.Context, *ent.MixinIdMutation) (ent.Value, error)
+// The MixinIDFunc type is an adapter to allow the use of ordinary
+// function as MixinID mutator.
+type MixinIDFunc func(context.Context, *ent.MixinIDMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f MixinIdFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.MixinIdMutation)
+func (f MixinIDFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.MixinIDMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MixinIdMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MixinIDMutation", m)
 	}
 	return f(ctx, mv)
 }

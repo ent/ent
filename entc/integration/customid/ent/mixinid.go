@@ -15,8 +15,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// MixinId is the model entity for the MixinId schema.
-type MixinId struct {
+// MixinID is the model entity for the MixinID schema.
+type MixinID struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
@@ -27,7 +27,7 @@ type MixinId struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*MixinId) scanValues() []interface{} {
+func (*MixinID) scanValues() []interface{} {
 	return []interface{}{
 		&uuid.UUID{},      // id
 		&sql.NullString{}, // someOtherField
@@ -36,8 +36,8 @@ func (*MixinId) scanValues() []interface{} {
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the MixinId fields.
-func (mi *MixinId) assignValues(values ...interface{}) error {
+// to the MixinID fields.
+func (mi *MixinID) assignValues(values ...interface{}) error {
 	if m, n := len(values), len(mixinid.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -60,28 +60,28 @@ func (mi *MixinId) assignValues(values ...interface{}) error {
 	return nil
 }
 
-// Update returns a builder for updating this MixinId.
-// Note that, you need to call MixinId.Unwrap() before calling this method, if this MixinId
+// Update returns a builder for updating this MixinID.
+// Note that, you need to call MixinID.Unwrap() before calling this method, if this MixinID
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (mi *MixinId) Update() *MixinIdUpdateOne {
-	return (&MixinIdClient{config: mi.config}).UpdateOne(mi)
+func (mi *MixinID) Update() *MixinIDUpdateOne {
+	return (&MixinIDClient{config: mi.config}).UpdateOne(mi)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
 // so that all next queries will be executed through the driver which created the transaction.
-func (mi *MixinId) Unwrap() *MixinId {
+func (mi *MixinID) Unwrap() *MixinID {
 	tx, ok := mi.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: MixinId is not a transactional entity")
+		panic("ent: MixinID is not a transactional entity")
 	}
 	mi.config.driver = tx.drv
 	return mi
 }
 
 // String implements the fmt.Stringer.
-func (mi *MixinId) String() string {
+func (mi *MixinID) String() string {
 	var builder strings.Builder
-	builder.WriteString("MixinId(")
+	builder.WriteString("MixinID(")
 	builder.WriteString(fmt.Sprintf("id=%v", mi.ID))
 	builder.WriteString(", someOtherField=")
 	builder.WriteString(mi.SomeOtherField)
@@ -91,10 +91,10 @@ func (mi *MixinId) String() string {
 	return builder.String()
 }
 
-// MixinIds is a parsable slice of MixinId.
-type MixinIds []*MixinId
+// MixinIDs is a parsable slice of MixinID.
+type MixinIDs []*MixinID
 
-func (mi MixinIds) config(cfg config) {
+func (mi MixinIDs) config(cfg config) {
 	for _i := range mi {
 		mi[_i].config = cfg
 	}

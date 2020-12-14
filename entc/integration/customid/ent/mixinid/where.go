@@ -13,29 +13,29 @@ import (
 )
 
 // ID filters vertices based on their identifier.
-func ID(id uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func ID(id uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func IDEQ(id uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func IDNEQ(id uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func IDIn(ids ...uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(ids) == 0 {
@@ -51,8 +51,8 @@ func IDIn(ids ...uuid.UUID) predicate.MixinId {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func IDNotIn(ids ...uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(ids) == 0 {
@@ -68,68 +68,68 @@ func IDNotIn(ids ...uuid.UUID) predicate.MixinId {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func IDGT(id uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func IDGTE(id uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func IDLT(id uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uuid.UUID) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func IDLTE(id uuid.UUID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
 	})
 }
 
 // SomeOtherField applies equality check predicate on the "someOtherField" field. It's identical to SomeOtherFieldEQ.
-func SomeOtherField(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherField(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // TestField applies equality check predicate on the "testField" field. It's identical to TestFieldEQ.
-func TestField(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestField(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTestField), v))
 	})
 }
 
 // SomeOtherFieldEQ applies the EQ predicate on the "someOtherField" field.
-func SomeOtherFieldEQ(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldEQ(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldNEQ applies the NEQ predicate on the "someOtherField" field.
-func SomeOtherFieldNEQ(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldNEQ(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldIn applies the In predicate on the "someOtherField" field.
-func SomeOtherFieldIn(vs ...string) predicate.MixinId {
+func SomeOtherFieldIn(vs ...string) predicate.MixinID {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.MixinId(func(s *sql.Selector) {
+	return predicate.MixinID(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -141,12 +141,12 @@ func SomeOtherFieldIn(vs ...string) predicate.MixinId {
 }
 
 // SomeOtherFieldNotIn applies the NotIn predicate on the "someOtherField" field.
-func SomeOtherFieldNotIn(vs ...string) predicate.MixinId {
+func SomeOtherFieldNotIn(vs ...string) predicate.MixinID {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.MixinId(func(s *sql.Selector) {
+	return predicate.MixinID(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -158,89 +158,89 @@ func SomeOtherFieldNotIn(vs ...string) predicate.MixinId {
 }
 
 // SomeOtherFieldGT applies the GT predicate on the "someOtherField" field.
-func SomeOtherFieldGT(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldGT(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldGTE applies the GTE predicate on the "someOtherField" field.
-func SomeOtherFieldGTE(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldGTE(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldLT applies the LT predicate on the "someOtherField" field.
-func SomeOtherFieldLT(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldLT(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldLTE applies the LTE predicate on the "someOtherField" field.
-func SomeOtherFieldLTE(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldLTE(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldContains applies the Contains predicate on the "someOtherField" field.
-func SomeOtherFieldContains(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldContains(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.Contains(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldHasPrefix applies the HasPrefix predicate on the "someOtherField" field.
-func SomeOtherFieldHasPrefix(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldHasPrefix(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.HasPrefix(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldHasSuffix applies the HasSuffix predicate on the "someOtherField" field.
-func SomeOtherFieldHasSuffix(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldHasSuffix(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldEqualFold applies the EqualFold predicate on the "someOtherField" field.
-func SomeOtherFieldEqualFold(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldEqualFold(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EqualFold(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // SomeOtherFieldContainsFold applies the ContainsFold predicate on the "someOtherField" field.
-func SomeOtherFieldContainsFold(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func SomeOtherFieldContainsFold(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldSomeOtherField), v))
 	})
 }
 
 // TestFieldEQ applies the EQ predicate on the "testField" field.
-func TestFieldEQ(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldEQ(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldNEQ applies the NEQ predicate on the "testField" field.
-func TestFieldNEQ(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldNEQ(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldIn applies the In predicate on the "testField" field.
-func TestFieldIn(vs ...string) predicate.MixinId {
+func TestFieldIn(vs ...string) predicate.MixinID {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.MixinId(func(s *sql.Selector) {
+	return predicate.MixinID(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -252,12 +252,12 @@ func TestFieldIn(vs ...string) predicate.MixinId {
 }
 
 // TestFieldNotIn applies the NotIn predicate on the "testField" field.
-func TestFieldNotIn(vs ...string) predicate.MixinId {
+func TestFieldNotIn(vs ...string) predicate.MixinID {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
-	return predicate.MixinId(func(s *sql.Selector) {
+	return predicate.MixinID(func(s *sql.Selector) {
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -269,71 +269,71 @@ func TestFieldNotIn(vs ...string) predicate.MixinId {
 }
 
 // TestFieldGT applies the GT predicate on the "testField" field.
-func TestFieldGT(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldGT(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldGTE applies the GTE predicate on the "testField" field.
-func TestFieldGTE(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldGTE(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldLT applies the LT predicate on the "testField" field.
-func TestFieldLT(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldLT(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldLTE applies the LTE predicate on the "testField" field.
-func TestFieldLTE(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldLTE(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldContains applies the Contains predicate on the "testField" field.
-func TestFieldContains(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldContains(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.Contains(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldHasPrefix applies the HasPrefix predicate on the "testField" field.
-func TestFieldHasPrefix(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldHasPrefix(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.HasPrefix(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldHasSuffix applies the HasSuffix predicate on the "testField" field.
-func TestFieldHasSuffix(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldHasSuffix(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldEqualFold applies the EqualFold predicate on the "testField" field.
-func TestFieldEqualFold(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldEqualFold(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EqualFold(s.C(FieldTestField), v))
 	})
 }
 
 // TestFieldContainsFold applies the ContainsFold predicate on the "testField" field.
-func TestFieldContainsFold(v string) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func TestFieldContainsFold(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldTestField), v))
 	})
 }
 
 // And groups list of predicates with the AND operator between them.
-func And(predicates ...predicate.MixinId) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func And(predicates ...predicate.MixinID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
 		for _, p := range predicates {
 			p(s1)
@@ -343,8 +343,8 @@ func And(predicates ...predicate.MixinId) predicate.MixinId {
 }
 
 // Or groups list of predicates with the OR operator between them.
-func Or(predicates ...predicate.MixinId) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func Or(predicates ...predicate.MixinID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
 		for i, p := range predicates {
 			if i > 0 {
@@ -357,8 +357,8 @@ func Or(predicates ...predicate.MixinId) predicate.MixinId {
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.MixinId) predicate.MixinId {
-	return predicate.MixinId(func(s *sql.Selector) {
+func Not(p predicate.MixinID) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
 		p(s.Not())
 	})
 }

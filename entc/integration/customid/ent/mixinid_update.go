@@ -17,38 +17,38 @@ import (
 	"github.com/facebook/ent/schema/field"
 )
 
-// MixinIdUpdate is the builder for updating MixinId entities.
-type MixinIdUpdate struct {
+// MixinIDUpdate is the builder for updating MixinID entities.
+type MixinIDUpdate struct {
 	config
 	hooks    []Hook
-	mutation *MixinIdMutation
+	mutation *MixinIDMutation
 }
 
 // Where adds a new predicate for the builder.
-func (miu *MixinIdUpdate) Where(ps ...predicate.MixinId) *MixinIdUpdate {
+func (miu *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
 	miu.mutation.predicates = append(miu.mutation.predicates, ps...)
 	return miu
 }
 
 // SetSomeOtherField sets the someOtherField field.
-func (miu *MixinIdUpdate) SetSomeOtherField(s string) *MixinIdUpdate {
+func (miu *MixinIDUpdate) SetSomeOtherField(s string) *MixinIDUpdate {
 	miu.mutation.SetSomeOtherField(s)
 	return miu
 }
 
 // SetTestField sets the testField field.
-func (miu *MixinIdUpdate) SetTestField(s string) *MixinIdUpdate {
+func (miu *MixinIDUpdate) SetTestField(s string) *MixinIDUpdate {
 	miu.mutation.SetTestField(s)
 	return miu
 }
 
-// Mutation returns the MixinIdMutation object of the builder.
-func (miu *MixinIdUpdate) Mutation() *MixinIdMutation {
+// Mutation returns the MixinIDMutation object of the builder.
+func (miu *MixinIDUpdate) Mutation() *MixinIDMutation {
 	return miu.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (miu *MixinIdUpdate) Save(ctx context.Context) (int, error) {
+func (miu *MixinIDUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
 		affected int
@@ -57,7 +57,7 @@ func (miu *MixinIdUpdate) Save(ctx context.Context) (int, error) {
 		affected, err = miu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*MixinIdMutation)
+			mutation, ok := m.(*MixinIDMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -77,7 +77,7 @@ func (miu *MixinIdUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (miu *MixinIdUpdate) SaveX(ctx context.Context) int {
+func (miu *MixinIDUpdate) SaveX(ctx context.Context) int {
 	affected, err := miu.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -86,19 +86,19 @@ func (miu *MixinIdUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (miu *MixinIdUpdate) Exec(ctx context.Context) error {
+func (miu *MixinIDUpdate) Exec(ctx context.Context) error {
 	_, err := miu.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (miu *MixinIdUpdate) ExecX(ctx context.Context) {
+func (miu *MixinIDUpdate) ExecX(ctx context.Context) {
 	if err := miu.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (miu *MixinIdUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   mixinid.Table,
@@ -141,41 +141,41 @@ func (miu *MixinIdUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return n, nil
 }
 
-// MixinIdUpdateOne is the builder for updating a single MixinId entity.
-type MixinIdUpdateOne struct {
+// MixinIDUpdateOne is the builder for updating a single MixinID entity.
+type MixinIDUpdateOne struct {
 	config
 	hooks    []Hook
-	mutation *MixinIdMutation
+	mutation *MixinIDMutation
 }
 
 // SetSomeOtherField sets the someOtherField field.
-func (miuo *MixinIdUpdateOne) SetSomeOtherField(s string) *MixinIdUpdateOne {
+func (miuo *MixinIDUpdateOne) SetSomeOtherField(s string) *MixinIDUpdateOne {
 	miuo.mutation.SetSomeOtherField(s)
 	return miuo
 }
 
 // SetTestField sets the testField field.
-func (miuo *MixinIdUpdateOne) SetTestField(s string) *MixinIdUpdateOne {
+func (miuo *MixinIDUpdateOne) SetTestField(s string) *MixinIDUpdateOne {
 	miuo.mutation.SetTestField(s)
 	return miuo
 }
 
-// Mutation returns the MixinIdMutation object of the builder.
-func (miuo *MixinIdUpdateOne) Mutation() *MixinIdMutation {
+// Mutation returns the MixinIDMutation object of the builder.
+func (miuo *MixinIDUpdateOne) Mutation() *MixinIDMutation {
 	return miuo.mutation
 }
 
 // Save executes the query and returns the updated entity.
-func (miuo *MixinIdUpdateOne) Save(ctx context.Context) (*MixinId, error) {
+func (miuo *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
 	var (
 		err  error
-		node *MixinId
+		node *MixinID
 	)
 	if len(miuo.hooks) == 0 {
 		node, err = miuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*MixinIdMutation)
+			mutation, ok := m.(*MixinIDMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -195,7 +195,7 @@ func (miuo *MixinIdUpdateOne) Save(ctx context.Context) (*MixinId, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (miuo *MixinIdUpdateOne) SaveX(ctx context.Context) *MixinId {
+func (miuo *MixinIDUpdateOne) SaveX(ctx context.Context) *MixinID {
 	node, err := miuo.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -204,19 +204,19 @@ func (miuo *MixinIdUpdateOne) SaveX(ctx context.Context) *MixinId {
 }
 
 // Exec executes the query on the entity.
-func (miuo *MixinIdUpdateOne) Exec(ctx context.Context) error {
+func (miuo *MixinIDUpdateOne) Exec(ctx context.Context) error {
 	_, err := miuo.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (miuo *MixinIdUpdateOne) ExecX(ctx context.Context) {
+func (miuo *MixinIDUpdateOne) ExecX(ctx context.Context) {
 	if err := miuo.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (miuo *MixinIdUpdateOne) sqlSave(ctx context.Context) (_node *MixinId, err error) {
+func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   mixinid.Table,
@@ -229,7 +229,7 @@ func (miuo *MixinIdUpdateOne) sqlSave(ctx context.Context) (_node *MixinId, err 
 	}
 	id, ok := miuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing MixinId.ID for update")}
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing MixinID.ID for update")}
 	}
 	_spec.Node.ID.Value = id
 	if value, ok := miuo.mutation.SomeOtherField(); ok {
@@ -246,7 +246,7 @@ func (miuo *MixinIdUpdateOne) sqlSave(ctx context.Context) (_node *MixinId, err 
 			Column: mixinid.FieldTestField,
 		})
 	}
-	_node = &MixinId{config: miuo.config}
+	_node = &MixinID{config: miuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues()
 	if err = sqlgraph.UpdateNode(ctx, miuo.driver, _spec); err != nil {

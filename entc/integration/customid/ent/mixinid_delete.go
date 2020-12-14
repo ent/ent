@@ -17,21 +17,21 @@ import (
 	"github.com/facebook/ent/schema/field"
 )
 
-// MixinIdDelete is the builder for deleting a MixinId entity.
-type MixinIdDelete struct {
+// MixinIDDelete is the builder for deleting a MixinID entity.
+type MixinIDDelete struct {
 	config
 	hooks    []Hook
-	mutation *MixinIdMutation
+	mutation *MixinIDMutation
 }
 
 // Where adds a new predicate to the delete builder.
-func (mid *MixinIdDelete) Where(ps ...predicate.MixinId) *MixinIdDelete {
+func (mid *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
 	mid.mutation.predicates = append(mid.mutation.predicates, ps...)
 	return mid
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (mid *MixinIdDelete) Exec(ctx context.Context) (int, error) {
+func (mid *MixinIDDelete) Exec(ctx context.Context) (int, error) {
 	var (
 		err      error
 		affected int
@@ -40,7 +40,7 @@ func (mid *MixinIdDelete) Exec(ctx context.Context) (int, error) {
 		affected, err = mid.sqlExec(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*MixinIdMutation)
+			mutation, ok := m.(*MixinIDMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -60,7 +60,7 @@ func (mid *MixinIdDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mid *MixinIdDelete) ExecX(ctx context.Context) int {
+func (mid *MixinIDDelete) ExecX(ctx context.Context) int {
 	n, err := mid.Exec(ctx)
 	if err != nil {
 		panic(err)
@@ -68,7 +68,7 @@ func (mid *MixinIdDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (mid *MixinIdDelete) sqlExec(ctx context.Context) (int, error) {
+func (mid *MixinIDDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: mixinid.Table,
@@ -88,13 +88,13 @@ func (mid *MixinIdDelete) sqlExec(ctx context.Context) (int, error) {
 	return sqlgraph.DeleteNodes(ctx, mid.driver, _spec)
 }
 
-// MixinIdDeleteOne is the builder for deleting a single MixinId entity.
-type MixinIdDeleteOne struct {
-	mid *MixinIdDelete
+// MixinIDDeleteOne is the builder for deleting a single MixinID entity.
+type MixinIDDeleteOne struct {
+	mid *MixinIDDelete
 }
 
 // Exec executes the deletion query.
-func (mido *MixinIdDeleteOne) Exec(ctx context.Context) error {
+func (mido *MixinIDDeleteOne) Exec(ctx context.Context) error {
 	n, err := mido.mid.Exec(ctx)
 	switch {
 	case err != nil:
@@ -107,6 +107,6 @@ func (mido *MixinIdDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mido *MixinIdDeleteOne) ExecX(ctx context.Context) {
+func (mido *MixinIDDeleteOne) ExecX(ctx context.Context) {
 	mido.mid.ExecX(ctx)
 }
