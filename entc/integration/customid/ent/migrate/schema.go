@@ -67,6 +67,26 @@ var (
 		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// MixinIdsColumns holds the columns for the "mixin_ids" table.
+	MixinIdsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "some_other_field", Type: field.TypeString},
+		{Name: "test_field", Type: field.TypeString},
+	}
+	// MixinIdsTable holds the schema information for the "mixin_ids" table.
+	MixinIdsTable = &schema.Table{
+		Name:        "mixin_ids",
+		Columns:     MixinIdsColumns,
+		PrimaryKey:  []*schema.Column{MixinIdsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+		Indexes: []*schema.Index{
+			{
+				Name:    "mixinid_id",
+				Unique:  false,
+				Columns: []*schema.Column{},
+			},
+		},
+	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 25},
@@ -201,6 +221,7 @@ var (
 		BlobsTable,
 		CarsTable,
 		GroupsTable,
+		MixinIdsTable,
 		PetsTable,
 		UsersTable,
 		BlobLinksTable,
