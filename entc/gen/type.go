@@ -483,9 +483,16 @@ func (t *Type) AddIndex(idx *load.Index) error {
 		return fmt.Errorf("missing fields or edges")
 	}
 	for _, name := range idx.Fields {
-		f, ok := t.fields[name]
-		if !ok {
-			return fmt.Errorf("unknown index field %q", name)
+		var f *Field
+
+		if name == t.ID.Name {
+			f = t.ID
+		} else {
+			var ok bool
+			f, ok = t.fields[name]
+			if !ok {
+				return fmt.Errorf("unknown index field %q", name)
+			}
 		}
 		if f.def.Size != nil && *f.def.Size > schema.DefaultStringLen {
 			return fmt.Errorf("field %q exceeds the index size limit (%d)", name, schema.DefaultStringLen)
