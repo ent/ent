@@ -15,6 +15,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/exposefks/ent/card"
 	"github.com/facebook/ent/entc/integration/exposefks/ent/pet"
 	"github.com/facebook/ent/entc/integration/exposefks/ent/predicate"
 	"github.com/facebook/ent/entc/integration/exposefks/ent/user"
@@ -32,6 +33,7 @@ type UserQuery struct {
 	withPets      *PetQuery
 	withFollowers *UserQuery
 	withFollowing *UserQuery
+	withCard      *CardQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -120,6 +122,28 @@ func (uq *UserQuery) QueryFollowing() *UserQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCard chains the current query on the card edge.
+func (uq *UserQuery) QueryCard() *CardQuery {
+	query := &CardQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -305,6 +329,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withPets:      uq.withPets.Clone(),
 		withFollowers: uq.withFollowers.Clone(),
 		withFollowing: uq.withFollowing.Clone(),
+		withCard:      uq.withCard.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -341,6 +366,17 @@ func (uq *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withFollowing = query
+	return uq
+}
+
+//  WithCard tells the query-builder to eager-loads the nodes that are connected to
+// the "card" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
+	query := &CardQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCard = query
 	return uq
 }
 
@@ -410,10 +446,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			uq.withPets != nil,
 			uq.withFollowers != nil,
 			uq.withFollowing != nil,
+			uq.withCard != nil,
 		}
 	)
 	_spec.ScanValues = func() []interface{} {
@@ -587,6 +624,33 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			for i := range nodes {
 				nodes[i].Edges.Following = append(nodes[i].Edges.Following, n)
 			}
+		}
+	}
+
+	if query := uq.withCard; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.Where(predicate.Card(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.CardColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.UserCard
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "UserCard" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "UserCard" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Card = n
 		}
 	}
 

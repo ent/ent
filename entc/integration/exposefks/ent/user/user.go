@@ -22,6 +22,8 @@ const (
 	EdgeFollowers = "followers"
 	// EdgeFollowing holds the string denoting the following edge name in mutations.
 	EdgeFollowing = "following"
+	// EdgeCard holds the string denoting the card edge name in mutations.
+	EdgeCard = "card"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -36,6 +38,13 @@ const (
 	FollowersTable = "user_following"
 	// FollowingTable is the table the holds the following relation/edge. The primary key declared below.
 	FollowingTable = "user_following"
+	// CardTable is the table the holds the card relation/edge.
+	CardTable = "cards"
+	// CardInverseTable is the table name for the Card entity.
+	// It exists in this package in order to avoid circular dependency with the "card" package.
+	CardInverseTable = "cards"
+	// CardColumn is the table column denoting the card relation/edge.
+	CardColumn = "user_card"
 )
 
 // Columns holds all SQL columns for user fields.

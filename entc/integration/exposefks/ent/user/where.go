@@ -394,6 +394,34 @@ func HasFollowingWith(preds ...predicate.User) predicate.User {
 	})
 }
 
+// HasCard applies the HasEdge predicate on the "card" edge.
+func HasCard() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CardTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, CardTable, CardColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCardWith applies the HasEdge predicate on the "card" edge with a given conditions (other predicates).
+func HasCardWith(preds ...predicate.Card) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CardInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, CardTable, CardColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

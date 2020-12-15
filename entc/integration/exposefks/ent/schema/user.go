@@ -26,5 +26,6 @@ func (User) Edges() []ent.Edge {
 		edge.To("pets", Pet.Type),
 		edge.To("following", User.Type).
 			From("followers"),
+		edge.To("card", Card.Type).Unique().Required(),
 	}
 }

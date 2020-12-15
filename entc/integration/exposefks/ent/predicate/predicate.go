@@ -10,6 +10,9 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 )
 
+// Card is the predicate function for card builders.
+type Card func(*sql.Selector)
+
 // Food is the predicate function for food builders.
 type Food func(*sql.Selector)
 

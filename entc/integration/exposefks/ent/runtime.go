@@ -6,8 +6,27 @@
 
 package ent
 
+import (
+	"time"
+
+	"github.com/facebook/ent/entc/integration/exposefks/ent/card"
+	"github.com/facebook/ent/entc/integration/exposefks/ent/schema"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	cardFields := schema.Card{}.Fields()
+	_ = cardFields
+	// cardDescNumber is the schema descriptor for number field.
+	cardDescNumber := cardFields[0].Descriptor()
+	// card.DefaultNumber holds the default value on creation for the number field.
+	card.DefaultNumber = cardDescNumber.Default.(string)
+	// card.NumberValidator is a validator for the "number" field. It is called by the builders before save.
+	card.NumberValidator = cardDescNumber.Validators[0].(func(string) error)
+	// cardDescCreatedAt is the schema descriptor for created_at field.
+	cardDescCreatedAt := cardFields[2].Descriptor()
+	// card.DefaultCreatedAt holds the default value on creation for the created_at field.
+	card.DefaultCreatedAt = cardDescCreatedAt.Default.(func() time.Time)
 }

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/entc/integration/exposefks/ent/card"
 	"github.com/facebook/ent/entc/integration/exposefks/ent/pet"
 	"github.com/facebook/ent/entc/integration/exposefks/ent/user"
 	"github.com/facebook/ent/schema/field"
@@ -89,6 +90,17 @@ func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
 	return uc.AddFollowingIDs(ids...)
 }
 
+// SetCardID sets the card edge to Card by id.
+func (uc *UserCreate) SetCardID(id int) *UserCreate {
+	uc.mutation.SetCardID(id)
+	return uc
+}
+
+// SetCard sets the card edge to Card.
+func (uc *UserCreate) SetCard(c *Card) *UserCreate {
+	return uc.SetCardID(c.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -142,6 +154,9 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+	}
+	if _, ok := uc.mutation.CardID(); !ok {
+		return &ValidationError{Name: "card", err: errors.New("ent: missing required edge \"card\"")}
 	}
 	return nil
 }
@@ -235,6 +250,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.CardIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.CardTable,
+			Columns: []string{user.CardColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: card.FieldID,
 				},
 			},
 		}

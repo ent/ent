@@ -12,6 +12,29 @@ import (
 )
 
 var (
+	// CardsColumns holds the columns for the "cards" table.
+	CardsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "number", Type: field.TypeString, Default: "unknown"},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "user_card", Type: field.TypeInt, Unique: true, Nullable: true},
+	}
+	// CardsTable holds the schema information for the "cards" table.
+	CardsTable = &schema.Table{
+		Name:       "cards",
+		Columns:    CardsColumns,
+		PrimaryKey: []*schema.Column{CardsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "cards_users_card",
+				Columns: []*schema.Column{CardsColumns[4]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// FoodsColumns holds the columns for the "foods" table.
 	FoodsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -95,6 +118,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CardsTable,
 		FoodsTable,
 		PetsTable,
 		UsersTable,
@@ -103,6 +127,7 @@ var (
 )
 
 func init() {
+	CardsTable.ForeignKeys[0].RefTable = UsersTable
 	PetsTable.ForeignKeys[0].RefTable = FoodsTable
 	PetsTable.ForeignKeys[1].RefTable = UsersTable
 	UserFollowingTable.ForeignKeys[0].RefTable = UsersTable

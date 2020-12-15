@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/facebook/ent/entc/integration/exposefks/ent/card"
 	"github.com/facebook/ent/entc/integration/exposefks/ent/user"
 )
 
@@ -36,9 +37,11 @@ type UserEdges struct {
 	Followers []*User
 	// Following holds the value of the following edge.
 	Following []*User
+	// Card holds the value of the card edge.
+	Card *Card
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // PetsOrErr returns the Pets value or an error if the edge
@@ -66,6 +69,20 @@ func (e UserEdges) FollowingOrErr() ([]*User, error) {
 		return e.Following, nil
 	}
 	return nil, &NotLoadedError{edge: "following"}
+}
+
+// CardOrErr returns the Card value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) CardOrErr() (*Card, error) {
+	if e.loadedTypes[3] {
+		if e.Card == nil {
+			// The edge card was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: card.Label}
+		}
+		return e.Card, nil
+	}
+	return nil, &NotLoadedError{edge: "card"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -115,6 +132,11 @@ func (u *User) QueryFollowers() *UserQuery {
 // QueryFollowing queries the following edge of the User.
 func (u *User) QueryFollowing() *UserQuery {
 	return (&UserClient{config: u.config}).QueryFollowing(u)
+}
+
+// QueryCard queries the card edge of the User.
+func (u *User) QueryCard() *CardQuery {
+	return (&UserClient{config: u.config}).QueryCard(u)
 }
 
 // Update returns a builder for updating this User.

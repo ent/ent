@@ -23,16 +23,21 @@ func TestExposeFKs(t *testing.T) {
 	ctx := context.Background()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 
-	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
+	card1 := client.Card.Create().SaveX(ctx)
+	card2 := client.Card.Create().SaveX(ctx)
+
+	a8m := client.User.Create().SetName("a8m").SetCard(card1).SaveX(ctx)
 	dogFood := client.Food.Create().SetName("dog food").SaveX(ctx)
 
-	errorhandler := client.User.Create().SetName("errorhandler").SaveX(ctx)
+	errorhandler := client.User.Create().SetName("errorhandler").SetCard(card2).SaveX(ctx)
 	mittens := client.Pet.Create().SetName("mittens").SetOwner(errorhandler).SaveX(ctx)
 	fred := client.Pet.Create().SetName("fred").SetOwner(a8m).SetFavouriteFood(dogFood).SaveX(ctx)
 
 	require.Nil(t, mittens.PetFavouriteFood)
 	require.Equal(t, errorhandler.ID, mittens.UserPets)
+	require.Equal(t, &errorhandler.ID, errorhandler.QueryCard().FirstX(ctx).UserCard)
 
 	require.Equal(t, &dogFood.ID, fred.PetFavouriteFood)
 	require.Equal(t, a8m.ID, fred.UserPets)
+	require.Equal(t, &a8m.ID, a8m.QueryCard().FirstX(ctx).UserCard)
 }
