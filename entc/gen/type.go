@@ -556,9 +556,9 @@ func (t *Type) resolveFKs() error {
 			refid = e.Type.ID
 		}
 
-		// If we encounter a inverse edge for this foreign key then the nillability value should be set
-		// by the optionality of the edge otherwise, the foreign key should be nilable.
-		fkNillable := !t.featureEnabled(FeatureExposeFKs) || !e.IsInverse() || e.Optional
+		// If we encounter an edge that owns the FK  then the nillability value
+		// should be set by the optionality of the edge otherwise, the foreign key should be nilable.
+		fkNillable := !t.featureEnabled(FeatureExposeFKs) || !e.OwnFK() || e.Optional
 
 		fk := &ForeignKey{
 			Edge: e,
