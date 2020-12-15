@@ -45,7 +45,7 @@ type (
 		Indexes []*Index
 		// ForeignKeys are the foreign-keys that resides in the type table.
 		ForeignKeys []*ForeignKey
-		foreignKeys map[string]struct{}
+		foreignKeys map[string]*ForeignKey
 		// Annotations that were defined for the field in the schema.
 		// The mapping is from the Annotation.Name() to a JSON decoded object.
 		Annotations map[string]interface{}
@@ -181,7 +181,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		Annotations: schema.Annotations,
 		Fields:      make([]*Field, 0, len(schema.Fields)),
 		fields:      make(map[string]*Field, len(schema.Fields)),
-		foreignKeys: make(map[string]struct{}),
+		foreignKeys: make(map[string]*ForeignKey),
 	}
 	if err := typ.check(); err != nil {
 		return nil, err
@@ -551,12 +551,6 @@ func (t *Type) resolveFKs() error {
 			continue
 		}
 
-		if fk := t.ForeignKeyForEdge(e); fk != nil {
-			fk.Field.Nillable = fk.Field.Nillable && e.Optional
-			fk.Field.Optional = fk.Field.Optional && e.Optional
-			continue
-		}
-
 		refid := t.ID
 		if e.OwnFK() {
 			refid = e.Type.ID
@@ -576,20 +570,23 @@ func (t *Type) resolveFKs() error {
 			},
 		}
 		if e.OwnFK() {
-			t.addFK(fk)
+			t.putFK(fk)
 		} else {
-			e.Type.addFK(fk)
+			e.Type.putFK(fk)
 		}
 	}
 	return nil
 }
 
-// AddForeignKey adds a foreign-key for the type if it doesn't exist.
-func (t *Type) addFK(fk *ForeignKey) {
-	if _, ok := t.foreignKeys[fk.Field.Name]; ok {
+// putFK adds a foreign-key for the type if it doesn't exist. If the foreign key does exist, it ensures
+// that the nilability of the field is consistent with the foriegn key
+func (t *Type) putFK(fk *ForeignKey) {
+	if existingFK, ok := t.foreignKeys[fk.Field.Name]; ok {
+		existingFK.Field.Nillable = existingFK.Field.Nillable && fk.Field.Nillable
+		existingFK.Field.Optional = existingFK.Field.Optional && fk.Field.Optional
 		return
 	}
-	t.foreignKeys[fk.Field.Name] = struct{}{}
+	t.foreignKeys[fk.Field.Name] = fk
 	t.ForeignKeys = append(t.ForeignKeys, fk)
 }
 
