@@ -8,7 +8,6 @@ package entql
 
 import (
 	"database/sql/driver"
-	"encoding/json"
 	"time"
 )
 
@@ -1652,108 +1651,6 @@ func ValueAnd(x, y ValueP, z ...ValueP) ValueP {
 // ValueNot returns a predicate that represents the logical negation of the given predicate.
 func ValueNot(x ValueP) ValueP {
 	expr := &valueP{}
-	expr.done = func(name string) {
-		expr.P = Not(x.Field(name))
-	}
-	return expr
-}
-
-// JsonP is the interface for predicates of type json.RawMessage (`type P[json.RawMessage]`).
-type JsonP interface {
-	Fielder
-	json()
-}
-
-// jsonP implements the JsonP interface.
-type jsonP struct {
-	P
-	done func(string)
-}
-
-func (p *jsonP) Field(name string) P {
-	p.done(name)
-	return p.P
-}
-
-func (*jsonP) json() {}
-
-// JsonEQ applies the EQ operation on the given value.
-func JsonEQ(v json.RawMessage) JsonP {
-	field := &Field{}
-	value := &Value{V: v}
-	done := func(name string) { field.Name = name }
-	return &jsonP{P: EQ(field, value), done: done}
-}
-
-// JsonNEQ applies the NEQ operation on the given value.
-func JsonNEQ(v json.RawMessage) JsonP {
-	field := &Field{}
-	value := &Value{V: v}
-	done := func(name string) { field.Name = name }
-	return &jsonP{P: NEQ(field, value), done: done}
-}
-
-// JsonLT applies the LT operation on the given value.
-func JsonLT(v json.RawMessage) JsonP {
-	field := &Field{}
-	value := &Value{V: v}
-	done := func(name string) { field.Name = name }
-	return &jsonP{P: LT(field, value), done: done}
-}
-
-// JsonLTE applies the LTE operation on the given value.
-func JsonLTE(v json.RawMessage) JsonP {
-	field := &Field{}
-	value := &Value{V: v}
-	done := func(name string) { field.Name = name }
-	return &jsonP{P: LTE(field, value), done: done}
-}
-
-// JsonGT applies the GT operation on the given value.
-func JsonGT(v json.RawMessage) JsonP {
-	field := &Field{}
-	value := &Value{V: v}
-	done := func(name string) { field.Name = name }
-	return &jsonP{P: GT(field, value), done: done}
-}
-
-// JsonGTE applies the GTE operation on the given value.
-func JsonGTE(v json.RawMessage) JsonP {
-	field := &Field{}
-	value := &Value{V: v}
-	done := func(name string) { field.Name = name }
-	return &jsonP{P: GTE(field, value), done: done}
-}
-
-// JsonOr returns a composed predicate that represents the logical OR predicate.
-func JsonOr(x, y JsonP, z ...JsonP) JsonP {
-	expr := &jsonP{}
-	expr.done = func(name string) {
-		zs := make([]P, len(z))
-		for i := range z {
-			zs[i] = z[i].Field(name)
-		}
-		expr.P = Or(x.Field(name), y.Field(name), zs...)
-	}
-	return expr
-}
-
-// JsonAnd returns a composed predicate that represents the logical AND predicate.
-func JsonAnd(x, y JsonP, z ...JsonP) JsonP {
-	expr := &jsonP{}
-	expr.done = func(name string) {
-		zs := make([]P, len(z))
-		for i := range z {
-			zs[i] = z[i].Field(name)
-		}
-		expr.P = And(x.Field(name), y.Field(name), zs...)
-	}
-	return expr
-}
-
-// JsonNot returns a predicate that represents the logical negation of the given predicate.
-func JsonNot(x JsonP) JsonP {
-	expr := &jsonP{}
 	expr.done = func(name string) {
 		expr.P = Not(x.Field(name))
 	}

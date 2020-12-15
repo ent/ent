@@ -121,7 +121,7 @@ type predicateAdder interface {
 		{{- if $f.IsTime }}{{ $iface = "TimeP" }}
 		{{- else if $f.IsBytes }}{{ $iface = "BytesP" }}
 		{{- else if $f.IsUUID }}{{ $iface = "ValueP" }}
-		{{- else if $f.IsJSON }}{{ $iface = "JsonP" }}
+		{{- else if $f.IsJSON }}{{ $iface = "BytesP" }}
 		{{- end }}
 		// Where{{ $f.StructField }} applies the entql {{ $type }} predicate on the {{ $f.Name }} field.
 		func (f *{{ $filter }}) Where{{ $f.StructField }}(p entql.{{ $iface }}) {
