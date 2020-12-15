@@ -579,7 +579,7 @@ func (t *Type) resolveFKs() error {
 }
 
 // putFK adds a foreign-key for the type if it doesn't exist. If the foreign key does exist, it ensures
-// that the nilability of the field is consistent with the foriegn key
+// that the nilability of the field is consistent with the foreign key
 func (t *Type) putFK(fk *ForeignKey) {
 	if existingFK, ok := t.foreignKeys[fk.Field.Name]; ok {
 		existingFK.Field.Nillable = existingFK.Field.Nillable && fk.Field.Nillable
