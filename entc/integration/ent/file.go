@@ -34,9 +34,9 @@ type File struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
 	Edges           FileEdges `json:"edges"`
+	user_files      *int
 	file_type_files *int
 	group_files     *int
-	user_files      *int
 }
 
 // FileEdges holds the relations/edges for other nodes in the graph.
@@ -104,9 +104,9 @@ func (*File) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*File) fkValues() []interface{} {
 	return []interface{}{
+		&sql.NullInt64{}, // user_files
 		&sql.NullInt64{}, // file_type_files
 		&sql.NullInt64{}, // group_files
-		&sql.NullInt64{}, // user_files
 	}
 }
 
@@ -151,22 +151,22 @@ func (f *File) assignValues(values ...interface{}) error {
 	values = values[5:]
 	if len(values) == len(file.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field user_files", value)
+		} else if value.Valid {
+			f.user_files = new(int)
+			*f.user_files = int(value.Int64)
+		}
+		if value, ok := values[1].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field file_type_files", value)
 		} else if value.Valid {
 			f.file_type_files = new(int)
 			*f.file_type_files = int(value.Int64)
 		}
-		if value, ok := values[1].(*sql.NullInt64); !ok {
+		if value, ok := values[2].(*sql.NullInt64); !ok {
 			return fmt.Errorf("unexpected type %T for edge-field group_files", value)
 		} else if value.Valid {
 			f.group_files = new(int)
 			*f.group_files = int(value.Int64)
-		}
-		if value, ok := values[2].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_files", value)
-		} else if value.Valid {
-			f.user_files = new(int)
-			*f.user_files = int(value.Int64)
 		}
 	}
 	return nil

@@ -48,8 +48,8 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
 var ForeignKeys = []string{
-	"user_pets",
 	"user_team",
+	"user_pets",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

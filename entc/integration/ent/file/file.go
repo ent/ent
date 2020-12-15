@@ -66,9 +66,9 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the File type.
 var ForeignKeys = []string{
+	"user_files",
 	"file_type_files",
 	"group_files",
-	"user_files",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
