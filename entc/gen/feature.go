@@ -43,11 +43,20 @@ var (
 		},
 	}
 
+	FeatureExposeFKs = Feature{
+		Name:        "exposefks",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Exposes foreign keys in sql codegen",
+		cleanup:     nil,
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
 		FeatureEntQL,
 		FeatureSnapshot,
+		FeatureExposeFKs,
 	}
 )
 

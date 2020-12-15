@@ -217,6 +217,24 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	return typ, nil
 }
 
+func (t Type) ForeignKeyForEdge(e *Edge) *ForeignKey {
+	for _, fk := range t.ForeignKeys {
+		if e.Rel.Column() == fk.Field.StorageKey() {
+			return fk
+		}
+	}
+	return nil
+}
+
+func (t Type) EdgeForForeignKey(fk *ForeignKey) *Edge {
+	for _, e := range t.FKEdges() {
+		if e.Rel.Column() == fk.Field.StorageKey() {
+			return e
+		}
+	}
+	return nil
+}
+
 // Label returns Gremlin label name of the node/type.
 func (t Type) Label() string {
 	return snake(t.Name)
@@ -528,20 +546,31 @@ func (t *Type) resolveFKs() error {
 		if err := e.setStorageKey(); err != nil {
 			return fmt.Errorf("%q edge: %v", e.Name, err)
 		}
-		if e.IsInverse() || e.M2M() {
+
+		if e.M2M() {
 			continue
 		}
+
+		if fk := t.ForeignKeyForEdge(e); fk != nil {
+			fk.Field.Nillable = fk.Field.Nillable && e.Optional
+			fk.Field.Optional = fk.Field.Optional && e.Optional
+			continue
+		}
+
 		refid := t.ID
 		if e.OwnFK() {
 			refid = e.Type.ID
 		}
+
+		fkNillable := !t.featureEnabled(FeatureExposeFKs) || e.Optional
+
 		fk := &ForeignKey{
 			Edge: e,
 			Field: &Field{
-				Name:        builderField(e.Rel.Column()),
+				Name:        e.StructFKField(),
 				Type:        refid.Type,
-				Nillable:    true,
-				Optional:    true,
+				Nillable:    fkNillable,
+				Optional:    fkNillable,
 				Unique:      e.Unique,
 				UserDefined: refid.UserDefined,
 			},
@@ -1133,6 +1162,10 @@ func (e Edge) StructField() string {
 // StructFKField returns the struct member for holding the edge
 // foreign-key in the model.
 func (e Edge) StructFKField() string {
+	if e.Type.featureEnabled(FeatureExposeFKs) {
+		return pascal(builderField(e.Rel.Column()))
+	}
+
 	return builderField(e.Rel.Column())
 }
 

@@ -113,8 +113,11 @@ func Storage(typ string) Option {
 // FeatureNames enables sets of features by their names.
 func FeatureNames(names ...string) Option {
 	return func(cfg *gen.Config) error {
-		for _, name := range names {
-			for _, feat := range gen.AllFeatures {
+		for _, feat := range gen.AllFeatures {
+			if feat.Default {
+				cfg.Features = append(cfg.Features, feat)
+			}
+			for _, name := range names {
 				if name == feat.Name {
 					cfg.Features = append(cfg.Features, feat)
 				}

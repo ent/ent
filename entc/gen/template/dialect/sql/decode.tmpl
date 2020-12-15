@@ -67,8 +67,12 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(values ...interface{}) error {
 						if value, ok := values[{{ $i }}].(*sql.NullInt64); !ok {
 							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
 						} else if value.Valid {
-							{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
-							*{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
+							{{- if $f.Nillable }}
+								{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
+								*{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
+							{{- else }}
+								{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
+							{{- end }}
 						}
 					{{- end }}
 				{{- end }}

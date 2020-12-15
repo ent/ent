@@ -67,7 +67,16 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			_spec.Edges = append(_spec.Edges, edge)
 		}
 	{{- end }}
-	return _node, _spec
+	{{- if ($.FeatureEnabled "exposefks") }}
+	{{- range $fk := $.ForeignKeys }}
+	{{- with $e := $.EdgeForForeignKey $fk }}
+		if id, ok := {{ $mutation }}.{{ $e.StructField }}ID(); ok {
+			_node.{{ $fk.Field.StructField }} = {{ if $fk.Field.Nillable }}&{{ end }}id
+		}
+	{{- end }}
+	{{- end }}
+	{{- end }}
+return _node, _spec
 }
 
 {{ end }}
