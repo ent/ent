@@ -172,10 +172,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	typ := &Type{
 		Config: c,
 		ID: &Field{
-			Name: "id",
-			//def: &load.Field{
-			//	Name: "id",
-			//},
+			Name:      "id",
 			Type:      idType,
 			StructTag: structTag("id", ""),
 		},
