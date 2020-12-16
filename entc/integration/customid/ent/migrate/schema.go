@@ -96,7 +96,7 @@ var (
 				Columns: []*schema.Column{MixinIdsColumns[0], MixinIdsColumns[2]},
 			},
 			{
-				Name:    "index_all",
+				Name:    "mixinid_id_mixin_field_some_field",
 				Unique:  false,
 				Columns: []*schema.Column{MixinIdsColumns[0], MixinIdsColumns[2], MixinIdsColumns[1]},
 			},

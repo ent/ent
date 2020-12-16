@@ -42,7 +42,7 @@ func (MixinID) Indexes() []ent.Index {
 		index.Fields("id"),
 		index.Fields("id", "some_field"),
 		index.Fields("id", "mixin_field"),
-		index.Fields("id", "mixin_field", "some_field").StorageKey("index_all"),
+		index.Fields("id", "mixin_field", "some_field"),
 	}
 }
 
