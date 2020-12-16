@@ -92,5 +92,7 @@ func (Card) Edges() []ent.Edge {
 func (Card) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id"),
+		index.Fields("number"),
+		index.Fields("id", "name", "number"),
 	}
 }
