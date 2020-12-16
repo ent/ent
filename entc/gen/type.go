@@ -486,12 +486,13 @@ func (t *Type) AddIndex(idx *load.Index) error {
 		return fmt.Errorf("missing fields or edges")
 	}
 	for _, name := range idx.Fields {
-		f, ok := t.fields[name]
-		if !ok || f == nil {
-			// Might be the ID field, so check
-			if t.ID.Name == name {
-				f = t.ID
-			} else {
+		var f *Field
+		if name == t.ID.Name {
+			f = t.ID
+		} else {
+			var ok bool
+			f, ok = t.fields[name]
+			if !ok {
 				return fmt.Errorf("unknown index field %q", name)
 			}
 		}
