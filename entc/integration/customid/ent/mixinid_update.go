@@ -30,15 +30,15 @@ func (miu *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
 	return miu
 }
 
-// SetSomeOtherField sets the someOtherField field.
-func (miu *MixinIDUpdate) SetSomeOtherField(s string) *MixinIDUpdate {
-	miu.mutation.SetSomeOtherField(s)
+// SetSomeField sets the some_field field.
+func (miu *MixinIDUpdate) SetSomeField(s string) *MixinIDUpdate {
+	miu.mutation.SetSomeField(s)
 	return miu
 }
 
-// SetTestField sets the testField field.
-func (miu *MixinIDUpdate) SetTestField(s string) *MixinIDUpdate {
-	miu.mutation.SetTestField(s)
+// SetMixinField sets the mixin_field field.
+func (miu *MixinIDUpdate) SetMixinField(s string) *MixinIDUpdate {
+	miu.mutation.SetMixinField(s)
 	return miu
 }
 
@@ -116,18 +116,18 @@ func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := miu.mutation.SomeOtherField(); ok {
+	if value, ok := miu.mutation.SomeField(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: mixinid.FieldSomeOtherField,
+			Column: mixinid.FieldSomeField,
 		})
 	}
-	if value, ok := miu.mutation.TestField(); ok {
+	if value, ok := miu.mutation.MixinField(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: mixinid.FieldTestField,
+			Column: mixinid.FieldMixinField,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, miu.driver, _spec); err != nil {
@@ -148,15 +148,15 @@ type MixinIDUpdateOne struct {
 	mutation *MixinIDMutation
 }
 
-// SetSomeOtherField sets the someOtherField field.
-func (miuo *MixinIDUpdateOne) SetSomeOtherField(s string) *MixinIDUpdateOne {
-	miuo.mutation.SetSomeOtherField(s)
+// SetSomeField sets the some_field field.
+func (miuo *MixinIDUpdateOne) SetSomeField(s string) *MixinIDUpdateOne {
+	miuo.mutation.SetSomeField(s)
 	return miuo
 }
 
-// SetTestField sets the testField field.
-func (miuo *MixinIDUpdateOne) SetTestField(s string) *MixinIDUpdateOne {
-	miuo.mutation.SetTestField(s)
+// SetMixinField sets the mixin_field field.
+func (miuo *MixinIDUpdateOne) SetMixinField(s string) *MixinIDUpdateOne {
+	miuo.mutation.SetMixinField(s)
 	return miuo
 }
 
@@ -232,18 +232,18 @@ func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing MixinID.ID for update")}
 	}
 	_spec.Node.ID.Value = id
-	if value, ok := miuo.mutation.SomeOtherField(); ok {
+	if value, ok := miuo.mutation.SomeField(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: mixinid.FieldSomeOtherField,
+			Column: mixinid.FieldSomeField,
 		})
 	}
-	if value, ok := miuo.mutation.TestField(); ok {
+	if value, ok := miuo.mutation.MixinField(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: mixinid.FieldTestField,
+			Column: mixinid.FieldMixinField,
 		})
 	}
 	_node = &MixinID{config: miuo.config}

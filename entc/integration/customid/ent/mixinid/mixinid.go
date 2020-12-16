@@ -15,10 +15,10 @@ const (
 	Label = "mixin_id"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldSomeOtherField holds the string denoting the someotherfield field in the database.
-	FieldSomeOtherField = "some_other_field"
-	// FieldTestField holds the string denoting the testfield field in the database.
-	FieldTestField = "test_field"
+	// FieldSomeField holds the string denoting the some_field field in the database.
+	FieldSomeField = "some_field"
+	// FieldMixinField holds the string denoting the mixin_field field in the database.
+	FieldMixinField = "mixin_field"
 
 	// Table holds the table name of the mixinid in the database.
 	Table = "mixin_ids"
@@ -27,8 +27,8 @@ const (
 // Columns holds all SQL columns for mixinid fields.
 var Columns = []string{
 	FieldID,
-	FieldSomeOtherField,
-	FieldTestField,
+	FieldSomeField,
+	FieldMixinField,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

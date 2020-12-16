@@ -1415,15 +1415,15 @@ func (m *GroupMutation) ResetEdge(name string) error {
 // nodes in the graph.
 type MixinIDMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uuid.UUID
-	someOtherField *string
-	testField      *string
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*MixinID, error)
-	predicates     []predicate.MixinID
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	some_field    *string
+	mixin_field   *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*MixinID, error)
+	predicates    []predicate.MixinID
 }
 
 var _ ent.Mutation = (*MixinIDMutation)(nil)
@@ -1511,78 +1511,78 @@ func (m *MixinIDMutation) ID() (id uuid.UUID, exists bool) {
 	return *m.id, true
 }
 
-// SetSomeOtherField sets the someOtherField field.
-func (m *MixinIDMutation) SetSomeOtherField(s string) {
-	m.someOtherField = &s
+// SetSomeField sets the some_field field.
+func (m *MixinIDMutation) SetSomeField(s string) {
+	m.some_field = &s
 }
 
-// SomeOtherField returns the someOtherField value in the mutation.
-func (m *MixinIDMutation) SomeOtherField() (r string, exists bool) {
-	v := m.someOtherField
+// SomeField returns the some_field value in the mutation.
+func (m *MixinIDMutation) SomeField() (r string, exists bool) {
+	v := m.some_field
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSomeOtherField returns the old someOtherField value of the MixinID.
+// OldSomeField returns the old some_field value of the MixinID.
 // If the MixinID object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *MixinIDMutation) OldSomeOtherField(ctx context.Context) (v string, err error) {
+func (m *MixinIDMutation) OldSomeField(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSomeOtherField is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldSomeField is allowed only on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldSomeOtherField requires an ID field in the mutation")
+		return v, fmt.Errorf("OldSomeField requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSomeOtherField: %w", err)
+		return v, fmt.Errorf("querying old value for OldSomeField: %w", err)
 	}
-	return oldValue.SomeOtherField, nil
+	return oldValue.SomeField, nil
 }
 
-// ResetSomeOtherField reset all changes of the "someOtherField" field.
-func (m *MixinIDMutation) ResetSomeOtherField() {
-	m.someOtherField = nil
+// ResetSomeField reset all changes of the "some_field" field.
+func (m *MixinIDMutation) ResetSomeField() {
+	m.some_field = nil
 }
 
-// SetTestField sets the testField field.
-func (m *MixinIDMutation) SetTestField(s string) {
-	m.testField = &s
+// SetMixinField sets the mixin_field field.
+func (m *MixinIDMutation) SetMixinField(s string) {
+	m.mixin_field = &s
 }
 
-// TestField returns the testField value in the mutation.
-func (m *MixinIDMutation) TestField() (r string, exists bool) {
-	v := m.testField
+// MixinField returns the mixin_field value in the mutation.
+func (m *MixinIDMutation) MixinField() (r string, exists bool) {
+	v := m.mixin_field
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldTestField returns the old testField value of the MixinID.
+// OldMixinField returns the old mixin_field value of the MixinID.
 // If the MixinID object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *MixinIDMutation) OldTestField(ctx context.Context) (v string, err error) {
+func (m *MixinIDMutation) OldMixinField(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldTestField is allowed only on UpdateOne operations")
+		return v, fmt.Errorf("OldMixinField is allowed only on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldTestField requires an ID field in the mutation")
+		return v, fmt.Errorf("OldMixinField requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTestField: %w", err)
+		return v, fmt.Errorf("querying old value for OldMixinField: %w", err)
 	}
-	return oldValue.TestField, nil
+	return oldValue.MixinField, nil
 }
 
-// ResetTestField reset all changes of the "testField" field.
-func (m *MixinIDMutation) ResetTestField() {
-	m.testField = nil
+// ResetMixinField reset all changes of the "mixin_field" field.
+func (m *MixinIDMutation) ResetMixinField() {
+	m.mixin_field = nil
 }
 
 // Op returns the operation name.
@@ -1600,11 +1600,11 @@ func (m *MixinIDMutation) Type() string {
 // fields that were in/decremented, call AddedFields().
 func (m *MixinIDMutation) Fields() []string {
 	fields := make([]string, 0, 2)
-	if m.someOtherField != nil {
-		fields = append(fields, mixinid.FieldSomeOtherField)
+	if m.some_field != nil {
+		fields = append(fields, mixinid.FieldSomeField)
 	}
-	if m.testField != nil {
-		fields = append(fields, mixinid.FieldTestField)
+	if m.mixin_field != nil {
+		fields = append(fields, mixinid.FieldMixinField)
 	}
 	return fields
 }
@@ -1614,10 +1614,10 @@ func (m *MixinIDMutation) Fields() []string {
 // not set, or was not define in the schema.
 func (m *MixinIDMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case mixinid.FieldSomeOtherField:
-		return m.SomeOtherField()
-	case mixinid.FieldTestField:
-		return m.TestField()
+	case mixinid.FieldSomeField:
+		return m.SomeField()
+	case mixinid.FieldMixinField:
+		return m.MixinField()
 	}
 	return nil, false
 }
@@ -1627,10 +1627,10 @@ func (m *MixinIDMutation) Field(name string) (ent.Value, bool) {
 // or the query to the database was failed.
 func (m *MixinIDMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case mixinid.FieldSomeOtherField:
-		return m.OldSomeOtherField(ctx)
-	case mixinid.FieldTestField:
-		return m.OldTestField(ctx)
+	case mixinid.FieldSomeField:
+		return m.OldSomeField(ctx)
+	case mixinid.FieldMixinField:
+		return m.OldMixinField(ctx)
 	}
 	return nil, fmt.Errorf("unknown MixinID field %s", name)
 }
@@ -1640,19 +1640,19 @@ func (m *MixinIDMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type mismatch the field type.
 func (m *MixinIDMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case mixinid.FieldSomeOtherField:
+	case mixinid.FieldSomeField:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSomeOtherField(v)
+		m.SetSomeField(v)
 		return nil
-	case mixinid.FieldTestField:
+	case mixinid.FieldMixinField:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetTestField(v)
+		m.SetMixinField(v)
 		return nil
 	}
 	return fmt.Errorf("unknown MixinID field %s", name)
@@ -1704,11 +1704,11 @@ func (m *MixinIDMutation) ClearField(name string) error {
 // defined in the schema.
 func (m *MixinIDMutation) ResetField(name string) error {
 	switch name {
-	case mixinid.FieldSomeOtherField:
-		m.ResetSomeOtherField()
+	case mixinid.FieldSomeField:
+		m.ResetSomeField()
 		return nil
-	case mixinid.FieldTestField:
-		m.ResetTestField()
+	case mixinid.FieldMixinField:
+		m.ResetMixinField()
 		return nil
 	}
 	return fmt.Errorf("unknown MixinID field %s", name)

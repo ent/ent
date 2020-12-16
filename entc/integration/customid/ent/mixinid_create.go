@@ -24,15 +24,15 @@ type MixinIDCreate struct {
 	hooks    []Hook
 }
 
-// SetSomeOtherField sets the someOtherField field.
-func (mic *MixinIDCreate) SetSomeOtherField(s string) *MixinIDCreate {
-	mic.mutation.SetSomeOtherField(s)
+// SetSomeField sets the some_field field.
+func (mic *MixinIDCreate) SetSomeField(s string) *MixinIDCreate {
+	mic.mutation.SetSomeField(s)
 	return mic
 }
 
-// SetTestField sets the testField field.
-func (mic *MixinIDCreate) SetTestField(s string) *MixinIDCreate {
-	mic.mutation.SetTestField(s)
+// SetMixinField sets the mixin_field field.
+func (mic *MixinIDCreate) SetMixinField(s string) *MixinIDCreate {
+	mic.mutation.SetMixinField(s)
 	return mic
 }
 
@@ -102,11 +102,11 @@ func (mic *MixinIDCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (mic *MixinIDCreate) check() error {
-	if _, ok := mic.mutation.SomeOtherField(); !ok {
-		return &ValidationError{Name: "someOtherField", err: errors.New("ent: missing required field \"someOtherField\"")}
+	if _, ok := mic.mutation.SomeField(); !ok {
+		return &ValidationError{Name: "some_field", err: errors.New("ent: missing required field \"some_field\"")}
 	}
-	if _, ok := mic.mutation.TestField(); !ok {
-		return &ValidationError{Name: "testField", err: errors.New("ent: missing required field \"testField\"")}
+	if _, ok := mic.mutation.MixinField(); !ok {
+		return &ValidationError{Name: "mixin_field", err: errors.New("ent: missing required field \"mixin_field\"")}
 	}
 	return nil
 }
@@ -137,21 +137,21 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := mic.mutation.SomeOtherField(); ok {
+	if value, ok := mic.mutation.SomeField(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: mixinid.FieldSomeOtherField,
+			Column: mixinid.FieldSomeField,
 		})
-		_node.SomeOtherField = value
+		_node.SomeField = value
 	}
-	if value, ok := mic.mutation.TestField(); ok {
+	if value, ok := mic.mutation.MixinField(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: mixinid.FieldTestField,
+			Column: mixinid.FieldMixinField,
 		})
-		_node.TestField = value
+		_node.MixinField = value
 	}
 	return _node, _spec
 }

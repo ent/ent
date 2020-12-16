@@ -243,12 +243,12 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 // Example:
 //
 //	var v []struct {
-//		SomeOtherField string `json:"someOtherField,omitempty"`
+//		SomeField string `json:"some_field,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.MixinID.Query().
-//		GroupBy(mixinid.FieldSomeOtherField).
+//		GroupBy(mixinid.FieldSomeField).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -269,11 +269,11 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 // Example:
 //
 //	var v []struct {
-//		SomeOtherField string `json:"someOtherField,omitempty"`
+//		SomeField string `json:"some_field,omitempty"`
 //	}
 //
 //	client.MixinID.Query().
-//		Select(mixinid.FieldSomeOtherField).
+//		Select(mixinid.FieldSomeField).
 //		Scan(ctx, &v)
 //
 func (miq *MixinIDQuery) Select(field string, fields ...string) *MixinIDSelect {

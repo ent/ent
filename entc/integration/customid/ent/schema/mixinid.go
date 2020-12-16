@@ -21,7 +21,7 @@ type BaseMixin struct {
 func (BaseMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New),
-		field.String("someOtherField"),
+		field.String("some_field"),
 	}
 }
 
@@ -33,18 +33,16 @@ type MixinID struct {
 // Fields of the MixinID.
 func (MixinID) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("testField"),
+		field.String("mixin_field"),
 	}
-}
-
-// Edges of the MixinID.
-func (MixinID) Edges() []ent.Edge {
-	return nil
 }
 
 func (MixinID) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("id"),
+		index.Fields("id", "some_field"),
+		index.Fields("id", "mixin_field"),
+		index.Fields("id", "mixin_field", "some_field").StorageKey("index_all"),
 	}
 }
 

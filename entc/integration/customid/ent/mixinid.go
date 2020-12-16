@@ -20,18 +20,18 @@ type MixinID struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// SomeOtherField holds the value of the "someOtherField" field.
-	SomeOtherField string `json:"someOtherField,omitempty"`
-	// TestField holds the value of the "testField" field.
-	TestField string `json:"testField,omitempty"`
+	// SomeField holds the value of the "some_field" field.
+	SomeField string `json:"some_field,omitempty"`
+	// MixinField holds the value of the "mixin_field" field.
+	MixinField string `json:"mixin_field,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
 func (*MixinID) scanValues() []interface{} {
 	return []interface{}{
 		&uuid.UUID{},      // id
-		&sql.NullString{}, // someOtherField
-		&sql.NullString{}, // testField
+		&sql.NullString{}, // some_field
+		&sql.NullString{}, // mixin_field
 	}
 }
 
@@ -48,14 +48,14 @@ func (mi *MixinID) assignValues(values ...interface{}) error {
 	}
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field someOtherField", values[0])
+		return fmt.Errorf("unexpected type %T for field some_field", values[0])
 	} else if value.Valid {
-		mi.SomeOtherField = value.String
+		mi.SomeField = value.String
 	}
 	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field testField", values[1])
+		return fmt.Errorf("unexpected type %T for field mixin_field", values[1])
 	} else if value.Valid {
-		mi.TestField = value.String
+		mi.MixinField = value.String
 	}
 	return nil
 }
@@ -83,10 +83,10 @@ func (mi *MixinID) String() string {
 	var builder strings.Builder
 	builder.WriteString("MixinID(")
 	builder.WriteString(fmt.Sprintf("id=%v", mi.ID))
-	builder.WriteString(", someOtherField=")
-	builder.WriteString(mi.SomeOtherField)
-	builder.WriteString(", testField=")
-	builder.WriteString(mi.TestField)
+	builder.WriteString(", some_field=")
+	builder.WriteString(mi.SomeField)
+	builder.WriteString(", mixin_field=")
+	builder.WriteString(mi.MixinField)
 	builder.WriteByte(')')
 	return builder.String()
 }

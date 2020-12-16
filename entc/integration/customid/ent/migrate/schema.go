@@ -70,8 +70,8 @@ var (
 	// MixinIdsColumns holds the columns for the "mixin_ids" table.
 	MixinIdsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
-		{Name: "some_other_field", Type: field.TypeString},
-		{Name: "test_field", Type: field.TypeString},
+		{Name: "some_field", Type: field.TypeString},
+		{Name: "mixin_field", Type: field.TypeString},
 	}
 	// MixinIdsTable holds the schema information for the "mixin_ids" table.
 	MixinIdsTable = &schema.Table{
@@ -84,6 +84,21 @@ var (
 				Name:    "mixinid_id",
 				Unique:  false,
 				Columns: []*schema.Column{MixinIdsColumns[0]},
+			},
+			{
+				Name:    "mixinid_id_some_field",
+				Unique:  false,
+				Columns: []*schema.Column{MixinIdsColumns[0], MixinIdsColumns[1]},
+			},
+			{
+				Name:    "mixinid_id_mixin_field",
+				Unique:  false,
+				Columns: []*schema.Column{MixinIdsColumns[0], MixinIdsColumns[2]},
+			},
+			{
+				Name:    "index_all",
+				Unique:  false,
+				Columns: []*schema.Column{MixinIdsColumns[0], MixinIdsColumns[2], MixinIdsColumns[1]},
 			},
 		},
 	}
