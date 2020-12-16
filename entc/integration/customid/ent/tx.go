@@ -22,6 +22,8 @@ type Tx struct {
 	Car *CarClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// MixinID is the client for interacting with the MixinID builders.
+	MixinID *MixinIDClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
@@ -164,6 +166,7 @@ func (tx *Tx) init() {
 	tx.Blob = NewBlobClient(tx.config)
 	tx.Car = NewCarClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
+	tx.MixinID = NewMixinIDClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
