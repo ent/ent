@@ -47,7 +47,7 @@ func (MixinID) Indexes() []ent.Index {
 	}
 }
 
-
+// Mixin of MixinID
 func (MixinID) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		BaseMixin{},
