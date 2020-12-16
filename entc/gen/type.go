@@ -172,7 +172,10 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	typ := &Type{
 		Config: c,
 		ID: &Field{
-			Name:      "id",
+			Name: "id",
+			//def: &load.Field{
+			//	Name: "id",
+			//},
 			Type:      idType,
 			StructTag: structTag("id", ""),
 		},
@@ -484,7 +487,6 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	}
 	for _, name := range idx.Fields {
 		var f *Field
-
 		if name == t.ID.Name {
 			f = t.ID
 		} else {
