@@ -140,25 +140,3 @@ func (d *DebugTx) Rollback() error {
 	d.log(d.ctx, fmt.Sprintf("Tx(%s): rollbacked", d.id))
 	return d.Tx.Rollback()
 }
-
-type errDriver struct {
-	Driver
-	err error
-}
-
-func (d errDriver) Exec(context.Context, string, interface{}, interface{}) error {
-	return d.err
-}
-
-func (d errDriver) Query(context.Context, string, interface{}, interface{}) error {
-	return d.err
-}
-
-func (d errDriver) Tx(context.Context) (Tx, error) {
-	return nil, d.err
-}
-
-// AlwaysFail returns a driver that always returns the given error.
-func AlwaysFail(driver Driver, err error) Driver {
-	return errDriver{driver, err}
-}
