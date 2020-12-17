@@ -10,6 +10,7 @@ import (
 	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
 	"github.com/facebook/ent/schema/mixin"
 )
 
@@ -84,5 +85,14 @@ func (Card) Edges() []ent.Edge {
 			Annotations(&template.Extension{
 				Type: "int",
 			}),
+	}
+}
+
+// Indexes of the Card.
+func (Card) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("id"),
+		index.Fields("number"),
+		index.Fields("id", "name", "number"),
 	}
 }

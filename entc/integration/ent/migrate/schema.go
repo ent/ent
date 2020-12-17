@@ -35,6 +35,23 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "card_id",
+				Unique:  false,
+				Columns: []*schema.Column{CardsColumns[0]},
+			},
+			{
+				Name:    "card_number",
+				Unique:  false,
+				Columns: []*schema.Column{CardsColumns[3]},
+			},
+			{
+				Name:    "card_id_name_number",
+				Unique:  false,
+				Columns: []*schema.Column{CardsColumns[0], CardsColumns[4], CardsColumns[3]},
+			},
+		},
 	}
 	// CommentsColumns holds the columns for the "comments" table.
 	CommentsColumns = []*schema.Column{
