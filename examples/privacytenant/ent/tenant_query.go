@@ -295,6 +295,9 @@ func (tq *TenantQuery) prepareQuery(ctx context.Context) error {
 		}
 		tq.sql = prev
 	}
+	if tenant.Policy == nil {
+		return errors.New("ent: uninitialized tenant.Policy (forgotten import ent/runtime?)")
+	}
 	if err := tenant.Policy.EvalQuery(ctx, tq); err != nil {
 		return err
 	}
