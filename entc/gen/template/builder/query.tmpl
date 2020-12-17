@@ -355,6 +355,9 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 		{{ $receiver }}.{{ $.Storage }} = prev
 	}
 	{{- if $.NumPolicy }}
+		if {{ $.Package }}.Policy == nil {
+			return errors.New("{{ $pkg }}: uninitialized {{ $.Package }}.Policy (forgotten import {{ $pkg }}/runtime?)")
+		}
 		if err := {{ $.Package }}.Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
 			return err
 		}

@@ -370,6 +370,9 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 		}
 		gq.sql = prev
 	}
+	if group.Policy == nil {
+		return errors.New("ent: uninitialized group.Policy (forgotten import ent/runtime?)")
+	}
 	if err := group.Policy.EvalQuery(ctx, gq); err != nil {
 		return err
 	}

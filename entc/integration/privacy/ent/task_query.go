@@ -370,6 +370,9 @@ func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 		}
 		tq.sql = prev
 	}
+	if task.Policy == nil {
+		return errors.New("ent: uninitialized task.Policy (forgotten import ent/runtime?)")
+	}
 	if err := task.Policy.EvalQuery(ctx, tq); err != nil {
 		return err
 	}
