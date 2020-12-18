@@ -129,6 +129,7 @@ func init() {
         {{- with $idx := $n.MixedInFields }}
             {{- range $i := $idx }}
                 {{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
+                _ = {{ $pkg }}MixinFields{{ $i }}
             {{- end }}
 		{{- end }}
 		{{- $fields := $n.Fields }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}
