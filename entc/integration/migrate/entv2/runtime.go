@@ -17,6 +17,7 @@ import (
 func init() {
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescMixedString is the schema descriptor for mixed_string field.

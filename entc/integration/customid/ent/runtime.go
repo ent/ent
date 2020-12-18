@@ -31,6 +31,7 @@ func init() {
 	blob.DefaultID = blobDescID.Default.(func() uuid.UUID)
 	carMixin := schema.Car{}.Mixin()
 	carMixinFields0 := carMixin[0].Fields()
+	_ = carMixinFields0
 	carFields := schema.Car{}.Fields()
 	_ = carFields
 	// carDescBeforeID is the schema descriptor for before_id field.
@@ -47,6 +48,7 @@ func init() {
 	car.IDValidator = carDescID.Validators[0].(func(int) error)
 	mixinidMixin := schema.MixinID{}.Mixin()
 	mixinidMixinFields0 := mixinidMixin[0].Fields()
+	_ = mixinidMixinFields0
 	mixinidFields := schema.MixinID{}.Fields()
 	_ = mixinidFields
 	// mixinidDescID is the schema descriptor for id field.
