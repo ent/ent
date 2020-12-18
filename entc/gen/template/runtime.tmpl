@@ -148,45 +148,45 @@ func init() {
 					{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
 				{{- end }}
 			{{- end }}
-		{{- if and $f.Default (not $f.IsEnum) }}
-			{{- $default := print $pkg "." $f.DefaultName }}
-			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-			{{- $defaultType := print $f.Type.Type }}{{ if or $f.IsTime $f.IsUUID }}{{ $defaultType = print "func() " $f.Type }}{{ end }}
-			{{- if and $f.HasGoType (not (hasPrefix $defaultType "func")) }}
-				{{ $default }} = {{ $f.Type }}({{ $desc }}.Default.({{ $defaultType }}))
-			{{- else }}
-				{{ $default }} = {{ $desc }}.Default.({{ $defaultType }})
+			{{- if and $f.Default (not $f.IsEnum) }}
+				{{- $default := print $pkg "." $f.DefaultName }}
+				// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
+				{{- $defaultType := print $f.Type.Type }}{{ if or $f.IsTime $f.IsUUID }}{{ $defaultType = print "func() " $f.Type }}{{ end }}
+				{{- if and $f.HasGoType (not (hasPrefix $defaultType "func")) }}
+					{{ $default }} = {{ $f.Type }}({{ $desc }}.Default.({{ $defaultType }}))
+				{{- else }}
+					{{ $default }} = {{ $desc }}.Default.({{ $defaultType }})
+				{{- end }}
 			{{- end }}
-		{{- end }}
-		{{- if $f.UpdateDefault }}
-			{{- $default := print $pkg "." $f.UpdateDefaultName }}
-			// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
-			{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
-		{{- end }}
-		{{- with $f.Validators }}
-			{{- $name := print $pkg "." $f.Validator }}
-			{{- $type :=  printf "func (%s) error" $f.Type.Type }}
-			// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
-			{{- if eq $f.Validators 1 }}
-				{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
-			{{- else }}
-				{{ $name }} = func() {{ $type }} {
-					validators := {{ $desc }}.Validators
-					fns := [...]func({{ $f.Type }}) error {
-						{{- range $j, $n := xrange $f.Validators }}
-							validators[{{ $j }}].(func({{ $f.Type.Type }}) error),
-						{{- end }}
-					}
-					return func({{ $f.BuilderField }} {{ $f.Type }}) error {
-						for _, fn := range fns {
-							if err := fn({{ $f.BuilderField }}); err != nil {
-								return err
-							}
+			{{- if $f.UpdateDefault }}
+				{{- $default := print $pkg "." $f.UpdateDefaultName }}
+				// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
+				{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
+			{{- end }}
+			{{- with $f.Validators }}
+				{{- $name := print $pkg "." $f.Validator }}
+				{{- $type :=  printf "func (%s) error" $f.Type.Type }}
+				// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
+				{{- if eq $f.Validators 1 }}
+					{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
+				{{- else }}
+					{{ $name }} = func() {{ $type }} {
+						validators := {{ $desc }}.Validators
+						fns := [...]func({{ $f.Type }}) error {
+							{{- range $j, $n := xrange $f.Validators }}
+								validators[{{ $j }}].(func({{ $f.Type.Type }}) error),
+							{{- end }}
 						}
-						return nil
-					}
-				}()
-			{{- end }}
+						return func({{ $f.BuilderField }} {{ $f.Type }}) error {
+							for _, fn := range fns {
+								if err := fn({{ $f.BuilderField }}); err != nil {
+									return err
+								}
+							}
+							return nil
+						}
+					}()
+				{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}
