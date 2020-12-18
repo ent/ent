@@ -56,7 +56,7 @@ type {{ $mutation }} struct {
 		{{- if $e.Unique }}
 			{{ $e.BuilderField }} *{{ $e.Type.ID.Type }}
 		{{- else }}
-            {{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
+			{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 			removed{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 		{{- end }}
 		cleared{{ $e.BuilderField }} bool

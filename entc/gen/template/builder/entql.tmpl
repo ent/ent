@@ -5,8 +5,8 @@ in the LICENSE file in the root directory of this source tree.
 */}}
 
 {{ define "entql" }}
-    {{ $tmpl := printf "dialect/%s/entql" $.Storage }}
-    {{ if hasTemplate $tmpl }}
-        {{ xtemplate $tmpl . }}
-    {{ end }}
+	{{ $tmpl := printf "dialect/%s/entql" $.Storage }}
+	{{ if hasTemplate $tmpl }}
+		{{ xtemplate $tmpl . }}
+	{{ end }}
 {{ end }}

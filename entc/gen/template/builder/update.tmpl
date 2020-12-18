@@ -277,7 +277,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	// check runs all checks and user-defined validators on the builder.
 	func ({{ $receiver }} *{{ $builder }}) check() error {
 		{{- range $f := $.Fields }}
-	        {{- with and (or $f.Validators $f.IsEnum) (not $f.Immutable) }}
+			{{- with and (or $f.Validators $f.IsEnum) (not $f.Immutable) }}
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- $basic := $f.BasicType "v" }}
 					if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {

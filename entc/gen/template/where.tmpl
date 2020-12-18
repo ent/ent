@@ -39,14 +39,14 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
 	{{ $comparable := $f.ConvertedToBasic }}
 	{{- if and $hasP $comparable }}
-        {{ $arg := "v" }}
+		{{ $arg := "v" }}
 		{{ $func := $f.StructField }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
 		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
 			{{- if $f.HasGoType }}
 				vc := {{ $f.BasicType "v" }}
-                {{- $arg = "vc" }}
-            {{- end }}
+				{{- $arg = "vc" }}
+			{{- end }}
 			return predicate.{{ $.Name }}(
 				{{- with extend $ "Arg" $arg "Field" $f -}}
 					{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
@@ -71,7 +71,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		{{- if $op.Variadic }}
 			v := make([]interface{}, len({{ $arg }}))
 			for i := range v {
-            			{{- with $f.BasicType (printf "%s[i]" $arg) }}
+				{{- with $f.BasicType (printf "%s[i]" $arg) }}
 					v[i] = {{ . }}
 				{{- else }}
 					v[i] = {{ $arg }}[i]

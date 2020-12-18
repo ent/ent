@@ -37,7 +37,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Type: "{{ $n.Name }}",
 			Fields: map[string]*sqlgraph.FieldSpec{
 				{{- range $f := $n.Fields }}
-                    {{ $n.Package }}.{{ $f.Constant }}: {Type: field.{{ $f.Type.ConstName }}, Column: {{ $n.Package }}.{{ $f.Constant }}},
+					{{ $n.Package }}.{{ $f.Constant }}: {Type: field.{{ $f.Type.ConstName }}, Column: {{ $n.Package }}.{{ $f.Constant }}},
 				{{- end }}
 			},
 		}
@@ -125,7 +125,7 @@ type predicateAdder interface {
 		}
 	{{ end }}
 
-    {{ range $e := $n.Edges }}
+	{{ range $e := $n.Edges }}
 		{{ $func := print "WhereHas" $e.StructField }}
 		// {{ $func }} applies a predicate to check if query has an edge {{ $e.Name }}.
 		func (f *{{ $filter }}) {{ $func }}() {
@@ -141,7 +141,7 @@ type predicateAdder interface {
 				}
 			})))
 		}
-    {{ end }}
+	{{ end }}
 {{ end }}
 
 {{ end }}
