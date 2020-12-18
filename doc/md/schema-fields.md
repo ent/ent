@@ -213,6 +213,9 @@ func (Card) Fields() []ent.Field {
 			Optional().
 			// A ValueScanner type.
 			GoType(&sql.NullString{}),
+		field.Enum("role").
+			// A convertible type to string.
+			GoType(role.Unknown),
 	}
 }
 ```
