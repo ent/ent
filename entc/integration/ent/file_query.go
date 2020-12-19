@@ -18,6 +18,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
 	"github.com/facebook/ent/entc/integration/ent/file"
 	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/group"
 	"github.com/facebook/ent/entc/integration/ent/predicate"
 	"github.com/facebook/ent/entc/integration/ent/user"
 	"github.com/facebook/ent/schema/field"
@@ -31,10 +32,11 @@ type FileQuery struct {
 	order      []OrderFunc
 	predicates []predicate.File
 	// eager-loading edges.
-	withOwner *UserQuery
-	withType  *FileTypeQuery
-	withField *FieldTypeQuery
-	withFKs   bool
+	withOwner     *UserQuery
+	withType      *FileTypeQuery
+	withField     *FieldTypeQuery
+	withFileGroup *GroupQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -123,6 +125,28 @@ func (fq *FileQuery) QueryField() *FieldTypeQuery {
 			sqlgraph.From(file.Table, file.FieldID, selector),
 			sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, file.FieldTable, file.FieldColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFileGroup chains the current query on the file_group edge.
+func (fq *FileQuery) QueryFileGroup() *GroupQuery {
+	query := &GroupQuery{config: fq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := fq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.FileGroupTable, file.FileGroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,14 +324,15 @@ func (fq *FileQuery) Clone() *FileQuery {
 		return nil
 	}
 	return &FileQuery{
-		config:     fq.config,
-		limit:      fq.limit,
-		offset:     fq.offset,
-		order:      append([]OrderFunc{}, fq.order...),
-		predicates: append([]predicate.File{}, fq.predicates...),
-		withOwner:  fq.withOwner.Clone(),
-		withType:   fq.withType.Clone(),
-		withField:  fq.withField.Clone(),
+		config:        fq.config,
+		limit:         fq.limit,
+		offset:        fq.offset,
+		order:         append([]OrderFunc{}, fq.order...),
+		predicates:    append([]predicate.File{}, fq.predicates...),
+		withOwner:     fq.withOwner.Clone(),
+		withType:      fq.withType.Clone(),
+		withField:     fq.withField.Clone(),
+		withFileGroup: fq.withFileGroup.Clone(),
 		// clone intermediate query.
 		sql:  fq.sql.Clone(),
 		path: fq.path,
@@ -344,6 +369,17 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 		opt(query)
 	}
 	fq.withField = query
+	return fq
+}
+
+//  WithFileGroup tells the query-builder to eager-loads the nodes that are connected to
+// the "file_group" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithFileGroup(opts ...func(*GroupQuery)) *FileQuery {
+	query := &GroupQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withFileGroup = query
 	return fq
 }
 
@@ -414,13 +450,14 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		nodes       = []*File{}
 		withFKs     = fq.withFKs
 		_spec       = fq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			fq.withOwner != nil,
 			fq.withType != nil,
 			fq.withField != nil,
+			fq.withFileGroup != nil,
 		}
 	)
-	if fq.withOwner != nil || fq.withType != nil {
+	if fq.withOwner != nil || fq.withType != nil || fq.withFileGroup != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -454,7 +491,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*File)
 		for i := range nodes {
-			if fk := nodes[i].user_files; fk != nil {
+			if fk := nodes[i].owner_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -467,7 +504,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_files" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Owner = n
@@ -479,7 +516,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*File)
 		for i := range nodes {
-			if fk := nodes[i].file_type_files; fk != nil {
+			if fk := nodes[i].type_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -492,7 +529,7 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "type_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Type = n
@@ -517,15 +554,40 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.file_field
+			fk := n.file_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "file_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "file_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Field = append(node.Edges.Field, n)
+		}
+	}
+
+	if query := fq.withFileGroup; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*File)
+		for i := range nodes {
+			if fk := nodes[i].file_group_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(group.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "file_group_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.FileGroup = n
+			}
 		}
 	}
 

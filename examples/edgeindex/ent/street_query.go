@@ -379,7 +379,7 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Street)
 		for i := range nodes {
-			if fk := nodes[i].city_streets; fk != nil {
+			if fk := nodes[i].city_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -392,7 +392,7 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "city_streets" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "city_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.City = n

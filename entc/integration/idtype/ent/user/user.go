@@ -26,7 +26,7 @@ const (
 	// SpouseTable is the table the holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
-	SpouseColumn = "user_spouse"
+	SpouseColumn = "spouse_id"
 	// FollowersTable is the table the holds the followers relation/edge. The primary key declared below.
 	FollowersTable = "user_following"
 	// FollowingTable is the table the holds the following relation/edge. The primary key declared below.
@@ -41,7 +41,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"user_spouse",
+	"spouse_id",
 }
 
 var (

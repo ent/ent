@@ -55,11 +55,12 @@ func (User) Edges() []ent.Edge {
 		edge.To("pets", Pet.Type),
 		edge.To("files", File.Type),
 		edge.To("groups", Group.Type),
-		edge.To("friends", User.Type),
+		edge.ToFrom("friends", User.Type),
 		edge.To("following", User.Type).From("followers"),
 		edge.To("team", Pet.Type).Unique(),
-		edge.To("spouse", User.Type).Unique(),
+		edge.ToFrom("spouse", User.Type).Unique(),
 		edge.To("parent", User.Type).Unique().From("children"),
+		edge.From("blocked_group", Group.Type).Ref("blocked").Unique(),
 	}
 }
 

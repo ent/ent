@@ -37,13 +37,13 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "card" package.
 	CardsInverseTable = "cards"
 	// CardsColumn is the table column denoting the cards relation/edge.
-	CardsColumn = "user_cards"
+	CardsColumn = "owner_id"
 	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "user_friends"
 	// BestFriendTable is the table the holds the best_friend relation/edge.
 	BestFriendTable = "users"
 	// BestFriendColumn is the table column denoting the best_friend relation/edge.
-	BestFriendColumn = "user_best_friend"
+	BestFriendColumn = "best_friend_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -56,7 +56,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"user_best_friend",
+	"best_friend_id",
 }
 
 var (

@@ -88,11 +88,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 	// the group and the users are connected to the same tenant.
 	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(nati).Save(admin)
 	if !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operatio to fail, since user (nati) is not connected to the same tenant")
+		return fmt.Errorf("expect operation to fail, since user (nati) is not connected to the same tenant")
 	}
 	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(nati, a8m).Save(admin)
 	if !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operatio to fail, since some users (nati) are not connected to the same tenant")
+		return fmt.Errorf("expect operation to fail, since some users (nati) are not connected to the same tenant")
 	}
 	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(a8m).Save(admin)
 	if err != nil {

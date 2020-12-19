@@ -61,7 +61,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "car" package.
 	CarInverseTable = "cars"
 	// CarColumn is the table column denoting the car relation/edge.
-	CarColumn = "user_car"
+	CarColumn = "owner_id"
 	// PetsTable is the table the holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.

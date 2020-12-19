@@ -35,18 +35,18 @@ const (
 	// ParentTable is the table the holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "user_children"
+	ParentColumn = "parent_id"
 	// ChildrenTable is the table the holds the children relation/edge.
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "user_children"
+	ChildrenColumn = "parent_id"
 	// PetsTable is the table the holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
-	PetsColumn = "user_pets"
+	PetsColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -56,7 +56,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"user_children",
+	"parent_id",
 }
 
 var (

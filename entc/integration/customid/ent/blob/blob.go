@@ -28,7 +28,7 @@ const (
 	// ParentTable is the table the holds the parent relation/edge.
 	ParentTable = "blobs"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "blob_parent"
+	ParentColumn = "parent_id"
 	// LinksTable is the table the holds the links relation/edge. The primary key declared below.
 	LinksTable = "blob_links"
 )
@@ -41,7 +41,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Blob type.
 var ForeignKeys = []string{
-	"blob_parent",
+	"parent_id",
 }
 
 var (

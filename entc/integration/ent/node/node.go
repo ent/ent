@@ -24,11 +24,11 @@ const (
 	// PrevTable is the table the holds the prev relation/edge.
 	PrevTable = "nodes"
 	// PrevColumn is the table column denoting the prev relation/edge.
-	PrevColumn = "node_next"
+	PrevColumn = "prev_id"
 	// NextTable is the table the holds the next relation/edge.
 	NextTable = "nodes"
 	// NextColumn is the table column denoting the next relation/edge.
-	NextColumn = "node_next"
+	NextColumn = "prev_id"
 )
 
 // Columns holds all SQL columns for node fields.
@@ -39,7 +39,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Node type.
 var ForeignKeys = []string{
-	"node_next",
+	"prev_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

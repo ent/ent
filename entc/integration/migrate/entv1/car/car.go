@@ -25,7 +25,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "user_car"
+	OwnerColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for car fields.
@@ -35,7 +35,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Car type.
 var ForeignKeys = []string{
-	"user_car",
+	"owner_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

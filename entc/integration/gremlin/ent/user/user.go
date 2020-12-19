@@ -56,6 +56,8 @@ const (
 	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
+	// EdgeBlockedGroup holds the string denoting the blocked_group edge name in mutations.
+	EdgeBlockedGroup = "blocked_group"
 
 	// CardLabel holds the string label denoting the card edge type in the database.
 	CardLabel = "user_card"
@@ -79,6 +81,8 @@ const (
 	ChildrenInverseLabel = "user_parent"
 	// ParentLabel holds the string label denoting the parent edge type in the database.
 	ParentLabel = "user_parent"
+	// BlockedGroupInverseLabel holds the string label denoting the blocked_group inverse edge type in the database.
+	BlockedGroupInverseLabel = "group_blocked"
 )
 
 var (

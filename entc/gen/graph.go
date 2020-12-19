@@ -111,6 +111,13 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 		check(resolve(t), "resolve %q relations", t.Name)
 	}
 	for _, t := range g.Nodes {
+		for _, e := range t.Edges {
+			if e.Rel.Type == Unk {
+				return nil, fmt.Errorf("edge %s.%s is missing for inverse edge", e.Owner.Name, e.Name)
+			}
+		}
+	}
+	for _, t := range g.Nodes {
 		check(t.resolveFKs(), "set %q foreign-keys", t.Name)
 	}
 	for i := range schemas {
@@ -245,6 +252,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Name:        e.Name,
 				Owner:       t,
 				Unique:      e.Unique,
+				Bidi:        e.Bidi,
 				Optional:    !e.Required,
 				StructTag:   e.Tag,
 				Annotations: e.Annotations,
@@ -304,13 +312,11 @@ func (g *Graph) addEdges(schema *load.Schema) {
 // 	 - A have a unique edge (E) to B, and B have a back-reference unique edge (E') for E.
 // 	 - A have a unique edge (E) to A.
 //
-// 	O2M (The "Many" side, keeps a reference to the "One" side).
-// 	 - A have an edge (E) to B (not unique), and B doesn't have a back-reference edge for E.
-// 	 - A have an edge (E) to B (not unique), and B have a back-reference unique edge (E') for E.
+// 	O2M (The "One" side, keeps a reference to the "Many" side).
+// 	 - A(One) have an edge (E) to B (not unique), and B(Many) have a back-reference unique edge (E') for E.
 //
 // 	M2O (The "Many" side, holds the reference to the "One" side).
-// 	 - A have a unique edge (E) to B, and B doesn't have a back-reference edge for E.
-// 	 - A have a unique edge (E) to B, and B have a back-reference non-unique edge (E') for E.
+// 	 - A(Many) have a unique edge (E) to B, and B(One) have a back-reference non-unique edge (E') for E.
 //
 // 	M2M
 // 	 - A have an edge (E) to B (not unique), and B have a back-reference non-unique edge (E') for E.
@@ -333,7 +339,7 @@ func resolve(t *Type) error {
 			table := t.Table()
 			// Name the foreign-key column in a format that wouldn't change even if an inverse
 			// edge is dropped (or added). The format is: "<Edge-Owner>_<Edge-Name>".
-			column := fmt.Sprintf("%s_%s", e.Type.Label(), snake(ref.Name))
+			column := snake(e.Name) + "_id"
 			switch a, b := ref.Unique, e.Unique; {
 			// If the relation column is in the inverse side/table. The rule is simple, if assoc is O2M,
 			// then inverse is M2O and the relation is in its table.
@@ -346,6 +352,7 @@ func resolve(t *Type) error {
 			case a && !b:
 				e.Rel.Type, ref.Rel.Type = O2M, M2O
 				table = e.Type.Table()
+				column = snake(ref.Name) + "_id"
 
 			case !a && !b:
 				e.Rel.Type, ref.Rel.Type = M2M, M2M
@@ -367,27 +374,27 @@ func resolve(t *Type) error {
 		// Assoc with uninitialized relation.
 		case !e.IsInverse() && e.Rel.Type == Unk:
 			switch {
-			case !e.Unique && e.Type == t:
+			case !e.Unique && e.Bidi:
+				if e.Type != t {
+					return fmt.Errorf("bi-directional edge %s.%s must be defined on the same type as edge owner, but got %s", t.Name, e.Name, e.Type.Name)
+				}
 				e.Rel.Type = M2M
-				e.Bidi = true
 				e.Rel.Table = t.Label() + "_" + e.Name
 				e.Rel.Columns = []string{e.Owner.Label() + "_id", rules.Singularize(e.Name) + "_id"}
-			case e.Unique && e.Type == t:
+			case e.Unique && e.Bidi:
+				if e.Type != t {
+					return fmt.Errorf("bi-directional edge %s.%s must be defined on the same type as edge owner, but got %s", t.Name, e.Name, e.Type.Name)
+				}
 				e.Rel.Type = O2O
-				e.Bidi = true
 				e.Rel.Table = t.Table()
-			case e.Unique:
-				e.Rel.Type = M2O
-				e.Rel.Table = t.Table()
-			default:
-				e.Rel.Type = O2M
-				e.Rel.Table = e.Type.Table()
-			}
-			if !e.M2M() {
-				e.Rel.Columns = []string{fmt.Sprintf("%s_%s", t.Label(), snake(e.Name))}
+				// Unlike assoc edges with inverse, we need to choose a unique name for the
+				// column in order to no conflict with other types that point to this type.
+				e.Rel.Columns = []string{fmt.Sprintf("%s_id", snake(rules.Singularize(e.Name)))}
 			}
 		}
+
 	}
+
 	return nil
 }
 

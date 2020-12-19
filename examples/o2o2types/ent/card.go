@@ -27,8 +27,8 @@ type Card struct {
 	Number string `json:"number,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
-	Edges     CardEdges `json:"edges"`
-	user_card *int
+	Edges    CardEdges `json:"edges"`
+	owner_id *int
 }
 
 // CardEdges holds the relations/edges for other nodes in the graph.
@@ -66,7 +66,7 @@ func (*Card) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Card) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // user_card
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
@@ -95,10 +95,10 @@ func (c *Card) assignValues(values ...interface{}) error {
 	values = values[2:]
 	if len(values) == len(card.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_card", value)
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
 		} else if value.Valid {
-			c.user_card = new(int)
-			*c.user_card = int(value.Int64)
+			c.owner_id = new(int)
+			*c.owner_id = int(value.Int64)
 		}
 	}
 	return nil

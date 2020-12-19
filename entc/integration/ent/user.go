@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/card"
+	"github.com/facebook/ent/entc/integration/ent/group"
 	"github.com/facebook/ent/entc/integration/ent/pet"
 	"github.com/facebook/ent/entc/integration/ent/user"
 )
@@ -41,10 +42,10 @@ type User struct {
 	SSOCert string `json:"SSOCert,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges         UserEdges `json:"edges"`
-	group_blocked *int
-	user_spouse   *int
-	user_parent   *int
+	Edges            UserEdges `json:"edges"`
+	blocked_group_id *int
+	spouse_id        *int
+	parent_id        *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -71,9 +72,11 @@ type UserEdges struct {
 	Children []*User
 	// Parent holds the value of the parent edge.
 	Parent *User
+	// BlockedGroup holds the value of the blocked_group edge.
+	BlockedGroup *Group
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
+	loadedTypes [12]bool
 }
 
 // CardOrErr returns the Card value or an error if the edge
@@ -195,6 +198,20 @@ func (e UserEdges) ParentOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "parent"}
 }
 
+// BlockedGroupOrErr returns the BlockedGroup value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) BlockedGroupOrErr() (*Group, error) {
+	if e.loadedTypes[11] {
+		if e.BlockedGroup == nil {
+			// The edge blocked_group was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: group.Label}
+		}
+		return e.BlockedGroup, nil
+	}
+	return nil, &NotLoadedError{edge: "blocked_group"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
@@ -214,9 +231,9 @@ func (*User) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*User) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // group_blocked
-		&sql.NullInt64{}, // user_spouse
-		&sql.NullInt64{}, // user_parent
+		&sql.NullInt64{}, // blocked_group_id
+		&sql.NullInt64{}, // spouse_id
+		&sql.NullInt64{}, // parent_id
 	}
 }
 
@@ -280,22 +297,22 @@ func (u *User) assignValues(values ...interface{}) error {
 	values = values[9:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field group_blocked", value)
+			return fmt.Errorf("unexpected type %T for edge-field blocked_group_id", value)
 		} else if value.Valid {
-			u.group_blocked = new(int)
-			*u.group_blocked = int(value.Int64)
+			u.blocked_group_id = new(int)
+			*u.blocked_group_id = int(value.Int64)
 		}
 		if value, ok := values[1].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
+			return fmt.Errorf("unexpected type %T for edge-field spouse_id", value)
 		} else if value.Valid {
-			u.user_spouse = new(int)
-			*u.user_spouse = int(value.Int64)
+			u.spouse_id = new(int)
+			*u.spouse_id = int(value.Int64)
 		}
 		if value, ok := values[2].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_parent", value)
+			return fmt.Errorf("unexpected type %T for edge-field parent_id", value)
 		} else if value.Valid {
-			u.user_parent = new(int)
-			*u.user_parent = int(value.Int64)
+			u.parent_id = new(int)
+			*u.parent_id = int(value.Int64)
 		}
 	}
 	return nil
@@ -354,6 +371,11 @@ func (u *User) QueryChildren() *UserQuery {
 // QueryParent queries the parent edge of the User.
 func (u *User) QueryParent() *UserQuery {
 	return (&UserClient{config: u.config}).QueryParent(u)
+}
+
+// QueryBlockedGroup queries the blocked_group edge of the User.
+func (u *User) QueryBlockedGroup() *GroupQuery {
+	return (&UserClient{config: u.config}).QueryBlockedGroup(u)
 }
 
 // Update returns a builder for updating this User.

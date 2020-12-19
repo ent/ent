@@ -1094,6 +1094,24 @@ func HasParentWith(preds ...predicate.User) predicate.User {
 	})
 }
 
+// HasBlockedGroup applies the HasEdge predicate on the "blocked_group" edge.
+func HasBlockedGroup() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.InE(BlockedGroupInverseLabel).InV()
+	})
+}
+
+// HasBlockedGroupWith applies the HasEdge predicate on the "blocked_group" edge with a given conditions (other predicates).
+func HasBlockedGroupWith(preds ...predicate.Group) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		tr := __.OutV()
+		for _, p := range preds {
+			p(tr)
+		}
+		t.InE(BlockedGroupInverseLabel).Where(tr).InV()
+	})
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(tr *dsl.Traversal) {

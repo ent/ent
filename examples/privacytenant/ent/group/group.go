@@ -31,7 +31,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "tenant" package.
 	TenantInverseTable = "tenants"
 	// TenantColumn is the table column denoting the tenant relation/edge.
-	TenantColumn = "group_tenant"
+	TenantColumn = "tenant_id"
 	// UsersTable is the table the holds the users relation/edge. The primary key declared below.
 	UsersTable = "user_groups"
 	// UsersInverseTable is the table name for the User entity.
@@ -47,7 +47,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Group type.
 var ForeignKeys = []string{
-	"group_tenant",
+	"tenant_id",
 }
 
 var (

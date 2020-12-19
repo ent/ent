@@ -33,7 +33,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "file" package.
 	FilesInverseTable = "files"
 	// FilesColumn is the table column denoting the files relation/edge.
-	FilesColumn = "file_type_files"
+	FilesColumn = "type_id"
 )
 
 // Columns holds all SQL columns for filetype fields.

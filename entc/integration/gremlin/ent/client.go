@@ -471,6 +471,17 @@ func (c *FieldTypeClient) GetX(ctx context.Context, id string) *FieldType {
 	return obj
 }
 
+// QueryFile queries the file edge of a FieldType.
+func (c *FieldTypeClient) QueryFile(ft *FieldType) *FileQuery {
+	query := &FileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+
+		fromV = g.V(ft.ID).InE(file.FieldLabel).OutV()
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *FieldTypeClient) Hooks() []Hook {
 	return c.hooks.FieldType
@@ -587,6 +598,17 @@ func (c *FileClient) QueryField(f *File) *FieldTypeQuery {
 	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(f.ID).OutE(file.FieldLabel).InV()
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFileGroup queries the file_group edge of a File.
+func (c *FileClient) QueryFileGroup(f *File) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+
+		fromV = g.V(f.ID).InE(group.FilesLabel).OutV()
 		return fromV, nil
 	}
 	return query
@@ -1709,6 +1731,17 @@ func (c *UserClient) QueryParent(u *User) *UserQuery {
 	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
 
 		fromV = g.V(u.ID).OutE(user.ParentLabel).InV()
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBlockedGroup queries the blocked_group edge of a User.
+func (c *UserClient) QueryBlockedGroup(u *User) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *dsl.Traversal, _ error) {
+
+		fromV = g.V(u.ID).InE(group.BlockedLabel).OutV()
 		return fromV, nil
 	}
 	return query

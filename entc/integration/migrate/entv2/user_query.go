@@ -455,13 +455,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_car
+			fk := n.owner_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_car" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_car" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Car = append(node.Edges.Car, n)
 		}

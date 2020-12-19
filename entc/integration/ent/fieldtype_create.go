@@ -17,6 +17,7 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/schema/field"
@@ -560,6 +561,25 @@ func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	return ftc
 }
 
+// SetFileID sets the file edge to File by id.
+func (ftc *FieldTypeCreate) SetFileID(id int) *FieldTypeCreate {
+	ftc.mutation.SetFileID(id)
+	return ftc
+}
+
+// SetNillableFileID sets the file edge to File by id if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableFileID(id *int) *FieldTypeCreate {
+	if id != nil {
+		ftc = ftc.SetFileID(*id)
+	}
+	return ftc
+}
+
+// SetFile sets the file edge to File.
+func (ftc *FieldTypeCreate) SetFile(f *File) *FieldTypeCreate {
+	return ftc.SetFileID(f.ID)
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -1070,6 +1090,25 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldUUID,
 		})
 		_node.UUID = value
+	}
+	if nodes := ftc.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fieldtype.FileTable,
+			Columns: []string{fieldtype.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

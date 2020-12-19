@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebook/ent/dialect/gremlin"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
@@ -68,9 +69,11 @@ type UserEdges struct {
 	Children []*User
 	// Parent holds the value of the parent edge.
 	Parent *User
+	// BlockedGroup holds the value of the blocked_group edge.
+	BlockedGroup *Group
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
+	loadedTypes [12]bool
 }
 
 // CardOrErr returns the Card value or an error if the edge
@@ -192,6 +195,20 @@ func (e UserEdges) ParentOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "parent"}
 }
 
+// BlockedGroupOrErr returns the BlockedGroup value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) BlockedGroupOrErr() (*Group, error) {
+	if e.loadedTypes[11] {
+		if e.BlockedGroup == nil {
+			// The edge blocked_group was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: group.Label}
+		}
+		return e.BlockedGroup, nil
+	}
+	return nil, &NotLoadedError{edge: "blocked_group"}
+}
+
 // FromResponse scans the gremlin response data into User.
 func (u *User) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
@@ -279,6 +296,11 @@ func (u *User) QueryChildren() *UserQuery {
 // QueryParent queries the parent edge of the User.
 func (u *User) QueryParent() *UserQuery {
 	return (&UserClient{config: u.config}).QueryParent(u)
+}
+
+// QueryBlockedGroup queries the blocked_group edge of the User.
+func (u *User) QueryBlockedGroup() *GroupQuery {
+	return (&UserClient{config: u.config}).QueryBlockedGroup(u)
 }
 
 // Update returns a builder for updating this User.

@@ -31,20 +31,20 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "user_pets"
+	OwnerColumn = "owner_id"
 	// CarsTable is the table the holds the cars relation/edge.
 	CarsTable = "cars"
 	// CarsInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.
 	CarsInverseTable = "cars"
 	// CarsColumn is the table column denoting the cars relation/edge.
-	CarsColumn = "pet_cars"
+	CarsColumn = "owner_id"
 	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "pet_friends"
 	// BestFriendTable is the table the holds the best_friend relation/edge.
 	BestFriendTable = "pets"
 	// BestFriendColumn is the table column denoting the best_friend relation/edge.
-	BestFriendColumn = "pet_best_friend"
+	BestFriendColumn = "best_friend_id"
 )
 
 // Columns holds all SQL columns for pet fields.
@@ -54,8 +54,8 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
 var ForeignKeys = []string{
-	"pet_best_friend",
-	"user_pets",
+	"best_friend_id",
+	"owner_id",
 }
 
 var (

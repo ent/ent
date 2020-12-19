@@ -18,8 +18,27 @@ const (
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 
+	// EdgeGroups holds the string denoting the groups edge name in mutations.
+	EdgeGroups = "groups"
+	// EdgeUsers holds the string denoting the users edge name in mutations.
+	EdgeUsers = "users"
+
 	// Table holds the table name of the tenant in the database.
 	Table = "tenants"
+	// GroupsTable is the table the holds the groups relation/edge.
+	GroupsTable = "groups"
+	// GroupsInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	GroupsInverseTable = "groups"
+	// GroupsColumn is the table column denoting the groups relation/edge.
+	GroupsColumn = "tenant_id"
+	// UsersTable is the table the holds the users relation/edge.
+	UsersTable = "users"
+	// UsersInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UsersInverseTable = "users"
+	// UsersColumn is the table column denoting the users relation/edge.
+	UsersColumn = "tenant_id"
 )
 
 // Columns holds all SQL columns for tenant fields.

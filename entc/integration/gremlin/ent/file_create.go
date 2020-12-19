@@ -18,6 +18,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
@@ -141,6 +142,25 @@ func (fc *FileCreate) AddField(f ...*FieldType) *FileCreate {
 		ids[i] = f[i].ID
 	}
 	return fc.AddFieldIDs(ids...)
+}
+
+// SetFileGroupID sets the file_group edge to Group by id.
+func (fc *FileCreate) SetFileGroupID(id string) *FileCreate {
+	fc.mutation.SetFileGroupID(id)
+	return fc
+}
+
+// SetNillableFileGroupID sets the file_group edge to Group by id if the given value is not nil.
+func (fc *FileCreate) SetNillableFileGroupID(id *string) *FileCreate {
+	if id != nil {
+		fc = fc.SetFileGroupID(*id)
+	}
+	return fc
+}
+
+// SetFileGroup sets the file_group edge to Group.
+func (fc *FileCreate) SetFileGroup(g *Group) *FileCreate {
+	return fc.SetFileGroupID(g.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -267,6 +287,9 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
 		})
+	}
+	for _, id := range fc.mutation.FileGroupIDs() {
+		v.AddE(group.FilesLabel).From(g.V(id)).InV()
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)

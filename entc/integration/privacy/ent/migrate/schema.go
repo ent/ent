@@ -19,7 +19,7 @@ var (
 		{Name: "description", Type: field.TypeString, Nullable: true},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"planned", "in_progress", "closed"}, Default: "planned"},
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_tasks", Type: field.TypeInt, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{

@@ -112,8 +112,18 @@ const (
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
 
+	// EdgeFile holds the string denoting the file edge name in mutations.
+	EdgeFile = "file"
+
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
+	// FileTable is the table the holds the file relation/edge.
+	FileTable = "field_types"
+	// FileInverseTable is the table name for the File entity.
+	// It exists in this package in order to avoid circular dependency with the "file" package.
+	FileInverseTable = "files"
+	// FileColumn is the table column denoting the file relation/edge.
+	FileColumn = "file_id"
 )
 
 // Columns holds all SQL columns for fieldtype fields.
@@ -170,7 +180,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the FieldType type.
 var ForeignKeys = []string{
-	"file_field",
+	"file_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

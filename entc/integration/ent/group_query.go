@@ -503,13 +503,13 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.group_files
+			fk := n.file_group_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_files" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "file_group_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_files" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "file_group_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Files = append(node.Edges.Files, n)
 		}
@@ -532,13 +532,13 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.group_blocked
+			fk := n.blocked_group_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_blocked" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "blocked_group_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_blocked" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "blocked_group_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Blocked = append(node.Edges.Blocked, n)
 		}
@@ -612,7 +612,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Group)
 		for i := range nodes {
-			if fk := nodes[i].group_info; fk != nil {
+			if fk := nodes[i].info_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -625,7 +625,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_info" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "info_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Info = n

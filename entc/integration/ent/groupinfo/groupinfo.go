@@ -27,7 +27,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "group" package.
 	GroupsInverseTable = "groups"
 	// GroupsColumn is the table column denoting the groups relation/edge.
-	GroupsColumn = "group_info"
+	GroupsColumn = "info_id"
 )
 
 // Columns holds all SQL columns for groupinfo fields.

@@ -451,7 +451,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		ids := make([]uint64, 0, len(nodes))
 		nodeids := make(map[uint64][]*User)
 		for i := range nodes {
-			if fk := nodes[i].user_spouse; fk != nil {
+			if fk := nodes[i].spouse_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -464,7 +464,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_spouse" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "spouse_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Spouse = n

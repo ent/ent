@@ -111,6 +111,12 @@ const (
 	FieldMAC = "mac"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
+
+	// EdgeFile holds the string denoting the file edge name in mutations.
+	EdgeFile = "file"
+
+	// FileInverseLabel holds the string label denoting the file inverse edge type in the database.
+	FileInverseLabel = "file_field"
 )
 
 var (

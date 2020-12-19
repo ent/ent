@@ -318,6 +318,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		"Spec",
 	)
 	graph.MustAddE(
+		"file",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fieldtype.FileTable,
+			Columns: []string{fieldtype.FileColumn},
+			Bidi:    false,
+		},
+		"FieldType",
+		"File",
+	)
+	graph.MustAddE(
 		"owner",
 		&sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -352,6 +364,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"File",
 		"FieldType",
+	)
+	graph.MustAddE(
+		"file_group",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.FileGroupTable,
+			Columns: []string{file.FileGroupColumn},
+			Bidi:    false,
+		},
+		"File",
+		"Group",
 	)
 	graph.MustAddE(
 		"files",
@@ -616,6 +640,18 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		"User",
 		"User",
+	)
+	graph.MustAddE(
+		"blocked_group",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BlockedGroupTable,
+			Columns: []string{user.BlockedGroupColumn},
+			Bidi:    false,
+		},
+		"User",
+		"Group",
 	)
 	return graph
 }()
@@ -1041,6 +1077,20 @@ func (f *FieldTypeFilter) WhereUUID(p entql.ValueP) {
 	f.Where(p.Field(fieldtype.FieldUUID))
 }
 
+// WhereHasFile applies a predicate to check if query has an edge file.
+func (f *FieldTypeFilter) WhereHasFile() {
+	f.Where(entql.HasEdge("file"))
+}
+
+// WhereHasFileWith applies a predicate to check if query has an edge file with a given conditions (other predicates).
+func (f *FieldTypeFilter) WhereHasFileWith(preds ...predicate.File) {
+	f.Where(entql.HasEdgeWith("file", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (fq *FileQuery) addPredicate(pred func(s *sql.Selector)) {
 	fq.predicates = append(fq.predicates, pred)
@@ -1141,6 +1191,20 @@ func (f *FileFilter) WhereHasField() {
 // WhereHasFieldWith applies a predicate to check if query has an edge field with a given conditions (other predicates).
 func (f *FileFilter) WhereHasFieldWith(preds ...predicate.FieldType) {
 	f.Where(entql.HasEdgeWith("field", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasFileGroup applies a predicate to check if query has an edge file_group.
+func (f *FileFilter) WhereHasFileGroup() {
+	f.Where(entql.HasEdge("file_group"))
+}
+
+// WhereHasFileGroupWith applies a predicate to check if query has an edge file_group with a given conditions (other predicates).
+func (f *FileFilter) WhereHasFileGroupWith(preds ...predicate.Group) {
+	f.Where(entql.HasEdgeWith("file_group", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}
@@ -1954,6 +2018,20 @@ func (f *UserFilter) WhereHasParent() {
 // WhereHasParentWith applies a predicate to check if query has an edge parent with a given conditions (other predicates).
 func (f *UserFilter) WhereHasParentWith(preds ...predicate.User) {
 	f.Where(entql.HasEdgeWith("parent", sqlgraph.WrapFunc(func(s *sql.Selector) {
+		for _, p := range preds {
+			p(s)
+		}
+	})))
+}
+
+// WhereHasBlockedGroup applies a predicate to check if query has an edge blocked_group.
+func (f *UserFilter) WhereHasBlockedGroup() {
+	f.Where(entql.HasEdge("blocked_group"))
+}
+
+// WhereHasBlockedGroupWith applies a predicate to check if query has an edge blocked_group with a given conditions (other predicates).
+func (f *UserFilter) WhereHasBlockedGroupWith(preds ...predicate.Group) {
+	f.Where(entql.HasEdgeWith("blocked_group", sqlgraph.WrapFunc(func(s *sql.Selector) {
 		for _, p := range preds {
 			p(s)
 		}

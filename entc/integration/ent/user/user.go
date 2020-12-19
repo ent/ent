@@ -56,6 +56,8 @@ const (
 	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
+	// EdgeBlockedGroup holds the string denoting the blocked_group edge name in mutations.
+	EdgeBlockedGroup = "blocked_group"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -65,21 +67,21 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "card" package.
 	CardInverseTable = "cards"
 	// CardColumn is the table column denoting the card relation/edge.
-	CardColumn = "user_card"
+	CardColumn = "owner_id"
 	// PetsTable is the table the holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
-	PetsColumn = "user_pets"
+	PetsColumn = "owner_id"
 	// FilesTable is the table the holds the files relation/edge.
 	FilesTable = "files"
 	// FilesInverseTable is the table name for the File entity.
 	// It exists in this package in order to avoid circular dependency with the "file" package.
 	FilesInverseTable = "files"
 	// FilesColumn is the table column denoting the files relation/edge.
-	FilesColumn = "user_files"
+	FilesColumn = "owner_id"
 	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.
 	GroupsTable = "user_groups"
 	// GroupsInverseTable is the table name for the Group entity.
@@ -97,19 +99,26 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	TeamInverseTable = "pets"
 	// TeamColumn is the table column denoting the team relation/edge.
-	TeamColumn = "user_team"
+	TeamColumn = "team_id"
 	// SpouseTable is the table the holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
-	SpouseColumn = "user_spouse"
+	SpouseColumn = "spouse_id"
 	// ChildrenTable is the table the holds the children relation/edge.
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "user_parent"
+	ChildrenColumn = "parent_id"
 	// ParentTable is the table the holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "user_parent"
+	ParentColumn = "parent_id"
+	// BlockedGroupTable is the table the holds the blocked_group relation/edge.
+	BlockedGroupTable = "users"
+	// BlockedGroupInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	BlockedGroupInverseTable = "groups"
+	// BlockedGroupColumn is the table column denoting the blocked_group relation/edge.
+	BlockedGroupColumn = "blocked_group_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -128,9 +137,9 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"group_blocked",
-	"user_spouse",
-	"user_parent",
+	"blocked_group_id",
+	"spouse_id",
+	"parent_id",
 }
 
 var (

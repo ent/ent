@@ -16,6 +16,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
@@ -317,6 +318,25 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 	return uc.SetParentID(u.ID)
 }
 
+// SetBlockedGroupID sets the blocked_group edge to Group by id.
+func (uc *UserCreate) SetBlockedGroupID(id string) *UserCreate {
+	uc.mutation.SetBlockedGroupID(id)
+	return uc
+}
+
+// SetNillableBlockedGroupID sets the blocked_group edge to Group by id if the given value is not nil.
+func (uc *UserCreate) SetNillableBlockedGroupID(id *string) *UserCreate {
+	if id != nil {
+		uc = uc.SetBlockedGroupID(*id)
+	}
+	return uc
+}
+
+// SetBlockedGroup sets the blocked_group edge to Group.
+func (uc *UserCreate) SetBlockedGroup(g *Group) *UserCreate {
+	return uc.SetBlockedGroupID(g.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -520,6 +540,9 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 	}
 	for _, id := range uc.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
+	}
+	for _, id := range uc.mutation.BlockedGroupIDs() {
+		v.AddE(group.BlockedLabel).From(g.V(id)).InV()
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)

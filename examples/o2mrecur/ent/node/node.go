@@ -24,11 +24,11 @@ const (
 	// ParentTable is the table the holds the parent relation/edge.
 	ParentTable = "nodes"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "node_children"
+	ParentColumn = "parent_id"
 	// ChildrenTable is the table the holds the children relation/edge.
 	ChildrenTable = "nodes"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "node_children"
+	ChildrenColumn = "parent_id"
 )
 
 // Columns holds all SQL columns for node fields.
@@ -39,7 +39,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Node type.
 var ForeignKeys = []string{
-	"node_children",
+	"parent_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -548,6 +548,24 @@ func HasFieldWith(preds ...predicate.FieldType) predicate.File {
 	})
 }
 
+// HasFileGroup applies the HasEdge predicate on the "file_group" edge.
+func HasFileGroup() predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.InE(FileGroupInverseLabel).InV()
+	})
+}
+
+// HasFileGroupWith applies the HasEdge predicate on the "file_group" edge with a given conditions (other predicates).
+func HasFileGroupWith(preds ...predicate.Group) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		tr := __.OutV()
+		for _, p := range preds {
+			p(tr)
+		}
+		t.InE(FileGroupInverseLabel).Where(tr).InV()
+	})
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
 	return predicate.File(func(tr *dsl.Traversal) {

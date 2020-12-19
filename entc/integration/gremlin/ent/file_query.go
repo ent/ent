@@ -18,6 +18,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
@@ -30,9 +31,10 @@ type FileQuery struct {
 	order      []OrderFunc
 	predicates []predicate.File
 	// eager-loading edges.
-	withOwner *UserQuery
-	withType  *FileTypeQuery
-	withField *FieldTypeQuery
+	withOwner     *UserQuery
+	withType      *FileTypeQuery
+	withField     *FieldTypeQuery
+	withFileGroup *GroupQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
@@ -99,6 +101,20 @@ func (fq *FileQuery) QueryField() *FieldTypeQuery {
 		}
 		gremlin := fq.gremlinQuery()
 		fromU = gremlin.OutE(file.FieldLabel).InV()
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFileGroup chains the current query on the file_group edge.
+func (fq *FileQuery) QueryFileGroup() *GroupQuery {
+	query := &GroupQuery{config: fq.config}
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := fq.gremlinQuery()
+		fromU = gremlin.InE(group.FilesLabel).OutV()
 		return fromU, nil
 	}
 	return query
@@ -274,14 +290,15 @@ func (fq *FileQuery) Clone() *FileQuery {
 		return nil
 	}
 	return &FileQuery{
-		config:     fq.config,
-		limit:      fq.limit,
-		offset:     fq.offset,
-		order:      append([]OrderFunc{}, fq.order...),
-		predicates: append([]predicate.File{}, fq.predicates...),
-		withOwner:  fq.withOwner.Clone(),
-		withType:   fq.withType.Clone(),
-		withField:  fq.withField.Clone(),
+		config:        fq.config,
+		limit:         fq.limit,
+		offset:        fq.offset,
+		order:         append([]OrderFunc{}, fq.order...),
+		predicates:    append([]predicate.File{}, fq.predicates...),
+		withOwner:     fq.withOwner.Clone(),
+		withType:      fq.withType.Clone(),
+		withField:     fq.withField.Clone(),
+		withFileGroup: fq.withFileGroup.Clone(),
 		// clone intermediate query.
 		gremlin: fq.gremlin.Clone(),
 		path:    fq.path,
@@ -318,6 +335,17 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 		opt(query)
 	}
 	fq.withField = query
+	return fq
+}
+
+//  WithFileGroup tells the query-builder to eager-loads the nodes that are connected to
+// the "file_group" edge. The optional arguments used to configure the query builder of the edge.
+func (fq *FileQuery) WithFileGroup(opts ...func(*GroupQuery)) *FileQuery {
+	query := &GroupQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withFileGroup = query
 	return fq
 }
 

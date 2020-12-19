@@ -15,6 +15,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/google/uuid"
@@ -118,8 +119,34 @@ type FieldType struct {
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
 	// UUID holds the value of the "uuid" field.
-	UUID       uuid.UUID `json:"uuid,omitempty"`
-	file_field *int
+	UUID uuid.UUID `json:"uuid,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the FieldTypeQuery when eager-loading is set.
+	Edges   FieldTypeEdges `json:"edges"`
+	file_id *int
+}
+
+// FieldTypeEdges holds the relations/edges for other nodes in the graph.
+type FieldTypeEdges struct {
+	// File holds the value of the file edge.
+	File *File
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// FileOrErr returns the File value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e FieldTypeEdges) FileOrErr() (*File, error) {
+	if e.loadedTypes[0] {
+		if e.File == nil {
+			// The edge file was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: file.Label}
+		}
+		return e.File, nil
+	}
+	return nil, &NotLoadedError{edge: "file"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -179,7 +206,7 @@ func (*FieldType) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*FieldType) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // file_field
+		&sql.NullInt64{}, // file_id
 	}
 }
 
@@ -440,13 +467,18 @@ func (ft *FieldType) assignValues(values ...interface{}) error {
 	values = values[47:]
 	if len(values) == len(fieldtype.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
+			return fmt.Errorf("unexpected type %T for edge-field file_id", value)
 		} else if value.Valid {
-			ft.file_field = new(int)
-			*ft.file_field = int(value.Int64)
+			ft.file_id = new(int)
+			*ft.file_id = int(value.Int64)
 		}
 	}
 	return nil
+}
+
+// QueryFile queries the file edge of the FieldType.
+func (ft *FieldType) QueryFile() *FileQuery {
+	return (&FieldTypeClient{config: ft.config}).QueryFile(ft)
 }
 
 // Update returns a builder for updating this FieldType.

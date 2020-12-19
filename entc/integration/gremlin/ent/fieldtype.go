@@ -18,6 +18,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
 	"github.com/google/uuid"
 )
 
@@ -120,6 +121,32 @@ type FieldType struct {
 	MAC schema.MAC `json:"mac,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the FieldTypeQuery when eager-loading is set.
+	Edges FieldTypeEdges `json:"edges"`
+}
+
+// FieldTypeEdges holds the relations/edges for other nodes in the graph.
+type FieldTypeEdges struct {
+	// File holds the value of the file edge.
+	File *File
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// FileOrErr returns the File value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e FieldTypeEdges) FileOrErr() (*File, error) {
+	if e.loadedTypes[0] {
+		if e.File == nil {
+			// The edge file was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: file.Label}
+		}
+		return e.File, nil
+	}
+	return nil, &NotLoadedError{edge: "file"}
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -230,6 +257,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.MAC = scanft.MAC
 	ft.UUID = scanft.UUID
 	return nil
+}
+
+// QueryFile queries the file edge of the FieldType.
+func (ft *FieldType) QueryFile() *FileQuery {
+	return (&FieldTypeClient{config: ft.config}).QueryFile(ft)
 }
 
 // Update returns a builder for updating this FieldType.

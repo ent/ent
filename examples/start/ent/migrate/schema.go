@@ -17,7 +17,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "model", Type: field.TypeString},
 		{Name: "registered_at", Type: field.TypeTime},
-		{Name: "user_cars", Type: field.TypeInt, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// CarsTable holds the schema information for the "cars" table.
 	CarsTable = &schema.Table{

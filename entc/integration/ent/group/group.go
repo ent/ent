@@ -39,14 +39,14 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "file" package.
 	FilesInverseTable = "files"
 	// FilesColumn is the table column denoting the files relation/edge.
-	FilesColumn = "group_files"
+	FilesColumn = "file_group_id"
 	// BlockedTable is the table the holds the blocked relation/edge.
 	BlockedTable = "users"
 	// BlockedInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	BlockedInverseTable = "users"
 	// BlockedColumn is the table column denoting the blocked relation/edge.
-	BlockedColumn = "group_blocked"
+	BlockedColumn = "blocked_group_id"
 	// UsersTable is the table the holds the users relation/edge. The primary key declared below.
 	UsersTable = "user_groups"
 	// UsersInverseTable is the table name for the User entity.
@@ -58,7 +58,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "groupinfo" package.
 	InfoInverseTable = "group_infos"
 	// InfoColumn is the table column denoting the info relation/edge.
-	InfoColumn = "group_info"
+	InfoColumn = "info_id"
 )
 
 // Columns holds all SQL columns for group fields.
@@ -73,7 +73,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Group type.
 var ForeignKeys = []string{
-	"group_info",
+	"info_id",
 }
 
 var (

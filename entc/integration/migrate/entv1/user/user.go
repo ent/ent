@@ -50,22 +50,22 @@ const (
 	// ParentTable is the table the holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
-	ParentColumn = "user_children"
+	ParentColumn = "parent_id"
 	// ChildrenTable is the table the holds the children relation/edge.
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
-	ChildrenColumn = "user_children"
+	ChildrenColumn = "parent_id"
 	// SpouseTable is the table the holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
-	SpouseColumn = "user_spouse"
+	SpouseColumn = "spouse_id"
 	// CarTable is the table the holds the car relation/edge.
 	CarTable = "cars"
 	// CarInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.
 	CarInverseTable = "cars"
 	// CarColumn is the table column denoting the car relation/edge.
-	CarColumn = "user_car"
+	CarColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -84,8 +84,8 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"user_children",
-	"user_spouse",
+	"parent_id",
+	"spouse_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

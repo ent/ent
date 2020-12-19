@@ -16,6 +16,7 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
 	"github.com/facebook/ent/entc/integration/ent/predicate"
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
@@ -1017,9 +1018,34 @@ func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetFileID sets the file edge to File by id.
+func (ftu *FieldTypeUpdate) SetFileID(id int) *FieldTypeUpdate {
+	ftu.mutation.SetFileID(id)
+	return ftu
+}
+
+// SetNillableFileID sets the file edge to File by id if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableFileID(id *int) *FieldTypeUpdate {
+	if id != nil {
+		ftu = ftu.SetFileID(*id)
+	}
+	return ftu
+}
+
+// SetFile sets the file edge to File.
+func (ftu *FieldTypeUpdate) SetFile(f *File) *FieldTypeUpdate {
+	return ftu.SetFileID(f.ID)
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
+}
+
+// ClearFile clears the "file" edge to type File.
+func (ftu *FieldTypeUpdate) ClearFile() *FieldTypeUpdate {
+	ftu.mutation.ClearFile()
+	return ftu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1909,6 +1935,41 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUUID,
 			Column: fieldtype.FieldUUID,
 		})
+	}
+	if ftu.mutation.FileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fieldtype.FileTable,
+			Columns: []string{fieldtype.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ftu.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fieldtype.FileTable,
+			Columns: []string{fieldtype.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -2909,9 +2970,34 @@ func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetFileID sets the file edge to File by id.
+func (ftuo *FieldTypeUpdateOne) SetFileID(id int) *FieldTypeUpdateOne {
+	ftuo.mutation.SetFileID(id)
+	return ftuo
+}
+
+// SetNillableFileID sets the file edge to File by id if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableFileID(id *int) *FieldTypeUpdateOne {
+	if id != nil {
+		ftuo = ftuo.SetFileID(*id)
+	}
+	return ftuo
+}
+
+// SetFile sets the file edge to File.
+func (ftuo *FieldTypeUpdateOne) SetFile(f *File) *FieldTypeUpdateOne {
+	return ftuo.SetFileID(f.ID)
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
+}
+
+// ClearFile clears the "file" edge to type File.
+func (ftuo *FieldTypeUpdateOne) ClearFile() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearFile()
+	return ftuo
 }
 
 // Save executes the query and returns the updated entity.
@@ -3799,6 +3885,41 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Type:   field.TypeUUID,
 			Column: fieldtype.FieldUUID,
 		})
+	}
+	if ftuo.mutation.FileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fieldtype.FileTable,
+			Columns: []string{fieldtype.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ftuo.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fieldtype.FileTable,
+			Columns: []string{fieldtype.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &FieldType{config: ftuo.config}
 	_spec.Assign = _node.assignValues

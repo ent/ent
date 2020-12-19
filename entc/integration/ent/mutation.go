@@ -1305,6 +1305,8 @@ type FieldTypeMutation struct {
 	mac                        *schema.MAC
 	uuid                       *uuid.UUID
 	clearedFields              map[string]struct{}
+	file                       *int
+	clearedfile                bool
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
 	predicates                 []predicate.FieldType
@@ -4265,6 +4267,45 @@ func (m *FieldTypeMutation) ResetUUID() {
 	delete(m.clearedFields, fieldtype.FieldUUID)
 }
 
+// SetFileID sets the file edge to File by id.
+func (m *FieldTypeMutation) SetFileID(id int) {
+	m.file = &id
+}
+
+// ClearFile clears the file edge to File.
+func (m *FieldTypeMutation) ClearFile() {
+	m.clearedfile = true
+}
+
+// FileCleared returns if the edge file was cleared.
+func (m *FieldTypeMutation) FileCleared() bool {
+	return m.clearedfile
+}
+
+// FileID returns the file id in the mutation.
+func (m *FieldTypeMutation) FileID() (id int, exists bool) {
+	if m.file != nil {
+		return *m.file, true
+	}
+	return
+}
+
+// FileIDs returns the file ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// FileID instead. It exists only for internal usage by the builders.
+func (m *FieldTypeMutation) FileIDs() (ids []int) {
+	if id := m.file; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFile reset all changes of the "file" edge.
+func (m *FieldTypeMutation) ResetFile() {
+	m.file = nil
+	m.clearedfile = false
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -5762,45 +5803,68 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *FieldTypeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.file != nil {
+		edges = append(edges, fieldtype.EdgeFile)
+	}
 	return edges
 }
 
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
 func (m *FieldTypeMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case fieldtype.EdgeFile:
+		if id := m.file; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *FieldTypeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
 func (m *FieldTypeMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *FieldTypeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedfile {
+		edges = append(edges, fieldtype.EdgeFile)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
 func (m *FieldTypeMutation) EdgeCleared(name string) bool {
+	switch name {
+	case fieldtype.EdgeFile:
+		return m.clearedfile
+	}
 	return false
 }
 
 // ClearEdge clears the value for the given name. It returns an
 // error if the edge name is not defined in the schema.
 func (m *FieldTypeMutation) ClearEdge(name string) error {
+	switch name {
+	case fieldtype.EdgeFile:
+		m.ClearFile()
+		return nil
+	}
 	return fmt.Errorf("unknown FieldType unique edge %s", name)
 }
 
@@ -5808,6 +5872,11 @@ func (m *FieldTypeMutation) ClearEdge(name string) error {
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
 func (m *FieldTypeMutation) ResetEdge(name string) error {
+	switch name {
+	case fieldtype.EdgeFile:
+		m.ResetFile()
+		return nil
+	}
 	return fmt.Errorf("unknown FieldType edge %s", name)
 }
 
@@ -5815,26 +5884,28 @@ func (m *FieldTypeMutation) ResetEdge(name string) error {
 // nodes in the graph.
 type FileMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	size          *int
-	addsize       *int
-	name          *string
-	user          *string
-	group         *string
-	_op           *bool
-	clearedFields map[string]struct{}
-	owner         *int
-	clearedowner  bool
-	_type         *int
-	cleared_type  bool
-	field         map[int]struct{}
-	removedfield  map[int]struct{}
-	clearedfield  bool
-	done          bool
-	oldValue      func(context.Context) (*File, error)
-	predicates    []predicate.File
+	op                Op
+	typ               string
+	id                *int
+	size              *int
+	addsize           *int
+	name              *string
+	user              *string
+	group             *string
+	_op               *bool
+	clearedFields     map[string]struct{}
+	owner             *int
+	clearedowner      bool
+	_type             *int
+	cleared_type      bool
+	field             map[int]struct{}
+	removedfield      map[int]struct{}
+	clearedfield      bool
+	file_group        *int
+	clearedfile_group bool
+	done              bool
+	oldValue          func(context.Context) (*File, error)
+	predicates        []predicate.File
 }
 
 var _ ent.Mutation = (*FileMutation)(nil)
@@ -6291,6 +6362,45 @@ func (m *FileMutation) ResetFieldEdge() {
 	m.removedfield = nil
 }
 
+// SetFileGroupID sets the file_group edge to Group by id.
+func (m *FileMutation) SetFileGroupID(id int) {
+	m.file_group = &id
+}
+
+// ClearFileGroup clears the file_group edge to Group.
+func (m *FileMutation) ClearFileGroup() {
+	m.clearedfile_group = true
+}
+
+// FileGroupCleared returns if the edge file_group was cleared.
+func (m *FileMutation) FileGroupCleared() bool {
+	return m.clearedfile_group
+}
+
+// FileGroupID returns the file_group id in the mutation.
+func (m *FileMutation) FileGroupID() (id int, exists bool) {
+	if m.file_group != nil {
+		return *m.file_group, true
+	}
+	return
+}
+
+// FileGroupIDs returns the file_group ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// FileGroupID instead. It exists only for internal usage by the builders.
+func (m *FileMutation) FileGroupIDs() (ids []int) {
+	if id := m.file_group; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFileGroup reset all changes of the "file_group" edge.
+func (m *FileMutation) ResetFileGroup() {
+	m.file_group = nil
+	m.clearedfile_group = false
+}
+
 // Op returns the operation name.
 func (m *FileMutation) Op() Op {
 	return m.op
@@ -6510,7 +6620,7 @@ func (m *FileMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *FileMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.owner != nil {
 		edges = append(edges, file.EdgeOwner)
 	}
@@ -6519,6 +6629,9 @@ func (m *FileMutation) AddedEdges() []string {
 	}
 	if m.field != nil {
 		edges = append(edges, file.EdgeField)
+	}
+	if m.file_group != nil {
+		edges = append(edges, file.EdgeFileGroup)
 	}
 	return edges
 }
@@ -6541,6 +6654,10 @@ func (m *FileMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case file.EdgeFileGroup:
+		if id := m.file_group; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
@@ -6548,7 +6665,7 @@ func (m *FileMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *FileMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedfield != nil {
 		edges = append(edges, file.EdgeField)
 	}
@@ -6572,7 +6689,7 @@ func (m *FileMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *FileMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedowner {
 		edges = append(edges, file.EdgeOwner)
 	}
@@ -6581,6 +6698,9 @@ func (m *FileMutation) ClearedEdges() []string {
 	}
 	if m.clearedfield {
 		edges = append(edges, file.EdgeField)
+	}
+	if m.clearedfile_group {
+		edges = append(edges, file.EdgeFileGroup)
 	}
 	return edges
 }
@@ -6595,6 +6715,8 @@ func (m *FileMutation) EdgeCleared(name string) bool {
 		return m.cleared_type
 	case file.EdgeField:
 		return m.clearedfield
+	case file.EdgeFileGroup:
+		return m.clearedfile_group
 	}
 	return false
 }
@@ -6608,6 +6730,9 @@ func (m *FileMutation) ClearEdge(name string) error {
 		return nil
 	case file.EdgeType:
 		m.ClearType()
+		return nil
+	case file.EdgeFileGroup:
+		m.ClearFileGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown File unique edge %s", name)
@@ -6626,6 +6751,9 @@ func (m *FileMutation) ResetEdge(name string) error {
 		return nil
 	case file.EdgeField:
 		m.ResetFieldEdge()
+		return nil
+	case file.EdgeFileGroup:
+		m.ResetFileGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown File edge %s", name)
@@ -10610,53 +10738,55 @@ func (m *TaskMutation) ResetEdge(name string) error {
 // nodes in the graph.
 type UserMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	optional_int     *int
-	addoptional_int  *int
-	age              *int
-	addage           *int
-	name             *string
-	last             *string
-	nickname         *string
-	phone            *string
-	password         *string
-	role             *user.Role
-	_SSOCert         *string
-	clearedFields    map[string]struct{}
-	card             *int
-	clearedcard      bool
-	pets             map[int]struct{}
-	removedpets      map[int]struct{}
-	clearedpets      bool
-	files            map[int]struct{}
-	removedfiles     map[int]struct{}
-	clearedfiles     bool
-	groups           map[int]struct{}
-	removedgroups    map[int]struct{}
-	clearedgroups    bool
-	friends          map[int]struct{}
-	removedfriends   map[int]struct{}
-	clearedfriends   bool
-	followers        map[int]struct{}
-	removedfollowers map[int]struct{}
-	clearedfollowers bool
-	following        map[int]struct{}
-	removedfollowing map[int]struct{}
-	clearedfollowing bool
-	team             *int
-	clearedteam      bool
-	spouse           *int
-	clearedspouse    bool
-	children         map[int]struct{}
-	removedchildren  map[int]struct{}
-	clearedchildren  bool
-	parent           *int
-	clearedparent    bool
-	done             bool
-	oldValue         func(context.Context) (*User, error)
-	predicates       []predicate.User
+	op                   Op
+	typ                  string
+	id                   *int
+	optional_int         *int
+	addoptional_int      *int
+	age                  *int
+	addage               *int
+	name                 *string
+	last                 *string
+	nickname             *string
+	phone                *string
+	password             *string
+	role                 *user.Role
+	_SSOCert             *string
+	clearedFields        map[string]struct{}
+	card                 *int
+	clearedcard          bool
+	pets                 map[int]struct{}
+	removedpets          map[int]struct{}
+	clearedpets          bool
+	files                map[int]struct{}
+	removedfiles         map[int]struct{}
+	clearedfiles         bool
+	groups               map[int]struct{}
+	removedgroups        map[int]struct{}
+	clearedgroups        bool
+	friends              map[int]struct{}
+	removedfriends       map[int]struct{}
+	clearedfriends       bool
+	followers            map[int]struct{}
+	removedfollowers     map[int]struct{}
+	clearedfollowers     bool
+	following            map[int]struct{}
+	removedfollowing     map[int]struct{}
+	clearedfollowing     bool
+	team                 *int
+	clearedteam          bool
+	spouse               *int
+	clearedspouse        bool
+	children             map[int]struct{}
+	removedchildren      map[int]struct{}
+	clearedchildren      bool
+	parent               *int
+	clearedparent        bool
+	blocked_group        *int
+	clearedblocked_group bool
+	done                 bool
+	oldValue             func(context.Context) (*User, error)
+	predicates           []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -11704,6 +11834,45 @@ func (m *UserMutation) ResetParent() {
 	m.clearedparent = false
 }
 
+// SetBlockedGroupID sets the blocked_group edge to Group by id.
+func (m *UserMutation) SetBlockedGroupID(id int) {
+	m.blocked_group = &id
+}
+
+// ClearBlockedGroup clears the blocked_group edge to Group.
+func (m *UserMutation) ClearBlockedGroup() {
+	m.clearedblocked_group = true
+}
+
+// BlockedGroupCleared returns if the edge blocked_group was cleared.
+func (m *UserMutation) BlockedGroupCleared() bool {
+	return m.clearedblocked_group
+}
+
+// BlockedGroupID returns the blocked_group id in the mutation.
+func (m *UserMutation) BlockedGroupID() (id int, exists bool) {
+	if m.blocked_group != nil {
+		return *m.blocked_group, true
+	}
+	return
+}
+
+// BlockedGroupIDs returns the blocked_group ids in the mutation.
+// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
+// BlockedGroupID instead. It exists only for internal usage by the builders.
+func (m *UserMutation) BlockedGroupIDs() (ids []int) {
+	if id := m.blocked_group; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetBlockedGroup reset all changes of the "blocked_group" edge.
+func (m *UserMutation) ResetBlockedGroup() {
+	m.blocked_group = nil
+	m.clearedblocked_group = false
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
@@ -12015,7 +12184,7 @@ func (m *UserMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 12)
 	if m.card != nil {
 		edges = append(edges, user.EdgeCard)
 	}
@@ -12048,6 +12217,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.parent != nil {
 		edges = append(edges, user.EdgeParent)
+	}
+	if m.blocked_group != nil {
+		edges = append(edges, user.EdgeBlockedGroup)
 	}
 	return edges
 }
@@ -12114,6 +12286,10 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 		if id := m.parent; id != nil {
 			return []ent.Value{*id}
 		}
+	case user.EdgeBlockedGroup:
+		if id := m.blocked_group; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
@@ -12121,7 +12297,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 12)
 	if m.removedpets != nil {
 		edges = append(edges, user.EdgePets)
 	}
@@ -12199,7 +12375,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 12)
 	if m.clearedcard {
 		edges = append(edges, user.EdgeCard)
 	}
@@ -12233,6 +12409,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedparent {
 		edges = append(edges, user.EdgeParent)
 	}
+	if m.clearedblocked_group {
+		edges = append(edges, user.EdgeBlockedGroup)
+	}
 	return edges
 }
 
@@ -12262,6 +12441,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedchildren
 	case user.EdgeParent:
 		return m.clearedparent
+	case user.EdgeBlockedGroup:
+		return m.clearedblocked_group
 	}
 	return false
 }
@@ -12281,6 +12462,9 @@ func (m *UserMutation) ClearEdge(name string) error {
 		return nil
 	case user.EdgeParent:
 		m.ClearParent()
+		return nil
+	case user.EdgeBlockedGroup:
+		m.ClearBlockedGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
@@ -12323,6 +12507,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 		return nil
 	case user.EdgeParent:
 		m.ResetParent()
+		return nil
+	case user.EdgeBlockedGroup:
+		m.ResetBlockedGroup()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

@@ -16,6 +16,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
@@ -28,17 +29,18 @@ type UserQuery struct {
 	order      []OrderFunc
 	predicates []predicate.User
 	// eager-loading edges.
-	withCard      *CardQuery
-	withPets      *PetQuery
-	withFiles     *FileQuery
-	withGroups    *GroupQuery
-	withFriends   *UserQuery
-	withFollowers *UserQuery
-	withFollowing *UserQuery
-	withTeam      *PetQuery
-	withSpouse    *UserQuery
-	withChildren  *UserQuery
-	withParent    *UserQuery
+	withCard         *CardQuery
+	withPets         *PetQuery
+	withFiles        *FileQuery
+	withGroups       *GroupQuery
+	withFriends      *UserQuery
+	withFollowers    *UserQuery
+	withFollowing    *UserQuery
+	withTeam         *PetQuery
+	withSpouse       *UserQuery
+	withChildren     *UserQuery
+	withParent       *UserQuery
+	withBlockedGroup *GroupQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
@@ -222,6 +224,20 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 	return query
 }
 
+// QueryBlockedGroup chains the current query on the blocked_group edge.
+func (uq *UserQuery) QueryBlockedGroup() *GroupQuery {
+	query := &GroupQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := uq.gremlinQuery()
+		fromU = gremlin.InE(group.BlockedLabel).OutV()
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity in the query. Returns *NotFoundError when no user was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
 	nodes, err := uq.Limit(1).All(ctx)
@@ -392,22 +408,23 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        uq.config,
-		limit:         uq.limit,
-		offset:        uq.offset,
-		order:         append([]OrderFunc{}, uq.order...),
-		predicates:    append([]predicate.User{}, uq.predicates...),
-		withCard:      uq.withCard.Clone(),
-		withPets:      uq.withPets.Clone(),
-		withFiles:     uq.withFiles.Clone(),
-		withGroups:    uq.withGroups.Clone(),
-		withFriends:   uq.withFriends.Clone(),
-		withFollowers: uq.withFollowers.Clone(),
-		withFollowing: uq.withFollowing.Clone(),
-		withTeam:      uq.withTeam.Clone(),
-		withSpouse:    uq.withSpouse.Clone(),
-		withChildren:  uq.withChildren.Clone(),
-		withParent:    uq.withParent.Clone(),
+		config:           uq.config,
+		limit:            uq.limit,
+		offset:           uq.offset,
+		order:            append([]OrderFunc{}, uq.order...),
+		predicates:       append([]predicate.User{}, uq.predicates...),
+		withCard:         uq.withCard.Clone(),
+		withPets:         uq.withPets.Clone(),
+		withFiles:        uq.withFiles.Clone(),
+		withGroups:       uq.withGroups.Clone(),
+		withFriends:      uq.withFriends.Clone(),
+		withFollowers:    uq.withFollowers.Clone(),
+		withFollowing:    uq.withFollowing.Clone(),
+		withTeam:         uq.withTeam.Clone(),
+		withSpouse:       uq.withSpouse.Clone(),
+		withChildren:     uq.withChildren.Clone(),
+		withParent:       uq.withParent.Clone(),
+		withBlockedGroup: uq.withBlockedGroup.Clone(),
 		// clone intermediate query.
 		gremlin: uq.gremlin.Clone(),
 		path:    uq.path,
@@ -532,6 +549,17 @@ func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withParent = query
+	return uq
+}
+
+//  WithBlockedGroup tells the query-builder to eager-loads the nodes that are connected to
+// the "blocked_group" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithBlockedGroup(opts ...func(*GroupQuery)) *UserQuery {
+	query := &GroupQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withBlockedGroup = query
 	return uq
 }
 

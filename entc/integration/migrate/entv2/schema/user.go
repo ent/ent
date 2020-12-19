@@ -92,7 +92,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("pets", Pet.Type).
 			StorageKey(edge.Column("owner_id")).
 			Unique(),
-		edge.To("friends", User.Type).
+		edge.ToFrom("friends", User.Type).
 			StorageKey(edge.Table("friends"), edge.Columns("user", "friend")),
 	}
 }

@@ -29,14 +29,14 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	TeamInverseTable = "users"
 	// TeamColumn is the table column denoting the team relation/edge.
-	TeamColumn = "user_team"
+	TeamColumn = "team_id"
 	// OwnerTable is the table the holds the owner relation/edge.
 	OwnerTable = "pets"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "user_pets"
+	OwnerColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for pet fields.
@@ -48,8 +48,8 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
 var ForeignKeys = []string{
-	"user_pets",
-	"user_team",
+	"owner_id",
+	"team_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

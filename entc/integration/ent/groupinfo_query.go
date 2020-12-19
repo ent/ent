@@ -382,13 +382,13 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.group_info
+			fk := n.info_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "info_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "info_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Groups = append(node.Edges.Groups, n)
 		}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebook/ent/dialect/gremlin"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
 
@@ -43,9 +44,11 @@ type FileEdges struct {
 	Type *FileType
 	// Field holds the value of the field edge.
 	Field []*FieldType
+	// FileGroup holds the value of the file_group edge.
+	FileGroup *Group
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
@@ -83,6 +86,20 @@ func (e FileEdges) FieldOrErr() ([]*FieldType, error) {
 		return e.Field, nil
 	}
 	return nil, &NotLoadedError{edge: "field"}
+}
+
+// FileGroupOrErr returns the FileGroup value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e FileEdges) FileGroupOrErr() (*Group, error) {
+	if e.loadedTypes[3] {
+		if e.FileGroup == nil {
+			// The edge file_group was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: group.Label}
+		}
+		return e.FileGroup, nil
+	}
+	return nil, &NotLoadedError{edge: "file_group"}
 }
 
 // FromResponse scans the gremlin response data into File.
@@ -124,6 +141,11 @@ func (f *File) QueryType() *FileTypeQuery {
 // QueryField queries the field edge of the File.
 func (f *File) QueryField() *FieldTypeQuery {
 	return (&FileClient{config: f.config}).QueryField(f)
+}
+
+// QueryFileGroup queries the file_group edge of the File.
+func (f *File) QueryFileGroup() *GroupQuery {
+	return (&FileClient{config: f.config}).QueryFileGroup(f)
 }
 
 // Update returns a builder for updating this File.

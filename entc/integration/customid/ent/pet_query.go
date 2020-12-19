@@ -465,7 +465,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
-			if fk := nodes[i].user_pets; fk != nil {
+			if fk := nodes[i].owner_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -478,7 +478,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Owner = n
@@ -503,13 +503,13 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.pet_cars
+			fk := n.owner_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "pet_cars" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "pet_cars" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Cars = append(node.Edges.Cars, n)
 		}
@@ -583,7 +583,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*Pet)
 		for i := range nodes {
-			if fk := nodes[i].pet_best_friend; fk != nil {
+			if fk := nodes[i].best_friend_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -596,7 +596,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "pet_best_friend" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "best_friend_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.BestFriend = n

@@ -37,7 +37,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "user_card"
+	OwnerColumn = "owner_id"
 	// SpecTable is the table the holds the spec relation/edge. The primary key declared below.
 	SpecTable = "spec_card"
 	// SpecInverseTable is the table name for the Spec entity.
@@ -56,7 +56,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the Card type.
 var ForeignKeys = []string{
-	"user_card",
+	"owner_id",
 }
 
 var (

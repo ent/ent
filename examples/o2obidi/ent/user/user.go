@@ -24,7 +24,7 @@ const (
 	// SpouseTable is the table the holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
-	SpouseColumn = "user_spouse"
+	SpouseColumn = "spouse_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -36,7 +36,7 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
 var ForeignKeys = []string{
-	"user_spouse",
+	"spouse_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

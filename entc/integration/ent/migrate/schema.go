@@ -19,7 +19,7 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "number", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Nullable: true},
-		{Name: "user_card", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
 	CardsTable = &schema.Table{
@@ -117,7 +117,7 @@ var (
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE"}, Default: "READ"},
 		{Name: "mac", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "macaddr"}},
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
-		{Name: "file_field", Type: field.TypeInt, Nullable: true},
+		{Name: "file_id", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
 	FieldTypesTable = &schema.Table{
@@ -142,9 +142,9 @@ var (
 		{Name: "user", Type: field.TypeString, Nullable: true},
 		{Name: "group", Type: field.TypeString, Nullable: true},
 		{Name: "op", Type: field.TypeBool, Nullable: true},
-		{Name: "file_type_files", Type: field.TypeInt, Nullable: true},
-		{Name: "group_files", Type: field.TypeInt, Nullable: true},
-		{Name: "user_files", Type: field.TypeInt, Nullable: true},
+		{Name: "type_id", Type: field.TypeInt, Nullable: true},
+		{Name: "file_group_id", Type: field.TypeInt, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// FilesTable holds the schema information for the "files" table.
 	FilesTable = &schema.Table{
@@ -186,17 +186,17 @@ var (
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[3]},
 			},
 			{
-				Name:    "file_user_files_file_type_files",
+				Name:    "file_owner_id_type_id",
 				Unique:  false,
 				Columns: []*schema.Column{FilesColumns[8], FilesColumns[6]},
 			},
 			{
-				Name:    "file_name_user_files_file_type_files",
+				Name:    "file_name_owner_id_type_id",
 				Unique:  true,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[8], FilesColumns[6]},
 			},
 			{
-				Name:    "file_name_user_files",
+				Name:    "file_name_owner_id",
 				Unique:  false,
 				Columns: []*schema.Column{FilesColumns[2], FilesColumns[8]},
 			},
@@ -235,7 +235,7 @@ var (
 		{Name: "type", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "max_users", Type: field.TypeInt, Nullable: true, Default: 10},
 		{Name: "name", Type: field.TypeString},
-		{Name: "group_info", Type: field.TypeInt, Nullable: true},
+		{Name: "info_id", Type: field.TypeInt, Nullable: true},
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
@@ -280,7 +280,7 @@ var (
 	NodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "value", Type: field.TypeInt, Nullable: true},
-		{Name: "node_next", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "prev_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// NodesTable holds the schema information for the "nodes" table.
 	NodesTable = &schema.Table{
@@ -302,8 +302,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
-		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
+		{Name: "team_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
@@ -328,7 +328,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "pet_name_user_pets",
+				Name:    "pet_name_owner_id",
 				Unique:  false,
 				Columns: []*schema.Column{PetsColumns[1], PetsColumns[3]},
 			},
@@ -369,9 +369,9 @@ var (
 		{Name: "password", Type: field.TypeString, Nullable: true},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin", "free-user"}, Default: "user"},
 		{Name: "sso_cert", Type: field.TypeString, Nullable: true},
-		{Name: "group_blocked", Type: field.TypeInt, Nullable: true},
-		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},
-		{Name: "user_parent", Type: field.TypeInt, Nullable: true},
+		{Name: "blocked_group_id", Type: field.TypeInt, Nullable: true},
+		{Name: "spouse_id", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

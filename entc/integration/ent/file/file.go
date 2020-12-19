@@ -28,6 +28,8 @@ const (
 	EdgeType = "type"
 	// EdgeField holds the string denoting the field edge name in mutations.
 	EdgeField = "field"
+	// EdgeFileGroup holds the string denoting the file_group edge name in mutations.
+	EdgeFileGroup = "file_group"
 
 	// Table holds the table name of the file in the database.
 	Table = "files"
@@ -37,21 +39,28 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "user_files"
+	OwnerColumn = "owner_id"
 	// TypeTable is the table the holds the type relation/edge.
 	TypeTable = "files"
 	// TypeInverseTable is the table name for the FileType entity.
 	// It exists in this package in order to avoid circular dependency with the "filetype" package.
 	TypeInverseTable = "file_types"
 	// TypeColumn is the table column denoting the type relation/edge.
-	TypeColumn = "file_type_files"
+	TypeColumn = "type_id"
 	// FieldTable is the table the holds the field relation/edge.
 	FieldTable = "field_types"
 	// FieldInverseTable is the table name for the FieldType entity.
 	// It exists in this package in order to avoid circular dependency with the "fieldtype" package.
 	FieldInverseTable = "field_types"
 	// FieldColumn is the table column denoting the field relation/edge.
-	FieldColumn = "file_field"
+	FieldColumn = "file_id"
+	// FileGroupTable is the table the holds the file_group relation/edge.
+	FileGroupTable = "files"
+	// FileGroupInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	FileGroupInverseTable = "groups"
+	// FileGroupColumn is the table column denoting the file_group relation/edge.
+	FileGroupColumn = "file_group_id"
 )
 
 // Columns holds all SQL columns for file fields.
@@ -66,9 +75,9 @@ var Columns = []string{
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the File type.
 var ForeignKeys = []string{
-	"file_type_files",
-	"group_files",
-	"user_files",
+	"type_id",
+	"file_group_id",
+	"owner_id",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -23,8 +23,8 @@ type Node struct {
 	Value int `json:"value,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the NodeQuery when eager-loading is set.
-	Edges         NodeEdges `json:"edges"`
-	node_children *int
+	Edges     NodeEdges `json:"edges"`
+	parent_id *int
 }
 
 // NodeEdges holds the relations/edges for other nodes in the graph.
@@ -72,7 +72,7 @@ func (*Node) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Node) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // node_children
+		&sql.NullInt64{}, // parent_id
 	}
 }
 
@@ -96,10 +96,10 @@ func (n *Node) assignValues(values ...interface{}) error {
 	values = values[1:]
 	if len(values) == len(node.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field node_children", value)
+			return fmt.Errorf("unexpected type %T for edge-field parent_id", value)
 		} else if value.Valid {
-			n.node_children = new(int)
-			*n.node_children = int(value.Int64)
+			n.parent_id = new(int)
+			*n.parent_id = int(value.Int64)
 		}
 	}
 	return nil

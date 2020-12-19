@@ -31,8 +31,8 @@ type Task struct {
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TaskQuery when eager-loading is set.
-	Edges      TaskEdges `json:"edges"`
-	user_tasks *int
+	Edges    TaskEdges `json:"edges"`
+	owner_id *int
 }
 
 // TaskEdges holds the relations/edges for other nodes in the graph.
@@ -83,7 +83,7 @@ func (*Task) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Task) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // user_tasks
+		&sql.NullInt64{}, // owner_id
 	}
 }
 
@@ -122,10 +122,10 @@ func (t *Task) assignValues(values ...interface{}) error {
 	values = values[4:]
 	if len(values) == len(task.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_tasks", value)
+			return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
 		} else if value.Valid {
-			t.user_tasks = new(int)
-			*t.user_tasks = int(value.Int64)
+			t.owner_id = new(int)
+			*t.owner_id = int(value.Int64)
 		}
 	}
 	return nil

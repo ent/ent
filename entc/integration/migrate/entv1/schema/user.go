@@ -49,7 +49,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("children", User.Type).
 			From("parent").
 			Unique(),
-		edge.To("spouse", User.Type).
+		edge.ToFrom("spouse", User.Type).
 			Unique(),
 		edge.To("car", Car.Type).
 			Unique(),

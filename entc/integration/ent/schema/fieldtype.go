@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/role"
+	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ type FieldType struct {
 	ent.Schema
 }
 
-// Fields of the File.
+// Fields of the FieldType.
 func (FieldType) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("int"),
@@ -144,6 +145,15 @@ func (FieldType) Fields() []ent.Field {
 			}),
 		field.UUID("uuid", uuid.UUID{}).
 			Optional(),
+	}
+}
+
+// Edges of the FieldType.
+func (FieldType) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("file", File.Type).
+			Ref("field").
+			Unique(),
 	}
 }
 

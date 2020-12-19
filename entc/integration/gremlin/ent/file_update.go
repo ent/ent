@@ -17,6 +17,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
@@ -174,6 +175,25 @@ func (fu *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
 	return fu.AddFieldIDs(ids...)
 }
 
+// SetFileGroupID sets the file_group edge to Group by id.
+func (fu *FileUpdate) SetFileGroupID(id string) *FileUpdate {
+	fu.mutation.SetFileGroupID(id)
+	return fu
+}
+
+// SetNillableFileGroupID sets the file_group edge to Group by id if the given value is not nil.
+func (fu *FileUpdate) SetNillableFileGroupID(id *string) *FileUpdate {
+	if id != nil {
+		fu = fu.SetFileGroupID(*id)
+	}
+	return fu
+}
+
+// SetFileGroup sets the file_group edge to Group.
+func (fu *FileUpdate) SetFileGroup(g *Group) *FileUpdate {
+	return fu.SetFileGroupID(g.ID)
+}
+
 // Mutation returns the FileMutation object of the builder.
 func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
@@ -210,6 +230,12 @@ func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
 		ids[i] = f[i].ID
 	}
 	return fu.RemoveFieldIDs(ids...)
+}
+
+// ClearFileGroup clears the "file_group" edge to type Group.
+func (fu *FileUpdate) ClearFileGroup() *FileUpdate {
+	fu.mutation.ClearFileGroup()
+	return fu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -362,6 +388,13 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
 		})
+	}
+	if fu.mutation.FileGroupCleared() {
+		tr := rv.Clone().InE(group.FilesLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range fu.mutation.FileGroupIDs() {
+		v.AddE(group.FilesLabel).From(g.V(id)).InV()
 	}
 	v.Count()
 	if len(constraints) > 0 {
@@ -525,6 +558,25 @@ func (fuo *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
 	return fuo.AddFieldIDs(ids...)
 }
 
+// SetFileGroupID sets the file_group edge to Group by id.
+func (fuo *FileUpdateOne) SetFileGroupID(id string) *FileUpdateOne {
+	fuo.mutation.SetFileGroupID(id)
+	return fuo
+}
+
+// SetNillableFileGroupID sets the file_group edge to Group by id if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableFileGroupID(id *string) *FileUpdateOne {
+	if id != nil {
+		fuo = fuo.SetFileGroupID(*id)
+	}
+	return fuo
+}
+
+// SetFileGroup sets the file_group edge to Group.
+func (fuo *FileUpdateOne) SetFileGroup(g *Group) *FileUpdateOne {
+	return fuo.SetFileGroupID(g.ID)
+}
+
 // Mutation returns the FileMutation object of the builder.
 func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
@@ -561,6 +613,12 @@ func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return fuo.RemoveFieldIDs(ids...)
+}
+
+// ClearFileGroup clears the "file_group" edge to type Group.
+func (fuo *FileUpdateOne) ClearFileGroup() *FileUpdateOne {
+	fuo.mutation.ClearFileGroup()
+	return fuo
 }
 
 // Save executes the query and returns the updated entity.
@@ -718,6 +776,13 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
 		})
+	}
+	if fuo.mutation.FileGroupCleared() {
+		tr := rv.Clone().InE(group.FilesLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range fuo.mutation.FileGroupIDs() {
+		v.AddE(group.FilesLabel).From(g.V(id)).InV()
 	}
 	v.ValueMap(true)
 	if len(constraints) > 0 {

@@ -16,7 +16,7 @@ var (
 	BlobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "uuid", Type: field.TypeUUID, Unique: true},
-		{Name: "blob_parent", Type: field.TypeUUID, Unique: true, Nullable: true},
+		{Name: "parent_id", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// BlobsTable holds the schema information for the "blobs" table.
 	BlobsTable = &schema.Table{
@@ -39,7 +39,7 @@ var (
 		{Name: "before_id", Type: field.TypeFloat64, Nullable: true},
 		{Name: "after_id", Type: field.TypeFloat64, Nullable: true},
 		{Name: "model", Type: field.TypeString},
-		{Name: "pet_cars", Type: field.TypeString, Nullable: true, Size: 25},
+		{Name: "owner_id", Type: field.TypeString, Nullable: true, Size: 25},
 	}
 	// CarsTable holds the schema information for the "cars" table.
 	CarsTable = &schema.Table{
@@ -105,8 +105,8 @@ var (
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 25},
-		{Name: "pet_best_friend", Type: field.TypeString, Unique: true, Nullable: true, Size: 25},
-		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
+		{Name: "best_friend_id", Type: field.TypeString, Unique: true, Nullable: true, Size: 25},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
@@ -133,7 +133,7 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "oid", Type: field.TypeInt, Increment: true},
-		{Name: "user_children", Type: field.TypeInt, Nullable: true},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

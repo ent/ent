@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
 	"github.com/facebook/ent/entc/integration/ent/file"
 	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/group"
 	"github.com/facebook/ent/entc/integration/ent/user"
 	"github.com/facebook/ent/schema/field"
 )
@@ -139,6 +140,25 @@ func (fc *FileCreate) AddField(f ...*FieldType) *FileCreate {
 		ids[i] = f[i].ID
 	}
 	return fc.AddFieldIDs(ids...)
+}
+
+// SetFileGroupID sets the file_group edge to Group by id.
+func (fc *FileCreate) SetFileGroupID(id int) *FileCreate {
+	fc.mutation.SetFileGroupID(id)
+	return fc
+}
+
+// SetNillableFileGroupID sets the file_group edge to Group by id if the given value is not nil.
+func (fc *FileCreate) SetNillableFileGroupID(id *int) *FileCreate {
+	if id != nil {
+		fc = fc.SetFileGroupID(*id)
+	}
+	return fc
+}
+
+// SetFileGroup sets the file_group edge to Group.
+func (fc *FileCreate) SetFileGroup(g *Group) *FileCreate {
+	return fc.SetFileGroupID(g.ID)
 }
 
 // Mutation returns the FileMutation object of the builder.
@@ -328,6 +348,25 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fc.mutation.FileGroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.FileGroupTable,
+			Columns: []string{file.FileGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
 				},
 			},
 		}

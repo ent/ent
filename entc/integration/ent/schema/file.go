@@ -46,6 +46,10 @@ func (File) Edges() []ent.Edge {
 			Ref("files").
 			Unique(),
 		edge.To("field", FieldType.Type),
+		// To avoid name conflict to field "group"
+		edge.From("file_group", Group.Type).
+			Ref("files").
+			Unique(),
 	}
 }
 

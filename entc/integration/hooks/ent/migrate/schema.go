@@ -19,7 +19,7 @@ var (
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "in_hook", Type: field.TypeString},
-		{Name: "user_cards", Type: field.TypeInt, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
 	CardsTable = &schema.Table{
@@ -42,7 +42,7 @@ var (
 		{Name: "version", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
 		{Name: "worth", Type: field.TypeUint, Nullable: true},
-		{Name: "user_best_friend", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "best_friend_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

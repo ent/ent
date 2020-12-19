@@ -17,6 +17,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
@@ -27,6 +28,8 @@ type FieldTypeQuery struct {
 	offset     *int
 	order      []OrderFunc
 	predicates []predicate.FieldType
+	// eager-loading edges.
+	withFile *FileQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 	path    func(context.Context) (*dsl.Traversal, error)
@@ -54,6 +57,20 @@ func (ftq *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
 func (ftq *FieldTypeQuery) Order(o ...OrderFunc) *FieldTypeQuery {
 	ftq.order = append(ftq.order, o...)
 	return ftq
+}
+
+// QueryFile chains the current query on the file edge.
+func (ftq *FieldTypeQuery) QueryFile() *FileQuery {
+	query := &FileQuery{config: ftq.config}
+	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		gremlin := ftq.gremlinQuery()
+		fromU = gremlin.InE(file.FieldLabel).OutV()
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first FieldType entity in the query. Returns *NotFoundError when no fieldtype was found.
@@ -231,10 +248,22 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		offset:     ftq.offset,
 		order:      append([]OrderFunc{}, ftq.order...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
+		withFile:   ftq.withFile.Clone(),
 		// clone intermediate query.
 		gremlin: ftq.gremlin.Clone(),
 		path:    ftq.path,
 	}
+}
+
+//  WithFile tells the query-builder to eager-loads the nodes that are connected to
+// the "file" edge. The optional arguments used to configure the query builder of the edge.
+func (ftq *FieldTypeQuery) WithFile(opts ...func(*FileQuery)) *FieldTypeQuery {
+	query := &FileQuery{config: ftq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	ftq.withFile = query
+	return ftq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.

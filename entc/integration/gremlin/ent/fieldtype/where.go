@@ -3918,6 +3918,24 @@ func UUIDNotNil() predicate.FieldType {
 	})
 }
 
+// HasFile applies the HasEdge predicate on the "file" edge.
+func HasFile() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.InE(FileInverseLabel).InV()
+	})
+}
+
+// HasFileWith applies the HasEdge predicate on the "file" edge with a given conditions (other predicates).
+func HasFileWith(preds ...predicate.File) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		tr := __.OutV()
+		for _, p := range preds {
+			p(tr)
+		}
+		t.InE(FileInverseLabel).Where(tr).InV()
+	})
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.FieldType) predicate.FieldType {
 	return predicate.FieldType(func(tr *dsl.Traversal) {

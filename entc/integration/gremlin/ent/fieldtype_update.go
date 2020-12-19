@@ -21,6 +21,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 	"github.com/google/uuid"
 )
@@ -1019,9 +1020,34 @@ func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetFileID sets the file edge to File by id.
+func (ftu *FieldTypeUpdate) SetFileID(id string) *FieldTypeUpdate {
+	ftu.mutation.SetFileID(id)
+	return ftu
+}
+
+// SetNillableFileID sets the file edge to File by id if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableFileID(id *string) *FieldTypeUpdate {
+	if id != nil {
+		ftu = ftu.SetFileID(*id)
+	}
+	return ftu
+}
+
+// SetFile sets the file edge to File.
+func (ftu *FieldTypeUpdate) SetFile(f *File) *FieldTypeUpdate {
+	return ftu.SetFileID(f.ID)
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
+}
+
+// ClearFile clears the "file" edge to type File.
+func (ftu *FieldTypeUpdate) ClearFile() *FieldTypeUpdate {
+	ftu.mutation.ClearFile()
+	return ftu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1134,6 +1160,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 		p(v)
 	}
 	var (
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if value, ok := ftu.mutation.Int(); ok {
@@ -1490,6 +1519,13 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
+	}
+	if ftu.mutation.FileCleared() {
+		tr := rv.Clone().InE(file.FieldLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range ftu.mutation.FileIDs() {
+		v.AddE(file.FieldLabel).From(g.V(id)).InV()
 	}
 	v.Count()
 	trs = append(trs, v)
@@ -2484,9 +2520,34 @@ func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetFileID sets the file edge to File by id.
+func (ftuo *FieldTypeUpdateOne) SetFileID(id string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetFileID(id)
+	return ftuo
+}
+
+// SetNillableFileID sets the file edge to File by id if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableFileID(id *string) *FieldTypeUpdateOne {
+	if id != nil {
+		ftuo = ftuo.SetFileID(*id)
+	}
+	return ftuo
+}
+
+// SetFile sets the file edge to File.
+func (ftuo *FieldTypeUpdateOne) SetFile(f *File) *FieldTypeUpdateOne {
+	return ftuo.SetFileID(f.ID)
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
+}
+
+// ClearFile clears the "file" edge to type File.
+func (ftuo *FieldTypeUpdateOne) ClearFile() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearFile()
+	return ftuo
 }
 
 // Save executes the query and returns the updated entity.
@@ -2604,6 +2665,9 @@ func (ftuo *FieldTypeUpdateOne) gremlinSave(ctx context.Context) (*FieldType, er
 func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	v := g.V(id)
 	var (
+		rv = v.Clone()
+		_  = rv
+
 		trs []*dsl.Traversal
 	)
 	if value, ok := ftuo.mutation.Int(); ok {
@@ -2960,6 +3024,13 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
+	}
+	if ftuo.mutation.FileCleared() {
+		tr := rv.Clone().InE(file.FieldLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range ftuo.mutation.FileIDs() {
+		v.AddE(file.FieldLabel).From(g.V(id)).InV()
 	}
 	v.ValueMap(true)
 	trs = append(trs, v)

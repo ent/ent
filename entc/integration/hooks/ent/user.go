@@ -27,8 +27,8 @@ type User struct {
 	Worth uint `json:"worth,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges            UserEdges `json:"edges"`
-	user_best_friend *int
+	Edges          UserEdges `json:"edges"`
+	best_friend_id *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -89,7 +89,7 @@ func (*User) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*User) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // user_best_friend
+		&sql.NullInt64{}, // best_friend_id
 	}
 }
 
@@ -123,10 +123,10 @@ func (u *User) assignValues(values ...interface{}) error {
 	values = values[3:]
 	if len(values) == len(user.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_best_friend", value)
+			return fmt.Errorf("unexpected type %T for edge-field best_friend_id", value)
 		} else if value.Valid {
-			u.user_best_friend = new(int)
-			*u.user_best_friend = int(value.Int64)
+			u.best_friend_id = new(int)
+			*u.best_friend_id = int(value.Int64)
 		}
 	}
 	return nil

@@ -23,8 +23,8 @@ type Blob struct {
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BlobQuery when eager-loading is set.
-	Edges       BlobEdges `json:"edges"`
-	blob_parent *uuid.UUID
+	Edges     BlobEdges `json:"edges"`
+	parent_id *uuid.UUID
 }
 
 // BlobEdges holds the relations/edges for other nodes in the graph.
@@ -72,7 +72,7 @@ func (*Blob) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Blob) fkValues() []interface{} {
 	return []interface{}{
-		&uuid.UUID{}, // blob_parent
+		&uuid.UUID{}, // parent_id
 	}
 }
 
@@ -96,9 +96,9 @@ func (b *Blob) assignValues(values ...interface{}) error {
 	values = values[1:]
 	if len(values) == len(blob.ForeignKeys) {
 		if value, ok := values[0].(*uuid.UUID); !ok {
-			return fmt.Errorf("unexpected type %T for field blob_parent", values[0])
+			return fmt.Errorf("unexpected type %T for field parent_id", values[0])
 		} else if value != nil {
-			b.blob_parent = value
+			b.parent_id = value
 		}
 	}
 	return nil

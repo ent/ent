@@ -27,7 +27,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "card" package.
 	CardInverseTable = "cards"
 	// CardColumn is the table column denoting the card relation/edge.
-	CardColumn = "user_card"
+	CardColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for user fields.

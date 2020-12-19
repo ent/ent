@@ -27,7 +27,7 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("pets", Pet.Type),
-		edge.To("friends", User.Type),
+		edge.ToFrom("friends", User.Type),
 		edge.From("groups", Group.Type).
 			Ref("users"),
 		edge.From("manage", Group.Type).

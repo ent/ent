@@ -369,6 +369,25 @@ func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
 	return uu.SetParentID(u.ID)
 }
 
+// SetBlockedGroupID sets the blocked_group edge to Group by id.
+func (uu *UserUpdate) SetBlockedGroupID(id int) *UserUpdate {
+	uu.mutation.SetBlockedGroupID(id)
+	return uu
+}
+
+// SetNillableBlockedGroupID sets the blocked_group edge to Group by id if the given value is not nil.
+func (uu *UserUpdate) SetNillableBlockedGroupID(id *int) *UserUpdate {
+	if id != nil {
+		uu = uu.SetBlockedGroupID(*id)
+	}
+	return uu
+}
+
+// SetBlockedGroup sets the blocked_group edge to Group.
+func (uu *UserUpdate) SetBlockedGroup(g *Group) *UserUpdate {
+	return uu.SetBlockedGroupID(g.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -542,6 +561,12 @@ func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 // ClearParent clears the "parent" edge to type User.
 func (uu *UserUpdate) ClearParent() *UserUpdate {
 	uu.mutation.ClearParent()
+	return uu
+}
+
+// ClearBlockedGroup clears the "blocked_group" edge to type Group.
+func (uu *UserUpdate) ClearBlockedGroup() *UserUpdate {
+	uu.mutation.ClearBlockedGroup()
 	return uu
 }
 
@@ -1260,6 +1285,41 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.BlockedGroupCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BlockedGroupTable,
+			Columns: []string{user.BlockedGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.BlockedGroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BlockedGroupTable,
+			Columns: []string{user.BlockedGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -1613,6 +1673,25 @@ func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
 	return uuo.SetParentID(u.ID)
 }
 
+// SetBlockedGroupID sets the blocked_group edge to Group by id.
+func (uuo *UserUpdateOne) SetBlockedGroupID(id int) *UserUpdateOne {
+	uuo.mutation.SetBlockedGroupID(id)
+	return uuo
+}
+
+// SetNillableBlockedGroupID sets the blocked_group edge to Group by id if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableBlockedGroupID(id *int) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetBlockedGroupID(*id)
+	}
+	return uuo
+}
+
+// SetBlockedGroup sets the blocked_group edge to Group.
+func (uuo *UserUpdateOne) SetBlockedGroup(g *Group) *UserUpdateOne {
+	return uuo.SetBlockedGroupID(g.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -1786,6 +1865,12 @@ func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 // ClearParent clears the "parent" edge to type User.
 func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 	uuo.mutation.ClearParent()
+	return uuo
+}
+
+// ClearBlockedGroup clears the "blocked_group" edge to type Group.
+func (uuo *UserUpdateOne) ClearBlockedGroup() *UserUpdateOne {
+	uuo.mutation.ClearBlockedGroup()
 	return uuo
 }
 
@@ -2494,6 +2579,41 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.BlockedGroupCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BlockedGroupTable,
+			Columns: []string{user.BlockedGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.BlockedGroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BlockedGroupTable,
+			Columns: []string{user.BlockedGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
 				},
 			},
 		}

@@ -28,7 +28,7 @@ var (
 	StreetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "city_streets", Type: field.TypeInt, Nullable: true},
+		{Name: "city_id", Type: field.TypeInt, Nullable: true},
 	}
 	// StreetsTable holds the schema information for the "streets" table.
 	StreetsTable = &schema.Table{
@@ -46,7 +46,7 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "street_name_city_streets",
+				Name:    "street_name_city_id",
 				Unique:  true,
 				Columns: []*schema.Column{StreetsColumns[1], StreetsColumns[2]},
 			},

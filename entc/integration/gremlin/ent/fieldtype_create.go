@@ -21,6 +21,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
 	"github.com/google/uuid"
 )
 
@@ -561,6 +562,25 @@ func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	return ftc
 }
 
+// SetFileID sets the file edge to File by id.
+func (ftc *FieldTypeCreate) SetFileID(id string) *FieldTypeCreate {
+	ftc.mutation.SetFileID(id)
+	return ftc
+}
+
+// SetNillableFileID sets the file edge to File by id if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableFileID(id *string) *FieldTypeCreate {
+	if id != nil {
+		ftc = ftc.SetFileID(*id)
+	}
+	return ftc
+}
+
+// SetFile sets the file edge to File.
+func (ftc *FieldTypeCreate) SetFile(f *File) *FieldTypeCreate {
+	return ftc.SetFileID(f.ID)
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -830,6 +850,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
+	}
+	for _, id := range ftc.mutation.FileIDs() {
+		v.AddE(file.FieldLabel).From(g.V(id)).InV()
 	}
 	return v.ValueMap(true)
 }

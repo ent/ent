@@ -17,7 +17,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "expired", Type: field.TypeTime},
 		{Name: "number", Type: field.TypeString},
-		{Name: "user_card", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
 	CardsTable = &schema.Table{

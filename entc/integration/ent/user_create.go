@@ -318,6 +318,25 @@ func (uc *UserCreate) SetParent(u *User) *UserCreate {
 	return uc.SetParentID(u.ID)
 }
 
+// SetBlockedGroupID sets the blocked_group edge to Group by id.
+func (uc *UserCreate) SetBlockedGroupID(id int) *UserCreate {
+	uc.mutation.SetBlockedGroupID(id)
+	return uc
+}
+
+// SetNillableBlockedGroupID sets the blocked_group edge to Group by id if the given value is not nil.
+func (uc *UserCreate) SetNillableBlockedGroupID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetBlockedGroupID(*id)
+	}
+	return uc
+}
+
+// SetBlockedGroup sets the blocked_group edge to Group.
+func (uc *UserCreate) SetBlockedGroup(g *Group) *UserCreate {
+	return uc.SetBlockedGroupID(g.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -704,6 +723,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.BlockedGroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.BlockedGroupTable,
+			Columns: []string{user.BlockedGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
 				},
 			},
 		}

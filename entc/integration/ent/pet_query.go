@@ -415,7 +415,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
-			if fk := nodes[i].user_team; fk != nil {
+			if fk := nodes[i].team_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -428,7 +428,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_team" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "team_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Team = n
@@ -440,7 +440,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
-			if fk := nodes[i].user_pets; fk != nil {
+			if fk := nodes[i].owner_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -453,7 +453,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Owner = n

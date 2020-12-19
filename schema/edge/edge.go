@@ -18,6 +18,7 @@ type Descriptor struct {
 	RefName     string              // ref name; inverse only.
 	Ref         *Descriptor         // edge reference; to/from of the same type.
 	Unique      bool                // unique edge.
+	Bidi        bool                // bidiretional edge.
 	Inverse     bool                // inverse edge.
 	Required    bool                // required on creation.
 	StorageKey  *StorageKey         // optional storage-key configuration.
@@ -32,6 +33,11 @@ func To(name string, t interface{}) *assocBuilder {
 // From represents a reversed-edge between two vertices that has a back-reference to its source edge.
 func From(name string, t interface{}) *inverseBuilder {
 	return &inverseBuilder{desc: &Descriptor{Name: name, Type: typ(t), Inverse: true}}
+}
+
+// ToFrom defines a bidirectional edge for a vertex
+func ToFrom(name string, t interface{}) *biBuilder {
+	return &biBuilder{desc: &Descriptor{Name: name, Type: typ(t), Bidi: true}}
 }
 
 func typ(t interface{}) string {
@@ -162,6 +168,69 @@ func (b *inverseBuilder) Annotations(annotations ...schema.Annotation) *inverseB
 
 // Descriptor implements the ent.Descriptor interface.
 func (b *inverseBuilder) Descriptor() *Descriptor {
+	return b.desc
+}
+
+// biBuilder is the builder for assoc edges.
+type biBuilder struct {
+	desc *Descriptor
+}
+
+// Unique sets the edge type to be unique. Basically, it's limited the ent to be one of the two:
+// one2one or one2many. one2one applied if the inverse-edge is also unique.
+func (b *biBuilder) Unique() *biBuilder {
+	b.desc.Unique = true
+	return b
+}
+
+// Required indicates that this edge is a required field on creation.
+// Unlike fields, edges are optional by default.
+func (b *biBuilder) Required() *biBuilder {
+	b.desc.Required = true
+	return b
+}
+
+// StructTag sets the struct tag of the assoc edge.
+func (b *biBuilder) StructTag(s string) *biBuilder {
+	b.desc.Tag = s
+	return b
+}
+
+// Comment used to put annotations on the schema.
+func (b *biBuilder) Comment(string) *biBuilder {
+	return b
+}
+
+// StorageKey sets the storage key of the edge.
+//
+//	edge.ToFrom("groups", Group.Type).
+//		StorageKey(edge.Table("user_groups"), edge.Columns("user_id", "group_id"))
+//
+func (b *biBuilder) StorageKey(opts ...StorageOption) *biBuilder {
+	if b.desc.StorageKey == nil {
+		b.desc.StorageKey = &StorageKey{}
+	}
+	for i := range opts {
+		opts[i](b.desc.StorageKey)
+	}
+	return b
+}
+
+// Annotations adds a list of annotations to the edge object to be used by
+// codegen extensions.
+//
+//	edge.To("pets", Pet.Type).
+//		Annotations(entgql.Config{
+//			FieldName: "Pets",
+//		})
+//
+func (b *biBuilder) Annotations(annotations ...schema.Annotation) *biBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Descriptor implements the ent.Descriptor interface.
+func (b *biBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 

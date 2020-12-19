@@ -12,8 +12,10 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/privacytenant/ent/group"
 	"github.com/facebook/ent/examples/privacytenant/ent/predicate"
 	"github.com/facebook/ent/examples/privacytenant/ent/tenant"
+	"github.com/facebook/ent/examples/privacytenant/ent/user"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -36,9 +38,81 @@ func (tu *TenantUpdate) SetName(s string) *TenantUpdate {
 	return tu
 }
 
+// AddGroupIDs adds the groups edge to Group by ids.
+func (tu *TenantUpdate) AddGroupIDs(ids ...int) *TenantUpdate {
+	tu.mutation.AddGroupIDs(ids...)
+	return tu
+}
+
+// AddGroups adds the groups edges to Group.
+func (tu *TenantUpdate) AddGroups(g ...*Group) *TenantUpdate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tu.AddGroupIDs(ids...)
+}
+
+// AddUserIDs adds the users edge to User by ids.
+func (tu *TenantUpdate) AddUserIDs(ids ...int) *TenantUpdate {
+	tu.mutation.AddUserIDs(ids...)
+	return tu
+}
+
+// AddUsers adds the users edges to User.
+func (tu *TenantUpdate) AddUsers(u ...*User) *TenantUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return tu.AddUserIDs(ids...)
+}
+
 // Mutation returns the TenantMutation object of the builder.
 func (tu *TenantUpdate) Mutation() *TenantMutation {
 	return tu.mutation
+}
+
+// ClearGroups clears all "groups" edges to type Group.
+func (tu *TenantUpdate) ClearGroups() *TenantUpdate {
+	tu.mutation.ClearGroups()
+	return tu
+}
+
+// RemoveGroupIDs removes the groups edge to Group by ids.
+func (tu *TenantUpdate) RemoveGroupIDs(ids ...int) *TenantUpdate {
+	tu.mutation.RemoveGroupIDs(ids...)
+	return tu
+}
+
+// RemoveGroups removes groups edges to Group.
+func (tu *TenantUpdate) RemoveGroups(g ...*Group) *TenantUpdate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tu.RemoveGroupIDs(ids...)
+}
+
+// ClearUsers clears all "users" edges to type User.
+func (tu *TenantUpdate) ClearUsers() *TenantUpdate {
+	tu.mutation.ClearUsers()
+	return tu
+}
+
+// RemoveUserIDs removes the users edge to User by ids.
+func (tu *TenantUpdate) RemoveUserIDs(ids ...int) *TenantUpdate {
+	tu.mutation.RemoveUserIDs(ids...)
+	return tu
+}
+
+// RemoveUsers removes users edges to User.
+func (tu *TenantUpdate) RemoveUsers(u ...*User) *TenantUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return tu.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -133,6 +207,114 @@ func (tu *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: tenant.FieldName,
 		})
 	}
+	if tu.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !tu.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.UsersTable,
+			Columns: []string{tenant.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !tu.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.UsersTable,
+			Columns: []string{tenant.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.UsersTable,
+			Columns: []string{tenant.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tenant.Label}
@@ -157,9 +339,81 @@ func (tuo *TenantUpdateOne) SetName(s string) *TenantUpdateOne {
 	return tuo
 }
 
+// AddGroupIDs adds the groups edge to Group by ids.
+func (tuo *TenantUpdateOne) AddGroupIDs(ids ...int) *TenantUpdateOne {
+	tuo.mutation.AddGroupIDs(ids...)
+	return tuo
+}
+
+// AddGroups adds the groups edges to Group.
+func (tuo *TenantUpdateOne) AddGroups(g ...*Group) *TenantUpdateOne {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tuo.AddGroupIDs(ids...)
+}
+
+// AddUserIDs adds the users edge to User by ids.
+func (tuo *TenantUpdateOne) AddUserIDs(ids ...int) *TenantUpdateOne {
+	tuo.mutation.AddUserIDs(ids...)
+	return tuo
+}
+
+// AddUsers adds the users edges to User.
+func (tuo *TenantUpdateOne) AddUsers(u ...*User) *TenantUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return tuo.AddUserIDs(ids...)
+}
+
 // Mutation returns the TenantMutation object of the builder.
 func (tuo *TenantUpdateOne) Mutation() *TenantMutation {
 	return tuo.mutation
+}
+
+// ClearGroups clears all "groups" edges to type Group.
+func (tuo *TenantUpdateOne) ClearGroups() *TenantUpdateOne {
+	tuo.mutation.ClearGroups()
+	return tuo
+}
+
+// RemoveGroupIDs removes the groups edge to Group by ids.
+func (tuo *TenantUpdateOne) RemoveGroupIDs(ids ...int) *TenantUpdateOne {
+	tuo.mutation.RemoveGroupIDs(ids...)
+	return tuo
+}
+
+// RemoveGroups removes groups edges to Group.
+func (tuo *TenantUpdateOne) RemoveGroups(g ...*Group) *TenantUpdateOne {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tuo.RemoveGroupIDs(ids...)
+}
+
+// ClearUsers clears all "users" edges to type User.
+func (tuo *TenantUpdateOne) ClearUsers() *TenantUpdateOne {
+	tuo.mutation.ClearUsers()
+	return tuo
+}
+
+// RemoveUserIDs removes the users edge to User by ids.
+func (tuo *TenantUpdateOne) RemoveUserIDs(ids ...int) *TenantUpdateOne {
+	tuo.mutation.RemoveUserIDs(ids...)
+	return tuo
+}
+
+// RemoveUsers removes users edges to User.
+func (tuo *TenantUpdateOne) RemoveUsers(u ...*User) *TenantUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return tuo.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -251,6 +505,114 @@ func (tuo *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err err
 			Value:  value,
 			Column: tenant.FieldName,
 		})
+	}
+	if tuo.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !tuo.mutation.GroupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.UsersTable,
+			Columns: []string{tenant.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !tuo.mutation.UsersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.UsersTable,
+			Columns: []string{tenant.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.UsersTable,
+			Columns: []string{tenant.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Tenant{config: tuo.config}
 	_spec.Assign = _node.assignValues

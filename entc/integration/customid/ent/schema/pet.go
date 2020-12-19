@@ -33,8 +33,8 @@ func (Pet) Edges() []ent.Edge {
 			Ref("pets").
 			Unique(),
 		edge.To("cars", Car.Type),
-		edge.To("friends", Pet.Type),
-		edge.To("best_friend", Pet.Type).
+		edge.ToFrom("friends", Pet.Type),
+		edge.ToFrom("best_friend", Pet.Type).
 			Unique(),
 	}
 }

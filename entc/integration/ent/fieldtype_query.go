@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
+	"github.com/facebook/ent/entc/integration/ent/file"
 	"github.com/facebook/ent/entc/integration/ent/predicate"
 	"github.com/facebook/ent/schema/field"
 )
@@ -26,7 +27,9 @@ type FieldTypeQuery struct {
 	offset     *int
 	order      []OrderFunc
 	predicates []predicate.FieldType
-	withFKs    bool
+	// eager-loading edges.
+	withFile *FileQuery
+	withFKs  bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -54,6 +57,28 @@ func (ftq *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
 func (ftq *FieldTypeQuery) Order(o ...OrderFunc) *FieldTypeQuery {
 	ftq.order = append(ftq.order, o...)
 	return ftq
+}
+
+// QueryFile chains the current query on the file edge.
+func (ftq *FieldTypeQuery) QueryFile() *FileQuery {
+	query := &FileQuery{config: ftq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ftq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ftq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fieldtype.Table, fieldtype.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fieldtype.FileTable, fieldtype.FileColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ftq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first FieldType entity in the query. Returns *NotFoundError when no fieldtype was found.
@@ -231,10 +256,22 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		offset:     ftq.offset,
 		order:      append([]OrderFunc{}, ftq.order...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
+		withFile:   ftq.withFile.Clone(),
 		// clone intermediate query.
 		sql:  ftq.sql.Clone(),
 		path: ftq.path,
 	}
+}
+
+//  WithFile tells the query-builder to eager-loads the nodes that are connected to
+// the "file" edge. The optional arguments used to configure the query builder of the edge.
+func (ftq *FieldTypeQuery) WithFile(opts ...func(*FileQuery)) *FieldTypeQuery {
+	query := &FileQuery{config: ftq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	ftq.withFile = query
+	return ftq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.
@@ -301,10 +338,16 @@ func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
 
 func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 	var (
-		nodes   = []*FieldType{}
-		withFKs = ftq.withFKs
-		_spec   = ftq.querySpec()
+		nodes       = []*FieldType{}
+		withFKs     = ftq.withFKs
+		_spec       = ftq.querySpec()
+		loadedTypes = [1]bool{
+			ftq.withFile != nil,
+		}
 	)
+	if ftq.withFile != nil {
+		withFKs = true
+	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.ForeignKeys...)
 	}
@@ -322,6 +365,7 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, ftq.driver, _spec); err != nil {
@@ -330,6 +374,32 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := ftq.withFile; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*FieldType)
+		for i := range nodes {
+			if fk := nodes[i].file_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(file.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "file_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.File = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 

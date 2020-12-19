@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
+	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
 )
@@ -367,6 +368,25 @@ func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
 	return uu.SetParentID(u.ID)
 }
 
+// SetBlockedGroupID sets the blocked_group edge to Group by id.
+func (uu *UserUpdate) SetBlockedGroupID(id string) *UserUpdate {
+	uu.mutation.SetBlockedGroupID(id)
+	return uu
+}
+
+// SetNillableBlockedGroupID sets the blocked_group edge to Group by id if the given value is not nil.
+func (uu *UserUpdate) SetNillableBlockedGroupID(id *string) *UserUpdate {
+	if id != nil {
+		uu = uu.SetBlockedGroupID(*id)
+	}
+	return uu
+}
+
+// SetBlockedGroup sets the blocked_group edge to Group.
+func (uu *UserUpdate) SetBlockedGroup(g *Group) *UserUpdate {
+	return uu.SetBlockedGroupID(g.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -540,6 +560,12 @@ func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 // ClearParent clears the "parent" edge to type User.
 func (uu *UserUpdate) ClearParent() *UserUpdate {
 	uu.mutation.ClearParent()
+	return uu
+}
+
+// ClearBlockedGroup clears the "blocked_group" edge to type Group.
+func (uu *UserUpdate) ClearBlockedGroup() *UserUpdate {
+	uu.mutation.ClearBlockedGroup()
 	return uu
 }
 
@@ -807,6 +833,13 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	for _, id := range uu.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
+	}
+	if uu.mutation.BlockedGroupCleared() {
+		tr := rv.Clone().InE(group.BlockedLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range uu.mutation.BlockedGroupIDs() {
+		v.AddE(group.BlockedLabel).From(g.V(id)).InV()
 	}
 	v.Count()
 	if len(constraints) > 0 {
@@ -1165,6 +1198,25 @@ func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
 	return uuo.SetParentID(u.ID)
 }
 
+// SetBlockedGroupID sets the blocked_group edge to Group by id.
+func (uuo *UserUpdateOne) SetBlockedGroupID(id string) *UserUpdateOne {
+	uuo.mutation.SetBlockedGroupID(id)
+	return uuo
+}
+
+// SetNillableBlockedGroupID sets the blocked_group edge to Group by id if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableBlockedGroupID(id *string) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetBlockedGroupID(*id)
+	}
+	return uuo
+}
+
+// SetBlockedGroup sets the blocked_group edge to Group.
+func (uuo *UserUpdateOne) SetBlockedGroup(g *Group) *UserUpdateOne {
+	return uuo.SetBlockedGroupID(g.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -1338,6 +1390,12 @@ func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 // ClearParent clears the "parent" edge to type User.
 func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 	uuo.mutation.ClearParent()
+	return uuo
+}
+
+// ClearBlockedGroup clears the "blocked_group" edge to type Group.
+func (uuo *UserUpdateOne) ClearBlockedGroup() *UserUpdateOne {
+	uuo.mutation.ClearBlockedGroup()
 	return uuo
 }
 
@@ -1610,6 +1668,13 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	for _, id := range uuo.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
+	}
+	if uuo.mutation.BlockedGroupCleared() {
+		tr := rv.Clone().InE(group.BlockedLabel).Drop().Iterate()
+		trs = append(trs, tr)
+	}
+	for _, id := range uuo.mutation.BlockedGroupIDs() {
+		v.AddE(group.BlockedLabel).From(g.V(id)).InV()
 	}
 	v.ValueMap(true)
 	if len(constraints) > 0 {

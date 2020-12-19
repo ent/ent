@@ -12,7 +12,9 @@ import (
 	"fmt"
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/privacytenant/ent/group"
 	"github.com/facebook/ent/examples/privacytenant/ent/tenant"
+	"github.com/facebook/ent/examples/privacytenant/ent/user"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -27,6 +29,36 @@ type TenantCreate struct {
 func (tc *TenantCreate) SetName(s string) *TenantCreate {
 	tc.mutation.SetName(s)
 	return tc
+}
+
+// AddGroupIDs adds the groups edge to Group by ids.
+func (tc *TenantCreate) AddGroupIDs(ids ...int) *TenantCreate {
+	tc.mutation.AddGroupIDs(ids...)
+	return tc
+}
+
+// AddGroups adds the groups edges to Group.
+func (tc *TenantCreate) AddGroups(g ...*Group) *TenantCreate {
+	ids := make([]int, len(g))
+	for i := range g {
+		ids[i] = g[i].ID
+	}
+	return tc.AddGroupIDs(ids...)
+}
+
+// AddUserIDs adds the users edge to User by ids.
+func (tc *TenantCreate) AddUserIDs(ids ...int) *TenantCreate {
+	tc.mutation.AddUserIDs(ids...)
+	return tc
+}
+
+// AddUsers adds the users edges to User.
+func (tc *TenantCreate) AddUsers(u ...*User) *TenantCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return tc.AddUserIDs(ids...)
 }
 
 // Mutation returns the TenantMutation object of the builder.
@@ -122,6 +154,44 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 			Column: tenant.FieldName,
 		})
 		_node.Name = value
+	}
+	if nodes := tc.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.GroupsTable,
+			Columns: []string{tenant.GroupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   tenant.UsersTable,
+			Columns: []string{tenant.UsersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

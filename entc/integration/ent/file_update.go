@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
 	"github.com/facebook/ent/entc/integration/ent/file"
 	"github.com/facebook/ent/entc/integration/ent/filetype"
+	"github.com/facebook/ent/entc/integration/ent/group"
 	"github.com/facebook/ent/entc/integration/ent/predicate"
 	"github.com/facebook/ent/entc/integration/ent/user"
 	"github.com/facebook/ent/schema/field"
@@ -173,6 +174,25 @@ func (fu *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
 	return fu.AddFieldIDs(ids...)
 }
 
+// SetFileGroupID sets the file_group edge to Group by id.
+func (fu *FileUpdate) SetFileGroupID(id int) *FileUpdate {
+	fu.mutation.SetFileGroupID(id)
+	return fu
+}
+
+// SetNillableFileGroupID sets the file_group edge to Group by id if the given value is not nil.
+func (fu *FileUpdate) SetNillableFileGroupID(id *int) *FileUpdate {
+	if id != nil {
+		fu = fu.SetFileGroupID(*id)
+	}
+	return fu
+}
+
+// SetFileGroup sets the file_group edge to Group.
+func (fu *FileUpdate) SetFileGroup(g *Group) *FileUpdate {
+	return fu.SetFileGroupID(g.ID)
+}
+
 // Mutation returns the FileMutation object of the builder.
 func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
@@ -209,6 +229,12 @@ func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
 		ids[i] = f[i].ID
 	}
 	return fu.RemoveFieldIDs(ids...)
+}
+
+// ClearFileGroup clears the "file_group" edge to type Group.
+func (fu *FileUpdate) ClearFileGroup() *FileUpdate {
+	fu.mutation.ClearFileGroup()
+	return fu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -480,6 +506,41 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if fu.mutation.FileGroupCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.FileGroupTable,
+			Columns: []string{file.FileGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.FileGroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.FileGroupTable,
+			Columns: []string{file.FileGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
@@ -638,6 +699,25 @@ func (fuo *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
 	return fuo.AddFieldIDs(ids...)
 }
 
+// SetFileGroupID sets the file_group edge to Group by id.
+func (fuo *FileUpdateOne) SetFileGroupID(id int) *FileUpdateOne {
+	fuo.mutation.SetFileGroupID(id)
+	return fuo
+}
+
+// SetNillableFileGroupID sets the file_group edge to Group by id if the given value is not nil.
+func (fuo *FileUpdateOne) SetNillableFileGroupID(id *int) *FileUpdateOne {
+	if id != nil {
+		fuo = fuo.SetFileGroupID(*id)
+	}
+	return fuo
+}
+
+// SetFileGroup sets the file_group edge to Group.
+func (fuo *FileUpdateOne) SetFileGroup(g *Group) *FileUpdateOne {
+	return fuo.SetFileGroupID(g.ID)
+}
+
 // Mutation returns the FileMutation object of the builder.
 func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
@@ -674,6 +754,12 @@ func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return fuo.RemoveFieldIDs(ids...)
+}
+
+// ClearFileGroup clears the "file_group" edge to type Group.
+func (fuo *FileUpdateOne) ClearFileGroup() *FileUpdateOne {
+	fuo.mutation.ClearFileGroup()
+	return fuo
 }
 
 // Save executes the query and returns the updated entity.
@@ -935,6 +1021,41 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: fieldtype.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fuo.mutation.FileGroupCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.FileGroupTable,
+			Columns: []string{file.FileGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.FileGroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.FileGroupTable,
+			Columns: []string{file.FileGroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
 				},
 			},
 		}

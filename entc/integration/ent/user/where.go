@@ -1395,6 +1395,34 @@ func HasParentWith(preds ...predicate.User) predicate.User {
 	})
 }
 
+// HasBlockedGroup applies the HasEdge predicate on the "blocked_group" edge.
+func HasBlockedGroup() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BlockedGroupTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, BlockedGroupTable, BlockedGroupColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBlockedGroupWith applies the HasEdge predicate on the "blocked_group" edge with a given conditions (other predicates).
+func HasBlockedGroupWith(preds ...predicate.Group) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(BlockedGroupInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, BlockedGroupTable, BlockedGroupColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups list of predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

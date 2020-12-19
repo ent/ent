@@ -24,8 +24,8 @@ type Group struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
-	Edges        GroupEdges `json:"edges"`
-	group_tenant *int
+	Edges     GroupEdges `json:"edges"`
+	tenant_id *int
 }
 
 // GroupEdges holds the relations/edges for other nodes in the graph.
@@ -73,7 +73,7 @@ func (*Group) scanValues() []interface{} {
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
 func (*Group) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // group_tenant
+		&sql.NullInt64{}, // tenant_id
 	}
 }
 
@@ -97,10 +97,10 @@ func (gr *Group) assignValues(values ...interface{}) error {
 	values = values[1:]
 	if len(values) == len(group.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field group_tenant", value)
+			return fmt.Errorf("unexpected type %T for edge-field tenant_id", value)
 		} else if value.Valid {
-			gr.group_tenant = new(int)
-			*gr.group_tenant = int(value.Int64)
+			gr.tenant_id = new(int)
+			*gr.tenant_id = int(value.Int64)
 		}
 	}
 	return nil

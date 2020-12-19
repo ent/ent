@@ -504,6 +504,22 @@ func (c *FieldTypeClient) GetX(ctx context.Context, id int) *FieldType {
 	return obj
 }
 
+// QueryFile queries the file edge of a FieldType.
+func (c *FieldTypeClient) QueryFile(ft *FieldType) *FileQuery {
+	query := &FileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ft.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fieldtype.Table, fieldtype.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fieldtype.FileTable, fieldtype.FileColumn),
+		)
+		fromV = sqlgraph.Neighbors(ft.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *FieldTypeClient) Hooks() []Hook {
 	return c.hooks.FieldType
@@ -633,6 +649,22 @@ func (c *FileClient) QueryField(f *File) *FieldTypeQuery {
 			sqlgraph.From(file.Table, file.FieldID, id),
 			sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, file.FieldTable, file.FieldColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFileGroup queries the file_group edge of a File.
+func (c *FileClient) QueryFileGroup(f *File) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.FileGroupTable, file.FileGroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
 		return fromV, nil
@@ -1865,6 +1897,22 @@ func (c *UserClient) QueryParent(u *User) *UserQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, user.ParentTable, user.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBlockedGroup queries the blocked_group edge of a User.
+func (c *UserClient) QueryBlockedGroup(u *User) *GroupQuery {
+	query := &GroupQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.BlockedGroupTable, user.BlockedGroupColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

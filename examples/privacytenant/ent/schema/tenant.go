@@ -8,6 +8,7 @@ import (
 	"github.com/facebook/ent"
 	"github.com/facebook/ent/examples/privacytenant/ent/privacy"
 	"github.com/facebook/ent/examples/privacytenant/rule"
+	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -28,6 +29,16 @@ func (Tenant) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
 			NotEmpty(),
+	}
+}
+
+// Edges of the Tenant.
+func (Tenant) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("groups", Group.Type).
+			Ref("tenant"),
+		edge.From("users", User.Type).
+			Ref("tenant"),
 	}
 }
 

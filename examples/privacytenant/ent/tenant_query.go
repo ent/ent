@@ -8,14 +8,17 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"github.com/facebook/ent/examples/privacytenant/ent/group"
 	"github.com/facebook/ent/examples/privacytenant/ent/predicate"
 	"github.com/facebook/ent/examples/privacytenant/ent/tenant"
+	"github.com/facebook/ent/examples/privacytenant/ent/user"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -26,6 +29,9 @@ type TenantQuery struct {
 	offset     *int
 	order      []OrderFunc
 	predicates []predicate.Tenant
+	// eager-loading edges.
+	withGroups *GroupQuery
+	withUsers  *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -53,6 +59,50 @@ func (tq *TenantQuery) Offset(offset int) *TenantQuery {
 func (tq *TenantQuery) Order(o ...OrderFunc) *TenantQuery {
 	tq.order = append(tq.order, o...)
 	return tq
+}
+
+// QueryGroups chains the current query on the groups edge.
+func (tq *TenantQuery) QueryGroups() *GroupQuery {
+	query := &GroupQuery{config: tq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tenant.GroupsTable, tenant.GroupsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUsers chains the current query on the users edge.
+func (tq *TenantQuery) QueryUsers() *UserQuery {
+	query := &UserQuery{config: tq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tenant.Table, tenant.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, tenant.UsersTable, tenant.UsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Tenant entity in the query. Returns *NotFoundError when no tenant was found.
@@ -230,10 +280,34 @@ func (tq *TenantQuery) Clone() *TenantQuery {
 		offset:     tq.offset,
 		order:      append([]OrderFunc{}, tq.order...),
 		predicates: append([]predicate.Tenant{}, tq.predicates...),
+		withGroups: tq.withGroups.Clone(),
+		withUsers:  tq.withUsers.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
 	}
+}
+
+//  WithGroups tells the query-builder to eager-loads the nodes that are connected to
+// the "groups" edge. The optional arguments used to configure the query builder of the edge.
+func (tq *TenantQuery) WithGroups(opts ...func(*GroupQuery)) *TenantQuery {
+	query := &GroupQuery{config: tq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withGroups = query
+	return tq
+}
+
+//  WithUsers tells the query-builder to eager-loads the nodes that are connected to
+// the "users" edge. The optional arguments used to configure the query builder of the edge.
+func (tq *TenantQuery) WithUsers(opts ...func(*UserQuery)) *TenantQuery {
+	query := &UserQuery{config: tq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withUsers = query
+	return tq
 }
 
 // GroupBy used to group vertices by one or more fields/columns.
@@ -306,8 +380,12 @@ func (tq *TenantQuery) prepareQuery(ctx context.Context) error {
 
 func (tq *TenantQuery) sqlAll(ctx context.Context) ([]*Tenant, error) {
 	var (
-		nodes = []*Tenant{}
-		_spec = tq.querySpec()
+		nodes       = []*Tenant{}
+		_spec       = tq.querySpec()
+		loadedTypes = [2]bool{
+			tq.withGroups != nil,
+			tq.withUsers != nil,
+		}
 	)
 	_spec.ScanValues = func() []interface{} {
 		node := &Tenant{config: tq.config}
@@ -320,6 +398,7 @@ func (tq *TenantQuery) sqlAll(ctx context.Context) ([]*Tenant, error) {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(values...)
 	}
 	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
@@ -328,6 +407,65 @@ func (tq *TenantQuery) sqlAll(ctx context.Context) ([]*Tenant, error) {
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := tq.withGroups; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Tenant)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Groups = []*Group{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Group(func(s *sql.Selector) {
+			s.Where(sql.InValues(tenant.GroupsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.tenant_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "tenant_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "tenant_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Groups = append(node.Edges.Groups, n)
+		}
+	}
+
+	if query := tq.withUsers; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Tenant)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Users = []*User{}
+		}
+		query.withFKs = true
+		query.Where(predicate.User(func(s *sql.Selector) {
+			s.Where(sql.InValues(tenant.UsersColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.tenant_id
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "tenant_id" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "tenant_id" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Users = append(node.Edges.Users, n)
+		}
+	}
+
 	return nodes, nil
 }
 

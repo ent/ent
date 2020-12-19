@@ -31,8 +31,8 @@ func (Blob) Fields() []ent.Field {
 // Edges of the Blob.
 func (Blob) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("parent", Blob.Type).
+		edge.ToFrom("parent", Blob.Type).
 			Unique(),
-		edge.To("links", Blob.Type),
+		edge.ToFrom("links", Blob.Type),
 	}
 }

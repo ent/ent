@@ -32,18 +32,19 @@ type UserQuery struct {
 	order      []OrderFunc
 	predicates []predicate.User
 	// eager-loading edges.
-	withCard      *CardQuery
-	withPets      *PetQuery
-	withFiles     *FileQuery
-	withGroups    *GroupQuery
-	withFriends   *UserQuery
-	withFollowers *UserQuery
-	withFollowing *UserQuery
-	withTeam      *PetQuery
-	withSpouse    *UserQuery
-	withChildren  *UserQuery
-	withParent    *UserQuery
-	withFKs       bool
+	withCard         *CardQuery
+	withPets         *PetQuery
+	withFiles        *FileQuery
+	withGroups       *GroupQuery
+	withFriends      *UserQuery
+	withFollowers    *UserQuery
+	withFollowing    *UserQuery
+	withTeam         *PetQuery
+	withSpouse       *UserQuery
+	withChildren     *UserQuery
+	withParent       *UserQuery
+	withBlockedGroup *GroupQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -315,6 +316,28 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 	return query
 }
 
+// QueryBlockedGroup chains the current query on the blocked_group edge.
+func (uq *UserQuery) QueryBlockedGroup() *GroupQuery {
+	query := &GroupQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.BlockedGroupTable, user.BlockedGroupColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first User entity in the query. Returns *NotFoundError when no user was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
 	nodes, err := uq.Limit(1).All(ctx)
@@ -485,22 +508,23 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        uq.config,
-		limit:         uq.limit,
-		offset:        uq.offset,
-		order:         append([]OrderFunc{}, uq.order...),
-		predicates:    append([]predicate.User{}, uq.predicates...),
-		withCard:      uq.withCard.Clone(),
-		withPets:      uq.withPets.Clone(),
-		withFiles:     uq.withFiles.Clone(),
-		withGroups:    uq.withGroups.Clone(),
-		withFriends:   uq.withFriends.Clone(),
-		withFollowers: uq.withFollowers.Clone(),
-		withFollowing: uq.withFollowing.Clone(),
-		withTeam:      uq.withTeam.Clone(),
-		withSpouse:    uq.withSpouse.Clone(),
-		withChildren:  uq.withChildren.Clone(),
-		withParent:    uq.withParent.Clone(),
+		config:           uq.config,
+		limit:            uq.limit,
+		offset:           uq.offset,
+		order:            append([]OrderFunc{}, uq.order...),
+		predicates:       append([]predicate.User{}, uq.predicates...),
+		withCard:         uq.withCard.Clone(),
+		withPets:         uq.withPets.Clone(),
+		withFiles:        uq.withFiles.Clone(),
+		withGroups:       uq.withGroups.Clone(),
+		withFriends:      uq.withFriends.Clone(),
+		withFollowers:    uq.withFollowers.Clone(),
+		withFollowing:    uq.withFollowing.Clone(),
+		withTeam:         uq.withTeam.Clone(),
+		withSpouse:       uq.withSpouse.Clone(),
+		withChildren:     uq.withChildren.Clone(),
+		withParent:       uq.withParent.Clone(),
+		withBlockedGroup: uq.withBlockedGroup.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -628,6 +652,17 @@ func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 	return uq
 }
 
+//  WithBlockedGroup tells the query-builder to eager-loads the nodes that are connected to
+// the "blocked_group" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithBlockedGroup(opts ...func(*GroupQuery)) *UserQuery {
+	query := &GroupQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withBlockedGroup = query
+	return uq
+}
+
 // GroupBy used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -695,7 +730,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [11]bool{
+		loadedTypes = [12]bool{
 			uq.withCard != nil,
 			uq.withPets != nil,
 			uq.withFiles != nil,
@@ -707,9 +742,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			uq.withSpouse != nil,
 			uq.withChildren != nil,
 			uq.withParent != nil,
+			uq.withBlockedGroup != nil,
 		}
 	)
-	if uq.withSpouse != nil || uq.withParent != nil {
+	if uq.withSpouse != nil || uq.withParent != nil || uq.withBlockedGroup != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -755,13 +791,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_card
+			fk := n.owner_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_card" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_card" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Card = n
 		}
@@ -784,13 +820,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_pets
+			fk := n.owner_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_pets" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Pets = append(node.Edges.Pets, n)
 		}
@@ -813,13 +849,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_files
+			fk := n.owner_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_files" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "owner_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_files" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Files = append(node.Edges.Files, n)
 		}
@@ -1097,13 +1133,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_team
+			fk := n.team_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_team" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "team_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_team" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "team_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Team = n
 		}
@@ -1113,7 +1149,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*User)
 		for i := range nodes {
-			if fk := nodes[i].user_spouse; fk != nil {
+			if fk := nodes[i].spouse_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -1126,7 +1162,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_spouse" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "spouse_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Spouse = n
@@ -1151,13 +1187,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_parent
+			fk := n.parent_id
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_parent" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "parent_id" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_parent" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Children = append(node.Edges.Children, n)
 		}
@@ -1167,7 +1203,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*User)
 		for i := range nodes {
-			if fk := nodes[i].user_parent; fk != nil {
+			if fk := nodes[i].parent_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -1180,10 +1216,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_parent" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Parent = n
+			}
+		}
+	}
+
+	if query := uq.withBlockedGroup; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*User)
+		for i := range nodes {
+			if fk := nodes[i].blocked_group_id; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(group.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "blocked_group_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.BlockedGroup = n
 			}
 		}
 	}

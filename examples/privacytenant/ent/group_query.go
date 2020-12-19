@@ -423,7 +423,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Group)
 		for i := range nodes {
-			if fk := nodes[i].group_tenant; fk != nil {
+			if fk := nodes[i].tenant_id; fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -436,7 +436,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_tenant" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "tenant_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Tenant = n

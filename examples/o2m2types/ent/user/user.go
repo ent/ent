@@ -27,7 +27,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
-	PetsColumn = "user_pets"
+	PetsColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for user fields.

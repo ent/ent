@@ -21,6 +21,38 @@ type Tenant struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the TenantQuery when eager-loading is set.
+	Edges TenantEdges `json:"edges"`
+}
+
+// TenantEdges holds the relations/edges for other nodes in the graph.
+type TenantEdges struct {
+	// Groups holds the value of the groups edge.
+	Groups []*Group
+	// Users holds the value of the users edge.
+	Users []*User
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [2]bool
+}
+
+// GroupsOrErr returns the Groups value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) GroupsOrErr() ([]*Group, error) {
+	if e.loadedTypes[0] {
+		return e.Groups, nil
+	}
+	return nil, &NotLoadedError{edge: "groups"}
+}
+
+// UsersOrErr returns the Users value or an error if the edge
+// was not loaded in eager-loading.
+func (e TenantEdges) UsersOrErr() ([]*User, error) {
+	if e.loadedTypes[1] {
+		return e.Users, nil
+	}
+	return nil, &NotLoadedError{edge: "users"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,6 +81,16 @@ func (t *Tenant) assignValues(values ...interface{}) error {
 		t.Name = value.String
 	}
 	return nil
+}
+
+// QueryGroups queries the groups edge of the Tenant.
+func (t *Tenant) QueryGroups() *GroupQuery {
+	return (&TenantClient{config: t.config}).QueryGroups(t)
+}
+
+// QueryUsers queries the users edge of the Tenant.
+func (t *Tenant) QueryUsers() *UserQuery {
+	return (&TenantClient{config: t.config}).QueryUsers(t)
 }
 
 // Update returns a builder for updating this Tenant.

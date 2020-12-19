@@ -15,7 +15,7 @@ var (
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "user_car", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// CarsTable holds the schema information for the "cars" table.
 	CarsTable = &schema.Table{
@@ -64,8 +64,8 @@ var (
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out"}},
 		{Name: "status", Type: field.TypeString, Nullable: true},
 		{Name: "workplace", Type: field.TypeString, Nullable: true, Size: 30},
-		{Name: "user_children", Type: field.TypeInt, Nullable: true},
-		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
+		{Name: "spouse_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
