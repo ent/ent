@@ -73,18 +73,18 @@ func As(fn AggregateFunc, end string) AggregateFunc {
 
 // ValidationError returns when validating a field fails.
 type ValidationError struct {
-    Name string // Field or edge name.
-    err error
+	Name string // Field or edge name.
+	err error
 }
 
 // Error implements the error interface.
 func (e *ValidationError) Error() string {
-    return e.err.Error()
+	return e.err.Error()
 }
 
 // Unwrap implements the errors.Wrapper interface.
 func (e *ValidationError) Unwrap() error {
-    return e.err
+	return e.err
 }
 
 // IsValidationError returns a boolean indicating whether the error is a validaton error.

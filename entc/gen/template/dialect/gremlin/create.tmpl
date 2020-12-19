@@ -10,8 +10,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.Name }}, error) {
-    res := &gremlin.Response{}
-    query, bindings := {{ $receiver }}.gremlin().Query()
+	res := &gremlin.Response{}
+	query, bindings := {{ $receiver }}.gremlin().Query()
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

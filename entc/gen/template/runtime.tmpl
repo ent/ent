@@ -16,13 +16,13 @@ backwards-compatibility with previous versions of ent.
 */}}
 
 {{ define "runtime/ent" }}
-    {{ template "runtime" $ }}
+	{{ template "runtime" $ }}
 {{ end }}
 
 {{ define "runtime/pkg" }}
-    {{ with extend $ "Package" "runtime" }}
-        {{ template "runtime" . }}
-    {{ end }}
+	{{ with extend $ "Package" "runtime" }}
+		{{ template "runtime" . }}
+	{{ end }}
 	{{ $module := $.ModuleInfo }}
 	{{ if or $module.Version $module.Sum }}
 	const (
@@ -49,13 +49,13 @@ backwards-compatibility with previous versions of ent.
 
 {{ if $rtpkg }} {{/* 1st format - runtime/runtime.go */}}
 	{{ if $hooks  }}
-    	{{ template "runtime/register" $ }}
+		{{ template "runtime/register" $ }}
 	{{ else }}
 		// The schema-stitching logic is generated in {{ $.Config.Package }}/runtime.go
 	{{ end }}
 {{ else }}{{/* 2nd format - ent/runtime.go */}}
 	{{ if not $hooks  }}
-    	{{ template "runtime/register" $ }}
+		{{ template "runtime/register" $ }}
 	{{ else }}
 		// The schema-stitching logic is generated in {{ $.Config.Package }}/runtime/runtime.go
 	{{ end }}
@@ -103,14 +103,14 @@ func init() {
 		}
 	{{- end }}
 	{{- with $hooks := $n.HookPositions }}
-        {{- /* Hooks defined in schema mixins. */}}
+		{{- /* Hooks defined in schema mixins. */}}
 		{{- with $idx := $n.MixedInHooks }}
 			{{- range $i := $idx }}
 				{{ print $pkg "MixinHooks" $i }} := {{ $pkg }}Mixin[{{ $i }}].Hooks()
 			{{- end }}
 		{{- end }}
-        {{- /* If there are hooks defined in the schema. */}}
-        {{- $schemaHooks := false }}{{ range $p := $hooks }}{{ if not $p.MixedIn }}{{ $schemaHooks = true }}{{ end }}{{ end }}
+		{{- /* If there are hooks defined in the schema. */}}
+		{{- $schemaHooks := false }}{{ range $p := $hooks }}{{ if not $p.MixedIn }}{{ $schemaHooks = true }}{{ end }}{{ end }}
 		{{- if $schemaHooks }}
 			{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
 		{{- end }}
@@ -119,18 +119,18 @@ func init() {
 				{{ $i = add $i 1 }}
 			{{- end }}
 			{{- if $p.MixedIn }}
-                {{ print $pkg ".Hooks" }}[{{ $i }}] =  {{ print $pkg "MixinHooks" $p.MixinIndex }}[{{ $p.Index }}]
+				{{ print $pkg ".Hooks" }}[{{ $i }}] =  {{ print $pkg "MixinHooks" $p.MixinIndex }}[{{ $p.Index }}]
 			{{- else }}
-                {{ print $pkg ".Hooks" }}[{{ $i }}] = {{ print $pkg "Hooks" }}[{{ $p.Index }}]
+				{{ print $pkg ".Hooks" }}[{{ $i }}] = {{ print $pkg "Hooks" }}[{{ $p.Index }}]
 			{{- end }}
 		{{- end }}
 	{{- end }}
 	{{- if or $n.HasDefault $n.HasValidators }}
-        {{- with $idx := $n.MixedInFields }}
-            {{- range $i := $idx }}
-                {{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
-                _ = {{ $pkg }}MixinFields{{ $i }}
-            {{- end }}
+		{{- with $idx := $n.MixedInFields }}
+			{{- range $i := $idx }}
+				{{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
+				_ = {{ $pkg }}MixinFields{{ $i }}
+			{{- end }}
 		{{- end }}
 		{{- $fields := $n.Fields }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}
 		{{- with $fields }}
