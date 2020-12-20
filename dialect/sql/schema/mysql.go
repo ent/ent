@@ -102,7 +102,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	for _, idx := range indexes {
 		t.AddIndex(idx.Name, idx.Unique, idx.columns)
 	}
-	if d.mariadb() {
+	if _, ok := d.mariadb(); ok {
 		if err := d.normalizeJSON(ctx, tx, t); err != nil {
 			return nil, err
 		}
@@ -281,6 +281,15 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
 	}
 	c.nullable(b)
 	c.defaultValue(b)
+	if c.Type == field.TypeJSON {
+		// Manually add a `CHECK` clause for older versions of MariaDB for validating the
+		// JSON documents. This constraint is automatically included from version 10.4.3.
+		if version, ok := d.mariadb(); ok && compareVersions(version, "10.4.3") == -1 {
+			b.Check(func(b *sql.Builder) {
+				b.WriteString("JSON_VALID(").Ident(c.Name).WriteByte(')')
+			})
+		}
+	}
 	return b
 }
 
@@ -571,9 +580,13 @@ func (d *MySQL) normalizeJSON(ctx context.Context, tx dialect.Tx, t *Table) erro
 	return rows.Close()
 }
 
-// mariadb reports if the migration runs on MariaDB.
-func (d *MySQL) mariadb() bool {
-	return strings.Contains(d.version, "MariaDB")
+// mariadb reports if the migration runs on MariaDB and returns the semver string.
+func (d *MySQL) mariadb() (string, bool) {
+	idx := strings.Index(d.version, "MariaDB")
+	if idx == -1 {
+		return "", false
+	}
+	return d.version[:idx-1], true
 }
 
 // parseColumn returns column parts, size and signed-info from a MySQL type.
