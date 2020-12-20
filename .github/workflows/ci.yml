@@ -122,6 +122,13 @@ jobs:
           MYSQL_ROOT_PASSWORD: pass
         ports:
           - 4306:3306
+      maria102:
+        image: mariadb:10.2.32
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4307:3306
         options: >-
           --health-cmd "mysqladmin ping -ppass"
           --health-interval 10s
@@ -248,6 +255,13 @@ jobs:
           MYSQL_ROOT_PASSWORD: pass
         ports:
           - 4306:3306
+      maria102:
+        image: mariadb:10.2.32
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4307:3306
         options: >-
           --health-cmd "mysqladmin ping -ppass"
           --health-interval 10s
