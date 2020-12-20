@@ -37,6 +37,7 @@ type ColumnBuilder struct {
 	attr   string             // extra attributes.
 	modify bool               // modify existing.
 	fk     *ForeignKeyBuilder // foreign-key constraint.
+	check  func(*Builder)     // column checks.
 }
 
 // Column returns a new ColumnBuilder with the given name.
@@ -66,12 +67,18 @@ func (c *ColumnBuilder) Constraint(fk *ForeignKeyBuilder) *ColumnBuilder {
 	return c
 }
 
+// Check adds a CHECK clause to the ADD COLUMN statement.
+func (c *ColumnBuilder) Check(check func(*Builder)) *ColumnBuilder {
+	c.check = check
+	return c
+}
+
 // Query returns query representation of a Column.
 func (c *ColumnBuilder) Query() (string, []interface{}) {
 	c.Ident(c.name)
 	if c.typ != "" {
 		if c.postgres() && c.modify {
-			c.Pad().WriteString("TYPE")
+			c.WriteString(" TYPE")
 		}
 		c.Pad().WriteString(c.typ)
 	}
@@ -84,6 +91,10 @@ func (c *ColumnBuilder) Query() (string, []interface{}) {
 		for _, action := range c.fk.actions {
 			c.Pad().WriteString(action)
 		}
+	}
+	if c.check != nil {
+		c.WriteString(" CHECK ")
+		c.Nested(c.check)
 	}
 	return c.String(), c.args
 }

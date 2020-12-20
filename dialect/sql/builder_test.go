@@ -78,11 +78,14 @@ func TestBuilder(t *testing.T) {
 				Columns(
 					Column("id").Type("int").Attr("auto_increment"),
 					Column("card_id").Type("int"),
+					Column("doc").Type("longtext").Check(func(b *Builder) {
+						b.WriteString("JSON_VALID(").Ident("doc").WriteByte(')')
+					}),
 				).
 				PrimaryKey("id", "name").
 				ForeignKeys(ForeignKey().Columns("card_id").
 					Reference(Reference().Table("cards").Columns("id")).OnDelete("SET NULL")),
-			wantQuery: "CREATE TABLE IF NOT EXISTS `users`(`id` int auto_increment, `card_id` int, PRIMARY KEY(`id`, `name`), FOREIGN KEY(`card_id`) REFERENCES `cards`(`id`) ON DELETE SET NULL)",
+			wantQuery: "CREATE TABLE IF NOT EXISTS `users`(`id` int auto_increment, `card_id` int, `doc` longtext CHECK (JSON_VALID(`doc`)), PRIMARY KEY(`id`, `name`), FOREIGN KEY(`card_id`) REFERENCES `cards`(`id`) ON DELETE SET NULL)",
 		},
 		{
 			input: Dialect(dialect.Postgres).CreateTable("users").
