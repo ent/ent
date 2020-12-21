@@ -392,7 +392,6 @@ func resolve(t *Type) error {
 				e.Rel.Columns = []string{fmt.Sprintf("%s_id", snake(rules.Singularize(e.Name)))}
 			}
 		}
-
 	}
 
 	return nil
