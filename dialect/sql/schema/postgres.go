@@ -214,19 +214,17 @@ const maxCharSize = 10 << 20
 // scanColumn scans the information a column from column description.
 func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
-		nullable        sql.NullString
-		defaults        sql.NullString
-		userDefinedType sql.NullString
+		nullable sql.NullString
+		defaults sql.NullString
+		udt      sql.NullString
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &userDefinedType); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt); err != nil {
 		return fmt.Errorf("scanning column description: %v", err)
 	}
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"
 	}
 	switch c.typ {
-	case "USER-DEFINED":
-		c.Type = field.TypeOther
 	case "boolean":
 		c.Type = field.TypeBool
 	case "smallint":
@@ -252,7 +250,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeJSON
 	case "uuid":
 		c.Type = field.TypeUUID
-	case "cidr", "inet", "macaddr", "macaddr8":
+	case "cidr", "inet", "macaddr", "macaddr8", "USER-DEFINED":
 		c.Type = field.TypeOther
 	}
 	switch {
