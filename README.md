@@ -16,13 +16,15 @@ with large data-models.
 
 ## Quick Installation
 ```console
-go get github.com/facebook/ent/cmd/entc
+go get github.com/facebook/ent/cmd/ent
 ```
 
 For proper installation using [Go modules], visit [entgo.io website][entgo instal].
 
-## Docs
+## Docs and Support
 The documentation for developing and using ent is available at: https://entgo.io
+
+For discussion and support, [open an issue](https://github.com/facebook/ent/issues/new/choose) or join our [channel](https://gophers.slack.com/archives/C01FMSQDT53) in the gophers Slack. 
 
 ## Join the ent Community
 In order to contribute to `ent`, see the [CONTRIBUTING](CONTRIBUTING.md) file for how to go get started.  

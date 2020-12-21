@@ -51,7 +51,7 @@ func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 // tableExist checks if a table exists in the database and current schema.
 func (d *Postgres) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Dialect(dialect.Postgres).
-		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
+		Select(sql.Count("*")).From(sql.Table("tables").Schema("information_schema")).
 		Where(sql.And(
 			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
 			sql.EQ("table_name", name),
@@ -62,7 +62,7 @@ func (d *Postgres) tableExist(ctx context.Context, tx dialect.Tx, name string) (
 // tableExist checks if a foreign-key exists in the current schema.
 func (d *Postgres) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
 	query, args := sql.Dialect(dialect.Postgres).
-		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
+		Select(sql.Count("*")).From(sql.Table("table_constraints").Schema("information_schema")).
 		Where(sql.And(
 			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
 			sql.EQ("constraint_type", "FOREIGN KEY"),
@@ -88,7 +88,7 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 	rows := &sql.Rows{}
 	query, args := sql.Dialect(dialect.Postgres).
 		Select("column_name", "data_type", "is_nullable", "column_default", "udt_name").
-		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
+		From(sql.Table("columns").Schema("information_schema")).
 		Where(sql.And(
 			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
 			sql.EQ("table_name", name),
@@ -118,7 +118,7 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 	}
 	// Populate the index information to the table and its columns.
 	// We do it manually, because PK and uniqueness information does
-	// not exist when querying the INFORMATION_SCHEMA.COLUMNS above.
+	// not exist when querying the information_schema.COLUMNS above.
 	for _, idx := range idxs {
 		switch {
 		case idx.primary:
@@ -391,7 +391,7 @@ func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, tab
 		name = prefix + name
 	}
 	query, args := sql.Dialect(dialect.Postgres).
-		Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
+		Select(sql.Count("*")).From(sql.Table("table_constraints").Schema("information_schema")).
 		Where(sql.And(
 			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
 			sql.EQ("constraint_type", "UNIQUE"),

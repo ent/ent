@@ -37,7 +37,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Type: "{{ $n.Name }}",
 			Fields: map[string]*sqlgraph.FieldSpec{
 				{{- range $f := $n.Fields }}
-                    {{ $n.Package }}.{{ $f.Constant }}: {Type: field.{{ $f.Type.ConstName }}, Column: {{ $n.Package }}.{{ $f.Constant }}},
+					{{ $n.Package }}.{{ $f.Constant }}: {Type: field.{{ $f.Type.ConstName }}, Column: {{ $n.Package }}.{{ $f.Constant }}},
 				{{- end }}
 			},
 		}
@@ -109,6 +109,7 @@ type predicateAdder interface {
 
 	{{ $type := $n.ID.Type.Type.String }}
 	{{ $iface := print (pascal $type) "P" }}
+	{{ if $n.ID.IsUUID }}{{ $iface = "ValueP" }}{{ end }}
 	// WhereID applies the entql {{ $type }} predicate on the id field.
 	func (f *{{ $filter }}) WhereID(p entql.{{ $iface }}) {
 		f.Where(p.Field({{ $n.Package }}.{{ $n.ID.Constant }}))
@@ -117,14 +118,14 @@ type predicateAdder interface {
 	{{ range $f := $n.Fields }}
 		{{ $type := $f.Type.Type.String }}
 		{{ $iface := print (pascal $type) "P" }}
-		{{ if $f.IsTime }}{{ $iface = "TimeP" }}{{ else if $f.IsBytes }}{{ $iface = "BytesP" }}{{ end }}
+		{{ if $f.IsTime }}{{ $iface = "TimeP" }}{{ else if $f.IsBytes }}{{ $iface = "BytesP" }}{{ else if $f.IsUUID }}{{ $iface = "ValueP" }}{{ end }}
 		// Where{{ $f.StructField }} applies the entql {{ $type }} predicate on the {{ $f.Name }} field.
 		func (f *{{ $filter }}) Where{{ $f.StructField }}(p entql.{{ $iface }}) {
 			f.Where(p.Field({{ $n.Package }}.{{ $f.Constant }}))
 		}
 	{{ end }}
 
-    {{ range $e := $n.Edges }}
+	{{ range $e := $n.Edges }}
 		{{ $func := print "WhereHas" $e.StructField }}
 		// {{ $func }} applies a predicate to check if query has an edge {{ $e.Name }}.
 		func (f *{{ $filter }}) {{ $func }}() {
@@ -140,7 +141,7 @@ type predicateAdder interface {
 				}
 			})))
 		}
-    {{ end }}
+	{{ end }}
 {{ end }}
 
 {{ end }}

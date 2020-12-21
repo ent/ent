@@ -17,6 +17,7 @@ import (
 	"github.com/facebook/ent/entc/integration/privacy/ent/team"
 	"github.com/facebook/ent/entc/integration/privacy/ent/user"
 	"github.com/facebook/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // TaskUpdate is the builder for updating Task entities.
@@ -69,6 +70,18 @@ func (tu *TaskUpdate) SetNillableStatus(t *task.Status) *TaskUpdate {
 	if t != nil {
 		tu.SetStatus(*t)
 	}
+	return tu
+}
+
+// SetUUID sets the uuid field.
+func (tu *TaskUpdate) SetUUID(u uuid.UUID) *TaskUpdate {
+	tu.mutation.SetUUID(u)
+	return tu
+}
+
+// ClearUUID clears the value of uuid.
+func (tu *TaskUpdate) ClearUUID() *TaskUpdate {
+	tu.mutation.ClearUUID()
 	return tu
 }
 
@@ -255,6 +268,19 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: task.FieldStatus,
 		})
 	}
+	if value, ok := tu.mutation.UUID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: task.FieldUUID,
+		})
+	}
+	if tu.mutation.UUIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Column: task.FieldUUID,
+		})
+	}
 	if tu.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -399,6 +425,18 @@ func (tuo *TaskUpdateOne) SetNillableStatus(t *task.Status) *TaskUpdateOne {
 	if t != nil {
 		tuo.SetStatus(*t)
 	}
+	return tuo
+}
+
+// SetUUID sets the uuid field.
+func (tuo *TaskUpdateOne) SetUUID(u uuid.UUID) *TaskUpdateOne {
+	tuo.mutation.SetUUID(u)
+	return tuo
+}
+
+// ClearUUID clears the value of uuid.
+func (tuo *TaskUpdateOne) ClearUUID() *TaskUpdateOne {
+	tuo.mutation.ClearUUID()
 	return tuo
 }
 
@@ -581,6 +619,19 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: task.FieldStatus,
+		})
+	}
+	if value, ok := tuo.mutation.UUID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: task.FieldUUID,
+		})
+	}
+	if tuo.mutation.UUIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Column: task.FieldUUID,
 		})
 	}
 	if tuo.mutation.TeamsCleared() {

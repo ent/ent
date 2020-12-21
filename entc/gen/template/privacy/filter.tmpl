@@ -16,51 +16,51 @@ type (
 		Where(entql.P)
 	}
 
-    // The FilterFunc type is an adapter to allow the use of ordinary
-    // functions as filters for query and mutation types.
-    FilterFunc func(context.Context, Filter) error
+	// The FilterFunc type is an adapter to allow the use of ordinary
+	// functions as filters for query and mutation types.
+	FilterFunc func(context.Context, Filter) error
 )
 
 // EvalQuery calls f(ctx, q) if the query implement the Filter interface, deny otherwise.
 func (f FilterFunc) EvalQuery(ctx context.Context, q {{ $pkg }}.Query) error {
-    fr, err := queryFilter(q)
-    if err != nil {
-        return err
-    }
-    return f(ctx, fr)
+	fr, err := queryFilter(q)
+	if err != nil {
+		return err
+	}
+	return f(ctx, fr)
 }
 
 // EvalMutation calls f(ctx, q) if the mutation implement the Filter interface, deny otherwise.
 func (f FilterFunc) EvalMutation(ctx context.Context, m {{ $pkg }}.Mutation) error {
-    fr, err := mutationFilter(m)
-    if err != nil {
-        return err
-    }
-    return f(ctx, fr)
+	fr, err := mutationFilter(m)
+	if err != nil {
+		return err
+	}
+	return f(ctx, fr)
 }
 
 var _ QueryMutationRule = FilterFunc(nil)
 
 func queryFilter(q {{ $pkg }}.Query) (Filter, error) {
-    switch q := q.(type) {
-    {{- range $n := $.Nodes }}
-        case *{{ $pkg }}.{{ $n.QueryName }}:
-            return q.Filter(), nil
-    {{- end }}
-    default:
-        return nil, Denyf("{{ $pkg }}/privacy: unexpected query type %T for query filter", q)
-    }
+	switch q := q.(type) {
+	{{- range $n := $.Nodes }}
+		case *{{ $pkg }}.{{ $n.QueryName }}:
+			return q.Filter(), nil
+	{{- end }}
+	default:
+		return nil, Denyf("{{ $pkg }}/privacy: unexpected query type %T for query filter", q)
+	}
 }
 
 func mutationFilter(m {{ $pkg }}.Mutation) (Filter, error) {
-    switch m := m.(type) {
-    {{- range $n := $.Nodes }}
-        case *{{ $pkg }}.{{ $n.MutationName }}:
-            return m.Filter(), nil
-    {{- end }}
-    default:
-        return nil, Denyf("{{ $pkg }}/privacy: unexpected mutation type %T for mutation filter", m)
-    }
+	switch m := m.(type) {
+	{{- range $n := $.Nodes }}
+		case *{{ $pkg }}.{{ $n.MutationName }}:
+			return m.Filter(), nil
+	{{- end }}
+	default:
+		return nil, Denyf("{{ $pkg }}/privacy: unexpected mutation type %T for mutation filter", m)
+	}
 }
 {{ end }}
 

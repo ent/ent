@@ -15,6 +15,7 @@ import (
 	"github.com/facebook/ent/entc/integration/privacy/ent/task"
 	"github.com/facebook/ent/entc/integration/privacy/ent/team"
 	"github.com/facebook/ent/entc/integration/privacy/ent/user"
+	"github.com/google/uuid"
 
 	"github.com/facebook/ent"
 )
@@ -43,6 +44,7 @@ type TaskMutation struct {
 	title         *string
 	description   *string
 	status        *task.Status
+	uuid          *uuid.UUID
 	clearedFields map[string]struct{}
 	teams         map[int]struct{}
 	removedteams  map[int]struct{}
@@ -59,7 +61,7 @@ var _ ent.Mutation = (*TaskMutation)(nil)
 // taskOption allows to manage the mutation configuration using functional options.
 type taskOption func(*TaskMutation)
 
-// newTaskMutation creates new mutation for $n.Name.
+// newTaskMutation creates new mutation for Task.
 func newTaskMutation(c config, op Op, opts ...taskOption) *TaskMutation {
 	m := &TaskMutation{
 		config:        c,
@@ -257,6 +259,56 @@ func (m *TaskMutation) ResetStatus() {
 	m.status = nil
 }
 
+// SetUUID sets the uuid field.
+func (m *TaskMutation) SetUUID(u uuid.UUID) {
+	m.uuid = &u
+}
+
+// UUID returns the uuid value in the mutation.
+func (m *TaskMutation) UUID() (r uuid.UUID, exists bool) {
+	v := m.uuid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUUID returns the old uuid value of the Task.
+// If the Task object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *TaskMutation) OldUUID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUUID is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUUID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+	}
+	return oldValue.UUID, nil
+}
+
+// ClearUUID clears the value of uuid.
+func (m *TaskMutation) ClearUUID() {
+	m.uuid = nil
+	m.clearedFields[task.FieldUUID] = struct{}{}
+}
+
+// UUIDCleared returns if the field uuid was cleared in this mutation.
+func (m *TaskMutation) UUIDCleared() bool {
+	_, ok := m.clearedFields[task.FieldUUID]
+	return ok
+}
+
+// ResetUUID reset all changes of the "uuid" field.
+func (m *TaskMutation) ResetUUID() {
+	m.uuid = nil
+	delete(m.clearedFields, task.FieldUUID)
+}
+
 // AddTeamIDs adds the teams edge to Team by ids.
 func (m *TaskMutation) AddTeamIDs(ids ...int) {
 	if m.teams == nil {
@@ -363,7 +415,7 @@ func (m *TaskMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.title != nil {
 		fields = append(fields, task.FieldTitle)
 	}
@@ -372,6 +424,9 @@ func (m *TaskMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, task.FieldStatus)
+	}
+	if m.uuid != nil {
+		fields = append(fields, task.FieldUUID)
 	}
 	return fields
 }
@@ -387,6 +442,8 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case task.FieldStatus:
 		return m.Status()
+	case task.FieldUUID:
+		return m.UUID()
 	}
 	return nil, false
 }
@@ -402,6 +459,8 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldDescription(ctx)
 	case task.FieldStatus:
 		return m.OldStatus(ctx)
+	case task.FieldUUID:
+		return m.OldUUID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Task field %s", name)
 }
@@ -431,6 +490,13 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
+		return nil
+	case task.FieldUUID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUUID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
@@ -465,6 +531,9 @@ func (m *TaskMutation) ClearedFields() []string {
 	if m.FieldCleared(task.FieldDescription) {
 		fields = append(fields, task.FieldDescription)
 	}
+	if m.FieldCleared(task.FieldUUID) {
+		fields = append(fields, task.FieldUUID)
+	}
 	return fields
 }
 
@@ -481,6 +550,9 @@ func (m *TaskMutation) ClearField(name string) error {
 	switch name {
 	case task.FieldDescription:
 		m.ClearDescription()
+		return nil
+	case task.FieldUUID:
+		m.ClearUUID()
 		return nil
 	}
 	return fmt.Errorf("unknown Task nullable field %s", name)
@@ -499,6 +571,9 @@ func (m *TaskMutation) ResetField(name string) error {
 		return nil
 	case task.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case task.FieldUUID:
+		m.ResetUUID()
 		return nil
 	}
 	return fmt.Errorf("unknown Task field %s", name)
@@ -635,7 +710,7 @@ var _ ent.Mutation = (*TeamMutation)(nil)
 // teamOption allows to manage the mutation configuration using functional options.
 type teamOption func(*TeamMutation)
 
-// newTeamMutation creates new mutation for $n.Name.
+// newTeamMutation creates new mutation for Team.
 func newTeamMutation(c config, op Op, opts ...teamOption) *TeamMutation {
 	m := &TeamMutation{
 		config:        c,
@@ -1105,7 +1180,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,

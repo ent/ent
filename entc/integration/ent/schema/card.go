@@ -10,31 +10,47 @@ import (
 	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
+	"github.com/facebook/ent/schema/index"
 	"github.com/facebook/ent/schema/mixin"
 )
 
-// Card holds the schema definition for the CreditCard entity.
-type Card struct {
-	ent.Schema
+type CardMixin struct {
+	mixin.Schema
 }
 
-func (Card) Annotations() []schema.Annotation {
+func (CardMixin) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		edge.Annotation{
 			StructTag: `json:"card_edges" mashraki:"edges"`,
 		},
 		field.Annotation{
 			StructTag: map[string]string{
-				"id":     `json:"-"`,
+				"id":     `yaml:"-"`,
 				"number": `json:"-"`,
 			},
 		},
 	}
 }
 
+// Card holds the schema definition for the CreditCard entity.
+type Card struct {
+	ent.Schema
+}
+
 func (Card) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.Time{},
+		CardMixin{},
+	}
+}
+
+func (Card) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		field.Annotation{
+			StructTag: map[string]string{
+				"id": `json:"-"`,
+			},
+		},
 	}
 }
 
@@ -69,5 +85,14 @@ func (Card) Edges() []ent.Edge {
 			Annotations(&template.Extension{
 				Type: "int",
 			}),
+	}
+}
+
+// Indexes of the Card.
+func (Card) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("id"),
+		index.Fields("number"),
+		index.Fields("id", "name", "number"),
 	}
 }

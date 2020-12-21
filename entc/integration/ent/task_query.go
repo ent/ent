@@ -25,7 +25,6 @@ type TaskQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Task
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -230,7 +229,6 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 		limit:      tq.limit,
 		offset:     tq.offset,
 		order:      append([]OrderFunc{}, tq.order...),
-		unique:     append([]string{}, tq.unique...),
 		predicates: append([]predicate.Task{}, tq.predicates...),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),

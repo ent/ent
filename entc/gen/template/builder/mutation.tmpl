@@ -56,7 +56,7 @@ type {{ $mutation }} struct {
 		{{- if $e.Unique }}
 			{{ $e.BuilderField }} *{{ $e.Type.ID.Type }}
 		{{- else }}
-            {{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
+			{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 			removed{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
 		{{- end }}
 		cleared{{ $e.BuilderField }} bool
@@ -72,7 +72,7 @@ var _ ent.Mutation = (*{{ $mutation }})(nil)
 // {{ $mutationOption }} allows to manage the mutation configuration using functional options.
 type {{ $mutationOption }} func(*{{ $mutation }})
 
-// new{{ $mutation }} creates new mutation for $n.Name.
+// new{{ $mutation }} creates new mutation for {{ $n.Name }}.
 func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mutation }} {
 	m := &{{ $mutation }}{
 		config:        c,
@@ -254,8 +254,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 
 
 {{ range $e := $n.Edges }}
-	{{ $op := "add" }}{{ if $e.Unique }}{{ $op = "set" }}{{ end }}
-	{{ $idsFunc := print (pascal $op) (singular $e.Name | pascal) "IDs" }}{{ if $e.Unique }}{{ $idsFunc = print (pascal $op) (pascal $e.Name) "ID" }}{{ end }}
+	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
 	// {{ $idsFunc }} {{ $op }}s the {{ $e.Name }} edge to {{ $e.Type.Name }} by id{{ if not $e.Unique }}s{{ end }}.
 	func (m *{{ $mutation }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) {
 		{{- if $e.Unique }}

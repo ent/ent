@@ -26,7 +26,6 @@ type {{ $builder }} struct {
 	limit		*int
 	offset		*int
 	order		[]OrderFunc
-	unique		[]string
 	predicates 	[]predicate.{{ $.Name }}
 	{{- with $.Edges }}
 		// eager-loading edges.
@@ -262,7 +261,6 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		limit: 		{{ $receiver }}.limit,
 		offset: 	{{ $receiver }}.offset,
 		order: 		append([]OrderFunc{}, {{ $receiver }}.order...),
-		unique: 	append([]string{}, {{ $receiver }}.unique...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
 		{{- range $e := $.Edges }}
 			{{ $e.EagerLoadField }}: {{ $receiver }}.{{ $e.EagerLoadField }}.Clone(),
@@ -357,6 +355,9 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 		{{ $receiver }}.{{ $.Storage }} = prev
 	}
 	{{- if $.NumPolicy }}
+		if {{ $.Package }}.Policy == nil {
+			return errors.New("{{ $pkg }}: uninitialized {{ $.Package }}.Policy (forgotten import {{ $pkg }}/runtime?)")
+		}
 		if err := {{ $.Package }}.Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
 			return err
 		}

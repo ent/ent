@@ -9,6 +9,7 @@ package ent
 import (
 	"github.com/facebook/ent/entc/integration/customid/ent/blob"
 	"github.com/facebook/ent/entc/integration/customid/ent/car"
+	"github.com/facebook/ent/entc/integration/customid/ent/mixinid"
 	"github.com/facebook/ent/entc/integration/customid/ent/pet"
 	"github.com/facebook/ent/entc/integration/customid/ent/schema"
 	"github.com/google/uuid"
@@ -30,6 +31,7 @@ func init() {
 	blob.DefaultID = blobDescID.Default.(func() uuid.UUID)
 	carMixin := schema.Car{}.Mixin()
 	carMixinFields0 := carMixin[0].Fields()
+	_ = carMixinFields0
 	carFields := schema.Car{}.Fields()
 	_ = carFields
 	// carDescBeforeID is the schema descriptor for before_id field.
@@ -44,6 +46,15 @@ func init() {
 	carDescID := carMixinFields0[1].Descriptor()
 	// car.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	car.IDValidator = carDescID.Validators[0].(func(int) error)
+	mixinidMixin := schema.MixinID{}.Mixin()
+	mixinidMixinFields0 := mixinidMixin[0].Fields()
+	_ = mixinidMixinFields0
+	mixinidFields := schema.MixinID{}.Fields()
+	_ = mixinidFields
+	// mixinidDescID is the schema descriptor for id field.
+	mixinidDescID := mixinidMixinFields0[0].Descriptor()
+	// mixinid.DefaultID holds the default value on creation for the id field.
+	mixinid.DefaultID = mixinidDescID.Default.(func() uuid.UUID)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescID is the schema descriptor for id field.

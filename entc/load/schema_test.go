@@ -30,6 +30,11 @@ func (OrderConfig) Name() string {
 	return "order_config"
 }
 
+func (o OrderConfig) Merge(ant schema.Annotation) schema.Annotation {
+	o.FieldName = ant.(OrderConfig).FieldName
+	return o
+}
+
 type IDConfig struct {
 	TagName string
 }
@@ -45,6 +50,7 @@ type AnnotationMixin struct {
 func (AnnotationMixin) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		IDConfig{TagName: "id tag"},
+		OrderConfig{FieldName: "mixin annotations"},
 	}
 }
 

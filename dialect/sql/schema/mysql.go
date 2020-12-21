@@ -6,9 +6,9 @@ package schema
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -45,7 +45,7 @@ func (d *MySQL) init(ctx context.Context, tx dialect.Tx) error {
 }
 
 func (d *MySQL) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
-	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
+	query, args := sql.Select(sql.Count("*")).From(sql.Table("TABLES").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", name),
@@ -54,7 +54,7 @@ func (d *MySQL) tableExist(ctx context.Context, tx dialect.Tx, name string) (boo
 }
 
 func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
-	query, args := sql.Select(sql.Count("*")).From(sql.Table("INFORMATION_SCHEMA.TABLE_CONSTRAINTS").Unquote()).
+	query, args := sql.Select(sql.Count("*")).From(sql.Table("TABLE_CONSTRAINTS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("CONSTRAINT_TYPE", "FOREIGN KEY"),
@@ -67,7 +67,7 @@ func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, 
 func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name").
-		From(sql.Table("INFORMATION_SCHEMA.COLUMNS").Unquote()).
+		From(sql.Table("COLUMNS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", name)),
@@ -102,6 +102,11 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	for _, idx := range indexes {
 		t.AddIndex(idx.Name, idx.Unique, idx.columns)
 	}
+	if _, ok := d.mariadb(); ok {
+		if err := d.normalizeJSON(ctx, tx, t); err != nil {
+			return nil, err
+		}
+	}
 	return t, nil
 }
 
@@ -109,7 +114,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Index, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("index_name", "column_name", "non_unique", "seq_in_index").
-		From(sql.Table("INFORMATION_SCHEMA.STATISTICS").Unquote()).
+		From(sql.Table("STATISTICS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", name),
@@ -137,7 +142,7 @@ func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expect
 	}
 	rows := &sql.Rows{}
 	query, args := sql.Select("AUTO_INCREMENT").
-		From(sql.Table("INFORMATION_SCHEMA.TABLES").Unquote()).
+		From(sql.Table("TABLES").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_SCHEMA", sql.Raw("(SELECT DATABASE())")),
 			sql.EQ("TABLE_NAME", t.Name),
@@ -257,7 +262,6 @@ func (d *MySQL) cType(c *Column) (t string) {
 		for i, e := range c.Enums {
 			values[i] = fmt.Sprintf("'%s'", e)
 		}
-		sort.Strings(values)
 		t = fmt.Sprintf("enum(%s)", strings.Join(values, ", "))
 	case field.TypeUUID:
 		t = "char(36) binary"
@@ -277,6 +281,15 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
 	}
 	c.nullable(b)
 	c.defaultValue(b)
+	if c.Type == field.TypeJSON {
+		// Manually add a `CHECK` clause for older versions of MariaDB for validating the
+		// JSON documents. This constraint is automatically included from version 10.4.3.
+		if version, ok := d.mariadb(); ok && compareVersions(version, "10.4.3") == -1 {
+			b.Check(func(b *sql.Builder) {
+				b.WriteString("JSON_VALID(").Ident(c.Name).WriteByte(')')
+			})
+		}
+	}
 	return b
 }
 
@@ -521,6 +534,61 @@ func (d *MySQL) alterColumns(table string, add, modify, drop []*Column) sql.Quer
 	return sql.Queries{b}
 }
 
+// normalizeJSON normalize MariaDB longtext columns to type JSON.
+func (d *MySQL) normalizeJSON(ctx context.Context, tx dialect.Tx, t *Table) error {
+	var (
+		names   []driver.Value
+		columns = make(map[string]*Column)
+	)
+	for _, c := range t.Columns {
+		if c.typ == "longtext" {
+			columns[c.Name] = c
+			names = append(names, c.Name)
+		}
+	}
+	if len(names) == 0 {
+		return nil
+	}
+	rows := &sql.Rows{}
+	query, args := sql.Select("CONSTRAINT_NAME", "CHECK_CLAUSE").
+		From(sql.Table("CHECK_CONSTRAINTS").Schema("INFORMATION_SCHEMA")).
+		Where(sql.And(
+			sql.EQ("CONSTRAINT_SCHEMA", sql.Raw("(SELECT DATABASE())")),
+			sql.EQ("TABLE_NAME", t.Name),
+			sql.InValues("CONSTRAINT_NAME", names...),
+		)).
+		Query()
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return fmt.Errorf("mysql: query table constraints %v", err)
+	}
+	// Call Close in cases of failures (Close is idempotent).
+	defer rows.Close()
+	for rows.Next() {
+		var name, check string
+		if err := rows.Scan(&name, &check); err != nil {
+			return fmt.Errorf("mysql: scan table constraints")
+		}
+		c, ok := columns[name]
+		if !ok || !strings.HasPrefix(check, "json_valid") {
+			continue
+		}
+		c.Type = field.TypeJSON
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	return rows.Close()
+}
+
+// mariadb reports if the migration runs on MariaDB and returns the semver string.
+func (d *MySQL) mariadb() (string, bool) {
+	idx := strings.Index(d.version, "MariaDB")
+	if idx == -1 {
+		return "", false
+	}
+	return d.version[:idx-1], true
+}
+
 // parseColumn returns column parts, size and signed-info from a MySQL type.
 func parseColumn(typ string) (parts []string, size int64, unsigned bool, err error) {
 	switch parts = strings.FieldsFunc(typ, func(r rune) bool {
@@ -547,7 +615,7 @@ func parseColumn(typ string) (parts []string, size int64, unsigned bool, err err
 
 // fkNames returns the foreign-key names of a column.
 func fkNames(ctx context.Context, tx dialect.Tx, table, column string) ([]string, error) {
-	query, args := sql.Select("CONSTRAINT_NAME").From(sql.Table("INFORMATION_SCHEMA.KEY_COLUMN_USAGE").Unquote()).
+	query, args := sql.Select("CONSTRAINT_NAME").From(sql.Table("KEY_COLUMN_USAGE").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			sql.EQ("TABLE_NAME", table),
 			sql.EQ("COLUMN_NAME", column),

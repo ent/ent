@@ -26,7 +26,6 @@ type TaskQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Task
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -231,7 +230,6 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 		limit:      tq.limit,
 		offset:     tq.offset,
 		order:      append([]OrderFunc{}, tq.order...),
-		unique:     append([]string{}, tq.unique...),
 		predicates: append([]predicate.Task{}, tq.predicates...),
 		// clone intermediate query.
 		gremlin: tq.gremlin.Clone(),
@@ -355,9 +353,7 @@ func (tq *TaskQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := tq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 

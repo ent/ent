@@ -3,8 +3,8 @@ id: templates
 title: External Templates
 ---
 
-`entc` accepts external [Go templates](https://golang.org/pkg/text/template) to execute using the `--template` flag.
-If the template name is already defined by `entc`, it will override the existing one. Otherwise, it will write the
+`ent` accepts external [Go templates](https://golang.org/pkg/text/template) to execute using the `--template` flag.
+If the template name already defined by `ent`, it will override the existing one. Otherwise, it will write the
 execution output to a file with the same name as the template. For example:
 
 `stringer.tmpl` - This template example will be written in a file named: `ent/stringer.go`.

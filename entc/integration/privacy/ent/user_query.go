@@ -28,7 +28,6 @@ type UserQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.User
 	// eager-loading edges.
 	withTeams *TeamQuery
@@ -280,7 +279,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		limit:      uq.limit,
 		offset:     uq.offset,
 		order:      append([]OrderFunc{}, uq.order...),
-		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
 		withTeams:  uq.withTeams.Clone(),
 		withTasks:  uq.withTasks.Clone(),
@@ -370,6 +368,9 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		uq.sql = prev
+	}
+	if user.Policy == nil {
+		return errors.New("ent: uninitialized user.Policy (forgotten import ent/runtime?)")
 	}
 	if err := user.Policy.EvalQuery(ctx, uq); err != nil {
 		return err

@@ -27,7 +27,6 @@ type CityQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.City
 	// eager-loading edges.
 	withStreets *StreetQuery
@@ -256,7 +255,6 @@ func (cq *CityQuery) Clone() *CityQuery {
 		limit:       cq.limit,
 		offset:      cq.offset,
 		order:       append([]OrderFunc{}, cq.order...),
-		unique:      append([]string{}, cq.unique...),
 		predicates:  append([]predicate.City{}, cq.predicates...),
 		withStreets: cq.withStreets.Clone(),
 		// clone intermediate query.

@@ -197,6 +197,20 @@ func TestNewGraphDuplicateEdges(t *testing.T) {
 	require.EqualError(t, err, `entc/gen: User schema contains multiple "groups" edges`)
 }
 
+func TestNewGraphDuplicateEdgeField(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]},
+		&load.Schema{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "parent", Info: &field.TypeInfo{Type: field.TypeInt}},
+			},
+			Edges: []*load.Edge{
+				{Name: "parent", Type: "User"},
+			},
+		})
+	require.EqualError(t, err, `entc/gen: User schema can't contain field and edge with the same name "parent"`)
+}
+
 func TestRelation(t *testing.T) {
 	require := require.New(t)
 	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, T1)

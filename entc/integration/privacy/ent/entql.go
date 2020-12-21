@@ -35,6 +35,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			task.FieldTitle:       {Type: field.TypeString, Column: task.FieldTitle},
 			task.FieldDescription: {Type: field.TypeString, Column: task.FieldDescription},
 			task.FieldStatus:      {Type: field.TypeEnum, Column: task.FieldStatus},
+			task.FieldUUID:        {Type: field.TypeUUID, Column: task.FieldUUID},
 		},
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
@@ -199,6 +200,11 @@ func (f *TaskFilter) WhereDescription(p entql.StringP) {
 // WhereStatus applies the entql string predicate on the status field.
 func (f *TaskFilter) WhereStatus(p entql.StringP) {
 	f.Where(p.Field(task.FieldStatus))
+}
+
+// WhereUUID applies the entql [16]byte predicate on the uuid field.
+func (f *TaskFilter) WhereUUID(p entql.ValueP) {
+	f.Where(p.Field(task.FieldUUID))
 }
 
 // WhereHasTeams applies a predicate to check if query has an edge teams.

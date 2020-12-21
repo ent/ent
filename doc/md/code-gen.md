@@ -5,19 +5,19 @@ title: Introduction
 
 ## Installation
 
-`ent` comes with a codegen tool called `entc`. In order to install
-`entc` run the following command:
+The project comes with a codegen tool called `ent`. In order to install
+`ent` run the following command:
 
 ```bash
-go get github.com/facebook/ent/cmd/entc
+go get github.com/facebook/ent/cmd/ent
 ``` 
 
 ## Initialize A New Schema
 
-In order to generate one or more schema templates, run `entc init` as follows:
+In order to generate one or more schema templates, run `ent init` as follows:
 
 ```bash
-entc init User Pet
+go run github.com/facebook/ent/cmd/ent init User Pet
 ```
 
 `init` will create the 2 schemas (`user.go` and `pet.go`) under the `ent/schema` directory.
@@ -27,7 +27,7 @@ is to have an `ent` directory under the root directory of the project.
 ## Generate Assets
 
 After adding a few [fields](schema-fields.md) and [edges](schema-edges.md), you want to generate
-the assets for working with your entities. Run `entc generate` from the root directory of the project,
+the assets for working with your entities. Run `ent generate` from the root directory of the project,
 or use `go generate`:
 
 
@@ -45,11 +45,11 @@ The `generate` command generates the following assets for the schemas:
 
 ## Version Compatibility Between `entc` And `ent`
 
-When working with `entc` in a project, you want to make sure that the version being
-used by `entc` is **identical** to the `ent` version used by your project.
+When working with `ent` CLI in a project, you want to make sure the version being
+used by the CLI is **identical** to the `ent` version used by your project.
 
 One of the options for achieving this is asking `go generate` to use the version
-mentioned in the `go.mod` file when running `entc`. If your project does not use
+mentioned in the `go.mod` file when running `ent`. If your project does not use
 [Go modules](https://github.com/golang/go/wiki/Modules#quick-start), setup one as follows:
 
 ```console
@@ -59,7 +59,7 @@ go mod init <project>
 And then, re-run the following command in order to add `ent` to your `go.mod` file:
 
 ```console
-go get github.com/facebook/ent/cmd/entc
+go get github.com/facebook/ent/cmd/ent
 ```
 
 Add a `generate.go` file to your project under `<project>/ent`:
@@ -67,25 +67,25 @@ Add a `generate.go` file to your project under `<project>/ent`:
 ```go
 package ent
 
-//go:generate go run github.com/facebook/ent/cmd/entc generate ./schema
+//go:generate go run github.com/facebook/ent/cmd/ent generate ./schema
 ```
 
 Finally, you can run `go generate ./ent` from the root directory of your project
-in order to run `entc` code generation on your project schemas.
+in order to run `ent` code generation on your project schemas.
 
 ## Code Generation Options
 
-For more info about codegen options, run `entc generate -h`:
+For more info about codegen options, run `ent generate -h`:
 
 ```console
 generate go code for the schema directory
 
 Usage:
-  entc generate [flags] path
+  ent generate [flags] path
 
 Examples:
-  entc generate ./ent/schema
-  entc generate github.com/a8m/x
+  ent generate ./ent/schema
+  ent generate github.com/a8m/x
 
 Flags:
       --feature strings       extend codegen with additional features
@@ -99,24 +99,24 @@ Flags:
 
 ## Storage Options
 
-`entc` can generate assets for both SQL and Gremlin dialect. The default dialect is SQL.
+`ent` can generate assets for both SQL and Gremlin dialect. The default dialect is SQL.
 
 ## External Templates
 
-`entc` accepts external Go templates to execute. If the template name is already defined by
-`entc`, it will override the existing one. Otherwise, it will write the execution output to
+`ent` accepts external Go templates to execute. If the template name already defined by
+`ent`, it will override the existing one. Otherwise, it will write the execution output to
 a file with the same name as the template. The flag format supports  `file`, `dir` and `glob`
 as follows:
 
 ```console
-entc generate --template <dir-path> --template glob="path/to/*.tmpl" ./ent/schema
+go run github.com/facebook/ent/cmd/ent generate --template <dir-path> --template glob="path/to/*.tmpl" ./ent/schema
 ```
 
 More information and examples can be found in the [external templates doc](templates.md).
 
 ## Use `entc` As A Package
 
-Another option for running `entc` is to use it as a package as follows:
+Another option for running `ent` CLI is to use it as a package as follows:
 
 ```go
 package main
@@ -148,7 +148,7 @@ The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/
 In order to get a description of your graph schema, run:
 
 ```bash
-entc describe ./ent/schema
+go run github.com/facebook/ent/cmd/ent describe ./ent/schema
 ```
 
 An example for the output is as follows:
@@ -230,3 +230,9 @@ func EnsureStructTag(name string) gen.Hook {
 	}
 }
 ```
+
+## Feature Flags
+
+The `entc` package provides a collection of code-generation features that be added or removed using flags.
+
+For more information, please see the [features-flags page](features.md).

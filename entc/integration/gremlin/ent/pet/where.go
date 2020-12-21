@@ -11,6 +11,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their identifier.
@@ -88,6 +89,13 @@ func IDLTE(id string) predicate.Pet {
 func Name(v string) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.EQ(v))
+	})
+}
+
+// UUID applies equality check predicate on the "uuid" field. It's identical to UUIDEQ.
+func UUID(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.EQ(v))
 	})
 }
 
@@ -173,6 +181,84 @@ func NameHasPrefix(v string) predicate.Pet {
 func NameHasSuffix(v string) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.EndingWith(v))
+	})
+}
+
+// UUIDEQ applies the EQ predicate on the "uuid" field.
+func UUIDEQ(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.EQ(v))
+	})
+}
+
+// UUIDNEQ applies the NEQ predicate on the "uuid" field.
+func UUIDNEQ(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.NEQ(v))
+	})
+}
+
+// UUIDIn applies the In predicate on the "uuid" field.
+func UUIDIn(vs ...uuid.UUID) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.Within(v...))
+	})
+}
+
+// UUIDNotIn applies the NotIn predicate on the "uuid" field.
+func UUIDNotIn(vs ...uuid.UUID) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.Without(v...))
+	})
+}
+
+// UUIDGT applies the GT predicate on the "uuid" field.
+func UUIDGT(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.GT(v))
+	})
+}
+
+// UUIDGTE applies the GTE predicate on the "uuid" field.
+func UUIDGTE(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.GTE(v))
+	})
+}
+
+// UUIDLT applies the LT predicate on the "uuid" field.
+func UUIDLT(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.LT(v))
+	})
+}
+
+// UUIDLTE applies the LTE predicate on the "uuid" field.
+func UUIDLTE(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUUID, p.LTE(v))
+	})
+}
+
+// UUIDIsNil applies the IsNil predicate on the "uuid" field.
+func UUIDIsNil() predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldUUID)
+	})
+}
+
+// UUIDNotNil applies the NotNil predicate on the "uuid" field.
+func UUIDNotNil() predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldUUID)
 	})
 }
 

@@ -12,6 +12,7 @@ import (
 
 	"github.com/facebook/ent/dialect/gremlin"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"github.com/google/uuid"
 )
 
 // Pet is the model entity for the Pet schema.
@@ -21,6 +22,8 @@ type Pet struct {
 	ID string `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// UUID holds the value of the "uuid" field.
+	UUID uuid.UUID `json:"uuid,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges PetEdges `json:"edges"`
@@ -72,14 +75,16 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanpe struct {
-		ID   string `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
+		ID   string    `json:"id,omitempty"`
+		Name string    `json:"name,omitempty"`
+		UUID uuid.UUID `json:"uuid,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
 	}
 	pe.ID = scanpe.ID
 	pe.Name = scanpe.Name
+	pe.UUID = scanpe.UUID
 	return nil
 }
 
@@ -118,6 +123,8 @@ func (pe *Pet) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(pe.Name)
+	builder.WriteString(", uuid=")
+	builder.WriteString(fmt.Sprintf("%v", pe.UUID))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -132,8 +139,9 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanpe []struct {
-		ID   string `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
+		ID   string    `json:"id,omitempty"`
+		Name string    `json:"name,omitempty"`
+		UUID uuid.UUID `json:"uuid,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
@@ -142,6 +150,7 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 		*pe = append(*pe, &Pet{
 			ID:   v.ID,
 			Name: v.Name,
+			UUID: v.UUID,
 		})
 	}
 	return nil

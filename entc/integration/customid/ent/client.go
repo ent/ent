@@ -17,6 +17,7 @@ import (
 	"github.com/facebook/ent/entc/integration/customid/ent/blob"
 	"github.com/facebook/ent/entc/integration/customid/ent/car"
 	"github.com/facebook/ent/entc/integration/customid/ent/group"
+	"github.com/facebook/ent/entc/integration/customid/ent/mixinid"
 	"github.com/facebook/ent/entc/integration/customid/ent/pet"
 	"github.com/facebook/ent/entc/integration/customid/ent/user"
 
@@ -36,6 +37,8 @@ type Client struct {
 	Car *CarClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// MixinID is the client for interacting with the MixinID builders.
+	MixinID *MixinIDClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
@@ -56,6 +59,7 @@ func (c *Client) init() {
 	c.Blob = NewBlobClient(c.config)
 	c.Car = NewCarClient(c.config)
 	c.Group = NewGroupClient(c.config)
+	c.MixinID = NewMixinIDClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -88,13 +92,14 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Blob:   NewBlobClient(cfg),
-		Car:    NewCarClient(cfg),
-		Group:  NewGroupClient(cfg),
-		Pet:    NewPetClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:     ctx,
+		config:  cfg,
+		Blob:    NewBlobClient(cfg),
+		Car:     NewCarClient(cfg),
+		Group:   NewGroupClient(cfg),
+		MixinID: NewMixinIDClient(cfg),
+		Pet:     NewPetClient(cfg),
+		User:    NewUserClient(cfg),
 	}, nil
 }
 
@@ -109,12 +114,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	}
 	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		config: cfg,
-		Blob:   NewBlobClient(cfg),
-		Car:    NewCarClient(cfg),
-		Group:  NewGroupClient(cfg),
-		Pet:    NewPetClient(cfg),
-		User:   NewUserClient(cfg),
+		config:  cfg,
+		Blob:    NewBlobClient(cfg),
+		Car:     NewCarClient(cfg),
+		Group:   NewGroupClient(cfg),
+		MixinID: NewMixinIDClient(cfg),
+		Pet:     NewPetClient(cfg),
+		User:    NewUserClient(cfg),
 	}, nil
 }
 
@@ -146,6 +152,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Blob.Use(hooks...)
 	c.Car.Use(hooks...)
 	c.Group.Use(hooks...)
+	c.MixinID.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -476,6 +483,94 @@ func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
 // Hooks returns the client hooks.
 func (c *GroupClient) Hooks() []Hook {
 	return c.hooks.Group
+}
+
+// MixinIDClient is a client for the MixinID schema.
+type MixinIDClient struct {
+	config
+}
+
+// NewMixinIDClient returns a client for the MixinID from the given config.
+func NewMixinIDClient(c config) *MixinIDClient {
+	return &MixinIDClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `mixinid.Hooks(f(g(h())))`.
+func (c *MixinIDClient) Use(hooks ...Hook) {
+	c.hooks.MixinID = append(c.hooks.MixinID, hooks...)
+}
+
+// Create returns a create builder for MixinID.
+func (c *MixinIDClient) Create() *MixinIDCreate {
+	mutation := newMixinIDMutation(c.config, OpCreate)
+	return &MixinIDCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MixinID entities.
+func (c *MixinIDClient) CreateBulk(builders ...*MixinIDCreate) *MixinIDCreateBulk {
+	return &MixinIDCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MixinID.
+func (c *MixinIDClient) Update() *MixinIDUpdate {
+	mutation := newMixinIDMutation(c.config, OpUpdate)
+	return &MixinIDUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MixinIDClient) UpdateOne(mi *MixinID) *MixinIDUpdateOne {
+	mutation := newMixinIDMutation(c.config, OpUpdateOne, withMixinID(mi))
+	return &MixinIDUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MixinIDClient) UpdateOneID(id uuid.UUID) *MixinIDUpdateOne {
+	mutation := newMixinIDMutation(c.config, OpUpdateOne, withMixinIDID(id))
+	return &MixinIDUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MixinID.
+func (c *MixinIDClient) Delete() *MixinIDDelete {
+	mutation := newMixinIDMutation(c.config, OpDelete)
+	return &MixinIDDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MixinIDClient) DeleteOne(mi *MixinID) *MixinIDDeleteOne {
+	return c.DeleteOneID(mi.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MixinIDClient) DeleteOneID(id uuid.UUID) *MixinIDDeleteOne {
+	builder := c.Delete().Where(mixinid.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MixinIDDeleteOne{builder}
+}
+
+// Query returns a query builder for MixinID.
+func (c *MixinIDClient) Query() *MixinIDQuery {
+	return &MixinIDQuery{config: c.config}
+}
+
+// Get returns a MixinID entity by its id.
+func (c *MixinIDClient) Get(ctx context.Context, id uuid.UUID) (*MixinID, error) {
+	return c.Query().Where(mixinid.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MixinIDClient) GetX(ctx context.Context, id uuid.UUID) *MixinID {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MixinIDClient) Hooks() []Hook {
+	return c.hooks.MixinID
 }
 
 // PetClient is a client for the Pet schema.

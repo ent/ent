@@ -53,7 +53,7 @@ var _ ent.Mutation = (*CityMutation)(nil)
 // cityOption allows to manage the mutation configuration using functional options.
 type cityOption func(*CityMutation)
 
-// newCityMutation creates new mutation for $n.Name.
+// newCityMutation creates new mutation for City.
 func newCityMutation(c config, op Op, opts ...cityOption) *CityMutation {
 	m := &CityMutation{
 		config:        c,
@@ -438,7 +438,7 @@ var _ ent.Mutation = (*StreetMutation)(nil)
 // streetOption allows to manage the mutation configuration using functional options.
 type streetOption func(*StreetMutation)
 
-// newStreetMutation creates new mutation for $n.Name.
+// newStreetMutation creates new mutation for Street.
 func newStreetMutation(c config, op Op, opts ...streetOption) *StreetMutation {
 	m := &StreetMutation{
 		config:        c,

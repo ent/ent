@@ -18,6 +18,7 @@ import (
 	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"github.com/google/uuid"
 )
 
 // PetUpdate is the builder for updating Pet entities.
@@ -36,6 +37,18 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 // SetName sets the name field.
 func (pu *PetUpdate) SetName(s string) *PetUpdate {
 	pu.mutation.SetName(s)
+	return pu
+}
+
+// SetUUID sets the uuid field.
+func (pu *PetUpdate) SetUUID(u uuid.UUID) *PetUpdate {
+	pu.mutation.SetUUID(u)
+	return pu
+}
+
+// ClearUUID clears the value of uuid.
+func (pu *PetUpdate) ClearUUID() *PetUpdate {
+	pu.mutation.ClearUUID()
 	return pu
 }
 
@@ -176,6 +189,16 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 	if value, ok := pu.mutation.Name(); ok {
 		v.Property(dsl.Single, pet.FieldName, value)
 	}
+	if value, ok := pu.mutation.UUID(); ok {
+		v.Property(dsl.Single, pet.FieldUUID, value)
+	}
+	var properties []interface{}
+	if pu.mutation.UUIDCleared() {
+		properties = append(properties, pet.FieldUUID)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
+	}
 	if pu.mutation.TeamCleared() {
 		tr := rv.Clone().InE(user.TeamLabel).Drop().Iterate()
 		trs = append(trs, tr)
@@ -219,6 +242,18 @@ type PetUpdateOne struct {
 // SetName sets the name field.
 func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
 	puo.mutation.SetName(s)
+	return puo
+}
+
+// SetUUID sets the uuid field.
+func (puo *PetUpdateOne) SetUUID(u uuid.UUID) *PetUpdateOne {
+	puo.mutation.SetUUID(u)
+	return puo
+}
+
+// ClearUUID clears the value of uuid.
+func (puo *PetUpdateOne) ClearUUID() *PetUpdateOne {
+	puo.mutation.ClearUUID()
 	return puo
 }
 
@@ -363,6 +398,16 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 	)
 	if value, ok := puo.mutation.Name(); ok {
 		v.Property(dsl.Single, pet.FieldName, value)
+	}
+	if value, ok := puo.mutation.UUID(); ok {
+		v.Property(dsl.Single, pet.FieldUUID, value)
+	}
+	var properties []interface{}
+	if puo.mutation.UUIDCleared() {
+		properties = append(properties, pet.FieldUUID)
+	}
+	if len(properties) > 0 {
+		v.SideEffect(__.Properties(properties...).Drop())
 	}
 	if puo.mutation.TeamCleared() {
 		tr := rv.Clone().InE(user.TeamLabel).Drop().Iterate()

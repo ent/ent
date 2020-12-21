@@ -25,7 +25,6 @@ type UserQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.User
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -230,7 +229,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 		limit:      uq.limit,
 		offset:     uq.offset,
 		order:      append([]OrderFunc{}, uq.order...),
-		unique:     append([]string{}, uq.unique...),
 		predicates: append([]predicate.User{}, uq.predicates...),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
@@ -296,6 +294,9 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		uq.sql = prev
+	}
+	if user.Policy == nil {
+		return errors.New("ent: uninitialized user.Policy (forgotten import ent/runtime?)")
 	}
 	if err := user.Policy.EvalQuery(ctx, uq); err != nil {
 		return err

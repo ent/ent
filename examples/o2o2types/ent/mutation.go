@@ -54,7 +54,7 @@ var _ ent.Mutation = (*CardMutation)(nil)
 // cardOption allows to manage the mutation configuration using functional options.
 type cardOption func(*CardMutation)
 
-// newCardMutation creates new mutation for $n.Name.
+// newCardMutation creates new mutation for Card.
 func newCardMutation(c config, op Op, opts ...cardOption) *CardMutation {
 	m := &CardMutation{
 		config:        c,
@@ -473,7 +473,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,

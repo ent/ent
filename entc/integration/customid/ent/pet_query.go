@@ -28,7 +28,6 @@ type PetQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Pet
 	// eager-loading edges.
 	withOwner      *UserQuery
@@ -327,7 +326,6 @@ func (pq *PetQuery) Clone() *PetQuery {
 		limit:          pq.limit,
 		offset:         pq.offset,
 		order:          append([]OrderFunc{}, pq.order...),
-		unique:         append([]string{}, pq.unique...),
 		predicates:     append([]predicate.Pet{}, pq.predicates...),
 		withOwner:      pq.withOwner.Clone(),
 		withCars:       pq.withCars.Clone(),

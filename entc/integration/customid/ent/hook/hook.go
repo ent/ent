@@ -52,6 +52,19 @@ func (f GroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return f(ctx, mv)
 }
 
+// The MixinIDFunc type is an adapter to allow the use of ordinary
+// function as MixinID mutator.
+type MixinIDFunc func(context.Context, *ent.MixinIDMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MixinIDFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.MixinIDMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MixinIDMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The PetFunc type is an adapter to allow the use of ordinary
 // function as Pet mutator.
 type PetFunc func(context.Context, *ent.PetMutation) (ent.Value, error)

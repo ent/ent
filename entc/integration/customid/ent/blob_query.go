@@ -27,7 +27,6 @@ type BlobQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Blob
 	// eager-loading edges.
 	withParent *BlobQuery
@@ -280,7 +279,6 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		limit:      bq.limit,
 		offset:     bq.offset,
 		order:      append([]OrderFunc{}, bq.order...),
-		unique:     append([]string{}, bq.unique...),
 		predicates: append([]predicate.Blob{}, bq.predicates...),
 		withParent: bq.withParent.Clone(),
 		withLinks:  bq.withLinks.Clone(),

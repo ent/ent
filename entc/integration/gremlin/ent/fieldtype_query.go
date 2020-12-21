@@ -26,7 +26,6 @@ type FieldTypeQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.FieldType
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -231,7 +230,6 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		limit:      ftq.limit,
 		offset:     ftq.offset,
 		order:      append([]OrderFunc{}, ftq.order...),
-		unique:     append([]string{}, ftq.unique...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
 		gremlin: ftq.gremlin.Clone(),
@@ -355,9 +353,7 @@ func (ftq *FieldTypeQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := ftq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 

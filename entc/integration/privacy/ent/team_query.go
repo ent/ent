@@ -28,7 +28,6 @@ type TeamQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Team
 	// eager-loading edges.
 	withTasks *TaskQuery
@@ -280,7 +279,6 @@ func (tq *TeamQuery) Clone() *TeamQuery {
 		limit:      tq.limit,
 		offset:     tq.offset,
 		order:      append([]OrderFunc{}, tq.order...),
-		unique:     append([]string{}, tq.unique...),
 		predicates: append([]predicate.Team{}, tq.predicates...),
 		withTasks:  tq.withTasks.Clone(),
 		withUsers:  tq.withUsers.Clone(),
@@ -370,6 +368,9 @@ func (tq *TeamQuery) prepareQuery(ctx context.Context) error {
 			return err
 		}
 		tq.sql = prev
+	}
+	if team.Policy == nil {
+		return errors.New("ent: uninitialized team.Policy (forgotten import ent/runtime?)")
 	}
 	if err := team.Policy.EvalQuery(ctx, tq); err != nil {
 		return err

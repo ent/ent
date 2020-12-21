@@ -25,7 +25,6 @@ type MediaQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Media
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -230,7 +229,6 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 		limit:      mq.limit,
 		offset:     mq.offset,
 		order:      append([]OrderFunc{}, mq.order...),
-		unique:     append([]string{}, mq.unique...),
 		predicates: append([]predicate.Media{}, mq.predicates...),
 		// clone intermediate query.
 		sql:  mq.sql.Clone(),

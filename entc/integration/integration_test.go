@@ -71,6 +71,18 @@ func TestMySQL(t *testing.T) {
 	}
 }
 
+func TestMaria(t *testing.T) {
+	client := enttest.Open(t, dialect.MySQL, "root:pass@tcp(localhost:4306)/test?parseTime=True", opts)
+	defer client.Close()
+	for _, tt := range tests {
+		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
+		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
+			drop(t, client)
+			tt(t, client)
+		})
+	}
+}
+
 func TestPostgres(t *testing.T) {
 	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433, "13": 5434} {
 		t.Run(version, func(t *testing.T) {
@@ -130,6 +142,9 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
 	usr := client.User.Create().SetName("foo").SetAge(20).SaveX(ctx)
+	client.User.Update().ExecX(ctx)
+	client.User.UpdateOne(usr).ExecX(ctx)
+	client.Node.Update().Where(node.ID(usr.ID)).ExecX(ctx)
 	require.Equal("foo", usr.Name)
 	require.Equal(20, usr.Age)
 	require.NotEmpty(usr.ID)

@@ -16,13 +16,13 @@ backwards-compatibility with previous versions of ent.
 */}}
 
 {{ define "runtime/ent" }}
-    {{ template "runtime" $ }}
+	{{ template "runtime" $ }}
 {{ end }}
 
 {{ define "runtime/pkg" }}
-    {{ with extend $ "Package" "runtime" }}
-        {{ template "runtime" . }}
-    {{ end }}
+	{{ with extend $ "Package" "runtime" }}
+		{{ template "runtime" . }}
+	{{ end }}
 	{{ $module := $.ModuleInfo }}
 	{{ if or $module.Version $module.Sum }}
 	const (
@@ -49,13 +49,13 @@ backwards-compatibility with previous versions of ent.
 
 {{ if $rtpkg }} {{/* 1st format - runtime/runtime.go */}}
 	{{ if $hooks  }}
-    	{{ template "runtime/register" $ }}
+		{{ template "runtime/register" $ }}
 	{{ else }}
 		// The schema-stitching logic is generated in {{ $.Config.Package }}/runtime.go
 	{{ end }}
 {{ else }}{{/* 2nd format - ent/runtime.go */}}
 	{{ if not $hooks  }}
-    	{{ template "runtime/register" $ }}
+		{{ template "runtime/register" $ }}
 	{{ else }}
 		// The schema-stitching logic is generated in {{ $.Config.Package }}/runtime/runtime.go
 	{{ end }}
@@ -103,14 +103,14 @@ func init() {
 		}
 	{{- end }}
 	{{- with $hooks := $n.HookPositions }}
-        {{- /* Hooks defined in schema mixins. */}}
+		{{- /* Hooks defined in schema mixins. */}}
 		{{- with $idx := $n.MixedInHooks }}
 			{{- range $i := $idx }}
 				{{ print $pkg "MixinHooks" $i }} := {{ $pkg }}Mixin[{{ $i }}].Hooks()
 			{{- end }}
 		{{- end }}
-        {{- /* If there are hooks defined in the schema. */}}
-        {{- $schemaHooks := false }}{{ range $p := $hooks }}{{ if not $p.MixedIn }}{{ $schemaHooks = true }}{{ end }}{{ end }}
+		{{- /* If there are hooks defined in the schema. */}}
+		{{- $schemaHooks := false }}{{ range $p := $hooks }}{{ if not $p.MixedIn }}{{ $schemaHooks = true }}{{ end }}{{ end }}
 		{{- if $schemaHooks }}
 			{{ print $pkg "Hooks" }} := {{ $schema }}.{{ $n.Name }}{}.Hooks()
 		{{- end }}
@@ -119,17 +119,18 @@ func init() {
 				{{ $i = add $i 1 }}
 			{{- end }}
 			{{- if $p.MixedIn }}
-                {{ print $pkg ".Hooks" }}[{{ $i }}] =  {{ print $pkg "MixinHooks" $p.MixinIndex }}[{{ $p.Index }}]
+				{{ print $pkg ".Hooks" }}[{{ $i }}] =  {{ print $pkg "MixinHooks" $p.MixinIndex }}[{{ $p.Index }}]
 			{{- else }}
-                {{ print $pkg ".Hooks" }}[{{ $i }}] = {{ print $pkg "Hooks" }}[{{ $p.Index }}]
+				{{ print $pkg ".Hooks" }}[{{ $i }}] = {{ print $pkg "Hooks" }}[{{ $p.Index }}]
 			{{- end }}
 		{{- end }}
 	{{- end }}
 	{{- if or $n.HasDefault $n.HasValidators }}
-        {{- with $idx := $n.MixedInFields }}
-            {{- range $i := $idx }}
-                {{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
-            {{- end }}
+		{{- with $idx := $n.MixedInFields }}
+			{{- range $i := $idx }}
+				{{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
+				_ = {{ $pkg }}MixinFields{{ $i }}
+			{{- end }}
 		{{- end }}
 		{{- $fields := $n.Fields }}{{ if $n.ID.UserDefined }}{{ $fields = append $fields $n.ID }}{{ end }}
 		{{- with $fields }}
@@ -147,45 +148,45 @@ func init() {
 					{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
 				{{- end }}
 			{{- end }}
-		{{- if and $f.Default (not $f.IsEnum) }}
-			{{- $default := print $pkg "." $f.DefaultName }}
-			// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-			{{- $defaultType := print $f.Type.Type }}{{ if or $f.IsTime $f.IsUUID }}{{ $defaultType = print "func() " $f.Type }}{{ end }}
-			{{- if and $f.HasGoType (not (hasPrefix $defaultType "func")) }}
-				{{ $default }} = {{ $f.Type }}({{ $desc }}.Default.({{ $defaultType }}))
-			{{- else }}
-				{{ $default }} = {{ $desc }}.Default.({{ $defaultType }})
+			{{- if and $f.Default (not $f.IsEnum) }}
+				{{- $default := print $pkg "." $f.DefaultName }}
+				// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
+				{{- $defaultType := print $f.Type.Type }}{{ if or $f.IsTime $f.IsUUID }}{{ $defaultType = print "func() " $f.Type }}{{ end }}
+				{{- if and $f.HasGoType (not (hasPrefix $defaultType "func")) }}
+					{{ $default }} = {{ $f.Type }}({{ $desc }}.Default.({{ $defaultType }}))
+				{{- else }}
+					{{ $default }} = {{ $desc }}.Default.({{ $defaultType }})
+				{{- end }}
 			{{- end }}
-		{{- end }}
-		{{- if $f.UpdateDefault }}
-			{{- $default := print $pkg "." $f.UpdateDefaultName }}
-			// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
-			{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
-		{{- end }}
-		{{- with $f.Validators }}
-			{{- $name := print $pkg "." $f.Validator }}
-			{{- $type :=  printf "func (%s) error" $f.Type.Type }}
-			// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
-			{{- if eq $f.Validators 1 }}
-				{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
-			{{- else }}
-				{{ $name }} = func() {{ $type }} {
-					validators := {{ $desc }}.Validators
-					fns := [...]func({{ $f.Type }}) error {
-						{{- range $j, $n := xrange $f.Validators }}
-							validators[{{ $j }}].(func({{ $f.Type.Type }}) error),
-						{{- end }}
-					}
-					return func({{ $f.BuilderField }} {{ $f.Type }}) error {
-						for _, fn := range fns {
-							if err := fn({{ $f.BuilderField }}); err != nil {
-								return err
-							}
+			{{- if $f.UpdateDefault }}
+				{{- $default := print $pkg "." $f.UpdateDefaultName }}
+				// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
+				{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
+			{{- end }}
+			{{- with $f.Validators }}
+				{{- $name := print $pkg "." $f.Validator }}
+				{{- $type :=  printf "func (%s) error" $f.Type.Type }}
+				// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
+				{{- if eq $f.Validators 1 }}
+					{{ $name }} = {{ $desc }}.Validators[0].({{ $type }})
+				{{- else }}
+					{{ $name }} = func() {{ $type }} {
+						validators := {{ $desc }}.Validators
+						fns := [...]func({{ $f.Type }}) error {
+							{{- range $j, $n := xrange $f.Validators }}
+								validators[{{ $j }}].(func({{ $f.Type.Type }}) error),
+							{{- end }}
 						}
-						return nil
-					}
-				}()
-			{{- end }}
+						return func({{ $f.BuilderField }} {{ $f.Type }}) error {
+							for _, fn := range fns {
+								if err := fn({{ $f.BuilderField }}); err != nil {
+									return err
+								}
+							}
+							return nil
+						}
+					}()
+				{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}

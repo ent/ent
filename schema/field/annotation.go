@@ -26,4 +26,29 @@ func (Annotation) Name() string {
 	return "Fields"
 }
 
-var _ schema.Annotation = (*Annotation)(nil)
+// Merge implements the schema.Merger interface.
+func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
+	var ant Annotation
+	switch other := other.(type) {
+	case Annotation:
+		ant = other
+	case *Annotation:
+		if other != nil {
+			ant = *other
+		}
+	default:
+		return a
+	}
+	for k, v := range ant.StructTag {
+		if a.StructTag == nil {
+			a.StructTag = make(map[string]string)
+		}
+		a.StructTag[k] = v
+	}
+	return a
+}
+
+var (
+	_ schema.Annotation = (*Annotation)(nil)
+	_ schema.Merger     = (*Annotation)(nil)
+)

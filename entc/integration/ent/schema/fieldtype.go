@@ -16,6 +16,8 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/schema/field"
+
+	"github.com/google/uuid"
 )
 
 // FieldType holds the schema definition for the FieldType entity.
@@ -140,6 +142,8 @@ func (FieldType) Fields() []ent.Field {
 				_, err := net.ParseMAC(s)
 				return err
 			}),
+		field.UUID("uuid", uuid.UUID{}).
+			Optional(),
 	}
 }
 

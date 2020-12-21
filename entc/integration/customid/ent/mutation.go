@@ -14,6 +14,7 @@ import (
 	"github.com/facebook/ent/entc/integration/customid/ent/blob"
 	"github.com/facebook/ent/entc/integration/customid/ent/car"
 	"github.com/facebook/ent/entc/integration/customid/ent/group"
+	"github.com/facebook/ent/entc/integration/customid/ent/mixinid"
 	"github.com/facebook/ent/entc/integration/customid/ent/pet"
 	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
 	"github.com/facebook/ent/entc/integration/customid/ent/user"
@@ -31,11 +32,12 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeBlob  = "Blob"
-	TypeCar   = "Car"
-	TypeGroup = "Group"
-	TypePet   = "Pet"
-	TypeUser  = "User"
+	TypeBlob    = "Blob"
+	TypeCar     = "Car"
+	TypeGroup   = "Group"
+	TypeMixinID = "MixinID"
+	TypePet     = "Pet"
+	TypeUser    = "User"
 )
 
 // BlobMutation represents an operation that mutate the Blobs
@@ -62,7 +64,7 @@ var _ ent.Mutation = (*BlobMutation)(nil)
 // blobOption allows to manage the mutation configuration using functional options.
 type blobOption func(*BlobMutation)
 
-// newBlobMutation creates new mutation for $n.Name.
+// newBlobMutation creates new mutation for Blob.
 func newBlobMutation(c config, op Op, opts ...blobOption) *BlobMutation {
 	m := &BlobMutation{
 		config:        c,
@@ -514,7 +516,7 @@ var _ ent.Mutation = (*CarMutation)(nil)
 // carOption allows to manage the mutation configuration using functional options.
 type carOption func(*CarMutation)
 
-// newCarMutation creates new mutation for $n.Name.
+// newCarMutation creates new mutation for Car.
 func newCarMutation(c config, op Op, opts ...carOption) *CarMutation {
 	m := &CarMutation{
 		config:        c,
@@ -1101,7 +1103,7 @@ var _ ent.Mutation = (*GroupMutation)(nil)
 // groupOption allows to manage the mutation configuration using functional options.
 type groupOption func(*GroupMutation)
 
-// newGroupMutation creates new mutation for $n.Name.
+// newGroupMutation creates new mutation for Group.
 func newGroupMutation(c config, op Op, opts ...groupOption) *GroupMutation {
 	m := &GroupMutation{
 		config:        c,
@@ -1409,6 +1411,361 @@ func (m *GroupMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Group edge %s", name)
 }
 
+// MixinIDMutation represents an operation that mutate the MixinIDs
+// nodes in the graph.
+type MixinIDMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uuid.UUID
+	some_field    *string
+	mixin_field   *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*MixinID, error)
+	predicates    []predicate.MixinID
+}
+
+var _ ent.Mutation = (*MixinIDMutation)(nil)
+
+// mixinidOption allows to manage the mutation configuration using functional options.
+type mixinidOption func(*MixinIDMutation)
+
+// newMixinIDMutation creates new mutation for MixinID.
+func newMixinIDMutation(c config, op Op, opts ...mixinidOption) *MixinIDMutation {
+	m := &MixinIDMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMixinID,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMixinIDID sets the id field of the mutation.
+func withMixinIDID(id uuid.UUID) mixinidOption {
+	return func(m *MixinIDMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MixinID
+		)
+		m.oldValue = func(ctx context.Context) (*MixinID, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MixinID.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMixinID sets the old MixinID of the mutation.
+func withMixinID(node *MixinID) mixinidOption {
+	return func(m *MixinIDMutation) {
+		m.oldValue = func(context.Context) (*MixinID, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MixinIDMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MixinIDMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that, this
+// operation is accepted only on MixinID creation.
+func (m *MixinIDMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the id value in the mutation. Note that, the id
+// is available only if it was provided to the builder.
+func (m *MixinIDMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetSomeField sets the some_field field.
+func (m *MixinIDMutation) SetSomeField(s string) {
+	m.some_field = &s
+}
+
+// SomeField returns the some_field value in the mutation.
+func (m *MixinIDMutation) SomeField() (r string, exists bool) {
+	v := m.some_field
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSomeField returns the old some_field value of the MixinID.
+// If the MixinID object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *MixinIDMutation) OldSomeField(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldSomeField is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldSomeField requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSomeField: %w", err)
+	}
+	return oldValue.SomeField, nil
+}
+
+// ResetSomeField reset all changes of the "some_field" field.
+func (m *MixinIDMutation) ResetSomeField() {
+	m.some_field = nil
+}
+
+// SetMixinField sets the mixin_field field.
+func (m *MixinIDMutation) SetMixinField(s string) {
+	m.mixin_field = &s
+}
+
+// MixinField returns the mixin_field value in the mutation.
+func (m *MixinIDMutation) MixinField() (r string, exists bool) {
+	v := m.mixin_field
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMixinField returns the old mixin_field value of the MixinID.
+// If the MixinID object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *MixinIDMutation) OldMixinField(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldMixinField is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldMixinField requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMixinField: %w", err)
+	}
+	return oldValue.MixinField, nil
+}
+
+// ResetMixinField reset all changes of the "mixin_field" field.
+func (m *MixinIDMutation) ResetMixinField() {
+	m.mixin_field = nil
+}
+
+// Op returns the operation name.
+func (m *MixinIDMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (MixinID).
+func (m *MixinIDMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during
+// this mutation. Note that, in order to get all numeric
+// fields that were in/decremented, call AddedFields().
+func (m *MixinIDMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.some_field != nil {
+		fields = append(fields, mixinid.FieldSomeField)
+	}
+	if m.mixin_field != nil {
+		fields = append(fields, mixinid.FieldMixinField)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name.
+// The second boolean value indicates that this field was
+// not set, or was not define in the schema.
+func (m *MixinIDMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case mixinid.FieldSomeField:
+		return m.SomeField()
+	case mixinid.FieldMixinField:
+		return m.MixinField()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database.
+// An error is returned if the mutation operation is not UpdateOne,
+// or the query to the database was failed.
+func (m *MixinIDMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case mixinid.FieldSomeField:
+		return m.OldSomeField(ctx)
+	case mixinid.FieldMixinField:
+		return m.OldMixinField(ctx)
+	}
+	return nil, fmt.Errorf("unknown MixinID field %s", name)
+}
+
+// SetField sets the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *MixinIDMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case mixinid.FieldSomeField:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSomeField(v)
+		return nil
+	case mixinid.FieldMixinField:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMixinField(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MixinID field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented
+// or decremented during this mutation.
+func (m *MixinIDMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was in/decremented
+// from a field with the given name. The second value indicates
+// that this field was not set, or was not define in the schema.
+func (m *MixinIDMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value for the given name. It returns an
+// error if the field is not defined in the schema, or if the
+// type mismatch the field type.
+func (m *MixinIDMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown MixinID numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared
+// during this mutation.
+func (m *MixinIDMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicates if this field was
+// cleared in this mutation.
+func (m *MixinIDMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value for the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MixinIDMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown MixinID nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation regarding the
+// given field name. It returns an error if the field is not
+// defined in the schema.
+func (m *MixinIDMutation) ResetField(name string) error {
+	switch name {
+	case mixinid.FieldSomeField:
+		m.ResetSomeField()
+		return nil
+	case mixinid.FieldMixinField:
+		m.ResetMixinField()
+		return nil
+	}
+	return fmt.Errorf("unknown MixinID field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this
+// mutation.
+func (m *MixinIDMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all ids (to other nodes) that were added for
+// the given edge name.
+func (m *MixinIDMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this
+// mutation.
+func (m *MixinIDMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all ids (to other nodes) that were removed for
+// the given edge name.
+func (m *MixinIDMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this
+// mutation.
+func (m *MixinIDMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean indicates if this edge was
+// cleared in this mutation.
+func (m *MixinIDMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value for the given name. It returns an
+// error if the edge name is not defined in the schema.
+func (m *MixinIDMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown MixinID unique edge %s", name)
+}
+
+// ResetEdge resets all changes in the mutation regarding the
+// given edge name. It returns an error if the edge is not
+// defined in the schema.
+func (m *MixinIDMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown MixinID edge %s", name)
+}
+
 // PetMutation represents an operation that mutate the Pets
 // nodes in the graph.
 type PetMutation struct {
@@ -1437,7 +1794,7 @@ var _ ent.Mutation = (*PetMutation)(nil)
 // petOption allows to manage the mutation configuration using functional options.
 type petOption func(*PetMutation)
 
-// newPetMutation creates new mutation for $n.Name.
+// newPetMutation creates new mutation for Pet.
 func newPetMutation(c config, op Op, opts ...petOption) *PetMutation {
 	m := &PetMutation{
 		config:        c,
@@ -1967,7 +2324,7 @@ var _ ent.Mutation = (*UserMutation)(nil)
 // userOption allows to manage the mutation configuration using functional options.
 type userOption func(*UserMutation)
 
-// newUserMutation creates new mutation for $n.Name.
+// newUserMutation creates new mutation for User.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
 		config:        c,

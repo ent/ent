@@ -13,3 +13,12 @@ type Annotation interface {
 	// Name defines the name of the annotation to be retrieved by the codegen.
 	Name() string
 }
+
+// Merger wraps the single Merge function allows custom annotation to provide
+// an implementation for merging 2 or more annotations from the same type.
+//
+// A common use case is where the same Annotation type is defined both in
+// mixin.Schema and ent.Schema.
+type Merger interface {
+	Merge(Annotation) Annotation
+}

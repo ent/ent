@@ -28,7 +28,6 @@ type CardQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Card
 	// eager-loading edges.
 	withOwner *UserQuery
@@ -264,7 +263,6 @@ func (cq *CardQuery) Clone() *CardQuery {
 		limit:      cq.limit,
 		offset:     cq.offset,
 		order:      append([]OrderFunc{}, cq.order...),
-		unique:     append([]string{}, cq.unique...),
 		predicates: append([]predicate.Card{}, cq.predicates...),
 		withOwner:  cq.withOwner.Clone(),
 		withSpec:   cq.withSpec.Clone(),
@@ -412,9 +410,7 @@ func (cq *CardQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := cq.unique; len(unique) == 0 {
-		v.Dedup()
-	}
+	v.Dedup()
 	return v
 }
 

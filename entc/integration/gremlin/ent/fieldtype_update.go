@@ -22,6 +22,7 @@ import (
 	"github.com/facebook/ent/entc/integration/ent/schema"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.
@@ -1006,6 +1007,18 @@ func (ftu *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetUUID sets the uuid field.
+func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
+	ftu.mutation.SetUUID(u)
+	return ftu
+}
+
+// ClearUUID clears the value of uuid.
+func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
+	ftu.mutation.ClearUUID()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1348,6 +1361,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
 	}
+	if value, ok := ftu.mutation.UUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldUUID, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1468,6 +1484,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.MACCleared() {
 		properties = append(properties, fieldtype.FieldMAC)
+	}
+	if ftu.mutation.UUIDCleared() {
+		properties = append(properties, fieldtype.FieldUUID)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -2453,6 +2472,18 @@ func (ftuo *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetUUID sets the uuid field.
+func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
+	ftuo.mutation.SetUUID(u)
+	return ftuo
+}
+
+// ClearUUID clears the value of uuid.
+func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearUUID()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -2800,6 +2831,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
 	}
+	if value, ok := ftuo.mutation.UUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldUUID, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -2920,6 +2954,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.MACCleared() {
 		properties = append(properties, fieldtype.FieldMAC)
+	}
+	if ftuo.mutation.UUIDCleared() {
+		properties = append(properties, fieldtype.FieldUUID)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

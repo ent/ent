@@ -36,6 +36,26 @@ services:
     ports:
       - 3308:3306
 
+  mariadb:
+    image: mariadb
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4306:3306
+
+  mariadb102:
+    image: mariadb:10.2.32
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4307:3306
+
   postgres10:
     image: postgres:10
     environment:

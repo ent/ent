@@ -73,6 +73,15 @@ jobs:
         environment:
           <<: *mysql_env
           MYSQL_TCP_PORT: 3308
+      - image: circleci/mariadb
+        environment:
+          <<: *mysql_env
+          MYSQL_TCP_PORT: 4306
+      - image: docker.io/bitnami/mariadb:10.2-debian-10
+        environment:
+          MARIADB_DATABASE: test
+          MARIADB_ROOT_PASSWORD: pass
+          MARIADB_PORT_NUMBER: 4307
       - image: circleci/postgres:10.0
         environment:
           POSTGRES_DB: test
@@ -105,6 +114,8 @@ jobs:
             -wait tcp://localhost:3306
             -wait tcp://localhost:3307
             -wait tcp://localhost:3308
+            -wait tcp://localhost:4306
+            -wait tcp://localhost:4307
             -wait tcp://localhost:5430
             -wait tcp://localhost:5431
             -wait tcp://localhost:5433
