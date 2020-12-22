@@ -896,12 +896,12 @@ func (f Field) NullTypeField(rec string) string {
 // otherwise.
 func (f Field) Column() *schema.Column {
 	c := &schema.Column{
-		Name:      f.StorageKey(),
-		Type:      f.Type.Type,
-		Unique:    f.Unique,
-		Nullable:  f.Optional,
-		Size:      f.size(),
-		Enums:     f.EnumValues(),
+		Name:     f.StorageKey(),
+		Type:     f.Type.Type,
+		Unique:   f.Unique,
+		Nullable: f.Optional,
+		Size:     f.size(),
+		Enums:    f.EnumValues(),
 	}
 	switch {
 	case f.Default && (f.Type.Numeric() || f.Type.Type == field.TypeBool):

@@ -14,7 +14,6 @@ import (
 
 var (
 	incrementalDisabled = false
-	incrementalEnabled  = true
 )
 
 type Mixin struct {
