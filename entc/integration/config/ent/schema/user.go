@@ -12,6 +12,11 @@ import (
 	"github.com/facebook/ent/schema/mixin"
 )
 
+var (
+	incrementalDisabled = false
+	incrementalEnabled  = true
+)
+
 type Mixin struct {
 	mixin.Schema
 }
@@ -31,6 +36,11 @@ type User struct {
 // Fields of the User schema.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("id").
+			StorageKey("user_id").
+			Annotations(entsql.Annotation{
+				Incremental: &incrementalDisabled,
+			}),
 		field.String("name").
 			Optional().
 			Annotations(entsql.Annotation{

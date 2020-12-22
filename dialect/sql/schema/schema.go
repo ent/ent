@@ -47,6 +47,7 @@ func NewTable(name string) *Table {
 
 // AddPrimary adds a new primary key to the table.
 func (t *Table) AddPrimary(c *Column) *Table {
+	c.Key = PrimaryKey
 	t.AddColumn(c)
 	t.PrimaryKey = append(t.PrimaryKey, c)
 	return t

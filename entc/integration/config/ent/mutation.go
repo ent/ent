@@ -113,6 +113,12 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that, this
+// operation is accepted only on User creation.
+func (m *UserMutation) SetID(id int) {
+	m.id = &id
+}
+
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
 func (m *UserMutation) ID() (id int, exists bool) {
