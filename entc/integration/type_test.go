@@ -85,6 +85,8 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal("localhost", ft.NullLink.String())
 	mac, err := net.ParseMAC("3b:b3:6b:3c:10:79")
 	require.NoError(err)
+	dt, err := time.Parse(time.RFC3339, "1906-01-02T00:00:00+00:00")
+	require.NoError(err)
 
 	ft = ft.Update().
 		SetInt(1).
@@ -100,7 +102,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNillableInt16(math.MaxInt16).
 		SetNillableInt32(math.MaxInt32).
 		SetNillableInt64(math.MaxInt64).
-		SetDatetime(time.Now()).
+		SetDatetime(dt).
 		SetDecimal(10.20).
 		SetDir("dir").
 		SetNdir("ndir").
@@ -123,7 +125,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int32(math.MaxInt32), *ft.NillableInt32)
 	require.Equal(int64(math.MaxInt64), *ft.NillableInt64)
 	require.Equal(10.20, ft.Decimal)
-	require.False(ft.Datetime.IsZero())
+	require.True(dt.Equal(ft.Datetime))
 	require.Equal(http.Dir("dir"), ft.Dir)
 	require.NotNil(*ft.Ndir)
 	require.Equal(http.Dir("ndir"), *ft.Ndir)
