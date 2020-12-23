@@ -47,35 +47,48 @@ func (e GroupInfoEdges) GroupsOrErr() ([]*Group, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*GroupInfo) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // desc
-		&sql.NullInt64{},  // max_users
+func (*GroupInfo) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case groupinfo.FieldID, groupinfo.FieldMaxUsers:
+			values[i] = &sql.NullInt64{}
+		case groupinfo.FieldDesc:
+			values[i] = &sql.NullString{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type GroupInfo", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the GroupInfo fields.
-func (gi *GroupInfo) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(groupinfo.Columns); m < n {
+func (gi *GroupInfo) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	gi.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field desc", values[0])
-	} else if value.Valid {
-		gi.Desc = value.String
-	}
-	if value, ok := values[1].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field max_users", values[1])
-	} else if value.Valid {
-		gi.MaxUsers = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case groupinfo.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			gi.ID = int(value.Int64)
+		case groupinfo.FieldDesc:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field desc", values[i])
+			} else if value.Valid {
+				gi.Desc = value.String
+			}
+		case groupinfo.FieldMaxUsers:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field max_users", values[i])
+			} else if value.Valid {
+				gi.MaxUsers = int(value.Int64)
+			}
+		}
 	}
 	return nil
 }

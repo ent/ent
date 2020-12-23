@@ -94,69 +94,79 @@ func (e GroupEdges) InfoOrErr() (*GroupInfo, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Group) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullBool{},   // active
-		&sql.NullTime{},   // expire
-		&sql.NullString{}, // type
-		&sql.NullInt64{},  // max_users
-		&sql.NullString{}, // name
+func (*Group) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case group.FieldActive:
+			values[i] = &sql.NullBool{}
+		case group.FieldID, group.FieldMaxUsers:
+			values[i] = &sql.NullInt64{}
+		case group.FieldType, group.FieldName:
+			values[i] = &sql.NullString{}
+		case group.FieldExpire:
+			values[i] = &sql.NullTime{}
+		case group.ForeignKeys[0]: // group_info
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Group", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Group) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // group_info
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
-func (gr *Group) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(group.Columns); m < n {
+func (gr *Group) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	gr.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullBool); !ok {
-		return fmt.Errorf("unexpected type %T for field active", values[0])
-	} else if value.Valid {
-		gr.Active = value.Bool
-	}
-	if value, ok := values[1].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field expire", values[1])
-	} else if value.Valid {
-		gr.Expire = value.Time
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field type", values[2])
-	} else if value.Valid {
-		gr.Type = new(string)
-		*gr.Type = value.String
-	}
-	if value, ok := values[3].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field max_users", values[3])
-	} else if value.Valid {
-		gr.MaxUsers = int(value.Int64)
-	}
-	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[4])
-	} else if value.Valid {
-		gr.Name = value.String
-	}
-	values = values[5:]
-	if len(values) == len(group.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field group_info", value)
-		} else if value.Valid {
-			gr.group_info = new(int)
-			*gr.group_info = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case group.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			gr.ID = int(value.Int64)
+		case group.FieldActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field active", values[i])
+			} else if value.Valid {
+				gr.Active = value.Bool
+			}
+		case group.FieldExpire:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field expire", values[i])
+			} else if value.Valid {
+				gr.Expire = value.Time
+			}
+		case group.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				gr.Type = new(string)
+				*gr.Type = value.String
+			}
+		case group.FieldMaxUsers:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field max_users", values[i])
+			} else if value.Valid {
+				gr.MaxUsers = int(value.Int64)
+			}
+		case group.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				gr.Name = value.String
+			}
+		case group.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field group_info", value)
+			} else if value.Valid {
+				gr.group_info = new(int)
+				*gr.group_info = int(value.Int64)
+			}
 		}
 	}
 	return nil

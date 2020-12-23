@@ -49,41 +49,54 @@ func (e FileTypeEdges) FilesOrErr() ([]*File, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*FileType) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // name
-		&sql.NullString{}, // type
-		&sql.NullString{}, // state
+func (*FileType) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case filetype.FieldID:
+			values[i] = &sql.NullInt64{}
+		case filetype.FieldName, filetype.FieldType, filetype.FieldState:
+			values[i] = &sql.NullString{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type FileType", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the FileType fields.
-func (ft *FileType) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(filetype.Columns); m < n {
+func (ft *FileType) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	ft.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[0])
-	} else if value.Valid {
-		ft.Name = value.String
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field type", values[1])
-	} else if value.Valid {
-		ft.Type = filetype.Type(value.String)
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field state", values[2])
-	} else if value.Valid {
-		ft.State = filetype.State(value.String)
+	for i := range columns {
+		switch columns[i] {
+		case filetype.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			ft.ID = int(value.Int64)
+		case filetype.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				ft.Name = value.String
+			}
+		case filetype.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				ft.Type = filetype.Type(value.String)
+			}
+		case filetype.FieldState:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field state", values[i])
+			} else if value.Valid {
+				ft.State = filetype.State(value.String)
+			}
+		}
 	}
 	return nil
 }

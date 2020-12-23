@@ -41,18 +41,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.ForeignKeys...)
 			}
 	{{- end }}
-	_spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &{{ $.Name }}{config: {{ $receiver }}.config}
 		nodes = append(nodes, node)
-		values := node.scanValues()
-		{{- with $.ForeignKeys }}
-			if withFKs {
-				values = append(values, node.fkValues()...)
-			}
-		{{- end }}
-		return values
+		return node.scanValues(columns)
 	}
-	_spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(columns []string, values []interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("{{ $pkg }}: Assign called without calling ScanValues")
 		}
@@ -60,7 +54,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		{{- with $.Edges }}
 			node.Edges.loadedTypes = loadedTypes
 		{{- end }}
-		return node.assignValues(values...)
+		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		return nil, err

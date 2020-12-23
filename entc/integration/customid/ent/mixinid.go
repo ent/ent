@@ -27,35 +27,48 @@ type MixinID struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*MixinID) scanValues() []interface{} {
-	return []interface{}{
-		&uuid.UUID{},      // id
-		&sql.NullString{}, // some_field
-		&sql.NullString{}, // mixin_field
+func (*MixinID) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case mixinid.FieldSomeField, mixinid.FieldMixinField:
+			values[i] = &sql.NullString{}
+		case mixinid.FieldID:
+			values[i] = &uuid.UUID{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type MixinID", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the MixinID fields.
-func (mi *MixinID) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(mixinid.Columns); m < n {
+func (mi *MixinID) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	if value, ok := values[0].(*uuid.UUID); !ok {
-		return fmt.Errorf("unexpected type %T for field id", values[0])
-	} else if value != nil {
-		mi.ID = *value
-	}
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field some_field", values[0])
-	} else if value.Valid {
-		mi.SomeField = value.String
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field mixin_field", values[1])
-	} else if value.Valid {
-		mi.MixinField = value.String
+	for i := range columns {
+		switch columns[i] {
+		case mixinid.FieldID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				mi.ID = *value
+			}
+		case mixinid.FieldSomeField:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field some_field", values[i])
+			} else if value.Valid {
+				mi.SomeField = value.String
+			}
+		case mixinid.FieldMixinField:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field mixin_field", values[i])
+			} else if value.Valid {
+				mi.MixinField = value.String
+			}
+		}
 	}
 	return nil
 }

@@ -73,44 +73,50 @@ func (e UserEdges) FollowingOrErr() ([]*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // name
+func (*User) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case user.FieldID:
+			values[i] = &sql.NullInt64{}
+		case user.FieldName:
+			values[i] = &sql.NullString{}
+		case user.ForeignKeys[0]: // user_spouse
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*User) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // user_spouse
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m < n {
+func (u *User) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	u.ID = uint64(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[0])
-	} else if value.Valid {
-		u.Name = value.String
-	}
-	values = values[1:]
-	if len(values) == len(user.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
-		} else if value.Valid {
-			u.user_spouse = new(uint64)
-			*u.user_spouse = uint64(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case user.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			u.ID = uint64(value.Int64)
+		case user.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				u.Name = value.String
+			}
+		case user.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
+			} else if value.Valid {
+				u.user_spouse = new(uint64)
+				*u.user_spouse = uint64(value.Int64)
+			}
 		}
 	}
 	return nil

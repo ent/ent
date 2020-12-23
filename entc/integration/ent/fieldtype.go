@@ -123,327 +123,347 @@ type FieldType struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*FieldType) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},   // id
-		&sql.NullInt64{},   // int
-		&sql.NullInt64{},   // int8
-		&sql.NullInt64{},   // int16
-		&sql.NullInt64{},   // int32
-		&sql.NullInt64{},   // int64
-		&sql.NullInt64{},   // optional_int
-		&sql.NullInt64{},   // optional_int8
-		&sql.NullInt64{},   // optional_int16
-		&sql.NullInt64{},   // optional_int32
-		&sql.NullInt64{},   // optional_int64
-		&sql.NullInt64{},   // nillable_int
-		&sql.NullInt64{},   // nillable_int8
-		&sql.NullInt64{},   // nillable_int16
-		&sql.NullInt64{},   // nillable_int32
-		&sql.NullInt64{},   // nillable_int64
-		&sql.NullInt64{},   // validate_optional_int32
-		&sql.NullInt64{},   // optional_uint
-		&sql.NullInt64{},   // optional_uint8
-		&sql.NullInt64{},   // optional_uint16
-		&sql.NullInt64{},   // optional_uint32
-		&sql.NullInt64{},   // optional_uint64
-		&sql.NullString{},  // state
-		&sql.NullFloat64{}, // optional_float
-		&sql.NullFloat64{}, // optional_float32
-		&sql.NullTime{},    // datetime
-		&sql.NullFloat64{}, // decimal
-		&sql.NullString{},  // dir
-		&sql.NullString{},  // ndir
-		&sql.NullString{},  // str
-		&sql.NullString{},  // null_str
-		&schema.Link{},     // link
-		&schema.Link{},     // null_link
-		&sql.NullBool{},    // active
-		&sql.NullBool{},    // null_active
-		&sql.NullBool{},    // deleted
-		&sql.NullTime{},    // deleted_at
-		&[]byte{},          // ip
-		&sql.NullInt64{},   // null_int64
-		&sql.NullInt64{},   // schema_int
-		&sql.NullInt64{},   // schema_int8
-		&sql.NullInt64{},   // schema_int64
-		&sql.NullFloat64{}, // schema_float
-		&sql.NullFloat64{}, // schema_float32
-		&sql.NullFloat64{}, // null_float
-		&sql.NullString{},  // role
-		&schema.MAC{},      // mac
-		&uuid.UUID{},       // uuid
+func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case fieldtype.FieldIP:
+			values[i] = &[]byte{}
+		case fieldtype.FieldLink, fieldtype.FieldNullLink:
+			values[i] = &schema.Link{}
+		case fieldtype.FieldMAC:
+			values[i] = &schema.MAC{}
+		case fieldtype.FieldActive, fieldtype.FieldNullActive, fieldtype.FieldDeleted:
+			values[i] = &sql.NullBool{}
+		case fieldtype.FieldOptionalFloat, fieldtype.FieldOptionalFloat32, fieldtype.FieldDecimal, fieldtype.FieldSchemaFloat, fieldtype.FieldSchemaFloat32, fieldtype.FieldNullFloat:
+			values[i] = &sql.NullFloat64{}
+		case fieldtype.FieldID, fieldtype.FieldInt, fieldtype.FieldInt8, fieldtype.FieldInt16, fieldtype.FieldInt32, fieldtype.FieldInt64, fieldtype.FieldOptionalInt, fieldtype.FieldOptionalInt8, fieldtype.FieldOptionalInt16, fieldtype.FieldOptionalInt32, fieldtype.FieldOptionalInt64, fieldtype.FieldNillableInt, fieldtype.FieldNillableInt8, fieldtype.FieldNillableInt16, fieldtype.FieldNillableInt32, fieldtype.FieldNillableInt64, fieldtype.FieldValidateOptionalInt32, fieldtype.FieldOptionalUint, fieldtype.FieldOptionalUint8, fieldtype.FieldOptionalUint16, fieldtype.FieldOptionalUint32, fieldtype.FieldOptionalUint64, fieldtype.FieldNullInt64, fieldtype.FieldSchemaInt, fieldtype.FieldSchemaInt8, fieldtype.FieldSchemaInt64:
+			values[i] = &sql.NullInt64{}
+		case fieldtype.FieldState, fieldtype.FieldDir, fieldtype.FieldNdir, fieldtype.FieldStr, fieldtype.FieldNullStr, fieldtype.FieldRole:
+			values[i] = &sql.NullString{}
+		case fieldtype.FieldDatetime, fieldtype.FieldDeletedAt:
+			values[i] = &sql.NullTime{}
+		case fieldtype.FieldUUID:
+			values[i] = &uuid.UUID{}
+		case fieldtype.ForeignKeys[0]: // file_field
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type FieldType", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*FieldType) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // file_field
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the FieldType fields.
-func (ft *FieldType) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(fieldtype.Columns); m < n {
+func (ft *FieldType) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	ft.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field int", values[0])
-	} else if value.Valid {
-		ft.Int = int(value.Int64)
-	}
-	if value, ok := values[1].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field int8", values[1])
-	} else if value.Valid {
-		ft.Int8 = int8(value.Int64)
-	}
-	if value, ok := values[2].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field int16", values[2])
-	} else if value.Valid {
-		ft.Int16 = int16(value.Int64)
-	}
-	if value, ok := values[3].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field int32", values[3])
-	} else if value.Valid {
-		ft.Int32 = int32(value.Int64)
-	}
-	if value, ok := values[4].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field int64", values[4])
-	} else if value.Valid {
-		ft.Int64 = value.Int64
-	}
-	if value, ok := values[5].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_int", values[5])
-	} else if value.Valid {
-		ft.OptionalInt = int(value.Int64)
-	}
-	if value, ok := values[6].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_int8", values[6])
-	} else if value.Valid {
-		ft.OptionalInt8 = int8(value.Int64)
-	}
-	if value, ok := values[7].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_int16", values[7])
-	} else if value.Valid {
-		ft.OptionalInt16 = int16(value.Int64)
-	}
-	if value, ok := values[8].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_int32", values[8])
-	} else if value.Valid {
-		ft.OptionalInt32 = int32(value.Int64)
-	}
-	if value, ok := values[9].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_int64", values[9])
-	} else if value.Valid {
-		ft.OptionalInt64 = value.Int64
-	}
-	if value, ok := values[10].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field nillable_int", values[10])
-	} else if value.Valid {
-		ft.NillableInt = new(int)
-		*ft.NillableInt = int(value.Int64)
-	}
-	if value, ok := values[11].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field nillable_int8", values[11])
-	} else if value.Valid {
-		ft.NillableInt8 = new(int8)
-		*ft.NillableInt8 = int8(value.Int64)
-	}
-	if value, ok := values[12].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field nillable_int16", values[12])
-	} else if value.Valid {
-		ft.NillableInt16 = new(int16)
-		*ft.NillableInt16 = int16(value.Int64)
-	}
-	if value, ok := values[13].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field nillable_int32", values[13])
-	} else if value.Valid {
-		ft.NillableInt32 = new(int32)
-		*ft.NillableInt32 = int32(value.Int64)
-	}
-	if value, ok := values[14].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field nillable_int64", values[14])
-	} else if value.Valid {
-		ft.NillableInt64 = new(int64)
-		*ft.NillableInt64 = value.Int64
-	}
-	if value, ok := values[15].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field validate_optional_int32", values[15])
-	} else if value.Valid {
-		ft.ValidateOptionalInt32 = int32(value.Int64)
-	}
-	if value, ok := values[16].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_uint", values[16])
-	} else if value.Valid {
-		ft.OptionalUint = uint(value.Int64)
-	}
-	if value, ok := values[17].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_uint8", values[17])
-	} else if value.Valid {
-		ft.OptionalUint8 = uint8(value.Int64)
-	}
-	if value, ok := values[18].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_uint16", values[18])
-	} else if value.Valid {
-		ft.OptionalUint16 = uint16(value.Int64)
-	}
-	if value, ok := values[19].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_uint32", values[19])
-	} else if value.Valid {
-		ft.OptionalUint32 = uint32(value.Int64)
-	}
-	if value, ok := values[20].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_uint64", values[20])
-	} else if value.Valid {
-		ft.OptionalUint64 = uint64(value.Int64)
-	}
-	if value, ok := values[21].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field state", values[21])
-	} else if value.Valid {
-		ft.State = fieldtype.State(value.String)
-	}
-	if value, ok := values[22].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_float", values[22])
-	} else if value.Valid {
-		ft.OptionalFloat = value.Float64
-	}
-	if value, ok := values[23].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field optional_float32", values[23])
-	} else if value.Valid {
-		ft.OptionalFloat32 = float32(value.Float64)
-	}
-	if value, ok := values[24].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field datetime", values[24])
-	} else if value.Valid {
-		ft.Datetime = value.Time
-	}
-	if value, ok := values[25].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field decimal", values[25])
-	} else if value.Valid {
-		ft.Decimal = value.Float64
-	}
-	if value, ok := values[26].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field dir", values[26])
-	} else if value.Valid {
-		ft.Dir = http.Dir(value.String)
-	}
-	if value, ok := values[27].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field ndir", values[27])
-	} else if value.Valid {
-		ft.Ndir = new(http.Dir)
-		*ft.Ndir = http.Dir(value.String)
-	}
-	if value, ok := values[28].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field str", values[28])
-	} else if value != nil {
-		ft.Str = *value
-	}
-	if value, ok := values[29].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field null_str", values[29])
-	} else if value != nil {
-		ft.NullStr = value
-	}
-	if value, ok := values[30].(*schema.Link); !ok {
-		return fmt.Errorf("unexpected type %T for field link", values[30])
-	} else if value != nil {
-		ft.Link = *value
-	}
-	if value, ok := values[31].(*schema.Link); !ok {
-		return fmt.Errorf("unexpected type %T for field null_link", values[31])
-	} else if value != nil {
-		ft.NullLink = value
-	}
-	if value, ok := values[32].(*sql.NullBool); !ok {
-		return fmt.Errorf("unexpected type %T for field active", values[32])
-	} else if value.Valid {
-		ft.Active = schema.Status(value.Bool)
-	}
-	if value, ok := values[33].(*sql.NullBool); !ok {
-		return fmt.Errorf("unexpected type %T for field null_active", values[33])
-	} else if value.Valid {
-		ft.NullActive = new(schema.Status)
-		*ft.NullActive = schema.Status(value.Bool)
-	}
-	if value, ok := values[34].(*sql.NullBool); !ok {
-		return fmt.Errorf("unexpected type %T for field deleted", values[34])
-	} else if value != nil {
-		ft.Deleted = *value
-	}
-	if value, ok := values[35].(*sql.NullTime); !ok {
-		return fmt.Errorf("unexpected type %T for field deleted_at", values[35])
-	} else if value != nil {
-		ft.DeletedAt = *value
-	}
-	if value, ok := values[36].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field ip", values[36])
-	} else if value != nil {
-		ft.IP = *value
-	}
-	if value, ok := values[37].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field null_int64", values[37])
-	} else if value != nil {
-		ft.NullInt64 = *value
-	}
-	if value, ok := values[38].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field schema_int", values[38])
-	} else if value.Valid {
-		ft.SchemaInt = schema.Int(value.Int64)
-	}
-	if value, ok := values[39].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field schema_int8", values[39])
-	} else if value.Valid {
-		ft.SchemaInt8 = schema.Int8(value.Int64)
-	}
-	if value, ok := values[40].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field schema_int64", values[40])
-	} else if value.Valid {
-		ft.SchemaInt64 = schema.Int64(value.Int64)
-	}
-	if value, ok := values[41].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field schema_float", values[41])
-	} else if value.Valid {
-		ft.SchemaFloat = schema.Float64(value.Float64)
-	}
-	if value, ok := values[42].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field schema_float32", values[42])
-	} else if value.Valid {
-		ft.SchemaFloat32 = schema.Float32(value.Float64)
-	}
-	if value, ok := values[43].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field null_float", values[43])
-	} else if value != nil {
-		ft.NullFloat = *value
-	}
-	if value, ok := values[44].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field role", values[44])
-	} else if value.Valid {
-		ft.Role = role.Role(value.String)
-	}
-	if value, ok := values[45].(*schema.MAC); !ok {
-		return fmt.Errorf("unexpected type %T for field mac", values[45])
-	} else if value != nil {
-		ft.MAC = *value
-	}
-	if value, ok := values[46].(*uuid.UUID); !ok {
-		return fmt.Errorf("unexpected type %T for field uuid", values[46])
-	} else if value != nil {
-		ft.UUID = *value
-	}
-	values = values[47:]
-	if len(values) == len(fieldtype.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field file_field", value)
-		} else if value.Valid {
-			ft.file_field = new(int)
-			*ft.file_field = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case fieldtype.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			ft.ID = int(value.Int64)
+		case fieldtype.FieldInt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field int", values[i])
+			} else if value.Valid {
+				ft.Int = int(value.Int64)
+			}
+		case fieldtype.FieldInt8:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field int8", values[i])
+			} else if value.Valid {
+				ft.Int8 = int8(value.Int64)
+			}
+		case fieldtype.FieldInt16:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field int16", values[i])
+			} else if value.Valid {
+				ft.Int16 = int16(value.Int64)
+			}
+		case fieldtype.FieldInt32:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field int32", values[i])
+			} else if value.Valid {
+				ft.Int32 = int32(value.Int64)
+			}
+		case fieldtype.FieldInt64:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field int64", values[i])
+			} else if value.Valid {
+				ft.Int64 = value.Int64
+			}
+		case fieldtype.FieldOptionalInt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_int", values[i])
+			} else if value.Valid {
+				ft.OptionalInt = int(value.Int64)
+			}
+		case fieldtype.FieldOptionalInt8:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_int8", values[i])
+			} else if value.Valid {
+				ft.OptionalInt8 = int8(value.Int64)
+			}
+		case fieldtype.FieldOptionalInt16:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_int16", values[i])
+			} else if value.Valid {
+				ft.OptionalInt16 = int16(value.Int64)
+			}
+		case fieldtype.FieldOptionalInt32:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_int32", values[i])
+			} else if value.Valid {
+				ft.OptionalInt32 = int32(value.Int64)
+			}
+		case fieldtype.FieldOptionalInt64:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_int64", values[i])
+			} else if value.Valid {
+				ft.OptionalInt64 = value.Int64
+			}
+		case fieldtype.FieldNillableInt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field nillable_int", values[i])
+			} else if value.Valid {
+				ft.NillableInt = new(int)
+				*ft.NillableInt = int(value.Int64)
+			}
+		case fieldtype.FieldNillableInt8:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field nillable_int8", values[i])
+			} else if value.Valid {
+				ft.NillableInt8 = new(int8)
+				*ft.NillableInt8 = int8(value.Int64)
+			}
+		case fieldtype.FieldNillableInt16:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field nillable_int16", values[i])
+			} else if value.Valid {
+				ft.NillableInt16 = new(int16)
+				*ft.NillableInt16 = int16(value.Int64)
+			}
+		case fieldtype.FieldNillableInt32:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field nillable_int32", values[i])
+			} else if value.Valid {
+				ft.NillableInt32 = new(int32)
+				*ft.NillableInt32 = int32(value.Int64)
+			}
+		case fieldtype.FieldNillableInt64:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field nillable_int64", values[i])
+			} else if value.Valid {
+				ft.NillableInt64 = new(int64)
+				*ft.NillableInt64 = value.Int64
+			}
+		case fieldtype.FieldValidateOptionalInt32:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field validate_optional_int32", values[i])
+			} else if value.Valid {
+				ft.ValidateOptionalInt32 = int32(value.Int64)
+			}
+		case fieldtype.FieldOptionalUint:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_uint", values[i])
+			} else if value.Valid {
+				ft.OptionalUint = uint(value.Int64)
+			}
+		case fieldtype.FieldOptionalUint8:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_uint8", values[i])
+			} else if value.Valid {
+				ft.OptionalUint8 = uint8(value.Int64)
+			}
+		case fieldtype.FieldOptionalUint16:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_uint16", values[i])
+			} else if value.Valid {
+				ft.OptionalUint16 = uint16(value.Int64)
+			}
+		case fieldtype.FieldOptionalUint32:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_uint32", values[i])
+			} else if value.Valid {
+				ft.OptionalUint32 = uint32(value.Int64)
+			}
+		case fieldtype.FieldOptionalUint64:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_uint64", values[i])
+			} else if value.Valid {
+				ft.OptionalUint64 = uint64(value.Int64)
+			}
+		case fieldtype.FieldState:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field state", values[i])
+			} else if value.Valid {
+				ft.State = fieldtype.State(value.String)
+			}
+		case fieldtype.FieldOptionalFloat:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_float", values[i])
+			} else if value.Valid {
+				ft.OptionalFloat = value.Float64
+			}
+		case fieldtype.FieldOptionalFloat32:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field optional_float32", values[i])
+			} else if value.Valid {
+				ft.OptionalFloat32 = float32(value.Float64)
+			}
+		case fieldtype.FieldDatetime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field datetime", values[i])
+			} else if value.Valid {
+				ft.Datetime = value.Time
+			}
+		case fieldtype.FieldDecimal:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field decimal", values[i])
+			} else if value.Valid {
+				ft.Decimal = value.Float64
+			}
+		case fieldtype.FieldDir:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field dir", values[i])
+			} else if value.Valid {
+				ft.Dir = http.Dir(value.String)
+			}
+		case fieldtype.FieldNdir:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field ndir", values[i])
+			} else if value.Valid {
+				ft.Ndir = new(http.Dir)
+				*ft.Ndir = http.Dir(value.String)
+			}
+		case fieldtype.FieldStr:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field str", values[i])
+			} else if value != nil {
+				ft.Str = *value
+			}
+		case fieldtype.FieldNullStr:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field null_str", values[i])
+			} else if value != nil {
+				ft.NullStr = value
+			}
+		case fieldtype.FieldLink:
+			if value, ok := values[i].(*schema.Link); !ok {
+				return fmt.Errorf("unexpected type %T for field link", values[i])
+			} else if value != nil {
+				ft.Link = *value
+			}
+		case fieldtype.FieldNullLink:
+			if value, ok := values[i].(*schema.Link); !ok {
+				return fmt.Errorf("unexpected type %T for field null_link", values[i])
+			} else if value != nil {
+				ft.NullLink = value
+			}
+		case fieldtype.FieldActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field active", values[i])
+			} else if value.Valid {
+				ft.Active = schema.Status(value.Bool)
+			}
+		case fieldtype.FieldNullActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field null_active", values[i])
+			} else if value.Valid {
+				ft.NullActive = new(schema.Status)
+				*ft.NullActive = schema.Status(value.Bool)
+			}
+		case fieldtype.FieldDeleted:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted", values[i])
+			} else if value != nil {
+				ft.Deleted = *value
+			}
+		case fieldtype.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value != nil {
+				ft.DeletedAt = *value
+			}
+		case fieldtype.FieldIP:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field ip", values[i])
+			} else if value != nil {
+				ft.IP = *value
+			}
+		case fieldtype.FieldNullInt64:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field null_int64", values[i])
+			} else if value != nil {
+				ft.NullInt64 = *value
+			}
+		case fieldtype.FieldSchemaInt:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field schema_int", values[i])
+			} else if value.Valid {
+				ft.SchemaInt = schema.Int(value.Int64)
+			}
+		case fieldtype.FieldSchemaInt8:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field schema_int8", values[i])
+			} else if value.Valid {
+				ft.SchemaInt8 = schema.Int8(value.Int64)
+			}
+		case fieldtype.FieldSchemaInt64:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field schema_int64", values[i])
+			} else if value.Valid {
+				ft.SchemaInt64 = schema.Int64(value.Int64)
+			}
+		case fieldtype.FieldSchemaFloat:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field schema_float", values[i])
+			} else if value.Valid {
+				ft.SchemaFloat = schema.Float64(value.Float64)
+			}
+		case fieldtype.FieldSchemaFloat32:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field schema_float32", values[i])
+			} else if value.Valid {
+				ft.SchemaFloat32 = schema.Float32(value.Float64)
+			}
+		case fieldtype.FieldNullFloat:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field null_float", values[i])
+			} else if value != nil {
+				ft.NullFloat = *value
+			}
+		case fieldtype.FieldRole:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field role", values[i])
+			} else if value.Valid {
+				ft.Role = role.Role(value.String)
+			}
+		case fieldtype.FieldMAC:
+			if value, ok := values[i].(*schema.MAC); !ok {
+				return fmt.Errorf("unexpected type %T for field mac", values[i])
+			} else if value != nil {
+				ft.MAC = *value
+			}
+		case fieldtype.FieldUUID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field uuid", values[i])
+			} else if value != nil {
+				ft.UUID = *value
+			}
+		case fieldtype.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field file_field", value)
+			} else if value.Valid {
+				ft.file_field = new(int)
+				*ft.file_field = int(value.Int64)
+			}
 		}
 	}
 	return nil
