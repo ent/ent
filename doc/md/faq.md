@@ -11,7 +11,8 @@ sidebar_label: FAQ
 [How to write an audit-log extension?](#how-to-write-an-audit-log-extension)  
 [How to write custom predicates?](#how-to-write-custom-predicates)  
 [How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets)  
-[How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql)
+[How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql)  
+[How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql)
 
 ## Answers
 
@@ -301,4 +302,18 @@ func (i *Inet) Scan(value interface{}) (err error) {
 func (i Inet) Value() (driver.Value, error) {
     return i.IP.String(), nil
 }
+```
+
+#### How to customize time fields to type `DATETIME` in MySQL?
+
+`Time` fields use the MySQL `TIMESTAMP` type in the schema creation by default, and this type
+ has a range of '1970-01-01 00:00:01' UTC to '2038-01-19 03:14:07' UTC (see, [MySQL docs](https://dev.mysql.com/doc/refman/5.6/en/datetime.html)). 
+
+In order to customize time fields for a wider range, use the MySQL `DATETIME` as follows:
+```go
+field.Time("birth_date").
+	Optional().
+	SchemaType(map[string]string{
+		dialect.MySQL: "datetime",
+	}),
 ```
