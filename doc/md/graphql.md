@@ -236,8 +236,38 @@ query {
 
 ## Fields Collection
 
-The collection template adds support for automatic fields collection from GraphQL requests using eager-loading
-the ent-edges. In order to configure this option to specific edges, use the `entgql.Annotation` as follows:
+The collection template adds support for automatic [GraphQL fields collection](https://spec.graphql.org/June2018/#sec-Field-Collection)
+for ent-edges using eager-loading. That means, if a query asks for nodes and their edges, entgql will add automatically [`With<E>`](eager-load.md#api)
+steps to the root query, and as a result, the client will execute constant number of queries to the database - and it works recursively.
+
+For example, given this GraphQL query:
+
+```graphql
+query {
+  users(first: 100) {
+    edges {
+      node {
+        photos {
+          link
+        }
+        posts {
+          content
+          comments {
+            content
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The client will execute 1 query for getting the users, 1 for getting the photos, and another 2 for getting the posts,
+and their comments (4 in total). This logic works both for root queries/resolvers and for the node(s) API.
+
+### Schema configuration
+
+In order to configure this option to specific edges, use the `entgql.Annotation` as follows:
 
 ```go
 func (Todo) Edges() []ent.Edge {
@@ -257,20 +287,37 @@ func (Todo) Edges() []ent.Edge {
 }
 ```
 
-Then, in the resolver, use it as follows:
+### Usage and Configuration
 
+The GraphQL extension generates also edge-resolvers for the nodes under the `edge.go` file as follows:
 ```go
-func (r *todoResolver) Parent(ctx context.Context, t *ent.Todo) (*ent.Todo, error) {
-	parent, err := t.Edges.ParentOrErr()
-	return parent, ent.MaskNotFound(err)
-}
-
-func (r *todoResolver) Children(ctx context.Context, obj *ent.Todo) ([]*ent.Todo, error) {
-	return obj.Edges.ChildrenOrErr()
+func (t *Todo) Children(ctx context.Context) ([]*Todo, error) {
+	result, err := t.Edges.ChildrenOrErr()
+	if IsNotLoaded(err) {
+		result, err = t.QueryChildren().All(ctx)
+	}
+	return result, err
 }
 ```
 
-More info about fields-collection can be found in [Relay website](https://spec.graphql.org/June2018/#sec-Field-Collection).
+However, if you need to explicitly write these resolvers by hand, you can add the
+[`forceResolver`](https://gqlgen.com/master/config#inline-config-with-directives) option to your GraphQL schema:
+
+```graphql
+type Todo implements Node {
+  id: ID!
+  children: [Todo]! @goField(forceResolver: true)
+}
+```
+
+Then, you can implement it on your type resolver.
+
+```go
+func (r *todoResolver) Children(ctx context.Context, obj *ent.Todo) ([]*ent.Todo, error) {
+	// Do something here.
+	return obj.Edges.ChildrenOrErr()
+}
+```
 
 ## Enum Implementation
 
