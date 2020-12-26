@@ -250,8 +250,16 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeJSON
 	case "uuid":
 		c.Type = field.TypeUUID
-	case "cidr", "inet", "macaddr", "macaddr8", "USER-DEFINED":
+	case "cidr", "inet", "macaddr", "macaddr8":
 		c.Type = field.TypeOther
+	case "USER-DEFINED":
+		c.Type = field.TypeOther
+
+		if !udt.Valid {
+			return fmt.Errorf("missing user defined type")
+		}
+
+		c.SchemaType = map[string]string{dialect.Postgres: udt.String}
 	}
 	switch {
 	case !defaults.Valid || c.Type == field.TypeTime || seqfunc(defaults.String):

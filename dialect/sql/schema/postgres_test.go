@@ -203,6 +203,34 @@ func TestPostgres_Create(t *testing.T) {
 			},
 		},
 		{
+			name: "scan table with custom type",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "custom", Type: field.TypeOther, SchemaType: map[string]string{dialect.Postgres: "customtype"}},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock pgMock) {
+				mock.start("120000")
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
+						AddRow("id", "bigint", "NO", "nextval('users_colname_seq'::regclass)", "NULL").
+						AddRow("custom", "USER-DEFINED", "NO", "NULL", "customtype"))
+				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
+						AddRow("users_pkey", "id", "t", "t", 0))
+				mock.ExpectCommit()
+			},
+		},
+		{
 			name: "add column to table",
 			tables: []*Table{
 				{

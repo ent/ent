@@ -39,6 +39,19 @@ func (f ConversionFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Val
 	return f(ctx, mv)
 }
 
+// The CustomTypeFunc type is an adapter to allow the use of ordinary
+// function as CustomType mutator.
+type CustomTypeFunc func(context.Context, *entv1.CustomTypeMutation) (entv1.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CustomTypeFunc) Mutate(ctx context.Context, m entv1.Mutation) (entv1.Value, error) {
+	mv, ok := m.(*entv1.CustomTypeMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv1.CustomTypeMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *entv1.UserMutation) (entv1.Value, error)
