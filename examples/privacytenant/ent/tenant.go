@@ -24,29 +24,42 @@ type Tenant struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Tenant) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // name
+func (*Tenant) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case tenant.FieldID:
+			values[i] = &sql.NullInt64{}
+		case tenant.FieldName:
+			values[i] = &sql.NullString{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Tenant", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Tenant fields.
-func (t *Tenant) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(tenant.Columns); m < n {
+func (t *Tenant) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	t.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[0])
-	} else if value.Valid {
-		t.Name = value.String
+	for i := range columns {
+		switch columns[i] {
+		case tenant.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			t.ID = int(value.Int64)
+		case tenant.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				t.Name = value.String
+			}
+		}
 	}
 	return nil
 }

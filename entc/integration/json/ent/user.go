@@ -40,85 +40,98 @@ type User struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
-		&[]byte{},        // t
-		&[]byte{},        // url
-		&[]byte{},        // raw
-		&[]byte{},        // dirs
-		&[]byte{},        // ints
-		&[]byte{},        // floats
-		&[]byte{},        // strings
+func (*User) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case user.FieldT, user.FieldURL, user.FieldRaw, user.FieldDirs, user.FieldInts, user.FieldFloats, user.FieldStrings:
+			values[i] = &[]byte{}
+		case user.FieldID:
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m < n {
+func (u *User) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	u.ID = int(value.Int64)
-	values = values[1:]
+	for i := range columns {
+		switch columns[i] {
+		case user.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			u.ID = int(value.Int64)
+		case user.FieldT:
 
-	if value, ok := values[0].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field t", values[0])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.T); err != nil {
-			return fmt.Errorf("unmarshal field t: %v", err)
-		}
-	}
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field t", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.T); err != nil {
+					return fmt.Errorf("unmarshal field t: %v", err)
+				}
+			}
+		case user.FieldURL:
 
-	if value, ok := values[1].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field url", values[1])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.URL); err != nil {
-			return fmt.Errorf("unmarshal field url: %v", err)
-		}
-	}
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field url", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.URL); err != nil {
+					return fmt.Errorf("unmarshal field url: %v", err)
+				}
+			}
+		case user.FieldRaw:
 
-	if value, ok := values[2].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field raw", values[2])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.Raw); err != nil {
-			return fmt.Errorf("unmarshal field raw: %v", err)
-		}
-	}
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field raw", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Raw); err != nil {
+					return fmt.Errorf("unmarshal field raw: %v", err)
+				}
+			}
+		case user.FieldDirs:
 
-	if value, ok := values[3].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field dirs", values[3])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.Dirs); err != nil {
-			return fmt.Errorf("unmarshal field dirs: %v", err)
-		}
-	}
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field dirs", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Dirs); err != nil {
+					return fmt.Errorf("unmarshal field dirs: %v", err)
+				}
+			}
+		case user.FieldInts:
 
-	if value, ok := values[4].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field ints", values[4])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.Ints); err != nil {
-			return fmt.Errorf("unmarshal field ints: %v", err)
-		}
-	}
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field ints", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Ints); err != nil {
+					return fmt.Errorf("unmarshal field ints: %v", err)
+				}
+			}
+		case user.FieldFloats:
 
-	if value, ok := values[5].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field floats", values[5])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.Floats); err != nil {
-			return fmt.Errorf("unmarshal field floats: %v", err)
-		}
-	}
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field floats", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Floats); err != nil {
+					return fmt.Errorf("unmarshal field floats: %v", err)
+				}
+			}
+		case user.FieldStrings:
 
-	if value, ok := values[6].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field strings", values[6])
-	} else if value != nil && len(*value) > 0 {
-		if err := json.Unmarshal(*value, &u.Strings); err != nil {
-			return fmt.Errorf("unmarshal field strings: %v", err)
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field strings", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Strings); err != nil {
+					return fmt.Errorf("unmarshal field strings: %v", err)
+				}
+			}
 		}
 	}
 	return nil

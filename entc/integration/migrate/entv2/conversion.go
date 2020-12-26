@@ -40,77 +40,90 @@ type Conversion struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Conversion) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // name
-		&sql.NullString{}, // int8_to_string
-		&sql.NullString{}, // uint8_to_string
-		&sql.NullString{}, // int16_to_string
-		&sql.NullString{}, // uint16_to_string
-		&sql.NullString{}, // int32_to_string
-		&sql.NullString{}, // uint32_to_string
-		&sql.NullString{}, // int64_to_string
-		&sql.NullString{}, // uint64_to_string
+func (*Conversion) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case conversion.FieldID:
+			values[i] = &sql.NullInt64{}
+		case conversion.FieldName, conversion.FieldInt8ToString, conversion.FieldUint8ToString, conversion.FieldInt16ToString, conversion.FieldUint16ToString, conversion.FieldInt32ToString, conversion.FieldUint32ToString, conversion.FieldInt64ToString, conversion.FieldUint64ToString:
+			values[i] = &sql.NullString{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Conversion", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Conversion fields.
-func (c *Conversion) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(conversion.Columns); m < n {
+func (c *Conversion) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	c.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[0])
-	} else if value.Valid {
-		c.Name = value.String
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field int8_to_string", values[1])
-	} else if value.Valid {
-		c.Int8ToString = value.String
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field uint8_to_string", values[2])
-	} else if value.Valid {
-		c.Uint8ToString = value.String
-	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field int16_to_string", values[3])
-	} else if value.Valid {
-		c.Int16ToString = value.String
-	}
-	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field uint16_to_string", values[4])
-	} else if value.Valid {
-		c.Uint16ToString = value.String
-	}
-	if value, ok := values[5].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field int32_to_string", values[5])
-	} else if value.Valid {
-		c.Int32ToString = value.String
-	}
-	if value, ok := values[6].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field uint32_to_string", values[6])
-	} else if value.Valid {
-		c.Uint32ToString = value.String
-	}
-	if value, ok := values[7].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field int64_to_string", values[7])
-	} else if value.Valid {
-		c.Int64ToString = value.String
-	}
-	if value, ok := values[8].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field uint64_to_string", values[8])
-	} else if value.Valid {
-		c.Uint64ToString = value.String
+	for i := range columns {
+		switch columns[i] {
+		case conversion.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			c.ID = int(value.Int64)
+		case conversion.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				c.Name = value.String
+			}
+		case conversion.FieldInt8ToString:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field int8_to_string", values[i])
+			} else if value.Valid {
+				c.Int8ToString = value.String
+			}
+		case conversion.FieldUint8ToString:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field uint8_to_string", values[i])
+			} else if value.Valid {
+				c.Uint8ToString = value.String
+			}
+		case conversion.FieldInt16ToString:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field int16_to_string", values[i])
+			} else if value.Valid {
+				c.Int16ToString = value.String
+			}
+		case conversion.FieldUint16ToString:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field uint16_to_string", values[i])
+			} else if value.Valid {
+				c.Uint16ToString = value.String
+			}
+		case conversion.FieldInt32ToString:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field int32_to_string", values[i])
+			} else if value.Valid {
+				c.Int32ToString = value.String
+			}
+		case conversion.FieldUint32ToString:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field uint32_to_string", values[i])
+			} else if value.Valid {
+				c.Uint32ToString = value.String
+			}
+		case conversion.FieldInt64ToString:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field int64_to_string", values[i])
+			} else if value.Valid {
+				c.Int64ToString = value.String
+			}
+		case conversion.FieldUint64ToString:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field uint64_to_string", values[i])
+			} else if value.Valid {
+				c.Uint64ToString = value.String
+			}
+		}
 	}
 	return nil
 }

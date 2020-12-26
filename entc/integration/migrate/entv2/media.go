@@ -26,35 +26,48 @@ type Media struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Media) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // source
-		&sql.NullString{}, // source_uri
+func (*Media) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case media.FieldID:
+			values[i] = &sql.NullInt64{}
+		case media.FieldSource, media.FieldSourceURI:
+			values[i] = &sql.NullString{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Media", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Media fields.
-func (m *Media) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(media.Columns); m < n {
+func (m *Media) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	m.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field source", values[0])
-	} else if value.Valid {
-		m.Source = value.String
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field source_uri", values[1])
-	} else if value.Valid {
-		m.SourceURI = value.String
+	for i := range columns {
+		switch columns[i] {
+		case media.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			m.ID = int(value.Int64)
+		case media.FieldSource:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field source", values[i])
+			} else if value.Valid {
+				m.Source = value.String
+			}
+		case media.FieldSourceURI:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field source_uri", values[i])
+			} else if value.Valid {
+				m.SourceURI = value.String
+			}
+		}
 	}
 	return nil
 }

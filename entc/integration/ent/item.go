@@ -22,24 +22,35 @@ type Item struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Item) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
+func (*Item) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case item.FieldID:
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Item", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Item fields.
-func (i *Item) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(item.Columns); m < n {
+func (i *Item) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
+	for j := range columns {
+		switch columns[j] {
+		case item.FieldID:
+			value, ok := values[j].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			i.ID = int(value.Int64)
+		}
 	}
-	i.ID = int(value.Int64)
-	values = values[1:]
 	return nil
 }
 

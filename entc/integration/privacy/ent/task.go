@@ -70,62 +70,70 @@ func (e TaskEdges) OwnerOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Task) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // title
-		&sql.NullString{}, // description
-		&sql.NullString{}, // status
-		&uuid.UUID{},      // uuid
+func (*Task) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case task.FieldID:
+			values[i] = &sql.NullInt64{}
+		case task.FieldTitle, task.FieldDescription, task.FieldStatus:
+			values[i] = &sql.NullString{}
+		case task.FieldUUID:
+			values[i] = &uuid.UUID{}
+		case task.ForeignKeys[0]: // user_tasks
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Task) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // user_tasks
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Task fields.
-func (t *Task) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(task.Columns); m < n {
+func (t *Task) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	t.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field title", values[0])
-	} else if value.Valid {
-		t.Title = value.String
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field description", values[1])
-	} else if value.Valid {
-		t.Description = value.String
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field status", values[2])
-	} else if value.Valid {
-		t.Status = task.Status(value.String)
-	}
-	if value, ok := values[3].(*uuid.UUID); !ok {
-		return fmt.Errorf("unexpected type %T for field uuid", values[3])
-	} else if value != nil {
-		t.UUID = *value
-	}
-	values = values[4:]
-	if len(values) == len(task.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_tasks", value)
-		} else if value.Valid {
-			t.user_tasks = new(int)
-			*t.user_tasks = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case task.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			t.ID = int(value.Int64)
+		case task.FieldTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field title", values[i])
+			} else if value.Valid {
+				t.Title = value.String
+			}
+		case task.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				t.Description = value.String
+			}
+		case task.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				t.Status = task.Status(value.String)
+			}
+		case task.FieldUUID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field uuid", values[i])
+			} else if value != nil {
+				t.UUID = *value
+			}
+		case task.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_tasks", value)
+			} else if value.Valid {
+				t.user_tasks = new(int)
+				*t.user_tasks = int(value.Int64)
+			}
 		}
 	}
 	return nil

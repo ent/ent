@@ -25,29 +25,40 @@ type Task struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Task) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
-		&sql.NullInt64{}, // priority
+func (*Task) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case task.FieldID, task.FieldPriority:
+			values[i] = &sql.NullInt64{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Task fields.
-func (t *Task) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(task.Columns); m < n {
+func (t *Task) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	t.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field priority", values[0])
-	} else if value.Valid {
-		t.Priority = schema.Priority(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case task.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			t.ID = int(value.Int64)
+		case task.FieldPriority:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field priority", values[i])
+			} else if value.Valid {
+				t.Priority = schema.Priority(value.Int64)
+			}
+		}
 	}
 	return nil
 }

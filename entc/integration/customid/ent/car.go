@@ -56,56 +56,64 @@ func (e CarEdges) OwnerOrErr() (*Pet, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Car) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},   // id
-		&sql.NullFloat64{}, // before_id
-		&sql.NullFloat64{}, // after_id
-		&sql.NullString{},  // model
+func (*Car) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case car.FieldBeforeID, car.FieldAfterID:
+			values[i] = &sql.NullFloat64{}
+		case car.FieldID:
+			values[i] = &sql.NullInt64{}
+		case car.FieldModel:
+			values[i] = &sql.NullString{}
+		case car.ForeignKeys[0]: // pet_cars
+			values[i] = &sql.NullString{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Car", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Car) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullString{}, // pet_cars
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Car fields.
-func (c *Car) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(car.Columns); m < n {
+func (c *Car) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	c.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field before_id", values[0])
-	} else if value.Valid {
-		c.BeforeID = value.Float64
-	}
-	if value, ok := values[1].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field after_id", values[1])
-	} else if value.Valid {
-		c.AfterID = value.Float64
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field model", values[2])
-	} else if value.Valid {
-		c.Model = value.String
-	}
-	values = values[3:]
-	if len(values) == len(car.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field pet_cars", values[0])
-		} else if value.Valid {
-			c.pet_cars = new(string)
-			*c.pet_cars = value.String
+	for i := range columns {
+		switch columns[i] {
+		case car.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			c.ID = int(value.Int64)
+		case car.FieldBeforeID:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field before_id", values[i])
+			} else if value.Valid {
+				c.BeforeID = value.Float64
+			}
+		case car.FieldAfterID:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field after_id", values[i])
+			} else if value.Valid {
+				c.AfterID = value.Float64
+			}
+		case car.FieldModel:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field model", values[i])
+			} else if value.Valid {
+				c.Model = value.String
+			}
+		case car.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field pet_cars", values[i])
+			} else if value.Valid {
+				c.pet_cars = new(string)
+				*c.pet_cars = value.String
+			}
 		}
 	}
 	return nil
