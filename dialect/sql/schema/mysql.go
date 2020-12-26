@@ -405,6 +405,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	case "tinyblob":
 		c.Size = math.MaxUint8
 		c.Type = field.TypeBytes
+	case "binary":
+		c.Size = size
+		c.Type = field.TypeBytes
 	case "blob":
 		c.Size = math.MaxUint16
 		c.Type = field.TypeBytes
@@ -604,7 +607,7 @@ func parseColumn(typ string) (parts []string, size int64, unsigned bool, err err
 		case len(parts) == 2: // int(10)
 			size, err = strconv.ParseInt(parts[1], 10, 0)
 		}
-	case "varbinary", "varchar", "char":
+	case "varbinary", "varchar", "char", "binary":
 		size, err = strconv.ParseInt(parts[1], 10, 64)
 	}
 	if err != nil {
