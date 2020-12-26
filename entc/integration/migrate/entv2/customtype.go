@@ -24,29 +24,42 @@ type CustomType struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*CustomType) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // custom
+func (*CustomType) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case customtype.FieldID:
+			values[i] = &sql.NullInt64{}
+		case customtype.FieldCustom:
+			values[i] = &sql.NullString{}
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type CustomType", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the CustomType fields.
-func (ct *CustomType) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(customtype.Columns); m < n {
+func (ct *CustomType) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	ct.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field custom", values[0])
-	} else if value.Valid {
-		ct.Custom = value.String
+	for i := range columns {
+		switch columns[i] {
+		case customtype.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			ct.ID = int(value.Int64)
+		case customtype.FieldCustom:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field custom", values[i])
+			} else if value.Valid {
+				ct.Custom = value.String
+			}
+		}
 	}
 	return nil
 }
