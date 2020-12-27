@@ -19,6 +19,9 @@ type CustomType struct {
 func (CustomType) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("custom").
-			Optional().SchemaType(map[string]string{dialect.Postgres: "customtype"}),
+			Optional().
+			SchemaType(map[string]string{
+				dialect.Postgres: "customtype",
+			}),
 	}
 }
