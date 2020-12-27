@@ -254,11 +254,9 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeOther
 	case "USER-DEFINED":
 		c.Type = field.TypeOther
-
 		if !udt.Valid {
-			return fmt.Errorf("missing user defined type")
+			return fmt.Errorf("missing user defined type for column %q", c.Name)
 		}
-
 		c.SchemaType = map[string]string{dialect.Postgres: udt.String}
 	}
 	switch {
