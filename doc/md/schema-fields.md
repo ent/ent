@@ -415,7 +415,7 @@ It's mapped to a column name in SQL dialects and to property name in Gremlin.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
-			StorageKey(`old_name"`),
+			StorageKey("old_name"),
 	}
 }
 ```
