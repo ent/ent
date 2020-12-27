@@ -52,6 +52,18 @@ var (
 		PrimaryKey:  []*schema.Column{ConversionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
+	// CustomTypesColumns holds the columns for the "custom_types" table.
+	CustomTypesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "custom", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "customtype"}},
+	}
+	// CustomTypesTable holds the schema information for the "custom_types" table.
+	CustomTypesTable = &schema.Table{
+		Name:        "custom_types",
+		Columns:     CustomTypesColumns,
+		PrimaryKey:  []*schema.Column{CustomTypesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -165,6 +177,7 @@ var (
 	Tables = []*schema.Table{
 		CarsTable,
 		ConversionsTable,
+		CustomTypesTable,
 		GroupsTable,
 		MediaTable,
 		PetsTable,

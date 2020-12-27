@@ -20,6 +20,8 @@ type Tx struct {
 	Car *CarClient
 	// Conversion is the client for interacting with the Conversion builders.
 	Conversion *ConversionClient
+	// CustomType is the client for interacting with the CustomType builders.
+	CustomType *CustomTypeClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -159,6 +161,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Car = NewCarClient(tx.config)
 	tx.Conversion = NewConversionClient(tx.config)
+	tx.CustomType = NewCustomTypeClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

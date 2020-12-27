@@ -15,6 +15,7 @@ import (
 
 	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/conversion"
+	"github.com/facebook/ent/entc/integration/migrate/entv2/customtype"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/group"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/media"
 	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
@@ -34,6 +35,8 @@ type Client struct {
 	Car *CarClient
 	// Conversion is the client for interacting with the Conversion builders.
 	Conversion *ConversionClient
+	// CustomType is the client for interacting with the CustomType builders.
+	CustomType *CustomTypeClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
 	// Media is the client for interacting with the Media builders.
@@ -57,6 +60,7 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Car = NewCarClient(c.config)
 	c.Conversion = NewConversionClient(c.config)
+	c.CustomType = NewCustomTypeClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.Media = NewMediaClient(c.config)
 	c.Pet = NewPetClient(c.config)
@@ -95,6 +99,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:     cfg,
 		Car:        NewCarClient(cfg),
 		Conversion: NewConversionClient(cfg),
+		CustomType: NewCustomTypeClient(cfg),
 		Group:      NewGroupClient(cfg),
 		Media:      NewMediaClient(cfg),
 		Pet:        NewPetClient(cfg),
@@ -116,6 +121,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:     cfg,
 		Car:        NewCarClient(cfg),
 		Conversion: NewConversionClient(cfg),
+		CustomType: NewCustomTypeClient(cfg),
 		Group:      NewGroupClient(cfg),
 		Media:      NewMediaClient(cfg),
 		Pet:        NewPetClient(cfg),
@@ -150,6 +156,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Car.Use(hooks...)
 	c.Conversion.Use(hooks...)
+	c.CustomType.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.Media.Use(hooks...)
 	c.Pet.Use(hooks...)
@@ -346,6 +353,94 @@ func (c *ConversionClient) GetX(ctx context.Context, id int) *Conversion {
 // Hooks returns the client hooks.
 func (c *ConversionClient) Hooks() []Hook {
 	return c.hooks.Conversion
+}
+
+// CustomTypeClient is a client for the CustomType schema.
+type CustomTypeClient struct {
+	config
+}
+
+// NewCustomTypeClient returns a client for the CustomType from the given config.
+func NewCustomTypeClient(c config) *CustomTypeClient {
+	return &CustomTypeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `customtype.Hooks(f(g(h())))`.
+func (c *CustomTypeClient) Use(hooks ...Hook) {
+	c.hooks.CustomType = append(c.hooks.CustomType, hooks...)
+}
+
+// Create returns a create builder for CustomType.
+func (c *CustomTypeClient) Create() *CustomTypeCreate {
+	mutation := newCustomTypeMutation(c.config, OpCreate)
+	return &CustomTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CustomType entities.
+func (c *CustomTypeClient) CreateBulk(builders ...*CustomTypeCreate) *CustomTypeCreateBulk {
+	return &CustomTypeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CustomType.
+func (c *CustomTypeClient) Update() *CustomTypeUpdate {
+	mutation := newCustomTypeMutation(c.config, OpUpdate)
+	return &CustomTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CustomTypeClient) UpdateOne(ct *CustomType) *CustomTypeUpdateOne {
+	mutation := newCustomTypeMutation(c.config, OpUpdateOne, withCustomType(ct))
+	return &CustomTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CustomTypeClient) UpdateOneID(id int) *CustomTypeUpdateOne {
+	mutation := newCustomTypeMutation(c.config, OpUpdateOne, withCustomTypeID(id))
+	return &CustomTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CustomType.
+func (c *CustomTypeClient) Delete() *CustomTypeDelete {
+	mutation := newCustomTypeMutation(c.config, OpDelete)
+	return &CustomTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *CustomTypeClient) DeleteOne(ct *CustomType) *CustomTypeDeleteOne {
+	return c.DeleteOneID(ct.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *CustomTypeClient) DeleteOneID(id int) *CustomTypeDeleteOne {
+	builder := c.Delete().Where(customtype.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CustomTypeDeleteOne{builder}
+}
+
+// Query returns a query builder for CustomType.
+func (c *CustomTypeClient) Query() *CustomTypeQuery {
+	return &CustomTypeQuery{config: c.config}
+}
+
+// Get returns a CustomType entity by its id.
+func (c *CustomTypeClient) Get(ctx context.Context, id int) (*CustomType, error) {
+	return c.Query().Where(customtype.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CustomTypeClient) GetX(ctx context.Context, id int) *CustomType {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CustomTypeClient) Hooks() []Hook {
+	return c.hooks.CustomType
 }
 
 // GroupClient is a client for the Group schema.

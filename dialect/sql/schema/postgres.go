@@ -87,7 +87,7 @@ func (d *Postgres) setRange(ctx context.Context, tx dialect.Tx, t *Table, value 
 func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Dialect(dialect.Postgres).
-		Select("column_name", "data_type", "is_nullable", "column_default").
+		Select("column_name", "data_type", "is_nullable", "column_default", "udt_name").
 		From(sql.Table("columns").Schema("information_schema")).
 		Where(sql.And(
 			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
@@ -216,8 +216,9 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
 		nullable sql.NullString
 		defaults sql.NullString
+		udt      sql.NullString
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt); err != nil {
 		return fmt.Errorf("scanning column description: %v", err)
 	}
 	if nullable.Valid {
@@ -251,6 +252,14 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeUUID
 	case "cidr", "inet", "macaddr", "macaddr8":
 		c.Type = field.TypeOther
+	case "USER-DEFINED":
+		c.Type = field.TypeOther
+
+		if !udt.Valid {
+			return fmt.Errorf("missing user defined type")
+		}
+
+		c.SchemaType = map[string]string{dialect.Postgres: udt.String}
 	}
 	switch {
 	case !defaults.Valid || c.Type == field.TypeTime || seqfunc(defaults.String):

@@ -30,6 +30,7 @@ type config struct {
 type hooks struct {
 	Car        []ent.Hook
 	Conversion []ent.Hook
+	CustomType []ent.Hook
 	Group      []ent.Hook
 	Media      []ent.Hook
 	Pet        []ent.Hook

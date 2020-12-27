@@ -67,6 +67,9 @@ func TestPostgres(t *testing.T) {
 			require.NoError(t, err, "connecting to migrate database")
 			defer drv.Close()
 
+			err = drv.Exec(ctx, "CREATE TYPE customtype as range (subtype = time)", []interface{}{}, new(sql.Result))
+			require.NoError(t, err, "creating custom type")
+
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
@@ -86,10 +89,11 @@ func TestSQLite(t *testing.T) {
 	SanityV2(t, drv.Dialect(), client)
 	idRange(t, client.Car.Create().SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
-	idRange(t, client.Group.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
-	idRange(t, client.Media.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
-	idRange(t, client.Pet.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
-	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 5<<32-1, 6<<32)
+	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
+	idRange(t, client.Group.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, client.Media.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
+	idRange(t, client.Pet.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
+	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 6<<32-1, 7<<32)
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -115,10 +119,10 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	idRange(t, clientv2.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
-	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 2<<32-1, 3<<32)
-	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
-	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
-	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
+	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
+	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
+	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
 
 	// SQL specific predicates.
 	EqualFold(t, clientv2)

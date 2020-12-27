@@ -39,6 +39,19 @@ func (f ConversionFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Val
 	return f(ctx, mv)
 }
 
+// The CustomTypeFunc type is an adapter to allow the use of ordinary
+// function as CustomType mutator.
+type CustomTypeFunc func(context.Context, *entv2.CustomTypeMutation) (entv2.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CustomTypeFunc) Mutate(ctx context.Context, m entv2.Mutation) (entv2.Value, error) {
+	mv, ok := m.(*entv2.CustomTypeMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *entv2.CustomTypeMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The GroupFunc type is an adapter to allow the use of ordinary
 // function as Group mutator.
 type GroupFunc func(context.Context, *entv2.GroupMutation) (entv2.Value, error)
