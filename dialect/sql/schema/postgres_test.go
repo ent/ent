@@ -260,17 +260,17 @@ func TestPostgres_Create(t *testing.T) {
 				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
-						AddRow("id", "bigint", "NO", "NULL", "NULL").
-						AddRow("name", "character varying", "YES", "NULL", "NULL").
-						AddRow("uuid", "uuid", "YES", "NULL", "NULL").
-						AddRow("created_at", "date", "NO", "CURRENT_DATE", "NULL").
-						AddRow("updated_at", "timestamp", "YES", "NULL", "NULL").
-						AddRow("deleted_at", "date", "YES", "NULL", "NULL").
-						AddRow("text", "text", "YES", "NULL", "NULL").
-						AddRow("cidr", "cidr", "NO", "NULL", "NULL").
-						AddRow("inet", "inet", "YES", "NULL", "NULL").
-						AddRow("macaddr", "macaddr", "YES", "NULL", "NULL").
-						AddRow("macaddr8", "macaddr8", "YES", "NULL", "NULL"))
+						AddRow("id", "bigint", "NO", "NULL", "int8").
+						AddRow("name", "character varying", "YES", "NULL", "varchar").
+						AddRow("uuid", "uuid", "YES", "NULL", "uuid").
+						AddRow("created_at", "date", "NO", "CURRENT_DATE", "date").
+						AddRow("updated_at", "timestamp", "YES", "NULL", "timestamptz").
+						AddRow("deleted_at", "date", "YES", "NULL", "date").
+						AddRow("text", "text", "YES", "NULL", "text").
+						AddRow("cidr", "cidr", "NO", "NULL", "cidr").
+						AddRow("inet", "inet", "YES", "NULL", "inet").
+						AddRow("macaddr", "macaddr", "YES", "NULL", "macaddr").
+						AddRow("macaddr8", "macaddr8", "YES", "NULL", "macaddr8"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0))
