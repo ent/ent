@@ -301,9 +301,9 @@ func TestPostgres_Create(t *testing.T) {
 				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
-						AddRow("id", "bigint", "NO", "NULL", "NULL").
-						AddRow("name", "character", "YES", "NULL", "NULL").
-						AddRow("doc", "jsonb", "YES", "NULL", "NULL"))
+						AddRow("id", "bigint", "NO", "NULL", "int8").
+						AddRow("name", "character", "YES", "NULL", "bpchar").
+						AddRow("doc", "jsonb", "YES", "NULL", "jsonb"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0))
