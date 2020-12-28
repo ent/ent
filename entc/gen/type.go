@@ -892,7 +892,8 @@ func (f Field) NullTypeField(rec string) string {
 	return expr
 }
 
-// Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field.
+// Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field, unless stated
+// otherwise.
 func (f Field) Column() *schema.Column {
 	c := &schema.Column{
 		Name:     f.StorageKey(),
@@ -916,6 +917,15 @@ func (f Field) Column() *schema.Column {
 	return c
 }
 
+// incremental returns if the column has an incremental behavior.
+// If no value is defined externally, we use a provided def flag
+func (f Field) incremental(def bool) bool {
+	if ant := f.EntSQL(); ant != nil && ant.Incremental != nil {
+		return *ant.Incremental
+	}
+	return def
+}
+
 // size returns the the field size defined in the schema.
 func (f Field) size() int64 {
 	if ant := f.EntSQL(); ant != nil && ant.Size != 0 {
@@ -933,7 +943,7 @@ func (f Field) PK() *schema.Column {
 		Name:      f.StorageKey(),
 		Type:      f.Type.Type,
 		Key:       schema.PrimaryKey,
-		Increment: true,
+		Increment: f.incremental(true),
 	}
 	// If the PK was defined by the user and it's UUID or string.
 	if f.UserDefined && !f.Type.Numeric() {

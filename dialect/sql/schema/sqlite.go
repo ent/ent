@@ -129,7 +129,7 @@ func (*SQLite) cType(c *Column) (t string) {
 func (d *SQLite) addColumn(c *Column) *sql.ColumnBuilder {
 	b := sql.Column(c.Name).Type(d.cType(c)).Attr(c.Attr)
 	c.unique(b)
-	if c.Increment {
+	if c.PrimaryKey() && c.Increment {
 		b.Attr("PRIMARY KEY AUTOINCREMENT")
 	}
 	c.nullable(b)

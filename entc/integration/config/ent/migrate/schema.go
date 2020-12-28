@@ -15,7 +15,7 @@ import (
 var (
 	// UsersColumns holds the columns for the "Users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "user_id", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Nullable: true, Size: 128},
 	}
 	// UsersTable holds the schema information for the "Users" table.

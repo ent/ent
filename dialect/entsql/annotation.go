@@ -50,6 +50,17 @@ type Annotation struct {
 	//	}
 	//
 	Size int64 `json:"size,omitempty"`
+
+	// Incremental defines the autoincremental behavior of a column. For example:
+	//
+	//  incrementalEnabled := true
+	//  entsql.Annotation{
+	//      Incremental: &incrementalEnabled,
+	//  }
+	//
+	// By default, this value is nil defaulting to whatever best fits each scenario.
+	//
+	Incremental *bool `json:"incremental,omitempty"`
 }
 
 // Name describes the annotation name.
@@ -84,6 +95,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if s := ant.Size; s != 0 {
 		a.Size = s
+	}
+	if s := ant.Incremental; s != nil {
+		a.Incremental = s
 	}
 	return a
 }
