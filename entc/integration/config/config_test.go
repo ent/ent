@@ -62,7 +62,7 @@ func TestMySQL(t *testing.T) {
 			require.NoError(t, err, "creating database")
 			defer root.Exec(ctx, "DROP DATABASE IF EXISTS config", []interface{}{}, new(sql.Result))
 
-			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
+			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/config?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")
 
 			client := ent.NewClient(ent.Driver(drv)).Debug()
