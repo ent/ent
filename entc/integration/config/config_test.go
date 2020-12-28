@@ -59,22 +59,20 @@ func TestMySQL(t *testing.T) {
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
-			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS migrate", []interface{}{}, new(sql.Result))
+			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS config", []interface{}{}, new(sql.Result))
 			require.NoError(t, err, "creating database")
-			defer root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS config", []interface{}{}, new(sql.Result))
 
-			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
+			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/config?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")
 
-			client := ent.NewClient(ent.Driver(drv)).Debug()
-
+			client := ent.NewClient(ent.Driver(drv))
 			// Run schema creation.
 			require.NoError(t, client.Schema.Create(ctx))
 
 			u, err := client.User.Create().SetID(200).Save(ctx)
 			require.NoError(t, err)
 			assert.Equal(t, 200, u.ID)
-
 			_, err = client.User.Create().Save(ctx)
 			assert.Error(t, err)
 		})
