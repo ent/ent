@@ -28,6 +28,7 @@ type TeamQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Team
 	// eager-loading edges.
 	withTasks *TaskQuery
@@ -350,18 +351,16 @@ func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
 //		Scan(ctx, &v)
 //
 func (tq *TeamQuery) Select(field string, fields ...string) *TeamSelect {
-	selector := &TeamSelect{config: tq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return tq.sqlQuery(), nil
-	}
-	return selector
+	tq.fields = append([]string{field}, fields...)
+	return &TeamSelect{TeamQuery: tq}
 }
 
 func (tq *TeamQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range tq.fields {
+		if !team.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if tq.path != nil {
 		prev, err := tq.path(ctx)
 		if err != nil {
@@ -864,20 +863,17 @@ func (tgb *TeamGroupBy) sqlQuery() *sql.Selector {
 
 // TeamSelect is the builder for select fields of Team entities.
 type TeamSelect struct {
-	config
-	fields []string
+	*TeamQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ts *TeamSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ts.path(ctx)
-	if err != nil {
+	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ts.sql = query
+	ts.sql = ts.TeamQuery.sqlQuery()
 	return ts.sqlScan(ctx, v)
 }
 
@@ -1077,11 +1073,6 @@ func (ts *TeamSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ts *TeamSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range ts.fields {
-		if !team.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := ts.sqlQuery().Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

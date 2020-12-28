@@ -29,6 +29,7 @@ type FileQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.File
 	// eager-loading edges.
 	withOwner *UserQuery
@@ -387,18 +388,16 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //		Scan(ctx, &v)
 //
 func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
-	selector := &FileSelect{config: fq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return fq.sqlQuery(), nil
-	}
-	return selector
+	fq.fields = append([]string{field}, fields...)
+	return &FileSelect{FileQuery: fq}
 }
 
 func (fq *FileQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range fq.fields {
+		if !file.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if fq.path != nil {
 		prev, err := fq.path(ctx)
 		if err != nil {
@@ -854,20 +853,17 @@ func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 
 // FileSelect is the builder for select fields of File entities.
 type FileSelect struct {
-	config
-	fields []string
+	*FileQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := fs.path(ctx)
-	if err != nil {
+	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fs.sql = query
+	fs.sql = fs.FileQuery.sqlQuery()
 	return fs.sqlScan(ctx, v)
 }
 
@@ -1067,11 +1063,6 @@ func (fs *FileSelect) BoolX(ctx context.Context) bool {
 }
 
 func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range fs.fields {
-		if !file.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := fs.sqlQuery().Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {

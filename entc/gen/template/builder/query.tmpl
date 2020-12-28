@@ -26,6 +26,7 @@ type {{ $builder }} struct {
 	limit		*int
 	offset		*int
 	order		[]OrderFunc
+	fields		[]string
 	predicates 	[]predicate.{{ $.Name }}
 	{{- with $.Edges }}
 		// eager-loading edges.
@@ -68,7 +69,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...OrderFunc) *{{ $builder }} {
 }
 
 {{/* this code has similarity with edge queries in client.tmpl */}}
-{{ range $_, $e := $.Edges }}
+{{ range $e := $.Edges }}
 	{{ $edge_builder := print (pascal $e.Type.Name) "Query" }}
 	// Query{{ pascal $e.Name }} chains the current query on the {{ $e.Name }} edge.
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
@@ -335,18 +336,18 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 //
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{{ $selectBuilder }} {
-	selector := &{{ $selectBuilder }}{config: {{ $receiver }}.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev {{ $.Storage.Builder }}, err error) {
-		if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return {{ $receiver }}.{{ $.Storage }}Query(), nil
-	}
-	return selector
+	{{ $receiver }}.fields = append([]string{field}, fields...)
+	return &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
 }
 
 func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
+	{{- /* Optional prepare checks per dialect. */}}
+	{{- $tmpl = printf "dialect/%s/query/preparecheck" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- with extend $ "Receiver" $receiver "Package" $pkg }}
+			{{- xtemplate $tmpl . }}
+		{{- end }}
+	{{- end }}
 	if {{ $receiver }}.path != nil {
 		prev, err := {{ $receiver }}.path(ctx)
 		if err != nil {
@@ -407,7 +408,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 	}
 }
 
-{{ range $_, $t := primitives }}
+{{ range $t := primitives }}
 	{{ $plural := pascal $t | plural }}
 	// {{ $plural }} returns list of {{ plural $t }} from group-by. It is only allowed when querying group-by with one field.
 	func ({{ $groupReceiver }} *{{ $groupBuilder }}) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
@@ -469,21 +470,18 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) ScanX(ctx context.Context, v in
 
 // {{ $selectBuilder }} is the builder for select fields of {{ pascal $.Name }} entities.
 type {{ $selectBuilder }} struct {
-	config
-	fields []string
+	*{{ $builder }}
 	// intermediate query (i.e. traversal path).
 	{{ $.Storage }} {{ $.Storage.Builder }}
-	path func(context.Context) ({{ $.Storage.Builder }}, error)
 }
 
 
 // Scan applies the selector query and scan the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v interface{}) error {
-	query, err := {{ $selectReceiver }}.path(ctx)
-	if err != nil {
+	if err := {{ $selectReceiver }}.prepareQuery(ctx); err != nil {
 		return err
 	}
-	{{ $selectReceiver }}.{{ $.Storage }} = query
+	{{ $selectReceiver }}.{{ $.Storage }} = {{ $selectReceiver }}.{{ $builder }}.{{ $.Storage }}Query()
 	return {{ $selectReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 
@@ -494,7 +492,7 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) ScanX(ctx context.Context, v 
 	}
 }
 
-{{ range $_, $t := primitives }}
+{{ range $t := primitives }}
 	{{ $plural := pascal $t | plural }}
 	// {{ $plural }} returns list of {{ plural $t }} from selector. It is only allowed when selecting one field.
 	func ({{ $selectReceiver }} *{{ $selectBuilder }}) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {

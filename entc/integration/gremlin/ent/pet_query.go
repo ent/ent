@@ -27,6 +27,7 @@ type PetQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Pet
 	// eager-loading edges.
 	withTeam  *UserQuery
@@ -333,15 +334,8 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Scan(ctx, &v)
 //
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
-	selector := &PetSelect{config: pq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return pq.gremlinQuery(), nil
-	}
-	return selector
+	pq.fields = append([]string{field}, fields...)
+	return &PetSelect{PetQuery: pq}
 }
 
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
@@ -673,20 +667,17 @@ func (pgb *PetGroupBy) gremlinQuery() *dsl.Traversal {
 
 // PetSelect is the builder for select fields of Pet entities.
 type PetSelect struct {
-	config
-	fields []string
+	*PetQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ps.path(ctx)
-	if err != nil {
+	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ps.gremlin = query
+	ps.gremlin = ps.PetQuery.gremlinQuery()
 	return ps.gremlinScan(ctx, v)
 }
 

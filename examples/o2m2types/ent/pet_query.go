@@ -26,6 +26,7 @@ type PetQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Pet
 	// eager-loading edges.
 	withOwner *UserQuery
@@ -314,18 +315,16 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Scan(ctx, &v)
 //
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
-	selector := &PetSelect{config: pq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return pq.sqlQuery(), nil
-	}
-	return selector
+	pq.fields = append([]string{field}, fields...)
+	return &PetSelect{PetQuery: pq}
 }
 
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range pq.fields {
+		if !pet.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if pq.path != nil {
 		prev, err := pq.path(ctx)
 		if err != nil {
@@ -725,20 +724,17 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 
 // PetSelect is the builder for select fields of Pet entities.
 type PetSelect struct {
-	config
-	fields []string
+	*PetQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ps.path(ctx)
-	if err != nil {
+	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ps.sql = query
+	ps.sql = ps.PetQuery.sqlQuery()
 	return ps.sqlScan(ctx, v)
 }
 
@@ -938,11 +934,6 @@ func (ps *PetSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range ps.fields {
-		if !pet.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := ps.sqlQuery().Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {

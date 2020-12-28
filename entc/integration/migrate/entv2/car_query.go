@@ -26,6 +26,7 @@ type CarQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Car
 	// eager-loading edges.
 	withOwner *UserQuery
@@ -290,18 +291,16 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 
 // Select one or more fields from the given query.
 func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
-	selector := &CarSelect{config: cq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.sqlQuery(), nil
-	}
-	return selector
+	cq.fields = append([]string{field}, fields...)
+	return &CarSelect{CarQuery: cq}
 }
 
 func (cq *CarQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range cq.fields {
+		if !car.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+		}
+	}
 	if cq.path != nil {
 		prev, err := cq.path(ctx)
 		if err != nil {
@@ -701,20 +700,17 @@ func (cgb *CarGroupBy) sqlQuery() *sql.Selector {
 
 // CarSelect is the builder for select fields of Car entities.
 type CarSelect struct {
-	config
-	fields []string
+	*CarQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CarSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := cs.path(ctx)
-	if err != nil {
+	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = query
+	cs.sql = cs.CarQuery.sqlQuery()
 	return cs.sqlScan(ctx, v)
 }
 
@@ -914,11 +910,6 @@ func (cs *CarSelect) BoolX(ctx context.Context) bool {
 }
 
 func (cs *CarSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range cs.fields {
-		if !car.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := cs.sqlQuery().Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

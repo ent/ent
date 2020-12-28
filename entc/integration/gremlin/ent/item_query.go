@@ -26,6 +26,7 @@ type ItemQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Item
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -253,15 +254,8 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 
 // Select one or more fields from the given query.
 func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
-	selector := &ItemSelect{config: iq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := iq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return iq.gremlinQuery(), nil
-	}
-	return selector
+	iq.fields = append([]string{field}, fields...)
+	return &ItemSelect{ItemQuery: iq}
 }
 
 func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
@@ -593,20 +587,17 @@ func (igb *ItemGroupBy) gremlinQuery() *dsl.Traversal {
 
 // ItemSelect is the builder for select fields of Item entities.
 type ItemSelect struct {
-	config
-	fields []string
+	*ItemQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := is.path(ctx)
-	if err != nil {
+	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
-	is.gremlin = query
+	is.gremlin = is.ItemQuery.gremlinQuery()
 	return is.gremlinScan(ctx, v)
 }
 

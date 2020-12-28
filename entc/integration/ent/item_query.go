@@ -25,6 +25,7 @@ type ItemQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Item
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -252,18 +253,16 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 
 // Select one or more fields from the given query.
 func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
-	selector := &ItemSelect{config: iq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := iq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return iq.sqlQuery(), nil
-	}
-	return selector
+	iq.fields = append([]string{field}, fields...)
+	return &ItemSelect{ItemQuery: iq}
 }
 
 func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range iq.fields {
+		if !item.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if iq.path != nil {
 		prev, err := iq.path(ctx)
 		if err != nil {
@@ -626,20 +625,17 @@ func (igb *ItemGroupBy) sqlQuery() *sql.Selector {
 
 // ItemSelect is the builder for select fields of Item entities.
 type ItemSelect struct {
-	config
-	fields []string
+	*ItemQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := is.path(ctx)
-	if err != nil {
+	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
-	is.sql = query
+	is.sql = is.ItemQuery.sqlQuery()
 	return is.sqlScan(ctx, v)
 }
 
@@ -839,11 +835,6 @@ func (is *ItemSelect) BoolX(ctx context.Context) bool {
 }
 
 func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range is.fields {
-		if !item.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := is.sqlQuery().Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {

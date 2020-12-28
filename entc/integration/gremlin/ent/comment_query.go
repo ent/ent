@@ -26,6 +26,7 @@ type CommentQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Comment
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -277,15 +278,8 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //		Scan(ctx, &v)
 //
 func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
-	selector := &CommentSelect{config: cq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.gremlinQuery(), nil
-	}
-	return selector
+	cq.fields = append([]string{field}, fields...)
+	return &CommentSelect{CommentQuery: cq}
 }
 
 func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
@@ -617,20 +611,17 @@ func (cgb *CommentGroupBy) gremlinQuery() *dsl.Traversal {
 
 // CommentSelect is the builder for select fields of Comment entities.
 type CommentSelect struct {
-	config
-	fields []string
+	*CommentQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := cs.path(ctx)
-	if err != nil {
+	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.gremlin = query
+	cs.gremlin = cs.CommentQuery.gremlinQuery()
 	return cs.gremlinScan(ctx, v)
 }
 

@@ -25,6 +25,7 @@ type MediaQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Media
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -276,18 +277,16 @@ func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 //		Scan(ctx, &v)
 //
 func (mq *MediaQuery) Select(field string, fields ...string) *MediaSelect {
-	selector := &MediaSelect{config: mq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := mq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return mq.sqlQuery(), nil
-	}
-	return selector
+	mq.fields = append([]string{field}, fields...)
+	return &MediaSelect{MediaQuery: mq}
 }
 
 func (mq *MediaQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range mq.fields {
+		if !media.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+		}
+	}
 	if mq.path != nil {
 		prev, err := mq.path(ctx)
 		if err != nil {
@@ -650,20 +649,17 @@ func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
 
 // MediaSelect is the builder for select fields of Media entities.
 type MediaSelect struct {
-	config
-	fields []string
+	*MediaQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ms *MediaSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ms.path(ctx)
-	if err != nil {
+	if err := ms.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ms.sql = query
+	ms.sql = ms.MediaQuery.sqlQuery()
 	return ms.sqlScan(ctx, v)
 }
 
@@ -863,11 +859,6 @@ func (ms *MediaSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ms *MediaSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range ms.fields {
-		if !media.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := ms.sqlQuery().Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {

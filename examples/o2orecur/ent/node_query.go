@@ -26,6 +26,7 @@ type NodeQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Node
 	// eager-loading edges.
 	withPrev *NodeQuery
@@ -349,18 +350,16 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Scan(ctx, &v)
 //
 func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
-	selector := &NodeSelect{config: nq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := nq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return nq.sqlQuery(), nil
-	}
-	return selector
+	nq.fields = append([]string{field}, fields...)
+	return &NodeSelect{NodeQuery: nq}
 }
 
 func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range nq.fields {
+		if !node.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if nq.path != nil {
 		prev, err := nq.path(ctx)
 		if err != nil {
@@ -789,20 +788,17 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 
 // NodeSelect is the builder for select fields of Node entities.
 type NodeSelect struct {
-	config
-	fields []string
+	*NodeQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ns.path(ctx)
-	if err != nil {
+	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ns.sql = query
+	ns.sql = ns.NodeQuery.sqlQuery()
 	return ns.sqlScan(ctx, v)
 }
 
@@ -1002,11 +998,6 @@ func (ns *NodeSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ns *NodeSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range ns.fields {
-		if !node.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := ns.sqlQuery().Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {
