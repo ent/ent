@@ -26,6 +26,7 @@ type MixinIDQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.MixinID
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -277,18 +278,16 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 //		Scan(ctx, &v)
 //
 func (miq *MixinIDQuery) Select(field string, fields ...string) *MixinIDSelect {
-	selector := &MixinIDSelect{config: miq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := miq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return miq.sqlQuery(), nil
-	}
-	return selector
+	miq.fields = append([]string{field}, fields...)
+	return &MixinIDSelect{MixinIDQuery: miq}
 }
 
 func (miq *MixinIDQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range miq.fields {
+		if !mixinid.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if miq.path != nil {
 		prev, err := miq.path(ctx)
 		if err != nil {
@@ -651,20 +650,17 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 
 // MixinIDSelect is the builder for select fields of MixinID entities.
 type MixinIDSelect struct {
-	config
-	fields []string
+	*MixinIDQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := mis.path(ctx)
-	if err != nil {
+	if err := mis.prepareQuery(ctx); err != nil {
 		return err
 	}
-	mis.sql = query
+	mis.sql = mis.MixinIDQuery.sqlQuery()
 	return mis.sqlScan(ctx, v)
 }
 
@@ -864,11 +860,6 @@ func (mis *MixinIDSelect) BoolX(ctx context.Context) bool {
 }
 
 func (mis *MixinIDSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range mis.fields {
-		if !mixinid.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := mis.sqlQuery().Query()
 	if err := mis.driver.Query(ctx, query, args, rows); err != nil {

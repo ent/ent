@@ -26,6 +26,7 @@ type TaskQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Task
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
@@ -277,15 +278,8 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 //		Scan(ctx, &v)
 //
 func (tq *TaskQuery) Select(field string, fields ...string) *TaskSelect {
-	selector := &TaskSelect{config: tq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return tq.gremlinQuery(), nil
-	}
-	return selector
+	tq.fields = append([]string{field}, fields...)
+	return &TaskSelect{TaskQuery: tq}
 }
 
 func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
@@ -617,20 +611,17 @@ func (tgb *TaskGroupBy) gremlinQuery() *dsl.Traversal {
 
 // TaskSelect is the builder for select fields of Task entities.
 type TaskSelect struct {
-	config
-	fields []string
+	*TaskQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ts.path(ctx)
-	if err != nil {
+	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ts.gremlin = query
+	ts.gremlin = ts.TaskQuery.gremlinQuery()
 	return ts.gremlinScan(ctx, v)
 }
 

@@ -27,6 +27,7 @@ type BlobQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Blob
 	// eager-loading edges.
 	withParent *BlobQuery
@@ -350,18 +351,16 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 //		Scan(ctx, &v)
 //
 func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
-	selector := &BlobSelect{config: bq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := bq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return bq.sqlQuery(), nil
-	}
-	return selector
+	bq.fields = append([]string{field}, fields...)
+	return &BlobSelect{BlobQuery: bq}
 }
 
 func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range bq.fields {
+		if !blob.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if bq.path != nil {
 		prev, err := bq.path(ctx)
 		if err != nil {
@@ -826,20 +825,17 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 
 // BlobSelect is the builder for select fields of Blob entities.
 type BlobSelect struct {
-	config
-	fields []string
+	*BlobQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := bs.path(ctx)
-	if err != nil {
+	if err := bs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	bs.sql = query
+	bs.sql = bs.BlobQuery.sqlQuery()
 	return bs.sqlScan(ctx, v)
 }
 
@@ -1039,11 +1035,6 @@ func (bs *BlobSelect) BoolX(ctx context.Context) bool {
 }
 
 func (bs *BlobSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range bs.fields {
-		if !blob.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := bs.sqlQuery().Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {

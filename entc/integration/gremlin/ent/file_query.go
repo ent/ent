@@ -28,6 +28,7 @@ type FileQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.File
 	// eager-loading edges.
 	withOwner *UserQuery
@@ -361,15 +362,8 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //		Scan(ctx, &v)
 //
 func (fq *FileQuery) Select(field string, fields ...string) *FileSelect {
-	selector := &FileSelect{config: fq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return fq.gremlinQuery(), nil
-	}
-	return selector
+	fq.fields = append([]string{field}, fields...)
+	return &FileSelect{FileQuery: fq}
 }
 
 func (fq *FileQuery) prepareQuery(ctx context.Context) error {
@@ -701,20 +695,17 @@ func (fgb *FileGroupBy) gremlinQuery() *dsl.Traversal {
 
 // FileSelect is the builder for select fields of File entities.
 type FileSelect struct {
-	config
-	fields []string
+	*FileQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := fs.path(ctx)
-	if err != nil {
+	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fs.gremlin = query
+	fs.gremlin = fs.FileQuery.gremlinQuery()
 	return fs.gremlinScan(ctx, v)
 }
 

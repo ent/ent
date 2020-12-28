@@ -26,6 +26,7 @@ type NodeQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Node
 	// eager-loading edges.
 	withPrev *NodeQuery
@@ -332,15 +333,8 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Scan(ctx, &v)
 //
 func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
-	selector := &NodeSelect{config: nq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := nq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return nq.gremlinQuery(), nil
-	}
-	return selector
+	nq.fields = append([]string{field}, fields...)
+	return &NodeSelect{NodeQuery: nq}
 }
 
 func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
@@ -672,20 +666,17 @@ func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
 
 // NodeSelect is the builder for select fields of Node entities.
 type NodeSelect struct {
-	config
-	fields []string
+	*NodeQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ns.path(ctx)
-	if err != nil {
+	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ns.gremlin = query
+	ns.gremlin = ns.NodeQuery.gremlinQuery()
 	return ns.gremlinScan(ctx, v)
 }
 

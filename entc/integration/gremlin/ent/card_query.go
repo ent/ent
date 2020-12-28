@@ -28,6 +28,7 @@ type CardQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Card
 	// eager-loading edges.
 	withOwner *UserQuery
@@ -334,15 +335,8 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //		Scan(ctx, &v)
 //
 func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
-	selector := &CardSelect{config: cq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.gremlinQuery(), nil
-	}
-	return selector
+	cq.fields = append([]string{field}, fields...)
+	return &CardSelect{CardQuery: cq}
 }
 
 func (cq *CardQuery) prepareQuery(ctx context.Context) error {
@@ -674,20 +668,17 @@ func (cgb *CardGroupBy) gremlinQuery() *dsl.Traversal {
 
 // CardSelect is the builder for select fields of Card entities.
 type CardSelect struct {
-	config
-	fields []string
+	*CardQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := cs.path(ctx)
-	if err != nil {
+	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.gremlin = query
+	cs.gremlin = cs.CardQuery.gremlinQuery()
 	return cs.gremlinScan(ctx, v)
 }
 

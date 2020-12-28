@@ -619,7 +619,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	_, err = client.Group.UpdateOne(grp).SetMaxUsers(-10).Save(ctx)
 	require.Error(err, "max_users validator failed")
 	_, err = client.Group.Query().Select("unknown_field").String(ctx)
-	require.EqualError(err, "invalid field \"unknown_field\" for selection")
+	require.EqualError(err, "ent: invalid field \"unknown_field\" for query")
 	_, err = client.Group.Query().GroupBy("unknown_field").String(ctx)
 	require.EqualError(err, "invalid field \"unknown_field\" for group-by")
 	_, err = client.User.Query().Order(ent.Asc("invalid")).Only(ctx)

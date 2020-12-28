@@ -25,6 +25,7 @@ type CustomTypeQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.CustomType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -276,18 +277,16 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 //		Scan(ctx, &v)
 //
 func (ctq *CustomTypeQuery) Select(field string, fields ...string) *CustomTypeSelect {
-	selector := &CustomTypeSelect{config: ctq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := ctq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return ctq.sqlQuery(), nil
-	}
-	return selector
+	ctq.fields = append([]string{field}, fields...)
+	return &CustomTypeSelect{CustomTypeQuery: ctq}
 }
 
 func (ctq *CustomTypeQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range ctq.fields {
+		if !customtype.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+		}
+	}
 	if ctq.path != nil {
 		prev, err := ctq.path(ctx)
 		if err != nil {
@@ -650,20 +649,17 @@ func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 
 // CustomTypeSelect is the builder for select fields of CustomType entities.
 type CustomTypeSelect struct {
-	config
-	fields []string
+	*CustomTypeQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cts *CustomTypeSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := cts.path(ctx)
-	if err != nil {
+	if err := cts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cts.sql = query
+	cts.sql = cts.CustomTypeQuery.sqlQuery()
 	return cts.sqlScan(ctx, v)
 }
 
@@ -863,11 +859,6 @@ func (cts *CustomTypeSelect) BoolX(ctx context.Context) bool {
 }
 
 func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range cts.fields {
-		if !customtype.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := cts.sqlQuery().Query()
 	if err := cts.driver.Query(ctx, query, args, rows); err != nil {

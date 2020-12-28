@@ -26,6 +26,7 @@ type SpecQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Spec
 	// eager-loading edges.
 	withCard *CardQuery
@@ -281,15 +282,8 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 
 // Select one or more fields from the given query.
 func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
-	selector := &SpecSelect{config: sq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return sq.gremlinQuery(), nil
-	}
-	return selector
+	sq.fields = append([]string{field}, fields...)
+	return &SpecSelect{SpecQuery: sq}
 }
 
 func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
@@ -621,20 +615,17 @@ func (sgb *SpecGroupBy) gremlinQuery() *dsl.Traversal {
 
 // SpecSelect is the builder for select fields of Spec entities.
 type SpecSelect struct {
-	config
-	fields []string
+	*SpecQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ss.path(ctx)
-	if err != nil {
+	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ss.gremlin = query
+	ss.gremlin = ss.SpecQuery.gremlinQuery()
 	return ss.gremlinScan(ctx, v)
 }
 

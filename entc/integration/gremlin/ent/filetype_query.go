@@ -26,6 +26,7 @@ type FileTypeQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.FileType
 	// eager-loading edges.
 	withFiles *FileQuery
@@ -305,15 +306,8 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 //		Scan(ctx, &v)
 //
 func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect {
-	selector := &FileTypeSelect{config: ftq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := ftq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return ftq.gremlinQuery(), nil
-	}
-	return selector
+	ftq.fields = append([]string{field}, fields...)
+	return &FileTypeSelect{FileTypeQuery: ftq}
 }
 
 func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
@@ -645,20 +639,17 @@ func (ftgb *FileTypeGroupBy) gremlinQuery() *dsl.Traversal {
 
 // FileTypeSelect is the builder for select fields of FileType entities.
 type FileTypeSelect struct {
-	config
-	fields []string
+	*FileTypeQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := fts.path(ctx)
-	if err != nil {
+	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fts.gremlin = query
+	fts.gremlin = fts.FileTypeQuery.gremlinQuery()
 	return fts.gremlinScan(ctx, v)
 }
 

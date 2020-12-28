@@ -25,6 +25,7 @@ type TenantQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Tenant
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -276,18 +277,16 @@ func (tq *TenantQuery) GroupBy(field string, fields ...string) *TenantGroupBy {
 //		Scan(ctx, &v)
 //
 func (tq *TenantQuery) Select(field string, fields ...string) *TenantSelect {
-	selector := &TenantSelect{config: tq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return tq.sqlQuery(), nil
-	}
-	return selector
+	tq.fields = append([]string{field}, fields...)
+	return &TenantSelect{TenantQuery: tq}
 }
 
 func (tq *TenantQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range tq.fields {
+		if !tenant.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if tq.path != nil {
 		prev, err := tq.path(ctx)
 		if err != nil {
@@ -656,20 +655,17 @@ func (tgb *TenantGroupBy) sqlQuery() *sql.Selector {
 
 // TenantSelect is the builder for select fields of Tenant entities.
 type TenantSelect struct {
-	config
-	fields []string
+	*TenantQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ts *TenantSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ts.path(ctx)
-	if err != nil {
+	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ts.sql = query
+	ts.sql = ts.TenantQuery.sqlQuery()
 	return ts.sqlScan(ctx, v)
 }
 
@@ -869,11 +865,6 @@ func (ts *TenantSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ts *TenantSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range ts.fields {
-		if !tenant.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := ts.sqlQuery().Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

@@ -25,6 +25,7 @@ type FieldTypeQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.FieldType
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
@@ -277,18 +278,16 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 //		Scan(ctx, &v)
 //
 func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSelect {
-	selector := &FieldTypeSelect{config: ftq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := ftq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return ftq.sqlQuery(), nil
-	}
-	return selector
+	ftq.fields = append([]string{field}, fields...)
+	return &FieldTypeSelect{FieldTypeQuery: ftq}
 }
 
 func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range ftq.fields {
+		if !fieldtype.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if ftq.path != nil {
 		prev, err := ftq.path(ctx)
 		if err != nil {
@@ -655,20 +654,17 @@ func (ftgb *FieldTypeGroupBy) sqlQuery() *sql.Selector {
 
 // FieldTypeSelect is the builder for select fields of FieldType entities.
 type FieldTypeSelect struct {
-	config
-	fields []string
+	*FieldTypeQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := fts.path(ctx)
-	if err != nil {
+	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fts.sql = query
+	fts.sql = fts.FieldTypeQuery.sqlQuery()
 	return fts.sqlScan(ctx, v)
 }
 
@@ -868,11 +864,6 @@ func (fts *FieldTypeSelect) BoolX(ctx context.Context) bool {
 }
 
 func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range fts.fields {
-		if !fieldtype.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := fts.sqlQuery().Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {

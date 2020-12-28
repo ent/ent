@@ -27,6 +27,7 @@ type GroupInfoQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.GroupInfo
 	// eager-loading edges.
 	withGroups *GroupQuery
@@ -314,18 +315,16 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //		Scan(ctx, &v)
 //
 func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSelect {
-	selector := &GroupInfoSelect{config: giq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := giq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return giq.sqlQuery(), nil
-	}
-	return selector
+	giq.fields = append([]string{field}, fields...)
+	return &GroupInfoSelect{GroupInfoQuery: giq}
 }
 
 func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range giq.fields {
+		if !groupinfo.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if giq.path != nil {
 		prev, err := giq.path(ctx)
 		if err != nil {
@@ -722,20 +721,17 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 
 // GroupInfoSelect is the builder for select fields of GroupInfo entities.
 type GroupInfoSelect struct {
-	config
-	fields []string
+	*GroupInfoQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := gis.path(ctx)
-	if err != nil {
+	if err := gis.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gis.sql = query
+	gis.sql = gis.GroupInfoQuery.sqlQuery()
 	return gis.sqlScan(ctx, v)
 }
 
@@ -935,11 +931,6 @@ func (gis *GroupInfoSelect) BoolX(ctx context.Context) bool {
 }
 
 func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range gis.fields {
-		if !groupinfo.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := gis.sqlQuery().Query()
 	if err := gis.driver.Query(ctx, query, args, rows); err != nil {

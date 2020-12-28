@@ -26,6 +26,7 @@ type StreetQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Street
 	// eager-loading edges.
 	withCity *CityQuery
@@ -314,18 +315,16 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 //		Scan(ctx, &v)
 //
 func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
-	selector := &StreetSelect{config: sq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return sq.sqlQuery(), nil
-	}
-	return selector
+	sq.fields = append([]string{field}, fields...)
+	return &StreetSelect{StreetQuery: sq}
 }
 
 func (sq *StreetQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range sq.fields {
+		if !street.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if sq.path != nil {
 		prev, err := sq.path(ctx)
 		if err != nil {
@@ -725,20 +724,17 @@ func (sgb *StreetGroupBy) sqlQuery() *sql.Selector {
 
 // StreetSelect is the builder for select fields of Street entities.
 type StreetSelect struct {
-	config
-	fields []string
+	*StreetQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ss.path(ctx)
-	if err != nil {
+	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ss.sql = query
+	ss.sql = ss.StreetQuery.sqlQuery()
 	return ss.sqlScan(ctx, v)
 }
 
@@ -938,11 +934,6 @@ func (ss *StreetSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ss *StreetSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range ss.fields {
-		if !street.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := ss.sqlQuery().Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

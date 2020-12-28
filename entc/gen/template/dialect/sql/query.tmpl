@@ -323,3 +323,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 		{{ if not $field.Nillable }}*{{ end }}{{ $arg }}
 	{{- end }}
 {{- end }}
+
+{{ define "dialect/sql/query/preparecheck" }}
+	{{- $pkg := $.Scope.Package }}
+	{{- $receiver := $.Scope.Receiver }}
+	for _, f := range {{ $receiver }}.fields {
+		if !{{ $.Package }}.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+		}
+	}
+{{- end }}

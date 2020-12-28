@@ -26,6 +26,7 @@ type UserQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
 	withCard      *CardQuery
@@ -575,15 +576,8 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //		Scan(ctx, &v)
 //
 func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
-	selector := &UserSelect{config: uq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return uq.gremlinQuery(), nil
-	}
-	return selector
+	uq.fields = append([]string{field}, fields...)
+	return &UserSelect{UserQuery: uq}
 }
 
 func (uq *UserQuery) prepareQuery(ctx context.Context) error {
@@ -915,20 +909,17 @@ func (ugb *UserGroupBy) gremlinQuery() *dsl.Traversal {
 
 // UserSelect is the builder for select fields of User entities.
 type UserSelect struct {
-	config
-	fields []string
+	*UserQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := us.path(ctx)
-	if err != nil {
+	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}
-	us.gremlin = query
+	us.gremlin = us.UserQuery.gremlinQuery()
 	return us.gremlinScan(ctx, v)
 }
 

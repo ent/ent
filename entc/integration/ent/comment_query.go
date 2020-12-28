@@ -25,6 +25,7 @@ type CommentQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Comment
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -276,18 +277,16 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //		Scan(ctx, &v)
 //
 func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
-	selector := &CommentSelect{config: cq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cq.sqlQuery(), nil
-	}
-	return selector
+	cq.fields = append([]string{field}, fields...)
+	return &CommentSelect{CommentQuery: cq}
 }
 
 func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range cq.fields {
+		if !comment.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if cq.path != nil {
 		prev, err := cq.path(ctx)
 		if err != nil {
@@ -650,20 +649,17 @@ func (cgb *CommentGroupBy) sqlQuery() *sql.Selector {
 
 // CommentSelect is the builder for select fields of Comment entities.
 type CommentSelect struct {
-	config
-	fields []string
+	*CommentQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := cs.path(ctx)
-	if err != nil {
+	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = query
+	cs.sql = cs.CommentQuery.sqlQuery()
 	return cs.sqlScan(ctx, v)
 }
 
@@ -863,11 +859,6 @@ func (cs *CommentSelect) BoolX(ctx context.Context) bool {
 }
 
 func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range cs.fields {
-		if !comment.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := cs.sqlQuery().Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

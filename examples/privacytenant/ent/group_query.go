@@ -28,6 +28,7 @@ type GroupQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Group
 	// eager-loading edges.
 	withTenant *TenantQuery
@@ -351,18 +352,16 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //		Scan(ctx, &v)
 //
 func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
-	selector := &GroupSelect{config: gq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := gq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return gq.sqlQuery(), nil
-	}
-	return selector
+	gq.fields = append([]string{field}, fields...)
+	return &GroupSelect{GroupQuery: gq}
 }
 
 func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range gq.fields {
+		if !group.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if gq.path != nil {
 		prev, err := gq.path(ctx)
 		if err != nil {
@@ -833,20 +832,17 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 
 // GroupSelect is the builder for select fields of Group entities.
 type GroupSelect struct {
-	config
-	fields []string
+	*GroupQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := gs.path(ctx)
-	if err != nil {
+	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.sql = query
+	gs.sql = gs.GroupQuery.sqlQuery()
 	return gs.sqlScan(ctx, v)
 }
 
@@ -1046,11 +1042,6 @@ func (gs *GroupSelect) BoolX(ctx context.Context) bool {
 }
 
 func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range gs.fields {
-		if !group.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := gs.sqlQuery().Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {

@@ -27,6 +27,7 @@ type SpecQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
+	fields     []string
 	predicates []predicate.Spec
 	// eager-loading edges.
 	withCard *CardQuery
@@ -290,18 +291,16 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 
 // Select one or more fields from the given query.
 func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
-	selector := &SpecSelect{config: sq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return sq.sqlQuery(), nil
-	}
-	return selector
+	sq.fields = append([]string{field}, fields...)
+	return &SpecSelect{SpecQuery: sq}
 }
 
 func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
+	for _, f := range sq.fields {
+		if !spec.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+		}
+	}
 	if sq.path != nil {
 		prev, err := sq.path(ctx)
 		if err != nil {
@@ -733,20 +732,17 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 
 // SpecSelect is the builder for select fields of Spec entities.
 type SpecSelect struct {
-	config
-	fields []string
+	*SpecQuery
 	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	sql *sql.Selector
 }
 
 // Scan applies the selector query and scan the result into the given value.
 func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ss.path(ctx)
-	if err != nil {
+	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ss.sql = query
+	ss.sql = ss.SpecQuery.sqlQuery()
 	return ss.sqlScan(ctx, v)
 }
 
@@ -946,11 +942,6 @@ func (ss *SpecSelect) BoolX(ctx context.Context) bool {
 }
 
 func (ss *SpecSelect) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range ss.fields {
-		if !spec.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := ss.sqlQuery().Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {

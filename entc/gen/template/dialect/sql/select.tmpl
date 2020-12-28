@@ -9,11 +9,6 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := receiver $builder }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range {{ $receiver }}.fields {
-		if !{{ $.Package }}.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
 	query, args := {{ $receiver }}.sqlQuery().Query()
 	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {
