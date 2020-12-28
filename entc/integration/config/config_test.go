@@ -65,15 +65,13 @@ func TestMySQL(t *testing.T) {
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/config?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")
 
-			client := ent.NewClient(ent.Driver(drv)).Debug()
-
+			client := ent.NewClient(ent.Driver(drv))
 			// Run schema creation.
 			require.NoError(t, client.Schema.Create(ctx))
 
 			u, err := client.User.Create().SetID(200).Save(ctx)
 			require.NoError(t, err)
 			assert.Equal(t, 200, u.ID)
-
 			_, err = client.User.Create().Save(ctx)
 			assert.Error(t, err)
 		})
