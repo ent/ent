@@ -7,9 +7,10 @@ package template
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 
 	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/dialect/sql"
