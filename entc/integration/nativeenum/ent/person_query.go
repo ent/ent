@@ -25,7 +25,6 @@ type PersonQuery struct {
 	limit      *int
 	offset     *int
 	order      []OrderFunc
-	unique     []string
 	predicates []predicate.Person
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -230,7 +229,6 @@ func (pq *PersonQuery) Clone() *PersonQuery {
 		limit:      pq.limit,
 		offset:     pq.offset,
 		order:      append([]OrderFunc{}, pq.order...),
-		unique:     append([]string{}, pq.unique...),
 		predicates: append([]predicate.Person{}, pq.predicates...),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
@@ -305,18 +303,17 @@ func (pq *PersonQuery) sqlAll(ctx context.Context) ([]*Person, error) {
 		nodes = []*Person{}
 		_spec = pq.querySpec()
 	)
-	_spec.ScanValues = func() []interface{} {
+	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Person{config: pq.config}
 		nodes = append(nodes, node)
-		values := node.scanValues()
-		return values
+		return node.scanValues(columns)
 	}
-	_spec.Assign = func(values ...interface{}) error {
+	_spec.Assign = func(columns []string, values []interface{}) error {
 		if len(nodes) == 0 {
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
-		return node.assignValues(values...)
+		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err
