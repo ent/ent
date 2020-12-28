@@ -329,6 +329,15 @@ func Select(t *testing.T, client *ent.Client) {
 		ScanX(ctx, &v)
 	require.Equal([]int{30, 30, 30}, []int{v[0].Age, v[1].Age, v[2].Age})
 	require.Equal([]string{"bar", "baz", "foo"}, []string{v[0].Name, v[1].Name, v[2].Name})
+
+	users := client.User.
+		Query().
+		Select(user.FieldAge).
+		AllX(ctx)
+	for i := range users {
+		require.Empty(users[i].Name)
+		require.NotZero(users[i].Age)
+	}
 }
 
 func Predicate(t *testing.T, client *ent.Client) {

@@ -553,6 +553,9 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   fq.sql,
 		Unique: true,
 	}
+	if fields := fq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := fq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

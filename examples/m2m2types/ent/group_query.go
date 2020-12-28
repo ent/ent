@@ -456,6 +456,9 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   gq.sql,
 		Unique: true,
 	}
+	if fields := gq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := gq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

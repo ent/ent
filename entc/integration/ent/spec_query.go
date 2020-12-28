@@ -432,6 +432,9 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   sq.sql,
 		Unique: true,
 	}
+	if fields := sq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := sq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
