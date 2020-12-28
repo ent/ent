@@ -525,6 +525,9 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   bq.sql,
 		Unique: true,
 	}
+	if fields := bq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := bq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

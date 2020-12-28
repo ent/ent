@@ -421,6 +421,9 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   ftq.sql,
 		Unique: true,
 	}
+	if fields := ftq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := ftq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

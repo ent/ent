@@ -423,6 +423,9 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   uq.sql,
 		Unique: true,
 	}
+	if fields := uq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := uq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

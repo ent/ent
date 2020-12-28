@@ -400,6 +400,9 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   cq.sql,
 		Unique: true,
 	}
+	if fields := cq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := cq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

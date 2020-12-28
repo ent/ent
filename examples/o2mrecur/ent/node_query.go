@@ -489,6 +489,9 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   nq.sql,
 		Unique: true,
 	}
+	if fields := nq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := nq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

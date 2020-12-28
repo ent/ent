@@ -628,6 +628,9 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   pq.sql,
 		Unique: true,
 	}
+	if fields := pq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := pq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

@@ -421,6 +421,9 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   giq.sql,
 		Unique: true,
 	}
+	if fields := giq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := giq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

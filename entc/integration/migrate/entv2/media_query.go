@@ -349,6 +349,9 @@ func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   mq.sql,
 		Unique: true,
 	}
+	if fields := mq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := mq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

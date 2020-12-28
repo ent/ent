@@ -563,6 +563,9 @@ func (tq *TeamQuery) querySpec() *sqlgraph.QuerySpec {
 		From:   tq.sql,
 		Unique: true,
 	}
+	if fields := tq.fields; len(fields) > 0 {
+		_spec.Node.Columns = fields
+	}
 	if ps := tq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
