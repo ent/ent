@@ -769,7 +769,7 @@ func (u *UpdateBuilder) Empty() bool {
 // Query returns query representation of an `UPDATE` statement.
 func (u *UpdateBuilder) Query() (string, []interface{}) {
 	u.WriteString("UPDATE ")
-	u.Ident(u.table).Pad().WriteString("SET ")
+	u.Ident(u.table).WriteString(" SET ")
 	for i, c := range u.nulls {
 		if i > 0 {
 			u.Comma()
@@ -1219,6 +1219,10 @@ func (p *Predicate) Append(f func(*Builder)) *Predicate {
 
 // Query returns query representation of a predicate.
 func (p *Predicate) Query() (string, []interface{}) {
+	if p.Len() > 0 || len(p.args) > 0 {
+		p.Reset()
+		p.args = nil
+	}
 	for _, f := range p.fns {
 		f(&p.Builder)
 	}

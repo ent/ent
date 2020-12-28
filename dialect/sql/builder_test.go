@@ -298,6 +298,20 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
+			input: func() Querier {
+				p1, p2 := EQ("name", "bar"), Or(EQ("age", 10), EQ("age", 20))
+				return Dialect(dialect.Postgres).
+					Update("users").
+					Set("name", "foo").
+					Where(p1).
+					Where(p2).
+					Where(p1).
+					Where(p2)
+			}(),
+			wantQuery: `UPDATE "users" SET "name" = $1 WHERE (("name" = $2 AND ("age" = $3 OR "age" = $4)) AND "name" = $5) AND ("age" = $6 OR "age" = $7)`,
+			wantArgs:  []interface{}{"foo", "bar", 10, 20, "bar", 10, 20},
+		},
+		{
 			input:     Update("users").Set("name", "foo").SetNull("spouse_id"),
 			wantQuery: "UPDATE `users` SET `spouse_id` = NULL, `name` = ?",
 			wantArgs:  []interface{}{"foo"},
