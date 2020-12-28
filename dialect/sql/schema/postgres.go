@@ -225,20 +225,6 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Nullable = nullable.String == "YES"
 	}
 	switch c.typ {
-	case "USER-DEFINED":
-		c.Type = field.TypeEnum
-
-		// Override schema type if not presented
-		if _, ok := c.SchemaType[dialect.Postgres]; !ok {
-			if c.SchemaType == nil {
-				c.SchemaType = make(map[string]string)
-			}
-			c.SchemaType[dialect.Postgres] = userDefinedType.String
-		}
-
-		if !userDefinedType.Valid {
-			return fmt.Errorf("user defined enum type not found")
-		}
 	case "boolean":
 		c.Type = field.TypeBool
 	case "smallint":
@@ -268,6 +254,11 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeOther
 	case "USER-DEFINED":
 		c.Type = field.TypeOther
+
+		// TODO: detect enum, possibly store all found enums on the migration object and check if the given type is an enum type
+		// alternatively implement a method isEnum(t string)
+		// c.Type = field.TypeEnum
+
 		if !udt.Valid {
 			return fmt.Errorf("missing user defined type for column %q", c.Name)
 		}
