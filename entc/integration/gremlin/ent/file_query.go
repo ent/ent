@@ -379,7 +379,17 @@ func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 
 func (fq *FileQuery) gremlinAll(ctx context.Context) ([]*File, error) {
 	res := &gremlin.Response{}
-	query, bindings := fq.gremlinQuery().ValueMap(true).Query()
+	traversal := fq.gremlinQuery()
+	if len(fq.fields) > 0 {
+		fields := make([]interface{}, len(fq.fields))
+		for i, f := range fq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

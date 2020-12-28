@@ -323,7 +323,17 @@ func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
 
 func (ftq *FileTypeQuery) gremlinAll(ctx context.Context) ([]*FileType, error) {
 	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().ValueMap(true).Query()
+	traversal := ftq.gremlinQuery()
+	if len(ftq.fields) > 0 {
+		fields := make([]interface{}, len(ftq.fields))
+		for i, f := range ftq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

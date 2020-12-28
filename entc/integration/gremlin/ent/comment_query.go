@@ -295,7 +295,17 @@ func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
 
 func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {
 	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().ValueMap(true).Query()
+	traversal := cq.gremlinQuery()
+	if len(cq.fields) > 0 {
+		fields := make([]interface{}, len(cq.fields))
+		for i, f := range cq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

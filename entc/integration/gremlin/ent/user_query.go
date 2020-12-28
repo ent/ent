@@ -593,7 +593,17 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 
 func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
 	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().ValueMap(true).Query()
+	traversal := uq.gremlinQuery()
+	if len(uq.fields) > 0 {
+		fields := make([]interface{}, len(uq.fields))
+		for i, f := range uq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

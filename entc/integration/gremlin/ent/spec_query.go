@@ -299,7 +299,17 @@ func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
 
 func (sq *SpecQuery) gremlinAll(ctx context.Context) ([]*Spec, error) {
 	res := &gremlin.Response{}
-	query, bindings := sq.gremlinQuery().ValueMap(true).Query()
+	traversal := sq.gremlinQuery()
+	if len(sq.fields) > 0 {
+		fields := make([]interface{}, len(sq.fields))
+		for i, f := range sq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := sq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

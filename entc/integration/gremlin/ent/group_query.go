@@ -405,7 +405,17 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 
 func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
 	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().ValueMap(true).Query()
+	traversal := gq.gremlinQuery()
+	if len(gq.fields) > 0 {
+		fields := make([]interface{}, len(gq.fields))
+		for i, f := range gq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

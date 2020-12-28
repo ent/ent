@@ -271,7 +271,17 @@ func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
 
 func (iq *ItemQuery) gremlinAll(ctx context.Context) ([]*Item, error) {
 	res := &gremlin.Response{}
-	query, bindings := iq.gremlinQuery().ValueMap(true).Query()
+	traversal := iq.gremlinQuery()
+	if len(iq.fields) > 0 {
+		fields := make([]interface{}, len(iq.fields))
+		for i, f := range iq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := iq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

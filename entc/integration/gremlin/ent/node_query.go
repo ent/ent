@@ -350,7 +350,17 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 
 func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
 	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().ValueMap(true).Query()
+	traversal := nq.gremlinQuery()
+	if len(nq.fields) > 0 {
+		fields := make([]interface{}, len(nq.fields))
+		for i, f := range nq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
