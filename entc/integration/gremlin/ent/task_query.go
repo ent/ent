@@ -295,7 +295,17 @@ func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 
 func (tq *TaskQuery) gremlinAll(ctx context.Context) ([]*Task, error) {
 	res := &gremlin.Response{}
-	query, bindings := tq.gremlinQuery().ValueMap(true).Query()
+	traversal := tq.gremlinQuery()
+	if len(tq.fields) > 0 {
+		fields := make([]interface{}, len(tq.fields))
+		for i, f := range tq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := tq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}

@@ -351,7 +351,17 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 
 func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
 	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().ValueMap(true).Query()
+	traversal := pq.gremlinQuery()
+	if len(pq.fields) > 0 {
+		fields := make([]interface{}, len(pq.fields))
+		for i, f := range pq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
