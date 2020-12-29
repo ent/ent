@@ -672,7 +672,7 @@ func (b *enumBuilder) Values(values ...string) *enumBuilder {
 //
 func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
 	if len(namevalue)%2 == 1 {
-		b.desc.err = fmt.Errorf("Enum.NamedValues: odd argument count")
+		b.desc.Err = fmt.Errorf("Enum.NamedValues: odd argument count")
 		return b
 	}
 	for i := 0; i < len(namevalue); i += 2 {
@@ -844,7 +844,7 @@ func (b *uuidBuilder) StructTag(s string) *uuidBuilder {
 func (b *uuidBuilder) Default(fn interface{}) *uuidBuilder {
 	typ := reflect.TypeOf(fn)
 	if typ.Kind() != reflect.Func || typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != b.desc.Info.String() {
-		b.desc.err = fmt.Errorf("expect type (func() %s) for uuid default value", b.desc.Info)
+		b.desc.Err = fmt.Errorf("expect type (func() %s) for uuid default value", b.desc.Info)
 	}
 	b.desc.Default = fn
 	return b
@@ -899,12 +899,7 @@ type Descriptor struct {
 	Sensitive     bool                    // sensitive info string field.
 	SchemaType    map[string]string       // override the schema type.
 	Annotations   []schema.Annotation     // field annotations.
-	err           error
-}
-
-// Err returns the error, if any, that was added by the field builder.
-func (d *Descriptor) Err() error {
-	return d.err
+	Err           error
 }
 
 func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
@@ -944,9 +939,9 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
 		}
 	default:
-		d.err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
+		d.Err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
 		if pt := reflect.PtrTo(t); pt.Implements(valueScannerType) {
-			d.err = fmt.Errorf("%s. Use %s instead", d.err, pt)
+			d.Err = fmt.Errorf("%s. Use %s instead", d.Err, pt)
 		}
 	}
 	d.Info = info
