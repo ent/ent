@@ -47,6 +47,7 @@ type Field struct {
 	Optional      bool                    `json:"optional,omitempty"`
 	Default       bool                    `json:"default,omitempty"`
 	DefaultValue  interface{}             `json:"default_value,omitempty"`
+	DefaultKind   reflect.Kind            `json:"default_kind,omitempty"`
 	UpdateDefault bool                    `json:"update_default,omitempty"`
 	Immutable     bool                    `json:"immutable,omitempty"`
 	Validators    int                     `json:"validators,omitempty"`
@@ -132,6 +133,9 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 	}
 	if size := int64(fd.Size); size != 0 {
 		sf.Size = &size
+	}
+	if sf.Default {
+		sf.DefaultKind = reflect.TypeOf(fd.Default).Kind()
 	}
 	// If the default value can be encoded to the generator.
 	// For example, not a function like time.Now.

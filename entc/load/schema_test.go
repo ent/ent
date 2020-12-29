@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"math"
+	"reflect"
 	"testing"
 	"time"
 
@@ -170,10 +171,12 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "sensitive", schema.Fields[5].Name)
 		require.Equal(t, field.TypeString, schema.Fields[5].Info.Type)
 		require.True(t, schema.Fields[5].Sensitive)
+		require.Equal(t, reflect.Invalid, schema.Fields[5].DefaultKind)
 
 		require.Equal(t, "creation_time", schema.Fields[6].Name)
 		require.Equal(t, field.TypeTime, schema.Fields[6].Info.Type)
 		require.Nil(t, schema.Fields[6].DefaultValue)
+		require.Equal(t, reflect.Func, schema.Fields[6].DefaultKind)
 
 		require.Equal(t, "uuid", schema.Fields[7].Name)
 		require.Equal(t, field.TypeUUID, schema.Fields[7].Info.Type)
