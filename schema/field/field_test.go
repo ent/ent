@@ -65,7 +65,7 @@ func TestInt(t *testing.T) {
 
 	type Count int
 	fd = field.Int("active").GoType(Count(0)).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Count", fd.Info.Ident)
 	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Count", fd.Info.String())
@@ -73,7 +73,7 @@ func TestInt(t *testing.T) {
 	assert.False(t, fd.Info.ValueScanner())
 
 	fd = field.Int("count").GoType(&sql.NullInt64{}).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "sql.NullInt64", fd.Info.Ident)
 	assert.Equal(t, "database/sql", fd.Info.PkgPath)
 	assert.Equal(t, "sql.NullInt64", fd.Info.String())
@@ -81,13 +81,13 @@ func TestInt(t *testing.T) {
 	assert.True(t, fd.Info.ValueScanner())
 
 	fd = field.Int("count").GoType(sql.NullInt64{}).Descriptor()
-	assert.EqualError(t, fd.Err(), `GoType must be a "int" type or ValueScanner. Use *sql.NullInt64 instead`)
+	assert.EqualError(t, fd.Err, `GoType must be a "int" type or ValueScanner. Use *sql.NullInt64 instead`)
 	fd = field.Int("count").GoType(false).Descriptor()
-	assert.EqualError(t, fd.Err(), `GoType must be a "int" type or ValueScanner`)
+	assert.EqualError(t, fd.Err, `GoType must be a "int" type or ValueScanner`)
 	fd = field.Int("count").GoType(struct{}{}).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Int("count").GoType(new(Count)).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 }
 
 func TestFloat(t *testing.T) {
@@ -104,7 +104,7 @@ func TestFloat(t *testing.T) {
 
 	type Count float64
 	fd = field.Float("active").GoType(Count(0)).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Count", fd.Info.Ident)
 	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Count", fd.Info.String())
@@ -112,7 +112,7 @@ func TestFloat(t *testing.T) {
 	assert.False(t, fd.Info.ValueScanner())
 
 	fd = field.Float("count").GoType(&sql.NullFloat64{}).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "sql.NullFloat64", fd.Info.Ident)
 	assert.Equal(t, "database/sql", fd.Info.PkgPath)
 	assert.Equal(t, "sql.NullFloat64", fd.Info.String())
@@ -120,11 +120,11 @@ func TestFloat(t *testing.T) {
 	assert.True(t, fd.Info.ValueScanner())
 
 	fd = field.Float("count").GoType(1).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Float("count").GoType(struct{}{}).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Float("count").GoType(new(Count)).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 }
 
 func TestBool(t *testing.T) {
@@ -137,7 +137,7 @@ func TestBool(t *testing.T) {
 
 	type Status bool
 	fd = field.Bool("active").GoType(Status(false)).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Status", fd.Info.Ident)
 	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Status", fd.Info.String())
@@ -145,7 +145,7 @@ func TestBool(t *testing.T) {
 	assert.False(t, fd.Info.ValueScanner())
 
 	fd = field.Bool("deleted").GoType(&sql.NullBool{}).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "sql.NullBool", fd.Info.Ident)
 	assert.Equal(t, "database/sql", fd.Info.PkgPath)
 	assert.Equal(t, "sql.NullBool", fd.Info.String())
@@ -153,11 +153,11 @@ func TestBool(t *testing.T) {
 	assert.True(t, fd.Info.ValueScanner())
 
 	fd = field.Bool("active").GoType(1).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Bool("active").GoType(struct{}{}).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Bool("active").GoType(new(Status)).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 }
 
 func TestBytes(t *testing.T) {
@@ -168,7 +168,7 @@ func TestBytes(t *testing.T) {
 	assert.Equal(t, []byte("{}"), fd.Default)
 
 	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "net.IP", fd.Info.Ident)
 	assert.Equal(t, "net", fd.Info.PkgPath)
 	assert.Equal(t, "net.IP", fd.Info.String())
@@ -176,7 +176,7 @@ func TestBytes(t *testing.T) {
 	assert.False(t, fd.Info.ValueScanner())
 
 	fd = field.Bytes("blob").GoType(&sql.NullString{}).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "sql.NullString", fd.Info.Ident)
 	assert.Equal(t, "database/sql", fd.Info.PkgPath)
 	assert.Equal(t, "sql.NullString", fd.Info.String())
@@ -184,11 +184,11 @@ func TestBytes(t *testing.T) {
 	assert.True(t, fd.Info.ValueScanner())
 
 	fd = field.Bytes("blob").GoType(1).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Bytes("blob").GoType(struct{}{}).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Bytes("blob").GoType(new(net.IP)).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 }
 
 func TestString(t *testing.T) {
@@ -202,7 +202,7 @@ func TestString(t *testing.T) {
 	assert.True(t, fd.Sensitive)
 
 	fd = field.String("name").GoType(http.Dir("dir")).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "http.Dir", fd.Info.Ident)
 	assert.Equal(t, "net/http", fd.Info.PkgPath)
 	assert.Equal(t, "http.Dir", fd.Info.String())
@@ -210,14 +210,14 @@ func TestString(t *testing.T) {
 	assert.False(t, fd.Info.ValueScanner())
 
 	fd = field.String("name").GoType(http.MethodOptions).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "string", fd.Info.Ident)
 	assert.Equal(t, "", fd.Info.PkgPath)
 	assert.Equal(t, "string", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 
 	fd = field.String("nullable_name").GoType(&sql.NullString{}).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "sql.NullString", fd.Info.Ident)
 	assert.Equal(t, "database/sql", fd.Info.PkgPath)
 	assert.Equal(t, "sql.NullString", fd.Info.String())
@@ -239,11 +239,11 @@ func TestString(t *testing.T) {
 	assert.True(t, fd.Info.Stringer())
 
 	fd = field.String("name").GoType(1).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.String("name").GoType(struct{}{}).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.String("name").GoType(new(http.Dir)).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 }
 
 func TestTime(t *testing.T) {
@@ -269,7 +269,7 @@ func TestTime(t *testing.T) {
 
 	type Time time.Time
 	fd = field.Time("deleted_at").GoType(Time{}).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Time", fd.Info.Ident)
 	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Time", fd.Info.String())
@@ -277,7 +277,7 @@ func TestTime(t *testing.T) {
 	assert.False(t, fd.Info.ValueScanner())
 
 	fd = field.Time("deleted_at").GoType(&sql.NullTime{}).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "sql.NullTime", fd.Info.Ident)
 	assert.Equal(t, "database/sql", fd.Info.PkgPath)
 	assert.Equal(t, "sql.NullTime", fd.Info.String())
@@ -285,11 +285,11 @@ func TestTime(t *testing.T) {
 	assert.True(t, fd.Info.ValueScanner())
 
 	fd = field.Time("active").GoType(1).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Time("active").GoType(struct{}{}).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 	fd = field.Time("active").GoType(new(Time)).Descriptor()
-	assert.Error(t, fd.Err())
+	assert.Error(t, fd.Err)
 }
 
 func TestJSON(t *testing.T) {
@@ -378,7 +378,7 @@ func TestField_Enums(t *testing.T) {
 	assert.Equal(t, "user", fd.Enums[0].V)
 
 	fd = field.Enum("role").GoType(Role("")).Descriptor()
-	assert.NoError(t, fd.Err())
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Role", fd.Info.Ident)
 	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Role", fd.Info.String())
@@ -403,7 +403,7 @@ func TestField_UUID(t *testing.T) {
 	fd = field.UUID("id", uuid.UUID{}).
 		Default(uuid.UUID{}).
 		Descriptor()
-	assert.EqualError(t, fd.Err(), "expect type (func() uuid.UUID) for uuid default value")
+	assert.EqualError(t, fd.Err, "expect type (func() uuid.UUID) for uuid default value")
 }
 
 func TestTypeString(t *testing.T) {

@@ -104,8 +104,8 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 
 // NewField creates an loaded field from field descriptor.
 func NewField(fd *field.Descriptor) (*Field, error) {
-	if err := fd.Err(); err != nil {
-		return nil, fmt.Errorf("field %q: %v", fd.Name, err)
+	if fd.Err != nil {
+		return nil, fmt.Errorf("field %q: %v", fd.Name, fd.Err)
 	}
 	sf := &Field{
 		Name:          fd.Name,
