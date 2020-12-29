@@ -183,6 +183,21 @@ func TestBytes(t *testing.T) {
 	assert.True(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
 
+	fd = field.
+		Bytes("uuid").
+		GoType(&uuid.UUID{}).
+		DefaultFunc(func() []byte {
+			return []byte("{}")
+		}).
+		Descriptor()
+	assert.NoError(t, fd.Err)
+	assert.Equal(t, "uuid.UUID", fd.Info.Ident)
+	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
+	assert.Equal(t, "uuid.UUID", fd.Info.String())
+	assert.True(t, fd.Info.Nillable)
+	assert.True(t, fd.Info.ValueScanner())
+	assert.Equal(t, []byte("{}"), fd.Default.(func() []byte)())
+
 	fd = field.Bytes("blob").GoType(1).Descriptor()
 	assert.Error(t, fd.Err)
 	fd = field.Bytes("blob").GoType(struct{}{}).Descriptor()
@@ -192,9 +207,19 @@ func TestBytes(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
+	fd := field.String("name").
+		DefaultFunc(func() string {
+			return "Ent"
+		}).
+		Descriptor()
+
+	assert.Equal(t, "name", fd.Name)
+	assert.Equal(t, field.TypeString, fd.Info.Type)
+	assert.Equal(t, "Ent", fd.Default.(func() string)())
+
 	re := regexp.MustCompile("[a-zA-Z0-9]")
 	f := field.String("name").Unique().Match(re).Validate(func(string) error { return nil }).Sensitive()
-	fd := f.Descriptor()
+	fd = f.Descriptor()
 	assert.Equal(t, field.TypeString, fd.Info.Type)
 	assert.Equal(t, "name", fd.Name)
 	assert.True(t, fd.Unique)

@@ -208,6 +208,12 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 	return b
 }
 
+// DefaultFunc sets the default value generating function of the field.
+func (b *stringBuilder) DefaultFunc(fn func() string) *stringBuilder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *stringBuilder) Nillable() *stringBuilder {
@@ -481,6 +487,18 @@ type bytesBuilder struct {
 // Default sets the default value of the field.
 func (b *bytesBuilder) Default(v []byte) *bytesBuilder {
 	b.desc.Default = v
+	return b
+}
+
+// DefaultFunc sets the function that is applied to set default value
+// of the field on creation. For example:
+//
+//	field.Bytes("cuid").
+//		DefaultFunc(cuid.New)
+//
+func (b *bytesBuilder) DefaultFunc(v func() []byte) *bytesBuilder {
+	b.desc.Default = v
+
 	return b
 }
 

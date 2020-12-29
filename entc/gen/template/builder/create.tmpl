@@ -86,7 +86,7 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} 
 		{{- range $f := $fields }}
 			{{- if or $f.Default }}
 				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.IsTime $f.IsUUID }}(){{ end }}
+					v := {{ $.Package }}.{{ $f.DefaultName }}{{ if or $f.DefaultFunc $f.IsTime $f.IsUUID }}(){{ end }}
 					{{ $mutation }}.Set{{ $f.StructField }}(v)
 				}
 			{{- end }}

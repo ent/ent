@@ -73,7 +73,7 @@ const (
 			{{- if and $f.Default (not $f.IsEnum) }}
 				{{- $default := $f.DefaultName }}
 				// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-				{{ $default }} {{ if or $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }}
+				{{ $default }} {{ if or $f.DefaultFunc $f.IsTime $f.IsUUID }}func() {{ end }}{{ $f.Type }}
 			{{- end }}
 			{{- if $f.UpdateDefault }}
 				{{- $default := $f.UpdateDefaultName }}

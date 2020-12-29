@@ -735,6 +735,9 @@ func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
 // DefaultValue returns the default value of the field. Invoked by the template.
 func (f Field) DefaultValue() interface{} { return f.def.DefaultValue }
 
+// DefaultFunc returns a bool stating if the default value is a func. Invoked by the template.
+func (f Field) DefaultFunc() interface{} { return f.def.DefaultKind == reflect.Func }
+
 // BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {
 	return builderField(f.Name)
