@@ -32,6 +32,10 @@ func init() {
 	userDescPhone := userFields[4].Descriptor()
 	// user.DefaultPhone holds the default value on creation for the phone field.
 	user.DefaultPhone = userDescPhone.Default.(string)
+	// userDescBuffer is the schema descriptor for buffer field.
+	userDescBuffer := userFields[5].Descriptor()
+	// user.DefaultBuffer holds the default value on creation for the buffer field.
+	user.DefaultBuffer = userDescBuffer.Default.(func() []byte)
 	// userDescTitle is the schema descriptor for title field.
 	userDescTitle := userFields[6].Descriptor()
 	// user.DefaultTitle holds the default value on creation for the title field.

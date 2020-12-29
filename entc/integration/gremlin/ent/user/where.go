@@ -119,6 +119,13 @@ func Nickname(v string) predicate.User {
 	})
 }
 
+// Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
+func Address(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.EQ(v))
+	})
+}
+
 // Phone applies equality check predicate on the "phone" field. It's identical to PhoneEQ.
 func Phone(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -548,6 +555,105 @@ func NicknameIsNil() predicate.User {
 func NicknameNotNil() predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldNickname)
+	})
+}
+
+// AddressEQ applies the EQ predicate on the "address" field.
+func AddressEQ(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.EQ(v))
+	})
+}
+
+// AddressNEQ applies the NEQ predicate on the "address" field.
+func AddressNEQ(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.NEQ(v))
+	})
+}
+
+// AddressIn applies the In predicate on the "address" field.
+func AddressIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.Within(v...))
+	})
+}
+
+// AddressNotIn applies the NotIn predicate on the "address" field.
+func AddressNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.Without(v...))
+	})
+}
+
+// AddressGT applies the GT predicate on the "address" field.
+func AddressGT(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.GT(v))
+	})
+}
+
+// AddressGTE applies the GTE predicate on the "address" field.
+func AddressGTE(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.GTE(v))
+	})
+}
+
+// AddressLT applies the LT predicate on the "address" field.
+func AddressLT(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.LT(v))
+	})
+}
+
+// AddressLTE applies the LTE predicate on the "address" field.
+func AddressLTE(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.LTE(v))
+	})
+}
+
+// AddressContains applies the Contains predicate on the "address" field.
+func AddressContains(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.Containing(v))
+	})
+}
+
+// AddressHasPrefix applies the HasPrefix predicate on the "address" field.
+func AddressHasPrefix(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.StartingWith(v))
+	})
+}
+
+// AddressHasSuffix applies the HasSuffix predicate on the "address" field.
+func AddressHasSuffix(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.EndingWith(v))
+	})
+}
+
+// AddressIsNil applies the IsNil predicate on the "address" field.
+func AddressIsNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldAddress)
+	})
+}
+
+// AddressNotNil applies the NotNil predicate on the "address" field.
+func AddressNotNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldAddress)
 	})
 }
 

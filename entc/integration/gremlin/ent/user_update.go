@@ -112,6 +112,26 @@ func (uu *UserUpdate) ClearNickname() *UserUpdate {
 	return uu
 }
 
+// SetAddress sets the address field.
+func (uu *UserUpdate) SetAddress(s string) *UserUpdate {
+	uu.mutation.SetAddress(s)
+	return uu
+}
+
+// SetNillableAddress sets the address field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetAddress(*s)
+	}
+	return uu
+}
+
+// ClearAddress clears the value of address.
+func (uu *UserUpdate) ClearAddress() *UserUpdate {
+	uu.mutation.ClearAddress()
+	return uu
+}
+
 // SetPhone sets the phone field.
 func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
 	uu.mutation.SetPhone(s)
@@ -668,6 +688,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 		})
 		v.Property(dsl.Single, user.FieldNickname, value)
 	}
+	if value, ok := uu.mutation.Address(); ok {
+		v.Property(dsl.Single, user.FieldAddress, value)
+	}
 	if value, ok := uu.mutation.Phone(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(user.Label, user.FieldPhone, value).Count(),
@@ -690,6 +713,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	if uu.mutation.NicknameCleared() {
 		properties = append(properties, user.FieldNickname)
+	}
+	if uu.mutation.AddressCleared() {
+		properties = append(properties, user.FieldAddress)
 	}
 	if uu.mutation.PhoneCleared() {
 		properties = append(properties, user.FieldPhone)
@@ -907,6 +933,26 @@ func (uuo *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
 // ClearNickname clears the value of nickname.
 func (uuo *UserUpdateOne) ClearNickname() *UserUpdateOne {
 	uuo.mutation.ClearNickname()
+	return uuo
+}
+
+// SetAddress sets the address field.
+func (uuo *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
+	uuo.mutation.SetAddress(s)
+	return uuo
+}
+
+// SetNillableAddress sets the address field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetAddress(*s)
+	}
+	return uuo
+}
+
+// ClearAddress clears the value of address.
+func (uuo *UserUpdateOne) ClearAddress() *UserUpdateOne {
+	uuo.mutation.ClearAddress()
 	return uuo
 }
 
@@ -1471,6 +1517,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 		})
 		v.Property(dsl.Single, user.FieldNickname, value)
 	}
+	if value, ok := uuo.mutation.Address(); ok {
+		v.Property(dsl.Single, user.FieldAddress, value)
+	}
 	if value, ok := uuo.mutation.Phone(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(user.Label, user.FieldPhone, value).Count(),
@@ -1493,6 +1542,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if uuo.mutation.NicknameCleared() {
 		properties = append(properties, user.FieldNickname)
+	}
+	if uuo.mutation.AddressCleared() {
+		properties = append(properties, user.FieldAddress)
 	}
 	if uuo.mutation.PhoneCleared() {
 		properties = append(properties, user.FieldPhone)

@@ -53,7 +53,8 @@ func (User) Fields() []ent.Field {
 		field.String("phone").
 			Default("unknown"),
 		field.Bytes("buffer").
-			Optional(),
+			Optional().
+			DefaultFunc(func() []byte { return []byte("null") }),
 		// adding new column with supported default value
 		// in the database side, will append this value to
 		// all existing rows.

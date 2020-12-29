@@ -208,7 +208,12 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 	return b
 }
 
-// DefaultFunc sets the default value generating function of the field.
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation. For example:
+//
+//	field.String("cuid").
+//		DefaultFunc(cuid.New)
+//
 func (b *stringBuilder) DefaultFunc(fn func() string) *stringBuilder {
 	b.desc.Default = fn
 	return b
@@ -490,15 +495,14 @@ func (b *bytesBuilder) Default(v []byte) *bytesBuilder {
 	return b
 }
 
-// DefaultFunc sets the function that is applied to set default value
+// DefaultFunc sets the function that is applied to set the default value
 // of the field on creation. For example:
 //
 //	field.Bytes("cuid").
 //		DefaultFunc(cuid.New)
 //
-func (b *bytesBuilder) DefaultFunc(v func() []byte) *bytesBuilder {
-	b.desc.Default = v
-
+func (b *bytesBuilder) DefaultFunc(fn func() []byte) *bytesBuilder {
+	b.desc.Default = fn
 	return b
 }
 

@@ -31,6 +31,8 @@ type User struct {
 	Last string `json:"last,omitempty" graphql:"last_name"`
 	// Nickname holds the value of the "nickname" field.
 	Nickname string `json:"nickname,omitempty"`
+	// Address holds the value of the "address" field.
+	Address string `json:"address,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
 	// Password holds the value of the "password" field.
@@ -205,6 +207,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		Name        string    `json:"name,omitempty"`
 		Last        string    `json:"last,omitempty"`
 		Nickname    string    `json:"nickname,omitempty"`
+		Address     string    `json:"address,omitempty"`
 		Phone       string    `json:"phone,omitempty"`
 		Password    string    `json:"password,omitempty"`
 		Role        user.Role `json:"role,omitempty"`
@@ -219,6 +222,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Name = scanu.Name
 	u.Last = scanu.Last
 	u.Nickname = scanu.Nickname
+	u.Address = scanu.Address
 	u.Phone = scanu.Phone
 	u.Password = scanu.Password
 	u.Role = scanu.Role
@@ -314,6 +318,8 @@ func (u *User) String() string {
 	builder.WriteString(u.Last)
 	builder.WriteString(", nickname=")
 	builder.WriteString(u.Nickname)
+	builder.WriteString(", address=")
+	builder.WriteString(u.Address)
 	builder.WriteString(", phone=")
 	builder.WriteString(u.Phone)
 	builder.WriteString(", password=<sensitive>")
@@ -341,6 +347,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		Name        string    `json:"name,omitempty"`
 		Last        string    `json:"last,omitempty"`
 		Nickname    string    `json:"nickname,omitempty"`
+		Address     string    `json:"address,omitempty"`
 		Phone       string    `json:"phone,omitempty"`
 		Password    string    `json:"password,omitempty"`
 		Role        user.Role `json:"role,omitempty"`
@@ -357,6 +364,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 			Name:        v.Name,
 			Last:        v.Last,
 			Nickname:    v.Nickname,
+			Address:     v.Address,
 			Phone:       v.Phone,
 			Password:    v.Password,
 			Role:        v.Role,
