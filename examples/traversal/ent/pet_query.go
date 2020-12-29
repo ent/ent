@@ -526,7 +526,13 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if fields := pq.fields; len(fields) > 0 {
-		_spec.Node.Columns = fields
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, pet.FieldID)
+		for i := range fields {
+			if fields[i] != pet.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+			}
+		}
 	}
 	if ps := pq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

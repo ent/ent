@@ -350,7 +350,13 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if fields := ctq.fields; len(fields) > 0 {
-		_spec.Node.Columns = fields
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, customtype.FieldID)
+		for i := range fields {
+			if fields[i] != customtype.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+			}
+		}
 	}
 	if ps := ctq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
