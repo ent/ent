@@ -295,7 +295,7 @@ func Select(t *testing.T, client *ent.Client) {
 		Select(user.FieldName).
 		StringX(ctx)
 	require.Equal("foo", name)
-	client.User.Create().SetName("bar").SetAge(30).SaveX(ctx)
+	client.User.Create().SetName("bar").SetAge(30).AddFriends(u).SaveX(ctx)
 	t.Log("select one field with ordering")
 	names := client.User.
 		Query().
@@ -333,10 +333,20 @@ func Select(t *testing.T, client *ent.Client) {
 	users := client.User.
 		Query().
 		Select(user.FieldAge).
+		Where(user.Name("foo")).
+		WithFriends(func(q *ent.UserQuery) {
+			q.Select(user.FieldName)
+		}).
 		AllX(ctx)
 	for i := range users {
 		require.Empty(users[i].Name)
+		require.NotZero(users[i].ID)
 		require.NotZero(users[i].Age)
+		for _, f := range users[i].Edges.Friends {
+			require.NotEmpty(f.Name)
+			require.NotZero(f.ID)
+			require.Zero(f.Age)
+		}
 	}
 }
 

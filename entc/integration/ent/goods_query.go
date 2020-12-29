@@ -326,7 +326,13 @@ func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if fields := gq.fields; len(fields) > 0 {
-		_spec.Node.Columns = fields
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, goods.FieldID)
+		for i := range fields {
+			if fields[i] != goods.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+			}
+		}
 	}
 	if ps := gq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

@@ -425,7 +425,13 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 		Unique: true,
 	}
 	if fields := cq.fields; len(fields) > 0 {
-		_spec.Node.Columns = fields
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, card.FieldID)
+		for i := range fields {
+			if fields[i] != card.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+			}
+		}
 	}
 	if ps := cq.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
