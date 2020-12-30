@@ -1161,7 +1161,7 @@ func setTableColumns(fields []*FieldSpec, edges map[Rel][]*EdgeSpec, set func(st
 }
 
 // insertLastID invokes the insert query on the transaction and returns the LastInsertID.
-func insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) (int64, error) {
+func insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) (driver.Value, error) {
 	query, args := insert.Query()
 	// PostgreSQL does not support the LastInsertId() method of sql.Result
 	// on Exec, and should be extracted manually using the `RETURNING` clause.
@@ -1171,7 +1171,7 @@ func insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *sql.Inser
 			return 0, err
 		}
 		defer rows.Close()
-		return sql.ScanInt64(rows)
+		return sql.ScanValue(rows)
 	}
 	// MySQL, SQLite, etc.
 	var res sql.Result

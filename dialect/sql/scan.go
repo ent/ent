@@ -6,6 +6,7 @@ package sql
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"reflect"
 	"strings"
@@ -69,6 +70,15 @@ func ScanString(rows ColumnScanner) (string, error) {
 		return "", err
 	}
 	return s, nil
+}
+
+// ScanValue scans and returns a driver.Value from the rows columns.
+func ScanValue(rows ColumnScanner) (driver.Value, error) {
+	var v driver.Value
+	if err := ScanOne(rows, &v); err != nil {
+		return "", err
+	}
+	return v, nil
 }
 
 // ScanSlice scans the given ColumnScanner (basically, sql.Row or sql.Rows) into the given slice.
