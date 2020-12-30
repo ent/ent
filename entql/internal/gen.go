@@ -74,7 +74,7 @@ func ops(t field.Type) []string {
 
 func ident(t field.Type) string {
 	switch t {
-	case field.TypeBytes, field.TypeJSON:
+	case field.TypeBytes:
 		return "bytes"
 	case field.TypeTime:
 		return "time"
