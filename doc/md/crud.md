@@ -220,6 +220,10 @@ users, err := a8m.
 	All(ctx)
 ```
 
+More advance traversals can be found in the [next section](traversals.md). 
+
+## Field Selection
+
 Get all pet names.
 
 ```go
@@ -229,7 +233,20 @@ names, err := client.Pet.
 	Strings(ctx)
 ```
 
-Get all pet names and ages.
+Select partial objects and partial associations.gs
+Get all pets and their owners, but select and fill only the `ID` and `Name` fields.
+
+```go
+pets, err := client.Pet.
+    Query().
+    Select(pet.FieldName).
+    WithOwner(func (q *ent.UserQuery) {
+        q.Select(user.FieldName)
+    }).
+    All(ctx)
+```
+
+Scan all pet names and ages to custom struct.
 
 ```go
 var v []struct {
@@ -244,8 +261,6 @@ if err != nil {
 	log.Fatal(err)
 }
 ```
-
-More advance traversals can be found in the [next section](traversals.md). 
 
 ## Delete One 
 
