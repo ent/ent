@@ -149,4 +149,8 @@ func init() {
 	userDescLast := userFields[2].Descriptor()
 	// user.DefaultLast holds the default value on creation for the last field.
 	user.DefaultLast = userDescLast.Default.(string)
+	// userDescAddress is the schema descriptor for address field.
+	userDescAddress := userFields[4].Descriptor()
+	// user.DefaultAddress holds the default value on creation for the address field.
+	user.DefaultAddress = userDescAddress.Default.(func() string)
 }

@@ -151,7 +151,7 @@ func init() {
 			{{- if and $f.Default (not $f.IsEnum) }}
 				{{- $default := print $pkg "." $f.DefaultName }}
 				// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
-				{{- $defaultType := print $f.Type.Type }}{{ if or $f.IsTime $f.IsUUID }}{{ $defaultType = print "func() " $f.Type }}{{ end }}
+				{{- $defaultType := print $f.Type.Type }}{{ if $f.DefaultFunc }}{{ $defaultType = print "func() " $f.Type }}{{ end }}
 				{{- if and $f.HasGoType (not (hasPrefix $defaultType "func")) }}
 					{{ $default }} = {{ $f.Type }}({{ $desc }}.Default.({{ $defaultType }}))
 				{{- else }}

@@ -286,6 +286,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultPhone
 		uc.mutation.SetPhone(v)
 	}
+	if _, ok := uc.mutation.Buffer(); !ok {
+		v := user.DefaultBuffer()
+		uc.mutation.SetBuffer(v)
+	}
 	if _, ok := uc.mutation.Title(); !ok {
 		v := user.DefaultTitle
 		uc.mutation.SetTitle(v)

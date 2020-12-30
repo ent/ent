@@ -287,6 +287,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldName:        {Type: field.TypeString, Column: user.FieldName},
 			user.FieldLast:        {Type: field.TypeString, Column: user.FieldLast},
 			user.FieldNickname:    {Type: field.TypeString, Column: user.FieldNickname},
+			user.FieldAddress:     {Type: field.TypeString, Column: user.FieldAddress},
 			user.FieldPhone:       {Type: field.TypeString, Column: user.FieldPhone},
 			user.FieldPassword:    {Type: field.TypeString, Column: user.FieldPassword},
 			user.FieldRole:        {Type: field.TypeEnum, Column: user.FieldRole},
@@ -1784,6 +1785,11 @@ func (f *UserFilter) WhereLast(p entql.StringP) {
 // WhereNickname applies the entql string predicate on the nickname field.
 func (f *UserFilter) WhereNickname(p entql.StringP) {
 	f.Where(p.Field(user.FieldNickname))
+}
+
+// WhereAddress applies the entql string predicate on the address field.
+func (f *UserFilter) WhereAddress(p entql.StringP) {
+	f.Where(p.Field(user.FieldAddress))
 }
 
 // WherePhone applies the entql string predicate on the phone field.

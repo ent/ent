@@ -31,6 +31,8 @@ type User struct {
 	Last string `json:"last,omitempty" graphql:"last_name"`
 	// Nickname holds the value of the "nickname" field.
 	Nickname string `json:"nickname,omitempty"`
+	// Address holds the value of the "address" field.
+	Address string `json:"address,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
 	// Password holds the value of the "password" field.
@@ -202,7 +204,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldID, user.FieldOptionalInt, user.FieldAge:
 			values[i] = &sql.NullInt64{}
-		case user.FieldName, user.FieldLast, user.FieldNickname, user.FieldPhone, user.FieldPassword, user.FieldRole, user.FieldSSOCert:
+		case user.FieldName, user.FieldLast, user.FieldNickname, user.FieldAddress, user.FieldPhone, user.FieldPassword, user.FieldRole, user.FieldSSOCert:
 			values[i] = &sql.NullString{}
 		case user.ForeignKeys[0]: // group_blocked
 			values[i] = &sql.NullInt64{}
@@ -260,6 +262,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field nickname", values[i])
 			} else if value.Valid {
 				u.Nickname = value.String
+			}
+		case user.FieldAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field address", values[i])
+			} else if value.Valid {
+				u.Address = value.String
 			}
 		case user.FieldPhone:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -399,6 +407,8 @@ func (u *User) String() string {
 	builder.WriteString(u.Last)
 	builder.WriteString(", nickname=")
 	builder.WriteString(u.Nickname)
+	builder.WriteString(", address=")
+	builder.WriteString(u.Address)
 	builder.WriteString(", phone=")
 	builder.WriteString(u.Phone)
 	builder.WriteString(", password=<sensitive>")

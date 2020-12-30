@@ -25,6 +25,8 @@ const (
 	FieldLast = "last"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
+	// FieldAddress holds the string denoting the address field in the database.
+	FieldAddress = "address"
 	// FieldPhone holds the string denoting the phone field in the database.
 	FieldPhone = "phone"
 	// FieldPassword holds the string denoting the password field in the database.
@@ -120,6 +122,7 @@ var Columns = []string{
 	FieldName,
 	FieldLast,
 	FieldNickname,
+	FieldAddress,
 	FieldPhone,
 	FieldPassword,
 	FieldRole,
@@ -168,6 +171,8 @@ var (
 	OptionalIntValidator func(int) error
 	// DefaultLast holds the default value on creation for the last field.
 	DefaultLast string
+	// DefaultAddress holds the default value on creation for the address field.
+	DefaultAddress func() string
 )
 
 // Role defines the type for the role enum field.

@@ -114,6 +114,8 @@ var (
 	NicknameValidator func(string) error
 	// DefaultPhone holds the default value on creation for the phone field.
 	DefaultPhone string
+	// DefaultBuffer holds the default value on creation for the buffer field.
+	DefaultBuffer func() []byte
 	// DefaultTitle holds the default value on creation for the title field.
 	DefaultTitle string
 )

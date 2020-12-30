@@ -183,8 +183,7 @@ func TestBytes(t *testing.T) {
 	assert.True(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
 
-	fd = field.
-		Bytes("uuid").
+	fd = field.Bytes("uuid").
 		GoType(&uuid.UUID{}).
 		DefaultFunc(func() []byte {
 			return []byte("{}")

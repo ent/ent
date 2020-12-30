@@ -81,6 +81,20 @@ func (uc *UserCreate) SetNillableNickname(s *string) *UserCreate {
 	return uc
 }
 
+// SetAddress sets the address field.
+func (uc *UserCreate) SetAddress(s string) *UserCreate {
+	uc.mutation.SetAddress(s)
+	return uc
+}
+
+// SetNillableAddress sets the address field if the given value is not nil.
+func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
+	if s != nil {
+		uc.SetAddress(*s)
+	}
+	return uc
+}
+
 // SetPhone sets the phone field.
 func (uc *UserCreate) SetPhone(s string) *UserCreate {
 	uc.mutation.SetPhone(s)
@@ -374,6 +388,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultLast
 		uc.mutation.SetLast(v)
 	}
+	if _, ok := uc.mutation.Address(); !ok {
+		v := user.DefaultAddress()
+		uc.mutation.SetAddress(v)
+	}
 	if _, ok := uc.mutation.Role(); !ok {
 		v := user.DefaultRole
 		uc.mutation.SetRole(v)
@@ -470,6 +488,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldNickname,
 		})
 		_node.Nickname = value
+	}
+	if value, ok := uc.mutation.Address(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldAddress,
+		})
+		_node.Address = value
 	}
 	if value, ok := uc.mutation.Phone(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
