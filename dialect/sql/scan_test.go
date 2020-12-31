@@ -171,6 +171,14 @@ func TestScanInt64(t *testing.T) {
 	require.EqualValues(t, 10, n)
 }
 
+func TestScanValue(t *testing.T) {
+	mock := sqlmock.NewRows([]string{"count"}).
+		AddRow(10)
+	n, err := ScanValue(toRows(mock))
+	require.NoError(t, err)
+	require.EqualValues(t, 10, n)
+}
+
 func TestScanOne(t *testing.T) {
 	mock := sqlmock.NewRows([]string{"name"}).
 		AddRow("10").
