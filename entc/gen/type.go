@@ -680,19 +680,23 @@ func (t Type) RelatedTypes() []*Type {
 	return related
 }
 
-// check checks the schema type.
-func (t *Type) check() error {
-	pkg := t.Package()
-	if token.Lookup(pkg).IsKeyword() {
-		return fmt.Errorf("schema lowercase name conflicts with Go keyword %q", pkg)
+// CheckNameConflicts will determine if a name is going to conflict with a pre-defined name
+func CheckNameConflicts(name string) error {
+	if token.Lookup(name).IsKeyword() {
+		return fmt.Errorf("schema lowercase name conflicts with Go keyword %q", name)
 	}
-	if types.Universe.Lookup(pkg) != nil {
-		return fmt.Errorf("schema lowercase name conflicts with Go predeclared identifier %q", pkg)
+	if types.Universe.Lookup(name) != nil {
+		return fmt.Errorf("schema lowercase name conflicts with Go predeclared identifier %q", name)
 	}
-	if _, ok := globalIdent[t.Name]; ok {
-		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", t.Name)
+	if _, ok := globalIdent[name]; ok {
+		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", name)
 	}
 	return nil
+}
+
+// check checks the schema type.
+func (t *Type) check() error {
+	return CheckNameConflicts(t.Package())
 }
 
 // checkField checks the schema field.

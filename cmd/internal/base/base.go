@@ -83,7 +83,7 @@ func InitCmd() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, names []string) {
 			if err := initEnv(target, names); err != nil {
-				log.Fatalln(err)
+				log.Fatalln(fmt.Errorf("ent/init: %w", err))
 			}
 		},
 	}
@@ -179,16 +179,19 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 // initEnv initialize an environment for ent codegen.
 func initEnv(target string, names []string) error {
 	if err := createDir(target); err != nil {
-		return err
+		return fmt.Errorf("create dir %s: %w", target, err)
 	}
 	for _, name := range names {
+		if err := gen.CheckNameConflicts(name); err != nil {
+			return fmt.Errorf("init schema %s: %w", name, err)
+		}
 		b := bytes.NewBuffer(nil)
 		if err := tmpl.Execute(b, name); err != nil {
-			log.Fatalln(err)
+			return fmt.Errorf("executing template %s: %w", name, err)
 		}
-		target := filepath.Join(target, strings.ToLower(name+".go"))
-		if err := ioutil.WriteFile(target, b.Bytes(), 0644); err != nil {
-			log.Fatalln(err)
+		newFileTarget := filepath.Join(target, strings.ToLower(name+".go"))
+		if err := ioutil.WriteFile(newFileTarget, b.Bytes(), 0644); err != nil {
+			return fmt.Errorf("writing file %s: %w", newFileTarget, err)
 		}
 	}
 	return nil
