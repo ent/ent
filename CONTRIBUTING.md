@@ -8,13 +8,15 @@ possible.
   - `dialect/sql/schema` - Auto migration logic resides there.
 
 - `schema` - User schema API.
-  - `schema/{field, edge, index}` - provides schema builders API.
+  - `schema/{field, edge, index, mixin}` - provides schema builders API.
   - `schema/field/gen` - Templates and codegen for numeric builders.
 
 - `entc` - Codegen of `ent`.
   - `entc/load` - `entc` loader API for loading user schemas into a Go objects at runtime.
   - `entc/gen` - The actual code generation logic resides in this package (and its `templates` package).
   - `integration` - Integration tests for `entc`.
+  
+- `privacy` - Runtime code for [privacy layer](https://entgo.io/docs/privacy/).
 
 - `doc` - Documentation code for `entgo.io` (uses [Docusaurus](https://docusaurus.io)).
   - `doc/md` - Markdown files for documentation.
