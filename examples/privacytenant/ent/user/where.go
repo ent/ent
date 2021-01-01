@@ -213,6 +213,20 @@ func NameContainsFold(v string) predicate.User {
 	})
 }
 
+// FoodsIsNil applies the IsNil predicate on the "foods" field.
+func FoodsIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldFoods)))
+	})
+}
+
+// FoodsNotNil applies the NotNil predicate on the "foods" field.
+func FoodsNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldFoods)))
+	})
+}
+
 // HasTenant applies the HasEdge predicate on the "tenant" edge.
 func HasTenant() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

@@ -35,8 +35,8 @@ func Example_PrivacyTenant() {
 	// Output:
 	// Tenant(id=1, name=GitHub)
 	// Tenant(id=2, name=GitLab)
-	// User(id=1, name=a8m)
-	// User(id=2, name=nati)
+	// User(id=1, name=a8m, foods=[])
+	// User(id=2, name=nati, foods=[Sushi Burritos])
 	// Group(id=1, name=entgo.io)
 }
 
@@ -66,7 +66,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Create 2 users connected to the 2 tenants we created above (a8m->GitHub, nati->GitLab).
 	a8m := client.User.Create().SetName("a8m").SetTenant(hub).SaveX(admin)
-	nati := client.User.Create().SetName("nati").SetTenant(lab).SaveX(admin)
+	nati := client.User.Create().SetName("nati").SetTenant(lab).SetFoods([]string{"Sushi", "Burritos"}).SaveX(admin)
 
 	hubView := viewer.NewContext(ctx, viewer.UserViewer{T: hub})
 	out := client.User.Query().OnlyX(hubView)

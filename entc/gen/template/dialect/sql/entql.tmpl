@@ -118,7 +118,10 @@ type predicateAdder interface {
 	{{ range $f := $n.Fields }}
 		{{ $type := $f.Type.Type.String }}
 		{{ $iface := print (pascal $type) "P" }}
-		{{ if $f.IsTime }}{{ $iface = "TimeP" }}{{ else if $f.IsBytes }}{{ $iface = "BytesP" }}{{ else if $f.IsUUID }}{{ $iface = "ValueP" }}{{ end }}
+		{{- if $f.IsTime }}{{ $iface = "TimeP" }}
+		{{- else if or $f.IsBytes $f.IsJSON }}{{ $iface = "BytesP" }}
+		{{- else if $f.IsUUID }}{{ $iface = "ValueP" }}
+		{{- end }}
 		// Where{{ $f.StructField }} applies the entql {{ $type }} predicate on the {{ $f.Name }} field.
 		func (f *{{ $filter }}) Where{{ $f.StructField }}(p entql.{{ $iface }}) {
 			f.Where(p.Field({{ $n.Package }}.{{ $f.Constant }}))

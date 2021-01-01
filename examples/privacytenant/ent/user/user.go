@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldFoods holds the string denoting the foods field in the database.
+	FieldFoods = "foods"
 
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
@@ -43,6 +45,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldFoods,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the User type.
