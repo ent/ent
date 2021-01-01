@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"sync"
 	"text/template/parse"
 
 	"github.com/facebook/ent/dialect/sql/schema"
@@ -642,16 +643,39 @@ func (a assets) write() error {
 }
 
 // format runs "goimports" on all assets.
-func (a assets) format() error {
-	for _, file := range a.files {
-		path := file.path
-		src, err := imports.Process(path, file.content, nil)
-		if err != nil {
-			return fmt.Errorf("format file %s: %v", path, err)
-		}
-		if err := ioutil.WriteFile(path, src, 0644); err != nil {
-			return fmt.Errorf("write file %s: %v", path, err)
-		}
+func (a assets) format() (out error) {
+	n := len(a.files)
+	errors := make(chan error)
+	done := make(chan bool)
+
+	var wg sync.WaitGroup
+	wg.Add(n)
+
+	for _, fi := range a.files {
+		go func(f file) {
+			defer wg.Done()
+			path := f.path
+			src, err := imports.Process(path, f.content, nil)
+			if err != nil {
+				errors <- fmt.Errorf("format file %s: %v", path, err)
+			}
+			if err := ioutil.WriteFile(path, src, 0644); err != nil {
+				errors <- fmt.Errorf("write file %s: %v", path, err)
+			}
+		}(fi)
+	}
+
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		break
+	case err := <-errors:
+		close(errors)
+		return err
 	}
 	return nil
 }
