@@ -39,6 +39,12 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 	return uc
 }
 
+// SetFoods sets the foods field.
+func (uc *UserCreate) SetFoods(s []string) *UserCreate {
+	uc.mutation.SetFoods(s)
+	return uc
+}
+
 // SetTenantID sets the tenant edge to Tenant by id.
 func (uc *UserCreate) SetTenantID(id int) *UserCreate {
 	uc.mutation.SetTenantID(id)
@@ -165,6 +171,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := uc.mutation.Foods(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldFoods,
+		})
+		_node.Foods = value
 	}
 	if nodes := uc.mutation.TenantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
