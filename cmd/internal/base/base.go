@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// custom implementation for pflag.
+// IDType is a custom ID implementation for pflag.
 type IDType field.Type
 
 // Set implements the Set method of the flag.Value interface.
