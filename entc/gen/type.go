@@ -683,14 +683,14 @@ func (t Type) RelatedTypes() []*Type {
 // ValidSchemaName will determine if a name is going to conflict with any
 // pre-defined names
 func ValidSchemaName(name string) error {
-	// Golang keywords and identifiers are lower case
-	lowerName := strings.ToLower(name)
+	// schema package is lower-cased (see Type.Package)
+	pkg := strings.ToLower(name)
 
-	if token.Lookup(lowerName).IsKeyword() {
-		return fmt.Errorf("schema lowercase name conflicts with Go keyword %q", lowerName)
+	if token.Lookup(pkg).IsKeyword() {
+		return fmt.Errorf("schema lowercase name conflicts with Go keyword %q", pkg)
 	}
-	if types.Universe.Lookup(lowerName) != nil {
-		return fmt.Errorf("schema lowercase name conflicts with Go predeclared identifier %q", lowerName)
+	if types.Universe.Lookup(pkg) != nil {
+		return fmt.Errorf("schema lowercase name conflicts with Go predeclared identifier %q", pkg)
 	}
 	if _, ok := globalIdent[name]; ok {
 		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", name)
