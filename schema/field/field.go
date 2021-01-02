@@ -12,7 +12,6 @@ import (
 	"math"
 	"reflect"
 	"regexp"
-	"sort"
 	"time"
 
 	"github.com/facebook/ent/schema"
@@ -700,26 +699,6 @@ func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
 	for i := 0; i < len(namevalue); i += 2 {
 		b.desc.Enums = append(b.desc.Enums, struct{ N, V string }{N: namevalue[i], V: namevalue[i+1]})
 	}
-	return b
-}
-
-// ValueMap adds the given values in the map to the enum value.
-// The key in the map is the Go identifier and the value in the
-// map is the actual enum value.
-//
-// If keys in not titled, ent codegen will change it to be exported.
-//
-// Deprecated: the ValueMap method predates the NamedValues method and it
-// is planned be removed in v0.5.0. New code should use NamedValues instead.
-func (b *enumBuilder) ValueMap(values map[string]string) *enumBuilder {
-	enums := make([]struct{ N, V string }, 0, len(values))
-	for k, v := range values {
-		enums = append(enums, struct{ N, V string }{N: k, V: v})
-	}
-	sort.Slice(enums, func(i, j int) bool {
-		return enums[i].V < enums[j].V
-	})
-	b.desc.Enums = append(b.desc.Enums, enums...)
 	return b
 }
 
