@@ -12,6 +12,7 @@ import (
 	"go/parser"
 	"go/token"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -647,16 +648,16 @@ func (a assets) format() error {
 	var eg errgroup.Group
 
 	for i := range a.files {
-		idx := i
-		f := a.files[idx]
+		f := a.files[i]
 		eg.Go(func() error {
-			path := f.path
-			src, err := imports.Process(path, f.content, nil)
+			filePath := f.path
+			log.Println(filePath)
+			src, err := imports.Process(filePath, f.content, nil)
 			if err != nil {
-				return fmt.Errorf("format file %s: %v", path, err)
+				return fmt.Errorf("formatting file %s: %w", filePath, err)
 			}
-			if err := ioutil.WriteFile(path, src, 0644); err != nil {
-				return fmt.Errorf("write file %s: %v", path, err)
+			if err := ioutil.WriteFile(filePath, src, 0644); err != nil {
+				return fmt.Errorf("writing file %s: %w", filePath, err)
 			}
 			return nil
 		})
