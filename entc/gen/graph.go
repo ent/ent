@@ -15,13 +15,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
-	"sync"
 	"text/template/parse"
 
 	"github.com/facebook/ent/dialect/sql/schema"
 	"github.com/facebook/ent/entc/load"
 	"github.com/facebook/ent/schema/field"
 
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/tools/imports"
 )
 
@@ -643,41 +643,26 @@ func (a assets) write() error {
 }
 
 // format runs "goimports" on all assets.
-func (a assets) format() (out error) {
-	n := len(a.files)
-	errors := make(chan error)
-	done := make(chan bool)
+func (a assets) format() error {
+	var eg errgroup.Group
 
-	var wg sync.WaitGroup
-	wg.Add(n)
-
-	for _, fi := range a.files {
-		go func(f file) {
-			defer wg.Done()
+	for i := range a.files {
+		idx := i
+		f := a.files[idx]
+		eg.Go(func() error {
 			path := f.path
 			src, err := imports.Process(path, f.content, nil)
 			if err != nil {
-				errors <- fmt.Errorf("format file %s: %v", path, err)
+				return fmt.Errorf("format file %s: %v", path, err)
 			}
 			if err := ioutil.WriteFile(path, src, 0644); err != nil {
-				errors <- fmt.Errorf("write file %s: %v", path, err)
+				return fmt.Errorf("write file %s: %v", path, err)
 			}
-		}(fi)
+			return nil
+		})
 	}
 
-	go func() {
-		wg.Wait()
-		close(done)
-	}()
-
-	select {
-	case <-done:
-		break
-	case err := <-errors:
-		close(errors)
-		return err
-	}
-	return nil
+	return eg.Wait()
 }
 
 // expect panics if the condition is false.
