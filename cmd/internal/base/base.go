@@ -182,7 +182,7 @@ func initEnv(target string, names []string) error {
 		return fmt.Errorf("create dir %s: %w", target, err)
 	}
 	for _, name := range names {
-		if err := gen.CheckNameConflicts(name); err != nil {
+		if err := gen.ValidSchemaName(name); err != nil {
 			return fmt.Errorf("init schema %s: %w", name, err)
 		}
 		b := bytes.NewBuffer(nil)

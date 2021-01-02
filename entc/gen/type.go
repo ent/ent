@@ -186,7 +186,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		fields:      make(map[string]*Field, len(schema.Fields)),
 		foreignKeys: make(map[string]struct{}),
 	}
-	if err := typ.check(); err != nil {
+	if err := ValidSchemaName(typ.Name); err != nil {
 		return nil, err
 	}
 	for _, f := range schema.Fields {
@@ -680,9 +680,9 @@ func (t Type) RelatedTypes() []*Type {
 	return related
 }
 
-// CheckNameConflicts will determine if a name is going to conflict with any
+// ValidSchemaName will determine if a name is going to conflict with any
 // pre-defined names
-func CheckNameConflicts(name string) error {
+func ValidSchemaName(name string) error {
 	// Golang keywords and identifiers are lower case
 	lowerName := strings.ToLower(name)
 
@@ -696,11 +696,6 @@ func CheckNameConflicts(name string) error {
 		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", name)
 	}
 	return nil
-}
-
-// check checks the schema type.
-func (t *Type) check() error {
-	return CheckNameConflicts(t.Name)
 }
 
 // checkField checks the schema field.
