@@ -12,7 +12,6 @@ import (
 	"go/parser"
 	"go/token"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -651,7 +650,6 @@ func (a assets) format() error {
 		f := a.files[i]
 		eg.Go(func() error {
 			filePath := f.path
-			log.Println(filePath)
 			src, err := imports.Process(filePath, f.content, nil)
 			if err != nil {
 				return fmt.Errorf("formatting file %s: %w", filePath, err)
