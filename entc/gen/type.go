@@ -186,7 +186,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		fields:      make(map[string]*Field, len(schema.Fields)),
 		foreignKeys: make(map[string]struct{}),
 	}
-	if err := typ.check(); err != nil {
+	if err := ValidSchemaName(typ.Name); err != nil {
 		return nil, err
 	}
 	for _, f := range schema.Fields {
@@ -680,17 +680,20 @@ func (t Type) RelatedTypes() []*Type {
 	return related
 }
 
-// check checks the schema type.
-func (t *Type) check() error {
-	pkg := t.Package()
+// ValidSchemaName will determine if a name is going to conflict with any
+// pre-defined names
+func ValidSchemaName(name string) error {
+	// schema package is lower-cased (see Type.Package)
+	pkg := strings.ToLower(name)
+
 	if token.Lookup(pkg).IsKeyword() {
 		return fmt.Errorf("schema lowercase name conflicts with Go keyword %q", pkg)
 	}
 	if types.Universe.Lookup(pkg) != nil {
 		return fmt.Errorf("schema lowercase name conflicts with Go predeclared identifier %q", pkg)
 	}
-	if _, ok := globalIdent[t.Name]; ok {
-		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", t.Name)
+	if _, ok := globalIdent[name]; ok {
+		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", name)
 	}
 	return nil
 }
