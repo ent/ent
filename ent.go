@@ -180,14 +180,13 @@ type (
 	// The Policy type defines the write privacy policy of an entity.
 	// The usage for the interface is as follows:
 	//
-	// type T struct {
-	//   ent.Schema
-	// }
+	//	type T struct {
+	//		ent.Schema
+	//	}
 	//
-	// func(T) Policy() ent.Policy {
-	//     return privacy.AlwaysAllowReadWrite()
-	// }
-	//
+	//	func(T) Policy() ent.Policy {
+	//		return privacy.AlwaysAllowReadWrite()
+	//	}
 	//
 	Policy interface {
 		EvalMutation(context.Context, Mutation) error
