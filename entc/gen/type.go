@@ -685,7 +685,6 @@ func (t Type) RelatedTypes() []*Type {
 func ValidSchemaName(name string) error {
 	// schema package is lower-cased (see Type.Package)
 	pkg := strings.ToLower(name)
-
 	if token.Lookup(pkg).IsKeyword() {
 		return fmt.Errorf("schema lowercase name conflicts with Go keyword %q", pkg)
 	}
@@ -822,6 +821,17 @@ func (f Field) MutationGetOld() string {
 // with the mutation methods, suffix the method with "Field".
 func (f Field) MutationReset() string {
 	name := "Reset" + pascal(f.Name)
+	if _, ok := mutMethods[name]; ok {
+		name += "Field"
+	}
+	return name
+}
+
+// MutationSet returns the method name for setting the field value.
+// The default name is "Set<FieldName>". If the the method conflicts
+// with the mutation methods, suffix the method with "Field".
+func (f Field) MutationSet() string {
+	name := "Set" + f.StructField()
 	if _, ok := mutMethods[name]; ok {
 		name += "Field"
 	}
