@@ -620,6 +620,11 @@ type InsertBuilder struct {
 	defaults  string
 	returning []string
 	values    [][]interface{}
+
+	// Upsert
+	conflictColumns []string
+	updateColumns   []string
+	updateValues    []interface{}
 }
 
 // Insert creates a builder for the `INSERT INTO` statement.
@@ -652,6 +657,19 @@ func (i *InsertBuilder) Columns(columns ...string) *InsertBuilder {
 // Values append a value tuple for the insert statement.
 func (i *InsertBuilder) Values(values ...interface{}) *InsertBuilder {
 	i.values = append(i.values, values)
+	return i
+}
+
+// ConflictColumns sets the columns to apply the update during upsert.
+func (i *InsertBuilder) ConflictColumns(values ...string) *InsertBuilder {
+	i.conflictColumns = append(i.conflictColumns, values...)
+	return i
+}
+
+// UpdateSet sets a column and a its value for use on upsert
+func (i *InsertBuilder) UpdateSet(column string, v interface{}) *InsertBuilder {
+	i.updateColumns = append(i.updateColumns, column)
+	i.updateValues = append(i.updateValues, v)
 	return i
 }
 
@@ -692,6 +710,27 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 			})
 		}
 	}
+
+	if len(i.conflictColumns) > 0 && i.postgres() {
+		i.WriteString(" ON CONFLICT ")
+		i.Nested(func(b *Builder) {
+			b.IdentComma(i.conflictColumns...)
+		})
+		i.WriteString(" DO UPDATE SET ")
+		for j, c := range i.updateColumns {
+			if j > 0 {
+				i.Comma()
+			}
+			i.Ident(c).WriteString(" = ")
+			switch v := i.updateValues[j].(type) {
+			case Querier:
+				i.Join(v)
+			default:
+				i.Arg(v)
+			}
+		}
+	}
+
 	if len(i.returning) > 0 && i.postgres() {
 		i.WriteString(" RETURNING ")
 		i.IdentComma(i.returning...)
@@ -1176,7 +1215,7 @@ func (p *Predicate) ContainsFold(col, sub string) *Predicate {
 	})
 }
 
-// CompositeGT returns a comiposite ">" predicate
+// CompositeGT returns a composite ">" predicate
 func CompositeGT(columns []string, args ...interface{}) *Predicate {
 	return P().CompositeGT(columns, args...)
 }

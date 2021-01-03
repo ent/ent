@@ -485,6 +485,11 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10, "foo", 20},
 		},
 		{
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("email").Values("user@example.com").ConflictColumns("email").UpdateSet("email", "user-1@example.com"),
+			wantQuery: `INSERT INTO "users" ("email") VALUES ($1) ON CONFLICT ("email") DO UPDATE SET "email" = $2`,
+			wantArgs:  []interface{}{"user@example.com", "user-1@example.com"},
+		},
+		{
 			input: Delete("users").
 				Where(NotNull("parent_id")),
 			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NOT NULL",
@@ -1258,13 +1263,13 @@ func TestBuilder(t *testing.T) {
 				Or().
 				Where(And(NEQ("f", "f"), NEQ("g", "g"))),
 			wantQuery: strings.NewReplacer("\n", "", "\t", "").Replace(`
-SELECT * FROM "users" 
-WHERE 
+SELECT * FROM "users"
+WHERE
 	(
-		(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6))) 
-		AND 
+		(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6)))
+		AND
 		(("a" = $7 OR ("b" = $8 AND "c" = $9)) AND (NOT ("d" IS NULL OR "e" IS NOT NULL)))
-	) 
+	)
 	OR ("f" <> $10 AND "g" <> $11)`),
 			wantArgs: []interface{}{1, 2, 3, 2, 4, 5, "a", "b", "c", "f", "g"},
 		},
