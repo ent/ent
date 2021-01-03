@@ -7,6 +7,7 @@ version: "3.7"
 services:
 
   mysql:
+    platform: linux/amd64
     image: mysql:5.6.35
     environment:
       MYSQL_DATABASE: test
@@ -17,6 +18,7 @@ services:
       - 3306:3306
 
   mysql57:
+    platform: linux/amd64
     image: mysql:5.7.26
     environment:
       MYSQL_DATABASE: test
@@ -27,6 +29,7 @@ services:
       - 3307:3306
 
   mysql8:
+    platform: linux/amd64
     image: mysql:8.0.19
     environment:
       MYSQL_DATABASE: test
@@ -37,6 +40,7 @@ services:
       - 3308:3306
 
   mariadb:
+    platform: linux/amd64
     image: mariadb
     environment:
       MYSQL_DATABASE: test
@@ -47,6 +51,7 @@ services:
       - 4306:3306
 
   mariadb102:
+    platform: linux/amd64
     image: mariadb:10.2.32
     environment:
       MYSQL_DATABASE: test
@@ -57,6 +62,7 @@ services:
       - 4307:3306
 
   postgres10:
+    platform: linux/amd64
     image: postgres:10
     environment:
       POSTGRES_DB: test
@@ -67,6 +73,7 @@ services:
       - 5430:5432
 
   postgres11:
+    platform: linux/amd64
     image: postgres:11
     environment:
       POSTGRES_DB: test
@@ -77,6 +84,7 @@ services:
       - 5431:5432
 
   postgres12:
+    platform: linux/amd64
     image: postgres:12
     environment:
       POSTGRES_DB: test
@@ -87,6 +95,7 @@ services:
       - 5433:5432
 
   postgres13:
+    platform: linux/amd64
     image: postgres:13
     environment:
       POSTGRES_DB: test
@@ -97,6 +106,7 @@ services:
       - 5434:5432
 
   gremlin:
+    platform: linux/amd64
     image: entgo/gremlin-server
     build: gremlin-server
     restart: on-failure
