@@ -600,7 +600,8 @@ func (b *bytesBuilder) Descriptor() *Descriptor {
 	// If the Default is present and a function, check that it's signtaure is appropriate.
 	if b.desc.Default != nil {
 		typ := reflect.TypeOf(b.desc.Default)
-		if typ.Kind() == reflect.Func && (typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != b.desc.Info.String()) {
+		// We check against "[]uint8" here because the reflect package treats byte as an alias to uint8.
+		if typ.Kind() == reflect.Func && (typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != "[]uint8") {
 			b.desc.Err = fmt.Errorf("expect type (func() %s) for default value", b.desc.Info)
 		}
 	}
