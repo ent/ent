@@ -213,7 +213,7 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 //	field.String("cuid").
 //		DefaultFunc(cuid.New)
 //
-func (b *stringBuilder) DefaultFunc(fn func() string) *stringBuilder {
+func (b *stringBuilder) DefaultFunc(fn interface{}) *stringBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -295,6 +295,13 @@ func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *stringBuilder) Descriptor() *Descriptor {
+	// If the Default is present and a function, check that it's signtaure is appropriate.
+	if b.desc.Default != nil {
+		typ := reflect.TypeOf(b.desc.Default)
+		if typ.Kind() == reflect.Func && (typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != b.desc.Info.String()) {
+			b.desc.Err = fmt.Errorf("expect type (func() %s) for default value", b.desc.Info)
+		}
+	}
 	return b.desc
 }
 
