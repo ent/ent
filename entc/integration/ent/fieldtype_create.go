@@ -30,43 +30,43 @@ type FieldTypeCreate struct {
 	hooks    []Hook
 }
 
-// SetInt sets the int field.
+// SetInt sets the "int" field.
 func (ftc *FieldTypeCreate) SetInt(i int) *FieldTypeCreate {
 	ftc.mutation.SetInt(i)
 	return ftc
 }
 
-// SetInt8 sets the int8 field.
+// SetInt8 sets the "int8" field.
 func (ftc *FieldTypeCreate) SetInt8(i int8) *FieldTypeCreate {
 	ftc.mutation.SetInt8(i)
 	return ftc
 }
 
-// SetInt16 sets the int16 field.
+// SetInt16 sets the "int16" field.
 func (ftc *FieldTypeCreate) SetInt16(i int16) *FieldTypeCreate {
 	ftc.mutation.SetInt16(i)
 	return ftc
 }
 
-// SetInt32 sets the int32 field.
+// SetInt32 sets the "int32" field.
 func (ftc *FieldTypeCreate) SetInt32(i int32) *FieldTypeCreate {
 	ftc.mutation.SetInt32(i)
 	return ftc
 }
 
-// SetInt64 sets the int64 field.
+// SetInt64 sets the "int64" field.
 func (ftc *FieldTypeCreate) SetInt64(i int64) *FieldTypeCreate {
 	ftc.mutation.SetInt64(i)
 	return ftc
 }
 
-// SetOptionalInt sets the optional_int field.
+// SetOptionalInt sets the "optional_int" field.
 func (ftc *FieldTypeCreate) SetOptionalInt(i int) *FieldTypeCreate {
 	ftc.mutation.SetOptionalInt(i)
 	return ftc
 }
 
-// SetNillableOptionalInt sets the optional_int field if the given value is not nil.
+// SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalInt(i *int) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetOptionalInt(*i)
@@ -74,13 +74,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt(i *int) *FieldTypeCreate {
 	return ftc
 }
 
-// SetOptionalInt8 sets the optional_int8 field.
+// SetOptionalInt8 sets the "optional_int8" field.
 func (ftc *FieldTypeCreate) SetOptionalInt8(i int8) *FieldTypeCreate {
 	ftc.mutation.SetOptionalInt8(i)
 	return ftc
 }
 
-// SetNillableOptionalInt8 sets the optional_int8 field if the given value is not nil.
+// SetNillableOptionalInt8 sets the "optional_int8" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalInt8(i *int8) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetOptionalInt8(*i)
@@ -88,13 +88,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt8(i *int8) *FieldTypeCreate {
 	return ftc
 }
 
-// SetOptionalInt16 sets the optional_int16 field.
+// SetOptionalInt16 sets the "optional_int16" field.
 func (ftc *FieldTypeCreate) SetOptionalInt16(i int16) *FieldTypeCreate {
 	ftc.mutation.SetOptionalInt16(i)
 	return ftc
 }
 
-// SetNillableOptionalInt16 sets the optional_int16 field if the given value is not nil.
+// SetNillableOptionalInt16 sets the "optional_int16" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalInt16(i *int16) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetOptionalInt16(*i)
@@ -102,13 +102,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt16(i *int16) *FieldTypeCreate 
 	return ftc
 }
 
-// SetOptionalInt32 sets the optional_int32 field.
+// SetOptionalInt32 sets the "optional_int32" field.
 func (ftc *FieldTypeCreate) SetOptionalInt32(i int32) *FieldTypeCreate {
 	ftc.mutation.SetOptionalInt32(i)
 	return ftc
 }
 
-// SetNillableOptionalInt32 sets the optional_int32 field if the given value is not nil.
+// SetNillableOptionalInt32 sets the "optional_int32" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalInt32(i *int32) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetOptionalInt32(*i)
@@ -116,13 +116,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt32(i *int32) *FieldTypeCreate 
 	return ftc
 }
 
-// SetOptionalInt64 sets the optional_int64 field.
+// SetOptionalInt64 sets the "optional_int64" field.
 func (ftc *FieldTypeCreate) SetOptionalInt64(i int64) *FieldTypeCreate {
 	ftc.mutation.SetOptionalInt64(i)
 	return ftc
 }
 
-// SetNillableOptionalInt64 sets the optional_int64 field if the given value is not nil.
+// SetNillableOptionalInt64 sets the "optional_int64" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalInt64(i *int64) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetOptionalInt64(*i)
@@ -130,13 +130,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalInt64(i *int64) *FieldTypeCreate 
 	return ftc
 }
 
-// SetNillableInt sets the nillable_int field.
+// SetNillableInt sets the "nillable_int" field.
 func (ftc *FieldTypeCreate) SetNillableInt(i int) *FieldTypeCreate {
 	ftc.mutation.SetNillableInt(i)
 	return ftc
 }
 
-// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableNillableInt(i *int) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetNillableInt(*i)
@@ -144,13 +144,13 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt(i *int) *FieldTypeCreate {
 	return ftc
 }
 
-// SetNillableInt8 sets the nillable_int8 field.
+// SetNillableInt8 sets the "nillable_int8" field.
 func (ftc *FieldTypeCreate) SetNillableInt8(i int8) *FieldTypeCreate {
 	ftc.mutation.SetNillableInt8(i)
 	return ftc
 }
 
-// SetNillableNillableInt8 sets the nillable_int8 field if the given value is not nil.
+// SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableNillableInt8(i *int8) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetNillableInt8(*i)
@@ -158,13 +158,13 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt8(i *int8) *FieldTypeCreate {
 	return ftc
 }
 
-// SetNillableInt16 sets the nillable_int16 field.
+// SetNillableInt16 sets the "nillable_int16" field.
 func (ftc *FieldTypeCreate) SetNillableInt16(i int16) *FieldTypeCreate {
 	ftc.mutation.SetNillableInt16(i)
 	return ftc
 }
 
-// SetNillableNillableInt16 sets the nillable_int16 field if the given value is not nil.
+// SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableNillableInt16(i *int16) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetNillableInt16(*i)
@@ -172,13 +172,13 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt16(i *int16) *FieldTypeCreate 
 	return ftc
 }
 
-// SetNillableInt32 sets the nillable_int32 field.
+// SetNillableInt32 sets the "nillable_int32" field.
 func (ftc *FieldTypeCreate) SetNillableInt32(i int32) *FieldTypeCreate {
 	ftc.mutation.SetNillableInt32(i)
 	return ftc
 }
 
-// SetNillableNillableInt32 sets the nillable_int32 field if the given value is not nil.
+// SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableNillableInt32(i *int32) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetNillableInt32(*i)
@@ -186,13 +186,13 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt32(i *int32) *FieldTypeCreate 
 	return ftc
 }
 
-// SetNillableInt64 sets the nillable_int64 field.
+// SetNillableInt64 sets the "nillable_int64" field.
 func (ftc *FieldTypeCreate) SetNillableInt64(i int64) *FieldTypeCreate {
 	ftc.mutation.SetNillableInt64(i)
 	return ftc
 }
 
-// SetNillableNillableInt64 sets the nillable_int64 field if the given value is not nil.
+// SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableNillableInt64(i *int64) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetNillableInt64(*i)
@@ -200,13 +200,13 @@ func (ftc *FieldTypeCreate) SetNillableNillableInt64(i *int64) *FieldTypeCreate 
 	return ftc
 }
 
-// SetValidateOptionalInt32 sets the validate_optional_int32 field.
+// SetValidateOptionalInt32 sets the "validate_optional_int32" field.
 func (ftc *FieldTypeCreate) SetValidateOptionalInt32(i int32) *FieldTypeCreate {
 	ftc.mutation.SetValidateOptionalInt32(i)
 	return ftc
 }
 
-// SetNillableValidateOptionalInt32 sets the validate_optional_int32 field if the given value is not nil.
+// SetNillableValidateOptionalInt32 sets the "validate_optional_int32" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTypeCreate {
 	if i != nil {
 		ftc.SetValidateOptionalInt32(*i)
@@ -214,13 +214,13 @@ func (ftc *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTyp
 	return ftc
 }
 
-// SetOptionalUint sets the optional_uint field.
+// SetOptionalUint sets the "optional_uint" field.
 func (ftc *FieldTypeCreate) SetOptionalUint(u uint) *FieldTypeCreate {
 	ftc.mutation.SetOptionalUint(u)
 	return ftc
 }
 
-// SetNillableOptionalUint sets the optional_uint field if the given value is not nil.
+// SetNillableOptionalUint sets the "optional_uint" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalUint(u *uint) *FieldTypeCreate {
 	if u != nil {
 		ftc.SetOptionalUint(*u)
@@ -228,13 +228,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint(u *uint) *FieldTypeCreate {
 	return ftc
 }
 
-// SetOptionalUint8 sets the optional_uint8 field.
+// SetOptionalUint8 sets the "optional_uint8" field.
 func (ftc *FieldTypeCreate) SetOptionalUint8(u uint8) *FieldTypeCreate {
 	ftc.mutation.SetOptionalUint8(u)
 	return ftc
 }
 
-// SetNillableOptionalUint8 sets the optional_uint8 field if the given value is not nil.
+// SetNillableOptionalUint8 sets the "optional_uint8" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalUint8(u *uint8) *FieldTypeCreate {
 	if u != nil {
 		ftc.SetOptionalUint8(*u)
@@ -242,13 +242,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint8(u *uint8) *FieldTypeCreate 
 	return ftc
 }
 
-// SetOptionalUint16 sets the optional_uint16 field.
+// SetOptionalUint16 sets the "optional_uint16" field.
 func (ftc *FieldTypeCreate) SetOptionalUint16(u uint16) *FieldTypeCreate {
 	ftc.mutation.SetOptionalUint16(u)
 	return ftc
 }
 
-// SetNillableOptionalUint16 sets the optional_uint16 field if the given value is not nil.
+// SetNillableOptionalUint16 sets the "optional_uint16" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalUint16(u *uint16) *FieldTypeCreate {
 	if u != nil {
 		ftc.SetOptionalUint16(*u)
@@ -256,13 +256,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint16(u *uint16) *FieldTypeCreat
 	return ftc
 }
 
-// SetOptionalUint32 sets the optional_uint32 field.
+// SetOptionalUint32 sets the "optional_uint32" field.
 func (ftc *FieldTypeCreate) SetOptionalUint32(u uint32) *FieldTypeCreate {
 	ftc.mutation.SetOptionalUint32(u)
 	return ftc
 }
 
-// SetNillableOptionalUint32 sets the optional_uint32 field if the given value is not nil.
+// SetNillableOptionalUint32 sets the "optional_uint32" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalUint32(u *uint32) *FieldTypeCreate {
 	if u != nil {
 		ftc.SetOptionalUint32(*u)
@@ -270,13 +270,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint32(u *uint32) *FieldTypeCreat
 	return ftc
 }
 
-// SetOptionalUint64 sets the optional_uint64 field.
+// SetOptionalUint64 sets the "optional_uint64" field.
 func (ftc *FieldTypeCreate) SetOptionalUint64(u uint64) *FieldTypeCreate {
 	ftc.mutation.SetOptionalUint64(u)
 	return ftc
 }
 
-// SetNillableOptionalUint64 sets the optional_uint64 field if the given value is not nil.
+// SetNillableOptionalUint64 sets the "optional_uint64" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreate {
 	if u != nil {
 		ftc.SetOptionalUint64(*u)
@@ -284,13 +284,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreat
 	return ftc
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (ftc *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
 	ftc.mutation.SetState(f)
 	return ftc
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableState(f *fieldtype.State) *FieldTypeCreate {
 	if f != nil {
 		ftc.SetState(*f)
@@ -298,13 +298,13 @@ func (ftc *FieldTypeCreate) SetNillableState(f *fieldtype.State) *FieldTypeCreat
 	return ftc
 }
 
-// SetOptionalFloat sets the optional_float field.
+// SetOptionalFloat sets the "optional_float" field.
 func (ftc *FieldTypeCreate) SetOptionalFloat(f float64) *FieldTypeCreate {
 	ftc.mutation.SetOptionalFloat(f)
 	return ftc
 }
 
-// SetNillableOptionalFloat sets the optional_float field if the given value is not nil.
+// SetNillableOptionalFloat sets the "optional_float" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalFloat(f *float64) *FieldTypeCreate {
 	if f != nil {
 		ftc.SetOptionalFloat(*f)
@@ -312,13 +312,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat(f *float64) *FieldTypeCreat
 	return ftc
 }
 
-// SetOptionalFloat32 sets the optional_float32 field.
+// SetOptionalFloat32 sets the "optional_float32" field.
 func (ftc *FieldTypeCreate) SetOptionalFloat32(f float32) *FieldTypeCreate {
 	ftc.mutation.SetOptionalFloat32(f)
 	return ftc
 }
 
-// SetNillableOptionalFloat32 sets the optional_float32 field if the given value is not nil.
+// SetNillableOptionalFloat32 sets the "optional_float32" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCreate {
 	if f != nil {
 		ftc.SetOptionalFloat32(*f)
@@ -326,13 +326,13 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCre
 	return ftc
 }
 
-// SetDatetime sets the datetime field.
+// SetDatetime sets the "datetime" field.
 func (ftc *FieldTypeCreate) SetDatetime(t time.Time) *FieldTypeCreate {
 	ftc.mutation.SetDatetime(t)
 	return ftc
 }
 
-// SetNillableDatetime sets the datetime field if the given value is not nil.
+// SetNillableDatetime sets the "datetime" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableDatetime(t *time.Time) *FieldTypeCreate {
 	if t != nil {
 		ftc.SetDatetime(*t)
@@ -340,13 +340,13 @@ func (ftc *FieldTypeCreate) SetNillableDatetime(t *time.Time) *FieldTypeCreate {
 	return ftc
 }
 
-// SetDecimal sets the decimal field.
+// SetDecimal sets the "decimal" field.
 func (ftc *FieldTypeCreate) SetDecimal(f float64) *FieldTypeCreate {
 	ftc.mutation.SetDecimal(f)
 	return ftc
 }
 
-// SetNillableDecimal sets the decimal field if the given value is not nil.
+// SetNillableDecimal sets the "decimal" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
 	if f != nil {
 		ftc.SetDecimal(*f)
@@ -354,13 +354,13 @@ func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
 	return ftc
 }
 
-// SetDir sets the dir field.
+// SetDir sets the "dir" field.
 func (ftc *FieldTypeCreate) SetDir(h http.Dir) *FieldTypeCreate {
 	ftc.mutation.SetDir(h)
 	return ftc
 }
 
-// SetNillableDir sets the dir field if the given value is not nil.
+// SetNillableDir sets the "dir" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
 	if h != nil {
 		ftc.SetDir(*h)
@@ -368,13 +368,13 @@ func (ftc *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
 	return ftc
 }
 
-// SetNdir sets the ndir field.
+// SetNdir sets the "ndir" field.
 func (ftc *FieldTypeCreate) SetNdir(h http.Dir) *FieldTypeCreate {
 	ftc.mutation.SetNdir(h)
 	return ftc
 }
 
-// SetNillableNdir sets the ndir field if the given value is not nil.
+// SetNillableNdir sets the "ndir" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
 	if h != nil {
 		ftc.SetNdir(*h)
@@ -382,37 +382,37 @@ func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
 	return ftc
 }
 
-// SetStr sets the str field.
+// SetStr sets the "str" field.
 func (ftc *FieldTypeCreate) SetStr(ss sql.NullString) *FieldTypeCreate {
 	ftc.mutation.SetStr(ss)
 	return ftc
 }
 
-// SetNullStr sets the null_str field.
+// SetNullStr sets the "null_str" field.
 func (ftc *FieldTypeCreate) SetNullStr(ss sql.NullString) *FieldTypeCreate {
 	ftc.mutation.SetNullStr(ss)
 	return ftc
 }
 
-// SetLink sets the link field.
+// SetLink sets the "link" field.
 func (ftc *FieldTypeCreate) SetLink(s schema.Link) *FieldTypeCreate {
 	ftc.mutation.SetLink(s)
 	return ftc
 }
 
-// SetNullLink sets the null_link field.
+// SetNullLink sets the "null_link" field.
 func (ftc *FieldTypeCreate) SetNullLink(s schema.Link) *FieldTypeCreate {
 	ftc.mutation.SetNullLink(s)
 	return ftc
 }
 
-// SetActive sets the active field.
+// SetActive sets the "active" field.
 func (ftc *FieldTypeCreate) SetActive(s schema.Status) *FieldTypeCreate {
 	ftc.mutation.SetActive(s)
 	return ftc
 }
 
-// SetNillableActive sets the active field if the given value is not nil.
+// SetNillableActive sets the "active" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableActive(s *schema.Status) *FieldTypeCreate {
 	if s != nil {
 		ftc.SetActive(*s)
@@ -420,13 +420,13 @@ func (ftc *FieldTypeCreate) SetNillableActive(s *schema.Status) *FieldTypeCreate
 	return ftc
 }
 
-// SetNullActive sets the null_active field.
+// SetNullActive sets the "null_active" field.
 func (ftc *FieldTypeCreate) SetNullActive(s schema.Status) *FieldTypeCreate {
 	ftc.mutation.SetNullActive(s)
 	return ftc
 }
 
-// SetNillableNullActive sets the null_active field if the given value is not nil.
+// SetNillableNullActive sets the "null_active" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCreate {
 	if s != nil {
 		ftc.SetNullActive(*s)
@@ -434,37 +434,37 @@ func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCr
 	return ftc
 }
 
-// SetDeleted sets the deleted field.
+// SetDeleted sets the "deleted" field.
 func (ftc *FieldTypeCreate) SetDeleted(sb sql.NullBool) *FieldTypeCreate {
 	ftc.mutation.SetDeleted(sb)
 	return ftc
 }
 
-// SetDeletedAt sets the deleted_at field.
+// SetDeletedAt sets the "deleted_at" field.
 func (ftc *FieldTypeCreate) SetDeletedAt(st sql.NullTime) *FieldTypeCreate {
 	ftc.mutation.SetDeletedAt(st)
 	return ftc
 }
 
-// SetIP sets the ip field.
+// SetIP sets the "ip" field.
 func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 	ftc.mutation.SetIP(n)
 	return ftc
 }
 
-// SetNullInt64 sets the null_int64 field.
+// SetNullInt64 sets the "null_int64" field.
 func (ftc *FieldTypeCreate) SetNullInt64(si sql.NullInt64) *FieldTypeCreate {
 	ftc.mutation.SetNullInt64(si)
 	return ftc
 }
 
-// SetSchemaInt sets the schema_int field.
+// SetSchemaInt sets the "schema_int" field.
 func (ftc *FieldTypeCreate) SetSchemaInt(s schema.Int) *FieldTypeCreate {
 	ftc.mutation.SetSchemaInt(s)
 	return ftc
 }
 
-// SetNillableSchemaInt sets the schema_int field if the given value is not nil.
+// SetNillableSchemaInt sets the "schema_int" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableSchemaInt(s *schema.Int) *FieldTypeCreate {
 	if s != nil {
 		ftc.SetSchemaInt(*s)
@@ -472,13 +472,13 @@ func (ftc *FieldTypeCreate) SetNillableSchemaInt(s *schema.Int) *FieldTypeCreate
 	return ftc
 }
 
-// SetSchemaInt8 sets the schema_int8 field.
+// SetSchemaInt8 sets the "schema_int8" field.
 func (ftc *FieldTypeCreate) SetSchemaInt8(s schema.Int8) *FieldTypeCreate {
 	ftc.mutation.SetSchemaInt8(s)
 	return ftc
 }
 
-// SetNillableSchemaInt8 sets the schema_int8 field if the given value is not nil.
+// SetNillableSchemaInt8 sets the "schema_int8" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeCreate {
 	if s != nil {
 		ftc.SetSchemaInt8(*s)
@@ -486,13 +486,13 @@ func (ftc *FieldTypeCreate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeCrea
 	return ftc
 }
 
-// SetSchemaInt64 sets the schema_int64 field.
+// SetSchemaInt64 sets the "schema_int64" field.
 func (ftc *FieldTypeCreate) SetSchemaInt64(s schema.Int64) *FieldTypeCreate {
 	ftc.mutation.SetSchemaInt64(s)
 	return ftc
 }
 
-// SetNillableSchemaInt64 sets the schema_int64 field if the given value is not nil.
+// SetNillableSchemaInt64 sets the "schema_int64" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCreate {
 	if s != nil {
 		ftc.SetSchemaInt64(*s)
@@ -500,13 +500,13 @@ func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCr
 	return ftc
 }
 
-// SetSchemaFloat sets the schema_float field.
+// SetSchemaFloat sets the "schema_float" field.
 func (ftc *FieldTypeCreate) SetSchemaFloat(s schema.Float64) *FieldTypeCreate {
 	ftc.mutation.SetSchemaFloat(s)
 	return ftc
 }
 
-// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+// SetNillableSchemaFloat sets the "schema_float" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeCreate {
 	if s != nil {
 		ftc.SetSchemaFloat(*s)
@@ -514,13 +514,13 @@ func (ftc *FieldTypeCreate) SetNillableSchemaFloat(s *schema.Float64) *FieldType
 	return ftc
 }
 
-// SetSchemaFloat32 sets the schema_float32 field.
+// SetSchemaFloat32 sets the "schema_float32" field.
 func (ftc *FieldTypeCreate) SetSchemaFloat32(s schema.Float32) *FieldTypeCreate {
 	ftc.mutation.SetSchemaFloat32(s)
 	return ftc
 }
 
-// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+// SetNillableSchemaFloat32 sets the "schema_float32" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeCreate {
 	if s != nil {
 		ftc.SetSchemaFloat32(*s)
@@ -528,19 +528,19 @@ func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTy
 	return ftc
 }
 
-// SetNullFloat sets the null_float field.
+// SetNullFloat sets the "null_float" field.
 func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
 	ftc.mutation.SetNullFloat(sf)
 	return ftc
 }
 
-// SetRole sets the role field.
+// SetRole sets the "role" field.
 func (ftc *FieldTypeCreate) SetRole(r role.Role) *FieldTypeCreate {
 	ftc.mutation.SetRole(r)
 	return ftc
 }
 
-// SetNillableRole sets the role field if the given value is not nil.
+// SetNillableRole sets the "role" field if the given value is not nil.
 func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	if r != nil {
 		ftc.SetRole(*r)
@@ -548,13 +548,13 @@ func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	return ftc
 }
 
-// SetMAC sets the mac field.
+// SetMAC sets the "mac" field.
 func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
 	ftc.mutation.SetMAC(s)
 	return ftc
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	ftc.mutation.SetUUID(u)
 	return ftc
@@ -1086,7 +1086,7 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// FieldTypeCreateBulk is the builder for creating a bulk of FieldType entities.
+// FieldTypeCreateBulk is the builder for creating many FieldType entities in bulk.
 type FieldTypeCreateBulk struct {
 	config
 	builders []*FieldTypeCreate
@@ -1144,7 +1144,7 @@ func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error)
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ftcb *FieldTypeCreateBulk) SaveX(ctx context.Context) []*FieldType {
 	v, err := ftcb.Save(ctx)
 	if err != nil {

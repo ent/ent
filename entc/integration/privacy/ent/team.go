@@ -96,25 +96,25 @@ func (t *Team) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryTasks queries the tasks edge of the Team.
+// QueryTasks queries the "tasks" edge of the Team entity.
 func (t *Team) QueryTasks() *TaskQuery {
 	return (&TeamClient{config: t.config}).QueryTasks(t)
 }
 
-// QueryUsers queries the users edge of the Team.
+// QueryUsers queries the "users" edge of the Team entity.
 func (t *Team) QueryUsers() *UserQuery {
 	return (&TeamClient{config: t.config}).QueryUsers(t)
 }
 
 // Update returns a builder for updating this Team.
-// Note that, you need to call Team.Unwrap() before calling this method, if this Team
+// Note that you need to call Team.Unwrap() before calling this method if this Team
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Team) Update() *TeamUpdateOne {
 	return (&TeamClient{config: t.config}).UpdateOne(t)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Team entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (t *Team) Unwrap() *Team {
 	tx, ok := t.config.driver.(*txDriver)
 	if !ok {

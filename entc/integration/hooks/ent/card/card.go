@@ -77,10 +77,10 @@ func ValidColumn(column string) bool {
 //
 var (
 	Hooks [3]ent.Hook
-	// DefaultNumber holds the default value on creation for the number field.
+	// DefaultNumber holds the default value on creation for the "number" field.
 	DefaultNumber string
 	// NumberValidator is a validator for the "number" field. It is called by the builders before save.
 	NumberValidator func(string) error
-	// DefaultCreatedAt holds the default value on creation for the created_at field.
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )

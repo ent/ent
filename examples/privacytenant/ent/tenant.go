@@ -65,14 +65,14 @@ func (t *Tenant) assignValues(columns []string, values []interface{}) error {
 }
 
 // Update returns a builder for updating this Tenant.
-// Note that, you need to call Tenant.Unwrap() before calling this method, if this Tenant
+// Note that you need to call Tenant.Unwrap() before calling this method if this Tenant
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Tenant) Update() *TenantUpdateOne {
 	return (&TenantClient{config: t.config}).UpdateOne(t)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Tenant entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (t *Tenant) Unwrap() *Tenant {
 	tx, ok := t.config.driver.(*txDriver)
 	if !ok {

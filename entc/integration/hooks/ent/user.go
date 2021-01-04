@@ -138,30 +138,30 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryCards queries the cards edge of the User.
+// QueryCards queries the "cards" edge of the User entity.
 func (u *User) QueryCards() *CardQuery {
 	return (&UserClient{config: u.config}).QueryCards(u)
 }
 
-// QueryFriends queries the friends edge of the User.
+// QueryFriends queries the "friends" edge of the User entity.
 func (u *User) QueryFriends() *UserQuery {
 	return (&UserClient{config: u.config}).QueryFriends(u)
 }
 
-// QueryBestFriend queries the best_friend edge of the User.
+// QueryBestFriend queries the "best_friend" edge of the User entity.
 func (u *User) QueryBestFriend() *UserQuery {
 	return (&UserClient{config: u.config}).QueryBestFriend(u)
 }
 
 // Update returns a builder for updating this User.
-// Note that, you need to call User.Unwrap() before calling this method, if this User
+// Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
 	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the User entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (u *User) Unwrap() *User {
 	tx, ok := u.config.driver.(*txDriver)
 	if !ok {

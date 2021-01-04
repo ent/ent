@@ -23,13 +23,13 @@ type CarCreate struct {
 	hooks    []Hook
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cc *CarCreate) SetOwnerID(id int) *CarCreate {
 	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cc *CarCreate) SetNillableOwnerID(id *int) *CarCreate {
 	if id != nil {
 		cc = cc.SetOwnerID(*id)
@@ -37,7 +37,7 @@ func (cc *CarCreate) SetNillableOwnerID(id *int) *CarCreate {
 	return cc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cc *CarCreate) SetOwner(u *User) *CarCreate {
 	return cc.SetOwnerID(u.ID)
 }
@@ -142,7 +142,7 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// CarCreateBulk is the builder for creating a bulk of Car entities.
+// CarCreateBulk is the builder for creating many Car entities in bulk.
 type CarCreateBulk struct {
 	config
 	builders []*CarCreate
@@ -199,7 +199,7 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *CarCreateBulk) SaveX(ctx context.Context) []*Car {
 	v, err := ccb.Save(ctx)
 	if err != nil {

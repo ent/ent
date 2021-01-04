@@ -38,7 +38,7 @@ type BlobQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the BlobQuery builder.
 func (bq *BlobQuery) Where(ps ...predicate.Blob) *BlobQuery {
 	bq.predicates = append(bq.predicates, ps...)
 	return bq
@@ -62,7 +62,7 @@ func (bq *BlobQuery) Order(o ...OrderFunc) *BlobQuery {
 	return bq
 }
 
-// QueryParent chains the current query on the parent edge.
+// QueryParent chains the current query on the "parent" edge.
 func (bq *BlobQuery) QueryParent() *BlobQuery {
 	query := &BlobQuery{config: bq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -84,7 +84,7 @@ func (bq *BlobQuery) QueryParent() *BlobQuery {
 	return query
 }
 
-// QueryLinks chains the current query on the links edge.
+// QueryLinks chains the current query on the "links" edge.
 func (bq *BlobQuery) QueryLinks() *BlobQuery {
 	query := &BlobQuery{config: bq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -106,7 +106,8 @@ func (bq *BlobQuery) QueryLinks() *BlobQuery {
 	return query
 }
 
-// First returns the first Blob entity in the query. Returns *NotFoundError when no blob was found.
+// First returns the first Blob entity from the query.
+// Returns a *NotFoundError when no Blob was found.
 func (bq *BlobQuery) First(ctx context.Context) (*Blob, error) {
 	nodes, err := bq.Limit(1).All(ctx)
 	if err != nil {
@@ -127,7 +128,8 @@ func (bq *BlobQuery) FirstX(ctx context.Context) *Blob {
 	return node
 }
 
-// FirstID returns the first Blob id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Blob ID from the query.
+// Returns a *NotFoundError when no Blob ID was found.
 func (bq *BlobQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = bq.Limit(1).IDs(ctx); err != nil {
@@ -149,7 +151,9 @@ func (bq *BlobQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// Only returns the only Blob entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Blob entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Blob entity is not found.
+// Returns a *NotFoundError when no Blob entities are found.
 func (bq *BlobQuery) Only(ctx context.Context) (*Blob, error) {
 	nodes, err := bq.Limit(2).All(ctx)
 	if err != nil {
@@ -174,7 +178,9 @@ func (bq *BlobQuery) OnlyX(ctx context.Context) *Blob {
 	return node
 }
 
-// OnlyID returns the only Blob id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Blob ID in the query.
+// Returns a *NotSingularError when exactly one Blob ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (bq *BlobQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = bq.Limit(2).IDs(ctx); err != nil {
@@ -217,7 +223,7 @@ func (bq *BlobQuery) AllX(ctx context.Context) []*Blob {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Blob ids.
+// IDs executes the query and returns a list of Blob IDs.
 func (bq *BlobQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	var ids []uuid.UUID
 	if err := bq.Select(blob.FieldID).Scan(ctx, &ids); err != nil {
@@ -269,7 +275,7 @@ func (bq *BlobQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the BlobQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (bq *BlobQuery) Clone() *BlobQuery {
 	if bq == nil {
@@ -289,8 +295,8 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 	}
 }
 
-//  WithParent tells the query-builder to eager-loads the nodes that are connected to
-// the "parent" edge. The optional arguments used to configure the query builder of the edge.
+// WithParent tells the query-builder to eager-load the nodes that are connected to
+// the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (bq *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
 	query := &BlobQuery{config: bq.config}
 	for _, opt := range opts {
@@ -300,8 +306,8 @@ func (bq *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
 	return bq
 }
 
-//  WithLinks tells the query-builder to eager-loads the nodes that are connected to
-// the "links" edge. The optional arguments used to configure the query builder of the edge.
+// WithLinks tells the query-builder to eager-load the nodes that are connected to
+// the "links" edge. The optional arguments are used to configure the query builder of the edge.
 func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
 	query := &BlobQuery{config: bq.config}
 	for _, opt := range opts {
@@ -311,7 +317,7 @@ func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
 	return bq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -338,7 +344,8 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -582,7 +589,7 @@ func (bq *BlobQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// BlobGroupBy is the builder for group-by Blob entities.
+// BlobGroupBy is the group-by builder for Blob entities.
 type BlobGroupBy struct {
 	config
 	fields []string
@@ -598,7 +605,7 @@ func (bgb *BlobGroupBy) Aggregate(fns ...AggregateFunc) *BlobGroupBy {
 	return bgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (bgb *BlobGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := bgb.path(ctx)
 	if err != nil {
@@ -615,7 +622,8 @@ func (bgb *BlobGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (bgb *BlobGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(bgb.fields) > 1 {
 		return nil, errors.New("ent: BlobGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -636,7 +644,8 @@ func (bgb *BlobGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (bgb *BlobGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = bgb.Strings(ctx); err != nil {
@@ -662,7 +671,8 @@ func (bgb *BlobGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (bgb *BlobGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(bgb.fields) > 1 {
 		return nil, errors.New("ent: BlobGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -683,7 +693,8 @@ func (bgb *BlobGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (bgb *BlobGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = bgb.Ints(ctx); err != nil {
@@ -709,7 +720,8 @@ func (bgb *BlobGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (bgb *BlobGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(bgb.fields) > 1 {
 		return nil, errors.New("ent: BlobGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -730,7 +742,8 @@ func (bgb *BlobGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (bgb *BlobGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = bgb.Float64s(ctx); err != nil {
@@ -756,7 +769,8 @@ func (bgb *BlobGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (bgb *BlobGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(bgb.fields) > 1 {
 		return nil, errors.New("ent: BlobGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -777,7 +791,8 @@ func (bgb *BlobGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (bgb *BlobGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = bgb.Bools(ctx); err != nil {
@@ -832,14 +847,14 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(bgb.fields...)
 }
 
-// BlobSelect is the builder for select fields of Blob entities.
+// BlobSelect is the builder for selecting fields of Blob entities.
 type BlobSelect struct {
 	*BlobQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := bs.prepareQuery(ctx); err != nil {
 		return err
@@ -855,7 +870,7 @@ func (bs *BlobSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (bs *BlobSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(bs.fields) > 1 {
 		return nil, errors.New("ent: BlobSelect.Strings is not achievable when selecting more than 1 field")
@@ -876,7 +891,7 @@ func (bs *BlobSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (bs *BlobSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = bs.Strings(ctx); err != nil {
@@ -902,7 +917,7 @@ func (bs *BlobSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (bs *BlobSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(bs.fields) > 1 {
 		return nil, errors.New("ent: BlobSelect.Ints is not achievable when selecting more than 1 field")
@@ -923,7 +938,7 @@ func (bs *BlobSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (bs *BlobSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = bs.Ints(ctx); err != nil {
@@ -949,7 +964,7 @@ func (bs *BlobSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (bs *BlobSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(bs.fields) > 1 {
 		return nil, errors.New("ent: BlobSelect.Float64s is not achievable when selecting more than 1 field")
@@ -970,7 +985,7 @@ func (bs *BlobSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (bs *BlobSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = bs.Float64s(ctx); err != nil {
@@ -996,7 +1011,7 @@ func (bs *BlobSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (bs *BlobSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(bs.fields) > 1 {
 		return nil, errors.New("ent: BlobSelect.Bools is not achievable when selecting more than 1 field")
@@ -1017,7 +1032,7 @@ func (bs *BlobSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (bs *BlobSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = bs.Bools(ctx); err != nil {

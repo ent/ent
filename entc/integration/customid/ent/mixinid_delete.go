@@ -24,7 +24,7 @@ type MixinIDDelete struct {
 	mutation *MixinIDMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the MixinIDDelete builder.
 func (mid *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
 	mid.mutation.predicates = append(mid.mutation.predicates, ps...)
 	return mid

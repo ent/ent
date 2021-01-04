@@ -25,38 +25,38 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.mutation.ResetAge()
 	uu.mutation.SetAge(i)
 	return uu
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
 	uu.mutation.AddAge(i)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetCardID sets the card edge to Card by id.
+// SetCardID sets the "card" edge to the Card entity by ID.
 func (uu *UserUpdate) SetCardID(id int) *UserUpdate {
 	uu.mutation.SetCardID(id)
 	return uu
 }
 
-// SetNillableCardID sets the card edge to Card by id if the given value is not nil.
+// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetCardID(*id)
@@ -64,7 +64,7 @@ func (uu *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 	return uu
 }
 
-// SetCard sets the card edge to Card.
+// SetCard sets the "card" edge to the Card entity.
 func (uu *UserUpdate) SetCard(c *Card) *UserUpdate {
 	return uu.SetCardID(c.ID)
 }
@@ -74,7 +74,7 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearCard clears the "card" edge to type Card.
+// ClearCard clears the "card" edge to the Card entity.
 func (uu *UserUpdate) ClearCard() *UserUpdate {
 	uu.mutation.ClearCard()
 	return uu
@@ -223,32 +223,32 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.mutation.ResetAge()
 	uuo.mutation.SetAge(i)
 	return uuo
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
 	uuo.mutation.AddAge(i)
 	return uuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetCardID sets the card edge to Card by id.
+// SetCardID sets the "card" edge to the Card entity by ID.
 func (uuo *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
 	uuo.mutation.SetCardID(id)
 	return uuo
 }
 
-// SetNillableCardID sets the card edge to Card by id if the given value is not nil.
+// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetCardID(*id)
@@ -256,7 +256,7 @@ func (uuo *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 	return uuo
 }
 
-// SetCard sets the card edge to Card.
+// SetCard sets the "card" edge to the Card entity.
 func (uuo *UserUpdateOne) SetCard(c *Card) *UserUpdateOne {
 	return uuo.SetCardID(c.ID)
 }
@@ -266,13 +266,13 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearCard clears the "card" edge to type Card.
+// ClearCard clears the "card" edge to the Card entity.
 func (uuo *UserUpdateOne) ClearCard() *UserUpdateOne {
 	uuo.mutation.ClearCard()
 	return uuo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

@@ -12,7 +12,7 @@ import (
 	"github.com/facebook/ent/entc/integration/privacy/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -269,7 +269,7 @@ func HasUsersWith(preds ...predicate.User) predicate.Team {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Team) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -280,7 +280,7 @@ func And(predicates ...predicate.Team) predicate.Team {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Team) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

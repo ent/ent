@@ -112,25 +112,25 @@ func (gr *Group) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryTenant queries the tenant edge of the Group.
+// QueryTenant queries the "tenant" edge of the Group entity.
 func (gr *Group) QueryTenant() *TenantQuery {
 	return (&GroupClient{config: gr.config}).QueryTenant(gr)
 }
 
-// QueryUsers queries the users edge of the Group.
+// QueryUsers queries the "users" edge of the Group entity.
 func (gr *Group) QueryUsers() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryUsers(gr)
 }
 
 // Update returns a builder for updating this Group.
-// Note that, you need to call Group.Unwrap() before calling this method, if this Group
+// Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gr *Group) Update() *GroupUpdateOne {
 	return (&GroupClient{config: gr.config}).UpdateOne(gr)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (gr *Group) Unwrap() *Group {
 	tx, ok := gr.config.driver.(*txDriver)
 	if !ok {

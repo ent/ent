@@ -24,19 +24,19 @@ type StreetCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (sc *StreetCreate) SetName(s string) *StreetCreate {
 	sc.mutation.SetName(s)
 	return sc
 }
 
-// SetCityID sets the city edge to City by id.
+// SetCityID sets the "city" edge to the City entity by ID.
 func (sc *StreetCreate) SetCityID(id int) *StreetCreate {
 	sc.mutation.SetCityID(id)
 	return sc
 }
 
-// SetNillableCityID sets the city edge to City by id if the given value is not nil.
+// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
 func (sc *StreetCreate) SetNillableCityID(id *int) *StreetCreate {
 	if id != nil {
 		sc = sc.SetCityID(*id)
@@ -44,7 +44,7 @@ func (sc *StreetCreate) SetNillableCityID(id *int) *StreetCreate {
 	return sc
 }
 
-// SetCity sets the city edge to City.
+// SetCity sets the "city" edge to the City entity.
 func (sc *StreetCreate) SetCity(c *City) *StreetCreate {
 	return sc.SetCityID(c.ID)
 }
@@ -160,7 +160,7 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// StreetCreateBulk is the builder for creating a bulk of Street entities.
+// StreetCreateBulk is the builder for creating many Street entities in bulk.
 type StreetCreateBulk struct {
 	config
 	builders []*StreetCreate
@@ -217,7 +217,7 @@ func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (scb *StreetCreateBulk) SaveX(ctx context.Context) []*Street {
 	v, err := scb.Save(ctx)
 	if err != nil {

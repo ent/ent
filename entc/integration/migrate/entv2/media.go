@@ -73,14 +73,14 @@ func (m *Media) assignValues(columns []string, values []interface{}) error {
 }
 
 // Update returns a builder for updating this Media.
-// Note that, you need to call Media.Unwrap() before calling this method, if this Media
+// Note that you need to call Media.Unwrap() before calling this method if this Media
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (m *Media) Update() *MediaUpdateOne {
 	return (&MediaClient{config: m.config}).UpdateOne(m)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Media entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (m *Media) Unwrap() *Media {
 	tx, ok := m.config.driver.(*txDriver)
 	if !ok {

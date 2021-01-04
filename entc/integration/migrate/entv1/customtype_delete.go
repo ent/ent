@@ -24,7 +24,7 @@ type CustomTypeDelete struct {
 	mutation *CustomTypeMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the CustomTypeDelete builder.
 func (ctd *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete {
 	ctd.mutation.predicates = append(ctd.mutation.predicates, ps...)
 	return ctd

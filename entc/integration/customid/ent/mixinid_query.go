@@ -33,7 +33,7 @@ type MixinIDQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the MixinIDQuery builder.
 func (miq *MixinIDQuery) Where(ps ...predicate.MixinID) *MixinIDQuery {
 	miq.predicates = append(miq.predicates, ps...)
 	return miq
@@ -57,7 +57,8 @@ func (miq *MixinIDQuery) Order(o ...OrderFunc) *MixinIDQuery {
 	return miq
 }
 
-// First returns the first MixinID entity in the query. Returns *NotFoundError when no mixinid was found.
+// First returns the first MixinID entity from the query.
+// Returns a *NotFoundError when no MixinID was found.
 func (miq *MixinIDQuery) First(ctx context.Context) (*MixinID, error) {
 	nodes, err := miq.Limit(1).All(ctx)
 	if err != nil {
@@ -78,7 +79,8 @@ func (miq *MixinIDQuery) FirstX(ctx context.Context) *MixinID {
 	return node
 }
 
-// FirstID returns the first MixinID id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first MixinID ID from the query.
+// Returns a *NotFoundError when no MixinID ID was found.
 func (miq *MixinIDQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = miq.Limit(1).IDs(ctx); err != nil {
@@ -100,7 +102,9 @@ func (miq *MixinIDQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	return id
 }
 
-// Only returns the only MixinID entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single MixinID entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one MixinID entity is not found.
+// Returns a *NotFoundError when no MixinID entities are found.
 func (miq *MixinIDQuery) Only(ctx context.Context) (*MixinID, error) {
 	nodes, err := miq.Limit(2).All(ctx)
 	if err != nil {
@@ -125,7 +129,9 @@ func (miq *MixinIDQuery) OnlyX(ctx context.Context) *MixinID {
 	return node
 }
 
-// OnlyID returns the only MixinID id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only MixinID ID in the query.
+// Returns a *NotSingularError when exactly one MixinID ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (miq *MixinIDQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
 	if ids, err = miq.Limit(2).IDs(ctx); err != nil {
@@ -168,7 +174,7 @@ func (miq *MixinIDQuery) AllX(ctx context.Context) []*MixinID {
 	return nodes
 }
 
-// IDs executes the query and returns a list of MixinID ids.
+// IDs executes the query and returns a list of MixinID IDs.
 func (miq *MixinIDQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	var ids []uuid.UUID
 	if err := miq.Select(mixinid.FieldID).Scan(ctx, &ids); err != nil {
@@ -220,7 +226,7 @@ func (miq *MixinIDQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the MixinIDQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 	if miq == nil {
@@ -238,7 +244,7 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -265,7 +271,8 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -407,7 +414,7 @@ func (miq *MixinIDQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// MixinIDGroupBy is the builder for group-by MixinID entities.
+// MixinIDGroupBy is the group-by builder for MixinID entities.
 type MixinIDGroupBy struct {
 	config
 	fields []string
@@ -423,7 +430,7 @@ func (migb *MixinIDGroupBy) Aggregate(fns ...AggregateFunc) *MixinIDGroupBy {
 	return migb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (migb *MixinIDGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := migb.path(ctx)
 	if err != nil {
@@ -440,7 +447,8 @@ func (migb *MixinIDGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (migb *MixinIDGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(migb.fields) > 1 {
 		return nil, errors.New("ent: MixinIDGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -461,7 +469,8 @@ func (migb *MixinIDGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (migb *MixinIDGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = migb.Strings(ctx); err != nil {
@@ -487,7 +496,8 @@ func (migb *MixinIDGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (migb *MixinIDGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(migb.fields) > 1 {
 		return nil, errors.New("ent: MixinIDGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -508,7 +518,8 @@ func (migb *MixinIDGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (migb *MixinIDGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = migb.Ints(ctx); err != nil {
@@ -534,7 +545,8 @@ func (migb *MixinIDGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (migb *MixinIDGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(migb.fields) > 1 {
 		return nil, errors.New("ent: MixinIDGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -555,7 +567,8 @@ func (migb *MixinIDGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (migb *MixinIDGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = migb.Float64s(ctx); err != nil {
@@ -581,7 +594,8 @@ func (migb *MixinIDGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (migb *MixinIDGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(migb.fields) > 1 {
 		return nil, errors.New("ent: MixinIDGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -602,7 +616,8 @@ func (migb *MixinIDGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (migb *MixinIDGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = migb.Bools(ctx); err != nil {
@@ -657,14 +672,14 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(migb.fields...)
 }
 
-// MixinIDSelect is the builder for select fields of MixinID entities.
+// MixinIDSelect is the builder for selecting fields of MixinID entities.
 type MixinIDSelect struct {
 	*MixinIDQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := mis.prepareQuery(ctx); err != nil {
 		return err
@@ -680,7 +695,7 @@ func (mis *MixinIDSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (mis *MixinIDSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(mis.fields) > 1 {
 		return nil, errors.New("ent: MixinIDSelect.Strings is not achievable when selecting more than 1 field")
@@ -701,7 +716,7 @@ func (mis *MixinIDSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (mis *MixinIDSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = mis.Strings(ctx); err != nil {
@@ -727,7 +742,7 @@ func (mis *MixinIDSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (mis *MixinIDSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(mis.fields) > 1 {
 		return nil, errors.New("ent: MixinIDSelect.Ints is not achievable when selecting more than 1 field")
@@ -748,7 +763,7 @@ func (mis *MixinIDSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (mis *MixinIDSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = mis.Ints(ctx); err != nil {
@@ -774,7 +789,7 @@ func (mis *MixinIDSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (mis *MixinIDSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(mis.fields) > 1 {
 		return nil, errors.New("ent: MixinIDSelect.Float64s is not achievable when selecting more than 1 field")
@@ -795,7 +810,7 @@ func (mis *MixinIDSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (mis *MixinIDSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = mis.Float64s(ctx); err != nil {
@@ -821,7 +836,7 @@ func (mis *MixinIDSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (mis *MixinIDSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(mis.fields) > 1 {
 		return nil, errors.New("ent: MixinIDSelect.Bools is not achievable when selecting more than 1 field")
@@ -842,7 +857,7 @@ func (mis *MixinIDSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (mis *MixinIDSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = mis.Bools(ctx); err != nil {

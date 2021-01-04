@@ -23,19 +23,19 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetSpouseID sets the spouse edge to User by id.
+// SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (uc *UserCreate) SetSpouseID(id uint64) *UserCreate {
 	uc.mutation.SetSpouseID(id)
 	return uc
 }
 
-// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillableSpouseID(id *uint64) *UserCreate {
 	if id != nil {
 		uc = uc.SetSpouseID(*id)
@@ -43,18 +43,18 @@ func (uc *UserCreate) SetNillableSpouseID(id *uint64) *UserCreate {
 	return uc
 }
 
-// SetSpouse sets the spouse edge to User.
+// SetSpouse sets the "spouse" edge to the User entity.
 func (uc *UserCreate) SetSpouse(u *User) *UserCreate {
 	return uc.SetSpouseID(u.ID)
 }
 
-// AddFollowerIDs adds the followers edge to User by ids.
+// AddFollowerIDs adds the "followers" edge to the User entity by IDs.
 func (uc *UserCreate) AddFollowerIDs(ids ...uint64) *UserCreate {
 	uc.mutation.AddFollowerIDs(ids...)
 	return uc
 }
 
-// AddFollowers adds the followers edges to User.
+// AddFollowers adds the "followers" edges to the User entity.
 func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -63,13 +63,13 @@ func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 	return uc.AddFollowerIDs(ids...)
 }
 
-// AddFollowingIDs adds the following edge to User by ids.
+// AddFollowingIDs adds the "following" edge to the User entity by IDs.
 func (uc *UserCreate) AddFollowingIDs(ids ...uint64) *UserCreate {
 	uc.mutation.AddFollowingIDs(ids...)
 	return uc
 }
 
-// AddFollowing adds the following edges to User.
+// AddFollowing adds the "following" edges to the User entity.
 func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -227,7 +227,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -284,7 +284,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

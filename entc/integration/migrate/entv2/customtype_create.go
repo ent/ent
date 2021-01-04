@@ -22,13 +22,13 @@ type CustomTypeCreate struct {
 	hooks    []Hook
 }
 
-// SetCustom sets the custom field.
+// SetCustom sets the "custom" field.
 func (ctc *CustomTypeCreate) SetCustom(s string) *CustomTypeCreate {
 	ctc.mutation.SetCustom(s)
 	return ctc
 }
 
-// SetNillableCustom sets the custom field if the given value is not nil.
+// SetNillableCustom sets the "custom" field if the given value is not nil.
 func (ctc *CustomTypeCreate) SetNillableCustom(s *string) *CustomTypeCreate {
 	if s != nil {
 		ctc.SetCustom(*s)
@@ -125,7 +125,7 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// CustomTypeCreateBulk is the builder for creating a bulk of CustomType entities.
+// CustomTypeCreateBulk is the builder for creating many CustomType entities in bulk.
 type CustomTypeCreateBulk struct {
 	config
 	builders []*CustomTypeCreate
@@ -182,7 +182,7 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ctcb *CustomTypeCreateBulk) SaveX(ctx context.Context) []*CustomType {
 	v, err := ctcb.Save(ctx)
 	if err != nil {

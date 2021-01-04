@@ -26,19 +26,19 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uu *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddGroupIDs(ids...)
 	return uu
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -47,13 +47,13 @@ func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	return uu.AddGroupIDs(ids...)
 }
 
-// SetParentID sets the parent edge to User by id.
+// SetParentID sets the "parent" edge to the User entity by ID.
 func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
 	uu.mutation.SetParentID(id)
 	return uu
 }
 
-// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetParentID(*id)
@@ -61,18 +61,18 @@ func (uu *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 	return uu
 }
 
-// SetParent sets the parent edge to User.
+// SetParent sets the "parent" edge to the User entity.
 func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
 	return uu.SetParentID(u.ID)
 }
 
-// AddChildIDs adds the children edge to User by ids.
+// AddChildIDs adds the "children" edge to the User entity by IDs.
 func (uu *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddChildIDs(ids...)
 	return uu
 }
 
-// AddChildren adds the children edges to User.
+// AddChildren adds the "children" edges to the User entity.
 func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -81,13 +81,13 @@ func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 	return uu.AddChildIDs(ids...)
 }
 
-// AddPetIDs adds the pets edge to Pet by ids.
+// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uu *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
 	uu.mutation.AddPetIDs(ids...)
 	return uu
 }
 
-// AddPets adds the pets edges to Pet.
+// AddPets adds the "pets" edges to the Pet entity.
 func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -101,19 +101,19 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (uu *UserUpdate) ClearGroups() *UserUpdate {
 	uu.mutation.ClearGroups()
 	return uu
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveGroupIDs(ids...)
 	return uu
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -122,25 +122,25 @@ func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	return uu.RemoveGroupIDs(ids...)
 }
 
-// ClearParent clears the "parent" edge to type User.
+// ClearParent clears the "parent" edge to the User entity.
 func (uu *UserUpdate) ClearParent() *UserUpdate {
 	uu.mutation.ClearParent()
 	return uu
 }
 
-// ClearChildren clears all "children" edges to type User.
+// ClearChildren clears all "children" edges to the User entity.
 func (uu *UserUpdate) ClearChildren() *UserUpdate {
 	uu.mutation.ClearChildren()
 	return uu
 }
 
-// RemoveChildIDs removes the children edge to User by ids.
+// RemoveChildIDs removes the "children" edge to User entities by IDs.
 func (uu *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveChildIDs(ids...)
 	return uu
 }
 
-// RemoveChildren removes children edges to User.
+// RemoveChildren removes "children" edges to User entities.
 func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -149,19 +149,19 @@ func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 	return uu.RemoveChildIDs(ids...)
 }
 
-// ClearPets clears all "pets" edges to type Pet.
+// ClearPets clears all "pets" edges to the Pet entity.
 func (uu *UserUpdate) ClearPets() *UserUpdate {
 	uu.mutation.ClearPets()
 	return uu
 }
 
-// RemovePetIDs removes the pets edge to Pet by ids.
+// RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (uu *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
 	uu.mutation.RemovePetIDs(ids...)
 	return uu
 }
 
-// RemovePets removes pets edges to Pet.
+// RemovePets removes "pets" edges to Pet entities.
 func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -454,13 +454,13 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uuo *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddGroupIDs(ids...)
 	return uuo
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -469,13 +469,13 @@ func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	return uuo.AddGroupIDs(ids...)
 }
 
-// SetParentID sets the parent edge to User by id.
+// SetParentID sets the "parent" edge to the User entity by ID.
 func (uuo *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
 	uuo.mutation.SetParentID(id)
 	return uuo
 }
 
-// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetParentID(*id)
@@ -483,18 +483,18 @@ func (uuo *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
 	return uuo
 }
 
-// SetParent sets the parent edge to User.
+// SetParent sets the "parent" edge to the User entity.
 func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
 	return uuo.SetParentID(u.ID)
 }
 
-// AddChildIDs adds the children edge to User by ids.
+// AddChildIDs adds the "children" edge to the User entity by IDs.
 func (uuo *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddChildIDs(ids...)
 	return uuo
 }
 
-// AddChildren adds the children edges to User.
+// AddChildren adds the "children" edges to the User entity.
 func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -503,13 +503,13 @@ func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 	return uuo.AddChildIDs(ids...)
 }
 
-// AddPetIDs adds the pets edge to Pet by ids.
+// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uuo *UserUpdateOne) AddPetIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.AddPetIDs(ids...)
 	return uuo
 }
 
-// AddPets adds the pets edges to Pet.
+// AddPets adds the "pets" edges to the Pet entity.
 func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -523,19 +523,19 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
 	uuo.mutation.ClearGroups()
 	return uuo
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveGroupIDs(ids...)
 	return uuo
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -544,25 +544,25 @@ func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	return uuo.RemoveGroupIDs(ids...)
 }
 
-// ClearParent clears the "parent" edge to type User.
+// ClearParent clears the "parent" edge to the User entity.
 func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 	uuo.mutation.ClearParent()
 	return uuo
 }
 
-// ClearChildren clears all "children" edges to type User.
+// ClearChildren clears all "children" edges to the User entity.
 func (uuo *UserUpdateOne) ClearChildren() *UserUpdateOne {
 	uuo.mutation.ClearChildren()
 	return uuo
 }
 
-// RemoveChildIDs removes the children edge to User by ids.
+// RemoveChildIDs removes the "children" edge to User entities by IDs.
 func (uuo *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveChildIDs(ids...)
 	return uuo
 }
 
-// RemoveChildren removes children edges to User.
+// RemoveChildren removes "children" edges to User entities.
 func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -571,19 +571,19 @@ func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 	return uuo.RemoveChildIDs(ids...)
 }
 
-// ClearPets clears all "pets" edges to type Pet.
+// ClearPets clears all "pets" edges to the Pet entity.
 func (uuo *UserUpdateOne) ClearPets() *UserUpdateOne {
 	uuo.mutation.ClearPets()
 	return uuo
 }
 
-// RemovePetIDs removes the pets edge to Pet by ids.
+// RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (uuo *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.RemovePetIDs(ids...)
 	return uuo
 }
 
-// RemovePets removes pets edges to Pet.
+// RemovePets removes "pets" edges to Pet entities.
 func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -592,7 +592,7 @@ func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 	return uuo.RemovePetIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

@@ -103,7 +103,7 @@ func (gc *GoodsCreate) createSpec() (*Goods, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// GoodsCreateBulk is the builder for creating a bulk of Goods entities.
+// GoodsCreateBulk is the builder for creating many Goods entities in bulk.
 type GoodsCreateBulk struct {
 	config
 	builders []*GoodsCreate
@@ -160,7 +160,7 @@ func (gcb *GoodsCreateBulk) Save(ctx context.Context) ([]*Goods, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (gcb *GoodsCreateBulk) SaveX(ctx context.Context) []*Goods {
 	v, err := gcb.Save(ctx)
 	if err != nil {

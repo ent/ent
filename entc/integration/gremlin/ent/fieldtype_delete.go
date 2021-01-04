@@ -25,7 +25,7 @@ type FieldTypeDelete struct {
 	mutation *FieldTypeMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the FieldTypeDelete builder.
 func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
 	ftd.mutation.predicates = append(ftd.mutation.predicates, ps...)
 	return ftd

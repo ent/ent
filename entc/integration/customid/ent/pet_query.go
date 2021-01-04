@@ -41,7 +41,7 @@ type PetQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the PetQuery builder.
 func (pq *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
 	pq.predicates = append(pq.predicates, ps...)
 	return pq
@@ -65,7 +65,7 @@ func (pq *PetQuery) Order(o ...OrderFunc) *PetQuery {
 	return pq
 }
 
-// QueryOwner chains the current query on the owner edge.
+// QueryOwner chains the current query on the "owner" edge.
 func (pq *PetQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: pq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -87,7 +87,7 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// QueryCars chains the current query on the cars edge.
+// QueryCars chains the current query on the "cars" edge.
 func (pq *PetQuery) QueryCars() *CarQuery {
 	query := &CarQuery{config: pq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -109,7 +109,7 @@ func (pq *PetQuery) QueryCars() *CarQuery {
 	return query
 }
 
-// QueryFriends chains the current query on the friends edge.
+// QueryFriends chains the current query on the "friends" edge.
 func (pq *PetQuery) QueryFriends() *PetQuery {
 	query := &PetQuery{config: pq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -131,7 +131,7 @@ func (pq *PetQuery) QueryFriends() *PetQuery {
 	return query
 }
 
-// QueryBestFriend chains the current query on the best_friend edge.
+// QueryBestFriend chains the current query on the "best_friend" edge.
 func (pq *PetQuery) QueryBestFriend() *PetQuery {
 	query := &PetQuery{config: pq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -153,7 +153,8 @@ func (pq *PetQuery) QueryBestFriend() *PetQuery {
 	return query
 }
 
-// First returns the first Pet entity in the query. Returns *NotFoundError when no pet was found.
+// First returns the first Pet entity from the query.
+// Returns a *NotFoundError when no Pet was found.
 func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
 	nodes, err := pq.Limit(1).All(ctx)
 	if err != nil {
@@ -174,7 +175,8 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 	return node
 }
 
-// FirstID returns the first Pet id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Pet ID from the query.
+// Returns a *NotFoundError when no Pet ID was found.
 func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = pq.Limit(1).IDs(ctx); err != nil {
@@ -196,7 +198,9 @@ func (pq *PetQuery) FirstIDX(ctx context.Context) string {
 	return id
 }
 
-// Only returns the only Pet entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Pet entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Pet entity is not found.
+// Returns a *NotFoundError when no Pet entities are found.
 func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
 	nodes, err := pq.Limit(2).All(ctx)
 	if err != nil {
@@ -221,7 +225,9 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 	return node
 }
 
-// OnlyID returns the only Pet id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Pet ID in the query.
+// Returns a *NotSingularError when exactly one Pet ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = pq.Limit(2).IDs(ctx); err != nil {
@@ -264,7 +270,7 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Pet ids.
+// IDs executes the query and returns a list of Pet IDs.
 func (pq *PetQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
 	if err := pq.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
@@ -316,7 +322,7 @@ func (pq *PetQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the PetQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (pq *PetQuery) Clone() *PetQuery {
 	if pq == nil {
@@ -338,8 +344,8 @@ func (pq *PetQuery) Clone() *PetQuery {
 	}
 }
 
-//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
-// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 	query := &UserQuery{config: pq.config}
 	for _, opt := range opts {
@@ -349,8 +355,8 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 	return pq
 }
 
-//  WithCars tells the query-builder to eager-loads the nodes that are connected to
-// the "cars" edge. The optional arguments used to configure the query builder of the edge.
+// WithCars tells the query-builder to eager-load the nodes that are connected to
+// the "cars" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithCars(opts ...func(*CarQuery)) *PetQuery {
 	query := &CarQuery{config: pq.config}
 	for _, opt := range opts {
@@ -360,8 +366,8 @@ func (pq *PetQuery) WithCars(opts ...func(*CarQuery)) *PetQuery {
 	return pq
 }
 
-//  WithFriends tells the query-builder to eager-loads the nodes that are connected to
-// the "friends" edge. The optional arguments used to configure the query builder of the edge.
+// WithFriends tells the query-builder to eager-load the nodes that are connected to
+// the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithFriends(opts ...func(*PetQuery)) *PetQuery {
 	query := &PetQuery{config: pq.config}
 	for _, opt := range opts {
@@ -371,8 +377,8 @@ func (pq *PetQuery) WithFriends(opts ...func(*PetQuery)) *PetQuery {
 	return pq
 }
 
-//  WithBestFriend tells the query-builder to eager-loads the nodes that are connected to
-// the "best_friend" edge. The optional arguments used to configure the query builder of the edge.
+// WithBestFriend tells the query-builder to eager-load the nodes that are connected to
+// the "best_friend" edge. The optional arguments are used to configure the query builder of the edge.
 func (pq *PetQuery) WithBestFriend(opts ...func(*PetQuery)) *PetQuery {
 	query := &PetQuery{config: pq.config}
 	for _, opt := range opts {
@@ -382,7 +388,7 @@ func (pq *PetQuery) WithBestFriend(opts ...func(*PetQuery)) *PetQuery {
 	return pq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	group := &PetGroupBy{config: pq.config}
@@ -396,7 +402,8 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 	pq.fields = append([]string{field}, fields...)
 	return &PetSelect{PetQuery: pq}
@@ -685,7 +692,7 @@ func (pq *PetQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// PetGroupBy is the builder for group-by Pet entities.
+// PetGroupBy is the group-by builder for Pet entities.
 type PetGroupBy struct {
 	config
 	fields []string
@@ -701,7 +708,7 @@ func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 	return pgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := pgb.path(ctx)
 	if err != nil {
@@ -718,7 +725,8 @@ func (pgb *PetGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (pgb *PetGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(pgb.fields) > 1 {
 		return nil, errors.New("ent: PetGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -739,7 +747,8 @@ func (pgb *PetGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (pgb *PetGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = pgb.Strings(ctx); err != nil {
@@ -765,7 +774,8 @@ func (pgb *PetGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (pgb *PetGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(pgb.fields) > 1 {
 		return nil, errors.New("ent: PetGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -786,7 +796,8 @@ func (pgb *PetGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (pgb *PetGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = pgb.Ints(ctx); err != nil {
@@ -812,7 +823,8 @@ func (pgb *PetGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (pgb *PetGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(pgb.fields) > 1 {
 		return nil, errors.New("ent: PetGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -833,7 +845,8 @@ func (pgb *PetGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (pgb *PetGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = pgb.Float64s(ctx); err != nil {
@@ -859,7 +872,8 @@ func (pgb *PetGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (pgb *PetGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(pgb.fields) > 1 {
 		return nil, errors.New("ent: PetGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -880,7 +894,8 @@ func (pgb *PetGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (pgb *PetGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = pgb.Bools(ctx); err != nil {
@@ -935,14 +950,14 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(pgb.fields...)
 }
 
-// PetSelect is the builder for select fields of Pet entities.
+// PetSelect is the builder for selecting fields of Pet entities.
 type PetSelect struct {
 	*PetQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
@@ -958,7 +973,7 @@ func (ps *PetSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(ps.fields) > 1 {
 		return nil, errors.New("ent: PetSelect.Strings is not achievable when selecting more than 1 field")
@@ -979,7 +994,7 @@ func (ps *PetSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (ps *PetSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ps.Strings(ctx); err != nil {
@@ -1005,7 +1020,7 @@ func (ps *PetSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ps.fields) > 1 {
 		return nil, errors.New("ent: PetSelect.Ints is not achievable when selecting more than 1 field")
@@ -1026,7 +1041,7 @@ func (ps *PetSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ps.Ints(ctx); err != nil {
@@ -1052,7 +1067,7 @@ func (ps *PetSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ps.fields) > 1 {
 		return nil, errors.New("ent: PetSelect.Float64s is not achievable when selecting more than 1 field")
@@ -1073,7 +1088,7 @@ func (ps *PetSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ps.Float64s(ctx); err != nil {
@@ -1099,7 +1114,7 @@ func (ps *PetSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ps.fields) > 1 {
 		return nil, errors.New("ent: PetSelect.Bools is not achievable when selecting more than 1 field")
@@ -1120,7 +1135,7 @@ func (ps *PetSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (ps *PetSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ps.Bools(ctx); err != nil {

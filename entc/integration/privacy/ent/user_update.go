@@ -26,20 +26,20 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uu *UserUpdate) SetAge(u uint) *UserUpdate {
 	uu.mutation.ResetAge()
 	uu.mutation.SetAge(u)
 	return uu
 }
 
-// SetNillableAge sets the age field if the given value is not nil.
+// SetNillableAge sets the "age" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableAge(u *uint) *UserUpdate {
 	if u != nil {
 		uu.SetAge(*u)
@@ -47,25 +47,25 @@ func (uu *UserUpdate) SetNillableAge(u *uint) *UserUpdate {
 	return uu
 }
 
-// AddAge adds u to age.
+// AddAge adds u to the "age" field.
 func (uu *UserUpdate) AddAge(u uint) *UserUpdate {
 	uu.mutation.AddAge(u)
 	return uu
 }
 
-// ClearAge clears the value of age.
+// ClearAge clears the value of the "age" field.
 func (uu *UserUpdate) ClearAge() *UserUpdate {
 	uu.mutation.ClearAge()
 	return uu
 }
 
-// AddTeamIDs adds the teams edge to Team by ids.
+// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
 func (uu *UserUpdate) AddTeamIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddTeamIDs(ids...)
 	return uu
 }
 
-// AddTeams adds the teams edges to Team.
+// AddTeams adds the "teams" edges to the Team entity.
 func (uu *UserUpdate) AddTeams(t ...*Team) *UserUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -74,13 +74,13 @@ func (uu *UserUpdate) AddTeams(t ...*Team) *UserUpdate {
 	return uu.AddTeamIDs(ids...)
 }
 
-// AddTaskIDs adds the tasks edge to Task by ids.
+// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
 func (uu *UserUpdate) AddTaskIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddTaskIDs(ids...)
 	return uu
 }
 
-// AddTasks adds the tasks edges to Task.
+// AddTasks adds the "tasks" edges to the Task entity.
 func (uu *UserUpdate) AddTasks(t ...*Task) *UserUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -94,19 +94,19 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearTeams clears all "teams" edges to type Team.
+// ClearTeams clears all "teams" edges to the Team entity.
 func (uu *UserUpdate) ClearTeams() *UserUpdate {
 	uu.mutation.ClearTeams()
 	return uu
 }
 
-// RemoveTeamIDs removes the teams edge to Team by ids.
+// RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
 func (uu *UserUpdate) RemoveTeamIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveTeamIDs(ids...)
 	return uu
 }
 
-// RemoveTeams removes teams edges to Team.
+// RemoveTeams removes "teams" edges to Team entities.
 func (uu *UserUpdate) RemoveTeams(t ...*Team) *UserUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -115,19 +115,19 @@ func (uu *UserUpdate) RemoveTeams(t ...*Team) *UserUpdate {
 	return uu.RemoveTeamIDs(ids...)
 }
 
-// ClearTasks clears all "tasks" edges to type Task.
+// ClearTasks clears all "tasks" edges to the Task entity.
 func (uu *UserUpdate) ClearTasks() *UserUpdate {
 	uu.mutation.ClearTasks()
 	return uu
 }
 
-// RemoveTaskIDs removes the tasks edge to Task by ids.
+// RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
 func (uu *UserUpdate) RemoveTaskIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveTaskIDs(ids...)
 	return uu
 }
 
-// RemoveTasks removes tasks edges to Task.
+// RemoveTasks removes "tasks" edges to Task entities.
 func (uu *UserUpdate) RemoveTasks(t ...*Task) *UserUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -351,14 +351,14 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uuo *UserUpdateOne) SetAge(u uint) *UserUpdateOne {
 	uuo.mutation.ResetAge()
 	uuo.mutation.SetAge(u)
 	return uuo
 }
 
-// SetNillableAge sets the age field if the given value is not nil.
+// SetNillableAge sets the "age" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableAge(u *uint) *UserUpdateOne {
 	if u != nil {
 		uuo.SetAge(*u)
@@ -366,25 +366,25 @@ func (uuo *UserUpdateOne) SetNillableAge(u *uint) *UserUpdateOne {
 	return uuo
 }
 
-// AddAge adds u to age.
+// AddAge adds u to the "age" field.
 func (uuo *UserUpdateOne) AddAge(u uint) *UserUpdateOne {
 	uuo.mutation.AddAge(u)
 	return uuo
 }
 
-// ClearAge clears the value of age.
+// ClearAge clears the value of the "age" field.
 func (uuo *UserUpdateOne) ClearAge() *UserUpdateOne {
 	uuo.mutation.ClearAge()
 	return uuo
 }
 
-// AddTeamIDs adds the teams edge to Team by ids.
+// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
 func (uuo *UserUpdateOne) AddTeamIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddTeamIDs(ids...)
 	return uuo
 }
 
-// AddTeams adds the teams edges to Team.
+// AddTeams adds the "teams" edges to the Team entity.
 func (uuo *UserUpdateOne) AddTeams(t ...*Team) *UserUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -393,13 +393,13 @@ func (uuo *UserUpdateOne) AddTeams(t ...*Team) *UserUpdateOne {
 	return uuo.AddTeamIDs(ids...)
 }
 
-// AddTaskIDs adds the tasks edge to Task by ids.
+// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
 func (uuo *UserUpdateOne) AddTaskIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddTaskIDs(ids...)
 	return uuo
 }
 
-// AddTasks adds the tasks edges to Task.
+// AddTasks adds the "tasks" edges to the Task entity.
 func (uuo *UserUpdateOne) AddTasks(t ...*Task) *UserUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -413,19 +413,19 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearTeams clears all "teams" edges to type Team.
+// ClearTeams clears all "teams" edges to the Team entity.
 func (uuo *UserUpdateOne) ClearTeams() *UserUpdateOne {
 	uuo.mutation.ClearTeams()
 	return uuo
 }
 
-// RemoveTeamIDs removes the teams edge to Team by ids.
+// RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
 func (uuo *UserUpdateOne) RemoveTeamIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveTeamIDs(ids...)
 	return uuo
 }
 
-// RemoveTeams removes teams edges to Team.
+// RemoveTeams removes "teams" edges to Team entities.
 func (uuo *UserUpdateOne) RemoveTeams(t ...*Team) *UserUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -434,19 +434,19 @@ func (uuo *UserUpdateOne) RemoveTeams(t ...*Team) *UserUpdateOne {
 	return uuo.RemoveTeamIDs(ids...)
 }
 
-// ClearTasks clears all "tasks" edges to type Task.
+// ClearTasks clears all "tasks" edges to the Task entity.
 func (uuo *UserUpdateOne) ClearTasks() *UserUpdateOne {
 	uuo.mutation.ClearTasks()
 	return uuo
 }
 
-// RemoveTaskIDs removes the tasks edge to Task by ids.
+// RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
 func (uuo *UserUpdateOne) RemoveTaskIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveTaskIDs(ids...)
 	return uuo
 }
 
-// RemoveTasks removes tasks edges to Task.
+// RemoveTasks removes "tasks" edges to Task entities.
 func (uuo *UserUpdateOne) RemoveTasks(t ...*Task) *UserUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -455,7 +455,7 @@ func (uuo *UserUpdateOne) RemoveTasks(t ...*Task) *UserUpdateOne {
 	return uuo.RemoveTaskIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

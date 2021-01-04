@@ -36,7 +36,7 @@ type CityQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CityQuery builder.
 func (cq *CityQuery) Where(ps ...predicate.City) *CityQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
@@ -60,7 +60,7 @@ func (cq *CityQuery) Order(o ...OrderFunc) *CityQuery {
 	return cq
 }
 
-// QueryStreets chains the current query on the streets edge.
+// QueryStreets chains the current query on the "streets" edge.
 func (cq *CityQuery) QueryStreets() *StreetQuery {
 	query := &StreetQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -82,7 +82,8 @@ func (cq *CityQuery) QueryStreets() *StreetQuery {
 	return query
 }
 
-// First returns the first City entity in the query. Returns *NotFoundError when no city was found.
+// First returns the first City entity from the query.
+// Returns a *NotFoundError when no City was found.
 func (cq *CityQuery) First(ctx context.Context) (*City, error) {
 	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
@@ -103,7 +104,8 @@ func (cq *CityQuery) FirstX(ctx context.Context) *City {
 	return node
 }
 
-// FirstID returns the first City id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first City ID from the query.
+// Returns a *NotFoundError when no City ID was found.
 func (cq *CityQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
@@ -125,7 +127,9 @@ func (cq *CityQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only City entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single City entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one City entity is not found.
+// Returns a *NotFoundError when no City entities are found.
 func (cq *CityQuery) Only(ctx context.Context) (*City, error) {
 	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
@@ -150,7 +154,9 @@ func (cq *CityQuery) OnlyX(ctx context.Context) *City {
 	return node
 }
 
-// OnlyID returns the only City id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only City ID in the query.
+// Returns a *NotSingularError when exactly one City ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (cq *CityQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
@@ -193,7 +199,7 @@ func (cq *CityQuery) AllX(ctx context.Context) []*City {
 	return nodes
 }
 
-// IDs executes the query and returns a list of City ids.
+// IDs executes the query and returns a list of City IDs.
 func (cq *CityQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := cq.Select(city.FieldID).Scan(ctx, &ids); err != nil {
@@ -245,7 +251,7 @@ func (cq *CityQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the CityQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *CityQuery) Clone() *CityQuery {
 	if cq == nil {
@@ -264,8 +270,8 @@ func (cq *CityQuery) Clone() *CityQuery {
 	}
 }
 
-//  WithStreets tells the query-builder to eager-loads the nodes that are connected to
-// the "streets" edge. The optional arguments used to configure the query builder of the edge.
+// WithStreets tells the query-builder to eager-load the nodes that are connected to
+// the "streets" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CityQuery) WithStreets(opts ...func(*StreetQuery)) *CityQuery {
 	query := &StreetQuery{config: cq.config}
 	for _, opt := range opts {
@@ -275,7 +281,7 @@ func (cq *CityQuery) WithStreets(opts ...func(*StreetQuery)) *CityQuery {
 	return cq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -302,7 +308,8 @@ func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -478,7 +485,7 @@ func (cq *CityQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// CityGroupBy is the builder for group-by City entities.
+// CityGroupBy is the group-by builder for City entities.
 type CityGroupBy struct {
 	config
 	fields []string
@@ -494,7 +501,7 @@ func (cgb *CityGroupBy) Aggregate(fns ...AggregateFunc) *CityGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (cgb *CityGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
@@ -511,7 +518,8 @@ func (cgb *CityGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CityGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CityGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -532,7 +540,8 @@ func (cgb *CityGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CityGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cgb.Strings(ctx); err != nil {
@@ -558,7 +567,8 @@ func (cgb *CityGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CityGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CityGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -579,7 +589,8 @@ func (cgb *CityGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CityGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cgb.Ints(ctx); err != nil {
@@ -605,7 +616,8 @@ func (cgb *CityGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CityGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CityGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -626,7 +638,8 @@ func (cgb *CityGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CityGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cgb.Float64s(ctx); err != nil {
@@ -652,7 +665,8 @@ func (cgb *CityGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CityGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CityGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -673,7 +687,8 @@ func (cgb *CityGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CityGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cgb.Bools(ctx); err != nil {
@@ -728,14 +743,14 @@ func (cgb *CityGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }
 
-// CitySelect is the builder for select fields of City entities.
+// CitySelect is the builder for selecting fields of City entities.
 type CitySelect struct {
 	*CityQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
@@ -751,7 +766,7 @@ func (cs *CitySelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (cs *CitySelect) Strings(ctx context.Context) ([]string, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CitySelect.Strings is not achievable when selecting more than 1 field")
@@ -772,7 +787,7 @@ func (cs *CitySelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (cs *CitySelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cs.Strings(ctx); err != nil {
@@ -798,7 +813,7 @@ func (cs *CitySelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (cs *CitySelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CitySelect.Ints is not achievable when selecting more than 1 field")
@@ -819,7 +834,7 @@ func (cs *CitySelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (cs *CitySelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cs.Ints(ctx); err != nil {
@@ -845,7 +860,7 @@ func (cs *CitySelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (cs *CitySelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CitySelect.Float64s is not achievable when selecting more than 1 field")
@@ -866,7 +881,7 @@ func (cs *CitySelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (cs *CitySelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cs.Float64s(ctx); err != nil {
@@ -892,7 +907,7 @@ func (cs *CitySelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (cs *CitySelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CitySelect.Bools is not achievable when selecting more than 1 field")
@@ -913,7 +928,7 @@ func (cs *CitySelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (cs *CitySelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cs.Bools(ctx); err != nil {

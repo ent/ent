@@ -26,32 +26,32 @@ type PetUpdate struct {
 	mutation *PetMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the PetUpdate builder.
 func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
 	return pu
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (pu *PetUpdate) SetAge(i int) *PetUpdate {
 	pu.mutation.ResetAge()
 	pu.mutation.SetAge(i)
 	return pu
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (pu *PetUpdate) AddAge(i int) *PetUpdate {
 	pu.mutation.AddAge(i)
 	return pu
 }
 
-// SetLicensedAt sets the licensed_at field.
+// SetLicensedAt sets the "licensed_at" field.
 func (pu *PetUpdate) SetLicensedAt(t time.Time) *PetUpdate {
 	pu.mutation.SetLicensedAt(t)
 	return pu
 }
 
-// SetNillableLicensedAt sets the licensed_at field if the given value is not nil.
+// SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
 func (pu *PetUpdate) SetNillableLicensedAt(t *time.Time) *PetUpdate {
 	if t != nil {
 		pu.SetLicensedAt(*t)
@@ -59,19 +59,19 @@ func (pu *PetUpdate) SetNillableLicensedAt(t *time.Time) *PetUpdate {
 	return pu
 }
 
-// ClearLicensedAt clears the value of licensed_at.
+// ClearLicensedAt clears the value of the "licensed_at" field.
 func (pu *PetUpdate) ClearLicensedAt() *PetUpdate {
 	pu.mutation.ClearLicensedAt()
 	return pu
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
 	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	if id != nil {
 		pu = pu.SetOwnerID(*id)
@@ -79,7 +79,7 @@ func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	return pu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
@@ -89,7 +89,7 @@ func (pu *PetUpdate) Mutation() *PetMutation {
 	return pu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
 	return pu
@@ -244,26 +244,26 @@ type PetUpdateOne struct {
 	mutation *PetMutation
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (puo *PetUpdateOne) SetAge(i int) *PetUpdateOne {
 	puo.mutation.ResetAge()
 	puo.mutation.SetAge(i)
 	return puo
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (puo *PetUpdateOne) AddAge(i int) *PetUpdateOne {
 	puo.mutation.AddAge(i)
 	return puo
 }
 
-// SetLicensedAt sets the licensed_at field.
+// SetLicensedAt sets the "licensed_at" field.
 func (puo *PetUpdateOne) SetLicensedAt(t time.Time) *PetUpdateOne {
 	puo.mutation.SetLicensedAt(t)
 	return puo
 }
 
-// SetNillableLicensedAt sets the licensed_at field if the given value is not nil.
+// SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
 func (puo *PetUpdateOne) SetNillableLicensedAt(t *time.Time) *PetUpdateOne {
 	if t != nil {
 		puo.SetLicensedAt(*t)
@@ -271,19 +271,19 @@ func (puo *PetUpdateOne) SetNillableLicensedAt(t *time.Time) *PetUpdateOne {
 	return puo
 }
 
-// ClearLicensedAt clears the value of licensed_at.
+// ClearLicensedAt clears the value of the "licensed_at" field.
 func (puo *PetUpdateOne) ClearLicensedAt() *PetUpdateOne {
 	puo.mutation.ClearLicensedAt()
 	return puo
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
 	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetOwnerID(*id)
@@ -291,7 +291,7 @@ func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	return puo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
@@ -301,13 +301,13 @@ func (puo *PetUpdateOne) Mutation() *PetMutation {
 	return puo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
 	return puo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Pet entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 	var (
 		err  error

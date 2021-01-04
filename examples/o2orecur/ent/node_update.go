@@ -24,32 +24,32 @@ type NodeUpdate struct {
 	mutation *NodeMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the NodeUpdate builder.
 func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 	nu.mutation.predicates = append(nu.mutation.predicates, ps...)
 	return nu
 }
 
-// SetValue sets the value field.
+// SetValue sets the "value" field.
 func (nu *NodeUpdate) SetValue(i int) *NodeUpdate {
 	nu.mutation.ResetValue()
 	nu.mutation.SetValue(i)
 	return nu
 }
 
-// AddValue adds i to value.
+// AddValue adds i to the "value" field.
 func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 	nu.mutation.AddValue(i)
 	return nu
 }
 
-// SetPrevID sets the prev edge to Node by id.
+// SetPrevID sets the "prev" edge to the Node entity by ID.
 func (nu *NodeUpdate) SetPrevID(id int) *NodeUpdate {
 	nu.mutation.SetPrevID(id)
 	return nu
 }
 
-// SetNillablePrevID sets the prev edge to Node by id if the given value is not nil.
+// SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
 func (nu *NodeUpdate) SetNillablePrevID(id *int) *NodeUpdate {
 	if id != nil {
 		nu = nu.SetPrevID(*id)
@@ -57,18 +57,18 @@ func (nu *NodeUpdate) SetNillablePrevID(id *int) *NodeUpdate {
 	return nu
 }
 
-// SetPrev sets the prev edge to Node.
+// SetPrev sets the "prev" edge to the Node entity.
 func (nu *NodeUpdate) SetPrev(n *Node) *NodeUpdate {
 	return nu.SetPrevID(n.ID)
 }
 
-// SetNextID sets the next edge to Node by id.
+// SetNextID sets the "next" edge to the Node entity by ID.
 func (nu *NodeUpdate) SetNextID(id int) *NodeUpdate {
 	nu.mutation.SetNextID(id)
 	return nu
 }
 
-// SetNillableNextID sets the next edge to Node by id if the given value is not nil.
+// SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
 func (nu *NodeUpdate) SetNillableNextID(id *int) *NodeUpdate {
 	if id != nil {
 		nu = nu.SetNextID(*id)
@@ -76,7 +76,7 @@ func (nu *NodeUpdate) SetNillableNextID(id *int) *NodeUpdate {
 	return nu
 }
 
-// SetNext sets the next edge to Node.
+// SetNext sets the "next" edge to the Node entity.
 func (nu *NodeUpdate) SetNext(n *Node) *NodeUpdate {
 	return nu.SetNextID(n.ID)
 }
@@ -86,13 +86,13 @@ func (nu *NodeUpdate) Mutation() *NodeMutation {
 	return nu.mutation
 }
 
-// ClearPrev clears the "prev" edge to type Node.
+// ClearPrev clears the "prev" edge to the Node entity.
 func (nu *NodeUpdate) ClearPrev() *NodeUpdate {
 	nu.mutation.ClearPrev()
 	return nu
 }
 
-// ClearNext clears the "next" edge to type Node.
+// ClearNext clears the "next" edge to the Node entity.
 func (nu *NodeUpdate) ClearNext() *NodeUpdate {
 	nu.mutation.ClearNext()
 	return nu
@@ -269,26 +269,26 @@ type NodeUpdateOne struct {
 	mutation *NodeMutation
 }
 
-// SetValue sets the value field.
+// SetValue sets the "value" field.
 func (nuo *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
 	nuo.mutation.ResetValue()
 	nuo.mutation.SetValue(i)
 	return nuo
 }
 
-// AddValue adds i to value.
+// AddValue adds i to the "value" field.
 func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
 	nuo.mutation.AddValue(i)
 	return nuo
 }
 
-// SetPrevID sets the prev edge to Node by id.
+// SetPrevID sets the "prev" edge to the Node entity by ID.
 func (nuo *NodeUpdateOne) SetPrevID(id int) *NodeUpdateOne {
 	nuo.mutation.SetPrevID(id)
 	return nuo
 }
 
-// SetNillablePrevID sets the prev edge to Node by id if the given value is not nil.
+// SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
 func (nuo *NodeUpdateOne) SetNillablePrevID(id *int) *NodeUpdateOne {
 	if id != nil {
 		nuo = nuo.SetPrevID(*id)
@@ -296,18 +296,18 @@ func (nuo *NodeUpdateOne) SetNillablePrevID(id *int) *NodeUpdateOne {
 	return nuo
 }
 
-// SetPrev sets the prev edge to Node.
+// SetPrev sets the "prev" edge to the Node entity.
 func (nuo *NodeUpdateOne) SetPrev(n *Node) *NodeUpdateOne {
 	return nuo.SetPrevID(n.ID)
 }
 
-// SetNextID sets the next edge to Node by id.
+// SetNextID sets the "next" edge to the Node entity by ID.
 func (nuo *NodeUpdateOne) SetNextID(id int) *NodeUpdateOne {
 	nuo.mutation.SetNextID(id)
 	return nuo
 }
 
-// SetNillableNextID sets the next edge to Node by id if the given value is not nil.
+// SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
 func (nuo *NodeUpdateOne) SetNillableNextID(id *int) *NodeUpdateOne {
 	if id != nil {
 		nuo = nuo.SetNextID(*id)
@@ -315,7 +315,7 @@ func (nuo *NodeUpdateOne) SetNillableNextID(id *int) *NodeUpdateOne {
 	return nuo
 }
 
-// SetNext sets the next edge to Node.
+// SetNext sets the "next" edge to the Node entity.
 func (nuo *NodeUpdateOne) SetNext(n *Node) *NodeUpdateOne {
 	return nuo.SetNextID(n.ID)
 }
@@ -325,19 +325,19 @@ func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
 	return nuo.mutation
 }
 
-// ClearPrev clears the "prev" edge to type Node.
+// ClearPrev clears the "prev" edge to the Node entity.
 func (nuo *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
 	nuo.mutation.ClearPrev()
 	return nuo
 }
 
-// ClearNext clears the "next" edge to type Node.
+// ClearNext clears the "next" edge to the Node entity.
 func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
 	nuo.mutation.ClearNext()
 	return nuo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Node entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 	var (
 		err  error

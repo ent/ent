@@ -98,7 +98,7 @@ func (ic *ItemCreate) gremlin() *dsl.Traversal {
 	return v.ValueMap(true)
 }
 
-// ItemCreateBulk is the builder for creating a bulk of Item entities.
+// ItemCreateBulk is the builder for creating many Item entities in bulk.
 type ItemCreateBulk struct {
 	config
 	builders []*ItemCreate

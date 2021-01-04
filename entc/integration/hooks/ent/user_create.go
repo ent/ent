@@ -24,13 +24,13 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetVersion sets the version field.
+// SetVersion sets the "version" field.
 func (uc *UserCreate) SetVersion(i int) *UserCreate {
 	uc.mutation.SetVersion(i)
 	return uc
 }
 
-// SetNillableVersion sets the version field if the given value is not nil.
+// SetNillableVersion sets the "version" field if the given value is not nil.
 func (uc *UserCreate) SetNillableVersion(i *int) *UserCreate {
 	if i != nil {
 		uc.SetVersion(*i)
@@ -38,19 +38,19 @@ func (uc *UserCreate) SetNillableVersion(i *int) *UserCreate {
 	return uc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetWorth sets the worth field.
+// SetWorth sets the "worth" field.
 func (uc *UserCreate) SetWorth(u uint) *UserCreate {
 	uc.mutation.SetWorth(u)
 	return uc
 }
 
-// SetNillableWorth sets the worth field if the given value is not nil.
+// SetNillableWorth sets the "worth" field if the given value is not nil.
 func (uc *UserCreate) SetNillableWorth(u *uint) *UserCreate {
 	if u != nil {
 		uc.SetWorth(*u)
@@ -58,13 +58,13 @@ func (uc *UserCreate) SetNillableWorth(u *uint) *UserCreate {
 	return uc
 }
 
-// AddCardIDs adds the cards edge to Card by ids.
+// AddCardIDs adds the "cards" edge to the Card entity by IDs.
 func (uc *UserCreate) AddCardIDs(ids ...int) *UserCreate {
 	uc.mutation.AddCardIDs(ids...)
 	return uc
 }
 
-// AddCards adds the cards edges to Card.
+// AddCards adds the "cards" edges to the Card entity.
 func (uc *UserCreate) AddCards(c ...*Card) *UserCreate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -73,13 +73,13 @@ func (uc *UserCreate) AddCards(c ...*Card) *UserCreate {
 	return uc.AddCardIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uc *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFriendIDs(ids...)
 	return uc
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -88,13 +88,13 @@ func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 	return uc.AddFriendIDs(ids...)
 }
 
-// SetBestFriendID sets the best_friend edge to User by id.
+// SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (uc *UserCreate) SetBestFriendID(id int) *UserCreate {
 	uc.mutation.SetBestFriendID(id)
 	return uc
 }
 
-// SetNillableBestFriendID sets the best_friend edge to User by id if the given value is not nil.
+// SetNillableBestFriendID sets the "best_friend" edge to the User entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillableBestFriendID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetBestFriendID(*id)
@@ -102,7 +102,7 @@ func (uc *UserCreate) SetNillableBestFriendID(id *int) *UserCreate {
 	return uc
 }
 
-// SetBestFriend sets the best_friend edge to User.
+// SetBestFriend sets the "best_friend" edge to the User entity.
 func (uc *UserCreate) SetBestFriend(u *User) *UserCreate {
 	return uc.SetBestFriendID(u.ID)
 }
@@ -284,7 +284,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -342,7 +342,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

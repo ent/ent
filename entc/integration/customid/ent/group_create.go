@@ -23,19 +23,19 @@ type GroupCreate struct {
 	hooks    []Hook
 }
 
-// SetID sets the id field.
+// SetID sets the "id" field.
 func (gc *GroupCreate) SetID(i int) *GroupCreate {
 	gc.mutation.SetID(i)
 	return gc
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (gc *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
 	gc.mutation.AddUserIDs(ids...)
 	return gc
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -150,7 +150,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// GroupCreateBulk is the builder for creating a bulk of Group entities.
+// GroupCreateBulk is the builder for creating many Group entities in bulk.
 type GroupCreateBulk struct {
 	config
 	builders []*GroupCreate
@@ -209,7 +209,7 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
 	v, err := gcb.Save(ctx)
 	if err != nil {

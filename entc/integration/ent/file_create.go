@@ -26,13 +26,13 @@ type FileCreate struct {
 	hooks    []Hook
 }
 
-// SetSize sets the size field.
+// SetSize sets the "size" field.
 func (fc *FileCreate) SetSize(i int) *FileCreate {
 	fc.mutation.SetSize(i)
 	return fc
 }
 
-// SetNillableSize sets the size field if the given value is not nil.
+// SetNillableSize sets the "size" field if the given value is not nil.
 func (fc *FileCreate) SetNillableSize(i *int) *FileCreate {
 	if i != nil {
 		fc.SetSize(*i)
@@ -40,19 +40,19 @@ func (fc *FileCreate) SetNillableSize(i *int) *FileCreate {
 	return fc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (fc *FileCreate) SetName(s string) *FileCreate {
 	fc.mutation.SetName(s)
 	return fc
 }
 
-// SetUser sets the user field.
+// SetUser sets the "user" field.
 func (fc *FileCreate) SetUser(s string) *FileCreate {
 	fc.mutation.SetUser(s)
 	return fc
 }
 
-// SetNillableUser sets the user field if the given value is not nil.
+// SetNillableUser sets the "user" field if the given value is not nil.
 func (fc *FileCreate) SetNillableUser(s *string) *FileCreate {
 	if s != nil {
 		fc.SetUser(*s)
@@ -60,13 +60,13 @@ func (fc *FileCreate) SetNillableUser(s *string) *FileCreate {
 	return fc
 }
 
-// SetGroup sets the group field.
+// SetGroup sets the "group" field.
 func (fc *FileCreate) SetGroup(s string) *FileCreate {
 	fc.mutation.SetGroup(s)
 	return fc
 }
 
-// SetNillableGroup sets the group field if the given value is not nil.
+// SetNillableGroup sets the "group" field if the given value is not nil.
 func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 	if s != nil {
 		fc.SetGroup(*s)
@@ -74,13 +74,13 @@ func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
 	return fc
 }
 
-// SetOp sets the op field.
+// SetOp sets the "op" field.
 func (fc *FileCreate) SetOp(b bool) *FileCreate {
 	fc.mutation.SetOp(b)
 	return fc
 }
 
-// SetNillableOp sets the op field if the given value is not nil.
+// SetNillableOp sets the "op" field if the given value is not nil.
 func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
 	if b != nil {
 		fc.SetOp(*b)
@@ -88,13 +88,13 @@ func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
 	return fc
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fc *FileCreate) SetOwnerID(id int) *FileCreate {
 	fc.mutation.SetOwnerID(id)
 	return fc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (fc *FileCreate) SetNillableOwnerID(id *int) *FileCreate {
 	if id != nil {
 		fc = fc.SetOwnerID(*id)
@@ -102,18 +102,18 @@ func (fc *FileCreate) SetNillableOwnerID(id *int) *FileCreate {
 	return fc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (fc *FileCreate) SetOwner(u *User) *FileCreate {
 	return fc.SetOwnerID(u.ID)
 }
 
-// SetTypeID sets the type edge to FileType by id.
+// SetTypeID sets the "type" edge to the FileType entity by ID.
 func (fc *FileCreate) SetTypeID(id int) *FileCreate {
 	fc.mutation.SetTypeID(id)
 	return fc
 }
 
-// SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
+// SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
 func (fc *FileCreate) SetNillableTypeID(id *int) *FileCreate {
 	if id != nil {
 		fc = fc.SetTypeID(*id)
@@ -121,18 +121,18 @@ func (fc *FileCreate) SetNillableTypeID(id *int) *FileCreate {
 	return fc
 }
 
-// SetType sets the type edge to FileType.
+// SetType sets the "type" edge to the FileType entity.
 func (fc *FileCreate) SetType(f *FileType) *FileCreate {
 	return fc.SetTypeID(f.ID)
 }
 
-// AddFieldIDs adds the field edge to FieldType by ids.
+// AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
 func (fc *FileCreate) AddFieldIDs(ids ...int) *FileCreate {
 	fc.mutation.AddFieldIDs(ids...)
 	return fc
 }
 
-// AddField adds the field edges to FieldType.
+// AddField adds the "field" edges to the FieldType entity.
 func (fc *FileCreate) AddField(f ...*FieldType) *FileCreate {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -339,7 +339,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// FileCreateBulk is the builder for creating a bulk of File entities.
+// FileCreateBulk is the builder for creating many File entities in bulk.
 type FileCreateBulk struct {
 	config
 	builders []*FileCreate
@@ -397,7 +397,7 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (fcb *FileCreateBulk) SaveX(ctx context.Context) []*File {
 	v, err := fcb.Save(ctx)
 	if err != nil {

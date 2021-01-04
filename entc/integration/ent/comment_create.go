@@ -23,25 +23,25 @@ type CommentCreate struct {
 	hooks    []Hook
 }
 
-// SetUniqueInt sets the unique_int field.
+// SetUniqueInt sets the "unique_int" field.
 func (cc *CommentCreate) SetUniqueInt(i int) *CommentCreate {
 	cc.mutation.SetUniqueInt(i)
 	return cc
 }
 
-// SetUniqueFloat sets the unique_float field.
+// SetUniqueFloat sets the "unique_float" field.
 func (cc *CommentCreate) SetUniqueFloat(f float64) *CommentCreate {
 	cc.mutation.SetUniqueFloat(f)
 	return cc
 }
 
-// SetNillableInt sets the nillable_int field.
+// SetNillableInt sets the "nillable_int" field.
 func (cc *CommentCreate) SetNillableInt(i int) *CommentCreate {
 	cc.mutation.SetNillableInt(i)
 	return cc
 }
 
-// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
 func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
 	if i != nil {
 		cc.SetNillableInt(*i)
@@ -160,7 +160,7 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// CommentCreateBulk is the builder for creating a bulk of Comment entities.
+// CommentCreateBulk is the builder for creating many Comment entities in bulk.
 type CommentCreateBulk struct {
 	config
 	builders []*CommentCreate
@@ -217,7 +217,7 @@ func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *CommentCreateBulk) SaveX(ctx context.Context) []*Comment {
 	v, err := ccb.Save(ctx)
 	if err != nil {

@@ -86,16 +86,16 @@ const (
 var (
 	// OptionalIntValidator is a validator for the "optional_int" field. It is called by the builders before save.
 	OptionalIntValidator func(int) error
-	// DefaultLast holds the default value on creation for the last field.
+	// DefaultLast holds the default value on creation for the "last" field.
 	DefaultLast string
-	// DefaultAddress holds the default value on creation for the address field.
+	// DefaultAddress holds the default value on creation for the "address" field.
 	DefaultAddress func() string
 )
 
-// Role defines the type for the role enum field.
+// Role defines the type for the "role" enum field.
 type Role string
 
-// RoleUser is the default Role.
+// RoleUser is the default value of the Role enum.
 const DefaultRole = RoleUser
 
 // Role values.

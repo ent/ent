@@ -24,38 +24,38 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.mutation.ResetAge()
 	uu.mutation.SetAge(i)
 	return uu
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
 	uu.mutation.AddAge(i)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetSpouseID sets the spouse edge to User by id.
+// SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (uu *UserUpdate) SetSpouseID(id int) *UserUpdate {
 	uu.mutation.SetSpouseID(id)
 	return uu
 }
 
-// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetSpouseID(*id)
@@ -63,7 +63,7 @@ func (uu *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
 	return uu
 }
 
-// SetSpouse sets the spouse edge to User.
+// SetSpouse sets the "spouse" edge to the User entity.
 func (uu *UserUpdate) SetSpouse(u *User) *UserUpdate {
 	return uu.SetSpouseID(u.ID)
 }
@@ -73,7 +73,7 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearSpouse clears the "spouse" edge to type User.
+// ClearSpouse clears the "spouse" edge to the User entity.
 func (uu *UserUpdate) ClearSpouse() *UserUpdate {
 	uu.mutation.ClearSpouse()
 	return uu
@@ -222,32 +222,32 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.mutation.ResetAge()
 	uuo.mutation.SetAge(i)
 	return uuo
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
 	uuo.mutation.AddAge(i)
 	return uuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetSpouseID sets the spouse edge to User by id.
+// SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (uuo *UserUpdateOne) SetSpouseID(id int) *UserUpdateOne {
 	uuo.mutation.SetSpouseID(id)
 	return uuo
 }
 
-// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetSpouseID(*id)
@@ -255,7 +255,7 @@ func (uuo *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
 	return uuo
 }
 
-// SetSpouse sets the spouse edge to User.
+// SetSpouse sets the "spouse" edge to the User entity.
 func (uuo *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
 	return uuo.SetSpouseID(u.ID)
 }
@@ -265,13 +265,13 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearSpouse clears the "spouse" edge to type User.
+// ClearSpouse clears the "spouse" edge to the User entity.
 func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
 	uuo.mutation.ClearSpouse()
 	return uuo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

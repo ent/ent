@@ -26,19 +26,19 @@ type CardUpdate struct {
 	mutation *CardMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CardUpdate builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cu *CardUpdate) SetName(s string) *CardUpdate {
 	cu.mutation.SetName(s)
 	return cu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
 	if s != nil {
 		cu.SetName(*s)
@@ -46,19 +46,19 @@ func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
 	return cu
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cu *CardUpdate) ClearName() *CardUpdate {
 	cu.mutation.ClearName()
 	return cu
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CardUpdate) SetOwnerID(id int) *CardUpdate {
 	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cu *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 	if id != nil {
 		cu = cu.SetOwnerID(*id)
@@ -66,18 +66,18 @@ func (cu *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 	return cu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cu *CardUpdate) SetOwner(u *User) *CardUpdate {
 	return cu.SetOwnerID(u.ID)
 }
 
-// AddSpecIDs adds the spec edge to Spec by ids.
+// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (cu *CardUpdate) AddSpecIDs(ids ...int) *CardUpdate {
 	cu.mutation.AddSpecIDs(ids...)
 	return cu
 }
 
-// AddSpec adds the spec edges to Spec.
+// AddSpec adds the "spec" edges to the Spec entity.
 func (cu *CardUpdate) AddSpec(s ...*Spec) *CardUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -91,25 +91,25 @@ func (cu *CardUpdate) Mutation() *CardMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.mutation.ClearOwner()
 	return cu
 }
 
-// ClearSpec clears all "spec" edges to type Spec.
+// ClearSpec clears all "spec" edges to the Spec entity.
 func (cu *CardUpdate) ClearSpec() *CardUpdate {
 	cu.mutation.ClearSpec()
 	return cu
 }
 
-// RemoveSpecIDs removes the spec edge to Spec by ids.
+// RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (cu *CardUpdate) RemoveSpecIDs(ids ...int) *CardUpdate {
 	cu.mutation.RemoveSpecIDs(ids...)
 	return cu
 }
 
-// RemoveSpec removes spec edges to Spec.
+// RemoveSpec removes "spec" edges to Spec entities.
 func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -339,13 +339,13 @@ type CardUpdateOne struct {
 	mutation *CardMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cuo *CardUpdateOne) SetName(s string) *CardUpdateOne {
 	cuo.mutation.SetName(s)
 	return cuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
 	if s != nil {
 		cuo.SetName(*s)
@@ -353,19 +353,19 @@ func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
 	return cuo
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cuo *CardUpdateOne) ClearName() *CardUpdateOne {
 	cuo.mutation.ClearName()
 	return cuo
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cuo *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
 	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 	if id != nil {
 		cuo = cuo.SetOwnerID(*id)
@@ -373,18 +373,18 @@ func (cuo *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 	return cuo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cuo *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
 	return cuo.SetOwnerID(u.ID)
 }
 
-// AddSpecIDs adds the spec edge to Spec by ids.
+// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (cuo *CardUpdateOne) AddSpecIDs(ids ...int) *CardUpdateOne {
 	cuo.mutation.AddSpecIDs(ids...)
 	return cuo
 }
 
-// AddSpec adds the spec edges to Spec.
+// AddSpec adds the "spec" edges to the Spec entity.
 func (cuo *CardUpdateOne) AddSpec(s ...*Spec) *CardUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -398,25 +398,25 @@ func (cuo *CardUpdateOne) Mutation() *CardMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo
 }
 
-// ClearSpec clears all "spec" edges to type Spec.
+// ClearSpec clears all "spec" edges to the Spec entity.
 func (cuo *CardUpdateOne) ClearSpec() *CardUpdateOne {
 	cuo.mutation.ClearSpec()
 	return cuo
 }
 
-// RemoveSpecIDs removes the spec edge to Spec by ids.
+// RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (cuo *CardUpdateOne) RemoveSpecIDs(ids ...int) *CardUpdateOne {
 	cuo.mutation.RemoveSpecIDs(ids...)
 	return cuo
 }
 
-// RemoveSpec removes spec edges to Spec.
+// RemoveSpec removes "spec" edges to Spec entities.
 func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -425,7 +425,7 @@ func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 	return cuo.RemoveSpecIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Card entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	var (
 		err  error

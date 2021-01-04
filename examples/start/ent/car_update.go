@@ -26,31 +26,31 @@ type CarUpdate struct {
 	mutation *CarMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CarUpdate builder.
 func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
-// SetModel sets the model field.
+// SetModel sets the "model" field.
 func (cu *CarUpdate) SetModel(s string) *CarUpdate {
 	cu.mutation.SetModel(s)
 	return cu
 }
 
-// SetRegisteredAt sets the registered_at field.
+// SetRegisteredAt sets the "registered_at" field.
 func (cu *CarUpdate) SetRegisteredAt(t time.Time) *CarUpdate {
 	cu.mutation.SetRegisteredAt(t)
 	return cu
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CarUpdate) SetOwnerID(id int) *CarUpdate {
 	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cu *CarUpdate) SetNillableOwnerID(id *int) *CarUpdate {
 	if id != nil {
 		cu = cu.SetOwnerID(*id)
@@ -58,7 +58,7 @@ func (cu *CarUpdate) SetNillableOwnerID(id *int) *CarUpdate {
 	return cu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cu *CarUpdate) SetOwner(u *User) *CarUpdate {
 	return cu.SetOwnerID(u.ID)
 }
@@ -68,7 +68,7 @@ func (cu *CarUpdate) Mutation() *CarMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cu *CarUpdate) ClearOwner() *CarUpdate {
 	cu.mutation.ClearOwner()
 	return cu
@@ -210,25 +210,25 @@ type CarUpdateOne struct {
 	mutation *CarMutation
 }
 
-// SetModel sets the model field.
+// SetModel sets the "model" field.
 func (cuo *CarUpdateOne) SetModel(s string) *CarUpdateOne {
 	cuo.mutation.SetModel(s)
 	return cuo
 }
 
-// SetRegisteredAt sets the registered_at field.
+// SetRegisteredAt sets the "registered_at" field.
 func (cuo *CarUpdateOne) SetRegisteredAt(t time.Time) *CarUpdateOne {
 	cuo.mutation.SetRegisteredAt(t)
 	return cuo
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cuo *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
 	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cuo *CarUpdateOne) SetNillableOwnerID(id *int) *CarUpdateOne {
 	if id != nil {
 		cuo = cuo.SetOwnerID(*id)
@@ -236,7 +236,7 @@ func (cuo *CarUpdateOne) SetNillableOwnerID(id *int) *CarUpdateOne {
 	return cuo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cuo *CarUpdateOne) SetOwner(u *User) *CarUpdateOne {
 	return cuo.SetOwnerID(u.ID)
 }
@@ -246,13 +246,13 @@ func (cuo *CarUpdateOne) Mutation() *CarMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Car entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
 	var (
 		err  error

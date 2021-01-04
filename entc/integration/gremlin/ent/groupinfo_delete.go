@@ -25,7 +25,7 @@ type GroupInfoDelete struct {
 	mutation *GroupInfoMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the GroupInfoDelete builder.
 func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
 	gid.mutation.predicates = append(gid.mutation.predicates, ps...)
 	return gid

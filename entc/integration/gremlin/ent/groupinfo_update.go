@@ -27,26 +27,26 @@ type GroupInfoUpdate struct {
 	mutation *GroupInfoMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the GroupInfoUpdate builder.
 func (giu *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
 	giu.mutation.predicates = append(giu.mutation.predicates, ps...)
 	return giu
 }
 
-// SetDesc sets the desc field.
+// SetDesc sets the "desc" field.
 func (giu *GroupInfoUpdate) SetDesc(s string) *GroupInfoUpdate {
 	giu.mutation.SetDesc(s)
 	return giu
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (giu *GroupInfoUpdate) SetMaxUsers(i int) *GroupInfoUpdate {
 	giu.mutation.ResetMaxUsers()
 	giu.mutation.SetMaxUsers(i)
 	return giu
 }
 
-// SetNillableMaxUsers sets the max_users field if the given value is not nil.
+// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
 func (giu *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
 	if i != nil {
 		giu.SetMaxUsers(*i)
@@ -54,19 +54,19 @@ func (giu *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
 	return giu
 }
 
-// AddMaxUsers adds i to max_users.
+// AddMaxUsers adds i to the "max_users" field.
 func (giu *GroupInfoUpdate) AddMaxUsers(i int) *GroupInfoUpdate {
 	giu.mutation.AddMaxUsers(i)
 	return giu
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (giu *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
 	giu.mutation.AddGroupIDs(ids...)
 	return giu
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (giu *GroupInfoUpdate) AddGroups(g ...*Group) *GroupInfoUpdate {
 	ids := make([]string, len(g))
 	for i := range g {
@@ -80,19 +80,19 @@ func (giu *GroupInfoUpdate) Mutation() *GroupInfoMutation {
 	return giu.mutation
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (giu *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
 	giu.mutation.ClearGroups()
 	return giu
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (giu *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
 	giu.mutation.RemoveGroupIDs(ids...)
 	return giu
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 	ids := make([]string, len(g))
 	for i := range g {
@@ -222,20 +222,20 @@ type GroupInfoUpdateOne struct {
 	mutation *GroupInfoMutation
 }
 
-// SetDesc sets the desc field.
+// SetDesc sets the "desc" field.
 func (giuo *GroupInfoUpdateOne) SetDesc(s string) *GroupInfoUpdateOne {
 	giuo.mutation.SetDesc(s)
 	return giuo
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (giuo *GroupInfoUpdateOne) SetMaxUsers(i int) *GroupInfoUpdateOne {
 	giuo.mutation.ResetMaxUsers()
 	giuo.mutation.SetMaxUsers(i)
 	return giuo
 }
 
-// SetNillableMaxUsers sets the max_users field if the given value is not nil.
+// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
 func (giuo *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne {
 	if i != nil {
 		giuo.SetMaxUsers(*i)
@@ -243,19 +243,19 @@ func (giuo *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne 
 	return giuo
 }
 
-// AddMaxUsers adds i to max_users.
+// AddMaxUsers adds i to the "max_users" field.
 func (giuo *GroupInfoUpdateOne) AddMaxUsers(i int) *GroupInfoUpdateOne {
 	giuo.mutation.AddMaxUsers(i)
 	return giuo
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (giuo *GroupInfoUpdateOne) AddGroupIDs(ids ...string) *GroupInfoUpdateOne {
 	giuo.mutation.AddGroupIDs(ids...)
 	return giuo
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (giuo *GroupInfoUpdateOne) AddGroups(g ...*Group) *GroupInfoUpdateOne {
 	ids := make([]string, len(g))
 	for i := range g {
@@ -269,19 +269,19 @@ func (giuo *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
 	return giuo.mutation
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (giuo *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
 	giuo.mutation.ClearGroups()
 	return giuo
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (giuo *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
 	giuo.mutation.RemoveGroupIDs(ids...)
 	return giuo
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 	ids := make([]string, len(g))
 	for i := range g {
@@ -290,7 +290,7 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 	return giuo.RemoveGroupIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated GroupInfo entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 	var (
 		err  error

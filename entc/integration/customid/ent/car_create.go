@@ -24,13 +24,13 @@ type CarCreate struct {
 	hooks    []Hook
 }
 
-// SetBeforeID sets the before_id field.
+// SetBeforeID sets the "before_id" field.
 func (cc *CarCreate) SetBeforeID(f float64) *CarCreate {
 	cc.mutation.SetBeforeID(f)
 	return cc
 }
 
-// SetNillableBeforeID sets the before_id field if the given value is not nil.
+// SetNillableBeforeID sets the "before_id" field if the given value is not nil.
 func (cc *CarCreate) SetNillableBeforeID(f *float64) *CarCreate {
 	if f != nil {
 		cc.SetBeforeID(*f)
@@ -38,13 +38,13 @@ func (cc *CarCreate) SetNillableBeforeID(f *float64) *CarCreate {
 	return cc
 }
 
-// SetAfterID sets the after_id field.
+// SetAfterID sets the "after_id" field.
 func (cc *CarCreate) SetAfterID(f float64) *CarCreate {
 	cc.mutation.SetAfterID(f)
 	return cc
 }
 
-// SetNillableAfterID sets the after_id field if the given value is not nil.
+// SetNillableAfterID sets the "after_id" field if the given value is not nil.
 func (cc *CarCreate) SetNillableAfterID(f *float64) *CarCreate {
 	if f != nil {
 		cc.SetAfterID(*f)
@@ -52,25 +52,25 @@ func (cc *CarCreate) SetNillableAfterID(f *float64) *CarCreate {
 	return cc
 }
 
-// SetModel sets the model field.
+// SetModel sets the "model" field.
 func (cc *CarCreate) SetModel(s string) *CarCreate {
 	cc.mutation.SetModel(s)
 	return cc
 }
 
-// SetID sets the id field.
+// SetID sets the "id" field.
 func (cc *CarCreate) SetID(i int) *CarCreate {
 	cc.mutation.SetID(i)
 	return cc
 }
 
-// SetOwnerID sets the owner edge to Pet by id.
+// SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (cc *CarCreate) SetOwnerID(id string) *CarCreate {
 	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
-// SetNillableOwnerID sets the owner edge to Pet by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
 func (cc *CarCreate) SetNillableOwnerID(id *string) *CarCreate {
 	if id != nil {
 		cc = cc.SetOwnerID(*id)
@@ -78,7 +78,7 @@ func (cc *CarCreate) SetNillableOwnerID(id *string) *CarCreate {
 	return cc
 }
 
-// SetOwner sets the owner edge to Pet.
+// SetOwner sets the "owner" edge to the Pet entity.
 func (cc *CarCreate) SetOwner(p *Pet) *CarCreate {
 	return cc.SetOwnerID(p.ID)
 }
@@ -231,7 +231,7 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// CarCreateBulk is the builder for creating a bulk of Car entities.
+// CarCreateBulk is the builder for creating many Car entities in bulk.
 type CarCreateBulk struct {
 	config
 	builders []*CarCreate
@@ -290,7 +290,7 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *CarCreateBulk) SaveX(ctx context.Context) []*Car {
 	v, err := ccb.Save(ctx)
 	if err != nil {

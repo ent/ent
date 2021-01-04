@@ -36,7 +36,7 @@ type SpecQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the SpecQuery builder.
 func (sq *SpecQuery) Where(ps ...predicate.Spec) *SpecQuery {
 	sq.predicates = append(sq.predicates, ps...)
 	return sq
@@ -60,7 +60,7 @@ func (sq *SpecQuery) Order(o ...OrderFunc) *SpecQuery {
 	return sq
 }
 
-// QueryCard chains the current query on the card edge.
+// QueryCard chains the current query on the "card" edge.
 func (sq *SpecQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: sq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -82,7 +82,8 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 	return query
 }
 
-// First returns the first Spec entity in the query. Returns *NotFoundError when no spec was found.
+// First returns the first Spec entity from the query.
+// Returns a *NotFoundError when no Spec was found.
 func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
 	nodes, err := sq.Limit(1).All(ctx)
 	if err != nil {
@@ -103,7 +104,8 @@ func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
 	return node
 }
 
-// FirstID returns the first Spec id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Spec ID from the query.
+// Returns a *NotFoundError when no Spec ID was found.
 func (sq *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
@@ -125,7 +127,9 @@ func (sq *SpecQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Spec entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Spec entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Spec entity is not found.
+// Returns a *NotFoundError when no Spec entities are found.
 func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 	nodes, err := sq.Limit(2).All(ctx)
 	if err != nil {
@@ -150,7 +154,9 @@ func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
 	return node
 }
 
-// OnlyID returns the only Spec id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Spec ID in the query.
+// Returns a *NotSingularError when exactly one Spec ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (sq *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
@@ -193,7 +199,7 @@ func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Spec ids.
+// IDs executes the query and returns a list of Spec IDs.
 func (sq *SpecQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
@@ -245,7 +251,7 @@ func (sq *SpecQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the SpecQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (sq *SpecQuery) Clone() *SpecQuery {
 	if sq == nil {
@@ -264,8 +270,8 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 	}
 }
 
-//  WithCard tells the query-builder to eager-loads the nodes that are connected to
-// the "card" edge. The optional arguments used to configure the query builder of the edge.
+// WithCard tells the query-builder to eager-load the nodes that are connected to
+// the "card" edge. The optional arguments are used to configure the query builder of the edge.
 func (sq *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
 	query := &CardQuery{config: sq.config}
 	for _, opt := range opts {
@@ -275,7 +281,7 @@ func (sq *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
 	return sq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 	group := &SpecGroupBy{config: sq.config}
@@ -289,7 +295,8 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
 	sq.fields = append([]string{field}, fields...)
 	return &SpecSelect{SpecQuery: sq}
@@ -489,7 +496,7 @@ func (sq *SpecQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// SpecGroupBy is the builder for group-by Spec entities.
+// SpecGroupBy is the group-by builder for Spec entities.
 type SpecGroupBy struct {
 	config
 	fields []string
@@ -505,7 +512,7 @@ func (sgb *SpecGroupBy) Aggregate(fns ...AggregateFunc) *SpecGroupBy {
 	return sgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (sgb *SpecGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := sgb.path(ctx)
 	if err != nil {
@@ -522,7 +529,8 @@ func (sgb *SpecGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (sgb *SpecGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(sgb.fields) > 1 {
 		return nil, errors.New("ent: SpecGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -543,7 +551,8 @@ func (sgb *SpecGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (sgb *SpecGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = sgb.Strings(ctx); err != nil {
@@ -569,7 +578,8 @@ func (sgb *SpecGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (sgb *SpecGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(sgb.fields) > 1 {
 		return nil, errors.New("ent: SpecGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -590,7 +600,8 @@ func (sgb *SpecGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (sgb *SpecGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = sgb.Ints(ctx); err != nil {
@@ -616,7 +627,8 @@ func (sgb *SpecGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (sgb *SpecGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(sgb.fields) > 1 {
 		return nil, errors.New("ent: SpecGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -637,7 +649,8 @@ func (sgb *SpecGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (sgb *SpecGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = sgb.Float64s(ctx); err != nil {
@@ -663,7 +676,8 @@ func (sgb *SpecGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (sgb *SpecGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(sgb.fields) > 1 {
 		return nil, errors.New("ent: SpecGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -684,7 +698,8 @@ func (sgb *SpecGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (sgb *SpecGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = sgb.Bools(ctx); err != nil {
@@ -739,14 +754,14 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(sgb.fields...)
 }
 
-// SpecSelect is the builder for select fields of Spec entities.
+// SpecSelect is the builder for selecting fields of Spec entities.
 type SpecSelect struct {
 	*SpecQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
@@ -762,7 +777,7 @@ func (ss *SpecSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(ss.fields) > 1 {
 		return nil, errors.New("ent: SpecSelect.Strings is not achievable when selecting more than 1 field")
@@ -783,7 +798,7 @@ func (ss *SpecSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ss.Strings(ctx); err != nil {
@@ -809,7 +824,7 @@ func (ss *SpecSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ss.fields) > 1 {
 		return nil, errors.New("ent: SpecSelect.Ints is not achievable when selecting more than 1 field")
@@ -830,7 +845,7 @@ func (ss *SpecSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ss.Ints(ctx); err != nil {
@@ -856,7 +871,7 @@ func (ss *SpecSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ss.fields) > 1 {
 		return nil, errors.New("ent: SpecSelect.Float64s is not achievable when selecting more than 1 field")
@@ -877,7 +892,7 @@ func (ss *SpecSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ss.Float64s(ctx); err != nil {
@@ -903,7 +918,7 @@ func (ss *SpecSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ss.fields) > 1 {
 		return nil, errors.New("ent: SpecSelect.Bools is not achievable when selecting more than 1 field")
@@ -924,7 +939,7 @@ func (ss *SpecSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (ss *SpecSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ss.Bools(ctx); err != nil {

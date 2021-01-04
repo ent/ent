@@ -24,7 +24,7 @@ type FileTypeDelete struct {
 	mutation *FileTypeMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the FileTypeDelete builder.
 func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
 	ftd.mutation.predicates = append(ftd.mutation.predicates, ps...)
 	return ftd

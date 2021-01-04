@@ -25,25 +25,25 @@ type CityUpdate struct {
 	mutation *CityMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CityUpdate builder.
 func (cu *CityUpdate) Where(ps ...predicate.City) *CityUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cu *CityUpdate) SetName(s string) *CityUpdate {
 	cu.mutation.SetName(s)
 	return cu
 }
 
-// AddStreetIDs adds the streets edge to Street by ids.
+// AddStreetIDs adds the "streets" edge to the Street entity by IDs.
 func (cu *CityUpdate) AddStreetIDs(ids ...int) *CityUpdate {
 	cu.mutation.AddStreetIDs(ids...)
 	return cu
 }
 
-// AddStreets adds the streets edges to Street.
+// AddStreets adds the "streets" edges to the Street entity.
 func (cu *CityUpdate) AddStreets(s ...*Street) *CityUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -57,19 +57,19 @@ func (cu *CityUpdate) Mutation() *CityMutation {
 	return cu.mutation
 }
 
-// ClearStreets clears all "streets" edges to type Street.
+// ClearStreets clears all "streets" edges to the Street entity.
 func (cu *CityUpdate) ClearStreets() *CityUpdate {
 	cu.mutation.ClearStreets()
 	return cu
 }
 
-// RemoveStreetIDs removes the streets edge to Street by ids.
+// RemoveStreetIDs removes the "streets" edge to Street entities by IDs.
 func (cu *CityUpdate) RemoveStreetIDs(ids ...int) *CityUpdate {
 	cu.mutation.RemoveStreetIDs(ids...)
 	return cu
 }
 
-// RemoveStreets removes streets edges to Street.
+// RemoveStreets removes "streets" edges to Street entities.
 func (cu *CityUpdate) RemoveStreets(s ...*Street) *CityUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -226,19 +226,19 @@ type CityUpdateOne struct {
 	mutation *CityMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cuo *CityUpdateOne) SetName(s string) *CityUpdateOne {
 	cuo.mutation.SetName(s)
 	return cuo
 }
 
-// AddStreetIDs adds the streets edge to Street by ids.
+// AddStreetIDs adds the "streets" edge to the Street entity by IDs.
 func (cuo *CityUpdateOne) AddStreetIDs(ids ...int) *CityUpdateOne {
 	cuo.mutation.AddStreetIDs(ids...)
 	return cuo
 }
 
-// AddStreets adds the streets edges to Street.
+// AddStreets adds the "streets" edges to the Street entity.
 func (cuo *CityUpdateOne) AddStreets(s ...*Street) *CityUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -252,19 +252,19 @@ func (cuo *CityUpdateOne) Mutation() *CityMutation {
 	return cuo.mutation
 }
 
-// ClearStreets clears all "streets" edges to type Street.
+// ClearStreets clears all "streets" edges to the Street entity.
 func (cuo *CityUpdateOne) ClearStreets() *CityUpdateOne {
 	cuo.mutation.ClearStreets()
 	return cuo
 }
 
-// RemoveStreetIDs removes the streets edge to Street by ids.
+// RemoveStreetIDs removes the "streets" edge to Street entities by IDs.
 func (cuo *CityUpdateOne) RemoveStreetIDs(ids ...int) *CityUpdateOne {
 	cuo.mutation.RemoveStreetIDs(ids...)
 	return cuo
 }
 
-// RemoveStreets removes streets edges to Street.
+// RemoveStreets removes "streets" edges to Street entities.
 func (cuo *CityUpdateOne) RemoveStreets(s ...*Street) *CityUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -273,7 +273,7 @@ func (cuo *CityUpdateOne) RemoveStreets(s ...*Street) *CityUpdateOne {
 	return cuo.RemoveStreetIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated City entity.
 func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
 	var (
 		err  error

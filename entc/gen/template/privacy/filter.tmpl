@@ -16,12 +16,12 @@ type (
 		Where(entql.P)
 	}
 
-	// The FilterFunc type is an adapter to allow the use of ordinary
+	// The FilterFunc type is an adapter that allows the use of ordinary
 	// functions as filters for query and mutation types.
 	FilterFunc func(context.Context, Filter) error
 )
 
-// EvalQuery calls f(ctx, q) if the query implement the Filter interface, deny otherwise.
+// EvalQuery calls f(ctx, q) if the query implements the Filter interface, otherwise it is denied.
 func (f FilterFunc) EvalQuery(ctx context.Context, q {{ $pkg }}.Query) error {
 	fr, err := queryFilter(q)
 	if err != nil {
@@ -30,7 +30,7 @@ func (f FilterFunc) EvalQuery(ctx context.Context, q {{ $pkg }}.Query) error {
 	return f(ctx, fr)
 }
 
-// EvalMutation calls f(ctx, q) if the mutation implement the Filter interface, deny otherwise.
+// EvalMutation calls f(ctx, q) if the mutation implements the Filter interface, otherwise it is denied.
 func (f FilterFunc) EvalMutation(ctx context.Context, m {{ $pkg }}.Mutation) error {
 	fr, err := mutationFilter(m)
 	if err != nil {

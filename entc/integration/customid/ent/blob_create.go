@@ -24,25 +24,25 @@ type BlobCreate struct {
 	hooks    []Hook
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (bc *BlobCreate) SetUUID(u uuid.UUID) *BlobCreate {
 	bc.mutation.SetUUID(u)
 	return bc
 }
 
-// SetID sets the id field.
+// SetID sets the "id" field.
 func (bc *BlobCreate) SetID(u uuid.UUID) *BlobCreate {
 	bc.mutation.SetID(u)
 	return bc
 }
 
-// SetParentID sets the parent edge to Blob by id.
+// SetParentID sets the "parent" edge to the Blob entity by ID.
 func (bc *BlobCreate) SetParentID(id uuid.UUID) *BlobCreate {
 	bc.mutation.SetParentID(id)
 	return bc
 }
 
-// SetNillableParentID sets the parent edge to Blob by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
 func (bc *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
 	if id != nil {
 		bc = bc.SetParentID(*id)
@@ -50,18 +50,18 @@ func (bc *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
 	return bc
 }
 
-// SetParent sets the parent edge to Blob.
+// SetParent sets the "parent" edge to the Blob entity.
 func (bc *BlobCreate) SetParent(b *Blob) *BlobCreate {
 	return bc.SetParentID(b.ID)
 }
 
-// AddLinkIDs adds the links edge to Blob by ids.
+// AddLinkIDs adds the "links" edge to the Blob entity by IDs.
 func (bc *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
 	bc.mutation.AddLinkIDs(ids...)
 	return bc
 }
 
-// AddLinks adds the links edges to Blob.
+// AddLinks adds the "links" edges to the Blob entity.
 func (bc *BlobCreate) AddLinks(b ...*Blob) *BlobCreate {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
@@ -215,7 +215,7 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// BlobCreateBulk is the builder for creating a bulk of Blob entities.
+// BlobCreateBulk is the builder for creating many Blob entities in bulk.
 type BlobCreateBulk struct {
 	config
 	builders []*BlobCreate
@@ -271,7 +271,7 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
 	v, err := bcb.Save(ctx)
 	if err != nil {

@@ -25,25 +25,25 @@ type CardCreate struct {
 	hooks    []Hook
 }
 
-// SetExpired sets the expired field.
+// SetExpired sets the "expired" field.
 func (cc *CardCreate) SetExpired(t time.Time) *CardCreate {
 	cc.mutation.SetExpired(t)
 	return cc
 }
 
-// SetNumber sets the number field.
+// SetNumber sets the "number" field.
 func (cc *CardCreate) SetNumber(s string) *CardCreate {
 	cc.mutation.SetNumber(s)
 	return cc
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
 	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
 }
@@ -173,7 +173,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// CardCreateBulk is the builder for creating a bulk of Card entities.
+// CardCreateBulk is the builder for creating many Card entities in bulk.
 type CardCreateBulk struct {
 	config
 	builders []*CardCreate
@@ -230,7 +230,7 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
 	v, err := ccb.Save(ctx)
 	if err != nil {

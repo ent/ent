@@ -23,25 +23,25 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
 	uc.mutation.SetAge(i)
 	return uc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// AddFollowerIDs adds the followers edge to User by ids.
+// AddFollowerIDs adds the "followers" edge to the User entity by IDs.
 func (uc *UserCreate) AddFollowerIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFollowerIDs(ids...)
 	return uc
 }
 
-// AddFollowers adds the followers edges to User.
+// AddFollowers adds the "followers" edges to the User entity.
 func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -50,13 +50,13 @@ func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 	return uc.AddFollowerIDs(ids...)
 }
 
-// AddFollowingIDs adds the following edge to User by ids.
+// AddFollowingIDs adds the "following" edge to the User entity by IDs.
 func (uc *UserCreate) AddFollowingIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFollowingIDs(ids...)
 	return uc
 }
 
-// AddFollowing adds the following edges to User.
+// AddFollowing adds the "following" edges to the User entity.
 func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -206,7 +206,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -263,7 +263,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

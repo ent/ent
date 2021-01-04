@@ -27,19 +27,19 @@ type GroupUpdate struct {
 	mutation *GroupMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the GroupUpdate builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
 	return gu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 	gu.mutation.SetName(s)
 	return gu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (gu *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
 	if s != nil {
 		gu.SetName(*s)
@@ -47,24 +47,24 @@ func (gu *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
 	return gu
 }
 
-// SetTenantID sets the tenant edge to Tenant by id.
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (gu *GroupUpdate) SetTenantID(id int) *GroupUpdate {
 	gu.mutation.SetTenantID(id)
 	return gu
 }
 
-// SetTenant sets the tenant edge to Tenant.
+// SetTenant sets the "tenant" edge to the Tenant entity.
 func (gu *GroupUpdate) SetTenant(t *Tenant) *GroupUpdate {
 	return gu.SetTenantID(t.ID)
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (gu *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddUserIDs(ids...)
 	return gu
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -78,25 +78,25 @@ func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
 }
 
-// ClearTenant clears the "tenant" edge to type Tenant.
+// ClearTenant clears the "tenant" edge to the Tenant entity.
 func (gu *GroupUpdate) ClearTenant() *GroupUpdate {
 	gu.mutation.ClearTenant()
 	return gu
 }
 
-// ClearUsers clears all "users" edges to type User.
+// ClearUsers clears all "users" edges to the User entity.
 func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
 	gu.mutation.ClearUsers()
 	return gu
 }
 
-// RemoveUserIDs removes the users edge to User by ids.
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
 	return gu
 }
 
-// RemoveUsers removes users edges to User.
+// RemoveUsers removes "users" edges to User entities.
 func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -302,13 +302,13 @@ type GroupUpdateOne struct {
 	mutation *GroupMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 	guo.mutation.SetName(s)
 	return guo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (guo *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
 	if s != nil {
 		guo.SetName(*s)
@@ -316,24 +316,24 @@ func (guo *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
 	return guo
 }
 
-// SetTenantID sets the tenant edge to Tenant by id.
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (guo *GroupUpdateOne) SetTenantID(id int) *GroupUpdateOne {
 	guo.mutation.SetTenantID(id)
 	return guo
 }
 
-// SetTenant sets the tenant edge to Tenant.
+// SetTenant sets the "tenant" edge to the Tenant entity.
 func (guo *GroupUpdateOne) SetTenant(t *Tenant) *GroupUpdateOne {
 	return guo.SetTenantID(t.ID)
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (guo *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.AddUserIDs(ids...)
 	return guo
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -347,25 +347,25 @@ func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
 }
 
-// ClearTenant clears the "tenant" edge to type Tenant.
+// ClearTenant clears the "tenant" edge to the Tenant entity.
 func (guo *GroupUpdateOne) ClearTenant() *GroupUpdateOne {
 	guo.mutation.ClearTenant()
 	return guo
 }
 
-// ClearUsers clears all "users" edges to type User.
+// ClearUsers clears all "users" edges to the User entity.
 func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
 	guo.mutation.ClearUsers()
 	return guo
 }
 
-// RemoveUserIDs removes the users edge to User by ids.
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveUserIDs(ids...)
 	return guo
 }
 
-// RemoveUsers removes users edges to User.
+// RemoveUsers removes "users" edges to User entities.
 func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -374,7 +374,7 @@ func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	return guo.RemoveUserIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	var (
 		err  error

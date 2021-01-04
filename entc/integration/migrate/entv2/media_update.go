@@ -24,19 +24,19 @@ type MediaUpdate struct {
 	mutation *MediaMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the MediaUpdate builder.
 func (mu *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
 	mu.mutation.predicates = append(mu.mutation.predicates, ps...)
 	return mu
 }
 
-// SetSource sets the source field.
+// SetSource sets the "source" field.
 func (mu *MediaUpdate) SetSource(s string) *MediaUpdate {
 	mu.mutation.SetSource(s)
 	return mu
 }
 
-// SetNillableSource sets the source field if the given value is not nil.
+// SetNillableSource sets the "source" field if the given value is not nil.
 func (mu *MediaUpdate) SetNillableSource(s *string) *MediaUpdate {
 	if s != nil {
 		mu.SetSource(*s)
@@ -44,19 +44,19 @@ func (mu *MediaUpdate) SetNillableSource(s *string) *MediaUpdate {
 	return mu
 }
 
-// ClearSource clears the value of source.
+// ClearSource clears the value of the "source" field.
 func (mu *MediaUpdate) ClearSource() *MediaUpdate {
 	mu.mutation.ClearSource()
 	return mu
 }
 
-// SetSourceURI sets the source_uri field.
+// SetSourceURI sets the "source_uri" field.
 func (mu *MediaUpdate) SetSourceURI(s string) *MediaUpdate {
 	mu.mutation.SetSourceURI(s)
 	return mu
 }
 
-// SetNillableSourceURI sets the source_uri field if the given value is not nil.
+// SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
 func (mu *MediaUpdate) SetNillableSourceURI(s *string) *MediaUpdate {
 	if s != nil {
 		mu.SetSourceURI(*s)
@@ -64,7 +64,7 @@ func (mu *MediaUpdate) SetNillableSourceURI(s *string) *MediaUpdate {
 	return mu
 }
 
-// ClearSourceURI clears the value of source_uri.
+// ClearSourceURI clears the value of the "source_uri" field.
 func (mu *MediaUpdate) ClearSourceURI() *MediaUpdate {
 	mu.mutation.ClearSourceURI()
 	return mu
@@ -188,13 +188,13 @@ type MediaUpdateOne struct {
 	mutation *MediaMutation
 }
 
-// SetSource sets the source field.
+// SetSource sets the "source" field.
 func (muo *MediaUpdateOne) SetSource(s string) *MediaUpdateOne {
 	muo.mutation.SetSource(s)
 	return muo
 }
 
-// SetNillableSource sets the source field if the given value is not nil.
+// SetNillableSource sets the "source" field if the given value is not nil.
 func (muo *MediaUpdateOne) SetNillableSource(s *string) *MediaUpdateOne {
 	if s != nil {
 		muo.SetSource(*s)
@@ -202,19 +202,19 @@ func (muo *MediaUpdateOne) SetNillableSource(s *string) *MediaUpdateOne {
 	return muo
 }
 
-// ClearSource clears the value of source.
+// ClearSource clears the value of the "source" field.
 func (muo *MediaUpdateOne) ClearSource() *MediaUpdateOne {
 	muo.mutation.ClearSource()
 	return muo
 }
 
-// SetSourceURI sets the source_uri field.
+// SetSourceURI sets the "source_uri" field.
 func (muo *MediaUpdateOne) SetSourceURI(s string) *MediaUpdateOne {
 	muo.mutation.SetSourceURI(s)
 	return muo
 }
 
-// SetNillableSourceURI sets the source_uri field if the given value is not nil.
+// SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
 func (muo *MediaUpdateOne) SetNillableSourceURI(s *string) *MediaUpdateOne {
 	if s != nil {
 		muo.SetSourceURI(*s)
@@ -222,7 +222,7 @@ func (muo *MediaUpdateOne) SetNillableSourceURI(s *string) *MediaUpdateOne {
 	return muo
 }
 
-// ClearSourceURI clears the value of source_uri.
+// ClearSourceURI clears the value of the "source_uri" field.
 func (muo *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
 	muo.mutation.ClearSourceURI()
 	return muo
@@ -233,7 +233,7 @@ func (muo *MediaUpdateOne) Mutation() *MediaMutation {
 	return muo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Media entity.
 func (muo *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
 	var (
 		err  error

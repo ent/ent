@@ -49,9 +49,9 @@ const (
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
 
-	// CarFieldID holds the string denoting the id field of the Car.
+	// CarFieldID holds the string denoting the ID field of the Car.
 	CarFieldID = "id"
-	// PetFieldID holds the string denoting the id field of the Pet.
+	// PetFieldID holds the string denoting the ID field of the Pet.
 	PetFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -108,22 +108,22 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultMixedString holds the default value on creation for the mixed_string field.
+	// DefaultMixedString holds the default value on creation for the "mixed_string" field.
 	DefaultMixedString string
 	// NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
 	NicknameValidator func(string) error
-	// DefaultPhone holds the default value on creation for the phone field.
+	// DefaultPhone holds the default value on creation for the "phone" field.
 	DefaultPhone string
-	// DefaultBuffer holds the default value on creation for the buffer field.
+	// DefaultBuffer holds the default value on creation for the "buffer" field.
 	DefaultBuffer func() []byte
-	// DefaultTitle holds the default value on creation for the title field.
+	// DefaultTitle holds the default value on creation for the "title" field.
 	DefaultTitle string
 )
 
-// MixedEnum defines the type for the mixed_enum enum field.
+// MixedEnum defines the type for the "mixed_enum" enum field.
 type MixedEnum string
 
-// MixedEnumOn is the default MixedEnum.
+// MixedEnumOn is the default value of the MixedEnum enum.
 const DefaultMixedEnum = MixedEnumOn
 
 // MixedEnum values.
@@ -146,7 +146,7 @@ func MixedEnumValidator(me MixedEnum) error {
 	}
 }
 
-// State defines the type for the state enum field.
+// State defines the type for the "state" enum field.
 type State string
 
 // State values.
@@ -170,7 +170,7 @@ func StateValidator(s State) error {
 	}
 }
 
-// Status defines the type for the status enum field.
+// Status defines the type for the "status" enum field.
 type Status string
 
 // Status values.

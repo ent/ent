@@ -103,7 +103,7 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// ItemCreateBulk is the builder for creating a bulk of Item entities.
+// ItemCreateBulk is the builder for creating many Item entities in bulk.
 type ItemCreateBulk struct {
 	config
 	builders []*ItemCreate
@@ -160,7 +160,7 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (icb *ItemCreateBulk) SaveX(ctx context.Context) []*Item {
 	v, err := icb.Save(ctx)
 	if err != nil {

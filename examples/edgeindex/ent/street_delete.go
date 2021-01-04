@@ -24,7 +24,7 @@ type StreetDelete struct {
 	mutation *StreetMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the StreetDelete builder.
 func (sd *StreetDelete) Where(ps ...predicate.Street) *StreetDelete {
 	sd.mutation.predicates = append(sd.mutation.predicates, ps...)
 	return sd

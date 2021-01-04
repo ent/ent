@@ -25,13 +25,13 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 	if s != nil {
 		uc.SetName(*s)
@@ -39,30 +39,30 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 	return uc
 }
 
-// SetFoods sets the foods field.
+// SetFoods sets the "foods" field.
 func (uc *UserCreate) SetFoods(s []string) *UserCreate {
 	uc.mutation.SetFoods(s)
 	return uc
 }
 
-// SetTenantID sets the tenant edge to Tenant by id.
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (uc *UserCreate) SetTenantID(id int) *UserCreate {
 	uc.mutation.SetTenantID(id)
 	return uc
 }
 
-// SetTenant sets the tenant edge to Tenant.
+// SetTenant sets the "tenant" edge to the Tenant entity.
 func (uc *UserCreate) SetTenant(t *Tenant) *UserCreate {
 	return uc.SetTenantID(t.ID)
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
 	uc.mutation.AddGroupIDs(ids...)
 	return uc
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -221,7 +221,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -279,7 +279,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

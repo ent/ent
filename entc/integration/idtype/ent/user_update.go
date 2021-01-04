@@ -24,25 +24,25 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetSpouseID sets the spouse edge to User by id.
+// SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (uu *UserUpdate) SetSpouseID(id uint64) *UserUpdate {
 	uu.mutation.SetSpouseID(id)
 	return uu
 }
 
-// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillableSpouseID(id *uint64) *UserUpdate {
 	if id != nil {
 		uu = uu.SetSpouseID(*id)
@@ -50,18 +50,18 @@ func (uu *UserUpdate) SetNillableSpouseID(id *uint64) *UserUpdate {
 	return uu
 }
 
-// SetSpouse sets the spouse edge to User.
+// SetSpouse sets the "spouse" edge to the User entity.
 func (uu *UserUpdate) SetSpouse(u *User) *UserUpdate {
 	return uu.SetSpouseID(u.ID)
 }
 
-// AddFollowerIDs adds the followers edge to User by ids.
+// AddFollowerIDs adds the "followers" edge to the User entity by IDs.
 func (uu *UserUpdate) AddFollowerIDs(ids ...uint64) *UserUpdate {
 	uu.mutation.AddFollowerIDs(ids...)
 	return uu
 }
 
-// AddFollowers adds the followers edges to User.
+// AddFollowers adds the "followers" edges to the User entity.
 func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -70,13 +70,13 @@ func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
 	return uu.AddFollowerIDs(ids...)
 }
 
-// AddFollowingIDs adds the following edge to User by ids.
+// AddFollowingIDs adds the "following" edge to the User entity by IDs.
 func (uu *UserUpdate) AddFollowingIDs(ids ...uint64) *UserUpdate {
 	uu.mutation.AddFollowingIDs(ids...)
 	return uu
 }
 
-// AddFollowing adds the following edges to User.
+// AddFollowing adds the "following" edges to the User entity.
 func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -90,25 +90,25 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearSpouse clears the "spouse" edge to type User.
+// ClearSpouse clears the "spouse" edge to the User entity.
 func (uu *UserUpdate) ClearSpouse() *UserUpdate {
 	uu.mutation.ClearSpouse()
 	return uu
 }
 
-// ClearFollowers clears all "followers" edges to type User.
+// ClearFollowers clears all "followers" edges to the User entity.
 func (uu *UserUpdate) ClearFollowers() *UserUpdate {
 	uu.mutation.ClearFollowers()
 	return uu
 }
 
-// RemoveFollowerIDs removes the followers edge to User by ids.
+// RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
 func (uu *UserUpdate) RemoveFollowerIDs(ids ...uint64) *UserUpdate {
 	uu.mutation.RemoveFollowerIDs(ids...)
 	return uu
 }
 
-// RemoveFollowers removes followers edges to User.
+// RemoveFollowers removes "followers" edges to User entities.
 func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -117,19 +117,19 @@ func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
 	return uu.RemoveFollowerIDs(ids...)
 }
 
-// ClearFollowing clears all "following" edges to type User.
+// ClearFollowing clears all "following" edges to the User entity.
 func (uu *UserUpdate) ClearFollowing() *UserUpdate {
 	uu.mutation.ClearFollowing()
 	return uu
 }
 
-// RemoveFollowingIDs removes the following edge to User by ids.
+// RemoveFollowingIDs removes the "following" edge to User entities by IDs.
 func (uu *UserUpdate) RemoveFollowingIDs(ids ...uint64) *UserUpdate {
 	uu.mutation.RemoveFollowingIDs(ids...)
 	return uu
 }
 
-// RemoveFollowing removes following edges to User.
+// RemoveFollowing removes "following" edges to User entities.
 func (uu *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -375,19 +375,19 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetSpouseID sets the spouse edge to User by id.
+// SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (uuo *UserUpdateOne) SetSpouseID(id uint64) *UserUpdateOne {
 	uuo.mutation.SetSpouseID(id)
 	return uuo
 }
 
-// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableSpouseID(id *uint64) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetSpouseID(*id)
@@ -395,18 +395,18 @@ func (uuo *UserUpdateOne) SetNillableSpouseID(id *uint64) *UserUpdateOne {
 	return uuo
 }
 
-// SetSpouse sets the spouse edge to User.
+// SetSpouse sets the "spouse" edge to the User entity.
 func (uuo *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
 	return uuo.SetSpouseID(u.ID)
 }
 
-// AddFollowerIDs adds the followers edge to User by ids.
+// AddFollowerIDs adds the "followers" edge to the User entity by IDs.
 func (uuo *UserUpdateOne) AddFollowerIDs(ids ...uint64) *UserUpdateOne {
 	uuo.mutation.AddFollowerIDs(ids...)
 	return uuo
 }
 
-// AddFollowers adds the followers edges to User.
+// AddFollowers adds the "followers" edges to the User entity.
 func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -415,13 +415,13 @@ func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
 	return uuo.AddFollowerIDs(ids...)
 }
 
-// AddFollowingIDs adds the following edge to User by ids.
+// AddFollowingIDs adds the "following" edge to the User entity by IDs.
 func (uuo *UserUpdateOne) AddFollowingIDs(ids ...uint64) *UserUpdateOne {
 	uuo.mutation.AddFollowingIDs(ids...)
 	return uuo
 }
 
-// AddFollowing adds the following edges to User.
+// AddFollowing adds the "following" edges to the User entity.
 func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -435,25 +435,25 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearSpouse clears the "spouse" edge to type User.
+// ClearSpouse clears the "spouse" edge to the User entity.
 func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
 	uuo.mutation.ClearSpouse()
 	return uuo
 }
 
-// ClearFollowers clears all "followers" edges to type User.
+// ClearFollowers clears all "followers" edges to the User entity.
 func (uuo *UserUpdateOne) ClearFollowers() *UserUpdateOne {
 	uuo.mutation.ClearFollowers()
 	return uuo
 }
 
-// RemoveFollowerIDs removes the followers edge to User by ids.
+// RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
 func (uuo *UserUpdateOne) RemoveFollowerIDs(ids ...uint64) *UserUpdateOne {
 	uuo.mutation.RemoveFollowerIDs(ids...)
 	return uuo
 }
 
-// RemoveFollowers removes followers edges to User.
+// RemoveFollowers removes "followers" edges to User entities.
 func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -462,19 +462,19 @@ func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
 	return uuo.RemoveFollowerIDs(ids...)
 }
 
-// ClearFollowing clears all "following" edges to type User.
+// ClearFollowing clears all "following" edges to the User entity.
 func (uuo *UserUpdateOne) ClearFollowing() *UserUpdateOne {
 	uuo.mutation.ClearFollowing()
 	return uuo
 }
 
-// RemoveFollowingIDs removes the following edge to User by ids.
+// RemoveFollowingIDs removes the "following" edge to User entities by IDs.
 func (uuo *UserUpdateOne) RemoveFollowingIDs(ids ...uint64) *UserUpdateOne {
 	uuo.mutation.RemoveFollowingIDs(ids...)
 	return uuo
 }
 
-// RemoveFollowing removes following edges to User.
+// RemoveFollowing removes "following" edges to User entities.
 func (uuo *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
 	ids := make([]uint64, len(u))
 	for i := range u {
@@ -483,7 +483,7 @@ func (uuo *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
 	return uuo.RemoveFollowingIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

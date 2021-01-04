@@ -24,13 +24,13 @@ type TaskCreate struct {
 	hooks    []Hook
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tc *TaskCreate) SetPriority(s schema.Priority) *TaskCreate {
 	tc.mutation.SetPriority(s)
 	return tc
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tc *TaskCreate) SetNillablePriority(s *schema.Priority) *TaskCreate {
 	if s != nil {
 		tc.SetPriority(*s)
@@ -144,7 +144,7 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// TaskCreateBulk is the builder for creating a bulk of Task entities.
+// TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
 	config
 	builders []*TaskCreate
@@ -202,7 +202,7 @@ func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (tcb *TaskCreateBulk) SaveX(ctx context.Context) []*Task {
 	v, err := tcb.Save(ctx)
 	if err != nil {

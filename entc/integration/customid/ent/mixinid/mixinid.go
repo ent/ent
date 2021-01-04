@@ -42,6 +42,6 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultID holds the default value on creation for the id field.
+	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

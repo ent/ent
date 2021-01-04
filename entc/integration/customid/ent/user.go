@@ -123,35 +123,35 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryGroups queries the groups edge of the User.
+// QueryGroups queries the "groups" edge of the User entity.
 func (u *User) QueryGroups() *GroupQuery {
 	return (&UserClient{config: u.config}).QueryGroups(u)
 }
 
-// QueryParent queries the parent edge of the User.
+// QueryParent queries the "parent" edge of the User entity.
 func (u *User) QueryParent() *UserQuery {
 	return (&UserClient{config: u.config}).QueryParent(u)
 }
 
-// QueryChildren queries the children edge of the User.
+// QueryChildren queries the "children" edge of the User entity.
 func (u *User) QueryChildren() *UserQuery {
 	return (&UserClient{config: u.config}).QueryChildren(u)
 }
 
-// QueryPets queries the pets edge of the User.
+// QueryPets queries the "pets" edge of the User entity.
 func (u *User) QueryPets() *PetQuery {
 	return (&UserClient{config: u.config}).QueryPets(u)
 }
 
 // Update returns a builder for updating this User.
-// Note that, you need to call User.Unwrap() before calling this method, if this User
+// Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
 	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the User entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (u *User) Unwrap() *User {
 	tx, ok := u.config.driver.(*txDriver)
 	if !ok {

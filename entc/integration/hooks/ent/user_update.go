@@ -25,20 +25,20 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetVersion sets the version field.
+// SetVersion sets the "version" field.
 func (uu *UserUpdate) SetVersion(i int) *UserUpdate {
 	uu.mutation.ResetVersion()
 	uu.mutation.SetVersion(i)
 	return uu
 }
 
-// SetNillableVersion sets the version field if the given value is not nil.
+// SetNillableVersion sets the "version" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableVersion(i *int) *UserUpdate {
 	if i != nil {
 		uu.SetVersion(*i)
@@ -46,26 +46,26 @@ func (uu *UserUpdate) SetNillableVersion(i *int) *UserUpdate {
 	return uu
 }
 
-// AddVersion adds i to version.
+// AddVersion adds i to the "version" field.
 func (uu *UserUpdate) AddVersion(i int) *UserUpdate {
 	uu.mutation.AddVersion(i)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetWorth sets the worth field.
+// SetWorth sets the "worth" field.
 func (uu *UserUpdate) SetWorth(u uint) *UserUpdate {
 	uu.mutation.ResetWorth()
 	uu.mutation.SetWorth(u)
 	return uu
 }
 
-// SetNillableWorth sets the worth field if the given value is not nil.
+// SetNillableWorth sets the "worth" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableWorth(u *uint) *UserUpdate {
 	if u != nil {
 		uu.SetWorth(*u)
@@ -73,25 +73,25 @@ func (uu *UserUpdate) SetNillableWorth(u *uint) *UserUpdate {
 	return uu
 }
 
-// AddWorth adds u to worth.
+// AddWorth adds u to the "worth" field.
 func (uu *UserUpdate) AddWorth(u uint) *UserUpdate {
 	uu.mutation.AddWorth(u)
 	return uu
 }
 
-// ClearWorth clears the value of worth.
+// ClearWorth clears the value of the "worth" field.
 func (uu *UserUpdate) ClearWorth() *UserUpdate {
 	uu.mutation.ClearWorth()
 	return uu
 }
 
-// AddCardIDs adds the cards edge to Card by ids.
+// AddCardIDs adds the "cards" edge to the Card entity by IDs.
 func (uu *UserUpdate) AddCardIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddCardIDs(ids...)
 	return uu
 }
 
-// AddCards adds the cards edges to Card.
+// AddCards adds the "cards" edges to the Card entity.
 func (uu *UserUpdate) AddCards(c ...*Card) *UserUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -100,13 +100,13 @@ func (uu *UserUpdate) AddCards(c ...*Card) *UserUpdate {
 	return uu.AddCardIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uu *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFriendIDs(ids...)
 	return uu
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -115,13 +115,13 @@ func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 	return uu.AddFriendIDs(ids...)
 }
 
-// SetBestFriendID sets the best_friend edge to User by id.
+// SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (uu *UserUpdate) SetBestFriendID(id int) *UserUpdate {
 	uu.mutation.SetBestFriendID(id)
 	return uu
 }
 
-// SetNillableBestFriendID sets the best_friend edge to User by id if the given value is not nil.
+// SetNillableBestFriendID sets the "best_friend" edge to the User entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillableBestFriendID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetBestFriendID(*id)
@@ -129,7 +129,7 @@ func (uu *UserUpdate) SetNillableBestFriendID(id *int) *UserUpdate {
 	return uu
 }
 
-// SetBestFriend sets the best_friend edge to User.
+// SetBestFriend sets the "best_friend" edge to the User entity.
 func (uu *UserUpdate) SetBestFriend(u *User) *UserUpdate {
 	return uu.SetBestFriendID(u.ID)
 }
@@ -139,19 +139,19 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearCards clears all "cards" edges to type Card.
+// ClearCards clears all "cards" edges to the Card entity.
 func (uu *UserUpdate) ClearCards() *UserUpdate {
 	uu.mutation.ClearCards()
 	return uu
 }
 
-// RemoveCardIDs removes the cards edge to Card by ids.
+// RemoveCardIDs removes the "cards" edge to Card entities by IDs.
 func (uu *UserUpdate) RemoveCardIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveCardIDs(ids...)
 	return uu
 }
 
-// RemoveCards removes cards edges to Card.
+// RemoveCards removes "cards" edges to Card entities.
 func (uu *UserUpdate) RemoveCards(c ...*Card) *UserUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -160,19 +160,19 @@ func (uu *UserUpdate) RemoveCards(c ...*Card) *UserUpdate {
 	return uu.RemoveCardIDs(ids...)
 }
 
-// ClearFriends clears all "friends" edges to type User.
+// ClearFriends clears all "friends" edges to the User entity.
 func (uu *UserUpdate) ClearFriends() *UserUpdate {
 	uu.mutation.ClearFriends()
 	return uu
 }
 
-// RemoveFriendIDs removes the friends edge to User by ids.
+// RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (uu *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFriendIDs(ids...)
 	return uu
 }
 
-// RemoveFriends removes friends edges to User.
+// RemoveFriends removes "friends" edges to User entities.
 func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -181,7 +181,7 @@ func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 	return uu.RemoveFriendIDs(ids...)
 }
 
-// ClearBestFriend clears the "best_friend" edge to type User.
+// ClearBestFriend clears the "best_friend" edge to the User entity.
 func (uu *UserUpdate) ClearBestFriend() *UserUpdate {
 	uu.mutation.ClearBestFriend()
 	return uu
@@ -458,14 +458,14 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetVersion sets the version field.
+// SetVersion sets the "version" field.
 func (uuo *UserUpdateOne) SetVersion(i int) *UserUpdateOne {
 	uuo.mutation.ResetVersion()
 	uuo.mutation.SetVersion(i)
 	return uuo
 }
 
-// SetNillableVersion sets the version field if the given value is not nil.
+// SetNillableVersion sets the "version" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableVersion(i *int) *UserUpdateOne {
 	if i != nil {
 		uuo.SetVersion(*i)
@@ -473,26 +473,26 @@ func (uuo *UserUpdateOne) SetNillableVersion(i *int) *UserUpdateOne {
 	return uuo
 }
 
-// AddVersion adds i to version.
+// AddVersion adds i to the "version" field.
 func (uuo *UserUpdateOne) AddVersion(i int) *UserUpdateOne {
 	uuo.mutation.AddVersion(i)
 	return uuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetWorth sets the worth field.
+// SetWorth sets the "worth" field.
 func (uuo *UserUpdateOne) SetWorth(u uint) *UserUpdateOne {
 	uuo.mutation.ResetWorth()
 	uuo.mutation.SetWorth(u)
 	return uuo
 }
 
-// SetNillableWorth sets the worth field if the given value is not nil.
+// SetNillableWorth sets the "worth" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableWorth(u *uint) *UserUpdateOne {
 	if u != nil {
 		uuo.SetWorth(*u)
@@ -500,25 +500,25 @@ func (uuo *UserUpdateOne) SetNillableWorth(u *uint) *UserUpdateOne {
 	return uuo
 }
 
-// AddWorth adds u to worth.
+// AddWorth adds u to the "worth" field.
 func (uuo *UserUpdateOne) AddWorth(u uint) *UserUpdateOne {
 	uuo.mutation.AddWorth(u)
 	return uuo
 }
 
-// ClearWorth clears the value of worth.
+// ClearWorth clears the value of the "worth" field.
 func (uuo *UserUpdateOne) ClearWorth() *UserUpdateOne {
 	uuo.mutation.ClearWorth()
 	return uuo
 }
 
-// AddCardIDs adds the cards edge to Card by ids.
+// AddCardIDs adds the "cards" edge to the Card entity by IDs.
 func (uuo *UserUpdateOne) AddCardIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddCardIDs(ids...)
 	return uuo
 }
 
-// AddCards adds the cards edges to Card.
+// AddCards adds the "cards" edges to the Card entity.
 func (uuo *UserUpdateOne) AddCards(c ...*Card) *UserUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -527,13 +527,13 @@ func (uuo *UserUpdateOne) AddCards(c ...*Card) *UserUpdateOne {
 	return uuo.AddCardIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uuo *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddFriendIDs(ids...)
 	return uuo
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -542,13 +542,13 @@ func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 	return uuo.AddFriendIDs(ids...)
 }
 
-// SetBestFriendID sets the best_friend edge to User by id.
+// SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (uuo *UserUpdateOne) SetBestFriendID(id int) *UserUpdateOne {
 	uuo.mutation.SetBestFriendID(id)
 	return uuo
 }
 
-// SetNillableBestFriendID sets the best_friend edge to User by id if the given value is not nil.
+// SetNillableBestFriendID sets the "best_friend" edge to the User entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableBestFriendID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetBestFriendID(*id)
@@ -556,7 +556,7 @@ func (uuo *UserUpdateOne) SetNillableBestFriendID(id *int) *UserUpdateOne {
 	return uuo
 }
 
-// SetBestFriend sets the best_friend edge to User.
+// SetBestFriend sets the "best_friend" edge to the User entity.
 func (uuo *UserUpdateOne) SetBestFriend(u *User) *UserUpdateOne {
 	return uuo.SetBestFriendID(u.ID)
 }
@@ -566,19 +566,19 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearCards clears all "cards" edges to type Card.
+// ClearCards clears all "cards" edges to the Card entity.
 func (uuo *UserUpdateOne) ClearCards() *UserUpdateOne {
 	uuo.mutation.ClearCards()
 	return uuo
 }
 
-// RemoveCardIDs removes the cards edge to Card by ids.
+// RemoveCardIDs removes the "cards" edge to Card entities by IDs.
 func (uuo *UserUpdateOne) RemoveCardIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveCardIDs(ids...)
 	return uuo
 }
 
-// RemoveCards removes cards edges to Card.
+// RemoveCards removes "cards" edges to Card entities.
 func (uuo *UserUpdateOne) RemoveCards(c ...*Card) *UserUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -587,19 +587,19 @@ func (uuo *UserUpdateOne) RemoveCards(c ...*Card) *UserUpdateOne {
 	return uuo.RemoveCardIDs(ids...)
 }
 
-// ClearFriends clears all "friends" edges to type User.
+// ClearFriends clears all "friends" edges to the User entity.
 func (uuo *UserUpdateOne) ClearFriends() *UserUpdateOne {
 	uuo.mutation.ClearFriends()
 	return uuo
 }
 
-// RemoveFriendIDs removes the friends edge to User by ids.
+// RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (uuo *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveFriendIDs(ids...)
 	return uuo
 }
 
-// RemoveFriends removes friends edges to User.
+// RemoveFriends removes "friends" edges to User entities.
 func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -608,13 +608,13 @@ func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 	return uuo.RemoveFriendIDs(ids...)
 }
 
-// ClearBestFriend clears the "best_friend" edge to type User.
+// ClearBestFriend clears the "best_friend" edge to the User entity.
 func (uuo *UserUpdateOne) ClearBestFriend() *UserUpdateOne {
 	uuo.mutation.ClearBestFriend()
 	return uuo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

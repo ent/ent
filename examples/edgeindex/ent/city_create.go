@@ -24,19 +24,19 @@ type CityCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cc *CityCreate) SetName(s string) *CityCreate {
 	cc.mutation.SetName(s)
 	return cc
 }
 
-// AddStreetIDs adds the streets edge to Street by ids.
+// AddStreetIDs adds the "streets" edge to the Street entity by IDs.
 func (cc *CityCreate) AddStreetIDs(ids ...int) *CityCreate {
 	cc.mutation.AddStreetIDs(ids...)
 	return cc
 }
 
-// AddStreets adds the streets edges to Street.
+// AddStreets adds the "streets" edges to the Street entity.
 func (cc *CityCreate) AddStreets(s ...*Street) *CityCreate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -156,7 +156,7 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// CityCreateBulk is the builder for creating a bulk of City entities.
+// CityCreateBulk is the builder for creating many City entities in bulk.
 type CityCreateBulk struct {
 	config
 	builders []*CityCreate
@@ -213,7 +213,7 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *CityCreateBulk) SaveX(ctx context.Context) []*City {
 	v, err := ccb.Save(ctx)
 	if err != nil {

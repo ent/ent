@@ -24,13 +24,13 @@ type TenantUpdate struct {
 	mutation *TenantMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the TenantUpdate builder.
 func (tu *TenantUpdate) Where(ps ...predicate.Tenant) *TenantUpdate {
 	tu.mutation.predicates = append(tu.mutation.predicates, ps...)
 	return tu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (tu *TenantUpdate) SetName(s string) *TenantUpdate {
 	tu.mutation.SetName(s)
 	return tu
@@ -151,7 +151,7 @@ type TenantUpdateOne struct {
 	mutation *TenantMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (tuo *TenantUpdateOne) SetName(s string) *TenantUpdateOne {
 	tuo.mutation.SetName(s)
 	return tuo
@@ -162,7 +162,7 @@ func (tuo *TenantUpdateOne) Mutation() *TenantMutation {
 	return tuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Tenant entity.
 func (tuo *TenantUpdateOne) Save(ctx context.Context) (*Tenant, error) {
 	var (
 		err  error

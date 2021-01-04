@@ -32,7 +32,7 @@ type CustomTypeQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CustomTypeQuery builder.
 func (ctq *CustomTypeQuery) Where(ps ...predicate.CustomType) *CustomTypeQuery {
 	ctq.predicates = append(ctq.predicates, ps...)
 	return ctq
@@ -56,7 +56,8 @@ func (ctq *CustomTypeQuery) Order(o ...OrderFunc) *CustomTypeQuery {
 	return ctq
 }
 
-// First returns the first CustomType entity in the query. Returns *NotFoundError when no customtype was found.
+// First returns the first CustomType entity from the query.
+// Returns a *NotFoundError when no CustomType was found.
 func (ctq *CustomTypeQuery) First(ctx context.Context) (*CustomType, error) {
 	nodes, err := ctq.Limit(1).All(ctx)
 	if err != nil {
@@ -77,7 +78,8 @@ func (ctq *CustomTypeQuery) FirstX(ctx context.Context) *CustomType {
 	return node
 }
 
-// FirstID returns the first CustomType id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first CustomType ID from the query.
+// Returns a *NotFoundError when no CustomType ID was found.
 func (ctq *CustomTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = ctq.Limit(1).IDs(ctx); err != nil {
@@ -99,7 +101,9 @@ func (ctq *CustomTypeQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only CustomType entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single CustomType entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one CustomType entity is not found.
+// Returns a *NotFoundError when no CustomType entities are found.
 func (ctq *CustomTypeQuery) Only(ctx context.Context) (*CustomType, error) {
 	nodes, err := ctq.Limit(2).All(ctx)
 	if err != nil {
@@ -124,7 +128,9 @@ func (ctq *CustomTypeQuery) OnlyX(ctx context.Context) *CustomType {
 	return node
 }
 
-// OnlyID returns the only CustomType id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only CustomType ID in the query.
+// Returns a *NotSingularError when exactly one CustomType ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (ctq *CustomTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = ctq.Limit(2).IDs(ctx); err != nil {
@@ -167,7 +173,7 @@ func (ctq *CustomTypeQuery) AllX(ctx context.Context) []*CustomType {
 	return nodes
 }
 
-// IDs executes the query and returns a list of CustomType ids.
+// IDs executes the query and returns a list of CustomType IDs.
 func (ctq *CustomTypeQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := ctq.Select(customtype.FieldID).Scan(ctx, &ids); err != nil {
@@ -219,7 +225,7 @@ func (ctq *CustomTypeQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the CustomTypeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 	if ctq == nil {
@@ -237,7 +243,7 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -264,7 +270,8 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -406,7 +413,7 @@ func (ctq *CustomTypeQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// CustomTypeGroupBy is the builder for group-by CustomType entities.
+// CustomTypeGroupBy is the group-by builder for CustomType entities.
 type CustomTypeGroupBy struct {
 	config
 	fields []string
@@ -422,7 +429,7 @@ func (ctgb *CustomTypeGroupBy) Aggregate(fns ...AggregateFunc) *CustomTypeGroupB
 	return ctgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := ctgb.path(ctx)
 	if err != nil {
@@ -439,7 +446,8 @@ func (ctgb *CustomTypeGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ctgb *CustomTypeGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(ctgb.fields) > 1 {
 		return nil, errors.New("entv2: CustomTypeGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -460,7 +468,8 @@ func (ctgb *CustomTypeGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ctgb *CustomTypeGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ctgb.Strings(ctx); err != nil {
@@ -486,7 +495,8 @@ func (ctgb *CustomTypeGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ctgb *CustomTypeGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ctgb.fields) > 1 {
 		return nil, errors.New("entv2: CustomTypeGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -507,7 +517,8 @@ func (ctgb *CustomTypeGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ctgb *CustomTypeGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ctgb.Ints(ctx); err != nil {
@@ -533,7 +544,8 @@ func (ctgb *CustomTypeGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ctgb *CustomTypeGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ctgb.fields) > 1 {
 		return nil, errors.New("entv2: CustomTypeGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -554,7 +566,8 @@ func (ctgb *CustomTypeGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ctgb *CustomTypeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ctgb.Float64s(ctx); err != nil {
@@ -580,7 +593,8 @@ func (ctgb *CustomTypeGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ctgb *CustomTypeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ctgb.fields) > 1 {
 		return nil, errors.New("entv2: CustomTypeGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -601,7 +615,8 @@ func (ctgb *CustomTypeGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ctgb *CustomTypeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ctgb.Bools(ctx); err != nil {
@@ -656,14 +671,14 @@ func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(ctgb.fields...)
 }
 
-// CustomTypeSelect is the builder for select fields of CustomType entities.
+// CustomTypeSelect is the builder for selecting fields of CustomType entities.
 type CustomTypeSelect struct {
 	*CustomTypeQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cts *CustomTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cts.prepareQuery(ctx); err != nil {
 		return err
@@ -679,7 +694,7 @@ func (cts *CustomTypeSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (cts *CustomTypeSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(cts.fields) > 1 {
 		return nil, errors.New("entv2: CustomTypeSelect.Strings is not achievable when selecting more than 1 field")
@@ -700,7 +715,7 @@ func (cts *CustomTypeSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (cts *CustomTypeSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cts.Strings(ctx); err != nil {
@@ -726,7 +741,7 @@ func (cts *CustomTypeSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (cts *CustomTypeSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cts.fields) > 1 {
 		return nil, errors.New("entv2: CustomTypeSelect.Ints is not achievable when selecting more than 1 field")
@@ -747,7 +762,7 @@ func (cts *CustomTypeSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (cts *CustomTypeSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cts.Ints(ctx); err != nil {
@@ -773,7 +788,7 @@ func (cts *CustomTypeSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (cts *CustomTypeSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cts.fields) > 1 {
 		return nil, errors.New("entv2: CustomTypeSelect.Float64s is not achievable when selecting more than 1 field")
@@ -794,7 +809,7 @@ func (cts *CustomTypeSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (cts *CustomTypeSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cts.Float64s(ctx); err != nil {
@@ -820,7 +835,7 @@ func (cts *CustomTypeSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (cts *CustomTypeSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cts.fields) > 1 {
 		return nil, errors.New("entv2: CustomTypeSelect.Bools is not achievable when selecting more than 1 field")
@@ -841,7 +856,7 @@ func (cts *CustomTypeSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (cts *CustomTypeSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cts.Bools(ctx); err != nil {

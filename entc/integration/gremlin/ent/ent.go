@@ -19,7 +19,7 @@ import (
 	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
 )
 
-// ent aliases to avoid import conflict in user's code.
+// ent aliases to avoid import conflicts in user's code.
 type (
 	Op         = ent.Op
 	Hook       = ent.Hook

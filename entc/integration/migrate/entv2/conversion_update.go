@@ -24,19 +24,19 @@ type ConversionUpdate struct {
 	mutation *ConversionMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the ConversionUpdate builder.
 func (cu *ConversionUpdate) Where(ps ...predicate.Conversion) *ConversionUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cu *ConversionUpdate) SetName(s string) *ConversionUpdate {
 	cu.mutation.SetName(s)
 	return cu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableName(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetName(*s)
@@ -44,19 +44,19 @@ func (cu *ConversionUpdate) SetNillableName(s *string) *ConversionUpdate {
 	return cu
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cu *ConversionUpdate) ClearName() *ConversionUpdate {
 	cu.mutation.ClearName()
 	return cu
 }
 
-// SetInt8ToString sets the int8_to_string field.
+// SetInt8ToString sets the "int8_to_string" field.
 func (cu *ConversionUpdate) SetInt8ToString(s string) *ConversionUpdate {
 	cu.mutation.SetInt8ToString(s)
 	return cu
 }
 
-// SetNillableInt8ToString sets the int8_to_string field if the given value is not nil.
+// SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableInt8ToString(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetInt8ToString(*s)
@@ -64,19 +64,19 @@ func (cu *ConversionUpdate) SetNillableInt8ToString(s *string) *ConversionUpdate
 	return cu
 }
 
-// ClearInt8ToString clears the value of int8_to_string.
+// ClearInt8ToString clears the value of the "int8_to_string" field.
 func (cu *ConversionUpdate) ClearInt8ToString() *ConversionUpdate {
 	cu.mutation.ClearInt8ToString()
 	return cu
 }
 
-// SetUint8ToString sets the uint8_to_string field.
+// SetUint8ToString sets the "uint8_to_string" field.
 func (cu *ConversionUpdate) SetUint8ToString(s string) *ConversionUpdate {
 	cu.mutation.SetUint8ToString(s)
 	return cu
 }
 
-// SetNillableUint8ToString sets the uint8_to_string field if the given value is not nil.
+// SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableUint8ToString(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetUint8ToString(*s)
@@ -84,19 +84,19 @@ func (cu *ConversionUpdate) SetNillableUint8ToString(s *string) *ConversionUpdat
 	return cu
 }
 
-// ClearUint8ToString clears the value of uint8_to_string.
+// ClearUint8ToString clears the value of the "uint8_to_string" field.
 func (cu *ConversionUpdate) ClearUint8ToString() *ConversionUpdate {
 	cu.mutation.ClearUint8ToString()
 	return cu
 }
 
-// SetInt16ToString sets the int16_to_string field.
+// SetInt16ToString sets the "int16_to_string" field.
 func (cu *ConversionUpdate) SetInt16ToString(s string) *ConversionUpdate {
 	cu.mutation.SetInt16ToString(s)
 	return cu
 }
 
-// SetNillableInt16ToString sets the int16_to_string field if the given value is not nil.
+// SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableInt16ToString(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetInt16ToString(*s)
@@ -104,19 +104,19 @@ func (cu *ConversionUpdate) SetNillableInt16ToString(s *string) *ConversionUpdat
 	return cu
 }
 
-// ClearInt16ToString clears the value of int16_to_string.
+// ClearInt16ToString clears the value of the "int16_to_string" field.
 func (cu *ConversionUpdate) ClearInt16ToString() *ConversionUpdate {
 	cu.mutation.ClearInt16ToString()
 	return cu
 }
 
-// SetUint16ToString sets the uint16_to_string field.
+// SetUint16ToString sets the "uint16_to_string" field.
 func (cu *ConversionUpdate) SetUint16ToString(s string) *ConversionUpdate {
 	cu.mutation.SetUint16ToString(s)
 	return cu
 }
 
-// SetNillableUint16ToString sets the uint16_to_string field if the given value is not nil.
+// SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableUint16ToString(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetUint16ToString(*s)
@@ -124,19 +124,19 @@ func (cu *ConversionUpdate) SetNillableUint16ToString(s *string) *ConversionUpda
 	return cu
 }
 
-// ClearUint16ToString clears the value of uint16_to_string.
+// ClearUint16ToString clears the value of the "uint16_to_string" field.
 func (cu *ConversionUpdate) ClearUint16ToString() *ConversionUpdate {
 	cu.mutation.ClearUint16ToString()
 	return cu
 }
 
-// SetInt32ToString sets the int32_to_string field.
+// SetInt32ToString sets the "int32_to_string" field.
 func (cu *ConversionUpdate) SetInt32ToString(s string) *ConversionUpdate {
 	cu.mutation.SetInt32ToString(s)
 	return cu
 }
 
-// SetNillableInt32ToString sets the int32_to_string field if the given value is not nil.
+// SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableInt32ToString(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetInt32ToString(*s)
@@ -144,19 +144,19 @@ func (cu *ConversionUpdate) SetNillableInt32ToString(s *string) *ConversionUpdat
 	return cu
 }
 
-// ClearInt32ToString clears the value of int32_to_string.
+// ClearInt32ToString clears the value of the "int32_to_string" field.
 func (cu *ConversionUpdate) ClearInt32ToString() *ConversionUpdate {
 	cu.mutation.ClearInt32ToString()
 	return cu
 }
 
-// SetUint32ToString sets the uint32_to_string field.
+// SetUint32ToString sets the "uint32_to_string" field.
 func (cu *ConversionUpdate) SetUint32ToString(s string) *ConversionUpdate {
 	cu.mutation.SetUint32ToString(s)
 	return cu
 }
 
-// SetNillableUint32ToString sets the uint32_to_string field if the given value is not nil.
+// SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableUint32ToString(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetUint32ToString(*s)
@@ -164,19 +164,19 @@ func (cu *ConversionUpdate) SetNillableUint32ToString(s *string) *ConversionUpda
 	return cu
 }
 
-// ClearUint32ToString clears the value of uint32_to_string.
+// ClearUint32ToString clears the value of the "uint32_to_string" field.
 func (cu *ConversionUpdate) ClearUint32ToString() *ConversionUpdate {
 	cu.mutation.ClearUint32ToString()
 	return cu
 }
 
-// SetInt64ToString sets the int64_to_string field.
+// SetInt64ToString sets the "int64_to_string" field.
 func (cu *ConversionUpdate) SetInt64ToString(s string) *ConversionUpdate {
 	cu.mutation.SetInt64ToString(s)
 	return cu
 }
 
-// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+// SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableInt64ToString(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetInt64ToString(*s)
@@ -184,19 +184,19 @@ func (cu *ConversionUpdate) SetNillableInt64ToString(s *string) *ConversionUpdat
 	return cu
 }
 
-// ClearInt64ToString clears the value of int64_to_string.
+// ClearInt64ToString clears the value of the "int64_to_string" field.
 func (cu *ConversionUpdate) ClearInt64ToString() *ConversionUpdate {
 	cu.mutation.ClearInt64ToString()
 	return cu
 }
 
-// SetUint64ToString sets the uint64_to_string field.
+// SetUint64ToString sets the "uint64_to_string" field.
 func (cu *ConversionUpdate) SetUint64ToString(s string) *ConversionUpdate {
 	cu.mutation.SetUint64ToString(s)
 	return cu
 }
 
-// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+// SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
 func (cu *ConversionUpdate) SetNillableUint64ToString(s *string) *ConversionUpdate {
 	if s != nil {
 		cu.SetUint64ToString(*s)
@@ -204,7 +204,7 @@ func (cu *ConversionUpdate) SetNillableUint64ToString(s *string) *ConversionUpda
 	return cu
 }
 
-// ClearUint64ToString clears the value of uint64_to_string.
+// ClearUint64ToString clears the value of the "uint64_to_string" field.
 func (cu *ConversionUpdate) ClearUint64ToString() *ConversionUpdate {
 	cu.mutation.ClearUint64ToString()
 	return cu
@@ -419,13 +419,13 @@ type ConversionUpdateOne struct {
 	mutation *ConversionMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cuo *ConversionUpdateOne) SetName(s string) *ConversionUpdateOne {
 	cuo.mutation.SetName(s)
 	return cuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableName(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetName(*s)
@@ -433,19 +433,19 @@ func (cuo *ConversionUpdateOne) SetNillableName(s *string) *ConversionUpdateOne 
 	return cuo
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cuo *ConversionUpdateOne) ClearName() *ConversionUpdateOne {
 	cuo.mutation.ClearName()
 	return cuo
 }
 
-// SetInt8ToString sets the int8_to_string field.
+// SetInt8ToString sets the "int8_to_string" field.
 func (cuo *ConversionUpdateOne) SetInt8ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetInt8ToString(s)
 	return cuo
 }
 
-// SetNillableInt8ToString sets the int8_to_string field if the given value is not nil.
+// SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableInt8ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetInt8ToString(*s)
@@ -453,19 +453,19 @@ func (cuo *ConversionUpdateOne) SetNillableInt8ToString(s *string) *ConversionUp
 	return cuo
 }
 
-// ClearInt8ToString clears the value of int8_to_string.
+// ClearInt8ToString clears the value of the "int8_to_string" field.
 func (cuo *ConversionUpdateOne) ClearInt8ToString() *ConversionUpdateOne {
 	cuo.mutation.ClearInt8ToString()
 	return cuo
 }
 
-// SetUint8ToString sets the uint8_to_string field.
+// SetUint8ToString sets the "uint8_to_string" field.
 func (cuo *ConversionUpdateOne) SetUint8ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetUint8ToString(s)
 	return cuo
 }
 
-// SetNillableUint8ToString sets the uint8_to_string field if the given value is not nil.
+// SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableUint8ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetUint8ToString(*s)
@@ -473,19 +473,19 @@ func (cuo *ConversionUpdateOne) SetNillableUint8ToString(s *string) *ConversionU
 	return cuo
 }
 
-// ClearUint8ToString clears the value of uint8_to_string.
+// ClearUint8ToString clears the value of the "uint8_to_string" field.
 func (cuo *ConversionUpdateOne) ClearUint8ToString() *ConversionUpdateOne {
 	cuo.mutation.ClearUint8ToString()
 	return cuo
 }
 
-// SetInt16ToString sets the int16_to_string field.
+// SetInt16ToString sets the "int16_to_string" field.
 func (cuo *ConversionUpdateOne) SetInt16ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetInt16ToString(s)
 	return cuo
 }
 
-// SetNillableInt16ToString sets the int16_to_string field if the given value is not nil.
+// SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableInt16ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetInt16ToString(*s)
@@ -493,19 +493,19 @@ func (cuo *ConversionUpdateOne) SetNillableInt16ToString(s *string) *ConversionU
 	return cuo
 }
 
-// ClearInt16ToString clears the value of int16_to_string.
+// ClearInt16ToString clears the value of the "int16_to_string" field.
 func (cuo *ConversionUpdateOne) ClearInt16ToString() *ConversionUpdateOne {
 	cuo.mutation.ClearInt16ToString()
 	return cuo
 }
 
-// SetUint16ToString sets the uint16_to_string field.
+// SetUint16ToString sets the "uint16_to_string" field.
 func (cuo *ConversionUpdateOne) SetUint16ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetUint16ToString(s)
 	return cuo
 }
 
-// SetNillableUint16ToString sets the uint16_to_string field if the given value is not nil.
+// SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableUint16ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetUint16ToString(*s)
@@ -513,19 +513,19 @@ func (cuo *ConversionUpdateOne) SetNillableUint16ToString(s *string) *Conversion
 	return cuo
 }
 
-// ClearUint16ToString clears the value of uint16_to_string.
+// ClearUint16ToString clears the value of the "uint16_to_string" field.
 func (cuo *ConversionUpdateOne) ClearUint16ToString() *ConversionUpdateOne {
 	cuo.mutation.ClearUint16ToString()
 	return cuo
 }
 
-// SetInt32ToString sets the int32_to_string field.
+// SetInt32ToString sets the "int32_to_string" field.
 func (cuo *ConversionUpdateOne) SetInt32ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetInt32ToString(s)
 	return cuo
 }
 
-// SetNillableInt32ToString sets the int32_to_string field if the given value is not nil.
+// SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableInt32ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetInt32ToString(*s)
@@ -533,19 +533,19 @@ func (cuo *ConversionUpdateOne) SetNillableInt32ToString(s *string) *ConversionU
 	return cuo
 }
 
-// ClearInt32ToString clears the value of int32_to_string.
+// ClearInt32ToString clears the value of the "int32_to_string" field.
 func (cuo *ConversionUpdateOne) ClearInt32ToString() *ConversionUpdateOne {
 	cuo.mutation.ClearInt32ToString()
 	return cuo
 }
 
-// SetUint32ToString sets the uint32_to_string field.
+// SetUint32ToString sets the "uint32_to_string" field.
 func (cuo *ConversionUpdateOne) SetUint32ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetUint32ToString(s)
 	return cuo
 }
 
-// SetNillableUint32ToString sets the uint32_to_string field if the given value is not nil.
+// SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableUint32ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetUint32ToString(*s)
@@ -553,19 +553,19 @@ func (cuo *ConversionUpdateOne) SetNillableUint32ToString(s *string) *Conversion
 	return cuo
 }
 
-// ClearUint32ToString clears the value of uint32_to_string.
+// ClearUint32ToString clears the value of the "uint32_to_string" field.
 func (cuo *ConversionUpdateOne) ClearUint32ToString() *ConversionUpdateOne {
 	cuo.mutation.ClearUint32ToString()
 	return cuo
 }
 
-// SetInt64ToString sets the int64_to_string field.
+// SetInt64ToString sets the "int64_to_string" field.
 func (cuo *ConversionUpdateOne) SetInt64ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetInt64ToString(s)
 	return cuo
 }
 
-// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+// SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableInt64ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetInt64ToString(*s)
@@ -573,19 +573,19 @@ func (cuo *ConversionUpdateOne) SetNillableInt64ToString(s *string) *ConversionU
 	return cuo
 }
 
-// ClearInt64ToString clears the value of int64_to_string.
+// ClearInt64ToString clears the value of the "int64_to_string" field.
 func (cuo *ConversionUpdateOne) ClearInt64ToString() *ConversionUpdateOne {
 	cuo.mutation.ClearInt64ToString()
 	return cuo
 }
 
-// SetUint64ToString sets the uint64_to_string field.
+// SetUint64ToString sets the "uint64_to_string" field.
 func (cuo *ConversionUpdateOne) SetUint64ToString(s string) *ConversionUpdateOne {
 	cuo.mutation.SetUint64ToString(s)
 	return cuo
 }
 
-// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+// SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
 func (cuo *ConversionUpdateOne) SetNillableUint64ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
 		cuo.SetUint64ToString(*s)
@@ -593,7 +593,7 @@ func (cuo *ConversionUpdateOne) SetNillableUint64ToString(s *string) *Conversion
 	return cuo
 }
 
-// ClearUint64ToString clears the value of uint64_to_string.
+// ClearUint64ToString clears the value of the "uint64_to_string" field.
 func (cuo *ConversionUpdateOne) ClearUint64ToString() *ConversionUpdateOne {
 	cuo.mutation.ClearUint64ToString()
 	return cuo
@@ -604,7 +604,7 @@ func (cuo *ConversionUpdateOne) Mutation() *ConversionMutation {
 	return cuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Conversion entity.
 func (cuo *ConversionUpdateOne) Save(ctx context.Context) (*Conversion, error) {
 	var (
 		err  error

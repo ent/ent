@@ -101,20 +101,20 @@ func (s *Street) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryCity queries the city edge of the Street.
+// QueryCity queries the "city" edge of the Street entity.
 func (s *Street) QueryCity() *CityQuery {
 	return (&StreetClient{config: s.config}).QueryCity(s)
 }
 
 // Update returns a builder for updating this Street.
-// Note that, you need to call Street.Unwrap() before calling this method, if this Street
+// Note that you need to call Street.Unwrap() before calling this method if this Street
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *Street) Update() *StreetUpdateOne {
 	return (&StreetClient{config: s.config}).UpdateOne(s)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Street entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (s *Street) Unwrap() *Street {
 	tx, ok := s.config.driver.(*txDriver)
 	if !ok {

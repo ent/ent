@@ -42,11 +42,11 @@ const (
 )
 
 var (
-	// DefaultActive holds the default value on creation for the active field.
+	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	TypeValidator func(string) error
-	// DefaultMaxUsers holds the default value on creation for the max_users field.
+	// DefaultMaxUsers holds the default value on creation for the "max_users" field.
 	DefaultMaxUsers int
 	// MaxUsersValidator is a validator for the "max_users" field. It is called by the builders before save.
 	MaxUsersValidator func(int) error

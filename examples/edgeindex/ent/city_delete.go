@@ -24,7 +24,7 @@ type CityDelete struct {
 	mutation *CityMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the CityDelete builder.
 func (cd *CityDelete) Where(ps ...predicate.City) *CityDelete {
 	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd

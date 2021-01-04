@@ -24,19 +24,19 @@ type GroupInfoCreate struct {
 	hooks    []Hook
 }
 
-// SetDesc sets the desc field.
+// SetDesc sets the "desc" field.
 func (gic *GroupInfoCreate) SetDesc(s string) *GroupInfoCreate {
 	gic.mutation.SetDesc(s)
 	return gic
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (gic *GroupInfoCreate) SetMaxUsers(i int) *GroupInfoCreate {
 	gic.mutation.SetMaxUsers(i)
 	return gic
 }
 
-// SetNillableMaxUsers sets the max_users field if the given value is not nil.
+// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
 func (gic *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
 	if i != nil {
 		gic.SetMaxUsers(*i)
@@ -44,13 +44,13 @@ func (gic *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
 	return gic
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (gic *GroupInfoCreate) AddGroupIDs(ids ...int) *GroupInfoCreate {
 	gic.mutation.AddGroupIDs(ids...)
 	return gic
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (gic *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -190,7 +190,7 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// GroupInfoCreateBulk is the builder for creating a bulk of GroupInfo entities.
+// GroupInfoCreateBulk is the builder for creating many GroupInfo entities in bulk.
 type GroupInfoCreateBulk struct {
 	config
 	builders []*GroupInfoCreate
@@ -248,7 +248,7 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (gicb *GroupInfoCreateBulk) SaveX(ctx context.Context) []*GroupInfo {
 	v, err := gicb.Save(ctx)
 	if err != nil {

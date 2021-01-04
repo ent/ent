@@ -26,32 +26,32 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.mutation.ResetAge()
 	uu.mutation.SetAge(i)
 	return uu
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
 	uu.mutation.AddAge(i)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetName(*s)
@@ -59,13 +59,13 @@ func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	return uu
 }
 
-// AddCarIDs adds the cars edge to Car by ids.
+// AddCarIDs adds the "cars" edge to the Car entity by IDs.
 func (uu *UserUpdate) AddCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddCarIDs(ids...)
 	return uu
 }
 
-// AddCars adds the cars edges to Car.
+// AddCars adds the "cars" edges to the Car entity.
 func (uu *UserUpdate) AddCars(c ...*Car) *UserUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -74,13 +74,13 @@ func (uu *UserUpdate) AddCars(c ...*Car) *UserUpdate {
 	return uu.AddCarIDs(ids...)
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uu *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddGroupIDs(ids...)
 	return uu
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -94,19 +94,19 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearCars clears all "cars" edges to type Car.
+// ClearCars clears all "cars" edges to the Car entity.
 func (uu *UserUpdate) ClearCars() *UserUpdate {
 	uu.mutation.ClearCars()
 	return uu
 }
 
-// RemoveCarIDs removes the cars edge to Car by ids.
+// RemoveCarIDs removes the "cars" edge to Car entities by IDs.
 func (uu *UserUpdate) RemoveCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveCarIDs(ids...)
 	return uu
 }
 
-// RemoveCars removes cars edges to Car.
+// RemoveCars removes "cars" edges to Car entities.
 func (uu *UserUpdate) RemoveCars(c ...*Car) *UserUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -115,19 +115,19 @@ func (uu *UserUpdate) RemoveCars(c ...*Car) *UserUpdate {
 	return uu.RemoveCarIDs(ids...)
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (uu *UserUpdate) ClearGroups() *UserUpdate {
 	uu.mutation.ClearGroups()
 	return uu
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveGroupIDs(ids...)
 	return uu
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -368,26 +368,26 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.mutation.ResetAge()
 	uuo.mutation.SetAge(i)
 	return uuo
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
 	uuo.mutation.AddAge(i)
 	return uuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetName(*s)
@@ -395,13 +395,13 @@ func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// AddCarIDs adds the cars edge to Car by ids.
+// AddCarIDs adds the "cars" edge to the Car entity by IDs.
 func (uuo *UserUpdateOne) AddCarIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddCarIDs(ids...)
 	return uuo
 }
 
-// AddCars adds the cars edges to Car.
+// AddCars adds the "cars" edges to the Car entity.
 func (uuo *UserUpdateOne) AddCars(c ...*Car) *UserUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -410,13 +410,13 @@ func (uuo *UserUpdateOne) AddCars(c ...*Car) *UserUpdateOne {
 	return uuo.AddCarIDs(ids...)
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uuo *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddGroupIDs(ids...)
 	return uuo
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -430,19 +430,19 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearCars clears all "cars" edges to type Car.
+// ClearCars clears all "cars" edges to the Car entity.
 func (uuo *UserUpdateOne) ClearCars() *UserUpdateOne {
 	uuo.mutation.ClearCars()
 	return uuo
 }
 
-// RemoveCarIDs removes the cars edge to Car by ids.
+// RemoveCarIDs removes the "cars" edge to Car entities by IDs.
 func (uuo *UserUpdateOne) RemoveCarIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveCarIDs(ids...)
 	return uuo
 }
 
-// RemoveCars removes cars edges to Car.
+// RemoveCars removes "cars" edges to Car entities.
 func (uuo *UserUpdateOne) RemoveCars(c ...*Car) *UserUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -451,19 +451,19 @@ func (uuo *UserUpdateOne) RemoveCars(c ...*Car) *UserUpdateOne {
 	return uuo.RemoveCarIDs(ids...)
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
 	uuo.mutation.ClearGroups()
 	return uuo
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveGroupIDs(ids...)
 	return uuo
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -472,7 +472,7 @@ func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	return uuo.RemoveGroupIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

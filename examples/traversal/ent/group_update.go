@@ -25,25 +25,25 @@ type GroupUpdate struct {
 	mutation *GroupMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the GroupUpdate builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
 	return gu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (gu *GroupUpdate) SetName(s string) *GroupUpdate {
 	gu.mutation.SetName(s)
 	return gu
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (gu *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddUserIDs(ids...)
 	return gu
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -52,13 +52,13 @@ func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
 	return gu.AddUserIDs(ids...)
 }
 
-// SetAdminID sets the admin edge to User by id.
+// SetAdminID sets the "admin" edge to the User entity by ID.
 func (gu *GroupUpdate) SetAdminID(id int) *GroupUpdate {
 	gu.mutation.SetAdminID(id)
 	return gu
 }
 
-// SetNillableAdminID sets the admin edge to User by id if the given value is not nil.
+// SetNillableAdminID sets the "admin" edge to the User entity by ID if the given value is not nil.
 func (gu *GroupUpdate) SetNillableAdminID(id *int) *GroupUpdate {
 	if id != nil {
 		gu = gu.SetAdminID(*id)
@@ -66,7 +66,7 @@ func (gu *GroupUpdate) SetNillableAdminID(id *int) *GroupUpdate {
 	return gu
 }
 
-// SetAdmin sets the admin edge to User.
+// SetAdmin sets the "admin" edge to the User entity.
 func (gu *GroupUpdate) SetAdmin(u *User) *GroupUpdate {
 	return gu.SetAdminID(u.ID)
 }
@@ -76,19 +76,19 @@ func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
 }
 
-// ClearUsers clears all "users" edges to type User.
+// ClearUsers clears all "users" edges to the User entity.
 func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
 	gu.mutation.ClearUsers()
 	return gu
 }
 
-// RemoveUserIDs removes the users edge to User by ids.
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
 	return gu
 }
 
-// RemoveUsers removes users edges to User.
+// RemoveUsers removes "users" edges to User entities.
 func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -97,7 +97,7 @@ func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	return gu.RemoveUserIDs(ids...)
 }
 
-// ClearAdmin clears the "admin" edge to type User.
+// ClearAdmin clears the "admin" edge to the User entity.
 func (gu *GroupUpdate) ClearAdmin() *GroupUpdate {
 	gu.mutation.ClearAdmin()
 	return gu
@@ -286,19 +286,19 @@ type GroupUpdateOne struct {
 	mutation *GroupMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (guo *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
 	guo.mutation.SetName(s)
 	return guo
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (guo *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.AddUserIDs(ids...)
 	return guo
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -307,13 +307,13 @@ func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
 	return guo.AddUserIDs(ids...)
 }
 
-// SetAdminID sets the admin edge to User by id.
+// SetAdminID sets the "admin" edge to the User entity by ID.
 func (guo *GroupUpdateOne) SetAdminID(id int) *GroupUpdateOne {
 	guo.mutation.SetAdminID(id)
 	return guo
 }
 
-// SetNillableAdminID sets the admin edge to User by id if the given value is not nil.
+// SetNillableAdminID sets the "admin" edge to the User entity by ID if the given value is not nil.
 func (guo *GroupUpdateOne) SetNillableAdminID(id *int) *GroupUpdateOne {
 	if id != nil {
 		guo = guo.SetAdminID(*id)
@@ -321,7 +321,7 @@ func (guo *GroupUpdateOne) SetNillableAdminID(id *int) *GroupUpdateOne {
 	return guo
 }
 
-// SetAdmin sets the admin edge to User.
+// SetAdmin sets the "admin" edge to the User entity.
 func (guo *GroupUpdateOne) SetAdmin(u *User) *GroupUpdateOne {
 	return guo.SetAdminID(u.ID)
 }
@@ -331,19 +331,19 @@ func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
 }
 
-// ClearUsers clears all "users" edges to type User.
+// ClearUsers clears all "users" edges to the User entity.
 func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
 	guo.mutation.ClearUsers()
 	return guo
 }
 
-// RemoveUserIDs removes the users edge to User by ids.
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveUserIDs(ids...)
 	return guo
 }
 
-// RemoveUsers removes users edges to User.
+// RemoveUsers removes "users" edges to User entities.
 func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -352,13 +352,13 @@ func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	return guo.RemoveUserIDs(ids...)
 }
 
-// ClearAdmin clears the "admin" edge to type User.
+// ClearAdmin clears the "admin" edge to the User entity.
 func (guo *GroupUpdateOne) ClearAdmin() *GroupUpdateOne {
 	guo.mutation.ClearAdmin()
 	return guo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	var (
 		err  error

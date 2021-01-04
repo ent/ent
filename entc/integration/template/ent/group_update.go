@@ -24,20 +24,20 @@ type GroupUpdate struct {
 	mutation *GroupMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the GroupUpdate builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
 	return gu
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (gu *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
 	gu.mutation.ResetMaxUsers()
 	gu.mutation.SetMaxUsers(i)
 	return gu
 }
 
-// AddMaxUsers adds i to max_users.
+// AddMaxUsers adds i to the "max_users" field.
 func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
 	gu.mutation.AddMaxUsers(i)
 	return gu
@@ -149,14 +149,14 @@ type GroupUpdateOne struct {
 	mutation *GroupMutation
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (guo *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
 	guo.mutation.ResetMaxUsers()
 	guo.mutation.SetMaxUsers(i)
 	return guo
 }
 
-// AddMaxUsers adds i to max_users.
+// AddMaxUsers adds i to the "max_users" field.
 func (guo *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
 	guo.mutation.AddMaxUsers(i)
 	return guo
@@ -167,7 +167,7 @@ func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	var (
 		err  error

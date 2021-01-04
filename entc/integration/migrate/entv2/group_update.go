@@ -24,7 +24,7 @@ type GroupUpdate struct {
 	mutation *GroupMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the GroupUpdate builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
 	return gu
@@ -127,7 +127,7 @@ func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	var (
 		err  error

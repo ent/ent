@@ -26,19 +26,19 @@ type PetUpdate struct {
 	mutation *PetMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the PetUpdate builder.
 func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
 	return pu
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
 	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	if id != nil {
 		pu = pu.SetOwnerID(*id)
@@ -46,18 +46,18 @@ func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	return pu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
 
-// AddCarIDs adds the cars edge to Car by ids.
+// AddCarIDs adds the "cars" edge to the Car entity by IDs.
 func (pu *PetUpdate) AddCarIDs(ids ...int) *PetUpdate {
 	pu.mutation.AddCarIDs(ids...)
 	return pu
 }
 
-// AddCars adds the cars edges to Car.
+// AddCars adds the "cars" edges to the Car entity.
 func (pu *PetUpdate) AddCars(c ...*Car) *PetUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -66,13 +66,13 @@ func (pu *PetUpdate) AddCars(c ...*Car) *PetUpdate {
 	return pu.AddCarIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to Pet by ids.
+// AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (pu *PetUpdate) AddFriendIDs(ids ...string) *PetUpdate {
 	pu.mutation.AddFriendIDs(ids...)
 	return pu
 }
 
-// AddFriends adds the friends edges to Pet.
+// AddFriends adds the "friends" edges to the Pet entity.
 func (pu *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -81,13 +81,13 @@ func (pu *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
 	return pu.AddFriendIDs(ids...)
 }
 
-// SetBestFriendID sets the best_friend edge to Pet by id.
+// SetBestFriendID sets the "best_friend" edge to the Pet entity by ID.
 func (pu *PetUpdate) SetBestFriendID(id string) *PetUpdate {
 	pu.mutation.SetBestFriendID(id)
 	return pu
 }
 
-// SetNillableBestFriendID sets the best_friend edge to Pet by id if the given value is not nil.
+// SetNillableBestFriendID sets the "best_friend" edge to the Pet entity by ID if the given value is not nil.
 func (pu *PetUpdate) SetNillableBestFriendID(id *string) *PetUpdate {
 	if id != nil {
 		pu = pu.SetBestFriendID(*id)
@@ -95,7 +95,7 @@ func (pu *PetUpdate) SetNillableBestFriendID(id *string) *PetUpdate {
 	return pu
 }
 
-// SetBestFriend sets the best_friend edge to Pet.
+// SetBestFriend sets the "best_friend" edge to the Pet entity.
 func (pu *PetUpdate) SetBestFriend(p *Pet) *PetUpdate {
 	return pu.SetBestFriendID(p.ID)
 }
@@ -105,25 +105,25 @@ func (pu *PetUpdate) Mutation() *PetMutation {
 	return pu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
 	return pu
 }
 
-// ClearCars clears all "cars" edges to type Car.
+// ClearCars clears all "cars" edges to the Car entity.
 func (pu *PetUpdate) ClearCars() *PetUpdate {
 	pu.mutation.ClearCars()
 	return pu
 }
 
-// RemoveCarIDs removes the cars edge to Car by ids.
+// RemoveCarIDs removes the "cars" edge to Car entities by IDs.
 func (pu *PetUpdate) RemoveCarIDs(ids ...int) *PetUpdate {
 	pu.mutation.RemoveCarIDs(ids...)
 	return pu
 }
 
-// RemoveCars removes cars edges to Car.
+// RemoveCars removes "cars" edges to Car entities.
 func (pu *PetUpdate) RemoveCars(c ...*Car) *PetUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -132,19 +132,19 @@ func (pu *PetUpdate) RemoveCars(c ...*Car) *PetUpdate {
 	return pu.RemoveCarIDs(ids...)
 }
 
-// ClearFriends clears all "friends" edges to type Pet.
+// ClearFriends clears all "friends" edges to the Pet entity.
 func (pu *PetUpdate) ClearFriends() *PetUpdate {
 	pu.mutation.ClearFriends()
 	return pu
 }
 
-// RemoveFriendIDs removes the friends edge to Pet by ids.
+// RemoveFriendIDs removes the "friends" edge to Pet entities by IDs.
 func (pu *PetUpdate) RemoveFriendIDs(ids ...string) *PetUpdate {
 	pu.mutation.RemoveFriendIDs(ids...)
 	return pu
 }
 
-// RemoveFriends removes friends edges to Pet.
+// RemoveFriends removes "friends" edges to Pet entities.
 func (pu *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -153,7 +153,7 @@ func (pu *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
 	return pu.RemoveFriendIDs(ids...)
 }
 
-// ClearBestFriend clears the "best_friend" edge to type Pet.
+// ClearBestFriend clears the "best_friend" edge to the Pet entity.
 func (pu *PetUpdate) ClearBestFriend() *PetUpdate {
 	pu.mutation.ClearBestFriend()
 	return pu
@@ -424,13 +424,13 @@ type PetUpdateOne struct {
 	mutation *PetMutation
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
 	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetOwnerID(*id)
@@ -438,18 +438,18 @@ func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	return puo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
 
-// AddCarIDs adds the cars edge to Car by ids.
+// AddCarIDs adds the "cars" edge to the Car entity by IDs.
 func (puo *PetUpdateOne) AddCarIDs(ids ...int) *PetUpdateOne {
 	puo.mutation.AddCarIDs(ids...)
 	return puo
 }
 
-// AddCars adds the cars edges to Car.
+// AddCars adds the "cars" edges to the Car entity.
 func (puo *PetUpdateOne) AddCars(c ...*Car) *PetUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -458,13 +458,13 @@ func (puo *PetUpdateOne) AddCars(c ...*Car) *PetUpdateOne {
 	return puo.AddCarIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to Pet by ids.
+// AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (puo *PetUpdateOne) AddFriendIDs(ids ...string) *PetUpdateOne {
 	puo.mutation.AddFriendIDs(ids...)
 	return puo
 }
 
-// AddFriends adds the friends edges to Pet.
+// AddFriends adds the "friends" edges to the Pet entity.
 func (puo *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -473,13 +473,13 @@ func (puo *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
 	return puo.AddFriendIDs(ids...)
 }
 
-// SetBestFriendID sets the best_friend edge to Pet by id.
+// SetBestFriendID sets the "best_friend" edge to the Pet entity by ID.
 func (puo *PetUpdateOne) SetBestFriendID(id string) *PetUpdateOne {
 	puo.mutation.SetBestFriendID(id)
 	return puo
 }
 
-// SetNillableBestFriendID sets the best_friend edge to Pet by id if the given value is not nil.
+// SetNillableBestFriendID sets the "best_friend" edge to the Pet entity by ID if the given value is not nil.
 func (puo *PetUpdateOne) SetNillableBestFriendID(id *string) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetBestFriendID(*id)
@@ -487,7 +487,7 @@ func (puo *PetUpdateOne) SetNillableBestFriendID(id *string) *PetUpdateOne {
 	return puo
 }
 
-// SetBestFriend sets the best_friend edge to Pet.
+// SetBestFriend sets the "best_friend" edge to the Pet entity.
 func (puo *PetUpdateOne) SetBestFriend(p *Pet) *PetUpdateOne {
 	return puo.SetBestFriendID(p.ID)
 }
@@ -497,25 +497,25 @@ func (puo *PetUpdateOne) Mutation() *PetMutation {
 	return puo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
 	return puo
 }
 
-// ClearCars clears all "cars" edges to type Car.
+// ClearCars clears all "cars" edges to the Car entity.
 func (puo *PetUpdateOne) ClearCars() *PetUpdateOne {
 	puo.mutation.ClearCars()
 	return puo
 }
 
-// RemoveCarIDs removes the cars edge to Car by ids.
+// RemoveCarIDs removes the "cars" edge to Car entities by IDs.
 func (puo *PetUpdateOne) RemoveCarIDs(ids ...int) *PetUpdateOne {
 	puo.mutation.RemoveCarIDs(ids...)
 	return puo
 }
 
-// RemoveCars removes cars edges to Car.
+// RemoveCars removes "cars" edges to Car entities.
 func (puo *PetUpdateOne) RemoveCars(c ...*Car) *PetUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -524,19 +524,19 @@ func (puo *PetUpdateOne) RemoveCars(c ...*Car) *PetUpdateOne {
 	return puo.RemoveCarIDs(ids...)
 }
 
-// ClearFriends clears all "friends" edges to type Pet.
+// ClearFriends clears all "friends" edges to the Pet entity.
 func (puo *PetUpdateOne) ClearFriends() *PetUpdateOne {
 	puo.mutation.ClearFriends()
 	return puo
 }
 
-// RemoveFriendIDs removes the friends edge to Pet by ids.
+// RemoveFriendIDs removes the "friends" edge to Pet entities by IDs.
 func (puo *PetUpdateOne) RemoveFriendIDs(ids ...string) *PetUpdateOne {
 	puo.mutation.RemoveFriendIDs(ids...)
 	return puo
 }
 
-// RemoveFriends removes friends edges to Pet.
+// RemoveFriends removes "friends" edges to Pet entities.
 func (puo *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -545,13 +545,13 @@ func (puo *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
 	return puo.RemoveFriendIDs(ids...)
 }
 
-// ClearBestFriend clears the "best_friend" edge to type Pet.
+// ClearBestFriend clears the "best_friend" edge to the Pet entity.
 func (puo *PetUpdateOne) ClearBestFriend() *PetUpdateOne {
 	puo.mutation.ClearBestFriend()
 	return puo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Pet entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 	var (
 		err  error

@@ -25,7 +25,7 @@ type PetDelete struct {
 	mutation *PetMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the PetDelete builder.
 func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 	pd.mutation.predicates = append(pd.mutation.predicates, ps...)
 	return pd

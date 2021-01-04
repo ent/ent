@@ -470,14 +470,14 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 }
 
 // Update returns a builder for updating this FieldType.
-// Note that, you need to call FieldType.Unwrap() before calling this method, if this FieldType
+// Note that you need to call FieldType.Unwrap() before calling this method if this FieldType
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ft *FieldType) Update() *FieldTypeUpdateOne {
 	return (&FieldTypeClient{config: ft.config}).UpdateOne(ft)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the FieldType entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (ft *FieldType) Unwrap() *FieldType {
 	tx, ok := ft.config.driver.(*txDriver)
 	if !ok {

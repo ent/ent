@@ -11,7 +11,7 @@ import (
 	"github.com/facebook/ent/examples/privacytenant/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.Tenant {
 	return predicate.Tenant(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -212,7 +212,7 @@ func NameContainsFold(v string) predicate.Tenant {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Tenant) predicate.Tenant {
 	return predicate.Tenant(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -223,7 +223,7 @@ func And(predicates ...predicate.Tenant) predicate.Tenant {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Tenant) predicate.Tenant {
 	return predicate.Tenant(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

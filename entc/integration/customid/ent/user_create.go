@@ -24,19 +24,19 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetID sets the id field.
+// SetID sets the "id" field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
 	return uc
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
 	uc.mutation.AddGroupIDs(ids...)
 	return uc
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -45,13 +45,13 @@ func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 	return uc.AddGroupIDs(ids...)
 }
 
-// SetParentID sets the parent edge to User by id.
+// SetParentID sets the "parent" edge to the User entity by ID.
 func (uc *UserCreate) SetParentID(id int) *UserCreate {
 	uc.mutation.SetParentID(id)
 	return uc
 }
 
-// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillableParentID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetParentID(*id)
@@ -59,18 +59,18 @@ func (uc *UserCreate) SetNillableParentID(id *int) *UserCreate {
 	return uc
 }
 
-// SetParent sets the parent edge to User.
+// SetParent sets the "parent" edge to the User entity.
 func (uc *UserCreate) SetParent(u *User) *UserCreate {
 	return uc.SetParentID(u.ID)
 }
 
-// AddChildIDs adds the children edge to User by ids.
+// AddChildIDs adds the "children" edge to the User entity by IDs.
 func (uc *UserCreate) AddChildIDs(ids ...int) *UserCreate {
 	uc.mutation.AddChildIDs(ids...)
 	return uc
 }
 
-// AddChildren adds the children edges to User.
+// AddChildren adds the "children" edges to the User entity.
 func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -79,13 +79,13 @@ func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 	return uc.AddChildIDs(ids...)
 }
 
-// AddPetIDs adds the pets edge to Pet by ids.
+// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uc *UserCreate) AddPetIDs(ids ...string) *UserCreate {
 	uc.mutation.AddPetIDs(ids...)
 	return uc
 }
 
-// AddPets adds the pets edges to Pet.
+// AddPets adds the "pets" edges to the Pet entity.
 func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -257,7 +257,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -316,7 +316,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

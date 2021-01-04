@@ -74,14 +74,14 @@ func (mi *MixinID) assignValues(columns []string, values []interface{}) error {
 }
 
 // Update returns a builder for updating this MixinID.
-// Note that, you need to call MixinID.Unwrap() before calling this method, if this MixinID
+// Note that you need to call MixinID.Unwrap() before calling this method if this MixinID
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (mi *MixinID) Update() *MixinIDUpdateOne {
 	return (&MixinIDClient{config: mi.config}).UpdateOne(mi)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the MixinID entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (mi *MixinID) Unwrap() *MixinID {
 	tx, ok := mi.config.driver.(*txDriver)
 	if !ok {

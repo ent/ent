@@ -109,25 +109,25 @@ func (n *Node) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryParent queries the parent edge of the Node.
+// QueryParent queries the "parent" edge of the Node entity.
 func (n *Node) QueryParent() *NodeQuery {
 	return (&NodeClient{config: n.config}).QueryParent(n)
 }
 
-// QueryChildren queries the children edge of the Node.
+// QueryChildren queries the "children" edge of the Node entity.
 func (n *Node) QueryChildren() *NodeQuery {
 	return (&NodeClient{config: n.config}).QueryChildren(n)
 }
 
 // Update returns a builder for updating this Node.
-// Note that, you need to call Node.Unwrap() before calling this method, if this Node
+// Note that you need to call Node.Unwrap() before calling this method if this Node
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (n *Node) Update() *NodeUpdateOne {
 	return (&NodeClient{config: n.config}).UpdateOne(n)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Node entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (n *Node) Unwrap() *Node {
 	tx, ok := n.config.driver.(*txDriver)
 	if !ok {

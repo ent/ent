@@ -15,20 +15,18 @@ import (
 	"{{ $.Config.Package }}/{{ $.Package }}"
 )
 
-
 {{ $builder := $.DeleteName }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
 
-// {{ $builder }} is the builder for deleting a {{ pascal $.Name }} entity.
+// {{ $builder }} is the builder for deleting a {{ $.Name }} entity.
 type {{ $builder }} struct {
 	config
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
 }
 
-
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
 	{{ $mutation }}.predicates = append({{ $mutation }}.predicates, ps...)
 	return {{ $receiver }}

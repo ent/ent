@@ -95,10 +95,10 @@ var (
 	TitleValidator func(string) error
 )
 
-// Status defines the type for the status enum field.
+// Status defines the type for the "status" enum field.
 type Status string
 
-// StatusPlanned is the default Status.
+// StatusPlanned is the default value of the Status enum.
 const DefaultStatus = StatusPlanned
 
 // Status values.

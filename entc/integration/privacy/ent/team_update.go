@@ -26,25 +26,25 @@ type TeamUpdate struct {
 	mutation *TeamMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the TeamUpdate builder.
 func (tu *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
 	tu.mutation.predicates = append(tu.mutation.predicates, ps...)
 	return tu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (tu *TeamUpdate) SetName(s string) *TeamUpdate {
 	tu.mutation.SetName(s)
 	return tu
 }
 
-// AddTaskIDs adds the tasks edge to Task by ids.
+// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
 func (tu *TeamUpdate) AddTaskIDs(ids ...int) *TeamUpdate {
 	tu.mutation.AddTaskIDs(ids...)
 	return tu
 }
 
-// AddTasks adds the tasks edges to Task.
+// AddTasks adds the "tasks" edges to the Task entity.
 func (tu *TeamUpdate) AddTasks(t ...*Task) *TeamUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -53,13 +53,13 @@ func (tu *TeamUpdate) AddTasks(t ...*Task) *TeamUpdate {
 	return tu.AddTaskIDs(ids...)
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (tu *TeamUpdate) AddUserIDs(ids ...int) *TeamUpdate {
 	tu.mutation.AddUserIDs(ids...)
 	return tu
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (tu *TeamUpdate) AddUsers(u ...*User) *TeamUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -73,19 +73,19 @@ func (tu *TeamUpdate) Mutation() *TeamMutation {
 	return tu.mutation
 }
 
-// ClearTasks clears all "tasks" edges to type Task.
+// ClearTasks clears all "tasks" edges to the Task entity.
 func (tu *TeamUpdate) ClearTasks() *TeamUpdate {
 	tu.mutation.ClearTasks()
 	return tu
 }
 
-// RemoveTaskIDs removes the tasks edge to Task by ids.
+// RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
 func (tu *TeamUpdate) RemoveTaskIDs(ids ...int) *TeamUpdate {
 	tu.mutation.RemoveTaskIDs(ids...)
 	return tu
 }
 
-// RemoveTasks removes tasks edges to Task.
+// RemoveTasks removes "tasks" edges to Task entities.
 func (tu *TeamUpdate) RemoveTasks(t ...*Task) *TeamUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -94,19 +94,19 @@ func (tu *TeamUpdate) RemoveTasks(t ...*Task) *TeamUpdate {
 	return tu.RemoveTaskIDs(ids...)
 }
 
-// ClearUsers clears all "users" edges to type User.
+// ClearUsers clears all "users" edges to the User entity.
 func (tu *TeamUpdate) ClearUsers() *TeamUpdate {
 	tu.mutation.ClearUsers()
 	return tu
 }
 
-// RemoveUserIDs removes the users edge to User by ids.
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (tu *TeamUpdate) RemoveUserIDs(ids ...int) *TeamUpdate {
 	tu.mutation.RemoveUserIDs(ids...)
 	return tu
 }
 
-// RemoveUsers removes users edges to User.
+// RemoveUsers removes "users" edges to User entities.
 func (tu *TeamUpdate) RemoveUsers(u ...*User) *TeamUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -333,19 +333,19 @@ type TeamUpdateOne struct {
 	mutation *TeamMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (tuo *TeamUpdateOne) SetName(s string) *TeamUpdateOne {
 	tuo.mutation.SetName(s)
 	return tuo
 }
 
-// AddTaskIDs adds the tasks edge to Task by ids.
+// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
 func (tuo *TeamUpdateOne) AddTaskIDs(ids ...int) *TeamUpdateOne {
 	tuo.mutation.AddTaskIDs(ids...)
 	return tuo
 }
 
-// AddTasks adds the tasks edges to Task.
+// AddTasks adds the "tasks" edges to the Task entity.
 func (tuo *TeamUpdateOne) AddTasks(t ...*Task) *TeamUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -354,13 +354,13 @@ func (tuo *TeamUpdateOne) AddTasks(t ...*Task) *TeamUpdateOne {
 	return tuo.AddTaskIDs(ids...)
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (tuo *TeamUpdateOne) AddUserIDs(ids ...int) *TeamUpdateOne {
 	tuo.mutation.AddUserIDs(ids...)
 	return tuo
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (tuo *TeamUpdateOne) AddUsers(u ...*User) *TeamUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -374,19 +374,19 @@ func (tuo *TeamUpdateOne) Mutation() *TeamMutation {
 	return tuo.mutation
 }
 
-// ClearTasks clears all "tasks" edges to type Task.
+// ClearTasks clears all "tasks" edges to the Task entity.
 func (tuo *TeamUpdateOne) ClearTasks() *TeamUpdateOne {
 	tuo.mutation.ClearTasks()
 	return tuo
 }
 
-// RemoveTaskIDs removes the tasks edge to Task by ids.
+// RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
 func (tuo *TeamUpdateOne) RemoveTaskIDs(ids ...int) *TeamUpdateOne {
 	tuo.mutation.RemoveTaskIDs(ids...)
 	return tuo
 }
 
-// RemoveTasks removes tasks edges to Task.
+// RemoveTasks removes "tasks" edges to Task entities.
 func (tuo *TeamUpdateOne) RemoveTasks(t ...*Task) *TeamUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -395,19 +395,19 @@ func (tuo *TeamUpdateOne) RemoveTasks(t ...*Task) *TeamUpdateOne {
 	return tuo.RemoveTaskIDs(ids...)
 }
 
-// ClearUsers clears all "users" edges to type User.
+// ClearUsers clears all "users" edges to the User entity.
 func (tuo *TeamUpdateOne) ClearUsers() *TeamUpdateOne {
 	tuo.mutation.ClearUsers()
 	return tuo
 }
 
-// RemoveUserIDs removes the users edge to User by ids.
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (tuo *TeamUpdateOne) RemoveUserIDs(ids ...int) *TeamUpdateOne {
 	tuo.mutation.RemoveUserIDs(ids...)
 	return tuo
 }
 
-// RemoveUsers removes users edges to User.
+// RemoveUsers removes "users" edges to User entities.
 func (tuo *TeamUpdateOne) RemoveUsers(u ...*User) *TeamUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -416,7 +416,7 @@ func (tuo *TeamUpdateOne) RemoveUsers(u ...*User) *TeamUpdateOne {
 	return tuo.RemoveUserIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Team entity.
 func (tuo *TeamUpdateOne) Save(ctx context.Context) (*Team, error) {
 	var (
 		err  error

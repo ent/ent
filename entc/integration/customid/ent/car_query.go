@@ -36,7 +36,7 @@ type CarQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CarQuery builder.
 func (cq *CarQuery) Where(ps ...predicate.Car) *CarQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
@@ -60,7 +60,7 @@ func (cq *CarQuery) Order(o ...OrderFunc) *CarQuery {
 	return cq
 }
 
-// QueryOwner chains the current query on the owner edge.
+// QueryOwner chains the current query on the "owner" edge.
 func (cq *CarQuery) QueryOwner() *PetQuery {
 	query := &PetQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -82,7 +82,8 @@ func (cq *CarQuery) QueryOwner() *PetQuery {
 	return query
 }
 
-// First returns the first Car entity in the query. Returns *NotFoundError when no car was found.
+// First returns the first Car entity from the query.
+// Returns a *NotFoundError when no Car was found.
 func (cq *CarQuery) First(ctx context.Context) (*Car, error) {
 	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
@@ -103,7 +104,8 @@ func (cq *CarQuery) FirstX(ctx context.Context) *Car {
 	return node
 }
 
-// FirstID returns the first Car id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Car ID from the query.
+// Returns a *NotFoundError when no Car ID was found.
 func (cq *CarQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
@@ -125,7 +127,9 @@ func (cq *CarQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Car entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Car entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Car entity is not found.
+// Returns a *NotFoundError when no Car entities are found.
 func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
 	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
@@ -150,7 +154,9 @@ func (cq *CarQuery) OnlyX(ctx context.Context) *Car {
 	return node
 }
 
-// OnlyID returns the only Car id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Car ID in the query.
+// Returns a *NotSingularError when exactly one Car ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (cq *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
@@ -193,7 +199,7 @@ func (cq *CarQuery) AllX(ctx context.Context) []*Car {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Car ids.
+// IDs executes the query and returns a list of Car IDs.
 func (cq *CarQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := cq.Select(car.FieldID).Scan(ctx, &ids); err != nil {
@@ -245,7 +251,7 @@ func (cq *CarQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the CarQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *CarQuery) Clone() *CarQuery {
 	if cq == nil {
@@ -264,8 +270,8 @@ func (cq *CarQuery) Clone() *CarQuery {
 	}
 }
 
-//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
-// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CarQuery) WithOwner(opts ...func(*PetQuery)) *CarQuery {
 	query := &PetQuery{config: cq.config}
 	for _, opt := range opts {
@@ -275,7 +281,7 @@ func (cq *CarQuery) WithOwner(opts ...func(*PetQuery)) *CarQuery {
 	return cq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -302,7 +308,8 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -481,7 +488,7 @@ func (cq *CarQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// CarGroupBy is the builder for group-by Car entities.
+// CarGroupBy is the group-by builder for Car entities.
 type CarGroupBy struct {
 	config
 	fields []string
@@ -497,7 +504,7 @@ func (cgb *CarGroupBy) Aggregate(fns ...AggregateFunc) *CarGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (cgb *CarGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
@@ -514,7 +521,8 @@ func (cgb *CarGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CarGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CarGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -535,7 +543,8 @@ func (cgb *CarGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CarGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cgb.Strings(ctx); err != nil {
@@ -561,7 +570,8 @@ func (cgb *CarGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CarGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CarGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -582,7 +592,8 @@ func (cgb *CarGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CarGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cgb.Ints(ctx); err != nil {
@@ -608,7 +619,8 @@ func (cgb *CarGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CarGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CarGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -629,7 +641,8 @@ func (cgb *CarGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CarGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cgb.Float64s(ctx); err != nil {
@@ -655,7 +668,8 @@ func (cgb *CarGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CarGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CarGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -676,7 +690,8 @@ func (cgb *CarGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CarGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cgb.Bools(ctx); err != nil {
@@ -731,14 +746,14 @@ func (cgb *CarGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }
 
-// CarSelect is the builder for select fields of Car entities.
+// CarSelect is the builder for selecting fields of Car entities.
 type CarSelect struct {
 	*CarQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cs *CarSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
@@ -754,7 +769,7 @@ func (cs *CarSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CarSelect.Strings is not achievable when selecting more than 1 field")
@@ -775,7 +790,7 @@ func (cs *CarSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (cs *CarSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cs.Strings(ctx); err != nil {
@@ -801,7 +816,7 @@ func (cs *CarSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CarSelect.Ints is not achievable when selecting more than 1 field")
@@ -822,7 +837,7 @@ func (cs *CarSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cs.Ints(ctx); err != nil {
@@ -848,7 +863,7 @@ func (cs *CarSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CarSelect.Float64s is not achievable when selecting more than 1 field")
@@ -869,7 +884,7 @@ func (cs *CarSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cs.Float64s(ctx); err != nil {
@@ -895,7 +910,7 @@ func (cs *CarSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CarSelect.Bools is not achievable when selecting more than 1 field")
@@ -916,7 +931,7 @@ func (cs *CarSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (cs *CarSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cs.Bools(ctx); err != nil {

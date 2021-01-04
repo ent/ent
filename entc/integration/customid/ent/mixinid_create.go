@@ -24,19 +24,19 @@ type MixinIDCreate struct {
 	hooks    []Hook
 }
 
-// SetSomeField sets the some_field field.
+// SetSomeField sets the "some_field" field.
 func (mic *MixinIDCreate) SetSomeField(s string) *MixinIDCreate {
 	mic.mutation.SetSomeField(s)
 	return mic
 }
 
-// SetMixinField sets the mixin_field field.
+// SetMixinField sets the "mixin_field" field.
 func (mic *MixinIDCreate) SetMixinField(s string) *MixinIDCreate {
 	mic.mutation.SetMixinField(s)
 	return mic
 }
 
-// SetID sets the id field.
+// SetID sets the "id" field.
 func (mic *MixinIDCreate) SetID(u uuid.UUID) *MixinIDCreate {
 	mic.mutation.SetID(u)
 	return mic
@@ -156,7 +156,7 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// MixinIDCreateBulk is the builder for creating a bulk of MixinID entities.
+// MixinIDCreateBulk is the builder for creating many MixinID entities in bulk.
 type MixinIDCreateBulk struct {
 	config
 	builders []*MixinIDCreate
@@ -212,7 +212,7 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (micb *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
 	v, err := micb.Save(ctx)
 	if err != nil {

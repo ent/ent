@@ -15,7 +15,7 @@ const (
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
 
-	// UserFieldID holds the string denoting the id field of the User.
+	// UserFieldID holds the string denoting the ID field of the User.
 	UserFieldID = "oid"
 	// Table holds the table name of the group in the database.
 	Table = "groups"

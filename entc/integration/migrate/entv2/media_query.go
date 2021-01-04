@@ -32,7 +32,7 @@ type MediaQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the MediaQuery builder.
 func (mq *MediaQuery) Where(ps ...predicate.Media) *MediaQuery {
 	mq.predicates = append(mq.predicates, ps...)
 	return mq
@@ -56,7 +56,8 @@ func (mq *MediaQuery) Order(o ...OrderFunc) *MediaQuery {
 	return mq
 }
 
-// First returns the first Media entity in the query. Returns *NotFoundError when no media was found.
+// First returns the first Media entity from the query.
+// Returns a *NotFoundError when no Media was found.
 func (mq *MediaQuery) First(ctx context.Context) (*Media, error) {
 	nodes, err := mq.Limit(1).All(ctx)
 	if err != nil {
@@ -77,7 +78,8 @@ func (mq *MediaQuery) FirstX(ctx context.Context) *Media {
 	return node
 }
 
-// FirstID returns the first Media id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Media ID from the query.
+// Returns a *NotFoundError when no Media ID was found.
 func (mq *MediaQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = mq.Limit(1).IDs(ctx); err != nil {
@@ -99,7 +101,9 @@ func (mq *MediaQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Media entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Media entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Media entity is not found.
+// Returns a *NotFoundError when no Media entities are found.
 func (mq *MediaQuery) Only(ctx context.Context) (*Media, error) {
 	nodes, err := mq.Limit(2).All(ctx)
 	if err != nil {
@@ -124,7 +128,9 @@ func (mq *MediaQuery) OnlyX(ctx context.Context) *Media {
 	return node
 }
 
-// OnlyID returns the only Media id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Media ID in the query.
+// Returns a *NotSingularError when exactly one Media ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (mq *MediaQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = mq.Limit(2).IDs(ctx); err != nil {
@@ -167,7 +173,7 @@ func (mq *MediaQuery) AllX(ctx context.Context) []*Media {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Media ids.
+// IDs executes the query and returns a list of Media IDs.
 func (mq *MediaQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := mq.Select(media.FieldID).Scan(ctx, &ids); err != nil {
@@ -219,7 +225,7 @@ func (mq *MediaQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the MediaQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (mq *MediaQuery) Clone() *MediaQuery {
 	if mq == nil {
@@ -237,7 +243,7 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -264,7 +270,8 @@ func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -406,7 +413,7 @@ func (mq *MediaQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// MediaGroupBy is the builder for group-by Media entities.
+// MediaGroupBy is the group-by builder for Media entities.
 type MediaGroupBy struct {
 	config
 	fields []string
@@ -422,7 +429,7 @@ func (mgb *MediaGroupBy) Aggregate(fns ...AggregateFunc) *MediaGroupBy {
 	return mgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (mgb *MediaGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := mgb.path(ctx)
 	if err != nil {
@@ -439,7 +446,8 @@ func (mgb *MediaGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (mgb *MediaGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(mgb.fields) > 1 {
 		return nil, errors.New("entv2: MediaGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -460,7 +468,8 @@ func (mgb *MediaGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (mgb *MediaGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = mgb.Strings(ctx); err != nil {
@@ -486,7 +495,8 @@ func (mgb *MediaGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (mgb *MediaGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(mgb.fields) > 1 {
 		return nil, errors.New("entv2: MediaGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -507,7 +517,8 @@ func (mgb *MediaGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (mgb *MediaGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = mgb.Ints(ctx); err != nil {
@@ -533,7 +544,8 @@ func (mgb *MediaGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (mgb *MediaGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(mgb.fields) > 1 {
 		return nil, errors.New("entv2: MediaGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -554,7 +566,8 @@ func (mgb *MediaGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (mgb *MediaGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = mgb.Float64s(ctx); err != nil {
@@ -580,7 +593,8 @@ func (mgb *MediaGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (mgb *MediaGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(mgb.fields) > 1 {
 		return nil, errors.New("entv2: MediaGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -601,7 +615,8 @@ func (mgb *MediaGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (mgb *MediaGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = mgb.Bools(ctx); err != nil {
@@ -656,14 +671,14 @@ func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(mgb.fields...)
 }
 
-// MediaSelect is the builder for select fields of Media entities.
+// MediaSelect is the builder for selecting fields of Media entities.
 type MediaSelect struct {
 	*MediaQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ms *MediaSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ms.prepareQuery(ctx); err != nil {
 		return err
@@ -679,7 +694,7 @@ func (ms *MediaSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (ms *MediaSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(ms.fields) > 1 {
 		return nil, errors.New("entv2: MediaSelect.Strings is not achievable when selecting more than 1 field")
@@ -700,7 +715,7 @@ func (ms *MediaSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (ms *MediaSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ms.Strings(ctx); err != nil {
@@ -726,7 +741,7 @@ func (ms *MediaSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (ms *MediaSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ms.fields) > 1 {
 		return nil, errors.New("entv2: MediaSelect.Ints is not achievable when selecting more than 1 field")
@@ -747,7 +762,7 @@ func (ms *MediaSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (ms *MediaSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ms.Ints(ctx); err != nil {
@@ -773,7 +788,7 @@ func (ms *MediaSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (ms *MediaSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ms.fields) > 1 {
 		return nil, errors.New("entv2: MediaSelect.Float64s is not achievable when selecting more than 1 field")
@@ -794,7 +809,7 @@ func (ms *MediaSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (ms *MediaSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ms.Float64s(ctx); err != nil {
@@ -820,7 +835,7 @@ func (ms *MediaSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (ms *MediaSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ms.fields) > 1 {
 		return nil, errors.New("entv2: MediaSelect.Bools is not achievable when selecting more than 1 field")
@@ -841,7 +856,7 @@ func (ms *MediaSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (ms *MediaSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ms.Bools(ctx); err != nil {

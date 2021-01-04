@@ -37,14 +37,14 @@ func (i *Item) FromResponse(res *gremlin.Response) error {
 }
 
 // Update returns a builder for updating this Item.
-// Note that, you need to call Item.Unwrap() before calling this method, if this Item
+// Note that you need to call Item.Unwrap() before calling this method if this Item
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (i *Item) Update() *ItemUpdateOne {
 	return (&ItemClient{config: i.config}).UpdateOne(i)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Item entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (i *Item) Unwrap() *Item {
 	tx, ok := i.config.driver.(*txDriver)
 	if !ok {

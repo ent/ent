@@ -117,35 +117,35 @@ func (gr *Group) FromResponse(res *gremlin.Response) error {
 	return nil
 }
 
-// QueryFiles queries the files edge of the Group.
+// QueryFiles queries the "files" edge of the Group entity.
 func (gr *Group) QueryFiles() *FileQuery {
 	return (&GroupClient{config: gr.config}).QueryFiles(gr)
 }
 
-// QueryBlocked queries the blocked edge of the Group.
+// QueryBlocked queries the "blocked" edge of the Group entity.
 func (gr *Group) QueryBlocked() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryBlocked(gr)
 }
 
-// QueryUsers queries the users edge of the Group.
+// QueryUsers queries the "users" edge of the Group entity.
 func (gr *Group) QueryUsers() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryUsers(gr)
 }
 
-// QueryInfo queries the info edge of the Group.
+// QueryInfo queries the "info" edge of the Group entity.
 func (gr *Group) QueryInfo() *GroupInfoQuery {
 	return (&GroupClient{config: gr.config}).QueryInfo(gr)
 }
 
 // Update returns a builder for updating this Group.
-// Note that, you need to call Group.Unwrap() before calling this method, if this Group
+// Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gr *Group) Update() *GroupUpdateOne {
 	return (&GroupClient{config: gr.config}).UpdateOne(gr)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (gr *Group) Unwrap() *Group {
 	tx, ok := gr.config.driver.(*txDriver)
 	if !ok {

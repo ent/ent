@@ -24,7 +24,7 @@ type CommentDelete struct {
 	mutation *CommentMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the CommentDelete builder.
 func (cd *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
 	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
 	return cd

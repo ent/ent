@@ -54,10 +54,10 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Type defines the type for the type enum field.
+// Type defines the type for the "type" enum field.
 type Type string
 
-// TypePNG is the default Type.
+// TypePNG is the default value of the Type enum.
 const DefaultType = TypePNG
 
 // Type values.
@@ -81,10 +81,10 @@ func TypeValidator(_type Type) error {
 	}
 }
 
-// State defines the type for the state enum field.
+// State defines the type for the "state" enum field.
 type State string
 
-// StateOn is the default State.
+// StateOn is the default value of the State enum.
 const DefaultState = StateOn
 
 // State values.

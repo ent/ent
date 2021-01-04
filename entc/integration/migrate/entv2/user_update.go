@@ -26,19 +26,19 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetMixedString sets the mixed_string field.
+// SetMixedString sets the "mixed_string" field.
 func (uu *UserUpdate) SetMixedString(s string) *UserUpdate {
 	uu.mutation.SetMixedString(s)
 	return uu
 }
 
-// SetNillableMixedString sets the mixed_string field if the given value is not nil.
+// SetNillableMixedString sets the "mixed_string" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableMixedString(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetMixedString(*s)
@@ -46,13 +46,13 @@ func (uu *UserUpdate) SetNillableMixedString(s *string) *UserUpdate {
 	return uu
 }
 
-// SetMixedEnum sets the mixed_enum field.
+// SetMixedEnum sets the "mixed_enum" field.
 func (uu *UserUpdate) SetMixedEnum(ue user.MixedEnum) *UserUpdate {
 	uu.mutation.SetMixedEnum(ue)
 	return uu
 }
 
-// SetNillableMixedEnum sets the mixed_enum field if the given value is not nil.
+// SetNillableMixedEnum sets the "mixed_enum" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableMixedEnum(ue *user.MixedEnum) *UserUpdate {
 	if ue != nil {
 		uu.SetMixedEnum(*ue)
@@ -60,38 +60,38 @@ func (uu *UserUpdate) SetNillableMixedEnum(ue *user.MixedEnum) *UserUpdate {
 	return uu
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.mutation.ResetAge()
 	uu.mutation.SetAge(i)
 	return uu
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
 	uu.mutation.AddAge(i)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetNickname sets the nickname field.
+// SetNickname sets the "nickname" field.
 func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
 	uu.mutation.SetNickname(s)
 	return uu
 }
 
-// SetPhone sets the phone field.
+// SetPhone sets the "phone" field.
 func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
 	uu.mutation.SetPhone(s)
 	return uu
 }
 
-// SetNillablePhone sets the phone field if the given value is not nil.
+// SetNillablePhone sets the "phone" field if the given value is not nil.
 func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetPhone(*s)
@@ -99,25 +99,25 @@ func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
 	return uu
 }
 
-// SetBuffer sets the buffer field.
+// SetBuffer sets the "buffer" field.
 func (uu *UserUpdate) SetBuffer(b []byte) *UserUpdate {
 	uu.mutation.SetBuffer(b)
 	return uu
 }
 
-// ClearBuffer clears the value of buffer.
+// ClearBuffer clears the value of the "buffer" field.
 func (uu *UserUpdate) ClearBuffer() *UserUpdate {
 	uu.mutation.ClearBuffer()
 	return uu
 }
 
-// SetTitle sets the title field.
+// SetTitle sets the "title" field.
 func (uu *UserUpdate) SetTitle(s string) *UserUpdate {
 	uu.mutation.SetTitle(s)
 	return uu
 }
 
-// SetNillableTitle sets the title field if the given value is not nil.
+// SetNillableTitle sets the "title" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableTitle(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetTitle(*s)
@@ -125,13 +125,13 @@ func (uu *UserUpdate) SetNillableTitle(s *string) *UserUpdate {
 	return uu
 }
 
-// SetNewName sets the new_name field.
+// SetNewName sets the "new_name" field.
 func (uu *UserUpdate) SetNewName(s string) *UserUpdate {
 	uu.mutation.SetNewName(s)
 	return uu
 }
 
-// SetNillableNewName sets the new_name field if the given value is not nil.
+// SetNillableNewName sets the "new_name" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableNewName(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetNewName(*s)
@@ -139,31 +139,31 @@ func (uu *UserUpdate) SetNillableNewName(s *string) *UserUpdate {
 	return uu
 }
 
-// ClearNewName clears the value of new_name.
+// ClearNewName clears the value of the "new_name" field.
 func (uu *UserUpdate) ClearNewName() *UserUpdate {
 	uu.mutation.ClearNewName()
 	return uu
 }
 
-// SetBlob sets the blob field.
+// SetBlob sets the "blob" field.
 func (uu *UserUpdate) SetBlob(b []byte) *UserUpdate {
 	uu.mutation.SetBlob(b)
 	return uu
 }
 
-// ClearBlob clears the value of blob.
+// ClearBlob clears the value of the "blob" field.
 func (uu *UserUpdate) ClearBlob() *UserUpdate {
 	uu.mutation.ClearBlob()
 	return uu
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (uu *UserUpdate) SetState(u user.State) *UserUpdate {
 	uu.mutation.SetState(u)
 	return uu
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableState(u *user.State) *UserUpdate {
 	if u != nil {
 		uu.SetState(*u)
@@ -171,19 +171,19 @@ func (uu *UserUpdate) SetNillableState(u *user.State) *UserUpdate {
 	return uu
 }
 
-// ClearState clears the value of state.
+// ClearState clears the value of the "state" field.
 func (uu *UserUpdate) ClearState() *UserUpdate {
 	uu.mutation.ClearState()
 	return uu
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (uu *UserUpdate) SetStatus(u user.Status) *UserUpdate {
 	uu.mutation.SetStatus(u)
 	return uu
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableStatus(u *user.Status) *UserUpdate {
 	if u != nil {
 		uu.SetStatus(*u)
@@ -191,19 +191,19 @@ func (uu *UserUpdate) SetNillableStatus(u *user.Status) *UserUpdate {
 	return uu
 }
 
-// ClearStatus clears the value of status.
+// ClearStatus clears the value of the "status" field.
 func (uu *UserUpdate) ClearStatus() *UserUpdate {
 	uu.mutation.ClearStatus()
 	return uu
 }
 
-// SetWorkplace sets the workplace field.
+// SetWorkplace sets the "workplace" field.
 func (uu *UserUpdate) SetWorkplace(s string) *UserUpdate {
 	uu.mutation.SetWorkplace(s)
 	return uu
 }
 
-// SetNillableWorkplace sets the workplace field if the given value is not nil.
+// SetNillableWorkplace sets the "workplace" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableWorkplace(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetWorkplace(*s)
@@ -211,19 +211,19 @@ func (uu *UserUpdate) SetNillableWorkplace(s *string) *UserUpdate {
 	return uu
 }
 
-// ClearWorkplace clears the value of workplace.
+// ClearWorkplace clears the value of the "workplace" field.
 func (uu *UserUpdate) ClearWorkplace() *UserUpdate {
 	uu.mutation.ClearWorkplace()
 	return uu
 }
 
-// AddCarIDs adds the car edge to Car by ids.
+// AddCarIDs adds the "car" edge to the Car entity by IDs.
 func (uu *UserUpdate) AddCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddCarIDs(ids...)
 	return uu
 }
 
-// AddCar adds the car edges to Car.
+// AddCar adds the "car" edges to the Car entity.
 func (uu *UserUpdate) AddCar(c ...*Car) *UserUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -232,13 +232,13 @@ func (uu *UserUpdate) AddCar(c ...*Car) *UserUpdate {
 	return uu.AddCarIDs(ids...)
 }
 
-// SetPetsID sets the pets edge to Pet by id.
+// SetPetsID sets the "pets" edge to the Pet entity by ID.
 func (uu *UserUpdate) SetPetsID(id int) *UserUpdate {
 	uu.mutation.SetPetsID(id)
 	return uu
 }
 
-// SetNillablePetsID sets the pets edge to Pet by id if the given value is not nil.
+// SetNillablePetsID sets the "pets" edge to the Pet entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillablePetsID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetPetsID(*id)
@@ -246,18 +246,18 @@ func (uu *UserUpdate) SetNillablePetsID(id *int) *UserUpdate {
 	return uu
 }
 
-// SetPets sets the pets edge to Pet.
+// SetPets sets the "pets" edge to the Pet entity.
 func (uu *UserUpdate) SetPets(p *Pet) *UserUpdate {
 	return uu.SetPetsID(p.ID)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uu *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFriendIDs(ids...)
 	return uu
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -271,19 +271,19 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearCar clears all "car" edges to type Car.
+// ClearCar clears all "car" edges to the Car entity.
 func (uu *UserUpdate) ClearCar() *UserUpdate {
 	uu.mutation.ClearCar()
 	return uu
 }
 
-// RemoveCarIDs removes the car edge to Car by ids.
+// RemoveCarIDs removes the "car" edge to Car entities by IDs.
 func (uu *UserUpdate) RemoveCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveCarIDs(ids...)
 	return uu
 }
 
-// RemoveCar removes car edges to Car.
+// RemoveCar removes "car" edges to Car entities.
 func (uu *UserUpdate) RemoveCar(c ...*Car) *UserUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -292,25 +292,25 @@ func (uu *UserUpdate) RemoveCar(c ...*Car) *UserUpdate {
 	return uu.RemoveCarIDs(ids...)
 }
 
-// ClearPets clears the "pets" edge to type Pet.
+// ClearPets clears the "pets" edge to the Pet entity.
 func (uu *UserUpdate) ClearPets() *UserUpdate {
 	uu.mutation.ClearPets()
 	return uu
 }
 
-// ClearFriends clears all "friends" edges to type User.
+// ClearFriends clears all "friends" edges to the User entity.
 func (uu *UserUpdate) ClearFriends() *UserUpdate {
 	uu.mutation.ClearFriends()
 	return uu
 }
 
-// RemoveFriendIDs removes the friends edge to User by ids.
+// RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (uu *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFriendIDs(ids...)
 	return uu
 }
 
-// RemoveFriends removes friends edges to User.
+// RemoveFriends removes "friends" edges to User entities.
 func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -714,13 +714,13 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetMixedString sets the mixed_string field.
+// SetMixedString sets the "mixed_string" field.
 func (uuo *UserUpdateOne) SetMixedString(s string) *UserUpdateOne {
 	uuo.mutation.SetMixedString(s)
 	return uuo
 }
 
-// SetNillableMixedString sets the mixed_string field if the given value is not nil.
+// SetNillableMixedString sets the "mixed_string" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableMixedString(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetMixedString(*s)
@@ -728,13 +728,13 @@ func (uuo *UserUpdateOne) SetNillableMixedString(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetMixedEnum sets the mixed_enum field.
+// SetMixedEnum sets the "mixed_enum" field.
 func (uuo *UserUpdateOne) SetMixedEnum(ue user.MixedEnum) *UserUpdateOne {
 	uuo.mutation.SetMixedEnum(ue)
 	return uuo
 }
 
-// SetNillableMixedEnum sets the mixed_enum field if the given value is not nil.
+// SetNillableMixedEnum sets the "mixed_enum" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableMixedEnum(ue *user.MixedEnum) *UserUpdateOne {
 	if ue != nil {
 		uuo.SetMixedEnum(*ue)
@@ -742,38 +742,38 @@ func (uuo *UserUpdateOne) SetNillableMixedEnum(ue *user.MixedEnum) *UserUpdateOn
 	return uuo
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.mutation.ResetAge()
 	uuo.mutation.SetAge(i)
 	return uuo
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
 	uuo.mutation.AddAge(i)
 	return uuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetNickname sets the nickname field.
+// SetNickname sets the "nickname" field.
 func (uuo *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
 	uuo.mutation.SetNickname(s)
 	return uuo
 }
 
-// SetPhone sets the phone field.
+// SetPhone sets the "phone" field.
 func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
 	uuo.mutation.SetPhone(s)
 	return uuo
 }
 
-// SetNillablePhone sets the phone field if the given value is not nil.
+// SetNillablePhone sets the "phone" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetPhone(*s)
@@ -781,25 +781,25 @@ func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetBuffer sets the buffer field.
+// SetBuffer sets the "buffer" field.
 func (uuo *UserUpdateOne) SetBuffer(b []byte) *UserUpdateOne {
 	uuo.mutation.SetBuffer(b)
 	return uuo
 }
 
-// ClearBuffer clears the value of buffer.
+// ClearBuffer clears the value of the "buffer" field.
 func (uuo *UserUpdateOne) ClearBuffer() *UserUpdateOne {
 	uuo.mutation.ClearBuffer()
 	return uuo
 }
 
-// SetTitle sets the title field.
+// SetTitle sets the "title" field.
 func (uuo *UserUpdateOne) SetTitle(s string) *UserUpdateOne {
 	uuo.mutation.SetTitle(s)
 	return uuo
 }
 
-// SetNillableTitle sets the title field if the given value is not nil.
+// SetNillableTitle sets the "title" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableTitle(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetTitle(*s)
@@ -807,13 +807,13 @@ func (uuo *UserUpdateOne) SetNillableTitle(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetNewName sets the new_name field.
+// SetNewName sets the "new_name" field.
 func (uuo *UserUpdateOne) SetNewName(s string) *UserUpdateOne {
 	uuo.mutation.SetNewName(s)
 	return uuo
 }
 
-// SetNillableNewName sets the new_name field if the given value is not nil.
+// SetNillableNewName sets the "new_name" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableNewName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetNewName(*s)
@@ -821,31 +821,31 @@ func (uuo *UserUpdateOne) SetNillableNewName(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// ClearNewName clears the value of new_name.
+// ClearNewName clears the value of the "new_name" field.
 func (uuo *UserUpdateOne) ClearNewName() *UserUpdateOne {
 	uuo.mutation.ClearNewName()
 	return uuo
 }
 
-// SetBlob sets the blob field.
+// SetBlob sets the "blob" field.
 func (uuo *UserUpdateOne) SetBlob(b []byte) *UserUpdateOne {
 	uuo.mutation.SetBlob(b)
 	return uuo
 }
 
-// ClearBlob clears the value of blob.
+// ClearBlob clears the value of the "blob" field.
 func (uuo *UserUpdateOne) ClearBlob() *UserUpdateOne {
 	uuo.mutation.ClearBlob()
 	return uuo
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (uuo *UserUpdateOne) SetState(u user.State) *UserUpdateOne {
 	uuo.mutation.SetState(u)
 	return uuo
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableState(u *user.State) *UserUpdateOne {
 	if u != nil {
 		uuo.SetState(*u)
@@ -853,19 +853,19 @@ func (uuo *UserUpdateOne) SetNillableState(u *user.State) *UserUpdateOne {
 	return uuo
 }
 
-// ClearState clears the value of state.
+// ClearState clears the value of the "state" field.
 func (uuo *UserUpdateOne) ClearState() *UserUpdateOne {
 	uuo.mutation.ClearState()
 	return uuo
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (uuo *UserUpdateOne) SetStatus(u user.Status) *UserUpdateOne {
 	uuo.mutation.SetStatus(u)
 	return uuo
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableStatus(u *user.Status) *UserUpdateOne {
 	if u != nil {
 		uuo.SetStatus(*u)
@@ -873,19 +873,19 @@ func (uuo *UserUpdateOne) SetNillableStatus(u *user.Status) *UserUpdateOne {
 	return uuo
 }
 
-// ClearStatus clears the value of status.
+// ClearStatus clears the value of the "status" field.
 func (uuo *UserUpdateOne) ClearStatus() *UserUpdateOne {
 	uuo.mutation.ClearStatus()
 	return uuo
 }
 
-// SetWorkplace sets the workplace field.
+// SetWorkplace sets the "workplace" field.
 func (uuo *UserUpdateOne) SetWorkplace(s string) *UserUpdateOne {
 	uuo.mutation.SetWorkplace(s)
 	return uuo
 }
 
-// SetNillableWorkplace sets the workplace field if the given value is not nil.
+// SetNillableWorkplace sets the "workplace" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableWorkplace(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetWorkplace(*s)
@@ -893,19 +893,19 @@ func (uuo *UserUpdateOne) SetNillableWorkplace(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// ClearWorkplace clears the value of workplace.
+// ClearWorkplace clears the value of the "workplace" field.
 func (uuo *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
 	uuo.mutation.ClearWorkplace()
 	return uuo
 }
 
-// AddCarIDs adds the car edge to Car by ids.
+// AddCarIDs adds the "car" edge to the Car entity by IDs.
 func (uuo *UserUpdateOne) AddCarIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddCarIDs(ids...)
 	return uuo
 }
 
-// AddCar adds the car edges to Car.
+// AddCar adds the "car" edges to the Car entity.
 func (uuo *UserUpdateOne) AddCar(c ...*Car) *UserUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -914,13 +914,13 @@ func (uuo *UserUpdateOne) AddCar(c ...*Car) *UserUpdateOne {
 	return uuo.AddCarIDs(ids...)
 }
 
-// SetPetsID sets the pets edge to Pet by id.
+// SetPetsID sets the "pets" edge to the Pet entity by ID.
 func (uuo *UserUpdateOne) SetPetsID(id int) *UserUpdateOne {
 	uuo.mutation.SetPetsID(id)
 	return uuo
 }
 
-// SetNillablePetsID sets the pets edge to Pet by id if the given value is not nil.
+// SetNillablePetsID sets the "pets" edge to the Pet entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillablePetsID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetPetsID(*id)
@@ -928,18 +928,18 @@ func (uuo *UserUpdateOne) SetNillablePetsID(id *int) *UserUpdateOne {
 	return uuo
 }
 
-// SetPets sets the pets edge to Pet.
+// SetPets sets the "pets" edge to the Pet entity.
 func (uuo *UserUpdateOne) SetPets(p *Pet) *UserUpdateOne {
 	return uuo.SetPetsID(p.ID)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uuo *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddFriendIDs(ids...)
 	return uuo
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -953,19 +953,19 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearCar clears all "car" edges to type Car.
+// ClearCar clears all "car" edges to the Car entity.
 func (uuo *UserUpdateOne) ClearCar() *UserUpdateOne {
 	uuo.mutation.ClearCar()
 	return uuo
 }
 
-// RemoveCarIDs removes the car edge to Car by ids.
+// RemoveCarIDs removes the "car" edge to Car entities by IDs.
 func (uuo *UserUpdateOne) RemoveCarIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveCarIDs(ids...)
 	return uuo
 }
 
-// RemoveCar removes car edges to Car.
+// RemoveCar removes "car" edges to Car entities.
 func (uuo *UserUpdateOne) RemoveCar(c ...*Car) *UserUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -974,25 +974,25 @@ func (uuo *UserUpdateOne) RemoveCar(c ...*Car) *UserUpdateOne {
 	return uuo.RemoveCarIDs(ids...)
 }
 
-// ClearPets clears the "pets" edge to type Pet.
+// ClearPets clears the "pets" edge to the Pet entity.
 func (uuo *UserUpdateOne) ClearPets() *UserUpdateOne {
 	uuo.mutation.ClearPets()
 	return uuo
 }
 
-// ClearFriends clears all "friends" edges to type User.
+// ClearFriends clears all "friends" edges to the User entity.
 func (uuo *UserUpdateOne) ClearFriends() *UserUpdateOne {
 	uuo.mutation.ClearFriends()
 	return uuo
 }
 
-// RemoveFriendIDs removes the friends edge to User by ids.
+// RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (uuo *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveFriendIDs(ids...)
 	return uuo
 }
 
-// RemoveFriends removes friends edges to User.
+// RemoveFriends removes "friends" edges to User entities.
 func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -1001,7 +1001,7 @@ func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 	return uuo.RemoveFriendIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

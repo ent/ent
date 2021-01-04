@@ -19,7 +19,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ range $f := $fields }}
 	{{ $p := receiver $f.Type.String }}{{ if eq $p $receiver }} {{ $p = "value" }} {{ end }}
 	{{ $func := print "Set" $f.StructField }}
-	// {{ $func }} sets the {{ $f.Name }} field.
+	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $f.Type.Numeric $updater }}
@@ -32,7 +32,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{/* avoid generting nillable setters for nillable types. */}}
 	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" $f.StructField }}
-		// {{ $nillableFunc }} sets the {{ $f.Name }} field if the given value is not nil.
+		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {
 			if {{ $p }} != nil {
 				{{ $receiver }}.{{ $func }}(*{{ $p }})
@@ -43,7 +43,7 @@ in the LICENSE file in the root directory of this source tree.
 
 	{{ if and $f.Type.Numeric $f.ConvertedToBasic $updater }}
 		{{ $func := print "Add" $f.StructField }}
-		// {{ $func }} adds {{ $p }} to {{ $f.Name }}.
+		// {{ $func }} adds {{ $p }} to the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 			{{ $receiver }}.mutation.{{ $func }}({{ $p }})
 			return {{ $receiver }}
@@ -52,7 +52,7 @@ in the LICENSE file in the root directory of this source tree.
 
 	{{ if and $f.Optional $updater }}
 		{{ $func := print "Clear" $f.StructField }}
-		// {{ $func }} clears the value of {{ $f.Name }}.
+		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
 			{{ $receiver }}.mutation.{{ $func }}()
 			return {{ $receiver }}
@@ -62,14 +62,14 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ range $e := $.Edges }}
 	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
-	// {{ $idsFunc }} {{ $op }}s the {{ $e.Name }} edge to {{ $e.Type.Name }} by id{{ if not $e.Unique }}s{{ end }}.
+	// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID{{ if not $e.Unique }}s{{ end }}.
 	func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
 		{{ $receiver }}.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
 		return {{ $receiver }}
 	}
 	{{ if and $e.Unique $e.Optional }}
 		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
-		// {{ $nillableIDsFunc }} sets the {{ $e.Name }} edge to {{ $e.Type.Name }} by id if the given value is not nil.
+		// {{ $nillableIDsFunc }} sets the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {
 			if id != nil {
 				{{ $receiver}} = {{ $receiver }}.{{ $idsFunc }}(*id)
@@ -80,7 +80,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $p := lower (printf "%.1s" $e.Type.Name) }}
 	{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
 	{{ $func := print (pascal $op) $e.StructField }}
-	// {{ $func }} {{ $op }}s the {{ $e.Name }} edge{{if not $e.Unique}}s{{ end }} to {{ $e.Type.Name }}.
+	// {{ $func }} {{ $op }}s the "{{ $e.Name }}" edge{{if not $e.Unique}}s{{ end }} to the {{ $e.Type.Name }} entity.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
 		{{ if $e.Unique -}}
 			return {{ $receiver }}.{{ $idsFunc }}({{ $p }}.ID)

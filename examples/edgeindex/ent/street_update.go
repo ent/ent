@@ -25,25 +25,25 @@ type StreetUpdate struct {
 	mutation *StreetMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the StreetUpdate builder.
 func (su *StreetUpdate) Where(ps ...predicate.Street) *StreetUpdate {
 	su.mutation.predicates = append(su.mutation.predicates, ps...)
 	return su
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (su *StreetUpdate) SetName(s string) *StreetUpdate {
 	su.mutation.SetName(s)
 	return su
 }
 
-// SetCityID sets the city edge to City by id.
+// SetCityID sets the "city" edge to the City entity by ID.
 func (su *StreetUpdate) SetCityID(id int) *StreetUpdate {
 	su.mutation.SetCityID(id)
 	return su
 }
 
-// SetNillableCityID sets the city edge to City by id if the given value is not nil.
+// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
 func (su *StreetUpdate) SetNillableCityID(id *int) *StreetUpdate {
 	if id != nil {
 		su = su.SetCityID(*id)
@@ -51,7 +51,7 @@ func (su *StreetUpdate) SetNillableCityID(id *int) *StreetUpdate {
 	return su
 }
 
-// SetCity sets the city edge to City.
+// SetCity sets the "city" edge to the City entity.
 func (su *StreetUpdate) SetCity(c *City) *StreetUpdate {
 	return su.SetCityID(c.ID)
 }
@@ -61,7 +61,7 @@ func (su *StreetUpdate) Mutation() *StreetMutation {
 	return su.mutation
 }
 
-// ClearCity clears the "city" edge to type City.
+// ClearCity clears the "city" edge to the City entity.
 func (su *StreetUpdate) ClearCity() *StreetUpdate {
 	su.mutation.ClearCity()
 	return su
@@ -196,19 +196,19 @@ type StreetUpdateOne struct {
 	mutation *StreetMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (suo *StreetUpdateOne) SetName(s string) *StreetUpdateOne {
 	suo.mutation.SetName(s)
 	return suo
 }
 
-// SetCityID sets the city edge to City by id.
+// SetCityID sets the "city" edge to the City entity by ID.
 func (suo *StreetUpdateOne) SetCityID(id int) *StreetUpdateOne {
 	suo.mutation.SetCityID(id)
 	return suo
 }
 
-// SetNillableCityID sets the city edge to City by id if the given value is not nil.
+// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
 func (suo *StreetUpdateOne) SetNillableCityID(id *int) *StreetUpdateOne {
 	if id != nil {
 		suo = suo.SetCityID(*id)
@@ -216,7 +216,7 @@ func (suo *StreetUpdateOne) SetNillableCityID(id *int) *StreetUpdateOne {
 	return suo
 }
 
-// SetCity sets the city edge to City.
+// SetCity sets the "city" edge to the City entity.
 func (suo *StreetUpdateOne) SetCity(c *City) *StreetUpdateOne {
 	return suo.SetCityID(c.ID)
 }
@@ -226,13 +226,13 @@ func (suo *StreetUpdateOne) Mutation() *StreetMutation {
 	return suo.mutation
 }
 
-// ClearCity clears the "city" edge to type City.
+// ClearCity clears the "city" edge to the City entity.
 func (suo *StreetUpdateOne) ClearCity() *StreetUpdateOne {
 	suo.mutation.ClearCity()
 	return suo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Street entity.
 func (suo *StreetUpdateOne) Save(ctx context.Context) (*Street, error) {
 	var (
 		err  error

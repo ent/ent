@@ -25,13 +25,13 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetMixedString sets the mixed_string field.
+// SetMixedString sets the "mixed_string" field.
 func (uc *UserCreate) SetMixedString(s string) *UserCreate {
 	uc.mutation.SetMixedString(s)
 	return uc
 }
 
-// SetNillableMixedString sets the mixed_string field if the given value is not nil.
+// SetNillableMixedString sets the "mixed_string" field if the given value is not nil.
 func (uc *UserCreate) SetNillableMixedString(s *string) *UserCreate {
 	if s != nil {
 		uc.SetMixedString(*s)
@@ -39,13 +39,13 @@ func (uc *UserCreate) SetNillableMixedString(s *string) *UserCreate {
 	return uc
 }
 
-// SetMixedEnum sets the mixed_enum field.
+// SetMixedEnum sets the "mixed_enum" field.
 func (uc *UserCreate) SetMixedEnum(ue user.MixedEnum) *UserCreate {
 	uc.mutation.SetMixedEnum(ue)
 	return uc
 }
 
-// SetNillableMixedEnum sets the mixed_enum field if the given value is not nil.
+// SetNillableMixedEnum sets the "mixed_enum" field if the given value is not nil.
 func (uc *UserCreate) SetNillableMixedEnum(ue *user.MixedEnum) *UserCreate {
 	if ue != nil {
 		uc.SetMixedEnum(*ue)
@@ -53,31 +53,31 @@ func (uc *UserCreate) SetNillableMixedEnum(ue *user.MixedEnum) *UserCreate {
 	return uc
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
 	uc.mutation.SetAge(i)
 	return uc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetNickname sets the nickname field.
+// SetNickname sets the "nickname" field.
 func (uc *UserCreate) SetNickname(s string) *UserCreate {
 	uc.mutation.SetNickname(s)
 	return uc
 }
 
-// SetPhone sets the phone field.
+// SetPhone sets the "phone" field.
 func (uc *UserCreate) SetPhone(s string) *UserCreate {
 	uc.mutation.SetPhone(s)
 	return uc
 }
 
-// SetNillablePhone sets the phone field if the given value is not nil.
+// SetNillablePhone sets the "phone" field if the given value is not nil.
 func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
 	if s != nil {
 		uc.SetPhone(*s)
@@ -85,19 +85,19 @@ func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
 	return uc
 }
 
-// SetBuffer sets the buffer field.
+// SetBuffer sets the "buffer" field.
 func (uc *UserCreate) SetBuffer(b []byte) *UserCreate {
 	uc.mutation.SetBuffer(b)
 	return uc
 }
 
-// SetTitle sets the title field.
+// SetTitle sets the "title" field.
 func (uc *UserCreate) SetTitle(s string) *UserCreate {
 	uc.mutation.SetTitle(s)
 	return uc
 }
 
-// SetNillableTitle sets the title field if the given value is not nil.
+// SetNillableTitle sets the "title" field if the given value is not nil.
 func (uc *UserCreate) SetNillableTitle(s *string) *UserCreate {
 	if s != nil {
 		uc.SetTitle(*s)
@@ -105,13 +105,13 @@ func (uc *UserCreate) SetNillableTitle(s *string) *UserCreate {
 	return uc
 }
 
-// SetNewName sets the new_name field.
+// SetNewName sets the "new_name" field.
 func (uc *UserCreate) SetNewName(s string) *UserCreate {
 	uc.mutation.SetNewName(s)
 	return uc
 }
 
-// SetNillableNewName sets the new_name field if the given value is not nil.
+// SetNillableNewName sets the "new_name" field if the given value is not nil.
 func (uc *UserCreate) SetNillableNewName(s *string) *UserCreate {
 	if s != nil {
 		uc.SetNewName(*s)
@@ -119,19 +119,19 @@ func (uc *UserCreate) SetNillableNewName(s *string) *UserCreate {
 	return uc
 }
 
-// SetBlob sets the blob field.
+// SetBlob sets the "blob" field.
 func (uc *UserCreate) SetBlob(b []byte) *UserCreate {
 	uc.mutation.SetBlob(b)
 	return uc
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (uc *UserCreate) SetState(u user.State) *UserCreate {
 	uc.mutation.SetState(u)
 	return uc
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
 	if u != nil {
 		uc.SetState(*u)
@@ -139,13 +139,13 @@ func (uc *UserCreate) SetNillableState(u *user.State) *UserCreate {
 	return uc
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (uc *UserCreate) SetStatus(u user.Status) *UserCreate {
 	uc.mutation.SetStatus(u)
 	return uc
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (uc *UserCreate) SetNillableStatus(u *user.Status) *UserCreate {
 	if u != nil {
 		uc.SetStatus(*u)
@@ -153,13 +153,13 @@ func (uc *UserCreate) SetNillableStatus(u *user.Status) *UserCreate {
 	return uc
 }
 
-// SetWorkplace sets the workplace field.
+// SetWorkplace sets the "workplace" field.
 func (uc *UserCreate) SetWorkplace(s string) *UserCreate {
 	uc.mutation.SetWorkplace(s)
 	return uc
 }
 
-// SetNillableWorkplace sets the workplace field if the given value is not nil.
+// SetNillableWorkplace sets the "workplace" field if the given value is not nil.
 func (uc *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
 	if s != nil {
 		uc.SetWorkplace(*s)
@@ -167,19 +167,19 @@ func (uc *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
 	return uc
 }
 
-// SetID sets the id field.
+// SetID sets the "id" field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
 	return uc
 }
 
-// AddCarIDs adds the car edge to Car by ids.
+// AddCarIDs adds the "car" edge to the Car entity by IDs.
 func (uc *UserCreate) AddCarIDs(ids ...int) *UserCreate {
 	uc.mutation.AddCarIDs(ids...)
 	return uc
 }
 
-// AddCar adds the car edges to Car.
+// AddCar adds the "car" edges to the Car entity.
 func (uc *UserCreate) AddCar(c ...*Car) *UserCreate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -188,13 +188,13 @@ func (uc *UserCreate) AddCar(c ...*Car) *UserCreate {
 	return uc.AddCarIDs(ids...)
 }
 
-// SetPetsID sets the pets edge to Pet by id.
+// SetPetsID sets the "pets" edge to the Pet entity by ID.
 func (uc *UserCreate) SetPetsID(id int) *UserCreate {
 	uc.mutation.SetPetsID(id)
 	return uc
 }
 
-// SetNillablePetsID sets the pets edge to Pet by id if the given value is not nil.
+// SetNillablePetsID sets the "pets" edge to the Pet entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillablePetsID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetPetsID(*id)
@@ -202,18 +202,18 @@ func (uc *UserCreate) SetNillablePetsID(id *int) *UserCreate {
 	return uc
 }
 
-// SetPets sets the pets edge to Pet.
+// SetPets sets the "pets" edge to the Pet entity.
 func (uc *UserCreate) SetPets(p *Pet) *UserCreate {
 	return uc.SetPetsID(p.ID)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uc *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFriendIDs(ids...)
 	return uc
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -536,7 +536,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -596,7 +596,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

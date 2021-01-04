@@ -39,7 +39,7 @@ type CardQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CardQuery builder.
 func (cq *CardQuery) Where(ps ...predicate.Card) *CardQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
@@ -63,7 +63,7 @@ func (cq *CardQuery) Order(o ...OrderFunc) *CardQuery {
 	return cq
 }
 
-// QueryOwner chains the current query on the owner edge.
+// QueryOwner chains the current query on the "owner" edge.
 func (cq *CardQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -85,7 +85,7 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// QuerySpec chains the current query on the spec edge.
+// QuerySpec chains the current query on the "spec" edge.
 func (cq *CardQuery) QuerySpec() *SpecQuery {
 	query := &SpecQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -107,7 +107,8 @@ func (cq *CardQuery) QuerySpec() *SpecQuery {
 	return query
 }
 
-// First returns the first Card entity in the query. Returns *NotFoundError when no card was found.
+// First returns the first Card entity from the query.
+// Returns a *NotFoundError when no Card was found.
 func (cq *CardQuery) First(ctx context.Context) (*Card, error) {
 	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
@@ -128,7 +129,8 @@ func (cq *CardQuery) FirstX(ctx context.Context) *Card {
 	return node
 }
 
-// FirstID returns the first Card id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Card ID from the query.
+// Returns a *NotFoundError when no Card ID was found.
 func (cq *CardQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
@@ -150,7 +152,9 @@ func (cq *CardQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Card entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Card entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Card entity is not found.
+// Returns a *NotFoundError when no Card entities are found.
 func (cq *CardQuery) Only(ctx context.Context) (*Card, error) {
 	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
@@ -175,7 +179,9 @@ func (cq *CardQuery) OnlyX(ctx context.Context) *Card {
 	return node
 }
 
-// OnlyID returns the only Card id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Card ID in the query.
+// Returns a *NotSingularError when exactly one Card ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (cq *CardQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
@@ -218,7 +224,7 @@ func (cq *CardQuery) AllX(ctx context.Context) []*Card {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Card ids.
+// IDs executes the query and returns a list of Card IDs.
 func (cq *CardQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := cq.Select(card.FieldID).Scan(ctx, &ids); err != nil {
@@ -270,7 +276,7 @@ func (cq *CardQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the CardQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *CardQuery) Clone() *CardQuery {
 	if cq == nil {
@@ -290,8 +296,8 @@ func (cq *CardQuery) Clone() *CardQuery {
 	}
 }
 
-//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
-// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 	query := &UserQuery{config: cq.config}
 	for _, opt := range opts {
@@ -301,8 +307,8 @@ func (cq *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 	return cq
 }
 
-//  WithSpec tells the query-builder to eager-loads the nodes that are connected to
-// the "spec" edge. The optional arguments used to configure the query builder of the edge.
+// WithSpec tells the query-builder to eager-load the nodes that are connected to
+// the "spec" edge. The optional arguments are used to configure the query builder of the edge.
 func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
 	query := &SpecQuery{config: cq.config}
 	for _, opt := range opts {
@@ -312,7 +318,7 @@ func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
 	return cq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -339,7 +345,8 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -583,7 +590,7 @@ func (cq *CardQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// CardGroupBy is the builder for group-by Card entities.
+// CardGroupBy is the group-by builder for Card entities.
 type CardGroupBy struct {
 	config
 	fields []string
@@ -599,7 +606,7 @@ func (cgb *CardGroupBy) Aggregate(fns ...AggregateFunc) *CardGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
@@ -616,7 +623,8 @@ func (cgb *CardGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CardGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CardGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -637,7 +645,8 @@ func (cgb *CardGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CardGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cgb.Strings(ctx); err != nil {
@@ -663,7 +672,8 @@ func (cgb *CardGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CardGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CardGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -684,7 +694,8 @@ func (cgb *CardGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CardGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cgb.Ints(ctx); err != nil {
@@ -710,7 +721,8 @@ func (cgb *CardGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CardGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CardGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -731,7 +743,8 @@ func (cgb *CardGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CardGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cgb.Float64s(ctx); err != nil {
@@ -757,7 +770,8 @@ func (cgb *CardGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CardGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CardGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -778,7 +792,8 @@ func (cgb *CardGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CardGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cgb.Bools(ctx); err != nil {
@@ -833,14 +848,14 @@ func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }
 
-// CardSelect is the builder for select fields of Card entities.
+// CardSelect is the builder for selecting fields of Card entities.
 type CardSelect struct {
 	*CardQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
@@ -856,7 +871,7 @@ func (cs *CardSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (cs *CardSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CardSelect.Strings is not achievable when selecting more than 1 field")
@@ -877,7 +892,7 @@ func (cs *CardSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (cs *CardSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cs.Strings(ctx); err != nil {
@@ -903,7 +918,7 @@ func (cs *CardSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (cs *CardSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CardSelect.Ints is not achievable when selecting more than 1 field")
@@ -924,7 +939,7 @@ func (cs *CardSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (cs *CardSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cs.Ints(ctx); err != nil {
@@ -950,7 +965,7 @@ func (cs *CardSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (cs *CardSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CardSelect.Float64s is not achievable when selecting more than 1 field")
@@ -971,7 +986,7 @@ func (cs *CardSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (cs *CardSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cs.Float64s(ctx); err != nil {
@@ -997,7 +1012,7 @@ func (cs *CardSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (cs *CardSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CardSelect.Bools is not achievable when selecting more than 1 field")
@@ -1018,7 +1033,7 @@ func (cs *CardSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (cs *CardSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cs.Bools(ctx); err != nil {

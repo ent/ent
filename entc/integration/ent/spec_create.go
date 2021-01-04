@@ -23,13 +23,13 @@ type SpecCreate struct {
 	hooks    []Hook
 }
 
-// AddCardIDs adds the card edge to Card by ids.
+// AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (sc *SpecCreate) AddCardIDs(ids ...int) *SpecCreate {
 	sc.mutation.AddCardIDs(ids...)
 	return sc
 }
 
-// AddCard adds the card edges to Card.
+// AddCard adds the "card" edges to the Card entity.
 func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -138,7 +138,7 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// SpecCreateBulk is the builder for creating a bulk of Spec entities.
+// SpecCreateBulk is the builder for creating many Spec entities in bulk.
 type SpecCreateBulk struct {
 	config
 	builders []*SpecCreate
@@ -195,7 +195,7 @@ func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (scb *SpecCreateBulk) SaveX(ctx context.Context) []*Spec {
 	v, err := scb.Save(ctx)
 	if err != nil {

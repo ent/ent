@@ -108,25 +108,25 @@ func (b *Blob) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryParent queries the parent edge of the Blob.
+// QueryParent queries the "parent" edge of the Blob entity.
 func (b *Blob) QueryParent() *BlobQuery {
 	return (&BlobClient{config: b.config}).QueryParent(b)
 }
 
-// QueryLinks queries the links edge of the Blob.
+// QueryLinks queries the "links" edge of the Blob entity.
 func (b *Blob) QueryLinks() *BlobQuery {
 	return (&BlobClient{config: b.config}).QueryLinks(b)
 }
 
 // Update returns a builder for updating this Blob.
-// Note that, you need to call Blob.Unwrap() before calling this method, if this Blob
+// Note that you need to call Blob.Unwrap() before calling this method if this Blob
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (b *Blob) Update() *BlobUpdateOne {
 	return (&BlobClient{config: b.config}).UpdateOne(b)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Blob entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (b *Blob) Unwrap() *Blob {
 	tx, ok := b.config.driver.(*txDriver)
 	if !ok {

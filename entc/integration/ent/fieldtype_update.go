@@ -30,85 +30,85 @@ type FieldTypeUpdate struct {
 	mutation *FieldTypeMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the FieldTypeUpdate builder.
 func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
 	ftu.mutation.predicates = append(ftu.mutation.predicates, ps...)
 	return ftu
 }
 
-// SetInt sets the int field.
+// SetInt sets the "int" field.
 func (ftu *FieldTypeUpdate) SetInt(i int) *FieldTypeUpdate {
 	ftu.mutation.ResetInt()
 	ftu.mutation.SetInt(i)
 	return ftu
 }
 
-// AddInt adds i to int.
+// AddInt adds i to the "int" field.
 func (ftu *FieldTypeUpdate) AddInt(i int) *FieldTypeUpdate {
 	ftu.mutation.AddInt(i)
 	return ftu
 }
 
-// SetInt8 sets the int8 field.
+// SetInt8 sets the "int8" field.
 func (ftu *FieldTypeUpdate) SetInt8(i int8) *FieldTypeUpdate {
 	ftu.mutation.ResetInt8()
 	ftu.mutation.SetInt8(i)
 	return ftu
 }
 
-// AddInt8 adds i to int8.
+// AddInt8 adds i to the "int8" field.
 func (ftu *FieldTypeUpdate) AddInt8(i int8) *FieldTypeUpdate {
 	ftu.mutation.AddInt8(i)
 	return ftu
 }
 
-// SetInt16 sets the int16 field.
+// SetInt16 sets the "int16" field.
 func (ftu *FieldTypeUpdate) SetInt16(i int16) *FieldTypeUpdate {
 	ftu.mutation.ResetInt16()
 	ftu.mutation.SetInt16(i)
 	return ftu
 }
 
-// AddInt16 adds i to int16.
+// AddInt16 adds i to the "int16" field.
 func (ftu *FieldTypeUpdate) AddInt16(i int16) *FieldTypeUpdate {
 	ftu.mutation.AddInt16(i)
 	return ftu
 }
 
-// SetInt32 sets the int32 field.
+// SetInt32 sets the "int32" field.
 func (ftu *FieldTypeUpdate) SetInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.ResetInt32()
 	ftu.mutation.SetInt32(i)
 	return ftu
 }
 
-// AddInt32 adds i to int32.
+// AddInt32 adds i to the "int32" field.
 func (ftu *FieldTypeUpdate) AddInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.AddInt32(i)
 	return ftu
 }
 
-// SetInt64 sets the int64 field.
+// SetInt64 sets the "int64" field.
 func (ftu *FieldTypeUpdate) SetInt64(i int64) *FieldTypeUpdate {
 	ftu.mutation.ResetInt64()
 	ftu.mutation.SetInt64(i)
 	return ftu
 }
 
-// AddInt64 adds i to int64.
+// AddInt64 adds i to the "int64" field.
 func (ftu *FieldTypeUpdate) AddInt64(i int64) *FieldTypeUpdate {
 	ftu.mutation.AddInt64(i)
 	return ftu
 }
 
-// SetOptionalInt sets the optional_int field.
+// SetOptionalInt sets the "optional_int" field.
 func (ftu *FieldTypeUpdate) SetOptionalInt(i int) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalInt()
 	ftu.mutation.SetOptionalInt(i)
 	return ftu
 }
 
-// SetNillableOptionalInt sets the optional_int field if the given value is not nil.
+// SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalInt(i *int) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetOptionalInt(*i)
@@ -116,26 +116,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt(i *int) *FieldTypeUpdate {
 	return ftu
 }
 
-// AddOptionalInt adds i to optional_int.
+// AddOptionalInt adds i to the "optional_int" field.
 func (ftu *FieldTypeUpdate) AddOptionalInt(i int) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalInt(i)
 	return ftu
 }
 
-// ClearOptionalInt clears the value of optional_int.
+// ClearOptionalInt clears the value of the "optional_int" field.
 func (ftu *FieldTypeUpdate) ClearOptionalInt() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalInt()
 	return ftu
 }
 
-// SetOptionalInt8 sets the optional_int8 field.
+// SetOptionalInt8 sets the "optional_int8" field.
 func (ftu *FieldTypeUpdate) SetOptionalInt8(i int8) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalInt8()
 	ftu.mutation.SetOptionalInt8(i)
 	return ftu
 }
 
-// SetNillableOptionalInt8 sets the optional_int8 field if the given value is not nil.
+// SetNillableOptionalInt8 sets the "optional_int8" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalInt8(i *int8) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetOptionalInt8(*i)
@@ -143,26 +143,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt8(i *int8) *FieldTypeUpdate {
 	return ftu
 }
 
-// AddOptionalInt8 adds i to optional_int8.
+// AddOptionalInt8 adds i to the "optional_int8" field.
 func (ftu *FieldTypeUpdate) AddOptionalInt8(i int8) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalInt8(i)
 	return ftu
 }
 
-// ClearOptionalInt8 clears the value of optional_int8.
+// ClearOptionalInt8 clears the value of the "optional_int8" field.
 func (ftu *FieldTypeUpdate) ClearOptionalInt8() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalInt8()
 	return ftu
 }
 
-// SetOptionalInt16 sets the optional_int16 field.
+// SetOptionalInt16 sets the "optional_int16" field.
 func (ftu *FieldTypeUpdate) SetOptionalInt16(i int16) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalInt16()
 	ftu.mutation.SetOptionalInt16(i)
 	return ftu
 }
 
-// SetNillableOptionalInt16 sets the optional_int16 field if the given value is not nil.
+// SetNillableOptionalInt16 sets the "optional_int16" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalInt16(i *int16) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetOptionalInt16(*i)
@@ -170,26 +170,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt16(i *int16) *FieldTypeUpdate 
 	return ftu
 }
 
-// AddOptionalInt16 adds i to optional_int16.
+// AddOptionalInt16 adds i to the "optional_int16" field.
 func (ftu *FieldTypeUpdate) AddOptionalInt16(i int16) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalInt16(i)
 	return ftu
 }
 
-// ClearOptionalInt16 clears the value of optional_int16.
+// ClearOptionalInt16 clears the value of the "optional_int16" field.
 func (ftu *FieldTypeUpdate) ClearOptionalInt16() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalInt16()
 	return ftu
 }
 
-// SetOptionalInt32 sets the optional_int32 field.
+// SetOptionalInt32 sets the "optional_int32" field.
 func (ftu *FieldTypeUpdate) SetOptionalInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalInt32()
 	ftu.mutation.SetOptionalInt32(i)
 	return ftu
 }
 
-// SetNillableOptionalInt32 sets the optional_int32 field if the given value is not nil.
+// SetNillableOptionalInt32 sets the "optional_int32" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalInt32(i *int32) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetOptionalInt32(*i)
@@ -197,26 +197,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt32(i *int32) *FieldTypeUpdate 
 	return ftu
 }
 
-// AddOptionalInt32 adds i to optional_int32.
+// AddOptionalInt32 adds i to the "optional_int32" field.
 func (ftu *FieldTypeUpdate) AddOptionalInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalInt32(i)
 	return ftu
 }
 
-// ClearOptionalInt32 clears the value of optional_int32.
+// ClearOptionalInt32 clears the value of the "optional_int32" field.
 func (ftu *FieldTypeUpdate) ClearOptionalInt32() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalInt32()
 	return ftu
 }
 
-// SetOptionalInt64 sets the optional_int64 field.
+// SetOptionalInt64 sets the "optional_int64" field.
 func (ftu *FieldTypeUpdate) SetOptionalInt64(i int64) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalInt64()
 	ftu.mutation.SetOptionalInt64(i)
 	return ftu
 }
 
-// SetNillableOptionalInt64 sets the optional_int64 field if the given value is not nil.
+// SetNillableOptionalInt64 sets the "optional_int64" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalInt64(i *int64) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetOptionalInt64(*i)
@@ -224,26 +224,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalInt64(i *int64) *FieldTypeUpdate 
 	return ftu
 }
 
-// AddOptionalInt64 adds i to optional_int64.
+// AddOptionalInt64 adds i to the "optional_int64" field.
 func (ftu *FieldTypeUpdate) AddOptionalInt64(i int64) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalInt64(i)
 	return ftu
 }
 
-// ClearOptionalInt64 clears the value of optional_int64.
+// ClearOptionalInt64 clears the value of the "optional_int64" field.
 func (ftu *FieldTypeUpdate) ClearOptionalInt64() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalInt64()
 	return ftu
 }
 
-// SetNillableInt sets the nillable_int field.
+// SetNillableInt sets the "nillable_int" field.
 func (ftu *FieldTypeUpdate) SetNillableInt(i int) *FieldTypeUpdate {
 	ftu.mutation.ResetNillableInt()
 	ftu.mutation.SetNillableInt(i)
 	return ftu
 }
 
-// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableNillableInt(i *int) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetNillableInt(*i)
@@ -251,26 +251,26 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt(i *int) *FieldTypeUpdate {
 	return ftu
 }
 
-// AddNillableInt adds i to nillable_int.
+// AddNillableInt adds i to the "nillable_int" field.
 func (ftu *FieldTypeUpdate) AddNillableInt(i int) *FieldTypeUpdate {
 	ftu.mutation.AddNillableInt(i)
 	return ftu
 }
 
-// ClearNillableInt clears the value of nillable_int.
+// ClearNillableInt clears the value of the "nillable_int" field.
 func (ftu *FieldTypeUpdate) ClearNillableInt() *FieldTypeUpdate {
 	ftu.mutation.ClearNillableInt()
 	return ftu
 }
 
-// SetNillableInt8 sets the nillable_int8 field.
+// SetNillableInt8 sets the "nillable_int8" field.
 func (ftu *FieldTypeUpdate) SetNillableInt8(i int8) *FieldTypeUpdate {
 	ftu.mutation.ResetNillableInt8()
 	ftu.mutation.SetNillableInt8(i)
 	return ftu
 }
 
-// SetNillableNillableInt8 sets the nillable_int8 field if the given value is not nil.
+// SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableNillableInt8(i *int8) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetNillableInt8(*i)
@@ -278,26 +278,26 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt8(i *int8) *FieldTypeUpdate {
 	return ftu
 }
 
-// AddNillableInt8 adds i to nillable_int8.
+// AddNillableInt8 adds i to the "nillable_int8" field.
 func (ftu *FieldTypeUpdate) AddNillableInt8(i int8) *FieldTypeUpdate {
 	ftu.mutation.AddNillableInt8(i)
 	return ftu
 }
 
-// ClearNillableInt8 clears the value of nillable_int8.
+// ClearNillableInt8 clears the value of the "nillable_int8" field.
 func (ftu *FieldTypeUpdate) ClearNillableInt8() *FieldTypeUpdate {
 	ftu.mutation.ClearNillableInt8()
 	return ftu
 }
 
-// SetNillableInt16 sets the nillable_int16 field.
+// SetNillableInt16 sets the "nillable_int16" field.
 func (ftu *FieldTypeUpdate) SetNillableInt16(i int16) *FieldTypeUpdate {
 	ftu.mutation.ResetNillableInt16()
 	ftu.mutation.SetNillableInt16(i)
 	return ftu
 }
 
-// SetNillableNillableInt16 sets the nillable_int16 field if the given value is not nil.
+// SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableNillableInt16(i *int16) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetNillableInt16(*i)
@@ -305,26 +305,26 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt16(i *int16) *FieldTypeUpdate 
 	return ftu
 }
 
-// AddNillableInt16 adds i to nillable_int16.
+// AddNillableInt16 adds i to the "nillable_int16" field.
 func (ftu *FieldTypeUpdate) AddNillableInt16(i int16) *FieldTypeUpdate {
 	ftu.mutation.AddNillableInt16(i)
 	return ftu
 }
 
-// ClearNillableInt16 clears the value of nillable_int16.
+// ClearNillableInt16 clears the value of the "nillable_int16" field.
 func (ftu *FieldTypeUpdate) ClearNillableInt16() *FieldTypeUpdate {
 	ftu.mutation.ClearNillableInt16()
 	return ftu
 }
 
-// SetNillableInt32 sets the nillable_int32 field.
+// SetNillableInt32 sets the "nillable_int32" field.
 func (ftu *FieldTypeUpdate) SetNillableInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.ResetNillableInt32()
 	ftu.mutation.SetNillableInt32(i)
 	return ftu
 }
 
-// SetNillableNillableInt32 sets the nillable_int32 field if the given value is not nil.
+// SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableNillableInt32(i *int32) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetNillableInt32(*i)
@@ -332,26 +332,26 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt32(i *int32) *FieldTypeUpdate 
 	return ftu
 }
 
-// AddNillableInt32 adds i to nillable_int32.
+// AddNillableInt32 adds i to the "nillable_int32" field.
 func (ftu *FieldTypeUpdate) AddNillableInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.AddNillableInt32(i)
 	return ftu
 }
 
-// ClearNillableInt32 clears the value of nillable_int32.
+// ClearNillableInt32 clears the value of the "nillable_int32" field.
 func (ftu *FieldTypeUpdate) ClearNillableInt32() *FieldTypeUpdate {
 	ftu.mutation.ClearNillableInt32()
 	return ftu
 }
 
-// SetNillableInt64 sets the nillable_int64 field.
+// SetNillableInt64 sets the "nillable_int64" field.
 func (ftu *FieldTypeUpdate) SetNillableInt64(i int64) *FieldTypeUpdate {
 	ftu.mutation.ResetNillableInt64()
 	ftu.mutation.SetNillableInt64(i)
 	return ftu
 }
 
-// SetNillableNillableInt64 sets the nillable_int64 field if the given value is not nil.
+// SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableNillableInt64(i *int64) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetNillableInt64(*i)
@@ -359,26 +359,26 @@ func (ftu *FieldTypeUpdate) SetNillableNillableInt64(i *int64) *FieldTypeUpdate 
 	return ftu
 }
 
-// AddNillableInt64 adds i to nillable_int64.
+// AddNillableInt64 adds i to the "nillable_int64" field.
 func (ftu *FieldTypeUpdate) AddNillableInt64(i int64) *FieldTypeUpdate {
 	ftu.mutation.AddNillableInt64(i)
 	return ftu
 }
 
-// ClearNillableInt64 clears the value of nillable_int64.
+// ClearNillableInt64 clears the value of the "nillable_int64" field.
 func (ftu *FieldTypeUpdate) ClearNillableInt64() *FieldTypeUpdate {
 	ftu.mutation.ClearNillableInt64()
 	return ftu
 }
 
-// SetValidateOptionalInt32 sets the validate_optional_int32 field.
+// SetValidateOptionalInt32 sets the "validate_optional_int32" field.
 func (ftu *FieldTypeUpdate) SetValidateOptionalInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.ResetValidateOptionalInt32()
 	ftu.mutation.SetValidateOptionalInt32(i)
 	return ftu
 }
 
-// SetNillableValidateOptionalInt32 sets the validate_optional_int32 field if the given value is not nil.
+// SetNillableValidateOptionalInt32 sets the "validate_optional_int32" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableValidateOptionalInt32(i *int32) *FieldTypeUpdate {
 	if i != nil {
 		ftu.SetValidateOptionalInt32(*i)
@@ -386,26 +386,26 @@ func (ftu *FieldTypeUpdate) SetNillableValidateOptionalInt32(i *int32) *FieldTyp
 	return ftu
 }
 
-// AddValidateOptionalInt32 adds i to validate_optional_int32.
+// AddValidateOptionalInt32 adds i to the "validate_optional_int32" field.
 func (ftu *FieldTypeUpdate) AddValidateOptionalInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.AddValidateOptionalInt32(i)
 	return ftu
 }
 
-// ClearValidateOptionalInt32 clears the value of validate_optional_int32.
+// ClearValidateOptionalInt32 clears the value of the "validate_optional_int32" field.
 func (ftu *FieldTypeUpdate) ClearValidateOptionalInt32() *FieldTypeUpdate {
 	ftu.mutation.ClearValidateOptionalInt32()
 	return ftu
 }
 
-// SetOptionalUint sets the optional_uint field.
+// SetOptionalUint sets the "optional_uint" field.
 func (ftu *FieldTypeUpdate) SetOptionalUint(u uint) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalUint()
 	ftu.mutation.SetOptionalUint(u)
 	return ftu
 }
 
-// SetNillableOptionalUint sets the optional_uint field if the given value is not nil.
+// SetNillableOptionalUint sets the "optional_uint" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalUint(u *uint) *FieldTypeUpdate {
 	if u != nil {
 		ftu.SetOptionalUint(*u)
@@ -413,26 +413,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint(u *uint) *FieldTypeUpdate {
 	return ftu
 }
 
-// AddOptionalUint adds u to optional_uint.
+// AddOptionalUint adds u to the "optional_uint" field.
 func (ftu *FieldTypeUpdate) AddOptionalUint(u uint) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint(u)
 	return ftu
 }
 
-// ClearOptionalUint clears the value of optional_uint.
+// ClearOptionalUint clears the value of the "optional_uint" field.
 func (ftu *FieldTypeUpdate) ClearOptionalUint() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalUint()
 	return ftu
 }
 
-// SetOptionalUint8 sets the optional_uint8 field.
+// SetOptionalUint8 sets the "optional_uint8" field.
 func (ftu *FieldTypeUpdate) SetOptionalUint8(u uint8) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalUint8()
 	ftu.mutation.SetOptionalUint8(u)
 	return ftu
 }
 
-// SetNillableOptionalUint8 sets the optional_uint8 field if the given value is not nil.
+// SetNillableOptionalUint8 sets the "optional_uint8" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalUint8(u *uint8) *FieldTypeUpdate {
 	if u != nil {
 		ftu.SetOptionalUint8(*u)
@@ -440,26 +440,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint8(u *uint8) *FieldTypeUpdate 
 	return ftu
 }
 
-// AddOptionalUint8 adds u to optional_uint8.
+// AddOptionalUint8 adds u to the "optional_uint8" field.
 func (ftu *FieldTypeUpdate) AddOptionalUint8(u uint8) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint8(u)
 	return ftu
 }
 
-// ClearOptionalUint8 clears the value of optional_uint8.
+// ClearOptionalUint8 clears the value of the "optional_uint8" field.
 func (ftu *FieldTypeUpdate) ClearOptionalUint8() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalUint8()
 	return ftu
 }
 
-// SetOptionalUint16 sets the optional_uint16 field.
+// SetOptionalUint16 sets the "optional_uint16" field.
 func (ftu *FieldTypeUpdate) SetOptionalUint16(u uint16) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalUint16()
 	ftu.mutation.SetOptionalUint16(u)
 	return ftu
 }
 
-// SetNillableOptionalUint16 sets the optional_uint16 field if the given value is not nil.
+// SetNillableOptionalUint16 sets the "optional_uint16" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalUint16(u *uint16) *FieldTypeUpdate {
 	if u != nil {
 		ftu.SetOptionalUint16(*u)
@@ -467,26 +467,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint16(u *uint16) *FieldTypeUpdat
 	return ftu
 }
 
-// AddOptionalUint16 adds u to optional_uint16.
+// AddOptionalUint16 adds u to the "optional_uint16" field.
 func (ftu *FieldTypeUpdate) AddOptionalUint16(u uint16) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint16(u)
 	return ftu
 }
 
-// ClearOptionalUint16 clears the value of optional_uint16.
+// ClearOptionalUint16 clears the value of the "optional_uint16" field.
 func (ftu *FieldTypeUpdate) ClearOptionalUint16() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalUint16()
 	return ftu
 }
 
-// SetOptionalUint32 sets the optional_uint32 field.
+// SetOptionalUint32 sets the "optional_uint32" field.
 func (ftu *FieldTypeUpdate) SetOptionalUint32(u uint32) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalUint32()
 	ftu.mutation.SetOptionalUint32(u)
 	return ftu
 }
 
-// SetNillableOptionalUint32 sets the optional_uint32 field if the given value is not nil.
+// SetNillableOptionalUint32 sets the "optional_uint32" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalUint32(u *uint32) *FieldTypeUpdate {
 	if u != nil {
 		ftu.SetOptionalUint32(*u)
@@ -494,26 +494,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint32(u *uint32) *FieldTypeUpdat
 	return ftu
 }
 
-// AddOptionalUint32 adds u to optional_uint32.
+// AddOptionalUint32 adds u to the "optional_uint32" field.
 func (ftu *FieldTypeUpdate) AddOptionalUint32(u uint32) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint32(u)
 	return ftu
 }
 
-// ClearOptionalUint32 clears the value of optional_uint32.
+// ClearOptionalUint32 clears the value of the "optional_uint32" field.
 func (ftu *FieldTypeUpdate) ClearOptionalUint32() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalUint32()
 	return ftu
 }
 
-// SetOptionalUint64 sets the optional_uint64 field.
+// SetOptionalUint64 sets the "optional_uint64" field.
 func (ftu *FieldTypeUpdate) SetOptionalUint64(u uint64) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalUint64()
 	ftu.mutation.SetOptionalUint64(u)
 	return ftu
 }
 
-// SetNillableOptionalUint64 sets the optional_uint64 field if the given value is not nil.
+// SetNillableOptionalUint64 sets the "optional_uint64" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalUint64(u *uint64) *FieldTypeUpdate {
 	if u != nil {
 		ftu.SetOptionalUint64(*u)
@@ -521,25 +521,25 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint64(u *uint64) *FieldTypeUpdat
 	return ftu
 }
 
-// AddOptionalUint64 adds u to optional_uint64.
+// AddOptionalUint64 adds u to the "optional_uint64" field.
 func (ftu *FieldTypeUpdate) AddOptionalUint64(u uint64) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint64(u)
 	return ftu
 }
 
-// ClearOptionalUint64 clears the value of optional_uint64.
+// ClearOptionalUint64 clears the value of the "optional_uint64" field.
 func (ftu *FieldTypeUpdate) ClearOptionalUint64() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalUint64()
 	return ftu
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (ftu *FieldTypeUpdate) SetState(f fieldtype.State) *FieldTypeUpdate {
 	ftu.mutation.SetState(f)
 	return ftu
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableState(f *fieldtype.State) *FieldTypeUpdate {
 	if f != nil {
 		ftu.SetState(*f)
@@ -547,20 +547,20 @@ func (ftu *FieldTypeUpdate) SetNillableState(f *fieldtype.State) *FieldTypeUpdat
 	return ftu
 }
 
-// ClearState clears the value of state.
+// ClearState clears the value of the "state" field.
 func (ftu *FieldTypeUpdate) ClearState() *FieldTypeUpdate {
 	ftu.mutation.ClearState()
 	return ftu
 }
 
-// SetOptionalFloat sets the optional_float field.
+// SetOptionalFloat sets the "optional_float" field.
 func (ftu *FieldTypeUpdate) SetOptionalFloat(f float64) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalFloat()
 	ftu.mutation.SetOptionalFloat(f)
 	return ftu
 }
 
-// SetNillableOptionalFloat sets the optional_float field if the given value is not nil.
+// SetNillableOptionalFloat sets the "optional_float" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalFloat(f *float64) *FieldTypeUpdate {
 	if f != nil {
 		ftu.SetOptionalFloat(*f)
@@ -568,26 +568,26 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalFloat(f *float64) *FieldTypeUpdat
 	return ftu
 }
 
-// AddOptionalFloat adds f to optional_float.
+// AddOptionalFloat adds f to the "optional_float" field.
 func (ftu *FieldTypeUpdate) AddOptionalFloat(f float64) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalFloat(f)
 	return ftu
 }
 
-// ClearOptionalFloat clears the value of optional_float.
+// ClearOptionalFloat clears the value of the "optional_float" field.
 func (ftu *FieldTypeUpdate) ClearOptionalFloat() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalFloat()
 	return ftu
 }
 
-// SetOptionalFloat32 sets the optional_float32 field.
+// SetOptionalFloat32 sets the "optional_float32" field.
 func (ftu *FieldTypeUpdate) SetOptionalFloat32(f float32) *FieldTypeUpdate {
 	ftu.mutation.ResetOptionalFloat32()
 	ftu.mutation.SetOptionalFloat32(f)
 	return ftu
 }
 
-// SetNillableOptionalFloat32 sets the optional_float32 field if the given value is not nil.
+// SetNillableOptionalFloat32 sets the "optional_float32" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableOptionalFloat32(f *float32) *FieldTypeUpdate {
 	if f != nil {
 		ftu.SetOptionalFloat32(*f)
@@ -595,25 +595,25 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalFloat32(f *float32) *FieldTypeUpd
 	return ftu
 }
 
-// AddOptionalFloat32 adds f to optional_float32.
+// AddOptionalFloat32 adds f to the "optional_float32" field.
 func (ftu *FieldTypeUpdate) AddOptionalFloat32(f float32) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalFloat32(f)
 	return ftu
 }
 
-// ClearOptionalFloat32 clears the value of optional_float32.
+// ClearOptionalFloat32 clears the value of the "optional_float32" field.
 func (ftu *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalFloat32()
 	return ftu
 }
 
-// SetDatetime sets the datetime field.
+// SetDatetime sets the "datetime" field.
 func (ftu *FieldTypeUpdate) SetDatetime(t time.Time) *FieldTypeUpdate {
 	ftu.mutation.SetDatetime(t)
 	return ftu
 }
 
-// SetNillableDatetime sets the datetime field if the given value is not nil.
+// SetNillableDatetime sets the "datetime" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableDatetime(t *time.Time) *FieldTypeUpdate {
 	if t != nil {
 		ftu.SetDatetime(*t)
@@ -621,20 +621,20 @@ func (ftu *FieldTypeUpdate) SetNillableDatetime(t *time.Time) *FieldTypeUpdate {
 	return ftu
 }
 
-// ClearDatetime clears the value of datetime.
+// ClearDatetime clears the value of the "datetime" field.
 func (ftu *FieldTypeUpdate) ClearDatetime() *FieldTypeUpdate {
 	ftu.mutation.ClearDatetime()
 	return ftu
 }
 
-// SetDecimal sets the decimal field.
+// SetDecimal sets the "decimal" field.
 func (ftu *FieldTypeUpdate) SetDecimal(f float64) *FieldTypeUpdate {
 	ftu.mutation.ResetDecimal()
 	ftu.mutation.SetDecimal(f)
 	return ftu
 }
 
-// SetNillableDecimal sets the decimal field if the given value is not nil.
+// SetNillableDecimal sets the "decimal" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableDecimal(f *float64) *FieldTypeUpdate {
 	if f != nil {
 		ftu.SetDecimal(*f)
@@ -642,25 +642,25 @@ func (ftu *FieldTypeUpdate) SetNillableDecimal(f *float64) *FieldTypeUpdate {
 	return ftu
 }
 
-// AddDecimal adds f to decimal.
+// AddDecimal adds f to the "decimal" field.
 func (ftu *FieldTypeUpdate) AddDecimal(f float64) *FieldTypeUpdate {
 	ftu.mutation.AddDecimal(f)
 	return ftu
 }
 
-// ClearDecimal clears the value of decimal.
+// ClearDecimal clears the value of the "decimal" field.
 func (ftu *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate {
 	ftu.mutation.ClearDecimal()
 	return ftu
 }
 
-// SetDir sets the dir field.
+// SetDir sets the "dir" field.
 func (ftu *FieldTypeUpdate) SetDir(h http.Dir) *FieldTypeUpdate {
 	ftu.mutation.SetDir(h)
 	return ftu
 }
 
-// SetNillableDir sets the dir field if the given value is not nil.
+// SetNillableDir sets the "dir" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableDir(h *http.Dir) *FieldTypeUpdate {
 	if h != nil {
 		ftu.SetDir(*h)
@@ -668,19 +668,19 @@ func (ftu *FieldTypeUpdate) SetNillableDir(h *http.Dir) *FieldTypeUpdate {
 	return ftu
 }
 
-// ClearDir clears the value of dir.
+// ClearDir clears the value of the "dir" field.
 func (ftu *FieldTypeUpdate) ClearDir() *FieldTypeUpdate {
 	ftu.mutation.ClearDir()
 	return ftu
 }
 
-// SetNdir sets the ndir field.
+// SetNdir sets the "ndir" field.
 func (ftu *FieldTypeUpdate) SetNdir(h http.Dir) *FieldTypeUpdate {
 	ftu.mutation.SetNdir(h)
 	return ftu
 }
 
-// SetNillableNdir sets the ndir field if the given value is not nil.
+// SetNillableNdir sets the "ndir" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableNdir(h *http.Dir) *FieldTypeUpdate {
 	if h != nil {
 		ftu.SetNdir(*h)
@@ -688,67 +688,67 @@ func (ftu *FieldTypeUpdate) SetNillableNdir(h *http.Dir) *FieldTypeUpdate {
 	return ftu
 }
 
-// ClearNdir clears the value of ndir.
+// ClearNdir clears the value of the "ndir" field.
 func (ftu *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate {
 	ftu.mutation.ClearNdir()
 	return ftu
 }
 
-// SetStr sets the str field.
+// SetStr sets the "str" field.
 func (ftu *FieldTypeUpdate) SetStr(ss sql.NullString) *FieldTypeUpdate {
 	ftu.mutation.SetStr(ss)
 	return ftu
 }
 
-// ClearStr clears the value of str.
+// ClearStr clears the value of the "str" field.
 func (ftu *FieldTypeUpdate) ClearStr() *FieldTypeUpdate {
 	ftu.mutation.ClearStr()
 	return ftu
 }
 
-// SetNullStr sets the null_str field.
+// SetNullStr sets the "null_str" field.
 func (ftu *FieldTypeUpdate) SetNullStr(ss sql.NullString) *FieldTypeUpdate {
 	ftu.mutation.SetNullStr(ss)
 	return ftu
 }
 
-// ClearNullStr clears the value of null_str.
+// ClearNullStr clears the value of the "null_str" field.
 func (ftu *FieldTypeUpdate) ClearNullStr() *FieldTypeUpdate {
 	ftu.mutation.ClearNullStr()
 	return ftu
 }
 
-// SetLink sets the link field.
+// SetLink sets the "link" field.
 func (ftu *FieldTypeUpdate) SetLink(s schema.Link) *FieldTypeUpdate {
 	ftu.mutation.SetLink(s)
 	return ftu
 }
 
-// ClearLink clears the value of link.
+// ClearLink clears the value of the "link" field.
 func (ftu *FieldTypeUpdate) ClearLink() *FieldTypeUpdate {
 	ftu.mutation.ClearLink()
 	return ftu
 }
 
-// SetNullLink sets the null_link field.
+// SetNullLink sets the "null_link" field.
 func (ftu *FieldTypeUpdate) SetNullLink(s schema.Link) *FieldTypeUpdate {
 	ftu.mutation.SetNullLink(s)
 	return ftu
 }
 
-// ClearNullLink clears the value of null_link.
+// ClearNullLink clears the value of the "null_link" field.
 func (ftu *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
 	ftu.mutation.ClearNullLink()
 	return ftu
 }
 
-// SetActive sets the active field.
+// SetActive sets the "active" field.
 func (ftu *FieldTypeUpdate) SetActive(s schema.Status) *FieldTypeUpdate {
 	ftu.mutation.SetActive(s)
 	return ftu
 }
 
-// SetNillableActive sets the active field if the given value is not nil.
+// SetNillableActive sets the "active" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableActive(s *schema.Status) *FieldTypeUpdate {
 	if s != nil {
 		ftu.SetActive(*s)
@@ -756,19 +756,19 @@ func (ftu *FieldTypeUpdate) SetNillableActive(s *schema.Status) *FieldTypeUpdate
 	return ftu
 }
 
-// ClearActive clears the value of active.
+// ClearActive clears the value of the "active" field.
 func (ftu *FieldTypeUpdate) ClearActive() *FieldTypeUpdate {
 	ftu.mutation.ClearActive()
 	return ftu
 }
 
-// SetNullActive sets the null_active field.
+// SetNullActive sets the "null_active" field.
 func (ftu *FieldTypeUpdate) SetNullActive(s schema.Status) *FieldTypeUpdate {
 	ftu.mutation.SetNullActive(s)
 	return ftu
 }
 
-// SetNillableNullActive sets the null_active field if the given value is not nil.
+// SetNillableNullActive sets the "null_active" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableNullActive(s *schema.Status) *FieldTypeUpdate {
 	if s != nil {
 		ftu.SetNullActive(*s)
@@ -776,69 +776,69 @@ func (ftu *FieldTypeUpdate) SetNillableNullActive(s *schema.Status) *FieldTypeUp
 	return ftu
 }
 
-// ClearNullActive clears the value of null_active.
+// ClearNullActive clears the value of the "null_active" field.
 func (ftu *FieldTypeUpdate) ClearNullActive() *FieldTypeUpdate {
 	ftu.mutation.ClearNullActive()
 	return ftu
 }
 
-// SetDeleted sets the deleted field.
+// SetDeleted sets the "deleted" field.
 func (ftu *FieldTypeUpdate) SetDeleted(sb sql.NullBool) *FieldTypeUpdate {
 	ftu.mutation.SetDeleted(sb)
 	return ftu
 }
 
-// ClearDeleted clears the value of deleted.
+// ClearDeleted clears the value of the "deleted" field.
 func (ftu *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate {
 	ftu.mutation.ClearDeleted()
 	return ftu
 }
 
-// SetDeletedAt sets the deleted_at field.
+// SetDeletedAt sets the "deleted_at" field.
 func (ftu *FieldTypeUpdate) SetDeletedAt(st sql.NullTime) *FieldTypeUpdate {
 	ftu.mutation.SetDeletedAt(st)
 	return ftu
 }
 
-// ClearDeletedAt clears the value of deleted_at.
+// ClearDeletedAt clears the value of the "deleted_at" field.
 func (ftu *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
 	ftu.mutation.ClearDeletedAt()
 	return ftu
 }
 
-// SetIP sets the ip field.
+// SetIP sets the "ip" field.
 func (ftu *FieldTypeUpdate) SetIP(n net.IP) *FieldTypeUpdate {
 	ftu.mutation.SetIP(n)
 	return ftu
 }
 
-// ClearIP clears the value of ip.
+// ClearIP clears the value of the "ip" field.
 func (ftu *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
 	ftu.mutation.ClearIP()
 	return ftu
 }
 
-// SetNullInt64 sets the null_int64 field.
+// SetNullInt64 sets the "null_int64" field.
 func (ftu *FieldTypeUpdate) SetNullInt64(si sql.NullInt64) *FieldTypeUpdate {
 	ftu.mutation.ResetNullInt64()
 	ftu.mutation.SetNullInt64(si)
 	return ftu
 }
 
-// ClearNullInt64 clears the value of null_int64.
+// ClearNullInt64 clears the value of the "null_int64" field.
 func (ftu *FieldTypeUpdate) ClearNullInt64() *FieldTypeUpdate {
 	ftu.mutation.ClearNullInt64()
 	return ftu
 }
 
-// SetSchemaInt sets the schema_int field.
+// SetSchemaInt sets the "schema_int" field.
 func (ftu *FieldTypeUpdate) SetSchemaInt(s schema.Int) *FieldTypeUpdate {
 	ftu.mutation.ResetSchemaInt()
 	ftu.mutation.SetSchemaInt(s)
 	return ftu
 }
 
-// SetNillableSchemaInt sets the schema_int field if the given value is not nil.
+// SetNillableSchemaInt sets the "schema_int" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableSchemaInt(s *schema.Int) *FieldTypeUpdate {
 	if s != nil {
 		ftu.SetSchemaInt(*s)
@@ -846,26 +846,26 @@ func (ftu *FieldTypeUpdate) SetNillableSchemaInt(s *schema.Int) *FieldTypeUpdate
 	return ftu
 }
 
-// AddSchemaInt adds s to schema_int.
+// AddSchemaInt adds s to the "schema_int" field.
 func (ftu *FieldTypeUpdate) AddSchemaInt(s schema.Int) *FieldTypeUpdate {
 	ftu.mutation.AddSchemaInt(s)
 	return ftu
 }
 
-// ClearSchemaInt clears the value of schema_int.
+// ClearSchemaInt clears the value of the "schema_int" field.
 func (ftu *FieldTypeUpdate) ClearSchemaInt() *FieldTypeUpdate {
 	ftu.mutation.ClearSchemaInt()
 	return ftu
 }
 
-// SetSchemaInt8 sets the schema_int8 field.
+// SetSchemaInt8 sets the "schema_int8" field.
 func (ftu *FieldTypeUpdate) SetSchemaInt8(s schema.Int8) *FieldTypeUpdate {
 	ftu.mutation.ResetSchemaInt8()
 	ftu.mutation.SetSchemaInt8(s)
 	return ftu
 }
 
-// SetNillableSchemaInt8 sets the schema_int8 field if the given value is not nil.
+// SetNillableSchemaInt8 sets the "schema_int8" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeUpdate {
 	if s != nil {
 		ftu.SetSchemaInt8(*s)
@@ -873,26 +873,26 @@ func (ftu *FieldTypeUpdate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeUpda
 	return ftu
 }
 
-// AddSchemaInt8 adds s to schema_int8.
+// AddSchemaInt8 adds s to the "schema_int8" field.
 func (ftu *FieldTypeUpdate) AddSchemaInt8(s schema.Int8) *FieldTypeUpdate {
 	ftu.mutation.AddSchemaInt8(s)
 	return ftu
 }
 
-// ClearSchemaInt8 clears the value of schema_int8.
+// ClearSchemaInt8 clears the value of the "schema_int8" field.
 func (ftu *FieldTypeUpdate) ClearSchemaInt8() *FieldTypeUpdate {
 	ftu.mutation.ClearSchemaInt8()
 	return ftu
 }
 
-// SetSchemaInt64 sets the schema_int64 field.
+// SetSchemaInt64 sets the "schema_int64" field.
 func (ftu *FieldTypeUpdate) SetSchemaInt64(s schema.Int64) *FieldTypeUpdate {
 	ftu.mutation.ResetSchemaInt64()
 	ftu.mutation.SetSchemaInt64(s)
 	return ftu
 }
 
-// SetNillableSchemaInt64 sets the schema_int64 field if the given value is not nil.
+// SetNillableSchemaInt64 sets the "schema_int64" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeUpdate {
 	if s != nil {
 		ftu.SetSchemaInt64(*s)
@@ -900,26 +900,26 @@ func (ftu *FieldTypeUpdate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeUp
 	return ftu
 }
 
-// AddSchemaInt64 adds s to schema_int64.
+// AddSchemaInt64 adds s to the "schema_int64" field.
 func (ftu *FieldTypeUpdate) AddSchemaInt64(s schema.Int64) *FieldTypeUpdate {
 	ftu.mutation.AddSchemaInt64(s)
 	return ftu
 }
 
-// ClearSchemaInt64 clears the value of schema_int64.
+// ClearSchemaInt64 clears the value of the "schema_int64" field.
 func (ftu *FieldTypeUpdate) ClearSchemaInt64() *FieldTypeUpdate {
 	ftu.mutation.ClearSchemaInt64()
 	return ftu
 }
 
-// SetSchemaFloat sets the schema_float field.
+// SetSchemaFloat sets the "schema_float" field.
 func (ftu *FieldTypeUpdate) SetSchemaFloat(s schema.Float64) *FieldTypeUpdate {
 	ftu.mutation.ResetSchemaFloat()
 	ftu.mutation.SetSchemaFloat(s)
 	return ftu
 }
 
-// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+// SetNillableSchemaFloat sets the "schema_float" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeUpdate {
 	if s != nil {
 		ftu.SetSchemaFloat(*s)
@@ -927,26 +927,26 @@ func (ftu *FieldTypeUpdate) SetNillableSchemaFloat(s *schema.Float64) *FieldType
 	return ftu
 }
 
-// AddSchemaFloat adds s to schema_float.
+// AddSchemaFloat adds s to the "schema_float" field.
 func (ftu *FieldTypeUpdate) AddSchemaFloat(s schema.Float64) *FieldTypeUpdate {
 	ftu.mutation.AddSchemaFloat(s)
 	return ftu
 }
 
-// ClearSchemaFloat clears the value of schema_float.
+// ClearSchemaFloat clears the value of the "schema_float" field.
 func (ftu *FieldTypeUpdate) ClearSchemaFloat() *FieldTypeUpdate {
 	ftu.mutation.ClearSchemaFloat()
 	return ftu
 }
 
-// SetSchemaFloat32 sets the schema_float32 field.
+// SetSchemaFloat32 sets the "schema_float32" field.
 func (ftu *FieldTypeUpdate) SetSchemaFloat32(s schema.Float32) *FieldTypeUpdate {
 	ftu.mutation.ResetSchemaFloat32()
 	ftu.mutation.SetSchemaFloat32(s)
 	return ftu
 }
 
-// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+// SetNillableSchemaFloat32 sets the "schema_float32" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeUpdate {
 	if s != nil {
 		ftu.SetSchemaFloat32(*s)
@@ -954,38 +954,38 @@ func (ftu *FieldTypeUpdate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTy
 	return ftu
 }
 
-// AddSchemaFloat32 adds s to schema_float32.
+// AddSchemaFloat32 adds s to the "schema_float32" field.
 func (ftu *FieldTypeUpdate) AddSchemaFloat32(s schema.Float32) *FieldTypeUpdate {
 	ftu.mutation.AddSchemaFloat32(s)
 	return ftu
 }
 
-// ClearSchemaFloat32 clears the value of schema_float32.
+// ClearSchemaFloat32 clears the value of the "schema_float32" field.
 func (ftu *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
 	ftu.mutation.ClearSchemaFloat32()
 	return ftu
 }
 
-// SetNullFloat sets the null_float field.
+// SetNullFloat sets the "null_float" field.
 func (ftu *FieldTypeUpdate) SetNullFloat(sf sql.NullFloat64) *FieldTypeUpdate {
 	ftu.mutation.ResetNullFloat()
 	ftu.mutation.SetNullFloat(sf)
 	return ftu
 }
 
-// ClearNullFloat clears the value of null_float.
+// ClearNullFloat clears the value of the "null_float" field.
 func (ftu *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
 	ftu.mutation.ClearNullFloat()
 	return ftu
 }
 
-// SetRole sets the role field.
+// SetRole sets the "role" field.
 func (ftu *FieldTypeUpdate) SetRole(r role.Role) *FieldTypeUpdate {
 	ftu.mutation.SetRole(r)
 	return ftu
 }
 
-// SetNillableRole sets the role field if the given value is not nil.
+// SetNillableRole sets the "role" field if the given value is not nil.
 func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
 	if r != nil {
 		ftu.SetRole(*r)
@@ -993,25 +993,25 @@ func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
 	return ftu
 }
 
-// SetMAC sets the mac field.
+// SetMAC sets the "mac" field.
 func (ftu *FieldTypeUpdate) SetMAC(s schema.MAC) *FieldTypeUpdate {
 	ftu.mutation.SetMAC(s)
 	return ftu
 }
 
-// ClearMAC clears the value of mac.
+// ClearMAC clears the value of the "mac" field.
 func (ftu *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
 	ftu.mutation.ClearMAC()
 	return ftu
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
 	ftu.mutation.SetUUID(u)
 	return ftu
 }
 
-// ClearUUID clears the value of uuid.
+// ClearUUID clears the value of the "uuid" field.
 func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
 	ftu.mutation.ClearUUID()
 	return ftu
@@ -1928,79 +1928,79 @@ type FieldTypeUpdateOne struct {
 	mutation *FieldTypeMutation
 }
 
-// SetInt sets the int field.
+// SetInt sets the "int" field.
 func (ftuo *FieldTypeUpdateOne) SetInt(i int) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetInt()
 	ftuo.mutation.SetInt(i)
 	return ftuo
 }
 
-// AddInt adds i to int.
+// AddInt adds i to the "int" field.
 func (ftuo *FieldTypeUpdateOne) AddInt(i int) *FieldTypeUpdateOne {
 	ftuo.mutation.AddInt(i)
 	return ftuo
 }
 
-// SetInt8 sets the int8 field.
+// SetInt8 sets the "int8" field.
 func (ftuo *FieldTypeUpdateOne) SetInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetInt8()
 	ftuo.mutation.SetInt8(i)
 	return ftuo
 }
 
-// AddInt8 adds i to int8.
+// AddInt8 adds i to the "int8" field.
 func (ftuo *FieldTypeUpdateOne) AddInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.mutation.AddInt8(i)
 	return ftuo
 }
 
-// SetInt16 sets the int16 field.
+// SetInt16 sets the "int16" field.
 func (ftuo *FieldTypeUpdateOne) SetInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetInt16()
 	ftuo.mutation.SetInt16(i)
 	return ftuo
 }
 
-// AddInt16 adds i to int16.
+// AddInt16 adds i to the "int16" field.
 func (ftuo *FieldTypeUpdateOne) AddInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.mutation.AddInt16(i)
 	return ftuo
 }
 
-// SetInt32 sets the int32 field.
+// SetInt32 sets the "int32" field.
 func (ftuo *FieldTypeUpdateOne) SetInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetInt32()
 	ftuo.mutation.SetInt32(i)
 	return ftuo
 }
 
-// AddInt32 adds i to int32.
+// AddInt32 adds i to the "int32" field.
 func (ftuo *FieldTypeUpdateOne) AddInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddInt32(i)
 	return ftuo
 }
 
-// SetInt64 sets the int64 field.
+// SetInt64 sets the "int64" field.
 func (ftuo *FieldTypeUpdateOne) SetInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetInt64()
 	ftuo.mutation.SetInt64(i)
 	return ftuo
 }
 
-// AddInt64 adds i to int64.
+// AddInt64 adds i to the "int64" field.
 func (ftuo *FieldTypeUpdateOne) AddInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddInt64(i)
 	return ftuo
 }
 
-// SetOptionalInt sets the optional_int field.
+// SetOptionalInt sets the "optional_int" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt(i int) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalInt()
 	ftuo.mutation.SetOptionalInt(i)
 	return ftuo
 }
 
-// SetNillableOptionalInt sets the optional_int field if the given value is not nil.
+// SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt(i *int) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetOptionalInt(*i)
@@ -2008,26 +2008,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt(i *int) *FieldTypeUpdateO
 	return ftuo
 }
 
-// AddOptionalInt adds i to optional_int.
+// AddOptionalInt adds i to the "optional_int" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt(i int) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalInt(i)
 	return ftuo
 }
 
-// ClearOptionalInt clears the value of optional_int.
+// ClearOptionalInt clears the value of the "optional_int" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalInt()
 	return ftuo
 }
 
-// SetOptionalInt8 sets the optional_int8 field.
+// SetOptionalInt8 sets the "optional_int8" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalInt8()
 	ftuo.mutation.SetOptionalInt8(i)
 	return ftuo
 }
 
-// SetNillableOptionalInt8 sets the optional_int8 field if the given value is not nil.
+// SetNillableOptionalInt8 sets the "optional_int8" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt8(i *int8) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetOptionalInt8(*i)
@@ -2035,26 +2035,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt8(i *int8) *FieldTypeUpdat
 	return ftuo
 }
 
-// AddOptionalInt8 adds i to optional_int8.
+// AddOptionalInt8 adds i to the "optional_int8" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalInt8(i)
 	return ftuo
 }
 
-// ClearOptionalInt8 clears the value of optional_int8.
+// ClearOptionalInt8 clears the value of the "optional_int8" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt8() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalInt8()
 	return ftuo
 }
 
-// SetOptionalInt16 sets the optional_int16 field.
+// SetOptionalInt16 sets the "optional_int16" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalInt16()
 	ftuo.mutation.SetOptionalInt16(i)
 	return ftuo
 }
 
-// SetNillableOptionalInt16 sets the optional_int16 field if the given value is not nil.
+// SetNillableOptionalInt16 sets the "optional_int16" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt16(i *int16) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetOptionalInt16(*i)
@@ -2062,26 +2062,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt16(i *int16) *FieldTypeUpd
 	return ftuo
 }
 
-// AddOptionalInt16 adds i to optional_int16.
+// AddOptionalInt16 adds i to the "optional_int16" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalInt16(i)
 	return ftuo
 }
 
-// ClearOptionalInt16 clears the value of optional_int16.
+// ClearOptionalInt16 clears the value of the "optional_int16" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt16() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalInt16()
 	return ftuo
 }
 
-// SetOptionalInt32 sets the optional_int32 field.
+// SetOptionalInt32 sets the "optional_int32" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalInt32()
 	ftuo.mutation.SetOptionalInt32(i)
 	return ftuo
 }
 
-// SetNillableOptionalInt32 sets the optional_int32 field if the given value is not nil.
+// SetNillableOptionalInt32 sets the "optional_int32" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt32(i *int32) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetOptionalInt32(*i)
@@ -2089,26 +2089,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt32(i *int32) *FieldTypeUpd
 	return ftuo
 }
 
-// AddOptionalInt32 adds i to optional_int32.
+// AddOptionalInt32 adds i to the "optional_int32" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalInt32(i)
 	return ftuo
 }
 
-// ClearOptionalInt32 clears the value of optional_int32.
+// ClearOptionalInt32 clears the value of the "optional_int32" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt32() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalInt32()
 	return ftuo
 }
 
-// SetOptionalInt64 sets the optional_int64 field.
+// SetOptionalInt64 sets the "optional_int64" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalInt64()
 	ftuo.mutation.SetOptionalInt64(i)
 	return ftuo
 }
 
-// SetNillableOptionalInt64 sets the optional_int64 field if the given value is not nil.
+// SetNillableOptionalInt64 sets the "optional_int64" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt64(i *int64) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetOptionalInt64(*i)
@@ -2116,26 +2116,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalInt64(i *int64) *FieldTypeUpd
 	return ftuo
 }
 
-// AddOptionalInt64 adds i to optional_int64.
+// AddOptionalInt64 adds i to the "optional_int64" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalInt64(i)
 	return ftuo
 }
 
-// ClearOptionalInt64 clears the value of optional_int64.
+// ClearOptionalInt64 clears the value of the "optional_int64" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalInt64() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalInt64()
 	return ftuo
 }
 
-// SetNillableInt sets the nillable_int field.
+// SetNillableInt sets the "nillable_int" field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt(i int) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNillableInt()
 	ftuo.mutation.SetNillableInt(i)
 	return ftuo
 }
 
-// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt(i *int) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetNillableInt(*i)
@@ -2143,26 +2143,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt(i *int) *FieldTypeUpdateO
 	return ftuo
 }
 
-// AddNillableInt adds i to nillable_int.
+// AddNillableInt adds i to the "nillable_int" field.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt(i int) *FieldTypeUpdateOne {
 	ftuo.mutation.AddNillableInt(i)
 	return ftuo
 }
 
-// ClearNillableInt clears the value of nillable_int.
+// ClearNillableInt clears the value of the "nillable_int" field.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNillableInt()
 	return ftuo
 }
 
-// SetNillableInt8 sets the nillable_int8 field.
+// SetNillableInt8 sets the "nillable_int8" field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNillableInt8()
 	ftuo.mutation.SetNillableInt8(i)
 	return ftuo
 }
 
-// SetNillableNillableInt8 sets the nillable_int8 field if the given value is not nil.
+// SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt8(i *int8) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetNillableInt8(*i)
@@ -2170,26 +2170,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt8(i *int8) *FieldTypeUpdat
 	return ftuo
 }
 
-// AddNillableInt8 adds i to nillable_int8.
+// AddNillableInt8 adds i to the "nillable_int8" field.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.mutation.AddNillableInt8(i)
 	return ftuo
 }
 
-// ClearNillableInt8 clears the value of nillable_int8.
+// ClearNillableInt8 clears the value of the "nillable_int8" field.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt8() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNillableInt8()
 	return ftuo
 }
 
-// SetNillableInt16 sets the nillable_int16 field.
+// SetNillableInt16 sets the "nillable_int16" field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNillableInt16()
 	ftuo.mutation.SetNillableInt16(i)
 	return ftuo
 }
 
-// SetNillableNillableInt16 sets the nillable_int16 field if the given value is not nil.
+// SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt16(i *int16) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetNillableInt16(*i)
@@ -2197,26 +2197,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt16(i *int16) *FieldTypeUpd
 	return ftuo
 }
 
-// AddNillableInt16 adds i to nillable_int16.
+// AddNillableInt16 adds i to the "nillable_int16" field.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.mutation.AddNillableInt16(i)
 	return ftuo
 }
 
-// ClearNillableInt16 clears the value of nillable_int16.
+// ClearNillableInt16 clears the value of the "nillable_int16" field.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt16() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNillableInt16()
 	return ftuo
 }
 
-// SetNillableInt32 sets the nillable_int32 field.
+// SetNillableInt32 sets the "nillable_int32" field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNillableInt32()
 	ftuo.mutation.SetNillableInt32(i)
 	return ftuo
 }
 
-// SetNillableNillableInt32 sets the nillable_int32 field if the given value is not nil.
+// SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt32(i *int32) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetNillableInt32(*i)
@@ -2224,26 +2224,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt32(i *int32) *FieldTypeUpd
 	return ftuo
 }
 
-// AddNillableInt32 adds i to nillable_int32.
+// AddNillableInt32 adds i to the "nillable_int32" field.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddNillableInt32(i)
 	return ftuo
 }
 
-// ClearNillableInt32 clears the value of nillable_int32.
+// ClearNillableInt32 clears the value of the "nillable_int32" field.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt32() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNillableInt32()
 	return ftuo
 }
 
-// SetNillableInt64 sets the nillable_int64 field.
+// SetNillableInt64 sets the "nillable_int64" field.
 func (ftuo *FieldTypeUpdateOne) SetNillableInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNillableInt64()
 	ftuo.mutation.SetNillableInt64(i)
 	return ftuo
 }
 
-// SetNillableNillableInt64 sets the nillable_int64 field if the given value is not nil.
+// SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt64(i *int64) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetNillableInt64(*i)
@@ -2251,26 +2251,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt64(i *int64) *FieldTypeUpd
 	return ftuo
 }
 
-// AddNillableInt64 adds i to nillable_int64.
+// AddNillableInt64 adds i to the "nillable_int64" field.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddNillableInt64(i)
 	return ftuo
 }
 
-// ClearNillableInt64 clears the value of nillable_int64.
+// ClearNillableInt64 clears the value of the "nillable_int64" field.
 func (ftuo *FieldTypeUpdateOne) ClearNillableInt64() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNillableInt64()
 	return ftuo
 }
 
-// SetValidateOptionalInt32 sets the validate_optional_int32 field.
+// SetValidateOptionalInt32 sets the "validate_optional_int32" field.
 func (ftuo *FieldTypeUpdateOne) SetValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetValidateOptionalInt32()
 	ftuo.mutation.SetValidateOptionalInt32(i)
 	return ftuo
 }
 
-// SetNillableValidateOptionalInt32 sets the validate_optional_int32 field if the given value is not nil.
+// SetNillableValidateOptionalInt32 sets the "validate_optional_int32" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(i *int32) *FieldTypeUpdateOne {
 	if i != nil {
 		ftuo.SetValidateOptionalInt32(*i)
@@ -2278,26 +2278,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(i *int32) *Fiel
 	return ftuo
 }
 
-// AddValidateOptionalInt32 adds i to validate_optional_int32.
+// AddValidateOptionalInt32 adds i to the "validate_optional_int32" field.
 func (ftuo *FieldTypeUpdateOne) AddValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddValidateOptionalInt32(i)
 	return ftuo
 }
 
-// ClearValidateOptionalInt32 clears the value of validate_optional_int32.
+// ClearValidateOptionalInt32 clears the value of the "validate_optional_int32" field.
 func (ftuo *FieldTypeUpdateOne) ClearValidateOptionalInt32() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearValidateOptionalInt32()
 	return ftuo
 }
 
-// SetOptionalUint sets the optional_uint field.
+// SetOptionalUint sets the "optional_uint" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint(u uint) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalUint()
 	ftuo.mutation.SetOptionalUint(u)
 	return ftuo
 }
 
-// SetNillableOptionalUint sets the optional_uint field if the given value is not nil.
+// SetNillableOptionalUint sets the "optional_uint" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint(u *uint) *FieldTypeUpdateOne {
 	if u != nil {
 		ftuo.SetOptionalUint(*u)
@@ -2305,26 +2305,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint(u *uint) *FieldTypeUpdat
 	return ftuo
 }
 
-// AddOptionalUint adds u to optional_uint.
+// AddOptionalUint adds u to the "optional_uint" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint(u uint) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint(u)
 	return ftuo
 }
 
-// ClearOptionalUint clears the value of optional_uint.
+// ClearOptionalUint clears the value of the "optional_uint" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalUint()
 	return ftuo
 }
 
-// SetOptionalUint8 sets the optional_uint8 field.
+// SetOptionalUint8 sets the "optional_uint8" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint8(u uint8) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalUint8()
 	ftuo.mutation.SetOptionalUint8(u)
 	return ftuo
 }
 
-// SetNillableOptionalUint8 sets the optional_uint8 field if the given value is not nil.
+// SetNillableOptionalUint8 sets the "optional_uint8" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint8(u *uint8) *FieldTypeUpdateOne {
 	if u != nil {
 		ftuo.SetOptionalUint8(*u)
@@ -2332,26 +2332,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint8(u *uint8) *FieldTypeUpd
 	return ftuo
 }
 
-// AddOptionalUint8 adds u to optional_uint8.
+// AddOptionalUint8 adds u to the "optional_uint8" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint8(u uint8) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint8(u)
 	return ftuo
 }
 
-// ClearOptionalUint8 clears the value of optional_uint8.
+// ClearOptionalUint8 clears the value of the "optional_uint8" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint8() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalUint8()
 	return ftuo
 }
 
-// SetOptionalUint16 sets the optional_uint16 field.
+// SetOptionalUint16 sets the "optional_uint16" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint16(u uint16) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalUint16()
 	ftuo.mutation.SetOptionalUint16(u)
 	return ftuo
 }
 
-// SetNillableOptionalUint16 sets the optional_uint16 field if the given value is not nil.
+// SetNillableOptionalUint16 sets the "optional_uint16" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint16(u *uint16) *FieldTypeUpdateOne {
 	if u != nil {
 		ftuo.SetOptionalUint16(*u)
@@ -2359,26 +2359,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint16(u *uint16) *FieldTypeU
 	return ftuo
 }
 
-// AddOptionalUint16 adds u to optional_uint16.
+// AddOptionalUint16 adds u to the "optional_uint16" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint16(u uint16) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint16(u)
 	return ftuo
 }
 
-// ClearOptionalUint16 clears the value of optional_uint16.
+// ClearOptionalUint16 clears the value of the "optional_uint16" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint16() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalUint16()
 	return ftuo
 }
 
-// SetOptionalUint32 sets the optional_uint32 field.
+// SetOptionalUint32 sets the "optional_uint32" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint32(u uint32) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalUint32()
 	ftuo.mutation.SetOptionalUint32(u)
 	return ftuo
 }
 
-// SetNillableOptionalUint32 sets the optional_uint32 field if the given value is not nil.
+// SetNillableOptionalUint32 sets the "optional_uint32" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint32(u *uint32) *FieldTypeUpdateOne {
 	if u != nil {
 		ftuo.SetOptionalUint32(*u)
@@ -2386,26 +2386,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint32(u *uint32) *FieldTypeU
 	return ftuo
 }
 
-// AddOptionalUint32 adds u to optional_uint32.
+// AddOptionalUint32 adds u to the "optional_uint32" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint32(u uint32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint32(u)
 	return ftuo
 }
 
-// ClearOptionalUint32 clears the value of optional_uint32.
+// ClearOptionalUint32 clears the value of the "optional_uint32" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint32() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalUint32()
 	return ftuo
 }
 
-// SetOptionalUint64 sets the optional_uint64 field.
+// SetOptionalUint64 sets the "optional_uint64" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalUint64(u uint64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalUint64()
 	ftuo.mutation.SetOptionalUint64(u)
 	return ftuo
 }
 
-// SetNillableOptionalUint64 sets the optional_uint64 field if the given value is not nil.
+// SetNillableOptionalUint64 sets the "optional_uint64" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint64(u *uint64) *FieldTypeUpdateOne {
 	if u != nil {
 		ftuo.SetOptionalUint64(*u)
@@ -2413,25 +2413,25 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint64(u *uint64) *FieldTypeU
 	return ftuo
 }
 
-// AddOptionalUint64 adds u to optional_uint64.
+// AddOptionalUint64 adds u to the "optional_uint64" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalUint64(u uint64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint64(u)
 	return ftuo
 }
 
-// ClearOptionalUint64 clears the value of optional_uint64.
+// ClearOptionalUint64 clears the value of the "optional_uint64" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint64() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalUint64()
 	return ftuo
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (ftuo *FieldTypeUpdateOne) SetState(f fieldtype.State) *FieldTypeUpdateOne {
 	ftuo.mutation.SetState(f)
 	return ftuo
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableState(f *fieldtype.State) *FieldTypeUpdateOne {
 	if f != nil {
 		ftuo.SetState(*f)
@@ -2439,20 +2439,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableState(f *fieldtype.State) *FieldTypeU
 	return ftuo
 }
 
-// ClearState clears the value of state.
+// ClearState clears the value of the "state" field.
 func (ftuo *FieldTypeUpdateOne) ClearState() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearState()
 	return ftuo
 }
 
-// SetOptionalFloat sets the optional_float field.
+// SetOptionalFloat sets the "optional_float" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalFloat(f float64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalFloat()
 	ftuo.mutation.SetOptionalFloat(f)
 	return ftuo
 }
 
-// SetNillableOptionalFloat sets the optional_float field if the given value is not nil.
+// SetNillableOptionalFloat sets the "optional_float" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalFloat(f *float64) *FieldTypeUpdateOne {
 	if f != nil {
 		ftuo.SetOptionalFloat(*f)
@@ -2460,26 +2460,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalFloat(f *float64) *FieldTypeU
 	return ftuo
 }
 
-// AddOptionalFloat adds f to optional_float.
+// AddOptionalFloat adds f to the "optional_float" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalFloat(f float64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalFloat(f)
 	return ftuo
 }
 
-// ClearOptionalFloat clears the value of optional_float.
+// ClearOptionalFloat clears the value of the "optional_float" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalFloat()
 	return ftuo
 }
 
-// SetOptionalFloat32 sets the optional_float32 field.
+// SetOptionalFloat32 sets the "optional_float32" field.
 func (ftuo *FieldTypeUpdateOne) SetOptionalFloat32(f float32) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetOptionalFloat32()
 	ftuo.mutation.SetOptionalFloat32(f)
 	return ftuo
 }
 
-// SetNillableOptionalFloat32 sets the optional_float32 field if the given value is not nil.
+// SetNillableOptionalFloat32 sets the "optional_float32" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableOptionalFloat32(f *float32) *FieldTypeUpdateOne {
 	if f != nil {
 		ftuo.SetOptionalFloat32(*f)
@@ -2487,25 +2487,25 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalFloat32(f *float32) *FieldTyp
 	return ftuo
 }
 
-// AddOptionalFloat32 adds f to optional_float32.
+// AddOptionalFloat32 adds f to the "optional_float32" field.
 func (ftuo *FieldTypeUpdateOne) AddOptionalFloat32(f float32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalFloat32(f)
 	return ftuo
 }
 
-// ClearOptionalFloat32 clears the value of optional_float32.
+// ClearOptionalFloat32 clears the value of the "optional_float32" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalFloat32()
 	return ftuo
 }
 
-// SetDatetime sets the datetime field.
+// SetDatetime sets the "datetime" field.
 func (ftuo *FieldTypeUpdateOne) SetDatetime(t time.Time) *FieldTypeUpdateOne {
 	ftuo.mutation.SetDatetime(t)
 	return ftuo
 }
 
-// SetNillableDatetime sets the datetime field if the given value is not nil.
+// SetNillableDatetime sets the "datetime" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableDatetime(t *time.Time) *FieldTypeUpdateOne {
 	if t != nil {
 		ftuo.SetDatetime(*t)
@@ -2513,20 +2513,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableDatetime(t *time.Time) *FieldTypeUpda
 	return ftuo
 }
 
-// ClearDatetime clears the value of datetime.
+// ClearDatetime clears the value of the "datetime" field.
 func (ftuo *FieldTypeUpdateOne) ClearDatetime() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearDatetime()
 	return ftuo
 }
 
-// SetDecimal sets the decimal field.
+// SetDecimal sets the "decimal" field.
 func (ftuo *FieldTypeUpdateOne) SetDecimal(f float64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetDecimal()
 	ftuo.mutation.SetDecimal(f)
 	return ftuo
 }
 
-// SetNillableDecimal sets the decimal field if the given value is not nil.
+// SetNillableDecimal sets the "decimal" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableDecimal(f *float64) *FieldTypeUpdateOne {
 	if f != nil {
 		ftuo.SetDecimal(*f)
@@ -2534,25 +2534,25 @@ func (ftuo *FieldTypeUpdateOne) SetNillableDecimal(f *float64) *FieldTypeUpdateO
 	return ftuo
 }
 
-// AddDecimal adds f to decimal.
+// AddDecimal adds f to the "decimal" field.
 func (ftuo *FieldTypeUpdateOne) AddDecimal(f float64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddDecimal(f)
 	return ftuo
 }
 
-// ClearDecimal clears the value of decimal.
+// ClearDecimal clears the value of the "decimal" field.
 func (ftuo *FieldTypeUpdateOne) ClearDecimal() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearDecimal()
 	return ftuo
 }
 
-// SetDir sets the dir field.
+// SetDir sets the "dir" field.
 func (ftuo *FieldTypeUpdateOne) SetDir(h http.Dir) *FieldTypeUpdateOne {
 	ftuo.mutation.SetDir(h)
 	return ftuo
 }
 
-// SetNillableDir sets the dir field if the given value is not nil.
+// SetNillableDir sets the "dir" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableDir(h *http.Dir) *FieldTypeUpdateOne {
 	if h != nil {
 		ftuo.SetDir(*h)
@@ -2560,19 +2560,19 @@ func (ftuo *FieldTypeUpdateOne) SetNillableDir(h *http.Dir) *FieldTypeUpdateOne 
 	return ftuo
 }
 
-// ClearDir clears the value of dir.
+// ClearDir clears the value of the "dir" field.
 func (ftuo *FieldTypeUpdateOne) ClearDir() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearDir()
 	return ftuo
 }
 
-// SetNdir sets the ndir field.
+// SetNdir sets the "ndir" field.
 func (ftuo *FieldTypeUpdateOne) SetNdir(h http.Dir) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNdir(h)
 	return ftuo
 }
 
-// SetNillableNdir sets the ndir field if the given value is not nil.
+// SetNillableNdir sets the "ndir" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableNdir(h *http.Dir) *FieldTypeUpdateOne {
 	if h != nil {
 		ftuo.SetNdir(*h)
@@ -2580,67 +2580,67 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNdir(h *http.Dir) *FieldTypeUpdateOne
 	return ftuo
 }
 
-// ClearNdir clears the value of ndir.
+// ClearNdir clears the value of the "ndir" field.
 func (ftuo *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNdir()
 	return ftuo
 }
 
-// SetStr sets the str field.
+// SetStr sets the "str" field.
 func (ftuo *FieldTypeUpdateOne) SetStr(ss sql.NullString) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStr(ss)
 	return ftuo
 }
 
-// ClearStr clears the value of str.
+// ClearStr clears the value of the "str" field.
 func (ftuo *FieldTypeUpdateOne) ClearStr() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearStr()
 	return ftuo
 }
 
-// SetNullStr sets the null_str field.
+// SetNullStr sets the "null_str" field.
 func (ftuo *FieldTypeUpdateOne) SetNullStr(ss sql.NullString) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullStr(ss)
 	return ftuo
 }
 
-// ClearNullStr clears the value of null_str.
+// ClearNullStr clears the value of the "null_str" field.
 func (ftuo *FieldTypeUpdateOne) ClearNullStr() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNullStr()
 	return ftuo
 }
 
-// SetLink sets the link field.
+// SetLink sets the "link" field.
 func (ftuo *FieldTypeUpdateOne) SetLink(s schema.Link) *FieldTypeUpdateOne {
 	ftuo.mutation.SetLink(s)
 	return ftuo
 }
 
-// ClearLink clears the value of link.
+// ClearLink clears the value of the "link" field.
 func (ftuo *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearLink()
 	return ftuo
 }
 
-// SetNullLink sets the null_link field.
+// SetNullLink sets the "null_link" field.
 func (ftuo *FieldTypeUpdateOne) SetNullLink(s schema.Link) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullLink(s)
 	return ftuo
 }
 
-// ClearNullLink clears the value of null_link.
+// ClearNullLink clears the value of the "null_link" field.
 func (ftuo *FieldTypeUpdateOne) ClearNullLink() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNullLink()
 	return ftuo
 }
 
-// SetActive sets the active field.
+// SetActive sets the "active" field.
 func (ftuo *FieldTypeUpdateOne) SetActive(s schema.Status) *FieldTypeUpdateOne {
 	ftuo.mutation.SetActive(s)
 	return ftuo
 }
 
-// SetNillableActive sets the active field if the given value is not nil.
+// SetNillableActive sets the "active" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableActive(s *schema.Status) *FieldTypeUpdateOne {
 	if s != nil {
 		ftuo.SetActive(*s)
@@ -2648,19 +2648,19 @@ func (ftuo *FieldTypeUpdateOne) SetNillableActive(s *schema.Status) *FieldTypeUp
 	return ftuo
 }
 
-// ClearActive clears the value of active.
+// ClearActive clears the value of the "active" field.
 func (ftuo *FieldTypeUpdateOne) ClearActive() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearActive()
 	return ftuo
 }
 
-// SetNullActive sets the null_active field.
+// SetNullActive sets the "null_active" field.
 func (ftuo *FieldTypeUpdateOne) SetNullActive(s schema.Status) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullActive(s)
 	return ftuo
 }
 
-// SetNillableNullActive sets the null_active field if the given value is not nil.
+// SetNillableNullActive sets the "null_active" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableNullActive(s *schema.Status) *FieldTypeUpdateOne {
 	if s != nil {
 		ftuo.SetNullActive(*s)
@@ -2668,69 +2668,69 @@ func (ftuo *FieldTypeUpdateOne) SetNillableNullActive(s *schema.Status) *FieldTy
 	return ftuo
 }
 
-// ClearNullActive clears the value of null_active.
+// ClearNullActive clears the value of the "null_active" field.
 func (ftuo *FieldTypeUpdateOne) ClearNullActive() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNullActive()
 	return ftuo
 }
 
-// SetDeleted sets the deleted field.
+// SetDeleted sets the "deleted" field.
 func (ftuo *FieldTypeUpdateOne) SetDeleted(sb sql.NullBool) *FieldTypeUpdateOne {
 	ftuo.mutation.SetDeleted(sb)
 	return ftuo
 }
 
-// ClearDeleted clears the value of deleted.
+// ClearDeleted clears the value of the "deleted" field.
 func (ftuo *FieldTypeUpdateOne) ClearDeleted() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearDeleted()
 	return ftuo
 }
 
-// SetDeletedAt sets the deleted_at field.
+// SetDeletedAt sets the "deleted_at" field.
 func (ftuo *FieldTypeUpdateOne) SetDeletedAt(st sql.NullTime) *FieldTypeUpdateOne {
 	ftuo.mutation.SetDeletedAt(st)
 	return ftuo
 }
 
-// ClearDeletedAt clears the value of deleted_at.
+// ClearDeletedAt clears the value of the "deleted_at" field.
 func (ftuo *FieldTypeUpdateOne) ClearDeletedAt() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearDeletedAt()
 	return ftuo
 }
 
-// SetIP sets the ip field.
+// SetIP sets the "ip" field.
 func (ftuo *FieldTypeUpdateOne) SetIP(n net.IP) *FieldTypeUpdateOne {
 	ftuo.mutation.SetIP(n)
 	return ftuo
 }
 
-// ClearIP clears the value of ip.
+// ClearIP clears the value of the "ip" field.
 func (ftuo *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearIP()
 	return ftuo
 }
 
-// SetNullInt64 sets the null_int64 field.
+// SetNullInt64 sets the "null_int64" field.
 func (ftuo *FieldTypeUpdateOne) SetNullInt64(si sql.NullInt64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNullInt64()
 	ftuo.mutation.SetNullInt64(si)
 	return ftuo
 }
 
-// ClearNullInt64 clears the value of null_int64.
+// ClearNullInt64 clears the value of the "null_int64" field.
 func (ftuo *FieldTypeUpdateOne) ClearNullInt64() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNullInt64()
 	return ftuo
 }
 
-// SetSchemaInt sets the schema_int field.
+// SetSchemaInt sets the "schema_int" field.
 func (ftuo *FieldTypeUpdateOne) SetSchemaInt(s schema.Int) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetSchemaInt()
 	ftuo.mutation.SetSchemaInt(s)
 	return ftuo
 }
 
-// SetNillableSchemaInt sets the schema_int field if the given value is not nil.
+// SetNillableSchemaInt sets the "schema_int" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt(s *schema.Int) *FieldTypeUpdateOne {
 	if s != nil {
 		ftuo.SetSchemaInt(*s)
@@ -2738,26 +2738,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt(s *schema.Int) *FieldTypeUp
 	return ftuo
 }
 
-// AddSchemaInt adds s to schema_int.
+// AddSchemaInt adds s to the "schema_int" field.
 func (ftuo *FieldTypeUpdateOne) AddSchemaInt(s schema.Int) *FieldTypeUpdateOne {
 	ftuo.mutation.AddSchemaInt(s)
 	return ftuo
 }
 
-// ClearSchemaInt clears the value of schema_int.
+// ClearSchemaInt clears the value of the "schema_int" field.
 func (ftuo *FieldTypeUpdateOne) ClearSchemaInt() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearSchemaInt()
 	return ftuo
 }
 
-// SetSchemaInt8 sets the schema_int8 field.
+// SetSchemaInt8 sets the "schema_int8" field.
 func (ftuo *FieldTypeUpdateOne) SetSchemaInt8(s schema.Int8) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetSchemaInt8()
 	ftuo.mutation.SetSchemaInt8(s)
 	return ftuo
 }
 
-// SetNillableSchemaInt8 sets the schema_int8 field if the given value is not nil.
+// SetNillableSchemaInt8 sets the "schema_int8" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeUpdateOne {
 	if s != nil {
 		ftuo.SetSchemaInt8(*s)
@@ -2765,26 +2765,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt8(s *schema.Int8) *FieldType
 	return ftuo
 }
 
-// AddSchemaInt8 adds s to schema_int8.
+// AddSchemaInt8 adds s to the "schema_int8" field.
 func (ftuo *FieldTypeUpdateOne) AddSchemaInt8(s schema.Int8) *FieldTypeUpdateOne {
 	ftuo.mutation.AddSchemaInt8(s)
 	return ftuo
 }
 
-// ClearSchemaInt8 clears the value of schema_int8.
+// ClearSchemaInt8 clears the value of the "schema_int8" field.
 func (ftuo *FieldTypeUpdateOne) ClearSchemaInt8() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearSchemaInt8()
 	return ftuo
 }
 
-// SetSchemaInt64 sets the schema_int64 field.
+// SetSchemaInt64 sets the "schema_int64" field.
 func (ftuo *FieldTypeUpdateOne) SetSchemaInt64(s schema.Int64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetSchemaInt64()
 	ftuo.mutation.SetSchemaInt64(s)
 	return ftuo
 }
 
-// SetNillableSchemaInt64 sets the schema_int64 field if the given value is not nil.
+// SetNillableSchemaInt64 sets the "schema_int64" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeUpdateOne {
 	if s != nil {
 		ftuo.SetSchemaInt64(*s)
@@ -2792,26 +2792,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableSchemaInt64(s *schema.Int64) *FieldTy
 	return ftuo
 }
 
-// AddSchemaInt64 adds s to schema_int64.
+// AddSchemaInt64 adds s to the "schema_int64" field.
 func (ftuo *FieldTypeUpdateOne) AddSchemaInt64(s schema.Int64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddSchemaInt64(s)
 	return ftuo
 }
 
-// ClearSchemaInt64 clears the value of schema_int64.
+// ClearSchemaInt64 clears the value of the "schema_int64" field.
 func (ftuo *FieldTypeUpdateOne) ClearSchemaInt64() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearSchemaInt64()
 	return ftuo
 }
 
-// SetSchemaFloat sets the schema_float field.
+// SetSchemaFloat sets the "schema_float" field.
 func (ftuo *FieldTypeUpdateOne) SetSchemaFloat(s schema.Float64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetSchemaFloat()
 	ftuo.mutation.SetSchemaFloat(s)
 	return ftuo
 }
 
-// SetNillableSchemaFloat sets the schema_float field if the given value is not nil.
+// SetNillableSchemaFloat sets the "schema_float" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeUpdateOne {
 	if s != nil {
 		ftuo.SetSchemaFloat(*s)
@@ -2819,26 +2819,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableSchemaFloat(s *schema.Float64) *Field
 	return ftuo
 }
 
-// AddSchemaFloat adds s to schema_float.
+// AddSchemaFloat adds s to the "schema_float" field.
 func (ftuo *FieldTypeUpdateOne) AddSchemaFloat(s schema.Float64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddSchemaFloat(s)
 	return ftuo
 }
 
-// ClearSchemaFloat clears the value of schema_float.
+// ClearSchemaFloat clears the value of the "schema_float" field.
 func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearSchemaFloat()
 	return ftuo
 }
 
-// SetSchemaFloat32 sets the schema_float32 field.
+// SetSchemaFloat32 sets the "schema_float32" field.
 func (ftuo *FieldTypeUpdateOne) SetSchemaFloat32(s schema.Float32) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetSchemaFloat32()
 	ftuo.mutation.SetSchemaFloat32(s)
 	return ftuo
 }
 
-// SetNillableSchemaFloat32 sets the schema_float32 field if the given value is not nil.
+// SetNillableSchemaFloat32 sets the "schema_float32" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeUpdateOne {
 	if s != nil {
 		ftuo.SetSchemaFloat32(*s)
@@ -2846,38 +2846,38 @@ func (ftuo *FieldTypeUpdateOne) SetNillableSchemaFloat32(s *schema.Float32) *Fie
 	return ftuo
 }
 
-// AddSchemaFloat32 adds s to schema_float32.
+// AddSchemaFloat32 adds s to the "schema_float32" field.
 func (ftuo *FieldTypeUpdateOne) AddSchemaFloat32(s schema.Float32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddSchemaFloat32(s)
 	return ftuo
 }
 
-// ClearSchemaFloat32 clears the value of schema_float32.
+// ClearSchemaFloat32 clears the value of the "schema_float32" field.
 func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearSchemaFloat32()
 	return ftuo
 }
 
-// SetNullFloat sets the null_float field.
+// SetNullFloat sets the "null_float" field.
 func (ftuo *FieldTypeUpdateOne) SetNullFloat(sf sql.NullFloat64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNullFloat()
 	ftuo.mutation.SetNullFloat(sf)
 	return ftuo
 }
 
-// ClearNullFloat clears the value of null_float.
+// ClearNullFloat clears the value of the "null_float" field.
 func (ftuo *FieldTypeUpdateOne) ClearNullFloat() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearNullFloat()
 	return ftuo
 }
 
-// SetRole sets the role field.
+// SetRole sets the "role" field.
 func (ftuo *FieldTypeUpdateOne) SetRole(r role.Role) *FieldTypeUpdateOne {
 	ftuo.mutation.SetRole(r)
 	return ftuo
 }
 
-// SetNillableRole sets the role field if the given value is not nil.
+// SetNillableRole sets the "role" field if the given value is not nil.
 func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOne {
 	if r != nil {
 		ftuo.SetRole(*r)
@@ -2885,25 +2885,25 @@ func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOn
 	return ftuo
 }
 
-// SetMAC sets the mac field.
+// SetMAC sets the "mac" field.
 func (ftuo *FieldTypeUpdateOne) SetMAC(s schema.MAC) *FieldTypeUpdateOne {
 	ftuo.mutation.SetMAC(s)
 	return ftuo
 }
 
-// ClearMAC clears the value of mac.
+// ClearMAC clears the value of the "mac" field.
 func (ftuo *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearMAC()
 	return ftuo
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
 	ftuo.mutation.SetUUID(u)
 	return ftuo
 }
 
-// ClearUUID clears the value of uuid.
+// ClearUUID clears the value of the "uuid" field.
 func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearUUID()
 	return ftuo
@@ -2914,7 +2914,7 @@ func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated FieldType entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	var (
 		err  error
