@@ -185,8 +185,8 @@ func TestBytes(t *testing.T) {
 
 	fd = field.Bytes("uuid").
 		GoType(&uuid.UUID{}).
-		DefaultFunc(func() []byte {
-			return []byte("{}")
+		DefaultFunc(func() uuid.UUID {
+			return uuid.New()
 		}).
 		Descriptor()
 	assert.NoError(t, fd.Err)
@@ -195,7 +195,7 @@ func TestBytes(t *testing.T) {
 	assert.Equal(t, "uuid.UUID", fd.Info.String())
 	assert.True(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
-	assert.Equal(t, []byte("{}"), fd.Default.(func() []byte)())
+	assert.NotEmpty(t, fd.Default.(func() uuid.UUID)())
 
 	fd = field.Bytes("blob").GoType(1).Descriptor()
 	assert.Error(t, fd.Err)
@@ -203,6 +203,54 @@ func TestBytes(t *testing.T) {
 	assert.Error(t, fd.Err)
 	fd = field.Bytes("blob").GoType(new(net.IP)).Descriptor()
 	assert.Error(t, fd.Err)
+}
+
+func TestBytes_DefaultFunc(t *testing.T) {
+	f1 := func() net.IP { return net.IP("0.0.0.0") }
+	fd := field.Bytes("ip").GoType(net.IP("127.0.0.1")).DefaultFunc(f1).Descriptor()
+	assert.NoError(t, fd.Err)
+
+	var _ []byte = f1()
+	fd = field.Bytes("ip").DefaultFunc(f1).Descriptor()
+	assert.NoError(t, fd.Err)
+
+	f2 := func() []byte { return []byte("0.0.0.0") }
+	var _ net.IP = f2()
+	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).DefaultFunc(f2).Descriptor()
+	assert.NoError(t, fd.Err)
+
+	f3 := func() []uint8 { return []uint8("0.0.0.0") }
+	var _ net.IP = f3()
+	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).DefaultFunc(f3).Descriptor()
+	assert.NoError(t, fd.Err)
+	fd = field.Bytes("ip").DefaultFunc(f3).Descriptor()
+	assert.NoError(t, fd.Err)
+
+	f4 := func() net.IPMask { return net.IPMask("ffff:ff80::") }
+	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).DefaultFunc(f4).Descriptor()
+	assert.Error(t, fd.Err, "`var _ net.IP = f4()` should fail")
+}
+
+func TestString_DefaultFunc(t *testing.T) {
+	f1 := func() http.Dir { return "/tmp" }
+	fd := field.String("dir").GoType(http.Dir("/tmp")).DefaultFunc(f1).Descriptor()
+	assert.NoError(t, fd.Err)
+
+	fd = field.String("dir").DefaultFunc(f1).Descriptor()
+	assert.Error(t, fd.Err, "`var _ string = f1()` should fail")
+
+	f2 := func() string { return "/tmp" }
+	fd = field.String("dir").GoType(http.Dir("/tmp")).DefaultFunc(f2).Descriptor()
+	assert.Error(t, fd.Err, "`var _ http.Dir = f2()` should fail")
+
+	f3 := func() sql.NullString { return sql.NullString{} }
+	fd = field.String("str").GoType(&sql.NullString{}).DefaultFunc(f3).Descriptor()
+	assert.NoError(t, fd.Err)
+
+	type S string
+	f4 := func() S { return "" }
+	fd = field.String("str").GoType(http.Dir("/tmp")).DefaultFunc(f4).Descriptor()
+	assert.Error(t, fd.Err, "`var _ http.Dir = f4()` should fail")
 }
 
 func TestString(t *testing.T) {

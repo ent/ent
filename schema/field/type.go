@@ -179,6 +179,8 @@ type RType struct {
 	Kind    reflect.Kind
 	PkgPath string
 	Methods map[string]struct{ In, Out []*RType }
+	// Used only for in-package checks.
+	rtype reflect.Type
 }
 
 // TypeEqual tests if the RType is equal to given reflect.Type.

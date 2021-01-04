@@ -295,12 +295,8 @@ func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *stringBuilder) Descriptor() *Descriptor {
-	// If the Default is present and a function, check that it's signtaure is appropriate.
 	if b.desc.Default != nil {
-		typ := reflect.TypeOf(b.desc.Default)
-		if typ.Kind() == reflect.Func && (typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != b.desc.Info.String()) {
-			b.desc.Err = fmt.Errorf("expect type (func() %s) for default value", b.desc.Info)
-		}
+		b.desc.checkDefaultFunc(stringType)
 	}
 	return b.desc
 }
@@ -597,13 +593,8 @@ func (b *bytesBuilder) SchemaType(types map[string]string) *bytesBuilder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *bytesBuilder) Descriptor() *Descriptor {
-	// If the Default is present and a function, check that it's signtaure is appropriate.
 	if b.desc.Default != nil {
-		typ := reflect.TypeOf(b.desc.Default)
-		// We check against "[]uint8" here because the reflect package treats byte as an alias to uint8.
-		if typ.Kind() == reflect.Func && (typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != "[]uint8") {
-			b.desc.Err = fmt.Errorf("expect type (func() %s) for default value", b.desc.Info)
-		}
+		b.desc.checkDefaultFunc(bytesType)
 	}
 	return b.desc
 }
@@ -926,6 +917,7 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		Ident:   tv.String(),
 		PkgPath: tv.PkgPath(),
 		RType: &RType{
+			rtype:   tv,
 			Name:    tv.Name(),
 			Kind:    tv.Kind(),
 			PkgPath: tv.PkgPath(),
@@ -961,6 +953,24 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		}
 	}
 	d.Info = info
+}
+
+func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {
+	typ := reflect.TypeOf(d.Default)
+	if typ.Kind() != reflect.Func || d.Err != nil {
+		return
+	}
+	err := fmt.Errorf("expect type (func() %s) for default value", d.Info)
+	if typ.NumIn() != 0 || typ.NumOut() != 1 {
+		d.Err = err
+	}
+	rtype := expectType
+	if d.Info.RType != nil {
+		rtype = d.Info.RType.rtype
+	}
+	if !typ.Out(0).AssignableTo(rtype) {
+		d.Err = err
+	}
 }
 
 var (
