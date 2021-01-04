@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.MixinID {
 	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -331,7 +331,7 @@ func MixinFieldContainsFold(v string) predicate.MixinID {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.MixinID) predicate.MixinID {
 	return predicate.MixinID(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -342,7 +342,7 @@ func And(predicates ...predicate.MixinID) predicate.MixinID {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.MixinID) predicate.MixinID {
 	return predicate.MixinID(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

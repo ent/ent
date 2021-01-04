@@ -25,13 +25,13 @@ type CardCreate struct {
 	hooks    []Hook
 }
 
-// SetNumber sets the number field.
+// SetNumber sets the "number" field.
 func (cc *CardCreate) SetNumber(s string) *CardCreate {
 	cc.mutation.SetNumber(s)
 	return cc
 }
 
-// SetNillableNumber sets the number field if the given value is not nil.
+// SetNillableNumber sets the "number" field if the given value is not nil.
 func (cc *CardCreate) SetNillableNumber(s *string) *CardCreate {
 	if s != nil {
 		cc.SetNumber(*s)
@@ -39,13 +39,13 @@ func (cc *CardCreate) SetNillableNumber(s *string) *CardCreate {
 	return cc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cc *CardCreate) SetName(s string) *CardCreate {
 	cc.mutation.SetName(s)
 	return cc
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cc *CardCreate) SetNillableName(s *string) *CardCreate {
 	if s != nil {
 		cc.SetName(*s)
@@ -53,13 +53,13 @@ func (cc *CardCreate) SetNillableName(s *string) *CardCreate {
 	return cc
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (cc *CardCreate) SetCreatedAt(t time.Time) *CardCreate {
 	cc.mutation.SetCreatedAt(t)
 	return cc
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (cc *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
 	if t != nil {
 		cc.SetCreatedAt(*t)
@@ -67,19 +67,19 @@ func (cc *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
 	return cc
 }
 
-// SetInHook sets the in_hook field.
+// SetInHook sets the "in_hook" field.
 func (cc *CardCreate) SetInHook(s string) *CardCreate {
 	cc.mutation.SetInHook(s)
 	return cc
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cc *CardCreate) SetOwnerID(id int) *CardCreate {
 	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cc *CardCreate) SetNillableOwnerID(id *int) *CardCreate {
 	if id != nil {
 		cc = cc.SetOwnerID(*id)
@@ -87,7 +87,7 @@ func (cc *CardCreate) SetNillableOwnerID(id *int) *CardCreate {
 	return cc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
 }
@@ -251,7 +251,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// CardCreateBulk is the builder for creating a bulk of Card entities.
+// CardCreateBulk is the builder for creating many Card entities in bulk.
 type CardCreateBulk struct {
 	config
 	builders []*CardCreate
@@ -309,7 +309,7 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
 	v, err := ccb.Save(ctx)
 	if err != nil {

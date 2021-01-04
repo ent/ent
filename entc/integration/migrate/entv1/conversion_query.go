@@ -32,7 +32,7 @@ type ConversionQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the ConversionQuery builder.
 func (cq *ConversionQuery) Where(ps ...predicate.Conversion) *ConversionQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
@@ -56,7 +56,8 @@ func (cq *ConversionQuery) Order(o ...OrderFunc) *ConversionQuery {
 	return cq
 }
 
-// First returns the first Conversion entity in the query. Returns *NotFoundError when no conversion was found.
+// First returns the first Conversion entity from the query.
+// Returns a *NotFoundError when no Conversion was found.
 func (cq *ConversionQuery) First(ctx context.Context) (*Conversion, error) {
 	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
@@ -77,7 +78,8 @@ func (cq *ConversionQuery) FirstX(ctx context.Context) *Conversion {
 	return node
 }
 
-// FirstID returns the first Conversion id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Conversion ID from the query.
+// Returns a *NotFoundError when no Conversion ID was found.
 func (cq *ConversionQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
@@ -99,7 +101,9 @@ func (cq *ConversionQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Conversion entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Conversion entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Conversion entity is not found.
+// Returns a *NotFoundError when no Conversion entities are found.
 func (cq *ConversionQuery) Only(ctx context.Context) (*Conversion, error) {
 	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
@@ -124,7 +128,9 @@ func (cq *ConversionQuery) OnlyX(ctx context.Context) *Conversion {
 	return node
 }
 
-// OnlyID returns the only Conversion id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Conversion ID in the query.
+// Returns a *NotSingularError when exactly one Conversion ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (cq *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
@@ -167,7 +173,7 @@ func (cq *ConversionQuery) AllX(ctx context.Context) []*Conversion {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Conversion ids.
+// IDs executes the query and returns a list of Conversion IDs.
 func (cq *ConversionQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := cq.Select(conversion.FieldID).Scan(ctx, &ids); err != nil {
@@ -219,7 +225,7 @@ func (cq *ConversionQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the ConversionQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *ConversionQuery) Clone() *ConversionQuery {
 	if cq == nil {
@@ -237,7 +243,7 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -264,7 +270,8 @@ func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGr
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -406,7 +413,7 @@ func (cq *ConversionQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// ConversionGroupBy is the builder for group-by Conversion entities.
+// ConversionGroupBy is the group-by builder for Conversion entities.
 type ConversionGroupBy struct {
 	config
 	fields []string
@@ -422,7 +429,7 @@ func (cgb *ConversionGroupBy) Aggregate(fns ...AggregateFunc) *ConversionGroupBy
 	return cgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (cgb *ConversionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
@@ -439,7 +446,8 @@ func (cgb *ConversionGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConversionGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("entv1: ConversionGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -460,7 +468,8 @@ func (cgb *ConversionGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConversionGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cgb.Strings(ctx); err != nil {
@@ -486,7 +495,8 @@ func (cgb *ConversionGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConversionGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("entv1: ConversionGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -507,7 +517,8 @@ func (cgb *ConversionGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConversionGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cgb.Ints(ctx); err != nil {
@@ -533,7 +544,8 @@ func (cgb *ConversionGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConversionGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("entv1: ConversionGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -554,7 +566,8 @@ func (cgb *ConversionGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConversionGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cgb.Float64s(ctx); err != nil {
@@ -580,7 +593,8 @@ func (cgb *ConversionGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConversionGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("entv1: ConversionGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -601,7 +615,8 @@ func (cgb *ConversionGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *ConversionGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cgb.Bools(ctx); err != nil {
@@ -656,14 +671,14 @@ func (cgb *ConversionGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }
 
-// ConversionSelect is the builder for select fields of Conversion entities.
+// ConversionSelect is the builder for selecting fields of Conversion entities.
 type ConversionSelect struct {
 	*ConversionQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cs *ConversionSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
@@ -679,7 +694,7 @@ func (cs *ConversionSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (cs *ConversionSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("entv1: ConversionSelect.Strings is not achievable when selecting more than 1 field")
@@ -700,7 +715,7 @@ func (cs *ConversionSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (cs *ConversionSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cs.Strings(ctx); err != nil {
@@ -726,7 +741,7 @@ func (cs *ConversionSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (cs *ConversionSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("entv1: ConversionSelect.Ints is not achievable when selecting more than 1 field")
@@ -747,7 +762,7 @@ func (cs *ConversionSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (cs *ConversionSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cs.Ints(ctx); err != nil {
@@ -773,7 +788,7 @@ func (cs *ConversionSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (cs *ConversionSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("entv1: ConversionSelect.Float64s is not achievable when selecting more than 1 field")
@@ -794,7 +809,7 @@ func (cs *ConversionSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (cs *ConversionSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cs.Float64s(ctx); err != nil {
@@ -820,7 +835,7 @@ func (cs *ConversionSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (cs *ConversionSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("entv1: ConversionSelect.Bools is not achievable when selecting more than 1 field")
@@ -841,7 +856,7 @@ func (cs *ConversionSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (cs *ConversionSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cs.Bools(ctx); err != nil {

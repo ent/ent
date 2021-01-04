@@ -88,6 +88,6 @@ func ValidColumn(column string) bool {
 //
 var (
 	Hooks [1]ent.Hook
-	// DefaultVersion holds the default value on creation for the version field.
+	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int
 )

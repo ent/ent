@@ -42,14 +42,14 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 }
 
 // Update returns a builder for updating this Task.
-// Note that, you need to call Task.Unwrap() before calling this method, if this Task
+// Note that you need to call Task.Unwrap() before calling this method if this Task
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Task) Update() *TaskUpdateOne {
 	return (&TaskClient{config: t.config}).UpdateOne(t)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Task entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (t *Task) Unwrap() *Task {
 	tx, ok := t.config.driver.(*txDriver)
 	if !ok {

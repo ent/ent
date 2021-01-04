@@ -26,20 +26,20 @@ type TaskUpdate struct {
 	mutation *TaskMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the TaskUpdate builder.
 func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 	tu.mutation.predicates = append(tu.mutation.predicates, ps...)
 	return tu
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tu *TaskUpdate) SetPriority(s schema.Priority) *TaskUpdate {
 	tu.mutation.ResetPriority()
 	tu.mutation.SetPriority(s)
 	return tu
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tu *TaskUpdate) SetNillablePriority(s *schema.Priority) *TaskUpdate {
 	if s != nil {
 		tu.SetPriority(*s)
@@ -47,7 +47,7 @@ func (tu *TaskUpdate) SetNillablePriority(s *schema.Priority) *TaskUpdate {
 	return tu
 }
 
-// AddPriority adds s to priority.
+// AddPriority adds s to the "priority" field.
 func (tu *TaskUpdate) AddPriority(s schema.Priority) *TaskUpdate {
 	tu.mutation.AddPriority(s)
 	return tu
@@ -163,14 +163,14 @@ type TaskUpdateOne struct {
 	mutation *TaskMutation
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tuo *TaskUpdateOne) SetPriority(s schema.Priority) *TaskUpdateOne {
 	tuo.mutation.ResetPriority()
 	tuo.mutation.SetPriority(s)
 	return tuo
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tuo *TaskUpdateOne) SetNillablePriority(s *schema.Priority) *TaskUpdateOne {
 	if s != nil {
 		tuo.SetPriority(*s)
@@ -178,7 +178,7 @@ func (tuo *TaskUpdateOne) SetNillablePriority(s *schema.Priority) *TaskUpdateOne
 	return tuo
 }
 
-// AddPriority adds s to priority.
+// AddPriority adds s to the "priority" field.
 func (tuo *TaskUpdateOne) AddPriority(s schema.Priority) *TaskUpdateOne {
 	tuo.mutation.AddPriority(s)
 	return tuo
@@ -189,7 +189,7 @@ func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
 	return tuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Task entity.
 func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 	var (
 		err  error

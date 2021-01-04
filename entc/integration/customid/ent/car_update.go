@@ -25,20 +25,20 @@ type CarUpdate struct {
 	mutation *CarMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CarUpdate builder.
 func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
-// SetBeforeID sets the before_id field.
+// SetBeforeID sets the "before_id" field.
 func (cu *CarUpdate) SetBeforeID(f float64) *CarUpdate {
 	cu.mutation.ResetBeforeID()
 	cu.mutation.SetBeforeID(f)
 	return cu
 }
 
-// SetNillableBeforeID sets the before_id field if the given value is not nil.
+// SetNillableBeforeID sets the "before_id" field if the given value is not nil.
 func (cu *CarUpdate) SetNillableBeforeID(f *float64) *CarUpdate {
 	if f != nil {
 		cu.SetBeforeID(*f)
@@ -46,26 +46,26 @@ func (cu *CarUpdate) SetNillableBeforeID(f *float64) *CarUpdate {
 	return cu
 }
 
-// AddBeforeID adds f to before_id.
+// AddBeforeID adds f to the "before_id" field.
 func (cu *CarUpdate) AddBeforeID(f float64) *CarUpdate {
 	cu.mutation.AddBeforeID(f)
 	return cu
 }
 
-// ClearBeforeID clears the value of before_id.
+// ClearBeforeID clears the value of the "before_id" field.
 func (cu *CarUpdate) ClearBeforeID() *CarUpdate {
 	cu.mutation.ClearBeforeID()
 	return cu
 }
 
-// SetAfterID sets the after_id field.
+// SetAfterID sets the "after_id" field.
 func (cu *CarUpdate) SetAfterID(f float64) *CarUpdate {
 	cu.mutation.ResetAfterID()
 	cu.mutation.SetAfterID(f)
 	return cu
 }
 
-// SetNillableAfterID sets the after_id field if the given value is not nil.
+// SetNillableAfterID sets the "after_id" field if the given value is not nil.
 func (cu *CarUpdate) SetNillableAfterID(f *float64) *CarUpdate {
 	if f != nil {
 		cu.SetAfterID(*f)
@@ -73,31 +73,31 @@ func (cu *CarUpdate) SetNillableAfterID(f *float64) *CarUpdate {
 	return cu
 }
 
-// AddAfterID adds f to after_id.
+// AddAfterID adds f to the "after_id" field.
 func (cu *CarUpdate) AddAfterID(f float64) *CarUpdate {
 	cu.mutation.AddAfterID(f)
 	return cu
 }
 
-// ClearAfterID clears the value of after_id.
+// ClearAfterID clears the value of the "after_id" field.
 func (cu *CarUpdate) ClearAfterID() *CarUpdate {
 	cu.mutation.ClearAfterID()
 	return cu
 }
 
-// SetModel sets the model field.
+// SetModel sets the "model" field.
 func (cu *CarUpdate) SetModel(s string) *CarUpdate {
 	cu.mutation.SetModel(s)
 	return cu
 }
 
-// SetOwnerID sets the owner edge to Pet by id.
+// SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (cu *CarUpdate) SetOwnerID(id string) *CarUpdate {
 	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
-// SetNillableOwnerID sets the owner edge to Pet by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
 func (cu *CarUpdate) SetNillableOwnerID(id *string) *CarUpdate {
 	if id != nil {
 		cu = cu.SetOwnerID(*id)
@@ -105,7 +105,7 @@ func (cu *CarUpdate) SetNillableOwnerID(id *string) *CarUpdate {
 	return cu
 }
 
-// SetOwner sets the owner edge to Pet.
+// SetOwner sets the "owner" edge to the Pet entity.
 func (cu *CarUpdate) SetOwner(p *Pet) *CarUpdate {
 	return cu.SetOwnerID(p.ID)
 }
@@ -115,7 +115,7 @@ func (cu *CarUpdate) Mutation() *CarMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type Pet.
+// ClearOwner clears the "owner" edge to the Pet entity.
 func (cu *CarUpdate) ClearOwner() *CarUpdate {
 	cu.mutation.ClearOwner()
 	return cu
@@ -311,14 +311,14 @@ type CarUpdateOne struct {
 	mutation *CarMutation
 }
 
-// SetBeforeID sets the before_id field.
+// SetBeforeID sets the "before_id" field.
 func (cuo *CarUpdateOne) SetBeforeID(f float64) *CarUpdateOne {
 	cuo.mutation.ResetBeforeID()
 	cuo.mutation.SetBeforeID(f)
 	return cuo
 }
 
-// SetNillableBeforeID sets the before_id field if the given value is not nil.
+// SetNillableBeforeID sets the "before_id" field if the given value is not nil.
 func (cuo *CarUpdateOne) SetNillableBeforeID(f *float64) *CarUpdateOne {
 	if f != nil {
 		cuo.SetBeforeID(*f)
@@ -326,26 +326,26 @@ func (cuo *CarUpdateOne) SetNillableBeforeID(f *float64) *CarUpdateOne {
 	return cuo
 }
 
-// AddBeforeID adds f to before_id.
+// AddBeforeID adds f to the "before_id" field.
 func (cuo *CarUpdateOne) AddBeforeID(f float64) *CarUpdateOne {
 	cuo.mutation.AddBeforeID(f)
 	return cuo
 }
 
-// ClearBeforeID clears the value of before_id.
+// ClearBeforeID clears the value of the "before_id" field.
 func (cuo *CarUpdateOne) ClearBeforeID() *CarUpdateOne {
 	cuo.mutation.ClearBeforeID()
 	return cuo
 }
 
-// SetAfterID sets the after_id field.
+// SetAfterID sets the "after_id" field.
 func (cuo *CarUpdateOne) SetAfterID(f float64) *CarUpdateOne {
 	cuo.mutation.ResetAfterID()
 	cuo.mutation.SetAfterID(f)
 	return cuo
 }
 
-// SetNillableAfterID sets the after_id field if the given value is not nil.
+// SetNillableAfterID sets the "after_id" field if the given value is not nil.
 func (cuo *CarUpdateOne) SetNillableAfterID(f *float64) *CarUpdateOne {
 	if f != nil {
 		cuo.SetAfterID(*f)
@@ -353,31 +353,31 @@ func (cuo *CarUpdateOne) SetNillableAfterID(f *float64) *CarUpdateOne {
 	return cuo
 }
 
-// AddAfterID adds f to after_id.
+// AddAfterID adds f to the "after_id" field.
 func (cuo *CarUpdateOne) AddAfterID(f float64) *CarUpdateOne {
 	cuo.mutation.AddAfterID(f)
 	return cuo
 }
 
-// ClearAfterID clears the value of after_id.
+// ClearAfterID clears the value of the "after_id" field.
 func (cuo *CarUpdateOne) ClearAfterID() *CarUpdateOne {
 	cuo.mutation.ClearAfterID()
 	return cuo
 }
 
-// SetModel sets the model field.
+// SetModel sets the "model" field.
 func (cuo *CarUpdateOne) SetModel(s string) *CarUpdateOne {
 	cuo.mutation.SetModel(s)
 	return cuo
 }
 
-// SetOwnerID sets the owner edge to Pet by id.
+// SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (cuo *CarUpdateOne) SetOwnerID(id string) *CarUpdateOne {
 	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
-// SetNillableOwnerID sets the owner edge to Pet by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
 func (cuo *CarUpdateOne) SetNillableOwnerID(id *string) *CarUpdateOne {
 	if id != nil {
 		cuo = cuo.SetOwnerID(*id)
@@ -385,7 +385,7 @@ func (cuo *CarUpdateOne) SetNillableOwnerID(id *string) *CarUpdateOne {
 	return cuo
 }
 
-// SetOwner sets the owner edge to Pet.
+// SetOwner sets the "owner" edge to the Pet entity.
 func (cuo *CarUpdateOne) SetOwner(p *Pet) *CarUpdateOne {
 	return cuo.SetOwnerID(p.ID)
 }
@@ -395,13 +395,13 @@ func (cuo *CarUpdateOne) Mutation() *CarMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type Pet.
+// ClearOwner clears the "owner" edge to the Pet entity.
 func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Car entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
 	var (
 		err  error

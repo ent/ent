@@ -24,19 +24,19 @@ type MixinIDUpdate struct {
 	mutation *MixinIDMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the MixinIDUpdate builder.
 func (miu *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
 	miu.mutation.predicates = append(miu.mutation.predicates, ps...)
 	return miu
 }
 
-// SetSomeField sets the some_field field.
+// SetSomeField sets the "some_field" field.
 func (miu *MixinIDUpdate) SetSomeField(s string) *MixinIDUpdate {
 	miu.mutation.SetSomeField(s)
 	return miu
 }
 
-// SetMixinField sets the mixin_field field.
+// SetMixinField sets the "mixin_field" field.
 func (miu *MixinIDUpdate) SetMixinField(s string) *MixinIDUpdate {
 	miu.mutation.SetMixinField(s)
 	return miu
@@ -148,13 +148,13 @@ type MixinIDUpdateOne struct {
 	mutation *MixinIDMutation
 }
 
-// SetSomeField sets the some_field field.
+// SetSomeField sets the "some_field" field.
 func (miuo *MixinIDUpdateOne) SetSomeField(s string) *MixinIDUpdateOne {
 	miuo.mutation.SetSomeField(s)
 	return miuo
 }
 
-// SetMixinField sets the mixin_field field.
+// SetMixinField sets the "mixin_field" field.
 func (miuo *MixinIDUpdateOne) SetMixinField(s string) *MixinIDUpdateOne {
 	miuo.mutation.SetMixinField(s)
 	return miuo
@@ -165,7 +165,7 @@ func (miuo *MixinIDUpdateOne) Mutation() *MixinIDMutation {
 	return miuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated MixinID entity.
 func (miuo *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
 	var (
 		err  error

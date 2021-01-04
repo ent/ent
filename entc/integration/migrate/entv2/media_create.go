@@ -22,13 +22,13 @@ type MediaCreate struct {
 	hooks    []Hook
 }
 
-// SetSource sets the source field.
+// SetSource sets the "source" field.
 func (mc *MediaCreate) SetSource(s string) *MediaCreate {
 	mc.mutation.SetSource(s)
 	return mc
 }
 
-// SetNillableSource sets the source field if the given value is not nil.
+// SetNillableSource sets the "source" field if the given value is not nil.
 func (mc *MediaCreate) SetNillableSource(s *string) *MediaCreate {
 	if s != nil {
 		mc.SetSource(*s)
@@ -36,13 +36,13 @@ func (mc *MediaCreate) SetNillableSource(s *string) *MediaCreate {
 	return mc
 }
 
-// SetSourceURI sets the source_uri field.
+// SetSourceURI sets the "source_uri" field.
 func (mc *MediaCreate) SetSourceURI(s string) *MediaCreate {
 	mc.mutation.SetSourceURI(s)
 	return mc
 }
 
-// SetNillableSourceURI sets the source_uri field if the given value is not nil.
+// SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
 func (mc *MediaCreate) SetNillableSourceURI(s *string) *MediaCreate {
 	if s != nil {
 		mc.SetSourceURI(*s)
@@ -147,7 +147,7 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// MediaCreateBulk is the builder for creating a bulk of Media entities.
+// MediaCreateBulk is the builder for creating many Media entities in bulk.
 type MediaCreateBulk struct {
 	config
 	builders []*MediaCreate
@@ -204,7 +204,7 @@ func (mcb *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (mcb *MediaCreateBulk) SaveX(ctx context.Context) []*Media {
 	v, err := mcb.Save(ctx)
 	if err != nil {

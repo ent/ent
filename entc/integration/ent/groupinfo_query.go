@@ -36,7 +36,7 @@ type GroupInfoQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the GroupInfoQuery builder.
 func (giq *GroupInfoQuery) Where(ps ...predicate.GroupInfo) *GroupInfoQuery {
 	giq.predicates = append(giq.predicates, ps...)
 	return giq
@@ -60,7 +60,7 @@ func (giq *GroupInfoQuery) Order(o ...OrderFunc) *GroupInfoQuery {
 	return giq
 }
 
-// QueryGroups chains the current query on the groups edge.
+// QueryGroups chains the current query on the "groups" edge.
 func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: giq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -82,7 +82,8 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 	return query
 }
 
-// First returns the first GroupInfo entity in the query. Returns *NotFoundError when no groupinfo was found.
+// First returns the first GroupInfo entity from the query.
+// Returns a *NotFoundError when no GroupInfo was found.
 func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
 	nodes, err := giq.Limit(1).All(ctx)
 	if err != nil {
@@ -103,7 +104,8 @@ func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
 	return node
 }
 
-// FirstID returns the first GroupInfo id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first GroupInfo ID from the query.
+// Returns a *NotFoundError when no GroupInfo ID was found.
 func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = giq.Limit(1).IDs(ctx); err != nil {
@@ -125,7 +127,9 @@ func (giq *GroupInfoQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only GroupInfo entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single GroupInfo entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one GroupInfo entity is not found.
+// Returns a *NotFoundError when no GroupInfo entities are found.
 func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
 	nodes, err := giq.Limit(2).All(ctx)
 	if err != nil {
@@ -150,7 +154,9 @@ func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
 	return node
 }
 
-// OnlyID returns the only GroupInfo id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only GroupInfo ID in the query.
+// Returns a *NotSingularError when exactly one GroupInfo ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = giq.Limit(2).IDs(ctx); err != nil {
@@ -193,7 +199,7 @@ func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 	return nodes
 }
 
-// IDs executes the query and returns a list of GroupInfo ids.
+// IDs executes the query and returns a list of GroupInfo IDs.
 func (giq *GroupInfoQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
@@ -245,7 +251,7 @@ func (giq *GroupInfoQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the GroupInfoQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 	if giq == nil {
@@ -264,8 +270,8 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 	}
 }
 
-//  WithGroups tells the query-builder to eager-loads the nodes that are connected to
-// the "groups" edge. The optional arguments used to configure the query builder of the edge.
+// WithGroups tells the query-builder to eager-load the nodes that are connected to
+// the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery {
 	query := &GroupQuery{config: giq.config}
 	for _, opt := range opts {
@@ -275,7 +281,7 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 	return giq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -302,7 +308,8 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -478,7 +485,7 @@ func (giq *GroupInfoQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// GroupInfoGroupBy is the builder for group-by GroupInfo entities.
+// GroupInfoGroupBy is the group-by builder for GroupInfo entities.
 type GroupInfoGroupBy struct {
 	config
 	fields []string
@@ -494,7 +501,7 @@ func (gigb *GroupInfoGroupBy) Aggregate(fns ...AggregateFunc) *GroupInfoGroupBy 
 	return gigb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := gigb.path(ctx)
 	if err != nil {
@@ -511,7 +518,8 @@ func (gigb *GroupInfoGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (gigb *GroupInfoGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(gigb.fields) > 1 {
 		return nil, errors.New("ent: GroupInfoGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -532,7 +540,8 @@ func (gigb *GroupInfoGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (gigb *GroupInfoGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = gigb.Strings(ctx); err != nil {
@@ -558,7 +567,8 @@ func (gigb *GroupInfoGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (gigb *GroupInfoGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(gigb.fields) > 1 {
 		return nil, errors.New("ent: GroupInfoGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -579,7 +589,8 @@ func (gigb *GroupInfoGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (gigb *GroupInfoGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = gigb.Ints(ctx); err != nil {
@@ -605,7 +616,8 @@ func (gigb *GroupInfoGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (gigb *GroupInfoGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(gigb.fields) > 1 {
 		return nil, errors.New("ent: GroupInfoGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -626,7 +638,8 @@ func (gigb *GroupInfoGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (gigb *GroupInfoGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = gigb.Float64s(ctx); err != nil {
@@ -652,7 +665,8 @@ func (gigb *GroupInfoGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (gigb *GroupInfoGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(gigb.fields) > 1 {
 		return nil, errors.New("ent: GroupInfoGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -673,7 +687,8 @@ func (gigb *GroupInfoGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (gigb *GroupInfoGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = gigb.Bools(ctx); err != nil {
@@ -728,14 +743,14 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(gigb.fields...)
 }
 
-// GroupInfoSelect is the builder for select fields of GroupInfo entities.
+// GroupInfoSelect is the builder for selecting fields of GroupInfo entities.
 type GroupInfoSelect struct {
 	*GroupInfoQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := gis.prepareQuery(ctx); err != nil {
 		return err
@@ -751,7 +766,7 @@ func (gis *GroupInfoSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(gis.fields) > 1 {
 		return nil, errors.New("ent: GroupInfoSelect.Strings is not achievable when selecting more than 1 field")
@@ -772,7 +787,7 @@ func (gis *GroupInfoSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = gis.Strings(ctx); err != nil {
@@ -798,7 +813,7 @@ func (gis *GroupInfoSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(gis.fields) > 1 {
 		return nil, errors.New("ent: GroupInfoSelect.Ints is not achievable when selecting more than 1 field")
@@ -819,7 +834,7 @@ func (gis *GroupInfoSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = gis.Ints(ctx); err != nil {
@@ -845,7 +860,7 @@ func (gis *GroupInfoSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(gis.fields) > 1 {
 		return nil, errors.New("ent: GroupInfoSelect.Float64s is not achievable when selecting more than 1 field")
@@ -866,7 +881,7 @@ func (gis *GroupInfoSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = gis.Float64s(ctx); err != nil {
@@ -892,7 +907,7 @@ func (gis *GroupInfoSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(gis.fields) > 1 {
 		return nil, errors.New("ent: GroupInfoSelect.Bools is not achievable when selecting more than 1 field")
@@ -913,7 +928,7 @@ func (gis *GroupInfoSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (gis *GroupInfoSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = gis.Bools(ctx); err != nil {

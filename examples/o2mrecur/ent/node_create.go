@@ -23,19 +23,19 @@ type NodeCreate struct {
 	hooks    []Hook
 }
 
-// SetValue sets the value field.
+// SetValue sets the "value" field.
 func (nc *NodeCreate) SetValue(i int) *NodeCreate {
 	nc.mutation.SetValue(i)
 	return nc
 }
 
-// SetParentID sets the parent edge to Node by id.
+// SetParentID sets the "parent" edge to the Node entity by ID.
 func (nc *NodeCreate) SetParentID(id int) *NodeCreate {
 	nc.mutation.SetParentID(id)
 	return nc
 }
 
-// SetNillableParentID sets the parent edge to Node by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the Node entity by ID if the given value is not nil.
 func (nc *NodeCreate) SetNillableParentID(id *int) *NodeCreate {
 	if id != nil {
 		nc = nc.SetParentID(*id)
@@ -43,18 +43,18 @@ func (nc *NodeCreate) SetNillableParentID(id *int) *NodeCreate {
 	return nc
 }
 
-// SetParent sets the parent edge to Node.
+// SetParent sets the "parent" edge to the Node entity.
 func (nc *NodeCreate) SetParent(n *Node) *NodeCreate {
 	return nc.SetParentID(n.ID)
 }
 
-// AddChildIDs adds the children edge to Node by ids.
+// AddChildIDs adds the "children" edge to the Node entity by IDs.
 func (nc *NodeCreate) AddChildIDs(ids ...int) *NodeCreate {
 	nc.mutation.AddChildIDs(ids...)
 	return nc
 }
 
-// AddChildren adds the children edges to Node.
+// AddChildren adds the "children" edges to the Node entity.
 func (nc *NodeCreate) AddChildren(n ...*Node) *NodeCreate {
 	ids := make([]int, len(n))
 	for i := range n {
@@ -193,7 +193,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// NodeCreateBulk is the builder for creating a bulk of Node entities.
+// NodeCreateBulk is the builder for creating many Node entities in bulk.
 type NodeCreateBulk struct {
 	config
 	builders []*NodeCreate
@@ -250,7 +250,7 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ncb *NodeCreateBulk) SaveX(ctx context.Context) []*Node {
 	v, err := ncb.Save(ctx)
 	if err != nil {

@@ -23,19 +23,19 @@ type NodeCreate struct {
 	hooks    []Hook
 }
 
-// SetValue sets the value field.
+// SetValue sets the "value" field.
 func (nc *NodeCreate) SetValue(i int) *NodeCreate {
 	nc.mutation.SetValue(i)
 	return nc
 }
 
-// SetPrevID sets the prev edge to Node by id.
+// SetPrevID sets the "prev" edge to the Node entity by ID.
 func (nc *NodeCreate) SetPrevID(id int) *NodeCreate {
 	nc.mutation.SetPrevID(id)
 	return nc
 }
 
-// SetNillablePrevID sets the prev edge to Node by id if the given value is not nil.
+// SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
 func (nc *NodeCreate) SetNillablePrevID(id *int) *NodeCreate {
 	if id != nil {
 		nc = nc.SetPrevID(*id)
@@ -43,18 +43,18 @@ func (nc *NodeCreate) SetNillablePrevID(id *int) *NodeCreate {
 	return nc
 }
 
-// SetPrev sets the prev edge to Node.
+// SetPrev sets the "prev" edge to the Node entity.
 func (nc *NodeCreate) SetPrev(n *Node) *NodeCreate {
 	return nc.SetPrevID(n.ID)
 }
 
-// SetNextID sets the next edge to Node by id.
+// SetNextID sets the "next" edge to the Node entity by ID.
 func (nc *NodeCreate) SetNextID(id int) *NodeCreate {
 	nc.mutation.SetNextID(id)
 	return nc
 }
 
-// SetNillableNextID sets the next edge to Node by id if the given value is not nil.
+// SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
 func (nc *NodeCreate) SetNillableNextID(id *int) *NodeCreate {
 	if id != nil {
 		nc = nc.SetNextID(*id)
@@ -62,7 +62,7 @@ func (nc *NodeCreate) SetNillableNextID(id *int) *NodeCreate {
 	return nc
 }
 
-// SetNext sets the next edge to Node.
+// SetNext sets the "next" edge to the Node entity.
 func (nc *NodeCreate) SetNext(n *Node) *NodeCreate {
 	return nc.SetNextID(n.ID)
 }
@@ -197,7 +197,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// NodeCreateBulk is the builder for creating a bulk of Node entities.
+// NodeCreateBulk is the builder for creating many Node entities in bulk.
 type NodeCreateBulk struct {
 	config
 	builders []*NodeCreate
@@ -254,7 +254,7 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ncb *NodeCreateBulk) SaveX(ctx context.Context) []*Node {
 	v, err := ncb.Save(ctx)
 	if err != nil {

@@ -25,25 +25,25 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
 	pc.mutation.SetName(s)
 	return pc
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
 	pc.mutation.SetUUID(u)
 	return pc
 }
 
-// SetTeamID sets the team edge to User by id.
+// SetTeamID sets the "team" edge to the User entity by ID.
 func (pc *PetCreate) SetTeamID(id int) *PetCreate {
 	pc.mutation.SetTeamID(id)
 	return pc
 }
 
-// SetNillableTeamID sets the team edge to User by id if the given value is not nil.
+// SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
 func (pc *PetCreate) SetNillableTeamID(id *int) *PetCreate {
 	if id != nil {
 		pc = pc.SetTeamID(*id)
@@ -51,18 +51,18 @@ func (pc *PetCreate) SetNillableTeamID(id *int) *PetCreate {
 	return pc
 }
 
-// SetTeam sets the team edge to User.
+// SetTeam sets the "team" edge to the User entity.
 func (pc *PetCreate) SetTeam(u *User) *PetCreate {
 	return pc.SetTeamID(u.ID)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
 	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	if id != nil {
 		pc = pc.SetOwnerID(*id)
@@ -70,7 +70,7 @@ func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	return pc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
 }
@@ -213,7 +213,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// PetCreateBulk is the builder for creating a bulk of Pet entities.
+// PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
 	builders []*PetCreate
@@ -270,7 +270,7 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 	v, err := pcb.Save(ctx)
 	if err != nil {

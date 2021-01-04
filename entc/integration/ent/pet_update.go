@@ -26,37 +26,37 @@ type PetUpdate struct {
 	mutation *PetMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the PetUpdate builder.
 func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
 	return pu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (pu *PetUpdate) SetName(s string) *PetUpdate {
 	pu.mutation.SetName(s)
 	return pu
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (pu *PetUpdate) SetUUID(u uuid.UUID) *PetUpdate {
 	pu.mutation.SetUUID(u)
 	return pu
 }
 
-// ClearUUID clears the value of uuid.
+// ClearUUID clears the value of the "uuid" field.
 func (pu *PetUpdate) ClearUUID() *PetUpdate {
 	pu.mutation.ClearUUID()
 	return pu
 }
 
-// SetTeamID sets the team edge to User by id.
+// SetTeamID sets the "team" edge to the User entity by ID.
 func (pu *PetUpdate) SetTeamID(id int) *PetUpdate {
 	pu.mutation.SetTeamID(id)
 	return pu
 }
 
-// SetNillableTeamID sets the team edge to User by id if the given value is not nil.
+// SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
 func (pu *PetUpdate) SetNillableTeamID(id *int) *PetUpdate {
 	if id != nil {
 		pu = pu.SetTeamID(*id)
@@ -64,18 +64,18 @@ func (pu *PetUpdate) SetNillableTeamID(id *int) *PetUpdate {
 	return pu
 }
 
-// SetTeam sets the team edge to User.
+// SetTeam sets the "team" edge to the User entity.
 func (pu *PetUpdate) SetTeam(u *User) *PetUpdate {
 	return pu.SetTeamID(u.ID)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
 	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	if id != nil {
 		pu = pu.SetOwnerID(*id)
@@ -83,7 +83,7 @@ func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	return pu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
@@ -93,13 +93,13 @@ func (pu *PetUpdate) Mutation() *PetMutation {
 	return pu.mutation
 }
 
-// ClearTeam clears the "team" edge to type User.
+// ClearTeam clears the "team" edge to the User entity.
 func (pu *PetUpdate) ClearTeam() *PetUpdate {
 	pu.mutation.ClearTeam()
 	return pu
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
 	return pu
@@ -282,31 +282,31 @@ type PetUpdateOne struct {
 	mutation *PetMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
 	puo.mutation.SetName(s)
 	return puo
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (puo *PetUpdateOne) SetUUID(u uuid.UUID) *PetUpdateOne {
 	puo.mutation.SetUUID(u)
 	return puo
 }
 
-// ClearUUID clears the value of uuid.
+// ClearUUID clears the value of the "uuid" field.
 func (puo *PetUpdateOne) ClearUUID() *PetUpdateOne {
 	puo.mutation.ClearUUID()
 	return puo
 }
 
-// SetTeamID sets the team edge to User by id.
+// SetTeamID sets the "team" edge to the User entity by ID.
 func (puo *PetUpdateOne) SetTeamID(id int) *PetUpdateOne {
 	puo.mutation.SetTeamID(id)
 	return puo
 }
 
-// SetNillableTeamID sets the team edge to User by id if the given value is not nil.
+// SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
 func (puo *PetUpdateOne) SetNillableTeamID(id *int) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetTeamID(*id)
@@ -314,18 +314,18 @@ func (puo *PetUpdateOne) SetNillableTeamID(id *int) *PetUpdateOne {
 	return puo
 }
 
-// SetTeam sets the team edge to User.
+// SetTeam sets the "team" edge to the User entity.
 func (puo *PetUpdateOne) SetTeam(u *User) *PetUpdateOne {
 	return puo.SetTeamID(u.ID)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
 	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetOwnerID(*id)
@@ -333,7 +333,7 @@ func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	return puo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
@@ -343,19 +343,19 @@ func (puo *PetUpdateOne) Mutation() *PetMutation {
 	return puo.mutation
 }
 
-// ClearTeam clears the "team" edge to type User.
+// ClearTeam clears the "team" edge to the User entity.
 func (puo *PetUpdateOne) ClearTeam() *PetUpdateOne {
 	puo.mutation.ClearTeam()
 	return puo
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
 	return puo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Pet entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 	var (
 		err  error

@@ -22,13 +22,13 @@ type ConversionCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cc *ConversionCreate) SetName(s string) *ConversionCreate {
 	cc.mutation.SetName(s)
 	return cc
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableName(s *string) *ConversionCreate {
 	if s != nil {
 		cc.SetName(*s)
@@ -36,13 +36,13 @@ func (cc *ConversionCreate) SetNillableName(s *string) *ConversionCreate {
 	return cc
 }
 
-// SetInt8ToString sets the int8_to_string field.
+// SetInt8ToString sets the "int8_to_string" field.
 func (cc *ConversionCreate) SetInt8ToString(i int8) *ConversionCreate {
 	cc.mutation.SetInt8ToString(i)
 	return cc
 }
 
-// SetNillableInt8ToString sets the int8_to_string field if the given value is not nil.
+// SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableInt8ToString(i *int8) *ConversionCreate {
 	if i != nil {
 		cc.SetInt8ToString(*i)
@@ -50,13 +50,13 @@ func (cc *ConversionCreate) SetNillableInt8ToString(i *int8) *ConversionCreate {
 	return cc
 }
 
-// SetUint8ToString sets the uint8_to_string field.
+// SetUint8ToString sets the "uint8_to_string" field.
 func (cc *ConversionCreate) SetUint8ToString(u uint8) *ConversionCreate {
 	cc.mutation.SetUint8ToString(u)
 	return cc
 }
 
-// SetNillableUint8ToString sets the uint8_to_string field if the given value is not nil.
+// SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableUint8ToString(u *uint8) *ConversionCreate {
 	if u != nil {
 		cc.SetUint8ToString(*u)
@@ -64,13 +64,13 @@ func (cc *ConversionCreate) SetNillableUint8ToString(u *uint8) *ConversionCreate
 	return cc
 }
 
-// SetInt16ToString sets the int16_to_string field.
+// SetInt16ToString sets the "int16_to_string" field.
 func (cc *ConversionCreate) SetInt16ToString(i int16) *ConversionCreate {
 	cc.mutation.SetInt16ToString(i)
 	return cc
 }
 
-// SetNillableInt16ToString sets the int16_to_string field if the given value is not nil.
+// SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableInt16ToString(i *int16) *ConversionCreate {
 	if i != nil {
 		cc.SetInt16ToString(*i)
@@ -78,13 +78,13 @@ func (cc *ConversionCreate) SetNillableInt16ToString(i *int16) *ConversionCreate
 	return cc
 }
 
-// SetUint16ToString sets the uint16_to_string field.
+// SetUint16ToString sets the "uint16_to_string" field.
 func (cc *ConversionCreate) SetUint16ToString(u uint16) *ConversionCreate {
 	cc.mutation.SetUint16ToString(u)
 	return cc
 }
 
-// SetNillableUint16ToString sets the uint16_to_string field if the given value is not nil.
+// SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableUint16ToString(u *uint16) *ConversionCreate {
 	if u != nil {
 		cc.SetUint16ToString(*u)
@@ -92,13 +92,13 @@ func (cc *ConversionCreate) SetNillableUint16ToString(u *uint16) *ConversionCrea
 	return cc
 }
 
-// SetInt32ToString sets the int32_to_string field.
+// SetInt32ToString sets the "int32_to_string" field.
 func (cc *ConversionCreate) SetInt32ToString(i int32) *ConversionCreate {
 	cc.mutation.SetInt32ToString(i)
 	return cc
 }
 
-// SetNillableInt32ToString sets the int32_to_string field if the given value is not nil.
+// SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableInt32ToString(i *int32) *ConversionCreate {
 	if i != nil {
 		cc.SetInt32ToString(*i)
@@ -106,13 +106,13 @@ func (cc *ConversionCreate) SetNillableInt32ToString(i *int32) *ConversionCreate
 	return cc
 }
 
-// SetUint32ToString sets the uint32_to_string field.
+// SetUint32ToString sets the "uint32_to_string" field.
 func (cc *ConversionCreate) SetUint32ToString(u uint32) *ConversionCreate {
 	cc.mutation.SetUint32ToString(u)
 	return cc
 }
 
-// SetNillableUint32ToString sets the uint32_to_string field if the given value is not nil.
+// SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableUint32ToString(u *uint32) *ConversionCreate {
 	if u != nil {
 		cc.SetUint32ToString(*u)
@@ -120,13 +120,13 @@ func (cc *ConversionCreate) SetNillableUint32ToString(u *uint32) *ConversionCrea
 	return cc
 }
 
-// SetInt64ToString sets the int64_to_string field.
+// SetInt64ToString sets the "int64_to_string" field.
 func (cc *ConversionCreate) SetInt64ToString(i int64) *ConversionCreate {
 	cc.mutation.SetInt64ToString(i)
 	return cc
 }
 
-// SetNillableInt64ToString sets the int64_to_string field if the given value is not nil.
+// SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableInt64ToString(i *int64) *ConversionCreate {
 	if i != nil {
 		cc.SetInt64ToString(*i)
@@ -134,13 +134,13 @@ func (cc *ConversionCreate) SetNillableInt64ToString(i *int64) *ConversionCreate
 	return cc
 }
 
-// SetUint64ToString sets the uint64_to_string field.
+// SetUint64ToString sets the "uint64_to_string" field.
 func (cc *ConversionCreate) SetUint64ToString(u uint64) *ConversionCreate {
 	cc.mutation.SetUint64ToString(u)
 	return cc
 }
 
-// SetNillableUint64ToString sets the uint64_to_string field if the given value is not nil.
+// SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
 func (cc *ConversionCreate) SetNillableUint64ToString(u *uint64) *ConversionCreate {
 	if u != nil {
 		cc.SetUint64ToString(*u)
@@ -301,7 +301,7 @@ func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// ConversionCreateBulk is the builder for creating a bulk of Conversion entities.
+// ConversionCreateBulk is the builder for creating many Conversion entities in bulk.
 type ConversionCreateBulk struct {
 	config
 	builders []*ConversionCreate
@@ -358,7 +358,7 @@ func (ccb *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ccb *ConversionCreateBulk) SaveX(ctx context.Context) []*Conversion {
 	v, err := ccb.Save(ctx)
 	if err != nil {

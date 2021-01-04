@@ -23,13 +23,13 @@ type SpecCreate struct {
 	hooks    []Hook
 }
 
-// AddCardIDs adds the card edge to Card by ids.
+// AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (sc *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
 	sc.mutation.AddCardIDs(ids...)
 	return sc
 }
 
-// AddCard adds the card edges to Card.
+// AddCard adds the "card" edges to the Card entity.
 func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
 	ids := make([]string, len(c))
 	for i := range c {
@@ -116,7 +116,7 @@ func (sc *SpecCreate) gremlin() *dsl.Traversal {
 	return v.ValueMap(true)
 }
 
-// SpecCreateBulk is the builder for creating a bulk of Spec entities.
+// SpecCreateBulk is the builder for creating many Spec entities in bulk.
 type SpecCreateBulk struct {
 	config
 	builders []*SpecCreate

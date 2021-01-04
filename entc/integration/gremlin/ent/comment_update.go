@@ -26,46 +26,46 @@ type CommentUpdate struct {
 	mutation *CommentMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CommentUpdate builder.
 func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
 	return cu
 }
 
-// SetUniqueInt sets the unique_int field.
+// SetUniqueInt sets the "unique_int" field.
 func (cu *CommentUpdate) SetUniqueInt(i int) *CommentUpdate {
 	cu.mutation.ResetUniqueInt()
 	cu.mutation.SetUniqueInt(i)
 	return cu
 }
 
-// AddUniqueInt adds i to unique_int.
+// AddUniqueInt adds i to the "unique_int" field.
 func (cu *CommentUpdate) AddUniqueInt(i int) *CommentUpdate {
 	cu.mutation.AddUniqueInt(i)
 	return cu
 }
 
-// SetUniqueFloat sets the unique_float field.
+// SetUniqueFloat sets the "unique_float" field.
 func (cu *CommentUpdate) SetUniqueFloat(f float64) *CommentUpdate {
 	cu.mutation.ResetUniqueFloat()
 	cu.mutation.SetUniqueFloat(f)
 	return cu
 }
 
-// AddUniqueFloat adds f to unique_float.
+// AddUniqueFloat adds f to the "unique_float" field.
 func (cu *CommentUpdate) AddUniqueFloat(f float64) *CommentUpdate {
 	cu.mutation.AddUniqueFloat(f)
 	return cu
 }
 
-// SetNillableInt sets the nillable_int field.
+// SetNillableInt sets the "nillable_int" field.
 func (cu *CommentUpdate) SetNillableInt(i int) *CommentUpdate {
 	cu.mutation.ResetNillableInt()
 	cu.mutation.SetNillableInt(i)
 	return cu
 }
 
-// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
 func (cu *CommentUpdate) SetNillableNillableInt(i *int) *CommentUpdate {
 	if i != nil {
 		cu.SetNillableInt(*i)
@@ -73,13 +73,13 @@ func (cu *CommentUpdate) SetNillableNillableInt(i *int) *CommentUpdate {
 	return cu
 }
 
-// AddNillableInt adds i to nillable_int.
+// AddNillableInt adds i to the "nillable_int" field.
 func (cu *CommentUpdate) AddNillableInt(i int) *CommentUpdate {
 	cu.mutation.AddNillableInt(i)
 	return cu
 }
 
-// ClearNillableInt clears the value of nillable_int.
+// ClearNillableInt clears the value of the "nillable_int" field.
 func (cu *CommentUpdate) ClearNillableInt() *CommentUpdate {
 	cu.mutation.ClearNillableInt()
 	return cu
@@ -234,40 +234,40 @@ type CommentUpdateOne struct {
 	mutation *CommentMutation
 }
 
-// SetUniqueInt sets the unique_int field.
+// SetUniqueInt sets the "unique_int" field.
 func (cuo *CommentUpdateOne) SetUniqueInt(i int) *CommentUpdateOne {
 	cuo.mutation.ResetUniqueInt()
 	cuo.mutation.SetUniqueInt(i)
 	return cuo
 }
 
-// AddUniqueInt adds i to unique_int.
+// AddUniqueInt adds i to the "unique_int" field.
 func (cuo *CommentUpdateOne) AddUniqueInt(i int) *CommentUpdateOne {
 	cuo.mutation.AddUniqueInt(i)
 	return cuo
 }
 
-// SetUniqueFloat sets the unique_float field.
+// SetUniqueFloat sets the "unique_float" field.
 func (cuo *CommentUpdateOne) SetUniqueFloat(f float64) *CommentUpdateOne {
 	cuo.mutation.ResetUniqueFloat()
 	cuo.mutation.SetUniqueFloat(f)
 	return cuo
 }
 
-// AddUniqueFloat adds f to unique_float.
+// AddUniqueFloat adds f to the "unique_float" field.
 func (cuo *CommentUpdateOne) AddUniqueFloat(f float64) *CommentUpdateOne {
 	cuo.mutation.AddUniqueFloat(f)
 	return cuo
 }
 
-// SetNillableInt sets the nillable_int field.
+// SetNillableInt sets the "nillable_int" field.
 func (cuo *CommentUpdateOne) SetNillableInt(i int) *CommentUpdateOne {
 	cuo.mutation.ResetNillableInt()
 	cuo.mutation.SetNillableInt(i)
 	return cuo
 }
 
-// SetNillableNillableInt sets the nillable_int field if the given value is not nil.
+// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
 func (cuo *CommentUpdateOne) SetNillableNillableInt(i *int) *CommentUpdateOne {
 	if i != nil {
 		cuo.SetNillableInt(*i)
@@ -275,13 +275,13 @@ func (cuo *CommentUpdateOne) SetNillableNillableInt(i *int) *CommentUpdateOne {
 	return cuo
 }
 
-// AddNillableInt adds i to nillable_int.
+// AddNillableInt adds i to the "nillable_int" field.
 func (cuo *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
 	cuo.mutation.AddNillableInt(i)
 	return cuo
 }
 
-// ClearNillableInt clears the value of nillable_int.
+// ClearNillableInt clears the value of the "nillable_int" field.
 func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
 	cuo.mutation.ClearNillableInt()
 	return cuo
@@ -292,7 +292,7 @@ func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
 	return cuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Comment entity.
 func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 	var (
 		err  error

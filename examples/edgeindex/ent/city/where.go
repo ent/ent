@@ -12,7 +12,7 @@ import (
 	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.City {
 	return predicate.City(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -241,7 +241,7 @@ func HasStreetsWith(preds ...predicate.Street) predicate.City {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.City) predicate.City {
 	return predicate.City(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -252,7 +252,7 @@ func And(predicates ...predicate.City) predicate.City {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.City) predicate.City {
 	return predicate.City(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

@@ -26,43 +26,43 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetT sets the t field.
+// SetT sets the "t" field.
 func (uc *UserCreate) SetT(s *schema.T) *UserCreate {
 	uc.mutation.SetT(s)
 	return uc
 }
 
-// SetURL sets the url field.
+// SetURL sets the "url" field.
 func (uc *UserCreate) SetURL(u *url.URL) *UserCreate {
 	uc.mutation.SetURL(u)
 	return uc
 }
 
-// SetRaw sets the raw field.
+// SetRaw sets the "raw" field.
 func (uc *UserCreate) SetRaw(jm json.RawMessage) *UserCreate {
 	uc.mutation.SetRaw(jm)
 	return uc
 }
 
-// SetDirs sets the dirs field.
+// SetDirs sets the "dirs" field.
 func (uc *UserCreate) SetDirs(h []http.Dir) *UserCreate {
 	uc.mutation.SetDirs(h)
 	return uc
 }
 
-// SetInts sets the ints field.
+// SetInts sets the "ints" field.
 func (uc *UserCreate) SetInts(i []int) *UserCreate {
 	uc.mutation.SetInts(i)
 	return uc
 }
 
-// SetFloats sets the floats field.
+// SetFloats sets the "floats" field.
 func (uc *UserCreate) SetFloats(f []float64) *UserCreate {
 	uc.mutation.SetFloats(f)
 	return uc
 }
 
-// SetStrings sets the strings field.
+// SetStrings sets the "strings" field.
 func (uc *UserCreate) SetStrings(s []string) *UserCreate {
 	uc.mutation.SetStrings(s)
 	return uc
@@ -205,7 +205,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -262,7 +262,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

@@ -132,7 +132,7 @@ var (
 	MACValidator func(string) error
 )
 
-// State defines the type for the state enum field.
+// State defines the type for the "state" enum field.
 type State string
 
 // State values.

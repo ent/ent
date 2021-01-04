@@ -24,19 +24,19 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
-// SetID sets the id field.
+// SetID sets the "id" field.
 func (pc *PetCreate) SetID(s string) *PetCreate {
 	pc.mutation.SetID(s)
 	return pc
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
 	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	if id != nil {
 		pc = pc.SetOwnerID(*id)
@@ -44,18 +44,18 @@ func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	return pc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
 }
 
-// AddCarIDs adds the cars edge to Car by ids.
+// AddCarIDs adds the "cars" edge to the Car entity by IDs.
 func (pc *PetCreate) AddCarIDs(ids ...int) *PetCreate {
 	pc.mutation.AddCarIDs(ids...)
 	return pc
 }
 
-// AddCars adds the cars edges to Car.
+// AddCars adds the "cars" edges to the Car entity.
 func (pc *PetCreate) AddCars(c ...*Car) *PetCreate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -64,13 +64,13 @@ func (pc *PetCreate) AddCars(c ...*Car) *PetCreate {
 	return pc.AddCarIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to Pet by ids.
+// AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (pc *PetCreate) AddFriendIDs(ids ...string) *PetCreate {
 	pc.mutation.AddFriendIDs(ids...)
 	return pc
 }
 
-// AddFriends adds the friends edges to Pet.
+// AddFriends adds the "friends" edges to the Pet entity.
 func (pc *PetCreate) AddFriends(p ...*Pet) *PetCreate {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -79,13 +79,13 @@ func (pc *PetCreate) AddFriends(p ...*Pet) *PetCreate {
 	return pc.AddFriendIDs(ids...)
 }
 
-// SetBestFriendID sets the best_friend edge to Pet by id.
+// SetBestFriendID sets the "best_friend" edge to the Pet entity by ID.
 func (pc *PetCreate) SetBestFriendID(id string) *PetCreate {
 	pc.mutation.SetBestFriendID(id)
 	return pc
 }
 
-// SetNillableBestFriendID sets the best_friend edge to Pet by id if the given value is not nil.
+// SetNillableBestFriendID sets the "best_friend" edge to the Pet entity by ID if the given value is not nil.
 func (pc *PetCreate) SetNillableBestFriendID(id *string) *PetCreate {
 	if id != nil {
 		pc = pc.SetBestFriendID(*id)
@@ -93,7 +93,7 @@ func (pc *PetCreate) SetNillableBestFriendID(id *string) *PetCreate {
 	return pc
 }
 
-// SetBestFriend sets the best_friend edge to Pet.
+// SetBestFriend sets the "best_friend" edge to the Pet entity.
 func (pc *PetCreate) SetBestFriend(p *Pet) *PetCreate {
 	return pc.SetBestFriendID(p.ID)
 }
@@ -262,7 +262,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// PetCreateBulk is the builder for creating a bulk of Pet entities.
+// PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
 	builders []*PetCreate
@@ -317,7 +317,7 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 	v, err := pcb.Save(ctx)
 	if err != nil {

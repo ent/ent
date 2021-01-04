@@ -25,7 +25,7 @@ type ItemDelete struct {
 	mutation *ItemMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the ItemDelete builder.
 func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
 	id.mutation.predicates = append(id.mutation.predicates, ps...)
 	return id

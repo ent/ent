@@ -25,19 +25,19 @@ type TeamCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (tc *TeamCreate) SetName(s string) *TeamCreate {
 	tc.mutation.SetName(s)
 	return tc
 }
 
-// AddTaskIDs adds the tasks edge to Task by ids.
+// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
 func (tc *TeamCreate) AddTaskIDs(ids ...int) *TeamCreate {
 	tc.mutation.AddTaskIDs(ids...)
 	return tc
 }
 
-// AddTasks adds the tasks edges to Task.
+// AddTasks adds the "tasks" edges to the Task entity.
 func (tc *TeamCreate) AddTasks(t ...*Task) *TeamCreate {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -46,13 +46,13 @@ func (tc *TeamCreate) AddTasks(t ...*Task) *TeamCreate {
 	return tc.AddTaskIDs(ids...)
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (tc *TeamCreate) AddUserIDs(ids ...int) *TeamCreate {
 	tc.mutation.AddUserIDs(ids...)
 	return tc
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (tc *TeamCreate) AddUsers(u ...*User) *TeamCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -196,7 +196,7 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// TeamCreateBulk is the builder for creating a bulk of Team entities.
+// TeamCreateBulk is the builder for creating many Team entities in bulk.
 type TeamCreateBulk struct {
 	config
 	builders []*TeamCreate
@@ -253,7 +253,7 @@ func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (tcb *TeamCreateBulk) SaveX(ctx context.Context) []*Team {
 	v, err := tcb.Save(ctx)
 	if err != nil {

@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -235,7 +235,7 @@ func HasLinksWith(preds ...predicate.Blob) predicate.Blob {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Blob) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -246,7 +246,7 @@ func And(predicates ...predicate.Blob) predicate.Blob {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Blob) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

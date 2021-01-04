@@ -25,25 +25,25 @@ type FileTypeUpdate struct {
 	mutation *FileTypeMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the FileTypeUpdate builder.
 func (ftu *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 	ftu.mutation.predicates = append(ftu.mutation.predicates, ps...)
 	return ftu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
 	ftu.mutation.SetName(s)
 	return ftu
 }
 
-// SetType sets the type field.
+// SetType sets the "type" field.
 func (ftu *FileTypeUpdate) SetType(f filetype.Type) *FileTypeUpdate {
 	ftu.mutation.SetType(f)
 	return ftu
 }
 
-// SetNillableType sets the type field if the given value is not nil.
+// SetNillableType sets the "type" field if the given value is not nil.
 func (ftu *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
 	if f != nil {
 		ftu.SetType(*f)
@@ -51,13 +51,13 @@ func (ftu *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
 	return ftu
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (ftu *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
 	ftu.mutation.SetState(f)
 	return ftu
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (ftu *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
 	if f != nil {
 		ftu.SetState(*f)
@@ -65,13 +65,13 @@ func (ftu *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
 	return ftu
 }
 
-// AddFileIDs adds the files edge to File by ids.
+// AddFileIDs adds the "files" edge to the File entity by IDs.
 func (ftu *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
 	ftu.mutation.AddFileIDs(ids...)
 	return ftu
 }
 
-// AddFiles adds the files edges to File.
+// AddFiles adds the "files" edges to the File entity.
 func (ftu *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -85,19 +85,19 @@ func (ftu *FileTypeUpdate) Mutation() *FileTypeMutation {
 	return ftu.mutation
 }
 
-// ClearFiles clears all "files" edges to type File.
+// ClearFiles clears all "files" edges to the File entity.
 func (ftu *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
 	ftu.mutation.ClearFiles()
 	return ftu
 }
 
-// RemoveFileIDs removes the files edge to File by ids.
+// RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
 	ftu.mutation.RemoveFileIDs(ids...)
 	return ftu
 }
 
-// RemoveFiles removes files edges to File.
+// RemoveFiles removes "files" edges to File entities.
 func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -289,19 +289,19 @@ type FileTypeUpdateOne struct {
 	mutation *FileTypeMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (ftuo *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
 	ftuo.mutation.SetName(s)
 	return ftuo
 }
 
-// SetType sets the type field.
+// SetType sets the "type" field.
 func (ftuo *FileTypeUpdateOne) SetType(f filetype.Type) *FileTypeUpdateOne {
 	ftuo.mutation.SetType(f)
 	return ftuo
 }
 
-// SetNillableType sets the type field if the given value is not nil.
+// SetNillableType sets the "type" field if the given value is not nil.
 func (ftuo *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdateOne {
 	if f != nil {
 		ftuo.SetType(*f)
@@ -309,13 +309,13 @@ func (ftuo *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdate
 	return ftuo
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (ftuo *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
 	ftuo.mutation.SetState(f)
 	return ftuo
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (ftuo *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
 	if f != nil {
 		ftuo.SetState(*f)
@@ -323,13 +323,13 @@ func (ftuo *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpda
 	return ftuo
 }
 
-// AddFileIDs adds the files edge to File by ids.
+// AddFileIDs adds the "files" edge to the File entity by IDs.
 func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
 	ftuo.mutation.AddFileIDs(ids...)
 	return ftuo
 }
 
-// AddFiles adds the files edges to File.
+// AddFiles adds the "files" edges to the File entity.
 func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -343,19 +343,19 @@ func (ftuo *FileTypeUpdateOne) Mutation() *FileTypeMutation {
 	return ftuo.mutation
 }
 
-// ClearFiles clears all "files" edges to type File.
+// ClearFiles clears all "files" edges to the File entity.
 func (ftuo *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
 	ftuo.mutation.ClearFiles()
 	return ftuo
 }
 
-// RemoveFileIDs removes the files edge to File by ids.
+// RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (ftuo *FileTypeUpdateOne) RemoveFileIDs(ids ...int) *FileTypeUpdateOne {
 	ftuo.mutation.RemoveFileIDs(ids...)
 	return ftuo
 }
 
-// RemoveFiles removes files edges to File.
+// RemoveFiles removes "files" edges to File entities.
 func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -364,7 +364,7 @@ func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 	return ftuo.RemoveFileIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated FileType entity.
 func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 	var (
 		err  error

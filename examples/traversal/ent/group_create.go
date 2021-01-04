@@ -24,19 +24,19 @@ type GroupCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (gc *GroupCreate) SetName(s string) *GroupCreate {
 	gc.mutation.SetName(s)
 	return gc
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (gc *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
 	gc.mutation.AddUserIDs(ids...)
 	return gc
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -45,13 +45,13 @@ func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 	return gc.AddUserIDs(ids...)
 }
 
-// SetAdminID sets the admin edge to User by id.
+// SetAdminID sets the "admin" edge to the User entity by ID.
 func (gc *GroupCreate) SetAdminID(id int) *GroupCreate {
 	gc.mutation.SetAdminID(id)
 	return gc
 }
 
-// SetNillableAdminID sets the admin edge to User by id if the given value is not nil.
+// SetNillableAdminID sets the "admin" edge to the User entity by ID if the given value is not nil.
 func (gc *GroupCreate) SetNillableAdminID(id *int) *GroupCreate {
 	if id != nil {
 		gc = gc.SetAdminID(*id)
@@ -59,7 +59,7 @@ func (gc *GroupCreate) SetNillableAdminID(id *int) *GroupCreate {
 	return gc
 }
 
-// SetAdmin sets the admin edge to User.
+// SetAdmin sets the "admin" edge to the User entity.
 func (gc *GroupCreate) SetAdmin(u *User) *GroupCreate {
 	return gc.SetAdminID(u.ID)
 }
@@ -194,7 +194,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// GroupCreateBulk is the builder for creating a bulk of Group entities.
+// GroupCreateBulk is the builder for creating many Group entities in bulk.
 type GroupCreateBulk struct {
 	config
 	builders []*GroupCreate
@@ -251,7 +251,7 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
 	v, err := gcb.Save(ctx)
 	if err != nil {

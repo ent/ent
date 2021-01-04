@@ -129,14 +129,14 @@ func (c *Conversion) assignValues(columns []string, values []interface{}) error 
 }
 
 // Update returns a builder for updating this Conversion.
-// Note that, you need to call Conversion.Unwrap() before calling this method, if this Conversion
+// Note that you need to call Conversion.Unwrap() before calling this method if this Conversion
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Conversion) Update() *ConversionUpdateOne {
 	return (&ConversionClient{config: c.config}).UpdateOne(c)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Conversion entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (c *Conversion) Unwrap() *Conversion {
 	tx, ok := c.config.driver.(*txDriver)
 	if !ok {

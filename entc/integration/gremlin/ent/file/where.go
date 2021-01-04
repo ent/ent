@@ -13,7 +13,7 @@ import (
 	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -548,7 +548,7 @@ func HasFieldWith(preds ...predicate.FieldType) predicate.File {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.File) predicate.File {
 	return predicate.File(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))
@@ -561,7 +561,7 @@ func And(predicates ...predicate.File) predicate.File {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.File) predicate.File {
 	return predicate.File(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))

@@ -83,6 +83,6 @@ func ValidColumn(column string) bool {
 var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy
-	// DefaultName holds the default value on creation for the name field.
+	// DefaultName holds the default value on creation for the "name" field.
 	DefaultName string
 )

@@ -27,20 +27,20 @@ type FileUpdate struct {
 	mutation *FileMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the FileUpdate builder.
 func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	fu.mutation.predicates = append(fu.mutation.predicates, ps...)
 	return fu
 }
 
-// SetSize sets the size field.
+// SetSize sets the "size" field.
 func (fu *FileUpdate) SetSize(i int) *FileUpdate {
 	fu.mutation.ResetSize()
 	fu.mutation.SetSize(i)
 	return fu
 }
 
-// SetNillableSize sets the size field if the given value is not nil.
+// SetNillableSize sets the "size" field if the given value is not nil.
 func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 	if i != nil {
 		fu.SetSize(*i)
@@ -48,25 +48,25 @@ func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 	return fu
 }
 
-// AddSize adds i to size.
+// AddSize adds i to the "size" field.
 func (fu *FileUpdate) AddSize(i int) *FileUpdate {
 	fu.mutation.AddSize(i)
 	return fu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (fu *FileUpdate) SetName(s string) *FileUpdate {
 	fu.mutation.SetName(s)
 	return fu
 }
 
-// SetUser sets the user field.
+// SetUser sets the "user" field.
 func (fu *FileUpdate) SetUser(s string) *FileUpdate {
 	fu.mutation.SetUser(s)
 	return fu
 }
 
-// SetNillableUser sets the user field if the given value is not nil.
+// SetNillableUser sets the "user" field if the given value is not nil.
 func (fu *FileUpdate) SetNillableUser(s *string) *FileUpdate {
 	if s != nil {
 		fu.SetUser(*s)
@@ -74,19 +74,19 @@ func (fu *FileUpdate) SetNillableUser(s *string) *FileUpdate {
 	return fu
 }
 
-// ClearUser clears the value of user.
+// ClearUser clears the value of the "user" field.
 func (fu *FileUpdate) ClearUser() *FileUpdate {
 	fu.mutation.ClearUser()
 	return fu
 }
 
-// SetGroup sets the group field.
+// SetGroup sets the "group" field.
 func (fu *FileUpdate) SetGroup(s string) *FileUpdate {
 	fu.mutation.SetGroup(s)
 	return fu
 }
 
-// SetNillableGroup sets the group field if the given value is not nil.
+// SetNillableGroup sets the "group" field if the given value is not nil.
 func (fu *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
 	if s != nil {
 		fu.SetGroup(*s)
@@ -94,19 +94,19 @@ func (fu *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
 	return fu
 }
 
-// ClearGroup clears the value of group.
+// ClearGroup clears the value of the "group" field.
 func (fu *FileUpdate) ClearGroup() *FileUpdate {
 	fu.mutation.ClearGroup()
 	return fu
 }
 
-// SetOp sets the op field.
+// SetOp sets the "op" field.
 func (fu *FileUpdate) SetOp(b bool) *FileUpdate {
 	fu.mutation.SetOp(b)
 	return fu
 }
 
-// SetNillableOp sets the op field if the given value is not nil.
+// SetNillableOp sets the "op" field if the given value is not nil.
 func (fu *FileUpdate) SetNillableOp(b *bool) *FileUpdate {
 	if b != nil {
 		fu.SetOp(*b)
@@ -114,19 +114,19 @@ func (fu *FileUpdate) SetNillableOp(b *bool) *FileUpdate {
 	return fu
 }
 
-// ClearOp clears the value of op.
+// ClearOp clears the value of the "op" field.
 func (fu *FileUpdate) ClearOp() *FileUpdate {
 	fu.mutation.ClearOp()
 	return fu
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fu *FileUpdate) SetOwnerID(id int) *FileUpdate {
 	fu.mutation.SetOwnerID(id)
 	return fu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (fu *FileUpdate) SetNillableOwnerID(id *int) *FileUpdate {
 	if id != nil {
 		fu = fu.SetOwnerID(*id)
@@ -134,18 +134,18 @@ func (fu *FileUpdate) SetNillableOwnerID(id *int) *FileUpdate {
 	return fu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (fu *FileUpdate) SetOwner(u *User) *FileUpdate {
 	return fu.SetOwnerID(u.ID)
 }
 
-// SetTypeID sets the type edge to FileType by id.
+// SetTypeID sets the "type" edge to the FileType entity by ID.
 func (fu *FileUpdate) SetTypeID(id int) *FileUpdate {
 	fu.mutation.SetTypeID(id)
 	return fu
 }
 
-// SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
+// SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
 func (fu *FileUpdate) SetNillableTypeID(id *int) *FileUpdate {
 	if id != nil {
 		fu = fu.SetTypeID(*id)
@@ -153,18 +153,18 @@ func (fu *FileUpdate) SetNillableTypeID(id *int) *FileUpdate {
 	return fu
 }
 
-// SetType sets the type edge to FileType.
+// SetType sets the "type" edge to the FileType entity.
 func (fu *FileUpdate) SetType(f *FileType) *FileUpdate {
 	return fu.SetTypeID(f.ID)
 }
 
-// AddFieldIDs adds the field edge to FieldType by ids.
+// AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
 func (fu *FileUpdate) AddFieldIDs(ids ...int) *FileUpdate {
 	fu.mutation.AddFieldIDs(ids...)
 	return fu
 }
 
-// AddField adds the field edges to FieldType.
+// AddField adds the "field" edges to the FieldType entity.
 func (fu *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -178,31 +178,31 @@ func (fu *FileUpdate) Mutation() *FileMutation {
 	return fu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (fu *FileUpdate) ClearOwner() *FileUpdate {
 	fu.mutation.ClearOwner()
 	return fu
 }
 
-// ClearType clears the "type" edge to type FileType.
+// ClearType clears the "type" edge to the FileType entity.
 func (fu *FileUpdate) ClearType() *FileUpdate {
 	fu.mutation.ClearType()
 	return fu
 }
 
-// ClearFieldEdge clears all "field" edges to type FieldType.
+// ClearFieldEdge clears all "field" edges to the FieldType entity.
 func (fu *FileUpdate) ClearFieldEdge() *FileUpdate {
 	fu.mutation.ClearFieldEdge()
 	return fu
 }
 
-// RemoveFieldIDs removes the field edge to FieldType by ids.
+// RemoveFieldIDs removes the "field" edge to FieldType entities by IDs.
 func (fu *FileUpdate) RemoveFieldIDs(ids ...int) *FileUpdate {
 	fu.mutation.RemoveFieldIDs(ids...)
 	return fu
 }
 
-// RemoveField removes field edges to FieldType.
+// RemoveField removes "field" edges to FieldType entities.
 func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -498,14 +498,14 @@ type FileUpdateOne struct {
 	mutation *FileMutation
 }
 
-// SetSize sets the size field.
+// SetSize sets the "size" field.
 func (fuo *FileUpdateOne) SetSize(i int) *FileUpdateOne {
 	fuo.mutation.ResetSize()
 	fuo.mutation.SetSize(i)
 	return fuo
 }
 
-// SetNillableSize sets the size field if the given value is not nil.
+// SetNillableSize sets the "size" field if the given value is not nil.
 func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 	if i != nil {
 		fuo.SetSize(*i)
@@ -513,25 +513,25 @@ func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 	return fuo
 }
 
-// AddSize adds i to size.
+// AddSize adds i to the "size" field.
 func (fuo *FileUpdateOne) AddSize(i int) *FileUpdateOne {
 	fuo.mutation.AddSize(i)
 	return fuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
 	fuo.mutation.SetName(s)
 	return fuo
 }
 
-// SetUser sets the user field.
+// SetUser sets the "user" field.
 func (fuo *FileUpdateOne) SetUser(s string) *FileUpdateOne {
 	fuo.mutation.SetUser(s)
 	return fuo
 }
 
-// SetNillableUser sets the user field if the given value is not nil.
+// SetNillableUser sets the "user" field if the given value is not nil.
 func (fuo *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
 	if s != nil {
 		fuo.SetUser(*s)
@@ -539,19 +539,19 @@ func (fuo *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
 	return fuo
 }
 
-// ClearUser clears the value of user.
+// ClearUser clears the value of the "user" field.
 func (fuo *FileUpdateOne) ClearUser() *FileUpdateOne {
 	fuo.mutation.ClearUser()
 	return fuo
 }
 
-// SetGroup sets the group field.
+// SetGroup sets the "group" field.
 func (fuo *FileUpdateOne) SetGroup(s string) *FileUpdateOne {
 	fuo.mutation.SetGroup(s)
 	return fuo
 }
 
-// SetNillableGroup sets the group field if the given value is not nil.
+// SetNillableGroup sets the "group" field if the given value is not nil.
 func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
 	if s != nil {
 		fuo.SetGroup(*s)
@@ -559,19 +559,19 @@ func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
 	return fuo
 }
 
-// ClearGroup clears the value of group.
+// ClearGroup clears the value of the "group" field.
 func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
 	fuo.mutation.ClearGroup()
 	return fuo
 }
 
-// SetOp sets the op field.
+// SetOp sets the "op" field.
 func (fuo *FileUpdateOne) SetOp(b bool) *FileUpdateOne {
 	fuo.mutation.SetOp(b)
 	return fuo
 }
 
-// SetNillableOp sets the op field if the given value is not nil.
+// SetNillableOp sets the "op" field if the given value is not nil.
 func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
 	if b != nil {
 		fuo.SetOp(*b)
@@ -579,19 +579,19 @@ func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
 	return fuo
 }
 
-// ClearOp clears the value of op.
+// ClearOp clears the value of the "op" field.
 func (fuo *FileUpdateOne) ClearOp() *FileUpdateOne {
 	fuo.mutation.ClearOp()
 	return fuo
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (fuo *FileUpdateOne) SetOwnerID(id int) *FileUpdateOne {
 	fuo.mutation.SetOwnerID(id)
 	return fuo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (fuo *FileUpdateOne) SetNillableOwnerID(id *int) *FileUpdateOne {
 	if id != nil {
 		fuo = fuo.SetOwnerID(*id)
@@ -599,18 +599,18 @@ func (fuo *FileUpdateOne) SetNillableOwnerID(id *int) *FileUpdateOne {
 	return fuo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (fuo *FileUpdateOne) SetOwner(u *User) *FileUpdateOne {
 	return fuo.SetOwnerID(u.ID)
 }
 
-// SetTypeID sets the type edge to FileType by id.
+// SetTypeID sets the "type" edge to the FileType entity by ID.
 func (fuo *FileUpdateOne) SetTypeID(id int) *FileUpdateOne {
 	fuo.mutation.SetTypeID(id)
 	return fuo
 }
 
-// SetNillableTypeID sets the type edge to FileType by id if the given value is not nil.
+// SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
 func (fuo *FileUpdateOne) SetNillableTypeID(id *int) *FileUpdateOne {
 	if id != nil {
 		fuo = fuo.SetTypeID(*id)
@@ -618,18 +618,18 @@ func (fuo *FileUpdateOne) SetNillableTypeID(id *int) *FileUpdateOne {
 	return fuo
 }
 
-// SetType sets the type edge to FileType.
+// SetType sets the "type" edge to the FileType entity.
 func (fuo *FileUpdateOne) SetType(f *FileType) *FileUpdateOne {
 	return fuo.SetTypeID(f.ID)
 }
 
-// AddFieldIDs adds the field edge to FieldType by ids.
+// AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
 func (fuo *FileUpdateOne) AddFieldIDs(ids ...int) *FileUpdateOne {
 	fuo.mutation.AddFieldIDs(ids...)
 	return fuo
 }
 
-// AddField adds the field edges to FieldType.
+// AddField adds the "field" edges to the FieldType entity.
 func (fuo *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -643,31 +643,31 @@ func (fuo *FileUpdateOne) Mutation() *FileMutation {
 	return fuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
 	fuo.mutation.ClearOwner()
 	return fuo
 }
 
-// ClearType clears the "type" edge to type FileType.
+// ClearType clears the "type" edge to the FileType entity.
 func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
 	fuo.mutation.ClearType()
 	return fuo
 }
 
-// ClearFieldEdge clears all "field" edges to type FieldType.
+// ClearFieldEdge clears all "field" edges to the FieldType entity.
 func (fuo *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
 	fuo.mutation.ClearFieldEdge()
 	return fuo
 }
 
-// RemoveFieldIDs removes the field edge to FieldType by ids.
+// RemoveFieldIDs removes the "field" edge to FieldType entities by IDs.
 func (fuo *FileUpdateOne) RemoveFieldIDs(ids ...int) *FileUpdateOne {
 	fuo.mutation.RemoveFieldIDs(ids...)
 	return fuo
 }
 
-// RemoveField removes field edges to FieldType.
+// RemoveField removes "field" edges to FieldType entities.
 func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -676,7 +676,7 @@ func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 	return fuo.RemoveFieldIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated File entity.
 func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 	var (
 		err  error

@@ -26,19 +26,19 @@ type TaskCreate struct {
 	hooks    []Hook
 }
 
-// SetTitle sets the title field.
+// SetTitle sets the "title" field.
 func (tc *TaskCreate) SetTitle(s string) *TaskCreate {
 	tc.mutation.SetTitle(s)
 	return tc
 }
 
-// SetDescription sets the description field.
+// SetDescription sets the "description" field.
 func (tc *TaskCreate) SetDescription(s string) *TaskCreate {
 	tc.mutation.SetDescription(s)
 	return tc
 }
 
-// SetNillableDescription sets the description field if the given value is not nil.
+// SetNillableDescription sets the "description" field if the given value is not nil.
 func (tc *TaskCreate) SetNillableDescription(s *string) *TaskCreate {
 	if s != nil {
 		tc.SetDescription(*s)
@@ -46,13 +46,13 @@ func (tc *TaskCreate) SetNillableDescription(s *string) *TaskCreate {
 	return tc
 }
 
-// SetStatus sets the status field.
+// SetStatus sets the "status" field.
 func (tc *TaskCreate) SetStatus(t task.Status) *TaskCreate {
 	tc.mutation.SetStatus(t)
 	return tc
 }
 
-// SetNillableStatus sets the status field if the given value is not nil.
+// SetNillableStatus sets the "status" field if the given value is not nil.
 func (tc *TaskCreate) SetNillableStatus(t *task.Status) *TaskCreate {
 	if t != nil {
 		tc.SetStatus(*t)
@@ -60,19 +60,19 @@ func (tc *TaskCreate) SetNillableStatus(t *task.Status) *TaskCreate {
 	return tc
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (tc *TaskCreate) SetUUID(u uuid.UUID) *TaskCreate {
 	tc.mutation.SetUUID(u)
 	return tc
 }
 
-// AddTeamIDs adds the teams edge to Team by ids.
+// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
 func (tc *TaskCreate) AddTeamIDs(ids ...int) *TaskCreate {
 	tc.mutation.AddTeamIDs(ids...)
 	return tc
 }
 
-// AddTeams adds the teams edges to Team.
+// AddTeams adds the "teams" edges to the Team entity.
 func (tc *TaskCreate) AddTeams(t ...*Team) *TaskCreate {
 	ids := make([]int, len(t))
 	for i := range t {
@@ -81,13 +81,13 @@ func (tc *TaskCreate) AddTeams(t ...*Team) *TaskCreate {
 	return tc.AddTeamIDs(ids...)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (tc *TaskCreate) SetOwnerID(id int) *TaskCreate {
 	tc.mutation.SetOwnerID(id)
 	return tc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (tc *TaskCreate) SetNillableOwnerID(id *int) *TaskCreate {
 	if id != nil {
 		tc = tc.SetOwnerID(*id)
@@ -95,7 +95,7 @@ func (tc *TaskCreate) SetNillableOwnerID(id *int) *TaskCreate {
 	return tc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (tc *TaskCreate) SetOwner(u *User) *TaskCreate {
 	return tc.SetOwnerID(u.ID)
 }
@@ -276,7 +276,7 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// TaskCreateBulk is the builder for creating a bulk of Task entities.
+// TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
 	config
 	builders []*TaskCreate
@@ -334,7 +334,7 @@ func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (tcb *TaskCreateBulk) SaveX(ctx context.Context) []*Task {
 	v, err := tcb.Save(ctx)
 	if err != nil {

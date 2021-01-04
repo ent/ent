@@ -28,91 +28,91 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetT sets the t field.
+// SetT sets the "t" field.
 func (uu *UserUpdate) SetT(s *schema.T) *UserUpdate {
 	uu.mutation.SetT(s)
 	return uu
 }
 
-// ClearT clears the value of t.
+// ClearT clears the value of the "t" field.
 func (uu *UserUpdate) ClearT() *UserUpdate {
 	uu.mutation.ClearT()
 	return uu
 }
 
-// SetURL sets the url field.
+// SetURL sets the "url" field.
 func (uu *UserUpdate) SetURL(u *url.URL) *UserUpdate {
 	uu.mutation.SetURL(u)
 	return uu
 }
 
-// ClearURL clears the value of url.
+// ClearURL clears the value of the "url" field.
 func (uu *UserUpdate) ClearURL() *UserUpdate {
 	uu.mutation.ClearURL()
 	return uu
 }
 
-// SetRaw sets the raw field.
+// SetRaw sets the "raw" field.
 func (uu *UserUpdate) SetRaw(jm json.RawMessage) *UserUpdate {
 	uu.mutation.SetRaw(jm)
 	return uu
 }
 
-// ClearRaw clears the value of raw.
+// ClearRaw clears the value of the "raw" field.
 func (uu *UserUpdate) ClearRaw() *UserUpdate {
 	uu.mutation.ClearRaw()
 	return uu
 }
 
-// SetDirs sets the dirs field.
+// SetDirs sets the "dirs" field.
 func (uu *UserUpdate) SetDirs(h []http.Dir) *UserUpdate {
 	uu.mutation.SetDirs(h)
 	return uu
 }
 
-// ClearDirs clears the value of dirs.
+// ClearDirs clears the value of the "dirs" field.
 func (uu *UserUpdate) ClearDirs() *UserUpdate {
 	uu.mutation.ClearDirs()
 	return uu
 }
 
-// SetInts sets the ints field.
+// SetInts sets the "ints" field.
 func (uu *UserUpdate) SetInts(i []int) *UserUpdate {
 	uu.mutation.SetInts(i)
 	return uu
 }
 
-// ClearInts clears the value of ints.
+// ClearInts clears the value of the "ints" field.
 func (uu *UserUpdate) ClearInts() *UserUpdate {
 	uu.mutation.ClearInts()
 	return uu
 }
 
-// SetFloats sets the floats field.
+// SetFloats sets the "floats" field.
 func (uu *UserUpdate) SetFloats(f []float64) *UserUpdate {
 	uu.mutation.SetFloats(f)
 	return uu
 }
 
-// ClearFloats clears the value of floats.
+// ClearFloats clears the value of the "floats" field.
 func (uu *UserUpdate) ClearFloats() *UserUpdate {
 	uu.mutation.ClearFloats()
 	return uu
 }
 
-// SetStrings sets the strings field.
+// SetStrings sets the "strings" field.
 func (uu *UserUpdate) SetStrings(s []string) *UserUpdate {
 	uu.mutation.SetStrings(s)
 	return uu
 }
 
-// ClearStrings clears the value of strings.
+// ClearStrings clears the value of the "strings" field.
 func (uu *UserUpdate) ClearStrings() *UserUpdate {
 	uu.mutation.ClearStrings()
 	return uu
@@ -301,85 +301,85 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetT sets the t field.
+// SetT sets the "t" field.
 func (uuo *UserUpdateOne) SetT(s *schema.T) *UserUpdateOne {
 	uuo.mutation.SetT(s)
 	return uuo
 }
 
-// ClearT clears the value of t.
+// ClearT clears the value of the "t" field.
 func (uuo *UserUpdateOne) ClearT() *UserUpdateOne {
 	uuo.mutation.ClearT()
 	return uuo
 }
 
-// SetURL sets the url field.
+// SetURL sets the "url" field.
 func (uuo *UserUpdateOne) SetURL(u *url.URL) *UserUpdateOne {
 	uuo.mutation.SetURL(u)
 	return uuo
 }
 
-// ClearURL clears the value of url.
+// ClearURL clears the value of the "url" field.
 func (uuo *UserUpdateOne) ClearURL() *UserUpdateOne {
 	uuo.mutation.ClearURL()
 	return uuo
 }
 
-// SetRaw sets the raw field.
+// SetRaw sets the "raw" field.
 func (uuo *UserUpdateOne) SetRaw(jm json.RawMessage) *UserUpdateOne {
 	uuo.mutation.SetRaw(jm)
 	return uuo
 }
 
-// ClearRaw clears the value of raw.
+// ClearRaw clears the value of the "raw" field.
 func (uuo *UserUpdateOne) ClearRaw() *UserUpdateOne {
 	uuo.mutation.ClearRaw()
 	return uuo
 }
 
-// SetDirs sets the dirs field.
+// SetDirs sets the "dirs" field.
 func (uuo *UserUpdateOne) SetDirs(h []http.Dir) *UserUpdateOne {
 	uuo.mutation.SetDirs(h)
 	return uuo
 }
 
-// ClearDirs clears the value of dirs.
+// ClearDirs clears the value of the "dirs" field.
 func (uuo *UserUpdateOne) ClearDirs() *UserUpdateOne {
 	uuo.mutation.ClearDirs()
 	return uuo
 }
 
-// SetInts sets the ints field.
+// SetInts sets the "ints" field.
 func (uuo *UserUpdateOne) SetInts(i []int) *UserUpdateOne {
 	uuo.mutation.SetInts(i)
 	return uuo
 }
 
-// ClearInts clears the value of ints.
+// ClearInts clears the value of the "ints" field.
 func (uuo *UserUpdateOne) ClearInts() *UserUpdateOne {
 	uuo.mutation.ClearInts()
 	return uuo
 }
 
-// SetFloats sets the floats field.
+// SetFloats sets the "floats" field.
 func (uuo *UserUpdateOne) SetFloats(f []float64) *UserUpdateOne {
 	uuo.mutation.SetFloats(f)
 	return uuo
 }
 
-// ClearFloats clears the value of floats.
+// ClearFloats clears the value of the "floats" field.
 func (uuo *UserUpdateOne) ClearFloats() *UserUpdateOne {
 	uuo.mutation.ClearFloats()
 	return uuo
 }
 
-// SetStrings sets the strings field.
+// SetStrings sets the "strings" field.
 func (uuo *UserUpdateOne) SetStrings(s []string) *UserUpdateOne {
 	uuo.mutation.SetStrings(s)
 	return uuo
 }
 
-// ClearStrings clears the value of strings.
+// ClearStrings clears the value of the "strings" field.
 func (uuo *UserUpdateOne) ClearStrings() *UserUpdateOne {
 	uuo.mutation.ClearStrings()
 	return uuo
@@ -390,7 +390,7 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

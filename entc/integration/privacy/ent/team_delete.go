@@ -24,7 +24,7 @@ type TeamDelete struct {
 	mutation *TeamMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the TeamDelete builder.
 func (td *TeamDelete) Where(ps ...predicate.Team) *TeamDelete {
 	td.mutation.predicates = append(td.mutation.predicates, ps...)
 	return td

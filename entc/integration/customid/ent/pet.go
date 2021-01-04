@@ -139,35 +139,35 @@ func (pe *Pet) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryOwner queries the owner edge of the Pet.
+// QueryOwner queries the "owner" edge of the Pet entity.
 func (pe *Pet) QueryOwner() *UserQuery {
 	return (&PetClient{config: pe.config}).QueryOwner(pe)
 }
 
-// QueryCars queries the cars edge of the Pet.
+// QueryCars queries the "cars" edge of the Pet entity.
 func (pe *Pet) QueryCars() *CarQuery {
 	return (&PetClient{config: pe.config}).QueryCars(pe)
 }
 
-// QueryFriends queries the friends edge of the Pet.
+// QueryFriends queries the "friends" edge of the Pet entity.
 func (pe *Pet) QueryFriends() *PetQuery {
 	return (&PetClient{config: pe.config}).QueryFriends(pe)
 }
 
-// QueryBestFriend queries the best_friend edge of the Pet.
+// QueryBestFriend queries the "best_friend" edge of the Pet entity.
 func (pe *Pet) QueryBestFriend() *PetQuery {
 	return (&PetClient{config: pe.config}).QueryBestFriend(pe)
 }
 
 // Update returns a builder for updating this Pet.
-// Note that, you need to call Pet.Unwrap() before calling this method, if this Pet
+// Note that you need to call Pet.Unwrap() before calling this method if this Pet
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (pe *Pet) Update() *PetUpdateOne {
 	return (&PetClient{config: pe.config}).UpdateOne(pe)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Pet entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (pe *Pet) Unwrap() *Pet {
 	tx, ok := pe.config.driver.(*txDriver)
 	if !ok {

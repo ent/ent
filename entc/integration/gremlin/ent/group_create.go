@@ -28,13 +28,13 @@ type GroupCreate struct {
 	hooks    []Hook
 }
 
-// SetActive sets the active field.
+// SetActive sets the "active" field.
 func (gc *GroupCreate) SetActive(b bool) *GroupCreate {
 	gc.mutation.SetActive(b)
 	return gc
 }
 
-// SetNillableActive sets the active field if the given value is not nil.
+// SetNillableActive sets the "active" field if the given value is not nil.
 func (gc *GroupCreate) SetNillableActive(b *bool) *GroupCreate {
 	if b != nil {
 		gc.SetActive(*b)
@@ -42,19 +42,19 @@ func (gc *GroupCreate) SetNillableActive(b *bool) *GroupCreate {
 	return gc
 }
 
-// SetExpire sets the expire field.
+// SetExpire sets the "expire" field.
 func (gc *GroupCreate) SetExpire(t time.Time) *GroupCreate {
 	gc.mutation.SetExpire(t)
 	return gc
 }
 
-// SetType sets the type field.
+// SetType sets the "type" field.
 func (gc *GroupCreate) SetType(s string) *GroupCreate {
 	gc.mutation.SetType(s)
 	return gc
 }
 
-// SetNillableType sets the type field if the given value is not nil.
+// SetNillableType sets the "type" field if the given value is not nil.
 func (gc *GroupCreate) SetNillableType(s *string) *GroupCreate {
 	if s != nil {
 		gc.SetType(*s)
@@ -62,13 +62,13 @@ func (gc *GroupCreate) SetNillableType(s *string) *GroupCreate {
 	return gc
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (gc *GroupCreate) SetMaxUsers(i int) *GroupCreate {
 	gc.mutation.SetMaxUsers(i)
 	return gc
 }
 
-// SetNillableMaxUsers sets the max_users field if the given value is not nil.
+// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
 func (gc *GroupCreate) SetNillableMaxUsers(i *int) *GroupCreate {
 	if i != nil {
 		gc.SetMaxUsers(*i)
@@ -76,19 +76,19 @@ func (gc *GroupCreate) SetNillableMaxUsers(i *int) *GroupCreate {
 	return gc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (gc *GroupCreate) SetName(s string) *GroupCreate {
 	gc.mutation.SetName(s)
 	return gc
 }
 
-// AddFileIDs adds the files edge to File by ids.
+// AddFileIDs adds the "files" edge to the File entity by IDs.
 func (gc *GroupCreate) AddFileIDs(ids ...string) *GroupCreate {
 	gc.mutation.AddFileIDs(ids...)
 	return gc
 }
 
-// AddFiles adds the files edges to File.
+// AddFiles adds the "files" edges to the File entity.
 func (gc *GroupCreate) AddFiles(f ...*File) *GroupCreate {
 	ids := make([]string, len(f))
 	for i := range f {
@@ -97,13 +97,13 @@ func (gc *GroupCreate) AddFiles(f ...*File) *GroupCreate {
 	return gc.AddFileIDs(ids...)
 }
 
-// AddBlockedIDs adds the blocked edge to User by ids.
+// AddBlockedIDs adds the "blocked" edge to the User entity by IDs.
 func (gc *GroupCreate) AddBlockedIDs(ids ...string) *GroupCreate {
 	gc.mutation.AddBlockedIDs(ids...)
 	return gc
 }
 
-// AddBlocked adds the blocked edges to User.
+// AddBlocked adds the "blocked" edges to the User entity.
 func (gc *GroupCreate) AddBlocked(u ...*User) *GroupCreate {
 	ids := make([]string, len(u))
 	for i := range u {
@@ -112,13 +112,13 @@ func (gc *GroupCreate) AddBlocked(u ...*User) *GroupCreate {
 	return gc.AddBlockedIDs(ids...)
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (gc *GroupCreate) AddUserIDs(ids ...string) *GroupCreate {
 	gc.mutation.AddUserIDs(ids...)
 	return gc
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 	ids := make([]string, len(u))
 	for i := range u {
@@ -127,13 +127,13 @@ func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
 	return gc.AddUserIDs(ids...)
 }
 
-// SetInfoID sets the info edge to GroupInfo by id.
+// SetInfoID sets the "info" edge to the GroupInfo entity by ID.
 func (gc *GroupCreate) SetInfoID(id string) *GroupCreate {
 	gc.mutation.SetInfoID(id)
 	return gc
 }
 
-// SetInfo sets the info edge to GroupInfo.
+// SetInfo sets the "info" edge to the GroupInfo entity.
 func (gc *GroupCreate) SetInfo(g *GroupInfo) *GroupCreate {
 	return gc.SetInfoID(g.ID)
 }
@@ -300,7 +300,7 @@ func (gc *GroupCreate) gremlin() *dsl.Traversal {
 	return tr
 }
 
-// GroupCreateBulk is the builder for creating a bulk of Group entities.
+// GroupCreateBulk is the builder for creating many Group entities in bulk.
 type GroupCreateBulk struct {
 	config
 	builders []*GroupCreate

@@ -23,7 +23,7 @@ type TenantCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (tc *TenantCreate) SetName(s string) *TenantCreate {
 	tc.mutation.SetName(s)
 	return tc
@@ -126,7 +126,7 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// TenantCreateBulk is the builder for creating a bulk of Tenant entities.
+// TenantCreateBulk is the builder for creating many Tenant entities in bulk.
 type TenantCreateBulk struct {
 	config
 	builders []*TenantCreate
@@ -183,7 +183,7 @@ func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (tcb *TenantCreateBulk) SaveX(ctx context.Context) []*Tenant {
 	v, err := tcb.Save(ctx)
 	if err != nil {

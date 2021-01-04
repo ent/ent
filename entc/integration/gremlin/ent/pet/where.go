@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id string) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -298,7 +298,7 @@ func HasOwnerWith(preds ...predicate.User) predicate.Pet {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))
@@ -311,7 +311,7 @@ func And(predicates ...predicate.Pet) predicate.Pet {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))

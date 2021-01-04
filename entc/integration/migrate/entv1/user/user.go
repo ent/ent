@@ -43,7 +43,7 @@ const (
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
 
-	// CarFieldID holds the string denoting the id field of the Car.
+	// CarFieldID holds the string denoting the ID field of the Car.
 	CarFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -110,7 +110,7 @@ var (
 	WorkplaceValidator func(string) error
 )
 
-// State defines the type for the state enum field.
+// State defines the type for the "state" enum field.
 type State string
 
 // State values.

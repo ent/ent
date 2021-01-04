@@ -184,30 +184,30 @@ func (f *File) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryOwner queries the owner edge of the File.
+// QueryOwner queries the "owner" edge of the File entity.
 func (f *File) QueryOwner() *UserQuery {
 	return (&FileClient{config: f.config}).QueryOwner(f)
 }
 
-// QueryType queries the type edge of the File.
+// QueryType queries the "type" edge of the File entity.
 func (f *File) QueryType() *FileTypeQuery {
 	return (&FileClient{config: f.config}).QueryType(f)
 }
 
-// QueryField queries the field edge of the File.
+// QueryField queries the "field" edge of the File entity.
 func (f *File) QueryField() *FieldTypeQuery {
 	return (&FileClient{config: f.config}).QueryField(f)
 }
 
 // Update returns a builder for updating this File.
-// Note that, you need to call File.Unwrap() before calling this method, if this File
+// Note that you need to call File.Unwrap() before calling this method if this File
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (f *File) Update() *FileUpdateOne {
 	return (&FileClient{config: f.config}).UpdateOne(f)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the File entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (f *File) Unwrap() *File {
 	tx, ok := f.config.driver.(*txDriver)
 	if !ok {

@@ -25,19 +25,19 @@ type SpecUpdate struct {
 	mutation *SpecMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the SpecUpdate builder.
 func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
 	su.mutation.predicates = append(su.mutation.predicates, ps...)
 	return su
 }
 
-// AddCardIDs adds the card edge to Card by ids.
+// AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (su *SpecUpdate) AddCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.AddCardIDs(ids...)
 	return su
 }
 
-// AddCard adds the card edges to Card.
+// AddCard adds the "card" edges to the Card entity.
 func (su *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -51,19 +51,19 @@ func (su *SpecUpdate) Mutation() *SpecMutation {
 	return su.mutation
 }
 
-// ClearCard clears all "card" edges to type Card.
+// ClearCard clears all "card" edges to the Card entity.
 func (su *SpecUpdate) ClearCard() *SpecUpdate {
 	su.mutation.ClearCard()
 	return su
 }
 
-// RemoveCardIDs removes the card edge to Card by ids.
+// RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (su *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.RemoveCardIDs(ids...)
 	return su
 }
 
-// RemoveCard removes card edges to Card.
+// RemoveCard removes "card" edges to Card entities.
 func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -213,13 +213,13 @@ type SpecUpdateOne struct {
 	mutation *SpecMutation
 }
 
-// AddCardIDs adds the card edge to Card by ids.
+// AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (suo *SpecUpdateOne) AddCardIDs(ids ...int) *SpecUpdateOne {
 	suo.mutation.AddCardIDs(ids...)
 	return suo
 }
 
-// AddCard adds the card edges to Card.
+// AddCard adds the "card" edges to the Card entity.
 func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -233,19 +233,19 @@ func (suo *SpecUpdateOne) Mutation() *SpecMutation {
 	return suo.mutation
 }
 
-// ClearCard clears all "card" edges to type Card.
+// ClearCard clears all "card" edges to the Card entity.
 func (suo *SpecUpdateOne) ClearCard() *SpecUpdateOne {
 	suo.mutation.ClearCard()
 	return suo
 }
 
-// RemoveCardIDs removes the card edge to Card by ids.
+// RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (suo *SpecUpdateOne) RemoveCardIDs(ids ...int) *SpecUpdateOne {
 	suo.mutation.RemoveCardIDs(ids...)
 	return suo
 }
 
-// RemoveCard removes card edges to Card.
+// RemoveCard removes "card" edges to Card entities.
 func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -254,7 +254,7 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 	return suo.RemoveCardIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Spec entity.
 func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 	var (
 		err  error

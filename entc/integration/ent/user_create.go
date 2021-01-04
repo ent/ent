@@ -27,13 +27,13 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetOptionalInt sets the optional_int field.
+// SetOptionalInt sets the "optional_int" field.
 func (uc *UserCreate) SetOptionalInt(i int) *UserCreate {
 	uc.mutation.SetOptionalInt(i)
 	return uc
 }
 
-// SetNillableOptionalInt sets the optional_int field if the given value is not nil.
+// SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
 func (uc *UserCreate) SetNillableOptionalInt(i *int) *UserCreate {
 	if i != nil {
 		uc.SetOptionalInt(*i)
@@ -41,25 +41,25 @@ func (uc *UserCreate) SetNillableOptionalInt(i *int) *UserCreate {
 	return uc
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
 	uc.mutation.SetAge(i)
 	return uc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetLast sets the last field.
+// SetLast sets the "last" field.
 func (uc *UserCreate) SetLast(s string) *UserCreate {
 	uc.mutation.SetLast(s)
 	return uc
 }
 
-// SetNillableLast sets the last field if the given value is not nil.
+// SetNillableLast sets the "last" field if the given value is not nil.
 func (uc *UserCreate) SetNillableLast(s *string) *UserCreate {
 	if s != nil {
 		uc.SetLast(*s)
@@ -67,13 +67,13 @@ func (uc *UserCreate) SetNillableLast(s *string) *UserCreate {
 	return uc
 }
 
-// SetNickname sets the nickname field.
+// SetNickname sets the "nickname" field.
 func (uc *UserCreate) SetNickname(s string) *UserCreate {
 	uc.mutation.SetNickname(s)
 	return uc
 }
 
-// SetNillableNickname sets the nickname field if the given value is not nil.
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
 func (uc *UserCreate) SetNillableNickname(s *string) *UserCreate {
 	if s != nil {
 		uc.SetNickname(*s)
@@ -81,13 +81,13 @@ func (uc *UserCreate) SetNillableNickname(s *string) *UserCreate {
 	return uc
 }
 
-// SetAddress sets the address field.
+// SetAddress sets the "address" field.
 func (uc *UserCreate) SetAddress(s string) *UserCreate {
 	uc.mutation.SetAddress(s)
 	return uc
 }
 
-// SetNillableAddress sets the address field if the given value is not nil.
+// SetNillableAddress sets the "address" field if the given value is not nil.
 func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
 	if s != nil {
 		uc.SetAddress(*s)
@@ -95,13 +95,13 @@ func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
 	return uc
 }
 
-// SetPhone sets the phone field.
+// SetPhone sets the "phone" field.
 func (uc *UserCreate) SetPhone(s string) *UserCreate {
 	uc.mutation.SetPhone(s)
 	return uc
 }
 
-// SetNillablePhone sets the phone field if the given value is not nil.
+// SetNillablePhone sets the "phone" field if the given value is not nil.
 func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
 	if s != nil {
 		uc.SetPhone(*s)
@@ -109,13 +109,13 @@ func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
 	return uc
 }
 
-// SetPassword sets the password field.
+// SetPassword sets the "password" field.
 func (uc *UserCreate) SetPassword(s string) *UserCreate {
 	uc.mutation.SetPassword(s)
 	return uc
 }
 
-// SetNillablePassword sets the password field if the given value is not nil.
+// SetNillablePassword sets the "password" field if the given value is not nil.
 func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 	if s != nil {
 		uc.SetPassword(*s)
@@ -123,13 +123,13 @@ func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
 	return uc
 }
 
-// SetRole sets the role field.
+// SetRole sets the "role" field.
 func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
 	uc.mutation.SetRole(u)
 	return uc
 }
 
-// SetNillableRole sets the role field if the given value is not nil.
+// SetNillableRole sets the "role" field if the given value is not nil.
 func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 	if u != nil {
 		uc.SetRole(*u)
@@ -137,13 +137,13 @@ func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 	return uc
 }
 
-// SetSSOCert sets the SSOCert field.
+// SetSSOCert sets the "SSOCert" field.
 func (uc *UserCreate) SetSSOCert(s string) *UserCreate {
 	uc.mutation.SetSSOCert(s)
 	return uc
 }
 
-// SetNillableSSOCert sets the SSOCert field if the given value is not nil.
+// SetNillableSSOCert sets the "SSOCert" field if the given value is not nil.
 func (uc *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
 	if s != nil {
 		uc.SetSSOCert(*s)
@@ -151,13 +151,13 @@ func (uc *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
 	return uc
 }
 
-// SetCardID sets the card edge to Card by id.
+// SetCardID sets the "card" edge to the Card entity by ID.
 func (uc *UserCreate) SetCardID(id int) *UserCreate {
 	uc.mutation.SetCardID(id)
 	return uc
 }
 
-// SetNillableCardID sets the card edge to Card by id if the given value is not nil.
+// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillableCardID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetCardID(*id)
@@ -165,18 +165,18 @@ func (uc *UserCreate) SetNillableCardID(id *int) *UserCreate {
 	return uc
 }
 
-// SetCard sets the card edge to Card.
+// SetCard sets the "card" edge to the Card entity.
 func (uc *UserCreate) SetCard(c *Card) *UserCreate {
 	return uc.SetCardID(c.ID)
 }
 
-// AddPetIDs adds the pets edge to Pet by ids.
+// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uc *UserCreate) AddPetIDs(ids ...int) *UserCreate {
 	uc.mutation.AddPetIDs(ids...)
 	return uc
 }
 
-// AddPets adds the pets edges to Pet.
+// AddPets adds the "pets" edges to the Pet entity.
 func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -185,13 +185,13 @@ func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 	return uc.AddPetIDs(ids...)
 }
 
-// AddFileIDs adds the files edge to File by ids.
+// AddFileIDs adds the "files" edge to the File entity by IDs.
 func (uc *UserCreate) AddFileIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFileIDs(ids...)
 	return uc
 }
 
-// AddFiles adds the files edges to File.
+// AddFiles adds the "files" edges to the File entity.
 func (uc *UserCreate) AddFiles(f ...*File) *UserCreate {
 	ids := make([]int, len(f))
 	for i := range f {
@@ -200,13 +200,13 @@ func (uc *UserCreate) AddFiles(f ...*File) *UserCreate {
 	return uc.AddFileIDs(ids...)
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
 	uc.mutation.AddGroupIDs(ids...)
 	return uc
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -215,13 +215,13 @@ func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 	return uc.AddGroupIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uc *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFriendIDs(ids...)
 	return uc
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -230,13 +230,13 @@ func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 	return uc.AddFriendIDs(ids...)
 }
 
-// AddFollowerIDs adds the followers edge to User by ids.
+// AddFollowerIDs adds the "followers" edge to the User entity by IDs.
 func (uc *UserCreate) AddFollowerIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFollowerIDs(ids...)
 	return uc
 }
 
-// AddFollowers adds the followers edges to User.
+// AddFollowers adds the "followers" edges to the User entity.
 func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -245,13 +245,13 @@ func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
 	return uc.AddFollowerIDs(ids...)
 }
 
-// AddFollowingIDs adds the following edge to User by ids.
+// AddFollowingIDs adds the "following" edge to the User entity by IDs.
 func (uc *UserCreate) AddFollowingIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFollowingIDs(ids...)
 	return uc
 }
 
-// AddFollowing adds the following edges to User.
+// AddFollowing adds the "following" edges to the User entity.
 func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -260,13 +260,13 @@ func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
 	return uc.AddFollowingIDs(ids...)
 }
 
-// SetTeamID sets the team edge to Pet by id.
+// SetTeamID sets the "team" edge to the Pet entity by ID.
 func (uc *UserCreate) SetTeamID(id int) *UserCreate {
 	uc.mutation.SetTeamID(id)
 	return uc
 }
 
-// SetNillableTeamID sets the team edge to Pet by id if the given value is not nil.
+// SetNillableTeamID sets the "team" edge to the Pet entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillableTeamID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetTeamID(*id)
@@ -274,18 +274,18 @@ func (uc *UserCreate) SetNillableTeamID(id *int) *UserCreate {
 	return uc
 }
 
-// SetTeam sets the team edge to Pet.
+// SetTeam sets the "team" edge to the Pet entity.
 func (uc *UserCreate) SetTeam(p *Pet) *UserCreate {
 	return uc.SetTeamID(p.ID)
 }
 
-// SetSpouseID sets the spouse edge to User by id.
+// SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (uc *UserCreate) SetSpouseID(id int) *UserCreate {
 	uc.mutation.SetSpouseID(id)
 	return uc
 }
 
-// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetSpouseID(*id)
@@ -293,18 +293,18 @@ func (uc *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
 	return uc
 }
 
-// SetSpouse sets the spouse edge to User.
+// SetSpouse sets the "spouse" edge to the User entity.
 func (uc *UserCreate) SetSpouse(u *User) *UserCreate {
 	return uc.SetSpouseID(u.ID)
 }
 
-// AddChildIDs adds the children edge to User by ids.
+// AddChildIDs adds the "children" edge to the User entity by IDs.
 func (uc *UserCreate) AddChildIDs(ids ...int) *UserCreate {
 	uc.mutation.AddChildIDs(ids...)
 	return uc
 }
 
-// AddChildren adds the children edges to User.
+// AddChildren adds the "children" edges to the User entity.
 func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -313,13 +313,13 @@ func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
 	return uc.AddChildIDs(ids...)
 }
 
-// SetParentID sets the parent edge to User by id.
+// SetParentID sets the "parent" edge to the User entity by ID.
 func (uc *UserCreate) SetParentID(id int) *UserCreate {
 	uc.mutation.SetParentID(id)
 	return uc
 }
 
-// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillableParentID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetParentID(*id)
@@ -327,7 +327,7 @@ func (uc *UserCreate) SetNillableParentID(id *int) *UserCreate {
 	return uc
 }
 
-// SetParent sets the parent edge to User.
+// SetParent sets the "parent" edge to the User entity.
 func (uc *UserCreate) SetParent(u *User) *UserCreate {
 	return uc.SetParentID(u.ID)
 }
@@ -741,7 +741,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -799,7 +799,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {

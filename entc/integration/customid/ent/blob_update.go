@@ -25,25 +25,25 @@ type BlobUpdate struct {
 	mutation *BlobMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the BlobUpdate builder.
 func (bu *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
 	bu.mutation.predicates = append(bu.mutation.predicates, ps...)
 	return bu
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (bu *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
 	bu.mutation.SetUUID(u)
 	return bu
 }
 
-// SetParentID sets the parent edge to Blob by id.
+// SetParentID sets the "parent" edge to the Blob entity by ID.
 func (bu *BlobUpdate) SetParentID(id uuid.UUID) *BlobUpdate {
 	bu.mutation.SetParentID(id)
 	return bu
 }
 
-// SetNillableParentID sets the parent edge to Blob by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
 func (bu *BlobUpdate) SetNillableParentID(id *uuid.UUID) *BlobUpdate {
 	if id != nil {
 		bu = bu.SetParentID(*id)
@@ -51,18 +51,18 @@ func (bu *BlobUpdate) SetNillableParentID(id *uuid.UUID) *BlobUpdate {
 	return bu
 }
 
-// SetParent sets the parent edge to Blob.
+// SetParent sets the "parent" edge to the Blob entity.
 func (bu *BlobUpdate) SetParent(b *Blob) *BlobUpdate {
 	return bu.SetParentID(b.ID)
 }
 
-// AddLinkIDs adds the links edge to Blob by ids.
+// AddLinkIDs adds the "links" edge to the Blob entity by IDs.
 func (bu *BlobUpdate) AddLinkIDs(ids ...uuid.UUID) *BlobUpdate {
 	bu.mutation.AddLinkIDs(ids...)
 	return bu
 }
 
-// AddLinks adds the links edges to Blob.
+// AddLinks adds the "links" edges to the Blob entity.
 func (bu *BlobUpdate) AddLinks(b ...*Blob) *BlobUpdate {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
@@ -76,25 +76,25 @@ func (bu *BlobUpdate) Mutation() *BlobMutation {
 	return bu.mutation
 }
 
-// ClearParent clears the "parent" edge to type Blob.
+// ClearParent clears the "parent" edge to the Blob entity.
 func (bu *BlobUpdate) ClearParent() *BlobUpdate {
 	bu.mutation.ClearParent()
 	return bu
 }
 
-// ClearLinks clears all "links" edges to type Blob.
+// ClearLinks clears all "links" edges to the Blob entity.
 func (bu *BlobUpdate) ClearLinks() *BlobUpdate {
 	bu.mutation.ClearLinks()
 	return bu
 }
 
-// RemoveLinkIDs removes the links edge to Blob by ids.
+// RemoveLinkIDs removes the "links" edge to Blob entities by IDs.
 func (bu *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
 	bu.mutation.RemoveLinkIDs(ids...)
 	return bu
 }
 
-// RemoveLinks removes links edges to Blob.
+// RemoveLinks removes "links" edges to Blob entities.
 func (bu *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
@@ -286,19 +286,19 @@ type BlobUpdateOne struct {
 	mutation *BlobMutation
 }
 
-// SetUUID sets the uuid field.
+// SetUUID sets the "uuid" field.
 func (buo *BlobUpdateOne) SetUUID(u uuid.UUID) *BlobUpdateOne {
 	buo.mutation.SetUUID(u)
 	return buo
 }
 
-// SetParentID sets the parent edge to Blob by id.
+// SetParentID sets the "parent" edge to the Blob entity by ID.
 func (buo *BlobUpdateOne) SetParentID(id uuid.UUID) *BlobUpdateOne {
 	buo.mutation.SetParentID(id)
 	return buo
 }
 
-// SetNillableParentID sets the parent edge to Blob by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
 func (buo *BlobUpdateOne) SetNillableParentID(id *uuid.UUID) *BlobUpdateOne {
 	if id != nil {
 		buo = buo.SetParentID(*id)
@@ -306,18 +306,18 @@ func (buo *BlobUpdateOne) SetNillableParentID(id *uuid.UUID) *BlobUpdateOne {
 	return buo
 }
 
-// SetParent sets the parent edge to Blob.
+// SetParent sets the "parent" edge to the Blob entity.
 func (buo *BlobUpdateOne) SetParent(b *Blob) *BlobUpdateOne {
 	return buo.SetParentID(b.ID)
 }
 
-// AddLinkIDs adds the links edge to Blob by ids.
+// AddLinkIDs adds the "links" edge to the Blob entity by IDs.
 func (buo *BlobUpdateOne) AddLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
 	buo.mutation.AddLinkIDs(ids...)
 	return buo
 }
 
-// AddLinks adds the links edges to Blob.
+// AddLinks adds the "links" edges to the Blob entity.
 func (buo *BlobUpdateOne) AddLinks(b ...*Blob) *BlobUpdateOne {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
@@ -331,25 +331,25 @@ func (buo *BlobUpdateOne) Mutation() *BlobMutation {
 	return buo.mutation
 }
 
-// ClearParent clears the "parent" edge to type Blob.
+// ClearParent clears the "parent" edge to the Blob entity.
 func (buo *BlobUpdateOne) ClearParent() *BlobUpdateOne {
 	buo.mutation.ClearParent()
 	return buo
 }
 
-// ClearLinks clears all "links" edges to type Blob.
+// ClearLinks clears all "links" edges to the Blob entity.
 func (buo *BlobUpdateOne) ClearLinks() *BlobUpdateOne {
 	buo.mutation.ClearLinks()
 	return buo
 }
 
-// RemoveLinkIDs removes the links edge to Blob by ids.
+// RemoveLinkIDs removes the "links" edge to Blob entities by IDs.
 func (buo *BlobUpdateOne) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
 	buo.mutation.RemoveLinkIDs(ids...)
 	return buo
 }
 
-// RemoveLinks removes links edges to Blob.
+// RemoveLinks removes "links" edges to Blob entities.
 func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
@@ -358,7 +358,7 @@ func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
 	return buo.RemoveLinkIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Blob entity.
 func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
 	var (
 		err  error

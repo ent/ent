@@ -24,19 +24,19 @@ type CustomTypeUpdate struct {
 	mutation *CustomTypeMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CustomTypeUpdate builder.
 func (ctu *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate {
 	ctu.mutation.predicates = append(ctu.mutation.predicates, ps...)
 	return ctu
 }
 
-// SetCustom sets the custom field.
+// SetCustom sets the "custom" field.
 func (ctu *CustomTypeUpdate) SetCustom(s string) *CustomTypeUpdate {
 	ctu.mutation.SetCustom(s)
 	return ctu
 }
 
-// SetNillableCustom sets the custom field if the given value is not nil.
+// SetNillableCustom sets the "custom" field if the given value is not nil.
 func (ctu *CustomTypeUpdate) SetNillableCustom(s *string) *CustomTypeUpdate {
 	if s != nil {
 		ctu.SetCustom(*s)
@@ -44,7 +44,7 @@ func (ctu *CustomTypeUpdate) SetNillableCustom(s *string) *CustomTypeUpdate {
 	return ctu
 }
 
-// ClearCustom clears the value of custom.
+// ClearCustom clears the value of the "custom" field.
 func (ctu *CustomTypeUpdate) ClearCustom() *CustomTypeUpdate {
 	ctu.mutation.ClearCustom()
 	return ctu
@@ -155,13 +155,13 @@ type CustomTypeUpdateOne struct {
 	mutation *CustomTypeMutation
 }
 
-// SetCustom sets the custom field.
+// SetCustom sets the "custom" field.
 func (ctuo *CustomTypeUpdateOne) SetCustom(s string) *CustomTypeUpdateOne {
 	ctuo.mutation.SetCustom(s)
 	return ctuo
 }
 
-// SetNillableCustom sets the custom field if the given value is not nil.
+// SetNillableCustom sets the "custom" field if the given value is not nil.
 func (ctuo *CustomTypeUpdateOne) SetNillableCustom(s *string) *CustomTypeUpdateOne {
 	if s != nil {
 		ctuo.SetCustom(*s)
@@ -169,7 +169,7 @@ func (ctuo *CustomTypeUpdateOne) SetNillableCustom(s *string) *CustomTypeUpdateO
 	return ctuo
 }
 
-// ClearCustom clears the value of custom.
+// ClearCustom clears the value of the "custom" field.
 func (ctuo *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
 	ctuo.mutation.ClearCustom()
 	return ctuo
@@ -180,7 +180,7 @@ func (ctuo *CustomTypeUpdateOne) Mutation() *CustomTypeMutation {
 	return ctuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated CustomType entity.
 func (ctuo *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) {
 	var (
 		err  error

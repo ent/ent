@@ -26,19 +26,19 @@ type FileTypeCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (ftc *FileTypeCreate) SetName(s string) *FileTypeCreate {
 	ftc.mutation.SetName(s)
 	return ftc
 }
 
-// SetType sets the type field.
+// SetType sets the "type" field.
 func (ftc *FileTypeCreate) SetType(f filetype.Type) *FileTypeCreate {
 	ftc.mutation.SetType(f)
 	return ftc
 }
 
-// SetNillableType sets the type field if the given value is not nil.
+// SetNillableType sets the "type" field if the given value is not nil.
 func (ftc *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
 	if f != nil {
 		ftc.SetType(*f)
@@ -46,13 +46,13 @@ func (ftc *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
 	return ftc
 }
 
-// SetState sets the state field.
+// SetState sets the "state" field.
 func (ftc *FileTypeCreate) SetState(f filetype.State) *FileTypeCreate {
 	ftc.mutation.SetState(f)
 	return ftc
 }
 
-// SetNillableState sets the state field if the given value is not nil.
+// SetNillableState sets the "state" field if the given value is not nil.
 func (ftc *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
 	if f != nil {
 		ftc.SetState(*f)
@@ -60,13 +60,13 @@ func (ftc *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
 	return ftc
 }
 
-// AddFileIDs adds the files edge to File by ids.
+// AddFileIDs adds the "files" edge to the File entity by IDs.
 func (ftc *FileTypeCreate) AddFileIDs(ids ...string) *FileTypeCreate {
 	ftc.mutation.AddFileIDs(ids...)
 	return ftc
 }
 
-// AddFiles adds the files edges to File.
+// AddFiles adds the "files" edges to the File entity.
 func (ftc *FileTypeCreate) AddFiles(f ...*File) *FileTypeCreate {
 	ids := make([]string, len(f))
 	for i := range f {
@@ -214,7 +214,7 @@ func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {
 	return tr
 }
 
-// FileTypeCreateBulk is the builder for creating a bulk of FileType entities.
+// FileTypeCreateBulk is the builder for creating many FileType entities in bulk.
 type FileTypeCreateBulk struct {
 	config
 	builders []*FileTypeCreate

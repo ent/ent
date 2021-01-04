@@ -25,25 +25,25 @@ type PetUpdate struct {
 	mutation *PetMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the PetUpdate builder.
 func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
 	return pu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (pu *PetUpdate) SetName(s string) *PetUpdate {
 	pu.mutation.SetName(s)
 	return pu
 }
 
-// AddFriendIDs adds the friends edge to Pet by ids.
+// AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (pu *PetUpdate) AddFriendIDs(ids ...int) *PetUpdate {
 	pu.mutation.AddFriendIDs(ids...)
 	return pu
 }
 
-// AddFriends adds the friends edges to Pet.
+// AddFriends adds the "friends" edges to the Pet entity.
 func (pu *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -52,13 +52,13 @@ func (pu *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
 	return pu.AddFriendIDs(ids...)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
 	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	if id != nil {
 		pu = pu.SetOwnerID(*id)
@@ -66,7 +66,7 @@ func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	return pu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
@@ -76,19 +76,19 @@ func (pu *PetUpdate) Mutation() *PetMutation {
 	return pu.mutation
 }
 
-// ClearFriends clears all "friends" edges to type Pet.
+// ClearFriends clears all "friends" edges to the Pet entity.
 func (pu *PetUpdate) ClearFriends() *PetUpdate {
 	pu.mutation.ClearFriends()
 	return pu
 }
 
-// RemoveFriendIDs removes the friends edge to Pet by ids.
+// RemoveFriendIDs removes the "friends" edge to Pet entities by IDs.
 func (pu *PetUpdate) RemoveFriendIDs(ids ...int) *PetUpdate {
 	pu.mutation.RemoveFriendIDs(ids...)
 	return pu
 }
 
-// RemoveFriends removes friends edges to Pet.
+// RemoveFriends removes "friends" edges to Pet entities.
 func (pu *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -97,7 +97,7 @@ func (pu *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
 	return pu.RemoveFriendIDs(ids...)
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
 	return pu
@@ -286,19 +286,19 @@ type PetUpdateOne struct {
 	mutation *PetMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
 	puo.mutation.SetName(s)
 	return puo
 }
 
-// AddFriendIDs adds the friends edge to Pet by ids.
+// AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (puo *PetUpdateOne) AddFriendIDs(ids ...int) *PetUpdateOne {
 	puo.mutation.AddFriendIDs(ids...)
 	return puo
 }
 
-// AddFriends adds the friends edges to Pet.
+// AddFriends adds the "friends" edges to the Pet entity.
 func (puo *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -307,13 +307,13 @@ func (puo *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
 	return puo.AddFriendIDs(ids...)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
 	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetOwnerID(*id)
@@ -321,7 +321,7 @@ func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	return puo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
@@ -331,19 +331,19 @@ func (puo *PetUpdateOne) Mutation() *PetMutation {
 	return puo.mutation
 }
 
-// ClearFriends clears all "friends" edges to type Pet.
+// ClearFriends clears all "friends" edges to the Pet entity.
 func (puo *PetUpdateOne) ClearFriends() *PetUpdateOne {
 	puo.mutation.ClearFriends()
 	return puo
 }
 
-// RemoveFriendIDs removes the friends edge to Pet by ids.
+// RemoveFriendIDs removes the "friends" edge to Pet entities by IDs.
 func (puo *PetUpdateOne) RemoveFriendIDs(ids ...int) *PetUpdateOne {
 	puo.mutation.RemoveFriendIDs(ids...)
 	return puo
 }
 
-// RemoveFriends removes friends edges to Pet.
+// RemoveFriends removes "friends" edges to Pet entities.
 func (puo *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -352,13 +352,13 @@ func (puo *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
 	return puo.RemoveFriendIDs(ids...)
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
 	return puo
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Pet entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 	var (
 		err  error

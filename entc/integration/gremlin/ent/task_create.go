@@ -25,13 +25,13 @@ type TaskCreate struct {
 	hooks    []Hook
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tc *TaskCreate) SetPriority(s schema.Priority) *TaskCreate {
 	tc.mutation.SetPriority(s)
 	return tc
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tc *TaskCreate) SetNillablePriority(s *schema.Priority) *TaskCreate {
 	if s != nil {
 		tc.SetPriority(*s)
@@ -134,7 +134,7 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 	return v.ValueMap(true)
 }
 
-// TaskCreateBulk is the builder for creating a bulk of Task entities.
+// TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
 	config
 	builders []*TaskCreate

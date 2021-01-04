@@ -32,7 +32,7 @@ type TenantQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the TenantQuery builder.
 func (tq *TenantQuery) Where(ps ...predicate.Tenant) *TenantQuery {
 	tq.predicates = append(tq.predicates, ps...)
 	return tq
@@ -56,7 +56,8 @@ func (tq *TenantQuery) Order(o ...OrderFunc) *TenantQuery {
 	return tq
 }
 
-// First returns the first Tenant entity in the query. Returns *NotFoundError when no tenant was found.
+// First returns the first Tenant entity from the query.
+// Returns a *NotFoundError when no Tenant was found.
 func (tq *TenantQuery) First(ctx context.Context) (*Tenant, error) {
 	nodes, err := tq.Limit(1).All(ctx)
 	if err != nil {
@@ -77,7 +78,8 @@ func (tq *TenantQuery) FirstX(ctx context.Context) *Tenant {
 	return node
 }
 
-// FirstID returns the first Tenant id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Tenant ID from the query.
+// Returns a *NotFoundError when no Tenant ID was found.
 func (tq *TenantQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
@@ -99,7 +101,9 @@ func (tq *TenantQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Tenant entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Tenant entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Tenant entity is not found.
+// Returns a *NotFoundError when no Tenant entities are found.
 func (tq *TenantQuery) Only(ctx context.Context) (*Tenant, error) {
 	nodes, err := tq.Limit(2).All(ctx)
 	if err != nil {
@@ -124,7 +128,9 @@ func (tq *TenantQuery) OnlyX(ctx context.Context) *Tenant {
 	return node
 }
 
-// OnlyID returns the only Tenant id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Tenant ID in the query.
+// Returns a *NotSingularError when exactly one Tenant ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (tq *TenantQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
@@ -167,7 +173,7 @@ func (tq *TenantQuery) AllX(ctx context.Context) []*Tenant {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Tenant ids.
+// IDs executes the query and returns a list of Tenant IDs.
 func (tq *TenantQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := tq.Select(tenant.FieldID).Scan(ctx, &ids); err != nil {
@@ -219,7 +225,7 @@ func (tq *TenantQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the TenantQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (tq *TenantQuery) Clone() *TenantQuery {
 	if tq == nil {
@@ -237,7 +243,7 @@ func (tq *TenantQuery) Clone() *TenantQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -264,7 +270,8 @@ func (tq *TenantQuery) GroupBy(field string, fields ...string) *TenantGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -412,7 +419,7 @@ func (tq *TenantQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// TenantGroupBy is the builder for group-by Tenant entities.
+// TenantGroupBy is the group-by builder for Tenant entities.
 type TenantGroupBy struct {
 	config
 	fields []string
@@ -428,7 +435,7 @@ func (tgb *TenantGroupBy) Aggregate(fns ...AggregateFunc) *TenantGroupBy {
 	return tgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (tgb *TenantGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
@@ -445,7 +452,8 @@ func (tgb *TenantGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TenantGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(tgb.fields) > 1 {
 		return nil, errors.New("ent: TenantGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -466,7 +474,8 @@ func (tgb *TenantGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TenantGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = tgb.Strings(ctx); err != nil {
@@ -492,7 +501,8 @@ func (tgb *TenantGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TenantGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(tgb.fields) > 1 {
 		return nil, errors.New("ent: TenantGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -513,7 +523,8 @@ func (tgb *TenantGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TenantGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = tgb.Ints(ctx); err != nil {
@@ -539,7 +550,8 @@ func (tgb *TenantGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TenantGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(tgb.fields) > 1 {
 		return nil, errors.New("ent: TenantGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -560,7 +572,8 @@ func (tgb *TenantGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TenantGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = tgb.Float64s(ctx); err != nil {
@@ -586,7 +599,8 @@ func (tgb *TenantGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TenantGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(tgb.fields) > 1 {
 		return nil, errors.New("ent: TenantGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -607,7 +621,8 @@ func (tgb *TenantGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TenantGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = tgb.Bools(ctx); err != nil {
@@ -662,14 +677,14 @@ func (tgb *TenantGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(tgb.fields...)
 }
 
-// TenantSelect is the builder for select fields of Tenant entities.
+// TenantSelect is the builder for selecting fields of Tenant entities.
 type TenantSelect struct {
 	*TenantQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ts *TenantSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
@@ -685,7 +700,7 @@ func (ts *TenantSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (ts *TenantSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(ts.fields) > 1 {
 		return nil, errors.New("ent: TenantSelect.Strings is not achievable when selecting more than 1 field")
@@ -706,7 +721,7 @@ func (ts *TenantSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (ts *TenantSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ts.Strings(ctx); err != nil {
@@ -732,7 +747,7 @@ func (ts *TenantSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (ts *TenantSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ts.fields) > 1 {
 		return nil, errors.New("ent: TenantSelect.Ints is not achievable when selecting more than 1 field")
@@ -753,7 +768,7 @@ func (ts *TenantSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (ts *TenantSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ts.Ints(ctx); err != nil {
@@ -779,7 +794,7 @@ func (ts *TenantSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (ts *TenantSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ts.fields) > 1 {
 		return nil, errors.New("ent: TenantSelect.Float64s is not achievable when selecting more than 1 field")
@@ -800,7 +815,7 @@ func (ts *TenantSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (ts *TenantSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ts.Float64s(ctx); err != nil {
@@ -826,7 +841,7 @@ func (ts *TenantSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (ts *TenantSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ts.fields) > 1 {
 		return nil, errors.New("ent: TenantSelect.Bools is not achievable when selecting more than 1 field")
@@ -847,7 +862,7 @@ func (ts *TenantSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (ts *TenantSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ts.Bools(ctx); err != nil {

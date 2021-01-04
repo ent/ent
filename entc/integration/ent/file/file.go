@@ -87,7 +87,7 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultSize holds the default value on creation for the size field.
+	// DefaultSize holds the default value on creation for the "size" field.
 	DefaultSize int
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	SizeValidator func(int) error

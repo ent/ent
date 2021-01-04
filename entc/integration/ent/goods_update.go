@@ -24,7 +24,7 @@ type GoodsUpdate struct {
 	mutation *GoodsMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the GoodsUpdate builder.
 func (gu *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
 	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
 	return gu
@@ -127,7 +127,7 @@ func (guo *GoodsUpdateOne) Mutation() *GoodsMutation {
 	return guo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Goods entity.
 func (guo *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
 	var (
 		err  error

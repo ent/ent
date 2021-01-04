@@ -24,7 +24,7 @@ type NodeDelete struct {
 	mutation *NodeMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the NodeDelete builder.
 func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
 	nd.mutation.predicates = append(nd.mutation.predicates, ps...)
 	return nd

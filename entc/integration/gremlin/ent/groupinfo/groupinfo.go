@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	// DefaultMaxUsers holds the default value on creation for the max_users field.
+	// DefaultMaxUsers holds the default value on creation for the "max_users" field.
 	DefaultMaxUsers int
 )
 

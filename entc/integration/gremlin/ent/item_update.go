@@ -24,7 +24,7 @@ type ItemUpdate struct {
 	mutation *ItemMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the ItemUpdate builder.
 func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
 	iu.mutation.predicates = append(iu.mutation.predicates, ps...)
 	return iu
@@ -123,7 +123,7 @@ func (iuo *ItemUpdateOne) Mutation() *ItemMutation {
 	return iuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated Item entity.
 func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 	var (
 		err  error

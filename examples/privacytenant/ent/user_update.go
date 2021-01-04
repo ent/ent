@@ -27,19 +27,19 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetName(*s)
@@ -47,36 +47,36 @@ func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	return uu
 }
 
-// SetFoods sets the foods field.
+// SetFoods sets the "foods" field.
 func (uu *UserUpdate) SetFoods(s []string) *UserUpdate {
 	uu.mutation.SetFoods(s)
 	return uu
 }
 
-// ClearFoods clears the value of foods.
+// ClearFoods clears the value of the "foods" field.
 func (uu *UserUpdate) ClearFoods() *UserUpdate {
 	uu.mutation.ClearFoods()
 	return uu
 }
 
-// SetTenantID sets the tenant edge to Tenant by id.
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (uu *UserUpdate) SetTenantID(id int) *UserUpdate {
 	uu.mutation.SetTenantID(id)
 	return uu
 }
 
-// SetTenant sets the tenant edge to Tenant.
+// SetTenant sets the "tenant" edge to the Tenant entity.
 func (uu *UserUpdate) SetTenant(t *Tenant) *UserUpdate {
 	return uu.SetTenantID(t.ID)
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uu *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddGroupIDs(ids...)
 	return uu
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -90,25 +90,25 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearTenant clears the "tenant" edge to type Tenant.
+// ClearTenant clears the "tenant" edge to the Tenant entity.
 func (uu *UserUpdate) ClearTenant() *UserUpdate {
 	uu.mutation.ClearTenant()
 	return uu
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (uu *UserUpdate) ClearGroups() *UserUpdate {
 	uu.mutation.ClearGroups()
 	return uu
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveGroupIDs(ids...)
 	return uu
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -327,13 +327,13 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetName(*s)
@@ -341,36 +341,36 @@ func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetFoods sets the foods field.
+// SetFoods sets the "foods" field.
 func (uuo *UserUpdateOne) SetFoods(s []string) *UserUpdateOne {
 	uuo.mutation.SetFoods(s)
 	return uuo
 }
 
-// ClearFoods clears the value of foods.
+// ClearFoods clears the value of the "foods" field.
 func (uuo *UserUpdateOne) ClearFoods() *UserUpdateOne {
 	uuo.mutation.ClearFoods()
 	return uuo
 }
 
-// SetTenantID sets the tenant edge to Tenant by id.
+// SetTenantID sets the "tenant" edge to the Tenant entity by ID.
 func (uuo *UserUpdateOne) SetTenantID(id int) *UserUpdateOne {
 	uuo.mutation.SetTenantID(id)
 	return uuo
 }
 
-// SetTenant sets the tenant edge to Tenant.
+// SetTenant sets the "tenant" edge to the Tenant entity.
 func (uuo *UserUpdateOne) SetTenant(t *Tenant) *UserUpdateOne {
 	return uuo.SetTenantID(t.ID)
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uuo *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddGroupIDs(ids...)
 	return uuo
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -384,25 +384,25 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearTenant clears the "tenant" edge to type Tenant.
+// ClearTenant clears the "tenant" edge to the Tenant entity.
 func (uuo *UserUpdateOne) ClearTenant() *UserUpdateOne {
 	uuo.mutation.ClearTenant()
 	return uuo
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
 	uuo.mutation.ClearGroups()
 	return uuo
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveGroupIDs(ids...)
 	return uuo
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -411,7 +411,7 @@ func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	return uuo.RemoveGroupIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error

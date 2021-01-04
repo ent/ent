@@ -25,19 +25,19 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (pc *PetCreate) SetAge(i int) *PetCreate {
 	pc.mutation.SetAge(i)
 	return pc
 }
 
-// SetLicensedAt sets the licensed_at field.
+// SetLicensedAt sets the "licensed_at" field.
 func (pc *PetCreate) SetLicensedAt(t time.Time) *PetCreate {
 	pc.mutation.SetLicensedAt(t)
 	return pc
 }
 
-// SetNillableLicensedAt sets the licensed_at field if the given value is not nil.
+// SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
 func (pc *PetCreate) SetNillableLicensedAt(t *time.Time) *PetCreate {
 	if t != nil {
 		pc.SetLicensedAt(*t)
@@ -45,13 +45,13 @@ func (pc *PetCreate) SetNillableLicensedAt(t *time.Time) *PetCreate {
 	return pc
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
 	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	if id != nil {
 		pc = pc.SetOwnerID(*id)
@@ -59,7 +59,7 @@ func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	return pc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
 }
@@ -183,7 +183,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// PetCreateBulk is the builder for creating a bulk of Pet entities.
+// PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
 	builders []*PetCreate
@@ -240,7 +240,7 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 	v, err := pcb.Save(ctx)
 	if err != nil {

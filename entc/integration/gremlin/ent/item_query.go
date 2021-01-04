@@ -33,7 +33,7 @@ type ItemQuery struct {
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the ItemQuery builder.
 func (iq *ItemQuery) Where(ps ...predicate.Item) *ItemQuery {
 	iq.predicates = append(iq.predicates, ps...)
 	return iq
@@ -57,7 +57,8 @@ func (iq *ItemQuery) Order(o ...OrderFunc) *ItemQuery {
 	return iq
 }
 
-// First returns the first Item entity in the query. Returns *NotFoundError when no item was found.
+// First returns the first Item entity from the query.
+// Returns a *NotFoundError when no Item was found.
 func (iq *ItemQuery) First(ctx context.Context) (*Item, error) {
 	nodes, err := iq.Limit(1).All(ctx)
 	if err != nil {
@@ -78,7 +79,8 @@ func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
 	return node
 }
 
-// FirstID returns the first Item id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Item ID from the query.
+// Returns a *NotFoundError when no Item ID was found.
 func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
@@ -100,7 +102,9 @@ func (iq *ItemQuery) FirstIDX(ctx context.Context) string {
 	return id
 }
 
-// Only returns the only Item entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Item entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Item entity is not found.
+// Returns a *NotFoundError when no Item entities are found.
 func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
 	nodes, err := iq.Limit(2).All(ctx)
 	if err != nil {
@@ -125,7 +129,9 @@ func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
 	return node
 }
 
-// OnlyID returns the only Item id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Item ID in the query.
+// Returns a *NotSingularError when exactly one Item ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = iq.Limit(2).IDs(ctx); err != nil {
@@ -168,7 +174,7 @@ func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Item ids.
+// IDs executes the query and returns a list of Item IDs.
 func (iq *ItemQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
 	if err := iq.Select(item.FieldID).Scan(ctx, &ids); err != nil {
@@ -220,7 +226,7 @@ func (iq *ItemQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the ItemQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (iq *ItemQuery) Clone() *ItemQuery {
 	if iq == nil {
@@ -238,7 +244,7 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	group := &ItemGroupBy{config: iq.config}
@@ -252,7 +258,8 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
 	iq.fields = append([]string{field}, fields...)
 	return &ItemSelect{ItemQuery: iq}
@@ -337,7 +344,7 @@ func (iq *ItemQuery) gremlinQuery() *dsl.Traversal {
 	return v
 }
 
-// ItemGroupBy is the builder for group-by Item entities.
+// ItemGroupBy is the group-by builder for Item entities.
 type ItemGroupBy struct {
 	config
 	fields []string
@@ -353,7 +360,7 @@ func (igb *ItemGroupBy) Aggregate(fns ...AggregateFunc) *ItemGroupBy {
 	return igb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := igb.path(ctx)
 	if err != nil {
@@ -370,7 +377,8 @@ func (igb *ItemGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (igb *ItemGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(igb.fields) > 1 {
 		return nil, errors.New("ent: ItemGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -391,7 +399,8 @@ func (igb *ItemGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (igb *ItemGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = igb.Strings(ctx); err != nil {
@@ -417,7 +426,8 @@ func (igb *ItemGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (igb *ItemGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(igb.fields) > 1 {
 		return nil, errors.New("ent: ItemGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -438,7 +448,8 @@ func (igb *ItemGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (igb *ItemGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = igb.Ints(ctx); err != nil {
@@ -464,7 +475,8 @@ func (igb *ItemGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (igb *ItemGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(igb.fields) > 1 {
 		return nil, errors.New("ent: ItemGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -485,7 +497,8 @@ func (igb *ItemGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (igb *ItemGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = igb.Float64s(ctx); err != nil {
@@ -511,7 +524,8 @@ func (igb *ItemGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (igb *ItemGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(igb.fields) > 1 {
 		return nil, errors.New("ent: ItemGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -532,7 +546,8 @@ func (igb *ItemGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (igb *ItemGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = igb.Bools(ctx); err != nil {
@@ -595,14 +610,14 @@ func (igb *ItemGroupBy) gremlinQuery() *dsl.Traversal {
 		Next()
 }
 
-// ItemSelect is the builder for select fields of Item entities.
+// ItemSelect is the builder for selecting fields of Item entities.
 type ItemSelect struct {
 	*ItemQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
@@ -618,7 +633,7 @@ func (is *ItemSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(is.fields) > 1 {
 		return nil, errors.New("ent: ItemSelect.Strings is not achievable when selecting more than 1 field")
@@ -639,7 +654,7 @@ func (is *ItemSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (is *ItemSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = is.Strings(ctx); err != nil {
@@ -665,7 +680,7 @@ func (is *ItemSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(is.fields) > 1 {
 		return nil, errors.New("ent: ItemSelect.Ints is not achievable when selecting more than 1 field")
@@ -686,7 +701,7 @@ func (is *ItemSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = is.Ints(ctx); err != nil {
@@ -712,7 +727,7 @@ func (is *ItemSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(is.fields) > 1 {
 		return nil, errors.New("ent: ItemSelect.Float64s is not achievable when selecting more than 1 field")
@@ -733,7 +748,7 @@ func (is *ItemSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = is.Float64s(ctx); err != nil {
@@ -759,7 +774,7 @@ func (is *ItemSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(is.fields) > 1 {
 		return nil, errors.New("ent: ItemSelect.Bools is not achievable when selecting more than 1 field")
@@ -780,7 +795,7 @@ func (is *ItemSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (is *ItemSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = is.Bools(ctx); err != nil {

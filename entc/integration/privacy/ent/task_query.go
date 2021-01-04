@@ -39,7 +39,7 @@ type TaskQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the TaskQuery builder.
 func (tq *TaskQuery) Where(ps ...predicate.Task) *TaskQuery {
 	tq.predicates = append(tq.predicates, ps...)
 	return tq
@@ -63,7 +63,7 @@ func (tq *TaskQuery) Order(o ...OrderFunc) *TaskQuery {
 	return tq
 }
 
-// QueryTeams chains the current query on the teams edge.
+// QueryTeams chains the current query on the "teams" edge.
 func (tq *TaskQuery) QueryTeams() *TeamQuery {
 	query := &TeamQuery{config: tq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -85,7 +85,7 @@ func (tq *TaskQuery) QueryTeams() *TeamQuery {
 	return query
 }
 
-// QueryOwner chains the current query on the owner edge.
+// QueryOwner chains the current query on the "owner" edge.
 func (tq *TaskQuery) QueryOwner() *UserQuery {
 	query := &UserQuery{config: tq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
@@ -107,7 +107,8 @@ func (tq *TaskQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// First returns the first Task entity in the query. Returns *NotFoundError when no task was found.
+// First returns the first Task entity from the query.
+// Returns a *NotFoundError when no Task was found.
 func (tq *TaskQuery) First(ctx context.Context) (*Task, error) {
 	nodes, err := tq.Limit(1).All(ctx)
 	if err != nil {
@@ -128,7 +129,8 @@ func (tq *TaskQuery) FirstX(ctx context.Context) *Task {
 	return node
 }
 
-// FirstID returns the first Task id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Task ID from the query.
+// Returns a *NotFoundError when no Task ID was found.
 func (tq *TaskQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
@@ -150,7 +152,9 @@ func (tq *TaskQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Task entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Task entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Task entity is not found.
+// Returns a *NotFoundError when no Task entities are found.
 func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
 	nodes, err := tq.Limit(2).All(ctx)
 	if err != nil {
@@ -175,7 +179,9 @@ func (tq *TaskQuery) OnlyX(ctx context.Context) *Task {
 	return node
 }
 
-// OnlyID returns the only Task id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Task ID in the query.
+// Returns a *NotSingularError when exactly one Task ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (tq *TaskQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
@@ -218,7 +224,7 @@ func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Task ids.
+// IDs executes the query and returns a list of Task IDs.
 func (tq *TaskQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := tq.Select(task.FieldID).Scan(ctx, &ids); err != nil {
@@ -270,7 +276,7 @@ func (tq *TaskQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the TaskQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (tq *TaskQuery) Clone() *TaskQuery {
 	if tq == nil {
@@ -290,8 +296,8 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 	}
 }
 
-//  WithTeams tells the query-builder to eager-loads the nodes that are connected to
-// the "teams" edge. The optional arguments used to configure the query builder of the edge.
+// WithTeams tells the query-builder to eager-load the nodes that are connected to
+// the "teams" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TaskQuery) WithTeams(opts ...func(*TeamQuery)) *TaskQuery {
 	query := &TeamQuery{config: tq.config}
 	for _, opt := range opts {
@@ -301,8 +307,8 @@ func (tq *TaskQuery) WithTeams(opts ...func(*TeamQuery)) *TaskQuery {
 	return tq
 }
 
-//  WithOwner tells the query-builder to eager-loads the nodes that are connected to
-// the "owner" edge. The optional arguments used to configure the query builder of the edge.
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TaskQuery) WithOwner(opts ...func(*UserQuery)) *TaskQuery {
 	query := &UserQuery{config: tq.config}
 	for _, opt := range opts {
@@ -312,7 +318,7 @@ func (tq *TaskQuery) WithOwner(opts ...func(*UserQuery)) *TaskQuery {
 	return tq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -339,7 +345,8 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -589,7 +596,7 @@ func (tq *TaskQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// TaskGroupBy is the builder for group-by Task entities.
+// TaskGroupBy is the group-by builder for Task entities.
 type TaskGroupBy struct {
 	config
 	fields []string
@@ -605,7 +612,7 @@ func (tgb *TaskGroupBy) Aggregate(fns ...AggregateFunc) *TaskGroupBy {
 	return tgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (tgb *TaskGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := tgb.path(ctx)
 	if err != nil {
@@ -622,7 +629,8 @@ func (tgb *TaskGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TaskGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(tgb.fields) > 1 {
 		return nil, errors.New("ent: TaskGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -643,7 +651,8 @@ func (tgb *TaskGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TaskGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = tgb.Strings(ctx); err != nil {
@@ -669,7 +678,8 @@ func (tgb *TaskGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TaskGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(tgb.fields) > 1 {
 		return nil, errors.New("ent: TaskGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -690,7 +700,8 @@ func (tgb *TaskGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TaskGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = tgb.Ints(ctx); err != nil {
@@ -716,7 +727,8 @@ func (tgb *TaskGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TaskGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(tgb.fields) > 1 {
 		return nil, errors.New("ent: TaskGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -737,7 +749,8 @@ func (tgb *TaskGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TaskGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = tgb.Float64s(ctx); err != nil {
@@ -763,7 +776,8 @@ func (tgb *TaskGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TaskGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(tgb.fields) > 1 {
 		return nil, errors.New("ent: TaskGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -784,7 +798,8 @@ func (tgb *TaskGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (tgb *TaskGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = tgb.Bools(ctx); err != nil {
@@ -839,14 +854,14 @@ func (tgb *TaskGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(tgb.fields...)
 }
 
-// TaskSelect is the builder for select fields of Task entities.
+// TaskSelect is the builder for selecting fields of Task entities.
 type TaskSelect struct {
 	*TaskQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
@@ -862,7 +877,7 @@ func (ts *TaskSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (ts *TaskSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(ts.fields) > 1 {
 		return nil, errors.New("ent: TaskSelect.Strings is not achievable when selecting more than 1 field")
@@ -883,7 +898,7 @@ func (ts *TaskSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (ts *TaskSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ts.Strings(ctx); err != nil {
@@ -909,7 +924,7 @@ func (ts *TaskSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (ts *TaskSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ts.fields) > 1 {
 		return nil, errors.New("ent: TaskSelect.Ints is not achievable when selecting more than 1 field")
@@ -930,7 +945,7 @@ func (ts *TaskSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (ts *TaskSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ts.Ints(ctx); err != nil {
@@ -956,7 +971,7 @@ func (ts *TaskSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (ts *TaskSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ts.fields) > 1 {
 		return nil, errors.New("ent: TaskSelect.Float64s is not achievable when selecting more than 1 field")
@@ -977,7 +992,7 @@ func (ts *TaskSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (ts *TaskSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ts.Float64s(ctx); err != nil {
@@ -1003,7 +1018,7 @@ func (ts *TaskSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (ts *TaskSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ts.fields) > 1 {
 		return nil, errors.New("ent: TaskSelect.Bools is not achievable when selecting more than 1 field")
@@ -1024,7 +1039,7 @@ func (ts *TaskSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (ts *TaskSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ts.Bools(ctx); err != nil {

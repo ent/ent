@@ -32,7 +32,7 @@ type CommentQuery struct {
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the CommentQuery builder.
 func (cq *CommentQuery) Where(ps ...predicate.Comment) *CommentQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
@@ -56,7 +56,8 @@ func (cq *CommentQuery) Order(o ...OrderFunc) *CommentQuery {
 	return cq
 }
 
-// First returns the first Comment entity in the query. Returns *NotFoundError when no comment was found.
+// First returns the first Comment entity from the query.
+// Returns a *NotFoundError when no Comment was found.
 func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
 	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
@@ -77,7 +78,8 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 	return node
 }
 
-// FirstID returns the first Comment id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Comment ID from the query.
+// Returns a *NotFoundError when no Comment ID was found.
 func (cq *CommentQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
@@ -99,7 +101,9 @@ func (cq *CommentQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns the only Comment entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Comment entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Comment entity is not found.
+// Returns a *NotFoundError when no Comment entities are found.
 func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
 	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
@@ -124,7 +128,9 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 	return node
 }
 
-// OnlyID returns the only Comment id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Comment ID in the query.
+// Returns a *NotSingularError when exactly one Comment ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (cq *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
@@ -167,7 +173,7 @@ func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Comment ids.
+// IDs executes the query and returns a list of Comment IDs.
 func (cq *CommentQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
 	if err := cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
@@ -219,7 +225,7 @@ func (cq *CommentQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the CommentQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (cq *CommentQuery) Clone() *CommentQuery {
 	if cq == nil {
@@ -237,7 +243,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 	}
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -264,7 +270,8 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -406,7 +413,7 @@ func (cq *CommentQuery) sqlQuery() *sql.Selector {
 	return selector
 }
 
-// CommentGroupBy is the builder for group-by Comment entities.
+// CommentGroupBy is the group-by builder for Comment entities.
 type CommentGroupBy struct {
 	config
 	fields []string
@@ -422,7 +429,7 @@ func (cgb *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
 	return cgb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (cgb *CommentGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
@@ -439,7 +446,8 @@ func (cgb *CommentGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CommentGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CommentGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -460,7 +468,8 @@ func (cgb *CommentGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CommentGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cgb.Strings(ctx); err != nil {
@@ -486,7 +495,8 @@ func (cgb *CommentGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CommentGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CommentGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -507,7 +517,8 @@ func (cgb *CommentGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CommentGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cgb.Ints(ctx); err != nil {
@@ -533,7 +544,8 @@ func (cgb *CommentGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CommentGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CommentGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -554,7 +566,8 @@ func (cgb *CommentGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CommentGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cgb.Float64s(ctx); err != nil {
@@ -580,7 +593,8 @@ func (cgb *CommentGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CommentGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
 		return nil, errors.New("ent: CommentGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -601,7 +615,8 @@ func (cgb *CommentGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (cgb *CommentGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cgb.Bools(ctx); err != nil {
@@ -656,14 +671,14 @@ func (cgb *CommentGroupBy) sqlQuery() *sql.Selector {
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }
 
-// CommentSelect is the builder for select fields of Comment entities.
+// CommentSelect is the builder for selecting fields of Comment entities.
 type CommentSelect struct {
 	*CommentQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
@@ -679,7 +694,7 @@ func (cs *CommentSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CommentSelect.Strings is not achievable when selecting more than 1 field")
@@ -700,7 +715,7 @@ func (cs *CommentSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cs.Strings(ctx); err != nil {
@@ -726,7 +741,7 @@ func (cs *CommentSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CommentSelect.Ints is not achievable when selecting more than 1 field")
@@ -747,7 +762,7 @@ func (cs *CommentSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cs.Ints(ctx); err != nil {
@@ -773,7 +788,7 @@ func (cs *CommentSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CommentSelect.Float64s is not achievable when selecting more than 1 field")
@@ -794,7 +809,7 @@ func (cs *CommentSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cs.Float64s(ctx); err != nil {
@@ -820,7 +835,7 @@ func (cs *CommentSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
 		return nil, errors.New("ent: CommentSelect.Bools is not achievable when selecting more than 1 field")
@@ -841,7 +856,7 @@ func (cs *CommentSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (cs *CommentSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cs.Bools(ctx); err != nil {

@@ -18,7 +18,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -4543,7 +4543,7 @@ func UUIDNotNil() predicate.FieldType {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.FieldType) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -4554,7 +4554,7 @@ func And(predicates ...predicate.FieldType) predicate.FieldType {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.FieldType) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

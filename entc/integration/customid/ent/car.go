@@ -119,20 +119,20 @@ func (c *Car) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryOwner queries the owner edge of the Car.
+// QueryOwner queries the "owner" edge of the Car entity.
 func (c *Car) QueryOwner() *PetQuery {
 	return (&CarClient{config: c.config}).QueryOwner(c)
 }
 
 // Update returns a builder for updating this Car.
-// Note that, you need to call Car.Unwrap() before calling this method, if this Car
+// Note that you need to call Car.Unwrap() before calling this method if this Car
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Car) Update() *CarUpdateOne {
 	return (&CarClient{config: c.config}).UpdateOne(c)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Car entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (c *Car) Unwrap() *Car {
 	tx, ok := c.config.driver.(*txDriver)
 	if !ok {

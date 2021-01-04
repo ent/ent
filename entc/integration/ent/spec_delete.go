@@ -24,7 +24,7 @@ type SpecDelete struct {
 	mutation *SpecMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where adds a new predicate to the SpecDelete builder.
 func (sd *SpecDelete) Where(ps ...predicate.Spec) *SpecDelete {
 	sd.mutation.predicates = append(sd.mutation.predicates, ps...)
 	return sd
