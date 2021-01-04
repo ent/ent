@@ -157,9 +157,9 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 }
 
 {{ range $f := $n.Fields }}
-	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
-	{{ $func := print "Set" $f.StructField }}
 	{{ $const := print $n.Package "." $f.Constant }}
+	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
+	{{ $func := $f.MutationSet }}
 	// {{ $func }} sets the {{ $f.Name }} field.
 	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
 		m.{{ $f.BuilderField }} = &{{ $p }}
