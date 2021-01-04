@@ -612,6 +612,18 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 
 // defaults sets the default values of the builder before save.
 func (ftc *FieldTypeCreate) defaults() {
+	if _, ok := ftc.mutation.Str(); !ok {
+		v := fieldtype.DefaultStr()
+		ftc.mutation.SetStr(v)
+	}
+	if _, ok := ftc.mutation.NullStr(); !ok {
+		v := fieldtype.DefaultNullStr()
+		ftc.mutation.SetNullStr(v)
+	}
+	if _, ok := ftc.mutation.IP(); !ok {
+		v := fieldtype.DefaultIP()
+		ftc.mutation.SetIP(v)
+	}
 	if _, ok := ftc.mutation.Role(); !ok {
 		v := fieldtype.DefaultRole
 		ftc.mutation.SetRole(v)

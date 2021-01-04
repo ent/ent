@@ -185,9 +185,7 @@ func TestBytes(t *testing.T) {
 
 	fd = field.Bytes("uuid").
 		GoType(&uuid.UUID{}).
-		DefaultFunc(func() uuid.UUID {
-			return uuid.New()
-		}).
+		DefaultFunc(uuid.New).
 		Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.Equal(t, "uuid.UUID", fd.Info.Ident)
