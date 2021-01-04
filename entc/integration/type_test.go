@@ -61,8 +61,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNillableInt64(math.MinInt64).
 		SetDir("dir").
 		SetNdir("ndir").
-		SetStr(sql.NullString{String: "str", Valid: true}).
-		SetNullStr(sql.NullString{String: "str", Valid: true}).
+		SetNullStr(sql.NullString{String: "not-default", Valid: true}).
 		SetLink(schema.Link{URL: link}).
 		SetNullLink(schema.Link{URL: link}).
 		SetRole(role.Admin).
@@ -79,10 +78,11 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(http.Dir("dir"), ft.Dir)
 	require.NotNil(*ft.Ndir)
 	require.Equal(http.Dir("ndir"), *ft.Ndir)
-	require.Equal("str", ft.Str.String)
-	require.Equal("str", ft.NullStr.String)
+	require.Equal("default", ft.Str.String)
+	require.Equal("not-default", ft.NullStr.String)
 	require.Equal("localhost", ft.Link.String())
 	require.Equal("localhost", ft.NullLink.String())
+	require.Equal(net.IP("127.0.0.1").String(), ft.IP.String())
 	mac, err := net.ParseMAC("3b:b3:6b:3c:10:79")
 	require.NoError(err)
 	dt, err := time.Parse(time.RFC3339, "1906-01-02T00:00:00+00:00")

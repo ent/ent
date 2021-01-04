@@ -79,11 +79,17 @@ func (FieldType) Fields() []ent.Field {
 			GoType(http.Dir("ndir")),
 		field.String("str").
 			Optional().
-			GoType(&sql.NullString{}),
+			GoType(&sql.NullString{}).
+			DefaultFunc(func() sql.NullString {
+				return sql.NullString{String: "default", Valid: true}
+			}),
 		field.String("null_str").
 			Optional().
 			Nillable().
-			GoType(&sql.NullString{}),
+			GoType(&sql.NullString{}).
+			DefaultFunc(func() sql.NullString {
+				return sql.NullString{String: "default", Valid: true}
+			}),
 		field.String("link").
 			Optional().
 			NotEmpty().
@@ -107,7 +113,10 @@ func (FieldType) Fields() []ent.Field {
 			GoType(&sql.NullTime{}),
 		field.Bytes("ip").
 			Optional().
-			GoType(net.IP("127.0.0.1")),
+			GoType(net.IP("127.0.0.1")).
+			DefaultFunc(func() net.IP {
+				return net.IP("127.0.0.1")
+			}),
 		field.Int("null_int64").
 			Optional().
 			GoType(&sql.NullInt64{}),

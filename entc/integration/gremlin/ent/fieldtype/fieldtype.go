@@ -7,7 +7,9 @@
 package fieldtype
 
 import (
+	"database/sql"
 	"fmt"
+	"net"
 
 	"github.com/facebook/ent/entc/integration/ent/role"
 )
@@ -118,8 +120,14 @@ var (
 	ValidateOptionalInt32Validator func(int32) error
 	// NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
 	NdirValidator func(string) error
+	// DefaultStr holds the default value on creation for the str field.
+	DefaultStr func() sql.NullString
+	// DefaultNullStr holds the default value on creation for the null_str field.
+	DefaultNullStr func() sql.NullString
 	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	LinkValidator func(string) error
+	// DefaultIP holds the default value on creation for the ip field.
+	DefaultIP func() net.IP
 	// MACValidator is a validator for the "mac" field. It is called by the builders before save.
 	MACValidator func(string) error
 )

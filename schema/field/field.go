@@ -213,7 +213,7 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 //	field.String("cuid").
 //		DefaultFunc(cuid.New)
 //
-func (b *stringBuilder) DefaultFunc(fn func() string) *stringBuilder {
+func (b *stringBuilder) DefaultFunc(fn interface{}) *stringBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -295,6 +295,9 @@ func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *stringBuilder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(stringType)
+	}
 	return b.desc
 }
 
@@ -500,7 +503,7 @@ func (b *bytesBuilder) Default(v []byte) *bytesBuilder {
 //	field.Bytes("cuid").
 //		DefaultFunc(cuid.New)
 //
-func (b *bytesBuilder) DefaultFunc(fn func() []byte) *bytesBuilder {
+func (b *bytesBuilder) DefaultFunc(fn interface{}) *bytesBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -590,6 +593,9 @@ func (b *bytesBuilder) SchemaType(types map[string]string) *bytesBuilder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *bytesBuilder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(bytesType)
+	}
 	return b.desc
 }
 
@@ -911,6 +917,7 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		Ident:   tv.String(),
 		PkgPath: tv.PkgPath(),
 		RType: &RType{
+			rtype:   tv,
 			Name:    tv.Name(),
 			Kind:    tv.Kind(),
 			PkgPath: tv.PkgPath(),
@@ -946,6 +953,24 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		}
 	}
 	d.Info = info
+}
+
+func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {
+	typ := reflect.TypeOf(d.Default)
+	if typ.Kind() != reflect.Func || d.Err != nil {
+		return
+	}
+	err := fmt.Errorf("expect type (func() %s) for default value", d.Info)
+	if typ.NumIn() != 0 || typ.NumOut() != 1 {
+		d.Err = err
+	}
+	rtype := expectType
+	if d.Info.RType != nil {
+		rtype = d.Info.RType.rtype
+	}
+	if !typ.Out(0).AssignableTo(rtype) {
+		d.Err = err
+	}
 }
 
 var (

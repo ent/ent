@@ -7,8 +7,10 @@
 package ent
 
 import (
+	"net"
 	"time"
 
+	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent/card"
 	"github.com/facebook/ent/entc/integration/ent/fieldtype"
 	"github.com/facebook/ent/entc/integration/ent/file"
@@ -56,10 +58,22 @@ func init() {
 	fieldtypeDescNdir := fieldtypeFields[27].Descriptor()
 	// fieldtype.NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
 	fieldtype.NdirValidator = fieldtypeDescNdir.Validators[0].(func(string) error)
+	// fieldtypeDescStr is the schema descriptor for str field.
+	fieldtypeDescStr := fieldtypeFields[28].Descriptor()
+	// fieldtype.DefaultStr holds the default value on creation for the str field.
+	fieldtype.DefaultStr = fieldtypeDescStr.Default.(func() sql.NullString)
+	// fieldtypeDescNullStr is the schema descriptor for null_str field.
+	fieldtypeDescNullStr := fieldtypeFields[29].Descriptor()
+	// fieldtype.DefaultNullStr holds the default value on creation for the null_str field.
+	fieldtype.DefaultNullStr = fieldtypeDescNullStr.Default.(func() sql.NullString)
 	// fieldtypeDescLink is the schema descriptor for link field.
 	fieldtypeDescLink := fieldtypeFields[30].Descriptor()
 	// fieldtype.LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	fieldtype.LinkValidator = fieldtypeDescLink.Validators[0].(func(string) error)
+	// fieldtypeDescIP is the schema descriptor for ip field.
+	fieldtypeDescIP := fieldtypeFields[36].Descriptor()
+	// fieldtype.DefaultIP holds the default value on creation for the ip field.
+	fieldtype.DefaultIP = fieldtypeDescIP.Default.(func() net.IP)
 	// fieldtypeDescMAC is the schema descriptor for mac field.
 	fieldtypeDescMAC := fieldtypeFields[45].Descriptor()
 	// fieldtype.MACValidator is a validator for the "mac" field. It is called by the builders before save.
