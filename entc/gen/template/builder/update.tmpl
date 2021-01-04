@@ -17,7 +17,6 @@ import (
 	{{- end }}
 )
 
-
 {{ $builder := $.UpdateName }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
@@ -28,7 +27,7 @@ type {{ $builder }} struct {
 	{{- template "update/fields" $ -}}
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the {{ $builder }} builder.
 func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
 	{{ $mutation }}.predicates = append({{ $mutation }}.predicates, ps...)
 	return {{ $receiver }}
@@ -134,7 +133,7 @@ type {{ $onebuilder }} struct {
 	{{ template "update/edges" . }}
 {{ end }}
 
-// Save executes the query and returns the updated entity.
+// Save executes the query and returns the updated {{ $.Name }} entity.
 func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name }}, error) {
 	var (
 		err error
@@ -223,7 +222,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 
 {{ range $e := $.Edges }}
 	{{ $func := $e.MutationClear }}
-	// {{ $func }} clears {{ if $e.Unique }}the "{{ $e.Name }}" edge{{ else }}all "{{ $e.Name }}" edges{{ end }} to type {{ $e.Type.Name }}.
+	// {{ $func }} clears {{ if $e.Unique }}the "{{ $e.Name }}" edge{{ else }}all "{{ $e.Name }}" edges{{ end }} to the {{ $e.Type.Name }} entity.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
 		{{ $mutation }}.{{ $func }}()
 		return {{ $receiver }}
@@ -233,13 +232,13 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{/* if the name of the parameter conflicts with the receiver name */}}
 		{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
 		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
-		// {{ $idsFunc }} removes the {{ $e.Name }} edge to {{ $e.Type.Name }} by ids.
+		// {{ $idsFunc }} removes the "{{ $e.Name }}" edge to {{ $e.Type.Name }} entities by IDs.
 		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} {
 			{{ $mutation }}.{{ $idsFunc }}(ids...)
 			return {{ $receiver }}
 		}
 		{{ $func := print "Remove" $e.StructField }}
-		// {{ $func }} removes {{ $e.Name }} edges to {{ $e.Type.Name }}.
+		// {{ $func }} removes "{{ $e.Name }}" edges to {{ $e.Type.Name }} entities.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} ...*{{ $e.Type.Name }}) *{{ $builder }} {
 			ids := make([]{{ $e.Type.ID.Type }}, len({{ $p }}))
 			{{ $i := "i" }}{{ if eq $i $p }}{{ $i = "j" }}{{ end -}}

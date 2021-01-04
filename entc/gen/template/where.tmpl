@@ -12,7 +12,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}(
 		{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
@@ -115,7 +115,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	}
 {{ end }}
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}(
 		{{- $tmpl = printf "dialect/%s/predicate/and" $.Storage }}
@@ -123,7 +123,7 @@ func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	)
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}(
 		{{- $tmpl = printf "dialect/%s/predicate/or" $.Storage }}

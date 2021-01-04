@@ -27,7 +27,7 @@ func isSQLConstraintError(err error) (*ConstraintError, bool) {
 	return nil, false
 }
 
-// rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
+// rollback calls tx.Rollback and wraps the given error with the rollback error if present.
 func rollback(tx dialect.Tx, err error) error {
 	if rerr := tx.Rollback(); rerr != nil {
 		err = fmt.Errorf("%s: %v", err.Error(), rerr)

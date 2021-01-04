@@ -133,7 +133,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 {{ $bulk := printf "%sCreateBulk" (pascal $.Name) }}
 {{ $receiver = receiver $bulk }}
 
-// {{ $bulk }} is the builder for creating a bulk of {{ $.Name }} entities.
+// {{ $bulk }} is the builder for creating many {{ $.Name }} entities in bulk.
 type {{ $bulk }} struct {
 	config
 	builders []*{{  $builder }}
