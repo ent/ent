@@ -1819,7 +1819,6 @@ func (s *Selector) Query() (string, []interface{}) {
 	b.WriteString(" FROM ")
 	switch t := s.from.(type) {
 	case *SelectTable:
-		fmt.Println("ONE", s.dialect)
 		t.SetDialect(s.dialect)
 		b.WriteString(t.ref())
 	case *Selector:
