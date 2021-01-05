@@ -128,6 +128,124 @@ func TestNeighbors(t *testing.T) {
 			wantQuery: "SELECT * FROM `groups` JOIN (SELECT `user_groups`.`group_id` FROM `user_groups` WHERE `user_groups`.`user_id` = ?) AS `t1` ON `groups`.`id` = `t1`.`group_id`",
 			wantArgs:  []interface{}{2},
 		},
+		{
+			name: "schema/O2O/1type",
+			// Since the relation is on the same sql.Table,
+			// V used as a reference value.
+			input: NewStep(
+				From("users", "id", 1),
+				To("users", "id"),
+				ToSchema("mydb"),
+				Edge(O2O, false, "users", "spouse_id"),
+			),
+			wantQuery: "SELECT * FROM `mydb`.`users` WHERE `spouse_id` = ?",
+			wantArgs:  []interface{}{1},
+		},
+		{
+			name: "schema/O2O/1type/inverse",
+			input: NewStep(
+				From("nodes", "id", 1),
+				To("nodes", "id"),
+				ToSchema("mydb"),
+				Edge(O2O, true, "nodes", "prev_id"),
+				EdgeSchema("mydb"),
+			),
+			wantQuery: "SELECT * FROM `mydb`.`nodes` JOIN (SELECT `prev_id` FROM `mydb`.`nodes` WHERE `id` = ?) AS `t1` ON `mydb`.`nodes`.`id` = `t1`.`prev_id`",
+			wantArgs:  []interface{}{1},
+		},
+		{
+			name: "schema/O2M/1type",
+			input: NewStep(
+				From("users", "id", 1),
+				To("users", "id"),
+				ToSchema("mydb"),
+				Edge(O2M, false, "users", "parent_id"),
+			),
+			wantQuery: "SELECT * FROM `mydb`.`users` WHERE `parent_id` = ?",
+			wantArgs:  []interface{}{1},
+		},
+		{
+			name: "schema/O2O/2types",
+			input: NewStep(
+				From("users", "id", 2),
+				To("card", "id"),
+				ToSchema("mydb"),
+				Edge(O2O, false, "cards", "owner_id"),
+			),
+			wantQuery: "SELECT * FROM `mydb`.`card` WHERE `owner_id` = ?",
+			wantArgs:  []interface{}{2},
+		},
+		{
+			name: "schema/O2O/2types/inverse",
+			input: NewStep(
+				From("cards", "id", 2),
+				To("users", "id"),
+				ToSchema("mydb"),
+				Edge(O2O, true, "cards", "owner_id"),
+				EdgeSchema("mydb"),
+			),
+			wantQuery: "SELECT * FROM `mydb`.`users` JOIN (SELECT `owner_id` FROM `mydb`.`cards` WHERE `id` = ?) AS `t1` ON `mydb`.`users`.`id` = `t1`.`owner_id`",
+			wantArgs:  []interface{}{2},
+		},
+		{
+			name: "schema/O2M/2types",
+			input: NewStep(
+				From("users", "id", 1),
+				To("pets", "id"),
+				ToSchema("mydb"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
+			wantQuery: "SELECT * FROM `mydb`.`pets` WHERE `owner_id` = ?",
+			wantArgs:  []interface{}{1},
+		},
+		{
+			name: "schema/M2O/2types/inverse",
+			input: NewStep(
+				From("pets", "id", 2),
+				To("users", "id"),
+				ToSchema("s1"),
+				Edge(M2O, true, "pets", "owner_id"),
+				EdgeSchema("s2"),
+			),
+			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `owner_id` FROM `s2`.`pets` WHERE `id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`owner_id`",
+			wantArgs:  []interface{}{2},
+		},
+		{
+			name: "schema/M2O/1type/inverse",
+			input: NewStep(
+				From("users", "id", 2),
+				To("users", "id"),
+				ToSchema("s1"),
+				Edge(M2O, true, "users", "parent_id"),
+				EdgeSchema("s1"),
+			),
+			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `parent_id` FROM `s1`.`users` WHERE `id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`parent_id`",
+			wantArgs:  []interface{}{2},
+		},
+		{
+			name: "schema/M2M/2type",
+			input: NewStep(
+				From("groups", "id", 2),
+				To("users", "id"),
+				ToSchema("s1"),
+				Edge(M2M, false, "user_groups", "group_id", "user_id"),
+				EdgeSchema("s2"),
+			),
+			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `s2`.`user_groups`.`user_id` FROM `s2`.`user_groups` WHERE `s2`.`user_groups`.`group_id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`user_id`",
+			wantArgs:  []interface{}{2},
+		},
+		{
+			name: "schema/M2M/2type/inverse",
+			input: NewStep(
+				From("users", "id", 2),
+				To("groups", "id"),
+				ToSchema("s1"),
+				Edge(M2M, true, "user_groups", "group_id", "user_id"),
+				EdgeSchema("s2"),
+			),
+			wantQuery: "SELECT * FROM `s1`.`groups` JOIN (SELECT `s2`.`user_groups`.`group_id` FROM `s2`.`user_groups` WHERE `s2`.`user_groups`.`user_id` = ?) AS `t1` ON `s1`.`groups`.`id` = `t1`.`group_id`",
+			wantArgs:  []interface{}{2},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -202,6 +320,70 @@ JOIN
      (SELECT "groups"."id"
       FROM "groups"
       WHERE "name" = $1) AS "t1" ON "user_groups"."group_id" = "t1"."id") AS "t1" ON "users"."id" = "t1"."user_id"`,
+			wantArgs: []interface{}{"GitHub"},
+		},
+		{
+			name: "schema/O2M/2types",
+			input: NewStep(
+				From("users", "id", sql.Select().From(sql.Table("users").Schema("s2")).Where(sql.EQ("name", "a8m"))),
+				To("pets", "id"),
+				ToSchema("s1"),
+				Edge(O2M, false, "users", "owner_id"),
+			),
+			wantQuery: `SELECT * FROM "s1"."pets" JOIN (SELECT "s2"."users"."id" FROM "s2"."users" WHERE "name" = $1) AS "t1" ON "s1"."pets"."owner_id" = "t1"."id"`,
+			wantArgs:  []interface{}{"a8m"},
+		},
+		{
+			name: "schema/M2O/2types",
+			input: NewStep(
+				From("pets", "id", sql.Select().From(sql.Table("pets").Schema("s2")).Where(sql.EQ("name", "pedro"))),
+				To("users", "id"),
+				ToSchema("s1"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			wantQuery: `SELECT * FROM "s1"."users" JOIN (SELECT "s2"."pets"."owner_id" FROM "s2"."pets" WHERE "name" = $1) AS "t1" ON "s1"."users"."id" = "t1"."owner_id"`,
+			wantArgs:  []interface{}{"pedro"},
+		},
+		{
+			name: "schema/M2M/2types",
+			input: NewStep(
+				From("users", "id", sql.Select().From(sql.Table("users").Schema("s2")).Where(sql.EQ("name", "a8m"))),
+				To("groups", "id"),
+				ToSchema("s1"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+				EdgeSchema("s3"),
+			),
+			wantQuery: `
+SELECT *
+FROM "s1"."groups"
+JOIN
+  (SELECT "s3"."user_groups"."group_id"
+   FROM "s3"."user_groups"
+   JOIN
+     (SELECT "s2"."users"."id"
+      FROM "s2"."users"
+      WHERE "name" = $1) AS "t1" ON "s3"."user_groups"."user_id" = "t1"."id") AS "t1" ON "s1"."groups"."id" = "t1"."group_id"`,
+			wantArgs: []interface{}{"a8m"},
+		},
+		{
+			name: "schema/M2M/2types/inverse",
+			input: NewStep(
+				From("groups", "id", sql.Select().From(sql.Table("groups").Schema("s2")).Where(sql.EQ("name", "GitHub"))),
+				To("users", "id"),
+				ToSchema("s1"),
+				Edge(M2M, true, "user_groups", "user_id", "group_id"),
+				EdgeSchema("s3"),
+			),
+			wantQuery: `
+SELECT *
+FROM "s1"."users"
+JOIN
+  (SELECT "s3"."user_groups"."user_id"
+   FROM "s3"."user_groups"
+   JOIN
+     (SELECT "s2"."groups"."id"
+      FROM "s2"."groups"
+      WHERE "name" = $1) AS "t1" ON "s3"."user_groups"."group_id" = "t1"."id") AS "t1" ON "s1"."users"."id" = "t1"."user_id"`,
 			wantArgs: []interface{}{"GitHub"},
 		},
 	}
@@ -287,6 +469,72 @@ func TestHasNeighbors(t *testing.T) {
 			),
 			selector:  sql.Select("*").From(sql.Table("users")),
 			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `group_users`.`user_id` FROM `group_users`)",
+		},
+		{
+			name: "schema/O2O/1type",
+			step: NewStep(
+				From("nodes", "id"),
+				To("nodes", "id"),
+				Edge(O2O, false, "nodes", "prev_id"),
+				EdgeSchema("s1"),
+			),
+			selector:  sql.Select("*").From(sql.Table("nodes").Schema("s1")),
+			wantQuery: "SELECT * FROM `s1`.`nodes` WHERE `s1`.`nodes`.`id` IN (SELECT `s1`.`nodes`.`prev_id` FROM `s1`.`nodes` WHERE `s1`.`nodes`.`prev_id` IS NOT NULL)",
+		},
+		{
+			name: "schema/O2O/1type/inverse",
+			// Same example as above, but the neighbors
+			// query checks if a node "has-previous".
+			step: NewStep(
+				From("nodes", "id"),
+				To("nodes", "id"),
+				Edge(O2O, true, "nodes", "prev_id"),
+			),
+			selector:  sql.Select("*").From(sql.Table("nodes").Schema("s1")),
+			wantQuery: "SELECT * FROM `s1`.`nodes` WHERE `s1`.`nodes`.`prev_id` IS NOT NULL",
+		},
+		{
+			name: "schema/O2M/2type2",
+			step: NewStep(
+				From("users", "id"),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+				EdgeSchema("s2"),
+			),
+			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
+			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`pets`.`owner_id` FROM `s2`.`pets` WHERE `s2`.`pets`.`owner_id` IS NOT NULL)",
+		},
+		{
+			name: "schema/M2O/2type2",
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			selector:  sql.Select("*").From(sql.Table("pets").Schema("s1")),
+			wantQuery: "SELECT * FROM `s1`.`pets` WHERE `s1`.`pets`.`owner_id` IS NOT NULL",
+		},
+		{
+			name: "schema/M2M/2types",
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+				EdgeSchema("s2"),
+			),
+			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
+			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`user_groups`.`user_id` FROM `s2`.`user_groups`)",
+		},
+		{
+			name: "schema/M2M/2types/inverse",
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, true, "group_users", "group_id", "user_id"),
+				EdgeSchema("s2"),
+			),
+			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
+			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`group_users`.`user_id` FROM `s2`.`group_users`)",
 		},
 	}
 	for _, tt := range tests {
@@ -427,6 +675,60 @@ WHERE "groups"."id" IN
   FROM "user_groups"
   JOIN "users" AS "t0" ON "user_groups"."user_id" = "t0"."id" WHERE "name" IS NOT NULL AND "name" = $1)`,
 			wantArgs: []interface{}{"a8m"},
+		},
+		{
+			name: "schema/O2O",
+			step: NewStep(
+				From("users", "id"),
+				To("cards", "id"),
+				Edge(O2O, false, "cards", "owner_id"),
+				EdgeSchema("s2"),
+			),
+			selector: sql.Dialect("postgres").Select("*").From(sql.Table("users").Schema("s1")),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("expired", false))
+			},
+			wantQuery: `SELECT * FROM "s1"."users" WHERE "s1"."users"."id" IN (SELECT "s2"."cards"."owner_id" FROM "s2"."cards" WHERE "expired" = $1)`,
+			wantArgs:  []interface{}{false},
+		},
+		{
+			name: "schema/O2M",
+			step: NewStep(
+				From("users", "id"),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+				EdgeSchema("s2"),
+			),
+			selector: sql.Dialect("postgres").Select("*").
+				From(sql.Table("users").Schema("s1")).
+				Where(sql.EQ("last_name", "mashraki")),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("name", "pedro"))
+			},
+			wantQuery: `SELECT * FROM "s1"."users" WHERE "last_name" = $1 AND "s1"."users"."id" IN (SELECT "s2"."pets"."owner_id" FROM "s2"."pets" WHERE "name" = $2)`,
+			wantArgs:  []interface{}{"mashraki", "pedro"},
+		},
+		{
+			name: "schema/M2M",
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				ToSchema("s3"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+				EdgeSchema("s2"),
+			),
+			selector: sql.Dialect("postgres").Select("*").From(sql.Table("users").Schema("s1")),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("name", "GitHub"))
+			},
+			wantQuery: `
+SELECT *
+FROM "s1"."users"
+WHERE "s1"."users"."id" IN
+  (SELECT "s2"."user_groups"."user_id"
+  FROM "s2"."user_groups"
+  JOIN "s3"."groups" AS "t0" ON "s2"."user_groups"."group_id" = "t0"."id" WHERE "name" = $1)`,
+			wantArgs: []interface{}{"GitHub"},
 		},
 	}
 	for _, tt := range tests {
@@ -726,6 +1028,25 @@ func TestCreateNode(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?), (?, ?), (?, ?)")).
 					WithArgs(1, 2, 2, 1, 1, 3, 3, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "schema",
+			spec: &CreateSpec{
+				Table:  "users",
+				Schema: "mydb",
+				ID:     &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "age", Type: field.TypeInt, Value: 30},
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `mydb`.`users` (`age`, `name`) VALUES (?, ?)")).
+					WithArgs(30, "a8m").
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
 			},
@@ -1085,6 +1406,35 @@ func TestUpdateNode(t *testing.T) {
 			},
 			wantUser: &user{age: 31, id: 1},
 		},
+		{
+			name: "schema/fields/set",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Schema:  "mydb",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Fields: FieldMut{
+					Set: []*FieldSpec{
+						{Column: "age", Type: field.TypeInt, Value: 30},
+						{Column: "name", Type: field.TypeString, Value: "Ariel"},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(escape("UPDATE `mydb`.`users` SET `age` = ?, `name` = ? WHERE `id` = ?")).
+					WithArgs(30, "Ariel", 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `mydb`.`users` WHERE `id` = ?")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
+						AddRow(1, 30, "Ariel"))
+				mock.ExpectCommit()
+			},
+			wantUser: &user{name: "Ariel", age: 30, id: 1},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1317,6 +1667,24 @@ func TestDeleteNodes(t *testing.T) {
 	require.Equal(t, 2, affected)
 }
 
+func TestDeleteNodesSchema(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectBegin()
+	mock.ExpectExec(escape("DELETE FROM `mydb`.`users`")).
+		WillReturnResult(sqlmock.NewResult(0, 2))
+	mock.ExpectCommit()
+	affected, err := DeleteNodes(context.Background(), sql.OpenDB("", db), &DeleteSpec{
+		Node: &NodeSpec{
+			Table:  "users",
+			Schema: "mydb",
+			ID:     &FieldSpec{Column: "id", Type: field.TypeInt},
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, 2, affected)
+}
+
 func TestQueryNodes(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
@@ -1372,6 +1740,53 @@ func TestQueryNodes(t *testing.T) {
 	require.Equal(t, 3, n)
 }
 
+func TestQueryNodesSchema(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectQuery(escape("SELECT DISTINCT `mydb`.`users`.`id`, `mydb`.`users`.`age`, `mydb`.`users`.`name`, `mydb`.`users`.`fk1`, `mydb`.`users`.`fk2` FROM `mydb`.`users` WHERE `age` < ? ORDER BY `id` LIMIT 3 OFFSET 4")).
+		WithArgs(40).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name", "fk1", "fk2"}).
+			AddRow(1, 10, nil, nil, nil).
+			AddRow(2, 20, "", 0, 0).
+			AddRow(3, 30, "a8m", 1, 1))
+
+	var (
+		users []*user
+		spec  = &QuerySpec{
+			Node: &NodeSpec{
+				Table:   "users",
+				Schema:  "mydb",
+				Columns: []string{"id", "age", "name", "fk1", "fk2"},
+				ID:      &FieldSpec{Column: "id", Type: field.TypeInt},
+			},
+			Limit:  3,
+			Offset: 4,
+			Unique: true,
+			Order: func(s *sql.Selector) {
+				s.OrderBy("id")
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.LT("age", 40))
+			},
+			ScanValues: func(columns []string) ([]interface{}, error) {
+				u := &user{}
+				users = append(users, u)
+				return u.values(columns)
+			},
+			Assign: func(columns []string, values []interface{}) error {
+				return users[len(users)-1].assign(columns, values)
+			},
+		}
+	)
+
+	// Query and scan.
+	err = QueryNodes(context.Background(), sql.OpenDB("", db), spec)
+	require.NoError(t, err)
+	require.Equal(t, &user{id: 1, age: 10, name: ""}, users[0])
+	require.Equal(t, &user{id: 2, age: 20, name: ""}, users[1])
+	require.Equal(t, &user{id: 3, age: 30, name: "a8m", edges: struct{ fk1, fk2 int }{1, 1}}, users[2])
+}
+
 func TestQueryEdges(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
@@ -1387,6 +1802,44 @@ func TestQueryEdges(t *testing.T) {
 			Edge: &EdgeSpec{
 				Inverse: true,
 				Table:   "user_groups",
+				Columns: []string{"user_id", "group_id"},
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues("user_id", 1, 2, 3))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+			},
+			Assign: func(out, in interface{}) error {
+				o, i := out.(*sql.NullInt64), in.(*sql.NullInt64)
+				edges = append(edges, []int64{o.Int64, i.Int64})
+				return nil
+			},
+		}
+	)
+
+	// Query and scan.
+	err = QueryEdges(context.Background(), sql.OpenDB("", db), spec)
+	require.NoError(t, err)
+	require.Equal(t, [][]int64{{4, 5}, {4, 6}}, edges)
+}
+
+func TestQueryEdgesSchema(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectQuery(escape("SELECT `group_id`, `user_id` FROM `mydb`.`user_groups` WHERE `user_id` IN (?, ?, ?)")).
+		WithArgs(1, 2, 3).
+		WillReturnRows(sqlmock.NewRows([]string{"group_id", "user_id"}).
+			AddRow(4, 5).
+			AddRow(4, 6))
+
+	var (
+		edges [][]int64
+		spec  = &EdgeQuerySpec{
+			Edge: &EdgeSpec{
+				Inverse: true,
+				Table:   "user_groups",
+				Schema:  "mydb",
 				Columns: []string{"user_id", "group_id"},
 			},
 			Predicate: func(s *sql.Selector) {
