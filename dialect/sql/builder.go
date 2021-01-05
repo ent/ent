@@ -682,7 +682,7 @@ func (i *InsertBuilder) Returning(columns ...string) *InsertBuilder {
 // Query returns query representation of an `INSERT INTO` statement.
 func (i *InsertBuilder) Query() (string, []interface{}) {
 	i.WriteString("INSERT INTO ")
-	if i.schema != "" {
+	if i.schema != "" && i.dialect != dialect.SQLite {
 		i.Ident(i.schema).WriteByte('.')
 	}
 	i.Ident(i.table).Pad()
@@ -786,7 +786,7 @@ func (u *UpdateBuilder) Empty() bool {
 // Query returns query representation of an `UPDATE` statement.
 func (u *UpdateBuilder) Query() (string, []interface{}) {
 	u.WriteString("UPDATE ")
-	if u.schema != "" {
+	if u.schema != "" && u.dialect != dialect.SQLite {
 		u.Ident(u.schema).WriteByte('.')
 	}
 	u.Ident(u.table).WriteString(" SET ")
@@ -870,7 +870,7 @@ func (d *DeleteBuilder) FromSelect(s *Selector) *DeleteBuilder {
 // Query returns query representation of a `DELETE` statement.
 func (d *DeleteBuilder) Query() (string, []interface{}) {
 	d.WriteString("DELETE FROM ")
-	if d.schema != "" {
+	if d.schema != "" && d.dialect != dialect.SQLite {
 		d.Ident(d.schema).WriteByte('.')
 	}
 	d.Ident(d.table)
@@ -1461,7 +1461,7 @@ func (s *SelectTable) C(column string) string {
 		name = s.as
 	}
 	b := &Builder{dialect: s.dialect}
-	if s.schema != "" && s.as == "" {
+	if s.schema != "" && s.as == "" && s.dialect != dialect.SQLite {
 		b.Ident(s.schema).WriteByte('.')
 	}
 	b.Ident(name).WriteByte('.').Ident(column)
@@ -1491,7 +1491,7 @@ func (s *SelectTable) ref() string {
 		return s.name
 	}
 	b := &Builder{dialect: s.dialect}
-	if s.schema != "" {
+	if s.schema != "" && s.dialect != dialect.SQLite {
 		b.Ident(s.schema).WriteByte('.')
 	}
 	b.Ident(s.name)
@@ -1819,6 +1819,7 @@ func (s *Selector) Query() (string, []interface{}) {
 	b.WriteString(" FROM ")
 	switch t := s.from.(type) {
 	case *SelectTable:
+		fmt.Println("ONE", s.dialect)
 		t.SetDialect(s.dialect)
 		b.WriteString(t.ref())
 	case *Selector:

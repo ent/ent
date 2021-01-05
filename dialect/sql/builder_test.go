@@ -239,6 +239,11 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{1},
 		},
 		{
+			input:     Dialect(dialect.SQLite).Insert("users").Columns("age").Values(1).Schema("mydb"),
+			wantQuery: "INSERT INTO `users` (`age`) VALUES (?)",
+			wantArgs:  []interface{}{1},
+		},
+		{
 			input:     Dialect(dialect.Postgres).Insert("users").Columns("age").Values(1).Returning("id"),
 			wantQuery: `INSERT INTO "users" ("age") VALUES ($1) RETURNING "id"`,
 			wantArgs:  []interface{}{1},
@@ -295,6 +300,11 @@ func TestBuilder(t *testing.T) {
 		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Schema("mydb"),
 			wantQuery: `UPDATE "mydb"."users" SET "name" = $1`,
+			wantArgs:  []interface{}{"foo"},
+		},
+		{
+			input:     Dialect(dialect.SQLite).Update("users").Set("name", "foo").Schema("mydb"),
+			wantQuery: "UPDATE `users` SET `name` = ?",
 			wantArgs:  []interface{}{"foo"},
 		},
 		{
@@ -514,6 +524,13 @@ func TestBuilder(t *testing.T) {
 				Where(NotNull("parent_id")).
 				Schema("mydb"),
 			wantQuery: "DELETE FROM `mydb`.`users` WHERE `parent_id` IS NOT NULL",
+		},
+		{
+			input: Dialect(dialect.SQLite).
+				Delete("users").
+				Where(NotNull("parent_id")).
+				Schema("mydb"),
+			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NOT NULL",
 		},
 		{
 			input: Dialect(dialect.Postgres).
@@ -1332,6 +1349,21 @@ WHERE
 					Where(EQ(t2.C("name"), "pedro"))
 			}(),
 			wantQuery: "SELECT * FROM `s1`.`users` JOIN `s2`.`pets` AS `t0` ON `s1`.`users`.`id` = `t0`.`owner_id` WHERE `t0`.`name` = ?",
+			wantArgs:  []interface{}{"pedro"},
+		},
+		{
+			input: func() Querier {
+				t1, t2 := Table("users").Schema("s1"), Table("pets").Schema("s2")
+				sel := Select("*").
+					From(t1).Join(t2).
+					OnP(P(func(b *Builder) {
+						b.Ident(t1.C("id")).WriteOp(OpEQ).Ident(t2.C("owner_id"))
+					})).
+					Where(EQ(t2.C("name"), "pedro"))
+				sel.SetDialect(dialect.SQLite)
+				return sel
+			}(),
+			wantQuery: "SELECT * FROM `users` JOIN `pets` AS `t0` ON `users`.`id` = `t0`.`owner_id` WHERE `t0`.`name` = ?",
 			wantArgs:  []interface{}{"pedro"},
 		},
 	}
