@@ -525,6 +525,7 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   card.Table,
 			Columns: card.Columns,
+			Schema:  cq.CardSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: card.FieldID,

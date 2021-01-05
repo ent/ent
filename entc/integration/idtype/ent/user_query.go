@@ -623,6 +623,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
+			Schema:  uq.UserSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUint64,
 				Column: user.FieldID,

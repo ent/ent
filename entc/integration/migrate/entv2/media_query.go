@@ -348,6 +348,7 @@ func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   media.Table,
 			Columns: media.Columns,
+			Schema:  mq.MediaSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: media.FieldID,

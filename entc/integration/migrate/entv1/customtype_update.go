@@ -110,6 +110,7 @@ func (ctu *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   customtype.Table,
+			Schema:  ctu.CustomTypeSchema,
 			Columns: customtype.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -235,6 +236,7 @@ func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   customtype.Table,
+			Schema:  ctuo.CustomTypeSchema,
 			Columns: customtype.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

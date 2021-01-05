@@ -1118,6 +1118,7 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   fieldtype.Table,
+			Schema:  ftu.FieldTypeSchema,
 			Columns: fieldtype.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -3010,6 +3011,7 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   fieldtype.Table,
+			Schema:  ftuo.FieldTypeSchema,
 			Columns: fieldtype.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

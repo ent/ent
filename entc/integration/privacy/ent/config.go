@@ -24,6 +24,12 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// optional schema name for the Task table.
+	TaskSchema string
+	// optional schema name for the Team table.
+	TeamSchema string
+	// optional schema name for the User table.
+	UserSchema string
 }
 
 // hooks per client, for fast access.
@@ -61,5 +67,25 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// WithTaskSchema allows an alternate
+// database name to be passed into ent operations.
+func WithTaskSchema(schema string) Option {
+	return func(c *config) {
+		c.TaskSchema = schema
+	}
+} // WithTeamSchema allows an alternate
+// database name to be passed into ent operations.
+func WithTeamSchema(schema string) Option {
+	return func(c *config) {
+		c.TeamSchema = schema
+	}
+} // WithUserSchema allows an alternate
+// database name to be passed into ent operations.
+func WithUserSchema(schema string) Option {
+	return func(c *config) {
+		c.UserSchema = schema
 	}
 }

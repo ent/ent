@@ -155,7 +155,8 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Blob{config: bc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: blob.Table,
+			Table:  blob.Table,
+			Schema: bc.BlobSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
 				Column: blob.FieldID,

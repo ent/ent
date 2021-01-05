@@ -140,7 +140,8 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Team{config: tc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: team.Table,
+			Table:  team.Table,
+			Schema: tc.TeamSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: team.FieldID,

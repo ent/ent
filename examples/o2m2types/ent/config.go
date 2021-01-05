@@ -24,6 +24,10 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// optional schema name for the Pet table.
+	PetSchema string
+	// optional schema name for the User table.
+	UserSchema string
 }
 
 // hooks per client, for fast access.
@@ -60,5 +64,19 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// WithPetSchema allows an alternate
+// database name to be passed into ent operations.
+func WithPetSchema(schema string) Option {
+	return func(c *config) {
+		c.PetSchema = schema
+	}
+} // WithUserSchema allows an alternate
+// database name to be passed into ent operations.
+func WithUserSchema(schema string) Option {
+	return func(c *config) {
+		c.UserSchema = schema
 	}
 }

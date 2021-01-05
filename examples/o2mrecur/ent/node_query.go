@@ -488,6 +488,7 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   node.Table,
 			Columns: node.Columns,
+			Schema:  nq.NodeSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: node.FieldID,

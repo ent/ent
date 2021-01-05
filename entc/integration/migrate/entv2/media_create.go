@@ -121,7 +121,8 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Media{config: mc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: media.Table,
+			Table:  media.Table,
+			Schema: mc.MediaSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: media.FieldID,

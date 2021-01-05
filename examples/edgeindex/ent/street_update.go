@@ -122,6 +122,7 @@ func (su *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   street.Table,
+			Schema:  su.StreetSchema,
 			Columns: street.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -287,6 +288,7 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err err
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   street.Table,
+			Schema:  suo.StreetSchema,
 			Columns: street.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

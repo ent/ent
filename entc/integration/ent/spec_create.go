@@ -109,7 +109,8 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Spec{config: sc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: spec.Table,
+			Table:  spec.Table,
+			Schema: sc.SpecSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: spec.FieldID,

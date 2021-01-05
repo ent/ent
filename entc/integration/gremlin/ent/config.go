@@ -24,6 +24,34 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// optional schema name for the Card table.
+	CardSchema string
+	// optional schema name for the Comment table.
+	CommentSchema string
+	// optional schema name for the FieldType table.
+	FieldTypeSchema string
+	// optional schema name for the File table.
+	FileSchema string
+	// optional schema name for the FileType table.
+	FileTypeSchema string
+	// optional schema name for the Goods table.
+	GoodsSchema string
+	// optional schema name for the Group table.
+	GroupSchema string
+	// optional schema name for the GroupInfo table.
+	GroupInfoSchema string
+	// optional schema name for the Item table.
+	ItemSchema string
+	// optional schema name for the Node table.
+	NodeSchema string
+	// optional schema name for the Pet table.
+	PetSchema string
+	// optional schema name for the Spec table.
+	SpecSchema string
+	// optional schema name for the Task table.
+	TaskSchema string
+	// optional schema name for the User table.
+	UserSchema string
 }
 
 // hooks per client, for fast access.
@@ -72,5 +100,91 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// WithCardSchema allows an alternate
+// database name to be passed into ent operations.
+func WithCardSchema(schema string) Option {
+	return func(c *config) {
+		c.CardSchema = schema
+	}
+} // WithCommentSchema allows an alternate
+// database name to be passed into ent operations.
+func WithCommentSchema(schema string) Option {
+	return func(c *config) {
+		c.CommentSchema = schema
+	}
+} // WithFieldTypeSchema allows an alternate
+// database name to be passed into ent operations.
+func WithFieldTypeSchema(schema string) Option {
+	return func(c *config) {
+		c.FieldTypeSchema = schema
+	}
+} // WithFileSchema allows an alternate
+// database name to be passed into ent operations.
+func WithFileSchema(schema string) Option {
+	return func(c *config) {
+		c.FileSchema = schema
+	}
+} // WithFileTypeSchema allows an alternate
+// database name to be passed into ent operations.
+func WithFileTypeSchema(schema string) Option {
+	return func(c *config) {
+		c.FileTypeSchema = schema
+	}
+} // WithGoodsSchema allows an alternate
+// database name to be passed into ent operations.
+func WithGoodsSchema(schema string) Option {
+	return func(c *config) {
+		c.GoodsSchema = schema
+	}
+} // WithGroupSchema allows an alternate
+// database name to be passed into ent operations.
+func WithGroupSchema(schema string) Option {
+	return func(c *config) {
+		c.GroupSchema = schema
+	}
+} // WithGroupInfoSchema allows an alternate
+// database name to be passed into ent operations.
+func WithGroupInfoSchema(schema string) Option {
+	return func(c *config) {
+		c.GroupInfoSchema = schema
+	}
+} // WithItemSchema allows an alternate
+// database name to be passed into ent operations.
+func WithItemSchema(schema string) Option {
+	return func(c *config) {
+		c.ItemSchema = schema
+	}
+} // WithNodeSchema allows an alternate
+// database name to be passed into ent operations.
+func WithNodeSchema(schema string) Option {
+	return func(c *config) {
+		c.NodeSchema = schema
+	}
+} // WithPetSchema allows an alternate
+// database name to be passed into ent operations.
+func WithPetSchema(schema string) Option {
+	return func(c *config) {
+		c.PetSchema = schema
+	}
+} // WithSpecSchema allows an alternate
+// database name to be passed into ent operations.
+func WithSpecSchema(schema string) Option {
+	return func(c *config) {
+		c.SpecSchema = schema
+	}
+} // WithTaskSchema allows an alternate
+// database name to be passed into ent operations.
+func WithTaskSchema(schema string) Option {
+	return func(c *config) {
+		c.TaskSchema = schema
+	}
+} // WithUserSchema allows an alternate
+// database name to be passed into ent operations.
+func WithUserSchema(schema string) Option {
+	return func(c *config) {
+		c.UserSchema = schema
 	}
 }

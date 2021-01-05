@@ -93,7 +93,8 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Item{config: ic.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: item.Table,
+			Table:  item.Table,
+			Schema: ic.ItemSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: item.FieldID,

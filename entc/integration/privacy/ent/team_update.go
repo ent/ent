@@ -186,6 +186,7 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   team.Table,
+			Schema:  tu.TeamSchema,
 			Columns: team.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -487,6 +488,7 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   team.Table,
+			Schema:  tuo.TeamSchema,
 			Columns: team.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

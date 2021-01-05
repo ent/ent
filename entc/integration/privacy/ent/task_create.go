@@ -196,7 +196,8 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Task{config: tc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: task.Table,
+			Table:  task.Table,
+			Schema: tc.TaskSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: task.FieldID,

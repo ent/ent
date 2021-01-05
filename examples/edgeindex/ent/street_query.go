@@ -423,6 +423,7 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   street.Table,
 			Columns: street.Columns,
+			Schema:  sq.StreetSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: street.FieldID,

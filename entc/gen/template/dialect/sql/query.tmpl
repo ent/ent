@@ -88,6 +88,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
 			Columns: {{ $.Package }}.Columns,
+			Schema: {{ $receiver }}.{{ $.Name }}Schema,
 			ID: &sqlgraph.FieldSpec{
 				Type: field.{{ $.ID.Type.ConstName }},
 				Column: {{ $.Package }}.{{ $.ID.Constant }},

@@ -128,7 +128,8 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Card{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: card.Table,
+			Table:  card.Table,
+			Schema: cc.CardSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: card.FieldID,

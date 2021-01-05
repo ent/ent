@@ -113,7 +113,8 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Pet{config: pc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: pet.Table,
+			Table:  pet.Table,
+			Schema: pc.PetSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: pet.FieldID,

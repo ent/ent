@@ -354,6 +354,7 @@ func (tq *TenantQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   tenant.Table,
 			Columns: tenant.Columns,
+			Schema:  tq.TenantSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: tenant.FieldID,

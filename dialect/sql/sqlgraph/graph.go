@@ -319,6 +319,7 @@ type (
 	// decoding nodes in the graph.
 	NodeSpec struct {
 		Table   string
+		Schema  string
 		Columns []string
 		ID      *FieldSpec
 	}
@@ -329,6 +330,7 @@ type (
 	// a node in the graph.
 	CreateSpec struct {
 		Table  string
+		Schema string
 		ID     *FieldSpec
 		Fields []*FieldSpec
 		Edges  []*EdgeSpec
@@ -453,11 +455,11 @@ func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int
 		builder = sql.Dialect(drv.Dialect())
 	)
 	selector := builder.Select().
-		From(builder.Table(spec.Node.Table))
+		From(builder.Table(spec.Node.Table).Schema(spec.Node.Schema))
 	if pred := spec.Predicate; pred != nil {
 		pred(selector)
 	}
-	query, args := builder.Delete(spec.Node.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(spec.Node.Table).Schema(spec.Node.Schema).FromSelect(selector).Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -595,7 +597,7 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 }
 
 func (q *query) selector() (*sql.Selector, error) {
-	selector := q.builder.Select().From(q.builder.Table(q.Node.Table))
+	selector := q.builder.Select().From(q.builder.Table(q.Node.Table).Schema(q.Node.Schema))
 	if q.From != nil {
 		selector = q.From
 	}
@@ -667,9 +669,9 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 		addEdges   = EdgeSpecs(u.Edges.Add).GroupRel()
 		clearEdges = EdgeSpecs(u.Edges.Clear).GroupRel()
 		multiple   = u.hasExternalEdges(addEdges, clearEdges)
-		update     = u.builder.Update(u.Node.Table)
+		update     = u.builder.Update(u.Node.Table).Schema(u.Node.Schema)
 		selector   = u.builder.Select(u.Node.ID.Column).
-				From(u.builder.Table(u.Node.Table))
+				From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema))
 	)
 	if pred := u.Predicate; pred != nil {
 		pred(selector)
@@ -825,7 +827,7 @@ type creator struct {
 func (c *creator) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	var (
 		edges  = EdgeSpecs(c.Edges).GroupRel()
-		insert = c.builder.Insert(c.Table).Default()
+		insert = c.builder.Insert(c.Table).Schema(c.Schema).Default()
 	)
 	// Set and create the node.
 	if err := c.setTableColumns(insert, edges); err != nil {

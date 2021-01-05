@@ -154,6 +154,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   groupinfo.Table,
+			Schema:  giu.GroupInfoSchema,
 			Columns: groupinfo.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -384,6 +385,7 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   groupinfo.Table,
+			Schema:  giuo.GroupInfoSchema,
 			Columns: groupinfo.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

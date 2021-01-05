@@ -24,6 +24,12 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// optional schema name for the Car table.
+	CarSchema string
+	// optional schema name for the Group table.
+	GroupSchema string
+	// optional schema name for the User table.
+	UserSchema string
 }
 
 // hooks per client, for fast access.
@@ -61,5 +67,25 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// WithCarSchema allows an alternate
+// database name to be passed into ent operations.
+func WithCarSchema(schema string) Option {
+	return func(c *config) {
+		c.CarSchema = schema
+	}
+} // WithGroupSchema allows an alternate
+// database name to be passed into ent operations.
+func WithGroupSchema(schema string) Option {
+	return func(c *config) {
+		c.GroupSchema = schema
+	}
+} // WithUserSchema allows an alternate
+// database name to be passed into ent operations.
+func WithUserSchema(schema string) Option {
+	return func(c *config) {
+		c.UserSchema = schema
 	}
 }

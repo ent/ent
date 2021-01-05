@@ -71,7 +71,8 @@ func (nd *NodeDelete) ExecX(ctx context.Context) int {
 func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: node.Table,
+			Table:  node.Table,
+			Schema: nd.NodeSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: node.FieldID,

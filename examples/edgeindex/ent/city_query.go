@@ -420,6 +420,7 @@ func (cq *CityQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   city.Table,
 			Columns: city.Columns,
+			Schema:  cq.CitySchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: city.FieldID,

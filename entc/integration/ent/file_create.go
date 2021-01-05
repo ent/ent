@@ -232,7 +232,8 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 	var (
 		_node = &File{config: fc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: file.Table,
+			Table:  file.Table,
+			Schema: fc.FileSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: file.FieldID,

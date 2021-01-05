@@ -324,6 +324,7 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
 			Columns: group.Columns,
+			Schema:  gq.GroupSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: group.FieldID,

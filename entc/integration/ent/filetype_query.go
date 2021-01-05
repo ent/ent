@@ -420,6 +420,7 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   filetype.Table,
 			Columns: filetype.Columns,
+			Schema:  ftq.FileTypeSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: filetype.FieldID,

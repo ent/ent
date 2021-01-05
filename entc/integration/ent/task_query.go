@@ -348,6 +348,7 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   task.Table,
 			Columns: task.Columns,
+			Schema:  tq.TaskSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: task.FieldID,

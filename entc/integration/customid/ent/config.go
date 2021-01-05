@@ -24,6 +24,18 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// optional schema name for the Blob table.
+	BlobSchema string
+	// optional schema name for the Car table.
+	CarSchema string
+	// optional schema name for the Group table.
+	GroupSchema string
+	// optional schema name for the MixinID table.
+	MixinIDSchema string
+	// optional schema name for the Pet table.
+	PetSchema string
+	// optional schema name for the User table.
+	UserSchema string
 }
 
 // hooks per client, for fast access.
@@ -64,5 +76,43 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// WithBlobSchema allows an alternate
+// database name to be passed into ent operations.
+func WithBlobSchema(schema string) Option {
+	return func(c *config) {
+		c.BlobSchema = schema
+	}
+} // WithCarSchema allows an alternate
+// database name to be passed into ent operations.
+func WithCarSchema(schema string) Option {
+	return func(c *config) {
+		c.CarSchema = schema
+	}
+} // WithGroupSchema allows an alternate
+// database name to be passed into ent operations.
+func WithGroupSchema(schema string) Option {
+	return func(c *config) {
+		c.GroupSchema = schema
+	}
+} // WithMixinIDSchema allows an alternate
+// database name to be passed into ent operations.
+func WithMixinIDSchema(schema string) Option {
+	return func(c *config) {
+		c.MixinIDSchema = schema
+	}
+} // WithPetSchema allows an alternate
+// database name to be passed into ent operations.
+func WithPetSchema(schema string) Option {
+	return func(c *config) {
+		c.PetSchema = schema
+	}
+} // WithUserSchema allows an alternate
+// database name to be passed into ent operations.
+func WithUserSchema(schema string) Option {
+	return func(c *config) {
+		c.UserSchema = schema
 	}
 }

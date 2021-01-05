@@ -71,7 +71,8 @@ func (mid *MixinIDDelete) ExecX(ctx context.Context) int {
 func (mid *MixinIDDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: mixinid.Table,
+			Table:  mixinid.Table,
+			Schema: mid.MixinIDSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
 				Column: mixinid.FieldID,

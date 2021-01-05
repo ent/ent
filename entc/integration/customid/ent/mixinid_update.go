@@ -102,6 +102,7 @@ func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   mixinid.Table,
+			Schema:  miu.MixinIDSchema,
 			Columns: mixinid.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
@@ -220,6 +221,7 @@ func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   mixinid.Table,
+			Schema:  miuo.MixinIDSchema,
 			Columns: mixinid.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,

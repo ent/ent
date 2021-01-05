@@ -24,6 +24,20 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// optional schema name for the Car table.
+	CarSchema string
+	// optional schema name for the Conversion table.
+	ConversionSchema string
+	// optional schema name for the CustomType table.
+	CustomTypeSchema string
+	// optional schema name for the Group table.
+	GroupSchema string
+	// optional schema name for the Media table.
+	MediaSchema string
+	// optional schema name for the Pet table.
+	PetSchema string
+	// optional schema name for the User table.
+	UserSchema string
 }
 
 // hooks per client, for fast access.
@@ -65,5 +79,49 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// WithCarSchema allows an alternate
+// database name to be passed into ent operations.
+func WithCarSchema(schema string) Option {
+	return func(c *config) {
+		c.CarSchema = schema
+	}
+} // WithConversionSchema allows an alternate
+// database name to be passed into ent operations.
+func WithConversionSchema(schema string) Option {
+	return func(c *config) {
+		c.ConversionSchema = schema
+	}
+} // WithCustomTypeSchema allows an alternate
+// database name to be passed into ent operations.
+func WithCustomTypeSchema(schema string) Option {
+	return func(c *config) {
+		c.CustomTypeSchema = schema
+	}
+} // WithGroupSchema allows an alternate
+// database name to be passed into ent operations.
+func WithGroupSchema(schema string) Option {
+	return func(c *config) {
+		c.GroupSchema = schema
+	}
+} // WithMediaSchema allows an alternate
+// database name to be passed into ent operations.
+func WithMediaSchema(schema string) Option {
+	return func(c *config) {
+		c.MediaSchema = schema
+	}
+} // WithPetSchema allows an alternate
+// database name to be passed into ent operations.
+func WithPetSchema(schema string) Option {
+	return func(c *config) {
+		c.PetSchema = schema
+	}
+} // WithUserSchema allows an alternate
+// database name to be passed into ent operations.
+func WithUserSchema(schema string) Option {
+	return func(c *config) {
+		c.UserSchema = schema
 	}
 }

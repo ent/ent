@@ -151,7 +151,8 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Group{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: group.Table,
+			Table:  group.Table,
+			Schema: gc.GroupSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: group.FieldID,

@@ -71,7 +71,8 @@ func (md *MediaDelete) ExecX(ctx context.Context) int {
 func (md *MediaDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: media.Table,
+			Table:  media.Table,
+			Schema: md.MediaSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: media.FieldID,

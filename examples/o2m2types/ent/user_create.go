@@ -128,7 +128,8 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
 		_node = &User{config: uc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: user.Table,
+			Table:  user.Table,
+			Schema: uc.UserSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: user.FieldID,

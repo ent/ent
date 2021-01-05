@@ -71,7 +71,8 @@ func (cd *ConversionDelete) ExecX(ctx context.Context) int {
 func (cd *ConversionDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: conversion.Table,
+			Table:  conversion.Table,
+			Schema: cd.ConversionSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: conversion.FieldID,

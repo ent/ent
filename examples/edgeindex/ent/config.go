@@ -24,6 +24,10 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// optional schema name for the City table.
+	CitySchema string
+	// optional schema name for the Street table.
+	StreetSchema string
 }
 
 // hooks per client, for fast access.
@@ -60,5 +64,19 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// WithCitySchema allows an alternate
+// database name to be passed into ent operations.
+func WithCitySchema(schema string) Option {
+	return func(c *config) {
+		c.CitySchema = schema
+	}
+} // WithStreetSchema allows an alternate
+// database name to be passed into ent operations.
+func WithStreetSchema(schema string) Option {
+	return func(c *config) {
+		c.StreetSchema = schema
 	}
 }

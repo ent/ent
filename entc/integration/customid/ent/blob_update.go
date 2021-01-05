@@ -158,6 +158,7 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   blob.Table,
+			Schema:  bu.BlobSchema,
 			Columns: blob.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
@@ -413,6 +414,7 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   blob.Table,
+			Schema:  buo.BlobSchema,
 			Columns: blob.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,

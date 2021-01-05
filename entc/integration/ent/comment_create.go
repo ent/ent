@@ -126,7 +126,8 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Comment{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: comment.Table,
+			Table:  comment.Table,
+			Schema: cc.CommentSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: comment.FieldID,

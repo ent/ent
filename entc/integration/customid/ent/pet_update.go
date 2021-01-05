@@ -214,6 +214,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   pet.Table,
+			Schema:  pu.PetSchema,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
@@ -606,6 +607,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   pet.Table,
+			Schema:  puo.PetSchema,
 			Columns: pet.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,

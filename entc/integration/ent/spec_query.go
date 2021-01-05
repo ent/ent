@@ -431,6 +431,7 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   spec.Table,
 			Columns: spec.Columns,
+			Schema:  sq.SpecSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: spec.FieldID,
