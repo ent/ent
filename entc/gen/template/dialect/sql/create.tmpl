@@ -37,6 +37,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: {{ $.Package }}.Table,
+			Schema: {{ $receiver }}.{{ $.Name }}Schema,
 			ID: &sqlgraph.FieldSpec{
 				Type: field.{{ $.ID.Type.ConstName }},
 				Column: {{ $.Package }}.{{ $.ID.Constant }},

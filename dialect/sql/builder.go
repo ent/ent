@@ -616,6 +616,7 @@ func (d *DropIndexBuilder) Query() (string, []interface{}) {
 type InsertBuilder struct {
 	Builder
 	table     string
+	schema    string
 	columns   []string
 	defaults  string
 	returning []string
@@ -631,6 +632,12 @@ type InsertBuilder struct {
 //
 // Note: Insert inserts all values in one batch.
 func Insert(table string) *InsertBuilder { return &InsertBuilder{table: table} }
+
+// Schema sets the database name for the insert table.
+func (i *InsertBuilder) Schema(name string) *InsertBuilder {
+	i.schema = name
+	return i
+}
 
 // Set is a syntactic sugar API for inserting only one row.
 func (i *InsertBuilder) Set(column string, v interface{}) *InsertBuilder {
@@ -675,6 +682,9 @@ func (i *InsertBuilder) Returning(columns ...string) *InsertBuilder {
 // Query returns query representation of an `INSERT INTO` statement.
 func (i *InsertBuilder) Query() (string, []interface{}) {
 	i.WriteString("INSERT INTO ")
+	if i.schema != "" {
+		i.Ident(i.schema).WriteByte('.')
+	}
 	i.Ident(i.table).Pad()
 	if i.defaults != "" && len(i.columns) == 0 {
 		i.WriteString(i.defaults)
@@ -703,6 +713,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 type UpdateBuilder struct {
 	Builder
 	table   string
+	schema  string
 	where   *Predicate
 	nulls   []string
 	columns []string
@@ -714,6 +725,12 @@ type UpdateBuilder struct {
 //	Update("users").Set("name", "foo").Set("age", 10)
 //
 func Update(table string) *UpdateBuilder { return &UpdateBuilder{table: table} }
+
+// Schema sets the database name for the updated table.
+func (u *UpdateBuilder) Schema(name string) *UpdateBuilder {
+	u.schema = name
+	return u
+}
 
 // Set sets a column and a its value.
 func (u *UpdateBuilder) Set(column string, v interface{}) *UpdateBuilder {
@@ -769,6 +786,9 @@ func (u *UpdateBuilder) Empty() bool {
 // Query returns query representation of an `UPDATE` statement.
 func (u *UpdateBuilder) Query() (string, []interface{}) {
 	u.WriteString("UPDATE ")
+	if u.schema != "" {
+		u.Ident(u.schema).WriteByte('.')
+	}
 	u.Ident(u.table).WriteString(" SET ")
 	for i, c := range u.nulls {
 		if i > 0 {
@@ -801,8 +821,9 @@ func (u *UpdateBuilder) Query() (string, []interface{}) {
 // DeleteBuilder is a builder for `DELETE` statement.
 type DeleteBuilder struct {
 	Builder
-	table string
-	where *Predicate
+	table  string
+	schema string
+	where  *Predicate
 }
 
 // Delete creates a builder for the `DELETE` statement.
@@ -820,6 +841,12 @@ type DeleteBuilder struct {
 //		)
 //
 func Delete(table string) *DeleteBuilder { return &DeleteBuilder{table: table} }
+
+// Schema sets the database name for the table whose row will be deleted.
+func (d *DeleteBuilder) Schema(name string) *DeleteBuilder {
+	d.schema = name
+	return d
+}
 
 // Where appends a where predicate to the `DELETE` statement.
 func (d *DeleteBuilder) Where(p *Predicate) *DeleteBuilder {
@@ -843,6 +870,9 @@ func (d *DeleteBuilder) FromSelect(s *Selector) *DeleteBuilder {
 // Query returns query representation of a `DELETE` statement.
 func (d *DeleteBuilder) Query() (string, []interface{}) {
 	d.WriteString("DELETE FROM ")
+	if d.schema != "" {
+		d.Ident(d.schema).WriteByte('.')
+	}
 	d.Ident(d.table)
 	if d.where != nil {
 		d.WriteString(" WHERE ")
