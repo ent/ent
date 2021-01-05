@@ -224,8 +224,18 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{1},
 		},
 		{
+			input:     Insert("users").Columns("age").Values(1).Schema("mydb"),
+			wantQuery: "INSERT INTO `mydb`.`users` (`age`) VALUES (?)",
+			wantArgs:  []interface{}{1},
+		},
+		{
 			input:     Dialect(dialect.Postgres).Insert("users").Columns("age").Values(1),
 			wantQuery: `INSERT INTO "users" ("age") VALUES ($1)`,
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("age").Values(1).Schema("mydb"),
+			wantQuery: `INSERT INTO "mydb"."users" ("age") VALUES ($1)`,
 			wantArgs:  []interface{}{1},
 		},
 		{
@@ -273,8 +283,18 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo"},
 		},
 		{
+			input:     Update("users").Set("name", "foo").Schema("mydb"),
+			wantQuery: "UPDATE `mydb`.`users` SET `name` = ?",
+			wantArgs:  []interface{}{"foo"},
+		},
+		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo"),
 			wantQuery: `UPDATE "users" SET "name" = $1`,
+			wantArgs:  []interface{}{"foo"},
+		},
+		{
+			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Schema("mydb"),
+			wantQuery: `UPDATE "mydb"."users" SET "name" = $1`,
 			wantArgs:  []interface{}{"foo"},
 		},
 		{
@@ -490,10 +510,23 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NOT NULL",
 		},
 		{
+			input: Delete("users").
+				Where(NotNull("parent_id")).
+				Schema("mydb"),
+			wantQuery: "DELETE FROM `mydb`.`users` WHERE `parent_id` IS NOT NULL",
+		},
+		{
 			input: Dialect(dialect.Postgres).
 				Delete("users").
 				Where(IsNull("parent_id")),
 			wantQuery: `DELETE FROM "users" WHERE "parent_id" IS NULL`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Delete("users").
+				Where(IsNull("parent_id")).
+				Schema("mydb"),
+			wantQuery: `DELETE FROM "mydb"."users" WHERE "parent_id" IS NULL`,
 		},
 		{
 			input: Delete("users").
