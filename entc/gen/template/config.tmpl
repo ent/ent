@@ -24,6 +24,11 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	{{- with $tmpls := matchTemplate (printf "dialect/%s/config/fields/*" $.Storage) }}
+		{{ range $tmpl := $tmpls }}
+			{{ xtemplate $tmpl $ }}
+		{{ end }}
+	{{- end }}
 }
 
 // hooks per client, for fast access.
@@ -63,5 +68,11 @@ func Driver(driver dialect.Driver) Option {
 		c.driver = driver
 	}
 }
+
+{{ with $tmpls := matchTemplate (printf "dialect/%s/config/options/*" $.Storage) }}
+	{{ range $tmpl := $tmpls }}
+		{{ xtemplate $tmpl $ }}
+	{{ end }}
+{{ end }}
 
 {{ end }}
