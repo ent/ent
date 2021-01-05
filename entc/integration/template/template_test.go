@@ -18,7 +18,12 @@ import (
 )
 
 func TestCustomTemplate(t *testing.T) {
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open(
+		"sqlite3",
+		"file:ent?mode=memory&cache=shared&_fk=1",
+		// Custom config option.
+		ent.Boring(),
+	)
 	require.NoError(t, err)
 	defer client.Close()
 	ctx := context.Background()

@@ -1,0 +1,14 @@
+{{/* A template for adding additional config fields/options. */}}
+{{ define "dialect/sql/config/fields/boring" -}}
+	// Boring field added by a test template.
+	Boring string
+{{ end }}
+
+{{ define "dialect/sql/config/options/boring" }}
+	// Boring option added by a test template.
+	func Boring() Option {
+		return func(c *config) {
+			c.Boring = "Boring"
+		}
+	}
+{{ end }}
