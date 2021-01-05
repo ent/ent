@@ -682,9 +682,7 @@ func (i *InsertBuilder) Returning(columns ...string) *InsertBuilder {
 // Query returns query representation of an `INSERT INTO` statement.
 func (i *InsertBuilder) Query() (string, []interface{}) {
 	i.WriteString("INSERT INTO ")
-	if i.schema != "" {
-		i.Ident(i.schema).WriteByte('.')
-	}
+	i.writeSchema(i.schema)
 	i.Ident(i.table).Pad()
 	if i.defaults != "" && len(i.columns) == 0 {
 		i.WriteString(i.defaults)
@@ -786,9 +784,7 @@ func (u *UpdateBuilder) Empty() bool {
 // Query returns query representation of an `UPDATE` statement.
 func (u *UpdateBuilder) Query() (string, []interface{}) {
 	u.WriteString("UPDATE ")
-	if u.schema != "" {
-		u.Ident(u.schema).WriteByte('.')
-	}
+	u.writeSchema(u.schema)
 	u.Ident(u.table).WriteString(" SET ")
 	for i, c := range u.nulls {
 		if i > 0 {
@@ -870,9 +866,7 @@ func (d *DeleteBuilder) FromSelect(s *Selector) *DeleteBuilder {
 // Query returns query representation of a `DELETE` statement.
 func (d *DeleteBuilder) Query() (string, []interface{}) {
 	d.WriteString("DELETE FROM ")
-	if d.schema != "" {
-		d.Ident(d.schema).WriteByte('.')
-	}
+	d.writeSchema(d.schema)
 	d.Ident(d.table)
 	if d.where != nil {
 		d.WriteString(" WHERE ")
@@ -1461,8 +1455,8 @@ func (s *SelectTable) C(column string) string {
 		name = s.as
 	}
 	b := &Builder{dialect: s.dialect}
-	if s.schema != "" && s.as == "" {
-		b.Ident(s.schema).WriteByte('.')
+	if s.as == "" {
+		b.writeSchema(s.schema)
 	}
 	b.Ident(name).WriteByte('.').Ident(column)
 	return b.String()
@@ -1491,9 +1485,7 @@ func (s *SelectTable) ref() string {
 		return s.name
 	}
 	b := &Builder{dialect: s.dialect}
-	if s.schema != "" {
-		b.Ident(s.schema).WriteByte('.')
-	}
+	b.writeSchema(s.schema)
 	b.Ident(s.name)
 	if s.as != "" {
 		b.WriteString(" AS ")
@@ -2055,6 +2047,12 @@ func (b *Builder) WriteString(s string) *Builder {
 func (b *Builder) AddError(err error) *Builder {
 	b.errs = append(b.errs, err)
 	return b
+}
+
+func (b *Builder) writeSchema(schema string) {
+	if schema != "" && b.dialect != dialect.SQLite {
+		b.Ident(schema).WriteByte('.')
+	}
 }
 
 // Err returns a concatenated error of all errors encountered during
