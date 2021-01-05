@@ -282,6 +282,7 @@ func (fu *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   file.Table,
+			Schema:  fu.FileSchema,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -747,6 +748,7 @@ func (fuo *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   file.Table,
+			Schema:  fuo.FileSchema,
 			Columns: file.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

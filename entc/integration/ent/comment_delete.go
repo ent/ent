@@ -71,7 +71,8 @@ func (cd *CommentDelete) ExecX(ctx context.Context) int {
 func (cd *CommentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: comment.Table,
+			Table:  comment.Table,
+			Schema: cd.CommentSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: comment.FieldID,

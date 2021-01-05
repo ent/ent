@@ -126,7 +126,8 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 	var (
 		_node = &MixinID{config: mic.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: mixinid.Table,
+			Table:  mixinid.Table,
+			Schema: mic.MixinIDSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
 				Column: mixinid.FieldID,

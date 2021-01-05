@@ -326,6 +326,7 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   conversion.Table,
+			Schema:  cu.ConversionSchema,
 			Columns: conversion.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -827,6 +828,7 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   conversion.Table,
+			Schema:  cuo.ConversionSchema,
 			Columns: conversion.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

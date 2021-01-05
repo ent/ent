@@ -71,7 +71,8 @@ func (ud *UserDelete) ExecX(ctx context.Context) int {
 func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: user.Table,
+			Table:  user.Table,
+			Schema: ud.UserSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUint64,
 				Column: user.FieldID,

@@ -420,6 +420,7 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   groupinfo.Table,
 			Columns: groupinfo.Columns,
+			Schema:  giq.GroupInfoSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: groupinfo.FieldID,

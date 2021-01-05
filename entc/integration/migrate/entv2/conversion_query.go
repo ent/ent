@@ -348,6 +348,7 @@ func (cq *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   conversion.Table,
 			Columns: conversion.Columns,
+			Schema:  cq.ConversionSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: conversion.FieldID,

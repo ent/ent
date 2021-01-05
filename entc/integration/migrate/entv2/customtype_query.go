@@ -348,6 +348,7 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   customtype.Table,
 			Columns: customtype.Columns,
+			Schema:  ctq.CustomTypeSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: customtype.FieldID,

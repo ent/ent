@@ -107,7 +107,8 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 	var (
 		_node = &CustomType{config: ctc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: customtype.Table,
+			Table:  customtype.Table,
+			Schema: ctc.CustomTypeSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: customtype.FieldID,

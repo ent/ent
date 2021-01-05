@@ -227,6 +227,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   task.Table,
+			Schema:  tu.TaskSchema,
 			Columns: task.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -582,6 +583,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   task.Table,
+			Schema:  tuo.TaskSchema,
 			Columns: task.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

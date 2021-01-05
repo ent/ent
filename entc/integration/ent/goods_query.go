@@ -324,6 +324,7 @@ func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   goods.Table,
 			Columns: goods.Columns,
+			Schema:  gq.GoodsSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: goods.FieldID,

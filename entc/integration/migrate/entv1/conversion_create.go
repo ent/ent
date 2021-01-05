@@ -219,7 +219,8 @@ func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Conversion{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: conversion.Table,
+			Table:  conversion.Table,
+			Schema: cc.ConversionSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: conversion.FieldID,

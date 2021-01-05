@@ -145,7 +145,8 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	var (
 		_node = &GroupInfo{config: gic.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: groupinfo.Table,
+			Table:  groupinfo.Table,
+			Schema: gic.GroupInfoSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: groupinfo.FieldID,

@@ -130,6 +130,7 @@ func (mu *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   media.Table,
+			Schema:  mu.MediaSchema,
 			Columns: media.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -288,6 +289,7 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   media.Table,
+			Schema:  muo.MediaSchema,
 			Columns: media.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

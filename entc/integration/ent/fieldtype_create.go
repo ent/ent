@@ -700,7 +700,8 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 	var (
 		_node = &FieldType{config: ftc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: fieldtype.Table,
+			Table:  fieldtype.Table,
+			Schema: ftc.FieldTypeSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: fieldtype.FieldID,

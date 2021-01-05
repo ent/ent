@@ -349,6 +349,7 @@ func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   mixinid.Table,
 			Columns: mixinid.Columns,
+			Schema:  miq.MixinIDSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
 				Column: mixinid.FieldID,

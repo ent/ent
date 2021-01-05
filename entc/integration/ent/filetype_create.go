@@ -176,7 +176,8 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 	var (
 		_node = &FileType{config: ftc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: filetype.Table,
+			Table:  filetype.Table,
+			Schema: ftc.FileTypeSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: filetype.FieldID,

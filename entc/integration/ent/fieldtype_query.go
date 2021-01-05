@@ -353,6 +353,7 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   fieldtype.Table,
 			Columns: fieldtype.Columns,
+			Schema:  ftq.FieldTypeSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: fieldtype.FieldID,

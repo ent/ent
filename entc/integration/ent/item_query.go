@@ -324,6 +324,7 @@ func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   item.Table,
 			Columns: item.Columns,
+			Schema:  iq.ItemSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: item.FieldID,

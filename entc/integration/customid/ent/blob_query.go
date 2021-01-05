@@ -524,6 +524,7 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   blob.Table,
 			Columns: blob.Columns,
+			Schema:  bq.BlobSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
 				Column: blob.FieldID,

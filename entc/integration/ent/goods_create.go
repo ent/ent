@@ -93,7 +93,8 @@ func (gc *GoodsCreate) createSpec() (*Goods, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Goods{config: gc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: goods.Table,
+			Table:  goods.Table,
+			Schema: gc.GoodsSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: goods.FieldID,

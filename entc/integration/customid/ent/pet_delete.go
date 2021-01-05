@@ -71,7 +71,8 @@ func (pd *PetDelete) ExecX(ctx context.Context) int {
 func (pd *PetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: pet.Table,
+			Table:  pet.Table,
+			Schema: pd.PetSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeString,
 				Column: pet.FieldID,

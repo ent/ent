@@ -242,6 +242,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
+			Schema:  uu.UserSchema,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -669,6 +670,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   user.Table,
+			Schema:  uuo.UserSchema,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

@@ -90,6 +90,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
+			Schema:  gu.GroupSchema,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -182,6 +183,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   group.Table,
+			Schema:  guo.GroupSchema,
 			Columns: group.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,

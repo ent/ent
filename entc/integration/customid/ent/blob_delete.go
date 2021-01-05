@@ -71,7 +71,8 @@ func (bd *BlobDelete) ExecX(ctx context.Context) int {
 func (bd *BlobDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: blob.Table,
+			Table:  blob.Table,
+			Schema: bd.BlobSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeUUID,
 				Column: blob.FieldID,

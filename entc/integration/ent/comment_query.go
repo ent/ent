@@ -348,6 +348,7 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   comment.Table,
 			Columns: comment.Columns,
+			Schema:  cq.CommentSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: comment.FieldID,

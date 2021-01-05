@@ -562,6 +562,7 @@ func (tq *TeamQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   team.Table,
 			Columns: team.Columns,
+			Schema:  tq.TeamSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: team.FieldID,
