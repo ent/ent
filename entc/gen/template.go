@@ -103,6 +103,9 @@ var (
 		{
 			Name:   "config",
 			Format: "config.go",
+			ExtendPatterns: []string{
+				"dialect/*/config/*/*",
+			},
 		},
 		{
 			Name:   "mutation",

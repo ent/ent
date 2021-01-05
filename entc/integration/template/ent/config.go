@@ -24,6 +24,8 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// Boring field added by a test template.
+	Boring string
 }
 
 // hooks per client, for fast access.
@@ -61,5 +63,12 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// Boring option added by a test template.
+func Boring() Option {
+	return func(c *config) {
+		c.Boring = "Boring"
 	}
 }

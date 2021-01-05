@@ -25,9 +25,9 @@ type config struct {
 	// hooks to execute on mutations.
 	hooks *hooks
 	{{- with $tmpls := matchTemplate (printf "dialect/%s/config/fields/*" $.Storage) }}
-		{{ range $tmpl := $tmpls }}
+		{{- range $tmpl := $tmpls }}
 			{{ xtemplate $tmpl $ }}
-		{{ end }}
+		{{- end }}
 	{{- end }}
 }
 
