@@ -108,7 +108,8 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Tenant{config: tc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: tenant.Table,
+			Table:  tenant.Table,
+			Schema: tc.TenantSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: tenant.FieldID,

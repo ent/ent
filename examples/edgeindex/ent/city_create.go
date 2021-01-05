@@ -119,7 +119,8 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 	var (
 		_node = &City{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: city.Table,
+			Table:  city.Table,
+			Schema: cc.CitySchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: city.FieldID,

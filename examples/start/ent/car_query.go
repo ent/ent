@@ -423,6 +423,7 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table:   car.Table,
 			Columns: car.Columns,
+			Schema:  cq.CarSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: car.FieldID,

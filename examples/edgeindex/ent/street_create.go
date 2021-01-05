@@ -123,7 +123,8 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Street{config: sc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: street.Table,
+			Table:  street.Table,
+			Schema: sc.StreetSchema,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
 				Column: street.FieldID,

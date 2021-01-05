@@ -24,6 +24,8 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// optional schema name for the Node table.
+	NodeSchema string
 }
 
 // hooks per client, for fast access.
@@ -59,5 +61,13 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// WithNodeSchema allows an alternate
+// database name to be passed into ent operations.
+func WithNodeSchema(schema string) Option {
+	return func(c *config) {
+		c.NodeSchema = schema
 	}
 }

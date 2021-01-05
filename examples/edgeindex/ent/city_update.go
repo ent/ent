@@ -133,6 +133,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   city.Table,
+			Schema:  cu.CitySchema,
 			Columns: city.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
@@ -328,6 +329,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   city.Table,
+			Schema:  cuo.CitySchema,
 			Columns: city.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
