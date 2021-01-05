@@ -222,10 +222,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 					Columns: {{ $.Package }}.{{ $e.PKConstant }},
 				},
 				Predicate: func(s *sql.Selector) {
-					s.Where(sql.InValues({{ $.Package }}.{{ $e.PKConstant }}[{{ if $e.IsInverse }}1{{ else }}0{{ end }}], fks...))
+					if !query.eagerMethod.Is(EagerNested) {
+						s.Where(sql.InValues({{ $.Package }}.{{ $e.PKConstant }}[{{ if $e.IsInverse }}1{{ else }}0{{ end }}], fks...))
+					} else {
+						parentQuery := {{ $receiver }}.sqlQuery()
+						s.Where(sql.In({{ $.Package }}.{{ $e.PKConstant }}[{{ if $e.IsInverse }}1{{ else }}0{{ end }}], parentQuery.Select({{ $.Package }}.{{ $.ID.Constant }})))
+					}
 				},
-				{{ $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.NullType }}{{ end }}
-				{{ $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.NullType }}{{ end }}
+				{{- $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.NullType }}{{ end }}
+				{{- $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.NullType }}{{ end }}
 				ScanValues: func() [2]interface{}{
 					return [2]interface{}{&{{ $out }}{}, &{{ $in }}{}}
 				},
@@ -252,7 +257,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			if err := sqlgraph.QueryEdges(ctx, {{ $receiver }}.driver, _spec); err != nil {
 				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %v`, err)
 			}
-			query.Where({{ $e.Type.Package }}.IDIn(edgeids...))
+			if !query.eagerMethod.Is(EagerNested) {
+				query.Where({{ $e.Type.Package }}.IDIn(edgeids...))
+			} else {
+				parentQuery := {{ $receiver }}.sqlQuery()
+				query.Where(func(s *sql.Selector) {
+					s.Where(sql.In({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
+						sql.Dialect({{ $receiver }}.driver.Dialect()).
+							Select({{ $.Package }}.{{ $e.PKConstant }}[{{ if $e.IsInverse }}0{{ else }}1{{ end }}]).
+							From(sql.Table({{ $.Package }}.{{ $e.TableConstant }})).
+							Where(sql.In({{ $.Package }}.{{ $e.PKConstant }}[{{ if $e.IsInverse }}1{{ else }}0{{ end }}],
+							parentQuery.Select({{$.Package}}.{{$.ID.Constant}})))))
+				})		
+			}
+
 			neighbors, err := query.All(ctx)
 			if err != nil {
 				return nil, err
@@ -275,7 +293,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 					nodeids[*fk] = append(nodeids[*fk], nodes[i])
 				}
 			}
-			query.Where({{ $e.Type.Package }}.IDIn(ids...))
+			if !query.eagerMethod.Is(EagerNested) {
+				query.Where({{ $e.Type.Package }}.IDIn(ids...))
+			} else {
+				parentQuery := {{ $receiver }}.sqlQuery()
+				query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
+					s.Where(sql.In({{ $.Package }}.{{ $.ID.Constant }}, parentQuery.Select({{ $.Package }}.{{ $e.ColumnConstant }})))
+				}))
+			}
+
 			neighbors, err := query.All(ctx)
 			if err != nil {
 				return nil, err
@@ -300,9 +326,17 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 				{{- end }}
 			}
 			query.withFKs = true
-			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
-				s.Where(sql.InValues({{ $.Package }}.{{ $e.ColumnConstant }}, fks...))
-			}))
+			if !query.eagerMethod.Is(EagerNested) {
+				query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
+					s.Where(sql.InValues({{ $.Package }}.{{ $e.ColumnConstant }}, fks...))
+				}))
+			} else {
+				parentQuery := {{ $receiver }}.sqlQuery()
+				query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
+					s.Where(sql.In({{ $.Package }}.{{ $e.ColumnConstant }}, parentQuery.Select({{ $.Package }}.{{ $.ID.Constant }})))
+				}))
+			}
+
 			neighbors, err := query.All(ctx)
 			if err != nil {
 				return nil, err
