@@ -7,6 +7,7 @@
 package migrate
 
 import (
+	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/dialect/sql/schema"
 	"github.com/facebook/ent/schema/field"
 )
@@ -52,6 +53,7 @@ var (
 				Columns: []*schema.Column{CardsColumns[0], CardsColumns[4], CardsColumns[3]},
 			},
 		},
+		Annotation: &entsql.Annotation{Incremental: &[]bool{false}[0]},
 	}
 	// CommentsColumns holds the columns for the "comments" table.
 	CommentsColumns = []*schema.Column{

@@ -6,6 +6,7 @@ package schema
 
 import (
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/entc/integration/ent/template"
 	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
@@ -45,11 +46,16 @@ func (Card) Mixin() []ent.Mixin {
 }
 
 func (Card) Annotations() []schema.Annotation {
+	incrementalEnabled := false
+
 	return []schema.Annotation{
 		field.Annotation{
 			StructTag: map[string]string{
 				"id": `json:"-"`,
 			},
+		},
+		entsql.Annotation{
+			Incremental: &incrementalEnabled,
 		},
 	}
 }

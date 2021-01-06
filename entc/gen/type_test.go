@@ -273,6 +273,23 @@ func TestField_DefaultName(t *testing.T) {
 	}
 }
 
+func TestField_incremental(t *testing.T) {
+	tests := []struct {
+		annotations map[string]interface{}
+		def         bool
+		expected    bool
+	}{
+		{dict("EntSQL", nil), false, false},
+		{dict("EntSQL", nil), true, true},
+		{dict("EntSQL", dict("incremental", true)), false, true},
+		{dict("EntSQL", dict("incremental", false)), true, false},
+	}
+	for _, tt := range tests {
+		typ := &Field{Annotations: tt.annotations}
+		require.Equal(t, tt.expected, typ.incremental(tt.def))
+	}
+}
+
 func TestBuilderField(t *testing.T) {
 	tests := []struct {
 		name  string
