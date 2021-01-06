@@ -205,6 +205,11 @@ func init() {
 					{{- end }}
 				}
 			{{- end }}
+
+			{{- with $ant.Unique }}
+				{{ $table }}.Annotation.Unique = new(bool)
+				*{{ $table }}.Annotation.Unique = {{ with indirect . }}true{{ else }}false{{ end }}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 }
