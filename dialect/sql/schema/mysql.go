@@ -405,9 +405,6 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	case "tinyblob":
 		c.Size = math.MaxUint8
 		c.Type = field.TypeBytes
-	case "binary":
-		c.Size = size
-		c.Type = field.TypeBytes
 	case "blob":
 		c.Size = math.MaxUint16
 		c.Type = field.TypeBytes
@@ -417,7 +414,7 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	case "longblob":
 		c.Size = math.MaxUint32
 		c.Type = field.TypeBytes
-	case "varbinary":
+	case "binary", "varbinary":
 		c.Type = field.TypeBytes
 		c.Size = size
 	case "varchar":
