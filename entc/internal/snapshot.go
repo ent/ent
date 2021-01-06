@@ -218,7 +218,7 @@ func IsBuildError(err error) bool {
 	if strings.HasPrefix(err.Error(), "entc/load: #") {
 		return true
 	}
-	for _, s := range []string{"syntax error", "previous declaration", "invalid character"} {
+	for _, s := range []string{"syntax error", "previous declaration", "invalid character", "could not import"} {
 		if strings.Contains(err.Error(), s) {
 			return true
 		}
