@@ -66,23 +66,29 @@ func WithForeignKeys(b bool) MigrateOption {
 	}
 }
 
+// WithHooks adds a list of hooks to the schema migration.
+func WithHooks(hooks ...Hook) MigrateOption {
+	return func(m *Migrate) {
+		m.hooks = append(m.hooks, hooks...)
+	}
+}
+
 type (
 	// Creator is the interface that wraps the Create method.
 	Creator interface {
-		// Create creates tables.
+		// Create creates the given tables in the database. See Migrate.Create for more details.
 		Create(context.Context, ...*Table) error
 	}
 
-	// The CreateFunc type is an adapter to allow the use of ordinary
-	// function as Creator. If f is a function with the appropriate signature,
-	// CreateFunc(f) is a Creator that calls f.
+	// The CreateFunc type is an adapter to allow the use of ordinary function as Creator.
+	// If f is a function with the appropriate signature, CreateFunc(f) is a Creator that calls f.
 	CreateFunc func(context.Context, ...*Table) error
 
-	// Hook defines the "create middleware". A function that gets a Creator
-	// and returns a Creator. For example:
+	// Hook defines the "create middleware". A function that gets a Creator and returns a Creator.
+	// For example:
 	//
 	//	hook := func(next schema.Creator) schema.Creator {
-	//		return schema.CreateFunc(func(ctx context.Context, tables ...*Table) error {
+	//		return schema.CreateFunc(func(ctx context.Context, tables ...*schema.Table) error {
 	//			fmt.Println("Tables:", tables)
 	//			return next.Create(ctx, tables...)
 	//		})
@@ -94,13 +100,6 @@ type (
 // Create calls f(ctx, tables...).
 func (f CreateFunc) Create(ctx context.Context, tables ...*Table) error {
 	return f(ctx, tables...)
-}
-
-// WithHook adds a create hook.
-func WithHook(hook Hook) MigrateOption {
-	return func(m *Migrate) {
-		m.hooks = append(m.hooks, hook)
-	}
 }
 
 // Migrate runs the migrations logic for the SQL dialects.
@@ -121,7 +120,6 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 	for _, opt := range opts {
 		opt(m)
 	}
-
 	switch d.Dialect() {
 	case dialect.MySQL:
 		m.sqlDialect = &MySQL{Driver: d}
@@ -166,13 +164,13 @@ func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
 			return rollback(tx, err)
 		}
 	}
-	if err := m.createInTx(ctx, tx, tables...); err != nil {
+	if err := m.txCreate(ctx, tx, tables...); err != nil {
 		return rollback(tx, err)
 	}
 	return tx.Commit()
 }
 
-func (m *Migrate) createInTx(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
+func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
 	for _, t := range tables {
 		m.setupTable(t)
 		switch exist, err := m.tableExist(ctx, tx, t.Name); {
