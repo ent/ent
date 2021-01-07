@@ -352,7 +352,7 @@ func (f *Field) addAnnotation(an schema.Annotation) {
 }
 
 func (f *Field) defaults() error {
-	if !f.Default || !f.Info.Numeric() {
+	if !f.Default || !f.Info.Numeric() || f.DefaultKind == reflect.Func {
 		return nil
 	}
 	n, ok := f.DefaultValue.(float64)
