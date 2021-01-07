@@ -6,6 +6,7 @@ package field_test
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"net"
 	"net/http"
 	"net/url"
@@ -466,6 +467,29 @@ func TestField_UUID(t *testing.T) {
 		Default(uuid.UUID{}).
 		Descriptor()
 	assert.EqualError(t, fd.Err, "expect type (func() uuid.UUID) for uuid default value")
+}
+
+type custom struct {
+}
+
+func (c *custom) Scan(_ interface{}) (err error) {
+	return nil
+}
+
+func (c custom) Value() (driver.Value, error) {
+	return nil, nil
+}
+
+func TestField_Other(t *testing.T) {
+	fd := field.Other("other", &custom{}).
+		Unique().
+		Default(custom{}).
+		Descriptor()
+	assert.Equal(t, "other", fd.Name)
+	assert.True(t, fd.Unique)
+	assert.Equal(t, "field_test.custom", fd.Info.String())
+	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.NotNil(t, fd.Default)
 }
 
 func TestTypeString(t *testing.T) {

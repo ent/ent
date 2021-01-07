@@ -87,6 +87,8 @@ type FieldType struct {
 	NullStr *sql.NullString `json:"null_str,omitempty"`
 	// Link holds the value of the "link" field.
 	Link schema.Link `json:"link,omitempty"`
+	// LinkOther holds the value of the "link_other" field.
+	LinkOther schema.Link `json:"link_other,omitempty"`
 	// NullLink holds the value of the "null_link" field.
 	NullLink *schema.Link `json:"null_link,omitempty"`
 	// Active holds the value of the "active" field.
@@ -129,7 +131,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case fieldtype.FieldIP:
 			values[i] = &[]byte{}
-		case fieldtype.FieldLink, fieldtype.FieldNullLink:
+		case fieldtype.FieldLink, fieldtype.FieldLinkOther, fieldtype.FieldNullLink:
 			values[i] = &schema.Link{}
 		case fieldtype.FieldMAC:
 			values[i] = &schema.MAC{}
@@ -360,6 +362,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value != nil {
 				ft.Link = *value
 			}
+		case fieldtype.FieldLinkOther:
+			if value, ok := values[i].(*schema.Link); !ok {
+				return fmt.Errorf("unexpected type %T for field link_other", values[i])
+			} else if value != nil {
+				ft.LinkOther = *value
+			}
 		case fieldtype.FieldNullLink:
 			if value, ok := values[i].(*schema.Link); !ok {
 				return fmt.Errorf("unexpected type %T for field null_link", values[i])
@@ -568,6 +576,8 @@ func (ft *FieldType) String() string {
 	}
 	builder.WriteString(", link=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Link))
+	builder.WriteString(", link_other=")
+	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
 	if v := ft.NullLink; v != nil {
 		builder.WriteString(", null_link=")
 		builder.WriteString(fmt.Sprintf("%v", *v))

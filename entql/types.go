@@ -1656,3 +1656,73 @@ func ValueNot(x ValueP) ValueP {
 	}
 	return expr
 }
+
+// OtherP is the interface for predicates of type other (`type P[other]`).
+type OtherP interface {
+	Fielder
+	other()
+}
+
+// otherP implements the OtherP interface.
+type otherP struct {
+	P
+	done func(string)
+}
+
+func (p *otherP) Field(name string) P {
+	p.done(name)
+	return p.P
+}
+
+func (*otherP) other() {}
+
+// OtherEQ applies the EQ operation on the given value.
+func OtherEQ(v driver.Valuer) OtherP {
+	field := &Field{}
+	value := &Value{V: v}
+	done := func(name string) { field.Name = name }
+	return &otherP{P: EQ(field, value), done: done}
+}
+
+// OtherNEQ applies the NEQ operation on the given value.
+func OtherNEQ(v driver.Valuer) OtherP {
+	field := &Field{}
+	value := &Value{V: v}
+	done := func(name string) { field.Name = name }
+	return &otherP{P: NEQ(field, value), done: done}
+}
+
+// OtherOr returns a composed predicate that represents the logical OR predicate.
+func OtherOr(x, y OtherP, z ...OtherP) OtherP {
+	expr := &otherP{}
+	expr.done = func(name string) {
+		zs := make([]P, len(z))
+		for i := range z {
+			zs[i] = z[i].Field(name)
+		}
+		expr.P = Or(x.Field(name), y.Field(name), zs...)
+	}
+	return expr
+}
+
+// OtherAnd returns a composed predicate that represents the logical AND predicate.
+func OtherAnd(x, y OtherP, z ...OtherP) OtherP {
+	expr := &otherP{}
+	expr.done = func(name string) {
+		zs := make([]P, len(z))
+		for i := range z {
+			zs[i] = z[i].Field(name)
+		}
+		expr.P = And(x.Field(name), y.Field(name), zs...)
+	}
+	return expr
+}
+
+// OtherNot returns a predicate that represents the logical negation of the given predicate.
+func OtherNot(x OtherP) OtherP {
+	expr := &otherP{}
+	expr.done = func(name string) {
+		expr.P = Not(x.Field(name))
+	}
+	return expr
+}

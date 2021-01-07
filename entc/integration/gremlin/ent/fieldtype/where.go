@@ -2880,6 +2880,20 @@ func LinkNotNil() predicate.FieldType {
 	})
 }
 
+// LinkOtherIsNil applies the IsNil predicate on the "link_other" field.
+func LinkOtherIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldLinkOther)
+	})
+}
+
+// LinkOtherNotNil applies the NotNil predicate on the "link_other" field.
+func LinkOtherNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldLinkOther)
+	})
+}
+
 // NullLinkEQ applies the EQ predicate on the "null_link" field.
 func NullLinkEQ(v schema.Link) predicate.FieldType {
 	vc := v.String()

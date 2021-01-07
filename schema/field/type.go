@@ -161,6 +161,7 @@ var (
 		TypeUint64:  "uint64",
 		TypeFloat32: "float32",
 		TypeFloat64: "float64",
+		TypeOther:   "other",
 	}
 	constNames = [...]string{
 		TypeJSON:  "TypeJSON",

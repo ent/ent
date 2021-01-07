@@ -3341,6 +3341,20 @@ func LinkContainsFold(v schema.Link) predicate.FieldType {
 	})
 }
 
+// LinkOtherIsNil applies the IsNil predicate on the "link_other" field.
+func LinkOtherIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldLinkOther)))
+	})
+}
+
+// LinkOtherNotNil applies the NotNil predicate on the "link_other" field.
+func LinkOtherNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldLinkOther)))
+	})
+}
+
 // NullLinkEQ applies the EQ predicate on the "null_link" field.
 func NullLinkEQ(v schema.Link) predicate.FieldType {
 	vc := v.String()

@@ -730,6 +730,18 @@ func (ftu *FieldTypeUpdate) ClearLink() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetLinkOther sets the "link_other" field.
+func (ftu *FieldTypeUpdate) SetLinkOther(s schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetLinkOther(s)
+	return ftu
+}
+
+// ClearLinkOther clears the value of the "link_other" field.
+func (ftu *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate {
+	ftu.mutation.ClearLinkOther()
+	return ftu
+}
+
 // SetNullLink sets the "null_link" field.
 func (ftu *FieldTypeUpdate) SetNullLink(s schema.Link) *FieldTypeUpdate {
 	ftu.mutation.SetNullLink(s)
@@ -1671,6 +1683,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldLink,
+		})
+	}
+	if value, ok := ftu.mutation.LinkOther(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldLinkOther,
+		})
+	}
+	if ftu.mutation.LinkOtherCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: fieldtype.FieldLinkOther,
 		})
 	}
 	if value, ok := ftu.mutation.NullLink(); ok {
@@ -2622,6 +2647,18 @@ func (ftuo *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetLinkOther sets the "link_other" field.
+func (ftuo *FieldTypeUpdateOne) SetLinkOther(s schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetLinkOther(s)
+	return ftuo
+}
+
+// ClearLinkOther clears the value of the "link_other" field.
+func (ftuo *FieldTypeUpdateOne) ClearLinkOther() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearLinkOther()
+	return ftuo
+}
+
 // SetNullLink sets the "null_link" field.
 func (ftuo *FieldTypeUpdateOne) SetNullLink(s schema.Link) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullLink(s)
@@ -3561,6 +3598,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldLink,
+		})
+	}
+	if value, ok := ftuo.mutation.LinkOther(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldLinkOther,
+		})
+	}
+	if ftuo.mutation.LinkOtherCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: fieldtype.FieldLinkOther,
 		})
 	}
 	if value, ok := ftuo.mutation.NullLink(); ok {

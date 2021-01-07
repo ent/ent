@@ -400,6 +400,12 @@ func (ftc *FieldTypeCreate) SetLink(s schema.Link) *FieldTypeCreate {
 	return ftc
 }
 
+// SetLinkOther sets the "link_other" field.
+func (ftc *FieldTypeCreate) SetLinkOther(s schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetLinkOther(s)
+	return ftc
+}
+
 // SetNullLink sets the "null_link" field.
 func (ftc *FieldTypeCreate) SetNullLink(s schema.Link) *FieldTypeCreate {
 	ftc.mutation.SetNullLink(s)
@@ -954,6 +960,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldLink,
 		})
 		_node.Link = value
+	}
+	if value, ok := ftc.mutation.LinkOther(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldLinkOther,
+		})
+		_node.LinkOther = value
 	}
 	if value, ok := ftc.mutation.NullLink(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

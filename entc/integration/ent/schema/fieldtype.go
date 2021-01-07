@@ -94,6 +94,13 @@ func (FieldType) Fields() []ent.Field {
 			Optional().
 			NotEmpty().
 			GoType(&Link{}),
+		field.Other("link_other", &Link{}).
+			SchemaType(map[string]string{
+				dialect.MySQL:    "varchar",
+				dialect.Postgres: "varchar",
+				dialect.SQLite:   "text",
+			}).
+			Optional(),
 		field.String("null_link").
 			Optional().
 			Nillable().

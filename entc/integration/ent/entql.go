@@ -107,6 +107,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldStr:                   {Type: field.TypeString, Column: fieldtype.FieldStr},
 			fieldtype.FieldNullStr:               {Type: field.TypeString, Column: fieldtype.FieldNullStr},
 			fieldtype.FieldLink:                  {Type: field.TypeString, Column: fieldtype.FieldLink},
+			fieldtype.FieldLinkOther:             {Type: field.TypeOther, Column: fieldtype.FieldLinkOther},
 			fieldtype.FieldNullLink:              {Type: field.TypeString, Column: fieldtype.FieldNullLink},
 			fieldtype.FieldActive:                {Type: field.TypeBool, Column: fieldtype.FieldActive},
 			fieldtype.FieldNullActive:            {Type: field.TypeBool, Column: fieldtype.FieldNullActive},
@@ -960,6 +961,11 @@ func (f *FieldTypeFilter) WhereNullStr(p entql.StringP) {
 // WhereLink applies the entql string predicate on the link field.
 func (f *FieldTypeFilter) WhereLink(p entql.StringP) {
 	f.Where(p.Field(fieldtype.FieldLink))
+}
+
+// WhereLinkOther applies the entql other predicate on the link_other field.
+func (f *FieldTypeFilter) WhereLinkOther(p entql.OtherP) {
+	f.Where(p.Field(fieldtype.FieldLinkOther))
 }
 
 // WhereNullLink applies the entql string predicate on the null_link field.

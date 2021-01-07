@@ -732,6 +732,18 @@ func (ftu *FieldTypeUpdate) ClearLink() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetLinkOther sets the "link_other" field.
+func (ftu *FieldTypeUpdate) SetLinkOther(s schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetLinkOther(s)
+	return ftu
+}
+
+// ClearLinkOther clears the value of the "link_other" field.
+func (ftu *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate {
+	ftu.mutation.ClearLinkOther()
+	return ftu
+}
+
 // SetNullLink sets the "null_link" field.
 func (ftu *FieldTypeUpdate) SetNullLink(s schema.Link) *FieldTypeUpdate {
 	ftu.mutation.SetNullLink(s)
@@ -1301,6 +1313,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.Link(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLink, value)
 	}
+	if value, ok := ftu.mutation.LinkOther(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
+	}
 	if value, ok := ftu.mutation.NullLink(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
 	}
@@ -1442,6 +1457,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.LinkCleared() {
 		properties = append(properties, fieldtype.FieldLink)
+	}
+	if ftu.mutation.LinkOtherCleared() {
+		properties = append(properties, fieldtype.FieldLinkOther)
 	}
 	if ftu.mutation.NullLinkCleared() {
 		properties = append(properties, fieldtype.FieldNullLink)
@@ -2197,6 +2215,18 @@ func (ftuo *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetLinkOther sets the "link_other" field.
+func (ftuo *FieldTypeUpdateOne) SetLinkOther(s schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetLinkOther(s)
+	return ftuo
+}
+
+// ClearLinkOther clears the value of the "link_other" field.
+func (ftuo *FieldTypeUpdateOne) ClearLinkOther() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearLinkOther()
+	return ftuo
+}
+
 // SetNullLink sets the "null_link" field.
 func (ftuo *FieldTypeUpdateOne) SetNullLink(s schema.Link) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullLink(s)
@@ -2771,6 +2801,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.Link(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLink, value)
 	}
+	if value, ok := ftuo.mutation.LinkOther(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
+	}
 	if value, ok := ftuo.mutation.NullLink(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
 	}
@@ -2912,6 +2945,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.LinkCleared() {
 		properties = append(properties, fieldtype.FieldLink)
+	}
+	if ftuo.mutation.LinkOtherCleared() {
+		properties = append(properties, fieldtype.FieldLinkOther)
 	}
 	if ftuo.mutation.NullLinkCleared() {
 		properties = append(properties, fieldtype.FieldNullLink)
