@@ -6,31 +6,26 @@ package schema
 
 import (
 	"context"
+	"testing"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestMigrateHookOmitTable(t *testing.T) {
-	db, mock, err := sqlmock.New()
+	db, mk, err := sqlmock.New()
 	require.NoError(t, err)
 
-	tables := []*Table{
-		{Name: "users"},
-		{Name: "pets"},
-	}
-
-	myMock := mysqlMock{mock}
-	myMock.start("5.7.23")
-
-	myMock.tableExists("pets", false)
-	myMock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+	tables := []*Table{{Name: "users"}, {Name: "pets"}}
+	mock := mysqlMock{mk}
+	mock.start("5.7.23")
+	mock.tableExists("pets", false)
+	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
 		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
 
-	myMock.ExpectCommit()
-
-	migrate, err := NewMigrate(sql.OpenDB("mysql", db), WithHook(func(next Creator) Creator {
+	migrate, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
 		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
 			return next.Create(ctx, tables[1])
 		})
@@ -41,28 +36,21 @@ func TestMigrateHookOmitTable(t *testing.T) {
 }
 
 func TestMigrateHookAddTable(t *testing.T) {
-	db, mock, err := sqlmock.New()
+	db, mk, err := sqlmock.New()
 	require.NoError(t, err)
 
-	tables := []*Table{
-		{Name: "users"},
-		{Name: "pets"},
-	}
-
-	myMock := mysqlMock{mock}
-	myMock.start("5.7.23")
-
-	myMock.tableExists("users", false)
-	myMock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+	tables := []*Table{{Name: "users"}}
+	mock := mysqlMock{mk}
+	mock.start("5.7.23")
+	mock.tableExists("users", false)
+	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
 		WillReturnResult(sqlmock.NewResult(0, 1))
-
-	myMock.tableExists("pets", false)
-	myMock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+	mock.tableExists("pets", false)
+	mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `pets`() CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
 		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
 
-	myMock.ExpectCommit()
-
-	migrate, err := NewMigrate(sql.OpenDB("mysql", db), WithHook(func(next Creator) Creator {
+	migrate, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
 		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
 			return next.Create(ctx, tables[0], &Table{Name: "pets"})
 		})
