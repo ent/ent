@@ -27,7 +27,7 @@ type FieldType struct {
 }
 
 // Fields of the File.
-func (FieldType) Fields() []ent.Field {
+func (FieldType) Fields() []ent.Field { //nolint:funlen
 	return []ent.Field{
 		field.Int("int"),
 		field.Int8("int8"),
