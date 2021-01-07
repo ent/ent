@@ -174,6 +174,13 @@ func (b *intBuilder) Default(i int) *intBuilder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *intBuilder) DefaultFunc(fn interface{}) *intBuilder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *intBuilder) Nillable() *intBuilder {
@@ -311,6 +318,13 @@ func (b *uintBuilder) Positive() *uintBuilder {
 // Default sets the default value of the field.
 func (b *uintBuilder) Default(i uint) *uintBuilder {
 	b.desc.Default = i
+	return b
+}
+
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *uintBuilder) DefaultFunc(fn interface{}) *uintBuilder {
+	b.desc.Default = fn
 	return b
 }
 
@@ -464,6 +478,13 @@ func (b *int8Builder) Default(i int8) *int8Builder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *int8Builder) DefaultFunc(fn interface{}) *int8Builder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *int8Builder) Nillable() *int8Builder {
@@ -611,6 +632,13 @@ func (b *int16Builder) NonNegative() *int16Builder {
 // Default sets the default value of the field.
 func (b *int16Builder) Default(i int16) *int16Builder {
 	b.desc.Default = i
+	return b
+}
+
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *int16Builder) DefaultFunc(fn interface{}) *int16Builder {
+	b.desc.Default = fn
 	return b
 }
 
@@ -764,6 +792,13 @@ func (b *int32Builder) Default(i int32) *int32Builder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *int32Builder) DefaultFunc(fn interface{}) *int32Builder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *int32Builder) Nillable() *int32Builder {
@@ -914,6 +949,13 @@ func (b *int64Builder) Default(i int64) *int64Builder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *int64Builder) DefaultFunc(fn interface{}) *int64Builder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *int64Builder) Nillable() *int64Builder {
@@ -1051,6 +1093,13 @@ func (b *uint8Builder) Positive() *uint8Builder {
 // Default sets the default value of the field.
 func (b *uint8Builder) Default(i uint8) *uint8Builder {
 	b.desc.Default = i
+	return b
+}
+
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *uint8Builder) DefaultFunc(fn interface{}) *uint8Builder {
+	b.desc.Default = fn
 	return b
 }
 
@@ -1194,6 +1243,13 @@ func (b *uint16Builder) Default(i uint16) *uint16Builder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *uint16Builder) DefaultFunc(fn interface{}) *uint16Builder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *uint16Builder) Nillable() *uint16Builder {
@@ -1334,6 +1390,13 @@ func (b *uint32Builder) Default(i uint32) *uint32Builder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *uint32Builder) DefaultFunc(fn interface{}) *uint32Builder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
 func (b *uint32Builder) Nillable() *uint32Builder {
@@ -1471,6 +1534,13 @@ func (b *uint64Builder) Positive() *uint64Builder {
 // Default sets the default value of the field.
 func (b *uint64Builder) Default(i uint64) *uint64Builder {
 	b.desc.Default = i
+	return b
+}
+
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *uint64Builder) DefaultFunc(fn interface{}) *uint64Builder {
+	b.desc.Default = fn
 	return b
 }
 
