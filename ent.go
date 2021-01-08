@@ -363,3 +363,14 @@ const (
 func (i Op) Is(o Op) bool { return i&o != 0 }
 
 //go:generate go run golang.org/x/tools/cmd/stringer -type Op
+
+type LockType uint8
+
+// lock types.
+const (
+	_             LockType = iota // Unknown.
+	LockForUpdate                 // @TODO
+	LockForShare                  // @TODO
+)
+
+//go:generate go run golang.org/x/tools/cmd/stringer -type LockType

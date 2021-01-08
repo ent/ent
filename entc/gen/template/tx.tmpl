@@ -12,6 +12,7 @@ import (
 	"context"
 	"sync"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 )
 
@@ -22,6 +23,12 @@ type Tx struct {
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
 	{{ end }}
+
+	{{- /* Additional fields to add to the tx. */}}
+	{{- $tmpl := printf "dialect/%s/tx/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
 
 	// lazily loaded.
 	client     *Client
@@ -105,6 +112,12 @@ func (tx *Tx) Client() *Client {
 	})
 	return tx.client
 }
+
+{{- /* Additional functions to add to the tx. */}}
+{{ $tmpl = printf "dialect/%s/tx/funcs" $.Storage }}
+{{- if hasTemplate $tmpl }}
+	{{- xtemplate $tmpl . }}
+{{- end }}
 
 func (tx *Tx) init() {
 	{{ range $_, $n := $.Nodes -}}

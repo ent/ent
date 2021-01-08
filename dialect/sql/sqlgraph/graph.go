@@ -10,6 +10,7 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/json"
+	"entgo.io/ent"
 	"fmt"
 	"math"
 	"sort"
@@ -490,6 +491,7 @@ type QuerySpec struct {
 	Limit     int
 	Offset    int
 	Unique    bool
+	WithLock  ent.LockType
 	Order     func(*sql.Selector)
 	Predicate func(*sql.Selector)
 
@@ -615,7 +617,9 @@ func (q *query) selector(ctx context.Context) (*sql.Selector, error) {
 	if q.From != nil {
 		selector = q.From
 	}
+
 	selector.Select(selector.Columns(q.Node.Columns...)...)
+
 	if pred := q.Predicate; pred != nil {
 		pred(selector)
 	}
@@ -633,6 +637,14 @@ func (q *query) selector(ctx context.Context) (*sql.Selector, error) {
 	if q.Unique {
 		selector.Distinct()
 	}
+
+	switch q.WithLock {
+	case ent.LockForUpdate:
+		selector.ForUpdate()
+	case ent.LockForShare:
+		selector.ForShare()
+	}
+
 	if err := selector.Err(); err != nil {
 		return nil, err
 	}

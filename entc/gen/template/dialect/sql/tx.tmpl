@@ -4,6 +4,33 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{ define "dialect/sql/tx/fields" }}
+// withLock enables locking selects.
+withLock ent.LockType
+{{ end }}
+
+{{ define "dialect/sql/tx/funcs" }}
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (tx *Tx) LockForUpdate() *Tx {
+	if tx.withLock == ent.LockForUpdate {
+		return tx
+	}
+	txWithLock := &Tx{config: tx.config, withLock: ent.LockForUpdate}
+	txWithLock.init()
+	return txWithLock
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (tx *Tx) LockForShare() *Tx {
+	if tx.withLock == ent.LockForShare {
+		return tx
+	}
+	txWithLock := &Tx{config: tx.config, withLock: ent.LockForShare}
+	txWithLock.init()
+	return txWithLock
+}
+{{ end }}
+
 {{ define "dialect/sql/txoptions" }}
 // BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {

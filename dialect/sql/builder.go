@@ -1529,20 +1529,21 @@ type Selector struct {
 	Builder
 	// ctx stores contextual data typically from
 	// generated code such as alternate table schemas.
-	ctx      context.Context
-	as       string
-	columns  []string
-	from     TableView
-	joins    []join
-	where    *Predicate
-	or       bool
-	not      bool
-	order    []interface{}
-	group    []string
-	having   *Predicate
-	limit    *int
-	offset   *int
-	distinct bool
+	ctx       context.Context
+	as        string
+	forOption string
+	columns   []string
+	from      TableView
+	joins     []join
+	where     *Predicate
+	or        bool
+	not       bool
+	order     []interface{}
+	group     []string
+	having    *Predicate
+	limit     *int
+	offset    *int
+	distinct  bool
 }
 
 // WithContext sets the context into the *Selector.
@@ -1840,6 +1841,20 @@ func (s *Selector) Having(p *Predicate) *Selector {
 	return s
 }
 
+// ForUpdate appends the `FOR UPDATE` clause to the `SELECT` statement.
+func (s *Selector) ForUpdate() *Selector {
+	s.distinct = false // combination of DISTINCT and FOR UPDATE is not allowed
+	s.forOption = "FOR UPDATE"
+	return s
+}
+
+// ForShare appends the `FOR SHARE` clause to the `SELECT` statement.
+func (s *Selector) ForShare() *Selector {
+	s.distinct = false // combination of DISTINCT and FOR SHARE is not allowed
+	s.forOption = "FOR SHARE"
+	return s
+}
+
 // Query returns query representation of a `SELECT` statement.
 func (s *Selector) Query() (string, []interface{}) {
 	b := s.Builder.clone()
@@ -1907,6 +1922,11 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString(" OFFSET ")
 		b.WriteString(strconv.Itoa(*s.offset))
 	}
+
+	if s.forOption != "" {
+		b.WriteString(s.forOption)
+	}
+
 	s.total = b.total
 	return b.String(), b.args
 }
