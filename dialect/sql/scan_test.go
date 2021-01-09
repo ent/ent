@@ -111,6 +111,23 @@ func TestScanSlice(t *testing.T) {
 	require.NoError(t, ScanSlice(toRows(mock), &pids))
 	require.Equal(t, u1, pids[0].String())
 	require.Equal(t, u2, pids[1].String())
+
+	mock = sqlmock.NewRows([]string{"id", "first", "last"}).
+		AddRow(10, "Ariel", "Mashraki")
+	err := ScanSlice(toRows(mock), nil)
+	require.EqualError(t, err, "sql/scan: ScanSlice(nil)")
+	var p []struct {
+		_     int
+		ID    int
+		First string
+		Last  string
+	}
+	err = ScanSlice(toRows(mock), p)
+	require.EqualError(t, err, "sql/scan: ScanSlice(non-pointer []struct { _ int; ID int; First string; Last string })")
+	require.NoError(t, ScanSlice(toRows(mock), &p))
+	require.Equal(t, 10, p[0].ID)
+	require.Equal(t, "Ariel", p[0].First)
+	require.Equal(t, "Mashraki", p[0].Last)
 }
 
 func TestScanSlicePtr(t *testing.T) {
