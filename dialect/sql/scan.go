@@ -87,7 +87,17 @@ func ScanSlice(rows ColumnScanner, v interface{}) error {
 	if err != nil {
 		return fmt.Errorf("sql/scan: failed getting column names: %v", err)
 	}
-	rv := reflect.Indirect(reflect.ValueOf(v))
+	rv := reflect.ValueOf(v)
+	switch {
+	case rv.Kind() != reflect.Ptr:
+		if t := reflect.TypeOf(v); t != nil {
+			return fmt.Errorf("sql/scan: ScanSlice(non-pointer %s)", t)
+		}
+		fallthrough
+	case rv.IsNil():
+		return fmt.Errorf("sql/scan: ScanSlice(nil)")
+	}
+	rv = reflect.Indirect(rv)
 	if k := rv.Kind(); k != reflect.Slice {
 		return fmt.Errorf("sql/scan: invalid type %s. expected slice as an argument", k)
 	}
