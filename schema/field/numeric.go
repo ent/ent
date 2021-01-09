@@ -263,6 +263,9 @@ func (b *intBuilder) Annotations(annotations ...schema.Annotation) *intBuilder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *intBuilder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(intType)
+	}
 	return b.desc
 }
 
@@ -410,6 +413,9 @@ func (b *uintBuilder) Annotations(annotations ...schema.Annotation) *uintBuilder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uintBuilder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(uintType)
+	}
 	return b.desc
 }
 
@@ -567,6 +573,9 @@ func (b *int8Builder) Annotations(annotations ...schema.Annotation) *int8Builder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int8Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(int8Type)
+	}
 	return b.desc
 }
 
@@ -724,6 +733,9 @@ func (b *int16Builder) Annotations(annotations ...schema.Annotation) *int16Build
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int16Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(int16Type)
+	}
 	return b.desc
 }
 
@@ -881,6 +893,9 @@ func (b *int32Builder) Annotations(annotations ...schema.Annotation) *int32Build
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int32Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(int32Type)
+	}
 	return b.desc
 }
 
@@ -1038,6 +1053,9 @@ func (b *int64Builder) Annotations(annotations ...schema.Annotation) *int64Build
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int64Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(int64Type)
+	}
 	return b.desc
 }
 
@@ -1185,6 +1203,9 @@ func (b *uint8Builder) Annotations(annotations ...schema.Annotation) *uint8Build
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint8Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(uint8Type)
+	}
 	return b.desc
 }
 
@@ -1332,6 +1353,9 @@ func (b *uint16Builder) Annotations(annotations ...schema.Annotation) *uint16Bui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint16Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(uint16Type)
+	}
 	return b.desc
 }
 
@@ -1479,6 +1503,9 @@ func (b *uint32Builder) Annotations(annotations ...schema.Annotation) *uint32Bui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint32Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(uint32Type)
+	}
 	return b.desc
 }
 
@@ -1626,6 +1653,9 @@ func (b *uint64Builder) Annotations(annotations ...schema.Annotation) *uint64Bui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint64Builder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(uint64Type)
+	}
 	return b.desc
 }
 

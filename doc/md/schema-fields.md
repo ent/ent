@@ -148,11 +148,16 @@ If you need to set a custom function to generate IDs, you can use `DefaultFunc`
 to specify a function which will always be ran when the resource is created.
 
 ```go
+var globalIDCounter int64 = 0
+
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint64("id").
-			DefaultFunc(func() uint64 { return 89 }),
+		field.Int64("id").
+			DefaultFunc(func() uint64 {
+				// example of a dumb ID generator - use a production-ready alternative instead
+				return time.Now().Unix() << 8 | atomic.AddInt64(&counter, 1) % 256
+			}),
 	}
 }
 ```
@@ -254,6 +259,10 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
+
+In case your `DefaultFunc` is also returning an error, it is better if it is
+handled properly. In this case, you should use a
+[schema hook which runs on `ent.OpCreate`.](hooks.md#schema-hooks)
 
 ## Validators
 

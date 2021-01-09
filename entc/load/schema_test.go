@@ -252,10 +252,6 @@ type WithDefaults struct {
 }
 
 func (WithDefaults) Fields() []ent.Field {
-	idf := field.Int("int_default_func")
-	idf.Descriptor().Default = func() int {
-		return 1e9
-	}
 	return []ent.Field{
 		field.Int("int").
 			Default(1),
@@ -268,7 +264,9 @@ func (WithDefaults) Fields() []ent.Field {
 		field.Time("updated_at").
 			UpdateDefault(time.Now),
 		// see issue #1146
-		idf,
+		field.Int("int_default_func").DefaultFunc(func() int {
+			return 1e9
+		}),
 	}
 }
 
