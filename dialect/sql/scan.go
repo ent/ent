@@ -179,6 +179,10 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 	)
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
+		// Skip unexported fields.
+		if f.PkgPath != "" {
+			continue
+		}
 		name := strings.ToLower(f.Name)
 		if tag, ok := f.Tag.Lookup("sql"); ok {
 			name = tag
