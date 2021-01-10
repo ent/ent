@@ -149,14 +149,12 @@ to specify a function which will always be ran when the resource is created.
 See the [related FAQ](faq.md#how-do-i-use-a-custom-generator-of-ids) for more information.
 
 ```go
-var globalIDCounter int64 = 0
-
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("id").
 			DefaultFunc(func() int64 {
-				// example of a dumb ID generator - use a production-ready alternative instead
+				// An example of a dumb ID generator - use a production-ready alternative instead.
 				return time.Now().Unix() << 8 | atomic.AddInt64(&counter, 1) % 256
 			}),
 	}
@@ -261,8 +259,8 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-In case your `DefaultFunc` is also returning an error, it is better if it is
-handled properly. [See this FAQ.](faq.md#how-do-i-use-a-custom-generator-of-ids)
+In case your `DefaultFunc` is also returning an error, it is better to handle it properly using [schema-hooks](hooks.md#schema-hooks).
+See [this FAQ](faq.md#how-to-use-a-custom-generator-of-ids) for more information. 
 
 ## Validators
 
