@@ -13,7 +13,7 @@ sidebar_label: FAQ
 [How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets) \
 [How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql) \
 [How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
-[How do I use a custom generator of IDs?](#how-do-i-use-a-custom-generator-of-ids)
+[How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids)
 
 ## Answers
 
@@ -319,7 +319,7 @@ field.Time("birth_date").
 	}),
 ```
 
-#### How do I use a custom generator of IDs?
+#### How to use a custom generator of IDs?
 
 If you're using a custom ID generator instead of using auto-incrementing IDs in
 your database (e.g. Twitter's [Snowflake](https://github.com/twitter-archive/snowflake/tree/snowflake-2010)),
@@ -341,21 +341,22 @@ type BaseMixin struct {
 	mixin.Schema
 }
 
+// Fields of the Mixin.
 func (BaseMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint64("id"),
 	}
 }
 
+// Hooks of the Mixin.
 func (BaseMixin) Hooks() []ent.Hook {
 	return []ent.Hook{
 		hook.On(IDHook(), ent.OpCreate),
 	}
 }
 
-var sf = sonyflake.NewSonyflake(sonyflage.Settings{})
-
 func IDHook() ent.Hook {
+    sf := sonyflake.NewSonyflake(sonyflage.Settings{})
 	type IDSetter interface {
 		SetID(uint64)
 	}
