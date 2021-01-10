@@ -182,7 +182,7 @@ func (b *intBuilder) DefaultFunc(fn interface{}) *intBuilder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *intBuilder) Nillable() *intBuilder {
 	b.desc.Nillable = true
 	return b
@@ -332,7 +332,7 @@ func (b *uintBuilder) DefaultFunc(fn interface{}) *uintBuilder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *uintBuilder) Nillable() *uintBuilder {
 	b.desc.Nillable = true
 	return b
@@ -492,7 +492,7 @@ func (b *int8Builder) DefaultFunc(fn interface{}) *int8Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *int8Builder) Nillable() *int8Builder {
 	b.desc.Nillable = true
 	return b
@@ -652,7 +652,7 @@ func (b *int16Builder) DefaultFunc(fn interface{}) *int16Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *int16Builder) Nillable() *int16Builder {
 	b.desc.Nillable = true
 	return b
@@ -812,7 +812,7 @@ func (b *int32Builder) DefaultFunc(fn interface{}) *int32Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *int32Builder) Nillable() *int32Builder {
 	b.desc.Nillable = true
 	return b
@@ -972,7 +972,7 @@ func (b *int64Builder) DefaultFunc(fn interface{}) *int64Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *int64Builder) Nillable() *int64Builder {
 	b.desc.Nillable = true
 	return b
@@ -1122,7 +1122,7 @@ func (b *uint8Builder) DefaultFunc(fn interface{}) *uint8Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *uint8Builder) Nillable() *uint8Builder {
 	b.desc.Nillable = true
 	return b
@@ -1272,7 +1272,7 @@ func (b *uint16Builder) DefaultFunc(fn interface{}) *uint16Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *uint16Builder) Nillable() *uint16Builder {
 	b.desc.Nillable = true
 	return b
@@ -1422,7 +1422,7 @@ func (b *uint32Builder) DefaultFunc(fn interface{}) *uint32Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *uint32Builder) Nillable() *uint32Builder {
 	b.desc.Nillable = true
 	return b
@@ -1572,7 +1572,7 @@ func (b *uint64Builder) DefaultFunc(fn interface{}) *uint64Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *uint64Builder) Nillable() *uint64Builder {
 	b.desc.Nillable = true
 	return b
@@ -1733,7 +1733,7 @@ func (b *float64Builder) Default(i float64) *float64Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *float64Builder) Nillable() *float64Builder {
 	b.desc.Nillable = true
 	return b
@@ -1879,7 +1879,7 @@ func (b *float32Builder) Default(i float32) *float32Builder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *float32Builder) Nillable() *float32Builder {
 	b.desc.Nillable = true
 	return b

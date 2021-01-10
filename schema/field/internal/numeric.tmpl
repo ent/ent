@@ -116,7 +116,7 @@ func (b *{{ $builder }}) DefaultFunc(fn interface{}) *{{ $builder }} {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *{{ $builder }}) Nillable() *{{ $builder }} {
 	b.desc.Nillable = true
 	return b
@@ -276,7 +276,7 @@ func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *{{ $builder }}) Nillable() *{{ $builder }} {
 	b.desc.Nillable = true
 	return b

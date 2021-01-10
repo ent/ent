@@ -154,7 +154,7 @@ func (t *TableBuilder) PrimaryKey(column ...string) *TableBuilder {
 func (t *TableBuilder) ForeignKeys(fks ...*ForeignKeyBuilder) *TableBuilder {
 	queries := make([]Querier, len(fks))
 	for i := range fks {
-		// erase the constraint symbol/name.
+		// Erase the constraint symbol/name.
 		fks[i].symbol = ""
 		queries[i] = fks[i]
 	}
@@ -584,7 +584,7 @@ type DropIndexBuilder struct {
 //		DropIndex("index_name").
 //			Table("users").
 //
-// SQLite/PostgreSQL:
+//	SQLite/PostgreSQL:
 //
 //		DropIndex("index_name")
 //
