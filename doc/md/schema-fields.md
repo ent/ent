@@ -144,6 +144,25 @@ func (Pet) Fields() []ent.Field {
 }
 ```
 
+If you need to set a custom function to generate IDs, you can use `DefaultFunc`
+to specify a function which will always be ran when the resource is created.
+See the [related FAQ](faq.md#how-do-i-use-a-custom-generator-of-ids) for more information.
+
+```go
+var globalIDCounter int64 = 0
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int64("id").
+			DefaultFunc(func() int64 {
+				// example of a dumb ID generator - use a production-ready alternative instead
+				return time.Now().Unix() << 8 | atomic.AddInt64(&counter, 1) % 256
+			}),
+	}
+}
+```
+
 ## Database Type
 
 Each database dialect has its own mapping from Go type to database type. For example,
@@ -169,7 +188,7 @@ func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.Float("amount").
 			SchemaType(map[string]string{
-				dialect.MySQL:    "decimal(6,2)",   // Override MySQL. 
+				dialect.MySQL:    "decimal(6,2)",   // Override MySQL.
 				dialect.Postgres: "numeric",        // Override Postgres.
 			}),
 	}
@@ -223,6 +242,7 @@ func (Card) Fields() []ent.Field {
 ## Default Values
 
 **Non-unique** fields support default values using the `Default` and `UpdateDefault` methods.
+You can also specify `DefaultFunc` instead to have a custom generator.
 
 ```go
 // Fields of the User.
@@ -240,6 +260,9 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
+
+In case your `DefaultFunc` is also returning an error, it is better if it is
+handled properly. [See this FAQ.](faq.md#how-do-i-use-a-custom-generator-of-ids)
 
 ## Validators
 
