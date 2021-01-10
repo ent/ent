@@ -219,7 +219,7 @@ func (b *stringBuilder) DefaultFunc(fn interface{}) *stringBuilder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *stringBuilder) Nillable() *stringBuilder {
 	b.desc.Nillable = true
 	return b
@@ -307,7 +307,7 @@ type timeBuilder struct {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *timeBuilder) Nillable() *timeBuilder {
 	b.desc.Nillable = true
 	return b
@@ -421,7 +421,7 @@ func (b *boolBuilder) Default(v bool) *boolBuilder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *boolBuilder) Nillable() *boolBuilder {
 	b.desc.Nillable = true
 	return b
@@ -509,7 +509,7 @@ func (b *bytesBuilder) DefaultFunc(fn interface{}) *bytesBuilder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *bytesBuilder) Nillable() *bytesBuilder {
 	b.desc.Nillable = true
 	return b
@@ -740,7 +740,7 @@ func (b *enumBuilder) Comment(c string) *enumBuilder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *enumBuilder) Nillable() *enumBuilder {
 	b.desc.Nillable = true
 	return b
