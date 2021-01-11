@@ -1523,7 +1523,7 @@ type Selector struct {
 	where    *Predicate
 	or       bool
 	not      bool
-	order    []string
+	order    []interface{}
 	group    []string
 	having   *Predicate
 	limit    *int
@@ -1759,7 +1759,7 @@ func (s *Selector) Clone() *Selector {
 		having:   s.having.clone(),
 		joins:    append([]join{}, joins...),
 		group:    append([]string{}, s.group...),
-		order:    append([]string{}, s.order...),
+		order:    append([]interface{}{}, s.order...),
 		columns:  append([]string{}, s.columns...),
 	}
 }
@@ -1780,7 +1780,18 @@ func Desc(column string) string {
 
 // OrderBy appends the `ORDER BY` clause to the `SELECT` statement.
 func (s *Selector) OrderBy(columns ...string) *Selector {
-	s.order = append(s.order, columns...)
+	for i := range columns {
+		s.order = append(s.order, columns[i])
+	}
+	return s
+}
+
+// OrderExpr appends the `ORDER BY` clause to the `SELECT`
+// statement with custom list of expressions.
+func (s *Selector) OrderExpr(exprs ...Querier) *Selector {
+	for i := range exprs {
+		s.order = append(s.order, exprs[i])
+	}
 	return s
 }
 
@@ -1853,8 +1864,7 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.Join(s.having)
 	}
 	if len(s.order) > 0 {
-		b.WriteString(" ORDER BY ")
-		b.IdentComma(s.order...)
+		s.joinOrder(&b)
 	}
 	if s.limit != nil {
 		b.WriteString(" LIMIT ")
@@ -1866,6 +1876,21 @@ func (s *Selector) Query() (string, []interface{}) {
 	}
 	s.total = b.total
 	return b.String(), b.args
+}
+
+func (s *Selector) joinOrder(b *Builder) {
+	b.WriteString(" ORDER BY ")
+	for i := range s.order {
+		if i > 0 {
+			b.Comma()
+		}
+		switch order := s.order[i].(type) {
+		case string:
+			b.Ident(order)
+		case Querier:
+			b.Join(order)
+		}
+	}
 }
 
 // implement the table view interface.
