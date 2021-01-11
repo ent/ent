@@ -1952,12 +1952,22 @@ func (w *Wrapper) SetTotal(total int) {
 	}
 }
 
-// Raw returns a raw sql Querier that is placed as-is in the query.
+// Raw returns a raw SQL query that is placed as-is in the query.
 func Raw(s string) Querier { return &raw{s} }
 
 type raw struct{ s string }
 
 func (r *raw) Query() (string, []interface{}) { return r.s, nil }
+
+// Expr returns an SQL expression that implements the Querier interface.
+func Expr(exr string, args ...interface{}) Querier { return &expr{s: exr, args: args} }
+
+type expr struct {
+	s    string
+	args []interface{}
+}
+
+func (e *expr) Query() (string, []interface{}) { return e.s, e.args }
 
 // Queries are list of queries join with space between them.
 type Queries []Querier
