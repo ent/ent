@@ -117,22 +117,6 @@ func To(table, column string) StepOption {
 	}
 }
 
-// ToSchema sets the db name of the From
-// step
-func ToSchema(name string) StepOption {
-	return func(s *Step) {
-		s.To.Schema = name
-	}
-}
-
-// EdgeSchema sets the db name of the EDge
-// table
-func EdgeSchema(name string) StepOption {
-	return func(s *Step) {
-		s.Edge.Schema = name
-	}
-}
-
 // Edge sets the edge info for getting the neighbors.
 func Edge(rel Rel, inverse bool, table string, columns ...string) StepOption {
 	return func(s *Step) {

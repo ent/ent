@@ -132,117 +132,147 @@ func TestNeighbors(t *testing.T) {
 			name: "schema/O2O/1type",
 			// Since the relation is on the same sql.Table,
 			// V used as a reference value.
-			input: NewStep(
-				From("users", "id", 1),
-				To("users", "id"),
-				ToSchema("mydb"),
-				Edge(O2O, false, "users", "spouse_id"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("users", "id", 1),
+					To("users", "id"),
+					Edge(O2O, false, "users", "spouse_id"),
+				)
+				step.To.Schema = "mydb"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `mydb`.`users` WHERE `spouse_id` = ?",
 			wantArgs:  []interface{}{1},
 		},
 		{
 			name: "schema/O2O/1type/inverse",
-			input: NewStep(
-				From("nodes", "id", 1),
-				To("nodes", "id"),
-				ToSchema("mydb"),
-				Edge(O2O, true, "nodes", "prev_id"),
-				EdgeSchema("mydb"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("nodes", "id", 1),
+					To("nodes", "id"),
+					Edge(O2O, true, "nodes", "prev_id"),
+				)
+				step.To.Schema = "mydb"
+				step.Edge.Schema = "mydb"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `mydb`.`nodes` JOIN (SELECT `prev_id` FROM `mydb`.`nodes` WHERE `id` = ?) AS `t1` ON `mydb`.`nodes`.`id` = `t1`.`prev_id`",
 			wantArgs:  []interface{}{1},
 		},
 		{
 			name: "schema/O2M/1type",
-			input: NewStep(
-				From("users", "id", 1),
-				To("users", "id"),
-				ToSchema("mydb"),
-				Edge(O2M, false, "users", "parent_id"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("users", "id", 1),
+					To("users", "id"),
+					Edge(O2M, false, "users", "parent_id"),
+				)
+				step.To.Schema = "mydb"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `mydb`.`users` WHERE `parent_id` = ?",
 			wantArgs:  []interface{}{1},
 		},
 		{
 			name: "schema/O2O/2types",
-			input: NewStep(
-				From("users", "id", 2),
-				To("card", "id"),
-				ToSchema("mydb"),
-				Edge(O2O, false, "cards", "owner_id"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("users", "id", 2),
+					To("card", "id"),
+					Edge(O2O, false, "cards", "owner_id"),
+				)
+				step.To.Schema = "mydb"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `mydb`.`card` WHERE `owner_id` = ?",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "schema/O2O/2types/inverse",
-			input: NewStep(
-				From("cards", "id", 2),
-				To("users", "id"),
-				ToSchema("mydb"),
-				Edge(O2O, true, "cards", "owner_id"),
-				EdgeSchema("mydb"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("cards", "id", 2),
+					To("users", "id"),
+					Edge(O2O, true, "cards", "owner_id"),
+				)
+				step.To.Schema = "mydb"
+				step.Edge.Schema = "mydb"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `mydb`.`users` JOIN (SELECT `owner_id` FROM `mydb`.`cards` WHERE `id` = ?) AS `t1` ON `mydb`.`users`.`id` = `t1`.`owner_id`",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "schema/O2M/2types",
-			input: NewStep(
-				From("users", "id", 1),
-				To("pets", "id"),
-				ToSchema("mydb"),
-				Edge(O2M, false, "pets", "owner_id"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("users", "id", 1),
+					To("pets", "id"),
+					Edge(O2M, false, "pets", "owner_id"),
+				)
+				step.To.Schema = "mydb"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `mydb`.`pets` WHERE `owner_id` = ?",
 			wantArgs:  []interface{}{1},
 		},
 		{
 			name: "schema/M2O/2types/inverse",
-			input: NewStep(
-				From("pets", "id", 2),
-				To("users", "id"),
-				ToSchema("s1"),
-				Edge(M2O, true, "pets", "owner_id"),
-				EdgeSchema("s2"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("pets", "id", 2),
+					To("users", "id"),
+					Edge(M2O, true, "pets", "owner_id"),
+				)
+				step.To.Schema = "s1"
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `owner_id` FROM `s2`.`pets` WHERE `id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`owner_id`",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "schema/M2O/1type/inverse",
-			input: NewStep(
-				From("users", "id", 2),
-				To("users", "id"),
-				ToSchema("s1"),
-				Edge(M2O, true, "users", "parent_id"),
-				EdgeSchema("s1"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("users", "id", 2),
+					To("users", "id"),
+					Edge(M2O, true, "users", "parent_id"),
+				)
+				step.To.Schema = "s1"
+				step.Edge.Schema = "s1"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `parent_id` FROM `s1`.`users` WHERE `id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`parent_id`",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "schema/M2M/2type",
-			input: NewStep(
-				From("groups", "id", 2),
-				To("users", "id"),
-				ToSchema("s1"),
-				Edge(M2M, false, "user_groups", "group_id", "user_id"),
-				EdgeSchema("s2"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("groups", "id", 2),
+					To("users", "id"),
+					Edge(M2M, false, "user_groups", "group_id", "user_id"),
+				)
+				step.To.Schema = "s1"
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `s1`.`users` JOIN (SELECT `s2`.`user_groups`.`user_id` FROM `s2`.`user_groups` WHERE `s2`.`user_groups`.`group_id` = ?) AS `t1` ON `s1`.`users`.`id` = `t1`.`user_id`",
 			wantArgs:  []interface{}{2},
 		},
 		{
 			name: "schema/M2M/2type/inverse",
-			input: NewStep(
-				From("users", "id", 2),
-				To("groups", "id"),
-				ToSchema("s1"),
-				Edge(M2M, true, "user_groups", "group_id", "user_id"),
-				EdgeSchema("s2"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("users", "id", 2),
+					To("groups", "id"),
+					Edge(M2M, true, "user_groups", "group_id", "user_id"),
+				)
+				step.To.Schema = "s1"
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			wantQuery: "SELECT * FROM `s1`.`groups` JOIN (SELECT `s2`.`user_groups`.`group_id` FROM `s2`.`user_groups` WHERE `s2`.`user_groups`.`user_id` = ?) AS `t1` ON `s1`.`groups`.`id` = `t1`.`group_id`",
 			wantArgs:  []interface{}{2},
 		},
@@ -324,35 +354,44 @@ JOIN
 		},
 		{
 			name: "schema/O2M/2types",
-			input: NewStep(
-				From("users", "id", sql.Select().From(sql.Table("users").Schema("s2")).Where(sql.EQ("name", "a8m"))),
-				To("pets", "id"),
-				ToSchema("s1"),
-				Edge(O2M, false, "users", "owner_id"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("users", "id", sql.Select().From(sql.Table("users").Schema("s2")).Where(sql.EQ("name", "a8m"))),
+					To("pets", "id"),
+					Edge(O2M, false, "users", "owner_id"),
+				)
+				step.To.Schema = "s1"
+				return step
+			}(),
 			wantQuery: `SELECT * FROM "s1"."pets" JOIN (SELECT "s2"."users"."id" FROM "s2"."users" WHERE "name" = $1) AS "t1" ON "s1"."pets"."owner_id" = "t1"."id"`,
 			wantArgs:  []interface{}{"a8m"},
 		},
 		{
 			name: "schema/M2O/2types",
-			input: NewStep(
-				From("pets", "id", sql.Select().From(sql.Table("pets").Schema("s2")).Where(sql.EQ("name", "pedro"))),
-				To("users", "id"),
-				ToSchema("s1"),
-				Edge(M2O, true, "pets", "owner_id"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("pets", "id", sql.Select().From(sql.Table("pets").Schema("s2")).Where(sql.EQ("name", "pedro"))),
+					To("users", "id"),
+					Edge(M2O, true, "pets", "owner_id"),
+				)
+				step.To.Schema = "s1"
+				return step
+			}(),
 			wantQuery: `SELECT * FROM "s1"."users" JOIN (SELECT "s2"."pets"."owner_id" FROM "s2"."pets" WHERE "name" = $1) AS "t1" ON "s1"."users"."id" = "t1"."owner_id"`,
 			wantArgs:  []interface{}{"pedro"},
 		},
 		{
 			name: "schema/M2M/2types",
-			input: NewStep(
-				From("users", "id", sql.Select().From(sql.Table("users").Schema("s2")).Where(sql.EQ("name", "a8m"))),
-				To("groups", "id"),
-				ToSchema("s1"),
-				Edge(M2M, false, "user_groups", "user_id", "group_id"),
-				EdgeSchema("s3"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("users", "id", sql.Select().From(sql.Table("users").Schema("s2")).Where(sql.EQ("name", "a8m"))),
+					To("groups", "id"),
+					Edge(M2M, false, "user_groups", "user_id", "group_id"),
+				)
+				step.To.Schema = "s1"
+				step.Edge.Schema = "s3"
+				return step
+			}(),
 			wantQuery: `
 SELECT *
 FROM "s1"."groups"
@@ -367,13 +406,16 @@ JOIN
 		},
 		{
 			name: "schema/M2M/2types/inverse",
-			input: NewStep(
-				From("groups", "id", sql.Select().From(sql.Table("groups").Schema("s2")).Where(sql.EQ("name", "GitHub"))),
-				To("users", "id"),
-				ToSchema("s1"),
-				Edge(M2M, true, "user_groups", "user_id", "group_id"),
-				EdgeSchema("s3"),
-			),
+			input: func() *Step {
+				step := NewStep(
+					From("groups", "id", sql.Select().From(sql.Table("groups").Schema("s2")).Where(sql.EQ("name", "GitHub"))),
+					To("users", "id"),
+					Edge(M2M, true, "user_groups", "user_id", "group_id"),
+				)
+				step.To.Schema = "s1"
+				step.Edge.Schema = "s3"
+				return step
+			}(),
 			wantQuery: `
 SELECT *
 FROM "s1"."users"
@@ -472,12 +514,15 @@ func TestHasNeighbors(t *testing.T) {
 		},
 		{
 			name: "schema/O2O/1type",
-			step: NewStep(
-				From("nodes", "id"),
-				To("nodes", "id"),
-				Edge(O2O, false, "nodes", "prev_id"),
-				EdgeSchema("s1"),
-			),
+			step: func() *Step {
+				step := NewStep(
+					From("nodes", "id"),
+					To("nodes", "id"),
+					Edge(O2O, false, "nodes", "prev_id"),
+				)
+				step.Edge.Schema = "s1"
+				return step
+			}(),
 			selector:  sql.Select("*").From(sql.Table("nodes").Schema("s1")),
 			wantQuery: "SELECT * FROM `s1`.`nodes` WHERE `s1`.`nodes`.`id` IN (SELECT `s1`.`nodes`.`prev_id` FROM `s1`.`nodes` WHERE `s1`.`nodes`.`prev_id` IS NOT NULL)",
 		},
@@ -495,12 +540,15 @@ func TestHasNeighbors(t *testing.T) {
 		},
 		{
 			name: "schema/O2M/2type2",
-			step: NewStep(
-				From("users", "id"),
-				To("pets", "id"),
-				Edge(O2M, false, "pets", "owner_id"),
-				EdgeSchema("s2"),
-			),
+			step: func() *Step {
+				step := NewStep(
+					From("users", "id"),
+					To("pets", "id"),
+					Edge(O2M, false, "pets", "owner_id"),
+				)
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
 			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`pets`.`owner_id` FROM `s2`.`pets` WHERE `s2`.`pets`.`owner_id` IS NOT NULL)",
 		},
@@ -516,23 +564,29 @@ func TestHasNeighbors(t *testing.T) {
 		},
 		{
 			name: "schema/M2M/2types",
-			step: NewStep(
-				From("users", "id"),
-				To("groups", "id"),
-				Edge(M2M, false, "user_groups", "user_id", "group_id"),
-				EdgeSchema("s2"),
-			),
+			step: func() *Step {
+				step := NewStep(
+					From("users", "id"),
+					To("groups", "id"),
+					Edge(M2M, false, "user_groups", "user_id", "group_id"),
+				)
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
 			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`user_groups`.`user_id` FROM `s2`.`user_groups`)",
 		},
 		{
 			name: "schema/M2M/2types/inverse",
-			step: NewStep(
-				From("users", "id"),
-				To("groups", "id"),
-				Edge(M2M, true, "group_users", "group_id", "user_id"),
-				EdgeSchema("s2"),
-			),
+			step: func() *Step {
+				step := NewStep(
+					From("users", "id"),
+					To("groups", "id"),
+					Edge(M2M, true, "group_users", "group_id", "user_id"),
+				)
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
 			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`group_users`.`user_id` FROM `s2`.`group_users`)",
 		},
@@ -678,12 +732,15 @@ WHERE "groups"."id" IN
 		},
 		{
 			name: "schema/O2O",
-			step: NewStep(
-				From("users", "id"),
-				To("cards", "id"),
-				Edge(O2O, false, "cards", "owner_id"),
-				EdgeSchema("s2"),
-			),
+			step: func() *Step {
+				step := NewStep(
+					From("users", "id"),
+					To("cards", "id"),
+					Edge(O2O, false, "cards", "owner_id"),
+				)
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			selector: sql.Dialect("postgres").Select("*").From(sql.Table("users").Schema("s1")),
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("expired", false))
@@ -693,12 +750,15 @@ WHERE "groups"."id" IN
 		},
 		{
 			name: "schema/O2M",
-			step: NewStep(
-				From("users", "id"),
-				To("pets", "id"),
-				Edge(O2M, false, "pets", "owner_id"),
-				EdgeSchema("s2"),
-			),
+			step: func() *Step {
+				step := NewStep(
+					From("users", "id"),
+					To("pets", "id"),
+					Edge(O2M, false, "pets", "owner_id"),
+				)
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			selector: sql.Dialect("postgres").Select("*").
 				From(sql.Table("users").Schema("s1")).
 				Where(sql.EQ("last_name", "mashraki")),
@@ -710,13 +770,16 @@ WHERE "groups"."id" IN
 		},
 		{
 			name: "schema/M2M",
-			step: NewStep(
-				From("users", "id"),
-				To("groups", "id"),
-				ToSchema("s3"),
-				Edge(M2M, false, "user_groups", "user_id", "group_id"),
-				EdgeSchema("s2"),
-			),
+			step: func() *Step {
+				step := NewStep(
+					From("users", "id"),
+					To("groups", "id"),
+					Edge(M2M, false, "user_groups", "user_id", "group_id"),
+				)
+				step.To.Schema = "s3"
+				step.Edge.Schema = "s2"
+				return step
+			}(),
 			selector: sql.Dialect("postgres").Select("*").From(sql.Table("users").Schema("s1")),
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("name", "GitHub"))
