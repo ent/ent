@@ -1384,3 +1384,14 @@ func TestBuilder_Err(t *testing.T) {
 	b.AddError(fmt.Errorf("unexpected"))
 	require.EqualError(t, b.Err(), "invalid; unexpected")
 }
+
+func TestSelector_OrderByExpr(t *testing.T) {
+	query, args := Select("*").
+		From(Table("users")).
+		Where(GT("age", 28)).
+		OrderBy("name").
+		OrderExpr(Expr("CASE WHEN id=? THEN id WHEN id=? THEN name END DESC", 1, 2)).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `age` > ? ORDER BY `name`, CASE WHEN id=? THEN id WHEN id=? THEN name END DESC", query)
+	require.Equal(t, []interface{}{28, 1, 2}, args)
+}
