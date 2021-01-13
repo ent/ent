@@ -323,6 +323,11 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
+			input:     Update("users").Set("name", "foo").Where(EQ("name", Expr("?", "bar"))),
+			wantQuery: "UPDATE `users` SET `name` = ? WHERE `name` = ?",
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Where(EQ("name", "bar")),
 			wantQuery: `UPDATE "users" SET "name" = $1 WHERE "name" = $2`,
 			wantArgs:  []interface{}{"foo", "bar"},

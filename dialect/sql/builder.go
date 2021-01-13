@@ -2153,8 +2153,12 @@ func (b *Builder) WriteOp(op Op) *Builder {
 
 // Arg appends an input argument to the builder.
 func (b *Builder) Arg(a interface{}) *Builder {
-	if r, ok := a.(*raw); ok {
-		b.WriteString(r.s)
+	switch a := a.(type) {
+	case *raw:
+		b.WriteString(a.s)
+		return b
+	case Querier:
+		b.Join(a)
 		return b
 	}
 	b.total++
