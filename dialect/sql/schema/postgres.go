@@ -452,6 +452,14 @@ func (d *Postgres) tableSchema() sql.Querier {
 	return sql.Raw("CURRENT_SCHEMA()")
 }
 
+// tables returns the query for getting the in the schema.
+func (d *Postgres) tables() sql.Querier {
+	return sql.Dialect(dialect.Postgres).
+		Select("table_name").
+		From(sql.Table("tables").Schema("information_schema")).
+		Where(sql.EQ("table_schema", d.tableSchema()))
+}
+
 // alterColumns returns the queries for applying the columns change-set.
 func (d *Postgres) alterColumns(table string, add, modify, drop []*Column) sql.Queries {
 	b := sql.Dialect(dialect.Postgres).AlterTable(table)
