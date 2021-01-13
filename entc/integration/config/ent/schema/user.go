@@ -57,9 +57,11 @@ func (User) Mixin() []ent.Mixin {
 
 // Annotations of the User schema.
 func (User) Annotations() []schema.Annotation {
+	incremental := false
 	return []schema.Annotation{
 		entsql.Annotation{
-			Table: "Users",
+			Table:       "Users",
+			Incremental: &incremental,
 		},
 	}
 }

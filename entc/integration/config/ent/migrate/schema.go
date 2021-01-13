@@ -36,4 +36,6 @@ func init() {
 		Table:   "Users",
 		Charset: "utf8mb4",
 	}
+	UsersTable.Annotation.Incremental = new(bool)
+	*UsersTable.Annotation.Incremental = false
 }
