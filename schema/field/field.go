@@ -906,6 +906,7 @@ type Descriptor struct {
 	Sensitive     bool                    // sensitive info string field.
 	SchemaType    map[string]string       // override the schema type.
 	Annotations   []schema.Annotation     // field annotations.
+	Comment       string                  // field comment.
 	Err           error
 }
 

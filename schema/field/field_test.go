@@ -520,3 +520,10 @@ func TestTypeConstName(t *testing.T) {
 	typ = 21
 	assert.Equal(t, "invalid", typ.ConstName())
 }
+
+func TestComment(t *testing.T) {
+	fd := field.Int("age").
+		Comment("some comment").
+		Descriptor()
+	assert.Equal(t, "", fd.Comment) // not implemented yet
+}
