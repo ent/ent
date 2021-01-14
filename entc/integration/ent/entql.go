@@ -97,6 +97,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldOptionalUint16:        {Type: field.TypeUint16, Column: fieldtype.FieldOptionalUint16},
 			fieldtype.FieldOptionalUint32:        {Type: field.TypeUint32, Column: fieldtype.FieldOptionalUint32},
 			fieldtype.FieldOptionalUint64:        {Type: field.TypeUint64, Column: fieldtype.FieldOptionalUint64},
+			fieldtype.FieldDuration:              {Type: field.TypeInt64, Column: fieldtype.FieldDuration},
 			fieldtype.FieldState:                 {Type: field.TypeEnum, Column: fieldtype.FieldState},
 			fieldtype.FieldOptionalFloat:         {Type: field.TypeFloat64, Column: fieldtype.FieldOptionalFloat},
 			fieldtype.FieldOptionalFloat32:       {Type: field.TypeFloat32, Column: fieldtype.FieldOptionalFloat32},
@@ -910,6 +911,11 @@ func (f *FieldTypeFilter) WhereOptionalUint32(p entql.Uint32P) {
 // WhereOptionalUint64 applies the entql uint64 predicate on the optional_uint64 field.
 func (f *FieldTypeFilter) WhereOptionalUint64(p entql.Uint64P) {
 	f.Where(p.Field(fieldtype.FieldOptionalUint64))
+}
+
+// WhereDuration applies the entql int64 predicate on the duration field.
+func (f *FieldTypeFilter) WhereDuration(p entql.Int64P) {
+	f.Where(p.Field(fieldtype.FieldDuration))
 }
 
 // WhereState applies the entql string predicate on the state field.

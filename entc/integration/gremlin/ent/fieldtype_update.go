@@ -535,6 +535,33 @@ func (ftu *FieldTypeUpdate) ClearOptionalUint64() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetDuration sets the "duration" field.
+func (ftu *FieldTypeUpdate) SetDuration(t time.Duration) *FieldTypeUpdate {
+	ftu.mutation.ResetDuration()
+	ftu.mutation.SetDuration(t)
+	return ftu
+}
+
+// SetNillableDuration sets the "duration" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableDuration(t *time.Duration) *FieldTypeUpdate {
+	if t != nil {
+		ftu.SetDuration(*t)
+	}
+	return ftu
+}
+
+// AddDuration adds t to the "duration" field.
+func (ftu *FieldTypeUpdate) AddDuration(t time.Duration) *FieldTypeUpdate {
+	ftu.mutation.AddDuration(t)
+	return ftu
+}
+
+// ClearDuration clears the value of the "duration" field.
+func (ftu *FieldTypeUpdate) ClearDuration() *FieldTypeUpdate {
+	ftu.mutation.ClearDuration()
+	return ftu
+}
+
 // SetState sets the "state" field.
 func (ftu *FieldTypeUpdate) SetState(f fieldtype.State) *FieldTypeUpdate {
 	ftu.mutation.SetState(f)
@@ -1262,6 +1289,12 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.AddedOptionalUint64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUint64, __.Union(__.Values(fieldtype.FieldOptionalUint64), __.Constant(value)).Sum())
 	}
+	if value, ok := ftu.mutation.Duration(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDuration, value)
+	}
+	if value, ok := ftu.mutation.AddedDuration(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDuration, __.Union(__.Values(fieldtype.FieldDuration), __.Constant(value)).Sum())
+	}
 	if value, ok := ftu.mutation.State(); ok {
 		v.Property(dsl.Single, fieldtype.FieldState, value)
 	}
@@ -1412,6 +1445,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.OptionalUint64Cleared() {
 		properties = append(properties, fieldtype.FieldOptionalUint64)
+	}
+	if ftu.mutation.DurationCleared() {
+		properties = append(properties, fieldtype.FieldDuration)
 	}
 	if ftu.mutation.StateCleared() {
 		properties = append(properties, fieldtype.FieldState)
@@ -1997,6 +2033,33 @@ func (ftuo *FieldTypeUpdateOne) AddOptionalUint64(u uint64) *FieldTypeUpdateOne 
 // ClearOptionalUint64 clears the value of the "optional_uint64" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUint64() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalUint64()
+	return ftuo
+}
+
+// SetDuration sets the "duration" field.
+func (ftuo *FieldTypeUpdateOne) SetDuration(t time.Duration) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetDuration()
+	ftuo.mutation.SetDuration(t)
+	return ftuo
+}
+
+// SetNillableDuration sets the "duration" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableDuration(t *time.Duration) *FieldTypeUpdateOne {
+	if t != nil {
+		ftuo.SetDuration(*t)
+	}
+	return ftuo
+}
+
+// AddDuration adds t to the "duration" field.
+func (ftuo *FieldTypeUpdateOne) AddDuration(t time.Duration) *FieldTypeUpdateOne {
+	ftuo.mutation.AddDuration(t)
+	return ftuo
+}
+
+// ClearDuration clears the value of the "duration" field.
+func (ftuo *FieldTypeUpdateOne) ClearDuration() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearDuration()
 	return ftuo
 }
 
@@ -2732,6 +2795,12 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.AddedOptionalUint64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUint64, __.Union(__.Values(fieldtype.FieldOptionalUint64), __.Constant(value)).Sum())
 	}
+	if value, ok := ftuo.mutation.Duration(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDuration, value)
+	}
+	if value, ok := ftuo.mutation.AddedDuration(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDuration, __.Union(__.Values(fieldtype.FieldDuration), __.Constant(value)).Sum())
+	}
 	if value, ok := ftuo.mutation.State(); ok {
 		v.Property(dsl.Single, fieldtype.FieldState, value)
 	}
@@ -2882,6 +2951,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.OptionalUint64Cleared() {
 		properties = append(properties, fieldtype.FieldOptionalUint64)
+	}
+	if ftuo.mutation.DurationCleared() {
+		properties = append(properties, fieldtype.FieldDuration)
 	}
 	if ftuo.mutation.StateCleared() {
 		properties = append(properties, fieldtype.FieldState)

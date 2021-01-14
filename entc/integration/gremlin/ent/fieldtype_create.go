@@ -285,6 +285,20 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreat
 	return ftc
 }
 
+// SetDuration sets the "duration" field.
+func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
+	ftc.mutation.SetDuration(t)
+	return ftc
+}
+
+// SetNillableDuration sets the "duration" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDuration(t *time.Duration) *FieldTypeCreate {
+	if t != nil {
+		ftc.SetDuration(*t)
+	}
+	return ftc
+}
+
 // SetState sets the "state" field.
 func (ftc *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
 	ftc.mutation.SetState(f)
@@ -764,6 +778,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.OptionalUint64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUint64, value)
+	}
+	if value, ok := ftc.mutation.Duration(); ok {
+		v.Property(dsl.Single, fieldtype.FieldDuration, value)
 	}
 	if value, ok := ftc.mutation.State(); ok {
 		v.Property(dsl.Single, fieldtype.FieldState, value)
