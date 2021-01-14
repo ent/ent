@@ -93,6 +93,11 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ end }}
 
 {{ range $e := $.Edges }}
+	{{- with extend $ "Edge" $e -}}
+		{{ $tmpl := printf "dialect/%s/predicate/edge-fk" $.Storage }}
+		{{- xtemplate $tmpl . }}
+	{{- end -}}
+
 	{{ $func := print "Has" $e.StructField }}
 	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge.
 	func {{ $func }}() predicate.{{ $.Name }} {

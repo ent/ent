@@ -277,6 +277,81 @@ func LicensedAtNotNil() predicate.Pet {
 	})
 }
 
+// @TODO: comment
+func UserID(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(user_pets), v))
+	})
+}
+
+// UserIDEQ applies the EQ predicate on the user_pets field.
+func UserIDEQ(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(OwnerColumn), id))
+	})
+}
+
+// UserIDNEQ applies the NEQ predicate on the user_pets field.
+func UserIDNEQ(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(OwnerColumn), id))
+	})
+}
+
+// UserIDIn applies the In predicate on the user_pets field.
+func UserIDIn(ids ...int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(OwnerColumn), ids...))
+	})
+}
+
+// UserIDNotIn applies the NotIn predicate on the user_pets field.
+func UserIDNotIn(ids ...int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(OwnerColumn), ids...))
+	})
+}
+
+// UserIDGT applies the GT predicate on the user_pets field.
+func UserIDGT(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(OwnerColumn), id))
+	})
+}
+
+// UserIDGTE applies the GTE predicate on the user_pets field.
+func UserIDGTE(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(OwnerColumn), id))
+	})
+}
+
+// UserIDLT applies the LT predicate on the user_pets field.
+func UserIDLT(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(OwnerColumn), id))
+	})
+}
+
+// UserIDLTE applies the LTE predicate on the user_pets field.
+func UserIDLTE(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(OwnerColumn), id))
+	})
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {

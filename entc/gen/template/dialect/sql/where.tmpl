@@ -1,0 +1,31 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{ define "dialect/sql/predicate/edge-fk" -}}
+{{- $e := $.Scope.Edge -}}
+{{ if $e.OwnFK }}
+    // {{ $e.StructField }}ID applies the EQ predicate on the {{ $e.ColumnConstant }} field.
+    func {{ $e.StructField }}ID(id {{ $e.Type.ID.Type }}) predicate.{{ $.Name }} {
+        return predicate.{{ $.Name }}(func(s *sql.Selector) {
+            s.Where(sql.EQ(s.C({{ $e.ColumnConstant }}), id))
+        })
+    }
+
+    {{ range $op := ops $e.Type.ID }}
+        {{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
+        {{ $func := printf "%sID%s" $e.StructField $op.Name }}
+        // {{ $func }} applies the {{ $op.Name }} predicate on the {{ $e.StructFKField }} field.
+        func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $e.Type.ID.Type }}) predicate.{{ $.Name }} {
+            return predicate.{{ $.Name }}(
+                {{- with extend $ "Arg" $arg "Edge" $e "Op" $op "Storage" $.Storage -}}
+                    {{ $tmpl := printf "dialect/%s/predicate/edge/ops" $.Storage }}
+                    {{- xtemplate $tmpl . }}
+                {{- end -}}
+            )
+        }
+    {{ end }}
+{{ end }}
+{{- end }}
