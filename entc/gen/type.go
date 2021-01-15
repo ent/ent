@@ -21,6 +21,7 @@ import (
 	"github.com/facebook/ent/dialect/entsql"
 	"github.com/facebook/ent/dialect/sql/schema"
 	"github.com/facebook/ent/entc/load"
+	"github.com/facebook/ent/schema/codegen"
 	"github.com/facebook/ent/schema/field"
 )
 
@@ -243,6 +244,10 @@ func (t Type) EntSQL() *entsql.Annotation {
 
 // Package returns the package name of this node.
 func (t Type) Package() string {
+	ann := codegenAnnotate(t.Annotations)
+	if ann != nil && ann.PackageName != "" {
+		return ann.PackageName
+	}
 	return strings.ToLower(t.Name)
 }
 
@@ -1321,6 +1326,18 @@ func builderField(name string) string {
 // entsqlAnnotate extracts the entsql annotation from a loaded annotation format.
 func entsqlAnnotate(annotation map[string]interface{}) *entsql.Annotation {
 	annotate := &entsql.Annotation{}
+	if annotation == nil || annotation[annotate.Name()] == nil {
+		return nil
+	}
+	if buf, err := json.Marshal(annotation[annotate.Name()]); err == nil {
+		_ = json.Unmarshal(buf, &annotate)
+	}
+	return annotate
+}
+
+// codegenAnnotate extracts the entsql annotation from a loaded annotation format.
+func codegenAnnotate(annotation map[string]interface{}) *codegen.Annotation {
+	annotate := &codegen.Annotation{}
 	if annotation == nil || annotation[annotate.Name()] == nil {
 		return nil
 	}
