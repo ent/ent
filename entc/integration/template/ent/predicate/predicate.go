@@ -13,7 +13,7 @@ import (
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 
-// Pet is the predicate function for pet builders.
+// Pet is the predicate function for entpet builders.
 type Pet func(*sql.Selector)
 
 // User is the predicate function for user builders.

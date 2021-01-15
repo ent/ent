@@ -15,8 +15,8 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/schema"
+	"github.com/facebook/ent/entc/integration/template/ent/entpet"
 	"github.com/facebook/ent/entc/integration/template/ent/group"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
 	"github.com/facebook/ent/entc/integration/template/ent/user"
 
 	"golang.org/x/sync/semaphore"
@@ -125,7 +125,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	}
 	var ids []int
 	ids, err = u.QueryPets().
-		Select(pet.FieldID).
+		Select(entpet.FieldID).
 		Ints(ctx)
 	if err != nil {
 		return nil, err
@@ -177,7 +177,7 @@ func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
 			return nil, err
 		}
 		return n, nil
-	case pet.Table:
+	case entpet.Table:
 		n, err := c.Pet.Get(ctx, id)
 		if err != nil {
 			return nil, err

@@ -13,8 +13,8 @@ import (
 
 	"github.com/facebook/ent/entc/integration/template/ent/migrate"
 
+	"github.com/facebook/ent/entc/integration/template/ent/entpet"
 	"github.com/facebook/ent/entc/integration/template/ent/group"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
 	"github.com/facebook/ent/entc/integration/template/ent/user"
 
 	"github.com/facebook/ent/dialect"
@@ -236,7 +236,7 @@ func NewPetClient(c config) *PetClient {
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `pet.Hooks(f(g(h())))`.
+// A call to `Use(f, g, h)` equals to `entpet.Hooks(f(g(h())))`.
 func (c *PetClient) Use(hooks ...Hook) {
 	c.hooks.Pet = append(c.hooks.Pet, hooks...)
 }
@@ -283,7 +283,7 @@ func (c *PetClient) DeleteOne(pe *Pet) *PetDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
-	builder := c.Delete().Where(pet.ID(id))
+	builder := c.Delete().Where(entpet.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
 	return &PetDeleteOne{builder}
@@ -296,7 +296,7 @@ func (c *PetClient) Query() *PetQuery {
 
 // Get returns a Pet entity by its id.
 func (c *PetClient) Get(ctx context.Context, id int) (*Pet, error) {
-	return c.Query().Where(pet.ID(id)).Only(ctx)
+	return c.Query().Where(entpet.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
@@ -314,9 +314,9 @@ func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := pe.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pet.Table, pet.FieldID, id),
+			sqlgraph.From(entpet.Table, entpet.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, entpet.OwnerTable, entpet.OwnerColumn),
 		)
 		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
 		return fromV, nil
@@ -419,7 +419,7 @@ func (c *UserClient) QueryPets(u *User) *PetQuery {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.To(entpet.Table, entpet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)

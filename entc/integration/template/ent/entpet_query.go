@@ -14,7 +14,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
+	"github.com/facebook/ent/entc/integration/template/ent/entpet"
 	"github.com/facebook/ent/entc/integration/template/ent/predicate"
 	"github.com/facebook/ent/entc/integration/template/ent/user"
 	"github.com/facebook/ent/schema/field"
@@ -72,9 +72,9 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(pet.Table, pet.FieldID, selector),
+			sqlgraph.From(entpet.Table, entpet.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, entpet.OwnerTable, entpet.OwnerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -90,7 +90,7 @@ func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{pet.Label}
+		return nil, &NotFoundError{entpet.Label}
 	}
 	return nodes[0], nil
 }
@@ -112,7 +112,7 @@ func (pq *PetQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 		return
 	}
 	return ids[0], nil
@@ -139,9 +139,9 @@ func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{pet.Label}
+		return nil, &NotFoundError{entpet.Label}
 	default:
-		return nil, &NotSingularError{pet.Label}
+		return nil, &NotSingularError{entpet.Label}
 	}
 }
 
@@ -166,9 +166,9 @@ func (pq *PetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
-		err = &NotSingularError{pet.Label}
+		err = &NotSingularError{entpet.Label}
 	}
 	return
 }
@@ -202,7 +202,7 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 // IDs executes the query and returns a list of Pet IDs.
 func (pq *PetQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	if err := pq.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
+	if err := pq.Select(entpet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -292,7 +292,7 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //	}
 //
 //	client.Pet.Query().
-//		GroupBy(pet.FieldAge).
+//		GroupBy(entpet.FieldAge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -318,7 +318,7 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //	}
 //
 //	client.Pet.Query().
-//		Select(pet.FieldAge).
+//		Select(entpet.FieldAge).
 //		Scan(ctx, &v)
 //
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
@@ -328,7 +328,7 @@ func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
 
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range pq.fields {
-		if !pet.ValidColumn(f) {
+		if !entpet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -355,7 +355,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		withFKs = true
 	}
 	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
+		_spec.Node.Columns = append(_spec.Node.Columns, entpet.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Pet{config: pq.config}
@@ -421,11 +421,11 @@ func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
 func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   pet.Table,
-			Columns: pet.Columns,
+			Table:   entpet.Table,
+			Columns: entpet.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: pet.FieldID,
+				Column: entpet.FieldID,
 			},
 		},
 		From:   pq.sql,
@@ -433,9 +433,9 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := pq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, pet.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, entpet.FieldID)
 		for i := range fields {
-			if fields[i] != pet.FieldID {
+			if fields[i] != entpet.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -456,7 +456,7 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := pq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, pet.ValidColumn)
+				ps[i](selector, entpet.ValidColumn)
 			}
 		}
 	}
@@ -465,17 +465,17 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 
 func (pq *PetQuery) sqlQuery() *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
-	t1 := builder.Table(pet.Table)
-	selector := builder.Select(t1.Columns(pet.Columns...)...).From(t1)
+	t1 := builder.Table(entpet.Table)
+	selector := builder.Select(t1.Columns(entpet.Columns...)...).From(t1)
 	if pq.sql != nil {
 		selector = pq.sql
-		selector.Select(selector.Columns(pet.Columns...)...)
+		selector.Select(selector.Columns(entpet.Columns...)...)
 	}
 	for _, p := range pq.predicates {
 		p(selector)
 	}
 	for _, p := range pq.order {
-		p(selector, pet.ValidColumn)
+		p(selector, entpet.ValidColumn)
 	}
 	if offset := pq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -554,7 +554,7 @@ func (pgb *PetGroupBy) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
 		err = fmt.Errorf("ent: PetGroupBy.Strings returned %d results when one was expected", len(v))
 	}
@@ -603,7 +603,7 @@ func (pgb *PetGroupBy) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
 		err = fmt.Errorf("ent: PetGroupBy.Ints returned %d results when one was expected", len(v))
 	}
@@ -652,7 +652,7 @@ func (pgb *PetGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
 		err = fmt.Errorf("ent: PetGroupBy.Float64s returned %d results when one was expected", len(v))
 	}
@@ -701,7 +701,7 @@ func (pgb *PetGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
 		err = fmt.Errorf("ent: PetGroupBy.Bools returned %d results when one was expected", len(v))
 	}
@@ -719,7 +719,7 @@ func (pgb *PetGroupBy) BoolX(ctx context.Context) bool {
 
 func (pgb *PetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 	for _, f := range pgb.fields {
-		if !pet.ValidColumn(f) {
+		if !entpet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -741,7 +741,7 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
 	columns = append(columns, pgb.fields...)
 	for _, fn := range pgb.fns {
-		columns = append(columns, fn(selector, pet.ValidColumn))
+		columns = append(columns, fn(selector, entpet.ValidColumn))
 	}
 	return selector.Select(columns...).GroupBy(pgb.fields...)
 }
@@ -800,7 +800,7 @@ func (ps *PetSelect) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
 		err = fmt.Errorf("ent: PetSelect.Strings returned %d results when one was expected", len(v))
 	}
@@ -847,7 +847,7 @@ func (ps *PetSelect) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
 		err = fmt.Errorf("ent: PetSelect.Ints returned %d results when one was expected", len(v))
 	}
@@ -894,7 +894,7 @@ func (ps *PetSelect) Float64(ctx context.Context) (_ float64, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
 		err = fmt.Errorf("ent: PetSelect.Float64s returned %d results when one was expected", len(v))
 	}
@@ -941,7 +941,7 @@ func (ps *PetSelect) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{entpet.Label}
 	default:
 		err = fmt.Errorf("ent: PetSelect.Bools returned %d results when one was expected", len(v))
 	}

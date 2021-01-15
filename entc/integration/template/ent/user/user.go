@@ -24,7 +24,7 @@ const (
 	// PetsTable is the table the holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
-	// It exists in this package in order to avoid circular dependency with the "pet" package.
+	// It exists in this package in order to avoid circular dependency with the "entpet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "user_pets"

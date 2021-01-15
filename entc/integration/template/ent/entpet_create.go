@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
+	"github.com/facebook/ent/entc/integration/template/ent/entpet"
 	"github.com/facebook/ent/entc/integration/template/ent/user"
 	"github.com/facebook/ent/schema/field"
 )
@@ -138,10 +138,10 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Pet{config: pc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: pet.Table,
+			Table: entpet.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: pet.FieldID,
+				Column: entpet.FieldID,
 			},
 		}
 	)
@@ -149,7 +149,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: pet.FieldAge,
+			Column: entpet.FieldAge,
 		})
 		_node.Age = value
 	}
@@ -157,7 +157,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: pet.FieldLicensedAt,
+			Column: entpet.FieldLicensedAt,
 		})
 		_node.LicensedAt = &value
 	}
@@ -165,8 +165,8 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
+			Table:   entpet.OwnerTable,
+			Columns: []string{entpet.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
