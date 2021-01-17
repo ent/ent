@@ -520,6 +520,13 @@ func (d *MySQL) tableSchema() sql.Querier {
 	return sql.Raw("(SELECT DATABASE())")
 }
 
+// tables returns the query for getting the in the schema.
+func (d *MySQL) tables() sql.Querier {
+	return sql.Select("TABLE_NAME").
+		From(sql.Table("TABLES").Schema("INFORMATION_SCHEMA")).
+		Where(sql.EQ("TABLE_SCHEMA", d.tableSchema()))
+}
+
 // alterColumns returns the queries for applying the columns change-set.
 func (d *MySQL) alterColumns(table string, add, modify, drop []*Column) sql.Queries {
 	b := sql.Dialect(dialect.MySQL).AlterTable(table)
