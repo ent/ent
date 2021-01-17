@@ -24,10 +24,12 @@ import (
 func TestInt(t *testing.T) {
 	fd := field.Int("age").
 		Positive().
+		Comment("comment").
 		Descriptor()
 	assert.Equal(t, "age", fd.Name)
 	assert.Equal(t, field.TypeInt, fd.Info.Type)
 	assert.Len(t, fd.Validators, 1)
+	assert.Equal(t, "comment", fd.Comment)
 
 	fd = field.Int("age").
 		Default(10).
@@ -106,11 +108,12 @@ func TestInt_DefaultFunc(t *testing.T) {
 }
 
 func TestFloat(t *testing.T) {
-	f := field.Float("age").Positive()
+	f := field.Float("age").Comment("comment").Positive()
 	fd := f.Descriptor()
 	assert.Equal(t, "age", fd.Name)
 	assert.Equal(t, field.TypeFloat64, fd.Info.Type)
 	assert.Len(t, fd.Validators, 1)
+	assert.Equal(t, "comment", fd.Comment)
 
 	f = field.Float("age").Min(2.5).Max(5)
 	fd = f.Descriptor()
@@ -143,12 +146,13 @@ func TestFloat(t *testing.T) {
 }
 
 func TestBool(t *testing.T) {
-	fd := field.Bool("active").Default(true).Immutable().Descriptor()
+	fd := field.Bool("active").Default(true).Comment("comment").Immutable().Descriptor()
 	assert.Equal(t, "active", fd.Name)
 	assert.Equal(t, field.TypeBool, fd.Info.Type)
 	assert.NotNil(t, fd.Default)
 	assert.True(t, fd.Immutable)
 	assert.Equal(t, true, fd.Default)
+	assert.Equal(t, "comment", fd.Comment)
 
 	type Status bool
 	fd = field.Bool("active").GoType(Status(false)).Descriptor()
@@ -176,11 +180,12 @@ func TestBool(t *testing.T) {
 }
 
 func TestBytes(t *testing.T) {
-	fd := field.Bytes("active").Default([]byte("{}")).Descriptor()
+	fd := field.Bytes("active").Default([]byte("{}")).Comment("comment").Descriptor()
 	assert.Equal(t, "active", fd.Name)
 	assert.Equal(t, field.TypeBytes, fd.Info.Type)
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, []byte("{}"), fd.Default)
+	assert.Equal(t, "comment", fd.Comment)
 
 	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).Descriptor()
 	assert.NoError(t, fd.Err)
@@ -271,11 +276,13 @@ func TestString(t *testing.T) {
 		DefaultFunc(func() string {
 			return "Ent"
 		}).
+		Comment("comment").
 		Descriptor()
 
 	assert.Equal(t, "name", fd.Name)
 	assert.Equal(t, field.TypeString, fd.Info.Type)
 	assert.Equal(t, "Ent", fd.Default.(func() string)())
+	assert.Equal(t, "comment", fd.Comment)
 
 	re := regexp.MustCompile("[a-zA-Z0-9]")
 	f := field.String("name").Unique().Match(re).Validate(func(string) error { return nil }).Sensitive()
@@ -337,12 +344,14 @@ func TestTime(t *testing.T) {
 		Default(func() time.Time {
 			return now
 		}).
+		Comment("comment").
 		Descriptor()
 	assert.Equal(t, "created_at", fd.Name)
 	assert.Equal(t, field.TypeTime, fd.Info.Type)
 	assert.Equal(t, "time.Time", fd.Info.Type.String())
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, now, fd.Default.(func() time.Time)())
+	assert.Equal(t, "comment", fd.Comment)
 
 	fd = field.Time("updated_at").
 		UpdateDefault(func() time.Time {
@@ -380,12 +389,14 @@ func TestTime(t *testing.T) {
 func TestJSON(t *testing.T) {
 	fd := field.JSON("name", map[string]string{}).
 		Optional().
+		Comment("comment").
 		Descriptor()
 	assert.True(t, fd.Optional)
 	assert.Empty(t, fd.Info.PkgPath)
 	assert.Equal(t, "name", fd.Name)
 	assert.Equal(t, field.TypeJSON, fd.Info.Type)
 	assert.Equal(t, "map[string]string", fd.Info.String())
+	assert.Equal(t, "comment", fd.Comment)
 
 	fd = field.JSON("dir", http.Dir("dir")).
 		Optional().
@@ -438,12 +449,14 @@ func TestField_Enums(t *testing.T) {
 			"master",
 		).
 		Default("user").
+		Comment("comment").
 		Descriptor()
 	assert.Equal(t, "role", fd.Name)
 	assert.Equal(t, "user", fd.Enums[0].V)
 	assert.Equal(t, "admin", fd.Enums[1].V)
 	assert.Equal(t, "master", fd.Enums[2].V)
 	assert.Equal(t, "user", fd.Default)
+	assert.Equal(t, "comment", fd.Comment)
 
 	fd = field.Enum("role").
 		NamedValues("USER", "user").
@@ -469,6 +482,7 @@ func TestField_UUID(t *testing.T) {
 	fd := field.UUID("id", uuid.UUID{}).
 		Unique().
 		Default(uuid.New).
+		Comment("comment").
 		Descriptor()
 	assert.Equal(t, "id", fd.Name)
 	assert.True(t, fd.Unique)
@@ -476,6 +490,7 @@ func TestField_UUID(t *testing.T) {
 	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
 	assert.NotNil(t, fd.Default)
 	assert.NotEmpty(t, fd.Default.(func() uuid.UUID)())
+	assert.Equal(t, "comment", fd.Comment)
 
 	fd = field.UUID("id", uuid.UUID{}).
 		Default(uuid.UUID{}).
@@ -519,11 +534,4 @@ func TestTypeConstName(t *testing.T) {
 	assert.Equal(t, "TypeOther", typ.ConstName())
 	typ = 21
 	assert.Equal(t, "invalid", typ.ConstName())
-}
-
-func TestComment(t *testing.T) {
-	fd := field.Int("age").
-		Comment("some comment").
-		Descriptor()
-	assert.Equal(t, "", fd.Comment) // not implemented yet
 }
