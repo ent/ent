@@ -17,6 +17,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
+			{{- if $.FeatureEnabled "custom-schemas" }}
+			Schema: {{ $receiver }}.dbSchema.{{ $.Name }},
+			{{- end }}
 			Columns: {{ $.Package }}.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type: field.{{ $.ID.Type.ConstName }},
@@ -93,6 +96,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 		{{ $ret }} = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec.Assign = {{ $ret }}.assignValues
 		_spec.ScanValues = {{ $ret }}.scanValues
+	{{- end }}
+	{{- if $.FeatureEnabled "custom-schemas" }}
+	ctx = dbschema.SetSchema(ctx, {{ $receiver }}.dbSchema)
 	{{- end }}
 	{{- if $one }}
 		if err = sqlgraph.UpdateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {

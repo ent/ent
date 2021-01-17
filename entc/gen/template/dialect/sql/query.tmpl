@@ -56,6 +56,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		{{- end }}
 		return node.assignValues(columns, values)
 	}
+	{{- if $.FeatureEnabled "custom-schemas" }}
+	ctx = dbschema.SetSchema(ctx, {{ $receiver }}.dbSchema)
+	{{- end }}
 	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -87,6 +90,9 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
+			{{- if $.FeatureEnabled "custom-schemas" }}
+			Schema: {{ $receiver }}.dbSchema.{{ $.Name }},
+			{{- end }}
 			Columns: {{ $.Package }}.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type: field.{{ $.ID.Type.ConstName }},
@@ -128,10 +134,13 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
+func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect({{ $receiver }}.driver.Dialect())
 	t1 := builder.Table({{ $.Package }}.Table)
 	selector := builder.Select(t1.Columns({{ $.Package }}.Columns...)...).From(t1)
+	{{- if $.FeatureEnabled "custom-schemas" }}
+	selector.WithContext(dbschema.SetSchema(ctx, {{ $receiver }}.dbSchema))
+	{{- end }}
 	if {{ $receiver }}.sql != nil {
 		selector = {{ $receiver }}.sql
 		selector.Select(selector.Columns({{ $.Package }}.Columns...)...)
@@ -160,7 +169,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
-	selector := {{ $receiver }}.sqlQuery()
+	selector := {{ $receiver }}.sqlQuery(ctx)
 	if err := selector.Err(); err != nil {
 		return nil, err
 	}
@@ -175,6 +184,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
+	{{- if $.FeatureEnabled "custom-schemas" }}
+		step.To.Schema = {{ $receiver }}.dbSchema.{{ $e.Type.Name }}
+	{{- end }}
+	{{/* TODO: allow user to customize db destination of a join table */}}
 	{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
@@ -196,6 +209,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
+	{{- if $.FeatureEnabled "custom-schemas" }}
+		step.To.Schema = {{ $receiver }}.dbSchema.{{ $e.Type.Name }}
+		step.Edge.Schema = {{ $receiver }}.dbSchema.{{ $e.Type.Name }}
+	{{- end }}
 	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 

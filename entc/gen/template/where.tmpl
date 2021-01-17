@@ -10,6 +10,8 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
+{{ if $.FeatureEnabled "custom-schemas" }}import "{{ $.Config.Package }}/dbschema"{{ end }}
+
 {{ template "import" $ }}
 
 // ID filters vertices based on their ID field.

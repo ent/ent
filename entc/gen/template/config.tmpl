@@ -9,6 +9,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
+{{ if $.FeatureEnabled "custom-schemas" -}}import "{{ $.Config.Package }}/dbschema"{{ end }}
+
 {{ template "import" $ }}
 
 // Option function to configure the client.
@@ -29,6 +31,11 @@ type config struct {
 			{{ xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
+	{{ if $.FeatureEnabled "custom-schemas" }}
+		// dbSchema can be used to pass alternate
+		// schema names for ent models.
+		dbSchema dbschema.Schema
+	{{ end }}
 }
 
 // hooks per client, for fast access.
@@ -73,6 +80,16 @@ func Driver(driver dialect.Driver) Option {
 	{{ range $tmpl := $tmpls }}
 		{{ xtemplate $tmpl $ }}
 	{{ end }}
+{{ end }}
+
+{{ if $.FeatureEnabled "custom-schemas" }}
+	// WithAlternateSchemas allows an alternate
+	// database name to be passed into ent operations.
+	func WithAlternateSchemas(s dbschema.Schema) Option {
+		return func(c *config) {
+			c.dbSchema = s
+		}
+	}
 {{ end }}
 
 {{ end }}

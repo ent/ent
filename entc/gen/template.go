@@ -162,6 +162,13 @@ var (
 				return !g.featureEnabled(FeatureSnapshot)
 			},
 		},
+		{
+			Name:   "dbschema",
+			Format: "dbschema/dbschema.go",
+			Skip: func(g *Graph) bool {
+				return !g.featureEnabled(FeatureCustomSchemas) || g.Storage.Name != "sql"
+			},
+		},
 	}
 	// templates holds the Go templates for the code generation.
 	templates *Template
