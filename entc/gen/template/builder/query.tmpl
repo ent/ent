@@ -42,6 +42,16 @@ type {{ $builder }} struct {
 	// intermediate query (i.e. traversal path).
 	{{ $.Storage }} {{ $.Storage.Builder }}
 	path func(context.Context) ({{ $.Storage.Builder }}, error)
+	// eager loading method
+	eagerMethod EagerMethod
+}
+
+// EagerMethod sets the eager-loading method for this subquery. The default is to
+// load using multiple queries, and optionally ent.EagerNested can be used in order
+// to utilise sub-queries instead.
+func ({{ $receiver }} *{{ $builder }}) EagerMethod(m EagerMethod) *{{ $builder }} {
+  {{ $receiver }}.eagerMethod = m
+	return {{ $receiver }}
 }
 
 // Where adds a new predicate for the {{ $builder }} builder.

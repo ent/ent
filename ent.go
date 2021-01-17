@@ -359,7 +359,19 @@ const (
 	OpDeleteOne                // delete one one.
 )
 
-// Is reports whether o is match the given operation.
+// Is reports whether o matches the given operation.
 func (i Op) Is(o Op) bool { return i&o != 0 }
 
-//go:generate go run golang.org/x/tools/cmd/stringer -type Op
+// An EagerMethod represents the method used to eager-load edge entities
+type EagerMethod uint
+
+// Eager loading methods
+const (
+	EagerStandard EagerMethod = 1 << iota // standard multi-query loading
+	EagerNested                           // nested sub-query loading
+)
+
+// Is reports whether e matches the given method.
+func (i EagerMethod) Is(e EagerMethod) bool { return i&e != 0 }
+
+//go:generate go run golang.org/x/tools/cmd/stringer -type Op,EagerMethod -output enums_string.go

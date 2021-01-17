@@ -13,14 +13,15 @@ in the LICENSE file in the root directory of this source tree.
 
 // ent aliases to avoid import conflicts in user's code.
 type (
-	Op         = ent.Op
-	Hook       = ent.Hook
-	Value      = ent.Value
-	Query      = ent.Query
-	Policy     = ent.Policy
-	Mutator    = ent.Mutator
-	Mutation   = ent.Mutation
-	MutateFunc = ent.MutateFunc
+	Op          = ent.Op
+	Hook        = ent.Hook
+	Value       = ent.Value
+	Query       = ent.Query
+	Policy      = ent.Policy
+	Mutator     = ent.Mutator
+	Mutation    = ent.Mutation
+	MutateFunc  = ent.MutateFunc
+	EagerMethod = ent.EagerMethod
 )
 
 {{ $tmpl := printf "dialect/%s/order/signature" $.Storage }}

@@ -29,6 +29,10 @@ const (
 	OpUpdate    = ent.OpUpdate
 	OpUpdateOne = ent.OpUpdateOne
 
+	// Eager loading types.
+	EagerStandard = ent.EagerStandard
+	EagerNested   = ent.EagerNested
+
 	// Node types.
 	{{- range $n := $.Nodes }}
 		Type{{ $n.Name }} = "{{ $n.Name }}"
