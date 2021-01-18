@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/schema/field"
 
@@ -823,7 +824,7 @@ func TestHasNeighborsWithContext(t *testing.T) {
 			pred := func(s *sql.Selector) {
 				called = true
 				got := s.Context().Value(key("mykey")).(string)
-				require.Equal(t,  "myval" , got)
+				require.Equal(t, "myval", got)
 			}
 			HasNeighborsWith(sel, step, pred)
 			require.True(t, called, "expected predicate function to be called")
