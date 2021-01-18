@@ -810,7 +810,7 @@ func TestHasNeighborsWithContext(t *testing.T) {
 	ctx := context.WithValue(context.Background(), key("mykey"), "myval")
 	for _, rel := range [...]Rel{M2M, O2M, O2O} {
 		t.Run(rel.String(), func(t *testing.T) {
-			sel := sql.Dialect("postgres").
+			sel := sql.Dialect(dialect.Postgres).
 				Select("*").
 				From(sql.Table("users")).
 				WithContext(ctx)
