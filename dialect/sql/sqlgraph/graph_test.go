@@ -822,14 +822,11 @@ func TestHasNeighborsWithContext(t *testing.T) {
 			var called bool
 			pred := func(s *sql.Selector) {
 				called = true
-				if got := s.Context().Value(key("mykey")).(string); got != "myval" {
-					t.Fatalf("expected selector context to have %q but got %q", "myval", got)
-				}
+				got := s.Context().Value(key("mykey")).(string)
+				require.Equal(t,  "myval" , got)
 			}
 			HasNeighborsWith(sel, step, pred)
-			if !called {
-				t.Fatal("expected predicate function to be called")
-			}
+			require.True(t, called, "expected predicate function to be called")
 		})
 	}
 }
