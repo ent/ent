@@ -5,6 +5,7 @@
 package sql
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -1399,4 +1400,17 @@ func TestSelector_OrderByExpr(t *testing.T) {
 		Query()
 	require.Equal(t, "SELECT * FROM `users` WHERE `age` > ? ORDER BY `name`, CASE WHEN id=? THEN id WHEN id=? THEN name END DESC", query)
 	require.Equal(t, []interface{}{28, 1, 2}, args)
+}
+
+func TestBuilderContext(t *testing.T) {
+	type key string
+	want := "myval"
+	ctx := context.WithValue(context.Background(), key("mykey"), want)
+	sel := Dialect(dialect.Postgres).Select().WithContext(ctx)
+	if got := sel.Context().Value(key("mykey")).(string); got != want {
+		t.Fatalf("expected selector context key to be %q but got %q", want, got)
+	}
+	if got := sel.Clone().Context().Value(key("mykey")).(string); got != want {
+		t.Fatalf("expected cloned selector context key to be %q but got %q", want, got)
+	}
 }

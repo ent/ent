@@ -13,6 +13,7 @@ package sql
 
 import (
 	"bytes"
+	"context"
 	"database/sql/driver"
 	"fmt"
 	"strconv"
@@ -1516,6 +1517,9 @@ func (j join) clone() join {
 // Selector is a builder for the `SELECT` statement.
 type Selector struct {
 	Builder
+	// ctx stores contextual data typically from
+	// generated code such as alternate table schemas.
+	ctx      context.Context
 	as       string
 	columns  []string
 	from     TableView
@@ -1529,6 +1533,24 @@ type Selector struct {
 	limit    *int
 	offset   *int
 	distinct bool
+}
+
+// WithContext sets the context into the *Selector.
+func (s *Selector) WithContext(ctx context.Context) *Selector {
+	if ctx == nil {
+		panic("nil context")
+	}
+	s.ctx = ctx
+	return s
+}
+
+// Context returns the Selector context or Background
+// if nil.
+func (s *Selector) Context() context.Context {
+	if s.ctx != nil {
+		return s.ctx
+	}
+	return context.Background()
 }
 
 // Select returns a new selector for the `SELECT` statement.
@@ -1748,6 +1770,7 @@ func (s *Selector) Clone() *Selector {
 	}
 	return &Selector{
 		Builder:  s.Builder.clone(),
+		ctx:      s.ctx,
 		as:       s.as,
 		or:       s.or,
 		not:      s.not,
