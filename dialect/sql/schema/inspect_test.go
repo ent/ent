@@ -6,6 +6,7 @@ package schema
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"path"
 	"testing"
@@ -80,6 +81,23 @@ func TestInspector_Tables(t *testing.T) {
 					mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
 						WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "unique"}))
 				},
+				dialect.Postgres: func(mock mysqlMock) {
+					mock.ExpectQuery(escape(`SELECT "table_name" FROM "information_schema"."tables" WHERE "table_schema" = $1`)).
+						WithArgs("public").
+						WillReturnRows(sqlmock.NewRows([]string{"name"}).
+							AddRow("users"))
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+						WithArgs("public", "users").
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
+							AddRow("id", "bigint", "NO", "NULL", "int8").
+							AddRow("name", "character", "YES", "NULL", "bpchar").
+							AddRow("text", "text", "YES", "NULL", "text").
+							AddRow("uuid", "uuid", "YES", "NULL", "uuid"))
+					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "users"))).
+						WithArgs("public").
+						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
+							AddRow("users_pkey", "id", "t", "t", 0))
+				},
 			},
 			tables: func() []*Table {
 				var (
@@ -124,6 +142,7 @@ func tablesMatch(t *testing.T, got, expected []*Table) {
 }
 
 func columnsMatch(t *testing.T, got, expected []*Column) {
+	require.Equal(t, len(expected), len(got))
 	for i := range got {
 		c1, c2 := got[i], expected[i]
 		require.Equal(t, c1.Name, c2.Name)
