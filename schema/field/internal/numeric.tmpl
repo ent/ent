@@ -124,6 +124,7 @@ func (b *{{ $builder }}) Nillable() *{{ $builder }} {
 
 // Comment sets the comment of the field.
 func (b *{{ $builder }}) Comment(c string) *{{ $builder }} {
+	b.desc.Comment = c
 	return b
 }
 
@@ -284,6 +285,7 @@ func (b *{{ $builder }}) Nillable() *{{ $builder }} {
 
 // Comment sets the comment of the field.
 func (b *{{ $builder }}) Comment(c string) *{{ $builder }} {
+	b.desc.Comment = c
 	return b
 }
 

@@ -190,6 +190,7 @@ func (b *intBuilder) Nillable() *intBuilder {
 
 // Comment sets the comment of the field.
 func (b *intBuilder) Comment(c string) *intBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -340,6 +341,7 @@ func (b *uintBuilder) Nillable() *uintBuilder {
 
 // Comment sets the comment of the field.
 func (b *uintBuilder) Comment(c string) *uintBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -500,6 +502,7 @@ func (b *int8Builder) Nillable() *int8Builder {
 
 // Comment sets the comment of the field.
 func (b *int8Builder) Comment(c string) *int8Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -660,6 +663,7 @@ func (b *int16Builder) Nillable() *int16Builder {
 
 // Comment sets the comment of the field.
 func (b *int16Builder) Comment(c string) *int16Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -820,6 +824,7 @@ func (b *int32Builder) Nillable() *int32Builder {
 
 // Comment sets the comment of the field.
 func (b *int32Builder) Comment(c string) *int32Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -980,6 +985,7 @@ func (b *int64Builder) Nillable() *int64Builder {
 
 // Comment sets the comment of the field.
 func (b *int64Builder) Comment(c string) *int64Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -1130,6 +1136,7 @@ func (b *uint8Builder) Nillable() *uint8Builder {
 
 // Comment sets the comment of the field.
 func (b *uint8Builder) Comment(c string) *uint8Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -1280,6 +1287,7 @@ func (b *uint16Builder) Nillable() *uint16Builder {
 
 // Comment sets the comment of the field.
 func (b *uint16Builder) Comment(c string) *uint16Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -1430,6 +1438,7 @@ func (b *uint32Builder) Nillable() *uint32Builder {
 
 // Comment sets the comment of the field.
 func (b *uint32Builder) Comment(c string) *uint32Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -1580,6 +1589,7 @@ func (b *uint64Builder) Nillable() *uint64Builder {
 
 // Comment sets the comment of the field.
 func (b *uint64Builder) Comment(c string) *uint64Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -1741,6 +1751,7 @@ func (b *float64Builder) Nillable() *float64Builder {
 
 // Comment sets the comment of the field.
 func (b *float64Builder) Comment(c string) *float64Builder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -1887,6 +1898,7 @@ func (b *float32Builder) Nillable() *float32Builder {
 
 // Comment sets the comment of the field.
 func (b *float32Builder) Comment(c string) *float32Builder {
+	b.desc.Comment = c
 	return b
 }
 
