@@ -96,9 +96,9 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			GoType(&Link{}),
 		field.Other("link_other", &Link{}).
 			SchemaType(map[string]string{
-				dialect.MySQL:    "varchar",
 				dialect.Postgres: "varchar",
-				dialect.SQLite:   "text",
+				dialect.MySQL:    "varchar(255)",
+				dialect.SQLite:   "varchar(255)",
 			}).
 			Optional(),
 		field.String("null_link").
