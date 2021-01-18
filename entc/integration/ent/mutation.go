@@ -4334,7 +4334,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 48)
+	fields := make([]string, 0, 49)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}

@@ -71,11 +71,11 @@ func init() {
 	// fieldtype.LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	fieldtype.LinkValidator = fieldtypeDescLink.Validators[0].(func(string) error)
 	// fieldtypeDescIP is the schema descriptor for ip field.
-	fieldtypeDescIP := fieldtypeFields[37].Descriptor()
+	fieldtypeDescIP := fieldtypeFields[38].Descriptor()
 	// fieldtype.DefaultIP holds the default value on creation for the ip field.
 	fieldtype.DefaultIP = fieldtypeDescIP.Default.(func() net.IP)
 	// fieldtypeDescMAC is the schema descriptor for mac field.
-	fieldtypeDescMAC := fieldtypeFields[46].Descriptor()
+	fieldtypeDescMAC := fieldtypeFields[47].Descriptor()
 	// fieldtype.MACValidator is a validator for the "mac" field. It is called by the builders before save.
 	fieldtype.MACValidator = fieldtypeDescMAC.Validators[0].(func(string) error)
 	fileFields := schema.File{}.Fields()
