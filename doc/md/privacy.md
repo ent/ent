@@ -71,6 +71,9 @@ package ent
 //go:generate go run github.com/facebook/ent/cmd/ent generate --feature privacy ./schema
 ```
 
+It is recommended to add the [`schema/snapshot`](features.md#auto-solve-merge-conflicts) feature-flag along with the
+`privacy` to enhance the development experience (e.g. `--feature privacy,schema/snapshot`)
+
 2\. If you are using the configuration from the GraphQL documentation, add the feature flag as follows:
 
 ```go

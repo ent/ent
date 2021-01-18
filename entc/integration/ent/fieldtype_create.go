@@ -284,6 +284,20 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreat
 	return ftc
 }
 
+// SetDuration sets the "duration" field.
+func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
+	ftc.mutation.SetDuration(t)
+	return ftc
+}
+
+// SetNillableDuration sets the "duration" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDuration(t *time.Duration) *FieldTypeCreate {
+	if t != nil {
+		ftc.SetDuration(*t)
+	}
+	return ftc
+}
+
 // SetState sets the "state" field.
 func (ftc *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
 	ftc.mutation.SetState(f)
@@ -880,6 +894,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldOptionalUint64,
 		})
 		_node.OptionalUint64 = value
+	}
+	if value, ok := ftc.mutation.Duration(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: fieldtype.FieldDuration,
+		})
+		_node.Duration = value
 	}
 	if value, ok := ftc.mutation.State(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

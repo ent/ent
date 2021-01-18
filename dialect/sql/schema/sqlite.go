@@ -321,3 +321,10 @@ func (d *SQLite) alterColumns(table string, add, _, _ []*Column) sql.Queries {
 	// will support https://www.sqlite.org/lang_altertable.html#otheralter
 	return queries
 }
+
+// tables returns the query for getting the in the schema.
+func (d *SQLite) tables() sql.Querier {
+	return sql.Select("name").
+		From(sql.Table("sqlite_schema")).
+		Where(sql.EQ("type", "table"))
+}

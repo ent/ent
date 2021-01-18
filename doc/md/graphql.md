@@ -351,6 +351,12 @@ func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.To
 }
 ```
 
+## Examples
+
+The [ent-contrib](https://github.com/facebookincubator/ent-contrib) contains 2 examples at the moment:
+1. A complete GraphQL server with a simple [Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo) with numeric ID field
+2. The same [Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todouuid) in 1, but with UUID type for the ID field
+
 ---
 
 Please note that this documentation is under development. All code parts reside in [ent-contrib/entgql](https://github.com/facebookincubator/ent-contrib/tree/master/entgql),

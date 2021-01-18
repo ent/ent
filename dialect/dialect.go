@@ -6,6 +6,7 @@ package dialect
 
 import (
 	"context"
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"log"
@@ -106,6 +107,23 @@ func (d *DebugDriver) Tx(ctx context.Context) (Tx, error) {
 	}
 	id := uuid.New().String()
 	d.log(ctx, fmt.Sprintf("driver.Tx(%s): started", id))
+	return &DebugTx{tx, id, d.log, ctx}, nil
+}
+
+// BeginTx adds an log-id for the transaction and calls the underlying driver BeginTx command if it's supported.
+func (d *DebugDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, error) {
+	drv, ok := d.Driver.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (Tx, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Driver.BeginTx is not supported")
+	}
+	tx, err := drv.BeginTx(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	id := uuid.New().String()
+	d.log(ctx, fmt.Sprintf("driver.BeginTx(%s): started", id))
 	return &DebugTx{tx, id, d.log, ctx}, nil
 }
 

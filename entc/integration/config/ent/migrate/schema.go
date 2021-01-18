@@ -24,7 +24,6 @@ var (
 		Columns:     UsersColumns,
 		PrimaryKey:  []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
-		Annotation:  &entsql.Annotation{Table: "Users", Charset: "utf8mb4"},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -33,4 +32,10 @@ var (
 )
 
 func init() {
+	UsersTable.Annotation = &entsql.Annotation{
+		Table:   "Users",
+		Charset: "utf8mb4",
+	}
+	UsersTable.Annotation.Incremental = new(bool)
+	*UsersTable.Annotation.Incremental = false
 }

@@ -71,6 +71,9 @@ type Step struct {
 	Edge struct {
 		// Rel of the edge.
 		Rel Rel
+		// Schema is an optional name of the database
+		// where the table is defined.
+		Schema string
 		// Table name of where this edge columns reside.
 		Table string
 		// Columns of the edge.
@@ -84,6 +87,9 @@ type Step struct {
 	To struct {
 		// Table holds the table name of the neighbors (to).
 		Table string
+		// Schema is an optional name of the database
+		// where the table is defined.
+		Schema string
 		// Column to join with. Usually the "id" column.
 		Column string
 	}
@@ -147,8 +153,8 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 		if s.Edge.Inverse {
 			pk1, pk2 = pk2, pk1
 		}
-		to := builder.Table(s.To.Table)
-		join := builder.Table(s.Edge.Table)
+		to := builder.Table(s.To.Table).Schema(s.To.Schema)
+		join := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		match := builder.Select(join.C(pk1)).
 			From(join).
 			Where(sql.EQ(join.C(pk2), s.From.V))
@@ -157,9 +163,9 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 			Join(match).
 			On(to.C(s.To.Column), match.C(pk1))
 	case r == M2O || (r == O2O && s.Edge.Inverse):
-		t1 := builder.Table(s.To.Table)
+		t1 := builder.Table(s.To.Table).Schema(s.To.Schema)
 		t2 := builder.Select(s.Edge.Columns[0]).
-			From(builder.Table(s.Edge.Table)).
+			From(builder.Table(s.Edge.Table).Schema(s.Edge.Schema)).
 			Where(sql.EQ(s.From.Column, s.From.V))
 		q = builder.Select().
 			From(t1).
@@ -167,7 +173,7 @@ func Neighbors(dialect string, s *Step) (q *sql.Selector) {
 			On(t1.C(s.To.Column), t2.C(s.Edge.Columns[0]))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
 		q = builder.Select().
-			From(builder.Table(s.To.Table)).
+			From(builder.Table(s.To.Table).Schema(s.To.Schema)).
 			Where(sql.EQ(s.Edge.Columns[0], s.From.V))
 	}
 	return q
@@ -184,9 +190,9 @@ func SetNeighbors(dialect string, s *Step) (q *sql.Selector) {
 		if s.Edge.Inverse {
 			pk1, pk2 = pk2, pk1
 		}
-		to := builder.Table(s.To.Table)
+		to := builder.Table(s.To.Table).Schema(s.To.Schema)
 		set.Select(set.C(s.From.Column))
-		join := builder.Table(s.Edge.Table)
+		join := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		match := builder.Select(join.C(pk1)).
 			From(join).
 			Join(set).
@@ -196,14 +202,14 @@ func SetNeighbors(dialect string, s *Step) (q *sql.Selector) {
 			Join(match).
 			On(to.C(s.To.Column), match.C(pk1))
 	case r == M2O || (r == O2O && s.Edge.Inverse):
-		t1 := builder.Table(s.To.Table)
+		t1 := builder.Table(s.To.Table).Schema(s.To.Schema)
 		set.Select(set.C(s.Edge.Columns[0]))
 		q = builder.Select().
 			From(t1).
 			Join(set).
 			On(t1.C(s.To.Column), set.C(s.Edge.Columns[0]))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
-		t1 := builder.Table(s.To.Table)
+		t1 := builder.Table(s.To.Table).Schema(s.To.Schema)
 		set.Select(set.C(s.From.Column))
 		q = builder.Select().
 			From(t1).
@@ -223,7 +229,7 @@ func HasNeighbors(q *sql.Selector, s *Step) {
 			pk1 = s.Edge.Columns[1]
 		}
 		from := q.Table()
-		join := builder.Table(s.Edge.Table)
+		join := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		q.Where(
 			sql.In(
 				from.C(s.From.Column),
@@ -235,7 +241,7 @@ func HasNeighbors(q *sql.Selector, s *Step) {
 		q.Where(sql.NotNull(from.C(s.Edge.Columns[0])))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
 		from := q.Table()
-		to := builder.Table(s.Edge.Table)
+		to := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		q.Where(
 			sql.In(
 				from.C(s.From.Column),
@@ -258,8 +264,8 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 			pk1, pk2 = pk2, pk1
 		}
 		from := q.Table()
-		to := builder.Table(s.To.Table)
-		edge := builder.Table(s.Edge.Table)
+		to := builder.Table(s.To.Table).Schema(s.To.Schema)
+		edge := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join := builder.Select(edge.C(pk2)).
 			From(edge).
 			Join(to).
@@ -270,14 +276,14 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 		q.Where(sql.In(from.C(s.From.Column), join))
 	case r == M2O || (r == O2O && s.Edge.Inverse):
 		from := q.Table()
-		to := builder.Table(s.To.Table)
+		to := builder.Table(s.To.Table).Schema(s.To.Schema)
 		matches := builder.Select(to.C(s.To.Column)).
 			From(to)
 		pred(matches)
 		q.Where(sql.In(from.C(s.Edge.Columns[0]), matches))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
 		from := q.Table()
-		to := builder.Table(s.Edge.Table)
+		to := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		matches := builder.Select(to.C(s.Edge.Columns[0])).
 			From(to)
 		pred(matches)
@@ -307,6 +313,7 @@ type (
 		Rel     Rel
 		Inverse bool
 		Table   string
+		Schema  string
 		Columns []string
 		Bidi    bool        // bidirectional edge.
 		Target  *EdgeTarget // target nodes.
@@ -319,6 +326,7 @@ type (
 	// decoding nodes in the graph.
 	NodeSpec struct {
 		Table   string
+		Schema  string
 		Columns []string
 		ID      *FieldSpec
 	}
@@ -329,6 +337,7 @@ type (
 	// a node in the graph.
 	CreateSpec struct {
 		Table  string
+		Schema string
 		ID     *FieldSpec
 		Fields []*FieldSpec
 		Edges  []*EdgeSpec
@@ -453,11 +462,11 @@ func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int
 		builder = sql.Dialect(drv.Dialect())
 	)
 	selector := builder.Select().
-		From(builder.Table(spec.Node.Table))
+		From(builder.Table(spec.Node.Table).Schema(spec.Node.Schema))
 	if pred := spec.Predicate; pred != nil {
 		pred(selector)
 	}
-	query, args := builder.Delete(spec.Node.Table).FromSelect(selector).Query()
+	query, args := builder.Delete(spec.Node.Table).Schema(spec.Node.Schema).FromSelect(selector).Query()
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
 		return 0, rollback(tx, err)
 	}
@@ -518,7 +527,7 @@ func QueryEdges(ctx context.Context, drv dialect.Driver, spec *EdgeQuerySpec) er
 	}
 	selector := sql.Dialect(drv.Dialect()).
 		Select(out, in).
-		From(sql.Table(spec.Edge.Table))
+		From(sql.Table(spec.Edge.Table).Schema(spec.Edge.Schema))
 	if p := spec.Predicate; p != nil {
 		p(selector)
 	}
@@ -595,7 +604,7 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 }
 
 func (q *query) selector() (*sql.Selector, error) {
-	selector := q.builder.Select().From(q.builder.Table(q.Node.Table))
+	selector := q.builder.Select().From(q.builder.Table(q.Node.Table).Schema(q.Node.Schema))
 	if q.From != nil {
 		selector = q.From
 	}
@@ -636,7 +645,7 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 		addEdges   = EdgeSpecs(u.Edges.Add).GroupRel()
 		clearEdges = EdgeSpecs(u.Edges.Clear).GroupRel()
 	)
-	update := u.builder.Update(u.Node.Table).Where(sql.EQ(u.Node.ID.Column, id))
+	update := u.builder.Update(u.Node.Table).Schema(u.Node.Schema).Where(sql.EQ(u.Node.ID.Column, id))
 	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
 		return err
 	}
@@ -651,7 +660,7 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 		return err
 	}
 	selector := u.builder.Select(u.Node.Columns...).
-		From(u.builder.Table(u.Node.Table)).
+		From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
 		Where(sql.EQ(u.Node.ID.Column, u.Node.ID.Value))
 	rows := &sql.Rows{}
 	query, args := selector.Query()
@@ -667,9 +676,9 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 		addEdges   = EdgeSpecs(u.Edges.Add).GroupRel()
 		clearEdges = EdgeSpecs(u.Edges.Clear).GroupRel()
 		multiple   = u.hasExternalEdges(addEdges, clearEdges)
-		update     = u.builder.Update(u.Node.Table)
+		update     = u.builder.Update(u.Node.Table).Schema(u.Node.Schema)
 		selector   = u.builder.Select(u.Node.ID.Column).
-				From(u.builder.Table(u.Node.Table))
+				From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema))
 	)
 	if pred := u.Predicate; pred != nil {
 		pred(selector)
@@ -825,7 +834,7 @@ type creator struct {
 func (c *creator) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	var (
 		edges  = EdgeSpecs(c.Edges).GroupRel()
-		insert = c.builder.Insert(c.Table).Default()
+		insert = c.builder.Insert(c.Table).Schema(c.Schema).Default()
 	)
 	// Set and create the node.
 	if err := c.setTableColumns(insert, edges); err != nil {

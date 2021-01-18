@@ -214,3 +214,45 @@ func main() {
     }
 }
 ```
+
+## Migration Hooks
+
+The framework provides an option to add hooks (middlewares) to the migration phase.
+This option is ideal for modifying or filtering the tables that the migration is working on,
+or for creating custom resources in the database.
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "<project>/ent"
+    "<project>/ent/migrate"
+
+    "github.com/facebook/ent/dialect/sql/schema"
+)
+
+func main() {
+    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalf("failed connecting to mysql: %v", err)
+    }
+    defer client.Close()
+    ctx := context.Background()
+    // Run migration.
+    err = client.Schema.Create(
+        ctx,
+        schema.WithHooks(func(next schema.Creator) schema.Creator {
+            return schema.CreateFunc(func(ctx context.Context, tables ...*schema.Table) error {
+                // Run custom code here.
+                return next.Create(ctx, tables...)
+            })
+        }),
+    )
+    if err != nil {
+        log.Fatalf("failed creating schema resources: %v", err)
+    }
+}
+```

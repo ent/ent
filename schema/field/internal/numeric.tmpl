@@ -108,8 +108,15 @@ func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation.
+func (b *{{ $builder }}) DefaultFunc(fn interface{}) *{{ $builder }} {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *{{ $builder }}) Nillable() *{{ $builder }} {
 	b.desc.Nillable = true
 	return b
@@ -117,6 +124,7 @@ func (b *{{ $builder }}) Nillable() *{{ $builder }} {
 
 // Comment sets the comment of the field.
 func (b *{{ $builder }}) Comment(c string) *{{ $builder }} {
+	b.desc.Comment = c
 	return b
 }
 
@@ -191,6 +199,9 @@ func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $buil
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc({{ $t }}Type)
+	}
 	return b.desc
 }
 
@@ -266,7 +277,7 @@ func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *{{ $builder }}) Nillable() *{{ $builder }} {
 	b.desc.Nillable = true
 	return b
@@ -274,6 +285,7 @@ func (b *{{ $builder }}) Nillable() *{{ $builder }} {
 
 // Comment sets the comment of the field.
 func (b *{{ $builder }}) Comment(c string) *{{ $builder }} {
+	b.desc.Comment = c
 	return b
 }
 

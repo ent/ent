@@ -1250,6 +1250,8 @@ type FieldTypeMutation struct {
 	addoptional_uint32         *uint32
 	optional_uint64            *uint64
 	addoptional_uint64         *uint64
+	duration                   *time.Duration
+	addduration                *time.Duration
 	state                      *fieldtype.State
 	optional_float             *float64
 	addoptional_float          *float64
@@ -2768,6 +2770,76 @@ func (m *FieldTypeMutation) ResetOptionalUint64() {
 	m.optional_uint64 = nil
 	m.addoptional_uint64 = nil
 	delete(m.clearedFields, fieldtype.FieldOptionalUint64)
+}
+
+// SetDuration sets the "duration" field.
+func (m *FieldTypeMutation) SetDuration(t time.Duration) {
+	m.duration = &t
+	m.addduration = nil
+}
+
+// Duration returns the value of the "duration" field in the mutation.
+func (m *FieldTypeMutation) Duration() (r time.Duration, exists bool) {
+	v := m.duration
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDuration returns the old "duration" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldDuration(ctx context.Context) (v time.Duration, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDuration is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDuration requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDuration: %w", err)
+	}
+	return oldValue.Duration, nil
+}
+
+// AddDuration adds t to the "duration" field.
+func (m *FieldTypeMutation) AddDuration(t time.Duration) {
+	if m.addduration != nil {
+		*m.addduration += t
+	} else {
+		m.addduration = &t
+	}
+}
+
+// AddedDuration returns the value that was added to the "duration" field in this mutation.
+func (m *FieldTypeMutation) AddedDuration() (r time.Duration, exists bool) {
+	v := m.addduration
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDuration clears the value of the "duration" field.
+func (m *FieldTypeMutation) ClearDuration() {
+	m.duration = nil
+	m.addduration = nil
+	m.clearedFields[fieldtype.FieldDuration] = struct{}{}
+}
+
+// DurationCleared returns if the "duration" field was cleared in this mutation.
+func (m *FieldTypeMutation) DurationCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldDuration]
+	return ok
+}
+
+// ResetDuration resets all changes to the "duration" field.
+func (m *FieldTypeMutation) ResetDuration() {
+	m.duration = nil
+	m.addduration = nil
+	delete(m.clearedFields, fieldtype.FieldDuration)
 }
 
 // SetState sets the "state" field.
@@ -4326,6 +4398,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.optional_uint64 != nil {
 		fields = append(fields, fieldtype.FieldOptionalUint64)
 	}
+	if m.duration != nil {
+		fields = append(fields, fieldtype.FieldDuration)
+	}
 	if m.state != nil {
 		fields = append(fields, fieldtype.FieldState)
 	}
@@ -4457,6 +4532,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.OptionalUint32()
 	case fieldtype.FieldOptionalUint64:
 		return m.OptionalUint64()
+	case fieldtype.FieldDuration:
+		return m.Duration()
 	case fieldtype.FieldState:
 		return m.State()
 	case fieldtype.FieldOptionalFloat:
@@ -4562,6 +4639,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldOptionalUint32(ctx)
 	case fieldtype.FieldOptionalUint64:
 		return m.OldOptionalUint64(ctx)
+	case fieldtype.FieldDuration:
+		return m.OldDuration(ctx)
 	case fieldtype.FieldState:
 		return m.OldState(ctx)
 	case fieldtype.FieldOptionalFloat:
@@ -4771,6 +4850,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOptionalUint64(v)
+		return nil
+	case fieldtype.FieldDuration:
+		v, ok := value.(time.Duration)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDuration(v)
 		return nil
 	case fieldtype.FieldState:
 		v, ok := value.(fieldtype.State)
@@ -5032,6 +5118,9 @@ func (m *FieldTypeMutation) AddedFields() []string {
 	if m.addoptional_uint64 != nil {
 		fields = append(fields, fieldtype.FieldOptionalUint64)
 	}
+	if m.addduration != nil {
+		fields = append(fields, fieldtype.FieldDuration)
+	}
 	if m.addoptional_float != nil {
 		fields = append(fields, fieldtype.FieldOptionalFloat)
 	}
@@ -5106,6 +5195,8 @@ func (m *FieldTypeMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedOptionalUint32()
 	case fieldtype.FieldOptionalUint64:
 		return m.AddedOptionalUint64()
+	case fieldtype.FieldDuration:
+		return m.AddedDuration()
 	case fieldtype.FieldOptionalFloat:
 		return m.AddedOptionalFloat()
 	case fieldtype.FieldOptionalFloat32:
@@ -5278,6 +5369,13 @@ func (m *FieldTypeMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddOptionalUint64(v)
 		return nil
+	case fieldtype.FieldDuration:
+		v, ok := value.(time.Duration)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDuration(v)
+		return nil
 	case fieldtype.FieldOptionalFloat:
 		v, ok := value.(float64)
 		if !ok {
@@ -5389,6 +5487,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(fieldtype.FieldOptionalUint64) {
 		fields = append(fields, fieldtype.FieldOptionalUint64)
+	}
+	if m.FieldCleared(fieldtype.FieldDuration) {
+		fields = append(fields, fieldtype.FieldDuration)
 	}
 	if m.FieldCleared(fieldtype.FieldState) {
 		fields = append(fields, fieldtype.FieldState)
@@ -5529,6 +5630,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldOptionalUint64:
 		m.ClearOptionalUint64()
+		return nil
+	case fieldtype.FieldDuration:
+		m.ClearDuration()
 		return nil
 	case fieldtype.FieldState:
 		m.ClearState()
@@ -5678,6 +5782,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldOptionalUint64:
 		m.ResetOptionalUint64()
+		return nil
+	case fieldtype.FieldDuration:
+		m.ResetDuration()
 		return nil
 	case fieldtype.FieldState:
 		m.ResetState()

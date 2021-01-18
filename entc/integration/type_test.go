@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebook/ent/entc/integration/ent/task"
-
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/ent"
+	"github.com/facebook/ent/entc/integration/ent/fieldtype"
 	"github.com/facebook/ent/entc/integration/ent/role"
 	"github.com/facebook/ent/entc/integration/ent/schema"
+	"github.com/facebook/ent/entc/integration/ent/task"
 
 	"github.com/stretchr/testify/require"
 )
@@ -66,6 +66,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetLinkOther(schema.Link{URL: link}).
 		SetNullLink(schema.Link{URL: link}).
 		SetRole(role.Admin).
+		SetDuration(time.Hour).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)
@@ -141,6 +142,13 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(schema.Int8(8), ft.SchemaInt8)
 	require.Equal(schema.Int64(64), ft.SchemaInt64)
 	require.Equal(mac.String(), ft.MAC.String())
+
+	exists, err := client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour * 2)).Exist(ctx)
+	require.NoError(err)
+	require.True(exists)
+	exists, err = client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour)).Exist(ctx)
+	require.NoError(err)
+	require.False(exists)
 
 	_, err = client.Task.CreateBulk(
 		client.Task.Create().SetPriority(schema.PriorityLow),

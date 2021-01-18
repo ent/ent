@@ -201,7 +201,6 @@ func TestSQLite_Create(t *testing.T) {
 						AddRow("uuid", "uuid", 0, "Null", 0).
 						AddRow("id", "integer", 1, "NULL", 1))
 				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
-					WithArgs().
 					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` integer NOT NULL DEFAULT 0")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
@@ -232,7 +231,6 @@ func TestSQLite_Create(t *testing.T) {
 						AddRow("created_at", "datetime", 0, nil, 0).
 						AddRow("id", "integer", 1, "NULL", 1))
 				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
-					WithArgs().
 					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `updated_at` datetime NULL")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
@@ -272,7 +270,6 @@ func TestSQLite_Create(t *testing.T) {
 						AddRow("old_long", "blob", 1, nil, 0).
 						AddRow("id", "integer", 1, "NULL", 1))
 				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('blobs')")).
-					WithArgs().
 					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "unique"}))
 				for _, c := range []string{"tiny", "blob", "medium", "long"} {
 					mock.ExpectExec(escape(fmt.Sprintf("ALTER TABLE `blobs` ADD COLUMN `new_%s` blob NOT NULL", c))).
@@ -304,7 +301,6 @@ func TestSQLite_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
 						AddRow("id", "integer", 1, "NULL", 1))
 				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
-					WithArgs().
 					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `name` varchar(255) NOT NULL DEFAULT 'unknown'")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
@@ -348,7 +344,6 @@ func TestSQLite_Create(t *testing.T) {
 						AddRow("name", "varchar(255)", 1, "NULL", 0).
 						AddRow("id", "integer", 1, "NULL", 1))
 				mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
-					WithArgs().
 					WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "origin"}))
 				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `spouse_id` integer NULL CONSTRAINT user_spouse REFERENCES `users`(`id`) ON DELETE CASCADE")).
 					WillReturnResult(sqlmock.NewResult(0, 1))

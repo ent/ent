@@ -323,6 +323,11 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
+			input:     Update("users").Set("name", "foo").Where(EQ("name", Expr("?", "bar"))),
+			wantQuery: "UPDATE `users` SET `name` = ? WHERE `name` = ?",
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Where(EQ("name", "bar")),
 			wantQuery: `UPDATE "users" SET "name" = $1 WHERE "name" = $2`,
 			wantArgs:  []interface{}{"foo", "bar"},
@@ -1383,4 +1388,15 @@ func TestBuilder_Err(t *testing.T) {
 	require.EqualError(t, b.Err(), "invalid")
 	b.AddError(fmt.Errorf("unexpected"))
 	require.EqualError(t, b.Err(), "invalid; unexpected")
+}
+
+func TestSelector_OrderByExpr(t *testing.T) {
+	query, args := Select("*").
+		From(Table("users")).
+		Where(GT("age", 28)).
+		OrderBy("name").
+		OrderExpr(Expr("CASE WHEN id=? THEN id WHEN id=? THEN name END DESC", 1, 2)).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `age` > ? ORDER BY `name`, CASE WHEN id=? THEN id WHEN id=? THEN name END DESC", query)
+	require.Equal(t, []interface{}{28, 1, 2}, args)
 }

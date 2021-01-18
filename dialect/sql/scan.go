@@ -87,7 +87,17 @@ func ScanSlice(rows ColumnScanner, v interface{}) error {
 	if err != nil {
 		return fmt.Errorf("sql/scan: failed getting column names: %v", err)
 	}
-	rv := reflect.Indirect(reflect.ValueOf(v))
+	rv := reflect.ValueOf(v)
+	switch {
+	case rv.Kind() != reflect.Ptr:
+		if t := reflect.TypeOf(v); t != nil {
+			return fmt.Errorf("sql/scan: ScanSlice(non-pointer %s)", t)
+		}
+		fallthrough
+	case rv.IsNil():
+		return fmt.Errorf("sql/scan: ScanSlice(nil)")
+	}
+	rv = reflect.Indirect(rv)
 	if k := rv.Kind(); k != reflect.Slice {
 		return fmt.Errorf("sql/scan: invalid type %s. expected slice as an argument", k)
 	}
@@ -169,6 +179,10 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 	)
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
+		// Skip unexported fields.
+		if f.PkgPath != "" {
+			continue
+		}
 		name := strings.ToLower(f.Name)
 		if tag, ok := f.Tag.Lookup("sql"); ok {
 			name = tag

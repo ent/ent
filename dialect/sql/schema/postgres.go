@@ -17,6 +17,7 @@ import (
 // Postgres is a postgres migration driver.
 type Postgres struct {
 	dialect.Driver
+	schema  string
 	version string
 }
 
@@ -53,7 +54,7 @@ func (d *Postgres) tableExist(ctx context.Context, tx dialect.Tx, name string) (
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("tables").Schema("information_schema")).
 		Where(sql.And(
-			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			d.matchSchema(),
 			sql.EQ("table_name", name),
 		)).Query()
 	return exist(ctx, tx, query, args...)
@@ -64,7 +65,7 @@ func (d *Postgres) fkExist(ctx context.Context, tx dialect.Tx, name string) (boo
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("table_constraints").Schema("information_schema")).
 		Where(sql.And(
-			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			d.matchSchema(),
 			sql.EQ("constraint_type", "FOREIGN KEY"),
 			sql.EQ("constraint_name", name),
 		)).Query()
@@ -90,7 +91,7 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 		Select("column_name", "data_type", "is_nullable", "column_default", "udt_name").
 		From(sql.Table("columns").Schema("information_schema")).
 		Where(sql.And(
-			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			d.matchSchema(),
 			sql.EQ("table_name", name),
 		)).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
@@ -165,14 +166,23 @@ WHERE t.oid = idx.indrelid
   AND a.attrelid = t.oid
   AND a.attnum = ANY(idx.indkey)
   AND t.relkind = 'r'
-  AND n.nspname = CURRENT_SCHEMA()
+  AND n.nspname = %s
   AND t.relname = '%s'
 ORDER BY index_name, seq_in_index;
 `
 
+// indexesQuery returns the query (and its placeholders) for getting table indexes.
+func (d *Postgres) indexesQuery(table string) (string, []interface{}) {
+	if d.schema != "" {
+		return fmt.Sprintf(indexesQuery, "$1", table), []interface{}{d.schema}
+	}
+	return fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", table), nil
+}
+
 func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (Indexes, error) {
 	rows := &sql.Rows{}
-	if err := tx.Query(ctx, fmt.Sprintf(indexesQuery, table), []interface{}{}, rows); err != nil {
+	query, args := d.indexesQuery(table)
+	if err := tx.Query(ctx, query, args, rows); err != nil {
 		return nil, fmt.Errorf("querying indexes for table %s: %v", table, err)
 	}
 	defer rows.Close()
@@ -397,7 +407,7 @@ func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, tab
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("table_constraints").Schema("information_schema")).
 		Where(sql.And(
-			sql.EQ("table_schema", sql.Raw("CURRENT_SCHEMA()")),
+			d.matchSchema(),
 			sql.EQ("constraint_type", "UNIQUE"),
 			sql.EQ("constraint_name", name),
 		)).
@@ -436,9 +446,24 @@ func (d *Postgres) renameIndex(t *Table, old, new *Index) sql.Querier {
 	return sql.Dialect(dialect.Postgres).AlterIndex(old.realname).Rename(new.Name)
 }
 
-// tableSchema returns the query for getting the table schema.
-func (d *Postgres) tableSchema() sql.Querier {
-	return sql.Raw("(CURRENT_SCHEMA())")
+// matchSchema returns the predicate for matching table schema.
+func (d *Postgres) matchSchema(columns ...string) *sql.Predicate {
+	column := "table_schema"
+	if len(columns) > 0 {
+		column = columns[0]
+	}
+	if d.schema != "" {
+		return sql.EQ(column, d.schema)
+	}
+	return sql.EQ(column, sql.Raw("CURRENT_SCHEMA()"))
+}
+
+// tables returns the query for getting the in the schema.
+func (d *Postgres) tables() sql.Querier {
+	return sql.Dialect(dialect.Postgres).
+		Select("table_name").
+		From(sql.Table("tables").Schema("information_schema")).
+		Where(d.matchSchema())
 }
 
 // alterColumns returns the queries for applying the columns change-set.

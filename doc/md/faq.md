@@ -6,13 +6,14 @@ sidebar_label: FAQ
 
 ## Questions
 
-[How to create an entity from a struct `T`?](#how-to-create-an-entity-from-a-struct-t)  
-[How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator)  
-[How to write an audit-log extension?](#how-to-write-an-audit-log-extension)  
-[How to write custom predicates?](#how-to-write-custom-predicates)  
-[How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets)  
-[How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql)  
-[How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql)
+[How to create an entity from a struct `T`?](#how-to-create-an-entity-from-a-struct-t) \
+[How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator) \
+[How to write an audit-log extension?](#how-to-write-an-audit-log-extension) \
+[How to write custom predicates?](#how-to-write-custom-predicates) \
+[How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets) \
+[How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql) \
+[How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
+[How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids)
 
 ## Answers
 
@@ -307,7 +308,7 @@ func (i Inet) Value() (driver.Value, error) {
 #### How to customize time fields to type `DATETIME` in MySQL?
 
 `Time` fields use the MySQL `TIMESTAMP` type in the schema creation by default, and this type
- has a range of '1970-01-01 00:00:01' UTC to '2038-01-19 03:14:07' UTC (see, [MySQL docs](https://dev.mysql.com/doc/refman/5.6/en/datetime.html)). 
+ has a range of '1970-01-01 00:00:01' UTC to '2038-01-19 03:14:07' UTC (see, [MySQL docs](https://dev.mysql.com/doc/refman/5.6/en/datetime.html)).
 
 In order to customize time fields for a wider range, use the MySQL `DATETIME` as follows:
 ```go
@@ -317,3 +318,75 @@ field.Time("birth_date").
 		dialect.MySQL: "datetime",
 	}),
 ```
+
+#### How to use a custom generator of IDs?
+
+If you're using a custom ID generator instead of using auto-incrementing IDs in
+your database (e.g. Twitter's [Snowflake](https://github.com/twitter-archive/snowflake/tree/snowflake-2010)),
+you will need to write a custom ID field which automatically calls the generator
+on resource creation.
+
+To achieve this, you can either make use of `DefaultFunc` or of schema hooks -
+depending on your use case. If the generator does not return an error,
+`DefaultFunc` is more concise, whereas setting a hook on resource creation
+will allow you to capture errors as well. An example of how to use
+`DefaultFunc` can be seen in the section regarding [the ID field](schema-fields.md#id-field).
+
+Here is an example of how to use a custom generator with hooks, taking as an
+example [sonyflake](https://github.com/sony/sonyflake).
+
+```go
+// BaseMixin to be shared will all different schemas.
+type BaseMixin struct {
+	mixin.Schema
+}
+
+// Fields of the Mixin.
+func (BaseMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.Uint64("id"),
+	}
+}
+
+// Hooks of the Mixin.
+func (BaseMixin) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hook.On(IDHook(), ent.OpCreate),
+	}
+}
+
+func IDHook() ent.Hook {
+    sf := sonyflake.NewSonyflake(sonyflage.Settings{})
+	type IDSetter interface {
+		SetID(uint64)
+	}
+	return func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			is, ok := m.(IDSetter)
+			if !ok {
+				return nil, fmt.Errorf("unexpected mutation %T", m)
+			}
+			id, err := sf.NextID()
+			if err != nil {
+				return nil, err
+			}
+			is.SetID(id)
+			return next.Mutate(ctx, m)
+		})
+	}
+}
+
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Mixin of the User.
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		// Embed the BaseMixin in the user schema.
+		BaseMixin{},
+	}
+}
+```
+

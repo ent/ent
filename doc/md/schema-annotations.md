@@ -5,7 +5,7 @@ title: Annotations
 
 Schema annotations allow attaching metadata to schema objects like fields and edges and inject them to external templates.
 An annotation must be a Go type that is serializable to JSON raw value (e.g. struct, map or slice)
-and implement the [Annotation](https://pkg.go.dev/github.com/facebook/ent/schema/field?tab=doc#Annotation) interface.
+and implement the [Annotation](https://pkg.go.dev/github.com/facebook/ent/schema?tab=doc#Annotation) interface.
 
 The builtin annotations allow configuring the different storage drivers (like SQL) and control the code generation output. 
 

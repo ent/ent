@@ -66,6 +66,42 @@ func WithForeignKeys(b bool) MigrateOption {
 	}
 }
 
+// WithHooks adds a list of hooks to the schema migration.
+func WithHooks(hooks ...Hook) MigrateOption {
+	return func(m *Migrate) {
+		m.hooks = append(m.hooks, hooks...)
+	}
+}
+
+type (
+	// Creator is the interface that wraps the Create method.
+	Creator interface {
+		// Create creates the given tables in the database. See Migrate.Create for more details.
+		Create(context.Context, ...*Table) error
+	}
+
+	// The CreateFunc type is an adapter to allow the use of ordinary function as Creator.
+	// If f is a function with the appropriate signature, CreateFunc(f) is a Creator that calls f.
+	CreateFunc func(context.Context, ...*Table) error
+
+	// Hook defines the "create middleware". A function that gets a Creator and returns a Creator.
+	// For example:
+	//
+	//	hook := func(next schema.Creator) schema.Creator {
+	//		return schema.CreateFunc(func(ctx context.Context, tables ...*schema.Table) error {
+	//			fmt.Println("Tables:", tables)
+	//			return next.Create(ctx, tables...)
+	//		})
+	//	}
+	//
+	Hook func(Creator) Creator
+)
+
+// Create calls f(ctx, tables...).
+func (f CreateFunc) Create(ctx context.Context, tables ...*Table) error {
+	return f(ctx, tables...)
+}
+
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
@@ -75,6 +111,7 @@ type Migrate struct {
 	withFixture     bool     // with fks rename fixture.
 	withForeignKeys bool     // with foreign keys
 	typeRanges      []string // types order by their range.
+	hooks           []Hook   // hooks to apply before creation
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
@@ -106,6 +143,15 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 // Note that SQLite dialect does not support (this moment) the "append-only" mode describe above,
 // since it's used only for testing.
 func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
+	var creator Creator = CreateFunc(m.create)
+	for i := len(m.hooks) - 1; i >= 0; i-- {
+		creator = m.hooks[i](creator)
+	}
+
+	return creator.Create(ctx, tables...)
+}
+
+func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
 	tx, err := m.Tx(ctx)
 	if err != nil {
 		return err
@@ -118,13 +164,13 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 			return rollback(tx, err)
 		}
 	}
-	if err := m.create(ctx, tx, tables...); err != nil {
+	if err := m.txCreate(ctx, tx, tables...); err != nil {
 		return rollback(tx, err)
 	}
 	return tx.Commit()
 }
 
-func (m *Migrate) create(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
+func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
 	for _, t := range tables {
 		m.setupTable(t)
 		switch exist, err := m.tableExist(ctx, tx, t.Name); {
@@ -499,8 +545,8 @@ func (m *Migrate) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (
 		On(t1.C("constraint_name"), t2.C("constraint_name")).
 		Where(sql.And(
 			sql.EQ(t2.C("constraint_type"), sql.Raw("'FOREIGN KEY'")),
-			sql.EQ(t2.C("table_schema"), m.sqlDialect.(fkRenamer).tableSchema()),
-			sql.EQ(t1.C("table_schema"), m.sqlDialect.(fkRenamer).tableSchema()),
+			m.sqlDialect.(fkRenamer).matchSchema(t2.C("table_schema")),
+			m.sqlDialect.(fkRenamer).matchSchema(t1.C("table_schema")),
 			sql.EQ(t2.C("constraint_name"), fk.Symbol),
 		)).
 		Query()
@@ -610,7 +656,7 @@ type preparer interface {
 // fkRenamer is used by the fixture migration (to solve #285),
 // and it's implemented by the different dialects for renaming FKs.
 type fkRenamer interface {
-	tableSchema() sql.Querier
+	matchSchema(...string) *sql.Predicate
 	isImplicitIndex(*Index, *Column) bool
 	renameIndex(*Table, *Index, *Index) sql.Querier
 	renameColumn(*Table, *Column, *Column) sql.Querier

@@ -97,9 +97,6 @@ var (
 					{{- end }}
 				},
 			{{- end }}
-			{{- with $ant := $t.Annotation }}
-				Annotation: &entsql.Annotation{ {{ dumpFields $ant }} },
-			{{- end }}
 		}
 	{{- end }}
 	// Tables holds all the tables in the schema.
@@ -111,10 +108,30 @@ var (
 )
 
 func init() {
-	{{- range $_, $t := $.Tables }}
+	{{- range $t := $.Tables }}
 		{{- $table := pascal $t.Name | printf "%sTable" }}
 		{{- range $i, $fk := $t.ForeignKeys }}
 			{{ $table }}.ForeignKeys[{{ $i }}].RefTable = {{ pascal $fk.RefTable.Name | printf "%sTable" }}
+		{{- end }}
+		{{- with $ant := $t.Annotation }}
+			{{ $table }}.Annotation = &entsql.Annotation{
+				{{- with $ant.Table }}
+					Table: "{{ . }}",
+				{{- end }}
+				{{- with $ant.Charset }}
+					Charset: "{{ . }}",
+				{{- end }}
+				{{- with $ant.Collation }}
+					Collation: "{{ . }}",
+				{{- end }}
+				{{- with $ant.Options }}
+					Options: "{{ . }}",
+				{{- end }}
+			}
+			{{- with $ant.Incremental }}
+				{{ $table }}.Annotation.Incremental = new(bool)
+				*{{ $table }}.Annotation.Incremental = {{ with indirect . }}true{{ else }}false{{ end }}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 }

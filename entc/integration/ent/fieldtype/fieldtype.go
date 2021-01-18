@@ -61,6 +61,8 @@ const (
 	FieldOptionalUint32 = "optional_uint32"
 	// FieldOptionalUint64 holds the string denoting the optional_uint64 field in the database.
 	FieldOptionalUint64 = "optional_uint64"
+	// FieldDuration holds the string denoting the duration field in the database.
+	FieldDuration = "duration"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldOptionalFloat holds the string denoting the optional_float field in the database.
@@ -144,6 +146,7 @@ var Columns = []string{
 	FieldOptionalUint16,
 	FieldOptionalUint32,
 	FieldOptionalUint64,
+	FieldDuration,
 	FieldState,
 	FieldOptionalFloat,
 	FieldOptionalFloat32,

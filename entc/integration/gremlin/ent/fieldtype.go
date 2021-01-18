@@ -68,6 +68,8 @@ type FieldType struct {
 	OptionalUint32 uint32 `json:"optional_uint32,omitempty"`
 	// OptionalUint64 holds the value of the "optional_uint64" field.
 	OptionalUint64 uint64 `json:"optional_uint64,omitempty"`
+	// Duration holds the value of the "duration" field.
+	Duration time.Duration `json:"duration,omitempty"`
 	// State holds the value of the "state" field.
 	State fieldtype.State `json:"state,omitempty"`
 	// OptionalFloat holds the value of the "optional_float" field.
@@ -153,6 +155,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		OptionalUint16        uint16          `json:"optional_uint16,omitempty"`
 		OptionalUint32        uint32          `json:"optional_uint32,omitempty"`
 		OptionalUint64        uint64          `json:"optional_uint64,omitempty"`
+		Duration              time.Duration   `json:"duration,omitempty"`
 		State                 fieldtype.State `json:"state,omitempty"`
 		OptionalFloat         float64         `json:"optional_float,omitempty"`
 		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
@@ -206,6 +209,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.OptionalUint16 = scanft.OptionalUint16
 	ft.OptionalUint32 = scanft.OptionalUint32
 	ft.OptionalUint64 = scanft.OptionalUint64
+	ft.Duration = scanft.Duration
 	ft.State = scanft.State
 	ft.OptionalFloat = scanft.OptionalFloat
 	ft.OptionalFloat32 = scanft.OptionalFloat32
@@ -311,6 +315,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint32))
 	builder.WriteString(", optional_uint64=")
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint64))
+	builder.WriteString(", duration=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Duration))
 	builder.WriteString(", state=")
 	builder.WriteString(fmt.Sprintf("%v", ft.State))
 	builder.WriteString(", optional_float=")
@@ -409,6 +415,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		OptionalUint16        uint16          `json:"optional_uint16,omitempty"`
 		OptionalUint32        uint32          `json:"optional_uint32,omitempty"`
 		OptionalUint64        uint64          `json:"optional_uint64,omitempty"`
+		Duration              time.Duration   `json:"duration,omitempty"`
 		State                 fieldtype.State `json:"state,omitempty"`
 		OptionalFloat         float64         `json:"optional_float,omitempty"`
 		OptionalFloat32       float32         `json:"optional_float32,omitempty"`
@@ -464,6 +471,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			OptionalUint16:        v.OptionalUint16,
 			OptionalUint32:        v.OptionalUint32,
 			OptionalUint64:        v.OptionalUint64,
+			Duration:              v.Duration,
 			State:                 v.State,
 			OptionalFloat:         v.OptionalFloat,
 			OptionalFloat32:       v.OptionalFloat32,
