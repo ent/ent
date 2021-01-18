@@ -915,7 +915,7 @@ func (b *uuidBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 
-// otherBuilder is the builder for json fields.
+// otherBuilder is the builder for other fields.
 type otherBuilder struct {
 	desc *Descriptor
 }
