@@ -69,7 +69,7 @@ func (tq *TeamQuery) QueryTasks() *TaskQuery {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery()
+		selector := tq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -78,6 +78,7 @@ func (tq *TeamQuery) QueryTasks() *TaskQuery {
 			sqlgraph.To(task.Table, task.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, team.TasksTable, team.TasksPrimaryKey...),
 		)
+
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -91,7 +92,7 @@ func (tq *TeamQuery) QueryUsers() *UserQuery {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery()
+		selector := tq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -100,6 +101,7 @@ func (tq *TeamQuery) QueryUsers() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, team.UsersTable, team.UsersPrimaryKey...),
 		)
+
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -339,7 +341,7 @@ func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return tq.sqlQuery(), nil
+		return tq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -602,7 +604,7 @@ func (tq *TeamQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (tq *TeamQuery) sqlQuery() *sql.Selector {
+func (tq *TeamQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tq.driver.Dialect())
 	t1 := builder.Table(team.Table)
 	selector := builder.Select(t1.Columns(team.Columns...)...).From(t1)
@@ -897,7 +899,7 @@ func (ts *TeamSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ts.sql = ts.TeamQuery.sqlQuery()
+	ts.sql = ts.TeamQuery.sqlQuery(ctx)
 	return ts.sqlScan(ctx, v)
 }
 

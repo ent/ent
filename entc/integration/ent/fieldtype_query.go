@@ -266,7 +266,7 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 		if err := ftq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return ftq.sqlQuery(), nil
+		return ftq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -393,7 +393,7 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (ftq *FieldTypeQuery) sqlQuery() *sql.Selector {
+func (ftq *FieldTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ftq.driver.Dialect())
 	t1 := builder.Table(fieldtype.Table)
 	selector := builder.Select(t1.Columns(fieldtype.Columns...)...).From(t1)
@@ -688,7 +688,7 @@ func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fts.sql = fts.FieldTypeQuery.sqlQuery()
+	fts.sql = fts.FieldTypeQuery.sqlQuery(ctx)
 	return fts.sqlScan(ctx, v)
 }
 

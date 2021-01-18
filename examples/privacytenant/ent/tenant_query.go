@@ -265,7 +265,7 @@ func (tq *TenantQuery) GroupBy(field string, fields ...string) *TenantGroupBy {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return tq.sqlQuery(), nil
+		return tq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -394,7 +394,7 @@ func (tq *TenantQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (tq *TenantQuery) sqlQuery() *sql.Selector {
+func (tq *TenantQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tq.driver.Dialect())
 	t1 := builder.Table(tenant.Table)
 	selector := builder.Select(t1.Columns(tenant.Columns...)...).From(t1)
@@ -689,7 +689,7 @@ func (ts *TenantSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ts.sql = ts.TenantQuery.sqlQuery()
+	ts.sql = ts.TenantQuery.sqlQuery(ctx)
 	return ts.sqlScan(ctx, v)
 }
 

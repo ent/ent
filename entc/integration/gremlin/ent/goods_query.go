@@ -253,7 +253,7 @@ func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return gq.gremlinQuery(), nil
+		return gq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -278,7 +278,7 @@ func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
 
 func (gq *GoodsQuery) gremlinAll(ctx context.Context) ([]*Goods, error) {
 	res := &gremlin.Response{}
-	traversal := gq.gremlinQuery()
+	traversal := gq.gremlinQuery(ctx)
 	if len(gq.fields) > 0 {
 		fields := make([]interface{}, len(gq.fields))
 		for i, f := range gq.fields {
@@ -302,7 +302,7 @@ func (gq *GoodsQuery) gremlinAll(ctx context.Context) ([]*Goods, error) {
 
 func (gq *GoodsQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().Count().Query()
+	query, bindings := gq.gremlinQuery(ctx).Count().Query()
 	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -311,14 +311,14 @@ func (gq *GoodsQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (gq *GoodsQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().HasNext().Query()
+	query, bindings := gq.gremlinQuery(ctx).HasNext().Query()
 	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (gq *GoodsQuery) gremlinQuery() *dsl.Traversal {
+func (gq *GoodsQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(goods.Label)
 	if gq.gremlin != nil {
 		v = gq.gremlin.Clone()
@@ -622,7 +622,7 @@ func (gs *GoodsSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.gremlin = gs.GoodsQuery.gremlinQuery()
+	gs.gremlin = gs.GoodsQuery.gremlinQuery(ctx)
 	return gs.gremlinScan(ctx, v)
 }
 

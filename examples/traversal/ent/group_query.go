@@ -69,7 +69,7 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := gq.sqlQuery()
+		selector := gq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -78,6 +78,7 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
 		)
+
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -91,7 +92,7 @@ func (gq *GroupQuery) QueryAdmin() *UserQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := gq.sqlQuery()
+		selector := gq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -100,6 +101,7 @@ func (gq *GroupQuery) QueryAdmin() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, group.AdminTable, group.AdminColumn),
 		)
+
 		fromU = sqlgraph.SetNeighbors(gq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -339,7 +341,7 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return gq.sqlQuery(), nil
+		return gq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -564,7 +566,7 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (gq *GroupQuery) sqlQuery() *sql.Selector {
+func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(gq.driver.Dialect())
 	t1 := builder.Table(group.Table)
 	selector := builder.Select(t1.Columns(group.Columns...)...).From(t1)
@@ -859,7 +861,7 @@ func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.sql = gs.GroupQuery.sqlQuery()
+	gs.sql = gs.GroupQuery.sqlQuery(ctx)
 	return gs.sqlScan(ctx, v)
 }
 

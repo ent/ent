@@ -69,7 +69,7 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := cq.gremlinQuery()
+		gremlin := cq.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.CardLabel).OutV()
 		return fromU, nil
 	}
@@ -83,7 +83,7 @@ func (cq *CardQuery) QuerySpec() *SpecQuery {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := cq.gremlinQuery()
+		gremlin := cq.gremlinQuery(ctx)
 		fromU = gremlin.InE(spec.CardLabel).OutV()
 		return fromU, nil
 	}
@@ -323,7 +323,7 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return cq.gremlinQuery(), nil
+		return cq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -359,7 +359,7 @@ func (cq *CardQuery) prepareQuery(ctx context.Context) error {
 
 func (cq *CardQuery) gremlinAll(ctx context.Context) ([]*Card, error) {
 	res := &gremlin.Response{}
-	traversal := cq.gremlinQuery()
+	traversal := cq.gremlinQuery(ctx)
 	if len(cq.fields) > 0 {
 		fields := make([]interface{}, len(cq.fields))
 		for i, f := range cq.fields {
@@ -383,7 +383,7 @@ func (cq *CardQuery) gremlinAll(ctx context.Context) ([]*Card, error) {
 
 func (cq *CardQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().Count().Query()
+	query, bindings := cq.gremlinQuery(ctx).Count().Query()
 	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -392,14 +392,14 @@ func (cq *CardQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (cq *CardQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().HasNext().Query()
+	query, bindings := cq.gremlinQuery(ctx).HasNext().Query()
 	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (cq *CardQuery) gremlinQuery() *dsl.Traversal {
+func (cq *CardQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(card.Label)
 	if cq.gremlin != nil {
 		v = cq.gremlin.Clone()
@@ -703,7 +703,7 @@ func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.gremlin = cs.CardQuery.gremlinQuery()
+	cs.gremlin = cs.CardQuery.gremlinQuery(ctx)
 	return cs.gremlinScan(ctx, v)
 }
 
