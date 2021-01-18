@@ -65,6 +65,21 @@ func TestInspector_Tables(t *testing.T) {
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 							AddRow("PRIMARY", "id", "0", "1"))
 				},
+				dialect.SQLite: func(mock mysqlMock) {
+					mock.ExpectQuery(escape("SELECT `name` FROM `sqlite_schema` WHERE `type` = ?")).
+						WithArgs("table").
+						WillReturnRows(sqlmock.NewRows([]string{"name"}).
+							AddRow("users"))
+					mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('users') ORDER BY `pk`")).
+						WithArgs().
+						WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
+							AddRow("id", "integer", 1, "NULL", 1).
+							AddRow("name", "varchar(255)", 0, "NULL", 0).
+							AddRow("text", "text", 0, "NULL", 0).
+							AddRow("uuid", "uuid", 0, "NULL", 0))
+					mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
+						WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "unique"}))
+				},
 			},
 			tables: func() []*Table {
 				var (
@@ -103,8 +118,8 @@ func TestInspector_Tables(t *testing.T) {
 func tablesMatch(t *testing.T, got, expected []*Table) {
 	require.Equal(t, len(expected), len(got))
 	for i := range got {
-		columnsMatch(t, got[i].Columns, got[i].Columns)
-		columnsMatch(t, got[i].PrimaryKey, got[i].PrimaryKey)
+		columnsMatch(t, got[i].Columns, expected[i].Columns)
+		columnsMatch(t, got[i].PrimaryKey, expected[i].PrimaryKey)
 	}
 }
 
@@ -112,8 +127,7 @@ func columnsMatch(t *testing.T, got, expected []*Column) {
 	for i := range got {
 		c1, c2 := got[i], expected[i]
 		require.Equal(t, c1.Name, c2.Name)
-		require.Equal(t, c1.Type, c2.Type)
-		require.Equal(t, c1.Size, c2.Size)
 		require.Equal(t, c1.Nullable, c2.Nullable)
+		require.True(t, c1.Type == c2.Type || c1.ConvertibleTo(c2))
 	}
 }
