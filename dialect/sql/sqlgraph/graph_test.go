@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/schema/field"
 
@@ -801,6 +802,32 @@ WHERE "s1"."users"."id" IN
 			tt.wantQuery = strings.Join(strings.Fields(tt.wantQuery), " ")
 			require.Equal(t, tt.wantQuery, query)
 			require.Equal(t, tt.wantArgs, args)
+		})
+	}
+}
+
+func TestHasNeighborsWithContext(t *testing.T) {
+	type key string
+	ctx := context.WithValue(context.Background(), key("mykey"), "myval")
+	for _, rel := range [...]Rel{M2M, O2M, O2O} {
+		t.Run(rel.String(), func(t *testing.T) {
+			sel := sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				WithContext(ctx)
+			step := NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(rel, false, "user_groups", "user_id", "group_id"),
+			)
+			var called bool
+			pred := func(s *sql.Selector) {
+				called = true
+				got := s.Context().Value(key("mykey")).(string)
+				require.Equal(t, "myval", got)
+			}
+			HasNeighborsWith(sel, step, pred)
+			require.True(t, called, "expected predicate function to be called")
 		})
 	}
 }
