@@ -19,6 +19,9 @@ type Schema struct {
 {{- range $.Nodes }}
 	{{ .Name }} string
 {{- end }}
+{{- range .M2MModels }}
+	{{ . }} string
+{{- end }}
 }
 
 type ctxkey string

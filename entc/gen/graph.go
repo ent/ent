@@ -216,6 +216,26 @@ func (g *Graph) addNode(schema *load.Schema) {
 	g.Nodes = append(g.Nodes, t)
 }
 
+// M2MModels returns a unique list of all
+// M2M models in the graph
+func (g *Graph) M2MModels() []string {
+	var models []string
+	visited := map[string]struct{}{}
+	for _, n := range g.Nodes {
+		for _, e := range n.Edges {
+			if e.M2M() {
+				model := e.M2MModel()
+				if _, ok := visited[model]; ok {
+					continue
+				}
+				visited[model] = struct{}{}
+				models = append(models, model)
+			}
+		}
+	}
+	return models
+}
+
 // addIndexes adds the indexes for the schema type.
 func (g *Graph) addIndexes(schema *load.Schema) {
 	typ, _ := g.typ(schema.Name)

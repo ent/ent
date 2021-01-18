@@ -97,7 +97,11 @@ in the LICENSE file in the root directory of this source tree.
 		)
 		{{- if $.FeatureEnabled "custom-schemas" }}
 			step.To.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.Type.Name }}
-			step.Edge.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.Type.Name }}
+			{{- if $e.M2M }}
+				step.Edge.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.M2MModel }}
+			{{- else }}
+				step.Edge.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.Type.Name }}
+			{{- end }}
 		{{- end }}
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
