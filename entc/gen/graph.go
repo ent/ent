@@ -688,6 +688,9 @@ func catch(err *error) {
 }
 
 func extendExisting(name string) bool {
+	if match(partialPatterns[:], name) {
+		return true
+	}
 	for _, t := range Templates {
 		if match(t.ExtendPatterns, name) {
 			return true

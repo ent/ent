@@ -163,6 +163,11 @@ var (
 			},
 		},
 	}
+	// patterns for extending partial-templates (included by other templates).
+	partialPatterns = [...]string{
+		"dialect/additional/*",
+		"dialect/*/import/additional/*",
+	}
 	// templates holds the Go templates for the code generation.
 	templates *Template
 	// importPkg are the import packages used for code generation.

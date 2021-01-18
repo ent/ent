@@ -28,7 +28,7 @@ import (
 			"{{ $import }}"
 		{{- end }}
 	{{- end }}
-	{{ template "import/additional" $ }}
+	{{- template "import/additional" $ }}
 )
 {{ end }}
 
@@ -43,5 +43,16 @@ import (
 	{{- end }}
 {{- end }}
 
-{{/* A template that can be overrided in order to add additional imports to packages.*/}}
-{{ define "import/additional" }}{{ end }}
+{{/* A template for allowing additional imports by ent extensions or user templates.*/}}
+{{ define "import/additional" }}
+	{{- with $tmpls := matchTemplate "import/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+	{{- with $tmpls := matchTemplate (printf "dialect/%s/import/additional/*" $.Storage) }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{ end }}
