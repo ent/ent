@@ -136,7 +136,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect({{ $receiver }}.driver.Dialect())
-	t1 := builder.Table({{ $.Package }}.Table)
+	t1 := builder.Table({{ $.Package }}.Table).Schema({{ $receiver }}.dbSchema.{{ $.Name }})
 	selector := builder.Select(t1.Columns({{ $.Package }}.Columns...)...).From(t1)
 	{{- if $.FeatureEnabled "custom-schemas" }}
 	selector.WithContext(dbschema.SetSchema(ctx, {{ $receiver }}.dbSchema))
