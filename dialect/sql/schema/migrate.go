@@ -545,8 +545,8 @@ func (m *Migrate) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (
 		On(t1.C("constraint_name"), t2.C("constraint_name")).
 		Where(sql.And(
 			sql.EQ(t2.C("constraint_type"), sql.Raw("'FOREIGN KEY'")),
-			sql.EQ(t2.C("table_schema"), m.sqlDialect.(fkRenamer).tableSchema()),
-			sql.EQ(t1.C("table_schema"), m.sqlDialect.(fkRenamer).tableSchema()),
+			m.sqlDialect.(fkRenamer).matchSchema(t2.C("table_schema")),
+			m.sqlDialect.(fkRenamer).matchSchema(t1.C("table_schema")),
 			sql.EQ(t2.C("constraint_name"), fk.Symbol),
 		)).
 		Query()
@@ -656,7 +656,7 @@ type preparer interface {
 // fkRenamer is used by the fixture migration (to solve #285),
 // and it's implemented by the different dialects for renaming FKs.
 type fkRenamer interface {
-	tableSchema() sql.Querier
+	matchSchema(...string) *sql.Predicate
 	isImplicitIndex(*Index, *Column) bool
 	renameIndex(*Table, *Index, *Index) sql.Querier
 	renameColumn(*Table, *Column, *Column) sql.Querier
