@@ -73,7 +73,8 @@ func (User) Annotations() []schema.Annotation {
 
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("age"),
+		field.Int("age").
+			Comment("some comment"),
 		field.String("name").
 			Default("unknown").
 			Annotations(&OrderConfig{FieldName: "name"}),
@@ -210,6 +211,9 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, []string{"parent"}, schema.Indexes[1].Edges)
 		require.Equal(t, "user_parent_name", schema.Indexes[1].StorageKey)
 		require.True(t, schema.Indexes[1].Unique)
+
+		require.Equal(t, "some comment", schema.Fields[0].Comment)
+		require.Empty(t, schema.Fields[1].Comment)
 	}
 }
 

@@ -24,7 +24,13 @@ type {{ $.Name }} struct {
 	ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
 	{{- range $f := $.Fields }}
 		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
-		// {{ $f.StructField }} holds the value of the "{{ $f.Name }}" field.
+		{{- if $f.Comment }}
+			{{- range $line := split $f.Comment "\n" }}
+				// {{ $line }}
+			{{- end }}
+		{{- else }}
+			// {{ $f.StructField }} holds the value of the "{{ $f.Name }}" field.
+		{{- end }}
 		{{ $f.StructField }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $tag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
 	{{- end }}
 	{{- with $.Edges }}
