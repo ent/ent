@@ -9,7 +9,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
-{{ if $.FeatureEnabled "custom-schemas" -}}import "{{ $.Config.Package }}/dbschema"{{ end }}
+{{ if $.FeatureEnabled "sql/schemaconfig" -}}import "{{ $.Config.Package }}/internal"{{ end }}
 
 {{ template "import" $ }}
 
@@ -31,10 +31,10 @@ type config struct {
 			{{ xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{ if $.FeatureEnabled "custom-schemas" }}
-		// dbSchema can be used to pass alternate
+	{{ if $.FeatureEnabled "sql/schemaconfig" }}
+		// schemaConfig can be used to pass alternate
 		// schema names for ent models.
-		dbSchema dbschema.Schema
+		schemaConfig internal.SchemaConfig
 	{{ end }}
 }
 
@@ -82,12 +82,17 @@ func Driver(driver dialect.Driver) Option {
 	{{ end }}
 {{ end }}
 
-{{ if $.FeatureEnabled "custom-schemas" }}
+{{ if $.FeatureEnabled "sql/schemaconfig" }}
+	// SchemaConfig represents alternative db names
+	// for all ent models that can be passed
+	// at runtime.
+	type SchemaConfig = internal.SchemaConfig
+
 	// WithAlternateSchemas allows an alternate
 	// database name to be passed into ent operations.
-	func WithAlternateSchemas(s dbschema.Schema) Option {
+	func WithAlternateSchemas(s internal.SchemaConfig) Option {
 		return func(c *config) {
-			c.dbSchema = s
+			c.schemaConfig = s
 		}
 	}
 {{ end }}

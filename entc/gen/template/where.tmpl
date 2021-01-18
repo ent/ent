@@ -10,7 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ if $.FeatureEnabled "custom-schemas" }}import "{{ $.Config.Package }}/dbschema"{{ end }}
+{{ if $.FeatureEnabled "sql/schemaconfig" }}import "{{ $.Config.Package }}/internal"{{ end }}
 
 {{ template "import" $ }}
 

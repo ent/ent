@@ -4,18 +4,18 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
-{{ define "dbschema" }}
+{{ define "internal/schemaconfig" }}
 
-{{ with extend $ "Package" "dbschema" -}}
+{{ with extend $ "Package" "internal" -}}
 	{{ template "header" . }}
 {{ end }}
 
 import "context"
 
-// Schema represents alternative db names
+// SchemaConfig represents alternative db names
 // for all ent models that can be passed
 // at runtime.
-type Schema struct {    
+type SchemaConfig struct {    
 {{- range $.Nodes }}
 	{{ .Name }} string
 {{- end }}
@@ -28,15 +28,15 @@ type ctxkey string
 
 const key ctxkey = "schema"
 
-// SetSchema sets the schema into the context.
-func SetSchema(ctx context.Context, s Schema) context.Context {
+// SetSchemaConfig sets the schema into the context.
+func SetSchemaConfig(ctx context.Context, s SchemaConfig) context.Context {
 	return context.WithValue(ctx, key, s)
 }
 
-// SchemaFromContext returns the embedded schema or
+// SchemaConfigFromContext returns the embedded schema or
 // an empty one if not found.
-func SchemaFromContext(ctx context.Context) Schema {
-	s, _ := ctx.Value(key).(Schema)
+func SchemaConfigFromContext(ctx context.Context) SchemaConfig {
+	s, _ := ctx.Value(key).(SchemaConfig)
 	return s
 }
 

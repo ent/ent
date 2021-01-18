@@ -47,12 +47,12 @@ var (
 	// for each ent model. This is useful if your SQL tables are spread out against
 	// multiple databases.
 	FeatureCustomSchemas = Feature{
-		Name:        "custom-schemas",
+		Name:        "sql/schemaconfig",
 		Stage:       Experimental,
 		Default:     false,
 		Description: "Allows alternate schema names for each ent model. Useful if SQL tables are spread out against multiple databases",
 		cleanup: func(c *Config) error {
-			return os.RemoveAll(filepath.Join(c.Target, "dbschema"))
+			return os.RemoveAll(filepath.Join(c.Target, "internal"))
 		},
 	}
 

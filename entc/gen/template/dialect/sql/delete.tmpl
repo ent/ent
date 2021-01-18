@@ -13,8 +13,8 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
-			{{- if $.FeatureEnabled "custom-schemas" }}
-			Schema: {{ $receiver }}.dbSchema.{{ $.Name }},
+			{{- if $.FeatureEnabled "sql/schemaconfig" }}
+			Schema: {{ $receiver }}.schemaConfig.{{ $.Name }},
 			{{- end }}
 			ID: &sqlgraph.FieldSpec{
 				Type: field.{{ $.ID.Type.ConstName }},
@@ -29,8 +29,8 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 			}
 		}
 	}
-	{{- if $.FeatureEnabled "custom-schemas" }}
-	ctx = dbschema.SetSchema(ctx, {{ $receiver }}.dbSchema)
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+	ctx = internal.SetSchemaConfig(ctx, {{ $receiver }}.schemaConfig)
 	{{ end }}
 	return sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
 }

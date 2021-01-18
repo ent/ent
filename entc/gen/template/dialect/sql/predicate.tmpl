@@ -72,9 +72,10 @@ in the LICENSE file in the root directory of this source tree.
 				{{- end -}}
 			),
 		)
-		{{- if $.FeatureEnabled "custom-schemas" }}
-			step.To.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.Type.Name }}
-			step.Edge.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.Type.Name }}
+		{{- if $.FeatureEnabled "sql/schemaconfig" }}
+			_sc := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = _sc.{{ $e.Type.Name }}
+			step.Edge.Schema = _sc.{{ $e.Type.Name }}
 		{{- end }}
 		sqlgraph.HasNeighbors(s, step)
 	}
@@ -95,12 +96,13 @@ in the LICENSE file in the root directory of this source tree.
 				{{- end -}}
 			),
 		)
-		{{- if $.FeatureEnabled "custom-schemas" }}
-			step.To.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.Type.Name }}
+		{{- if $.FeatureEnabled "sql/schemaconfig" }}
+			_sc := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = _sc.{{ $e.Type.Name }}
 			{{- if $e.M2M }}
-				step.Edge.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.M2MModel }}
+				step.Edge.Schema = _sc.{{ $e.M2MModel }}
 			{{- else }}
-				step.Edge.Schema = dbschema.SchemaFromContext(s.Context()).{{ $e.Type.Name }}
+				step.Edge.Schema = _sc.{{ $e.Type.Name }}
 			{{- end }}
 		{{- end }}
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

@@ -163,8 +163,8 @@ var (
 			},
 		},
 		{
-			Name:   "dbschema",
-			Format: "dbschema/dbschema.go",
+			Name:   "internal/schemaconfig",
+			Format: "internal/schemaconfig.go",
 			Skip: func(g *Graph) bool {
 				return !g.featureEnabled(FeatureCustomSchemas) || g.Storage.Name != "sql"
 			},
