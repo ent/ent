@@ -168,6 +168,7 @@ var (
 		"dialect/additional/*",
 		"dialect/*/import/additional/*",
 		"dialect/*/*/spec/*",
+		"dialect/*/*/*/spec/*",
 	}
 	// templates holds the Go templates for the code generation.
 	templates *Template

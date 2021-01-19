@@ -255,6 +255,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 					return nil
 				},
 			}
+			{{- /* Allow mutating the sqlgraph.EdgeQuerySpec by ent extensions or user templates.*/}}
+			{{- with $tmpls := matchTemplate "dialect/sql/query/eagerloading/spec/*" }}
+				{{- range $tmpl := $tmpls }}
+					{{- xtemplate $tmpl $ }}
+				{{- end }}
+			{{- end }}
 			if err := sqlgraph.QueryEdges(ctx, {{ $receiver }}.driver, _spec); err != nil {
 				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %v`, err)
 			}
