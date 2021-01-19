@@ -266,7 +266,7 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 		if err := ftq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return ftq.gremlinQuery(), nil
+		return ftq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -302,7 +302,7 @@ func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
 
 func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context) ([]*FieldType, error) {
 	res := &gremlin.Response{}
-	traversal := ftq.gremlinQuery()
+	traversal := ftq.gremlinQuery(ctx)
 	if len(ftq.fields) > 0 {
 		fields := make([]interface{}, len(ftq.fields))
 		for i, f := range ftq.fields {
@@ -326,7 +326,7 @@ func (ftq *FieldTypeQuery) gremlinAll(ctx context.Context) ([]*FieldType, error)
 
 func (ftq *FieldTypeQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().Count().Query()
+	query, bindings := ftq.gremlinQuery(ctx).Count().Query()
 	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -335,14 +335,14 @@ func (ftq *FieldTypeQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (ftq *FieldTypeQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().HasNext().Query()
+	query, bindings := ftq.gremlinQuery(ctx).HasNext().Query()
 	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (ftq *FieldTypeQuery) gremlinQuery() *dsl.Traversal {
+func (ftq *FieldTypeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(fieldtype.Label)
 	if ftq.gremlin != nil {
 		v = ftq.gremlin.Clone()
@@ -646,7 +646,7 @@ func (fts *FieldTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fts.gremlin = fts.FieldTypeQuery.gremlinQuery()
+	fts.gremlin = fts.FieldTypeQuery.gremlinQuery(ctx)
 	return fts.gremlinScan(ctx, v)
 }
 

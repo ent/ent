@@ -15,6 +15,7 @@ import (
 	{{- range $path := $.SiblingImports }}
 		"{{ $path }}"
 	{{- end }}
+	{{ if $.FeatureEnabled "sql/schemaconfig" }}"{{ $.Config.Package }}/internal"{{ end }}
 )
 
 {{ $builder := $.UpdateName }}

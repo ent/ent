@@ -9,6 +9,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
+{{ if $.FeatureEnabled "sql/schemaconfig" -}}import "{{ $.Config.Package }}/internal"{{ end }}
+
 {{ template "import" $ }}
 
 // Option function to configure the client.
@@ -29,6 +31,11 @@ type config struct {
 			{{ xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
+	{{ if $.FeatureEnabled "sql/schemaconfig" }}
+		// schemaConfig can be used to pass alternate
+		// schema names for ent models.
+		schemaConfig internal.SchemaConfig
+	{{ end }}
 }
 
 // hooks per client, for fast access.
@@ -73,6 +80,21 @@ func Driver(driver dialect.Driver) Option {
 	{{ range $tmpl := $tmpls }}
 		{{ xtemplate $tmpl $ }}
 	{{ end }}
+{{ end }}
+
+{{ if $.FeatureEnabled "sql/schemaconfig" }}
+	// SchemaConfig represents alternative db names
+	// for all ent models that can be passed
+	// at runtime.
+	type SchemaConfig = internal.SchemaConfig
+
+	// WithAlternateSchemas allows an alternate
+	// database name to be passed into ent operations.
+	func WithAlternateSchemas(s internal.SchemaConfig) Option {
+		return func(c *config) {
+			c.schemaConfig = s
+		}
+	}
 {{ end }}
 
 {{ end }}

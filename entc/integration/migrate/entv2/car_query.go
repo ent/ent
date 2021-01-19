@@ -67,7 +67,7 @@ func (cq *CarQuery) QueryOwner() *UserQuery {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := cq.sqlQuery()
+		selector := cq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -76,6 +76,7 @@ func (cq *CarQuery) QueryOwner() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, car.OwnerTable, car.OwnerColumn),
 		)
+
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -290,7 +291,7 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return cq.sqlQuery(), nil
+		return cq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -439,7 +440,7 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cq *CarQuery) sqlQuery() *sql.Selector {
+func (cq *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(car.Table)
 	selector := builder.Select(t1.Columns(car.Columns...)...).From(t1)
@@ -734,7 +735,7 @@ func (cs *CarSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.CarQuery.sqlQuery()
+	cs.sql = cs.CarQuery.sqlQuery(ctx)
 	return cs.sqlScan(ctx, v)
 }
 

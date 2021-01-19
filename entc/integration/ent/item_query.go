@@ -252,7 +252,7 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 		if err := iq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return iq.sqlQuery(), nil
+		return iq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -364,7 +364,7 @@ func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (iq *ItemQuery) sqlQuery() *sql.Selector {
+func (iq *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(iq.driver.Dialect())
 	t1 := builder.Table(item.Table)
 	selector := builder.Select(t1.Columns(item.Columns...)...).From(t1)
@@ -659,7 +659,7 @@ func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := is.prepareQuery(ctx); err != nil {
 		return err
 	}
-	is.sql = is.ItemQuery.sqlQuery()
+	is.sql = is.ItemQuery.sqlQuery(ctx)
 	return is.sqlScan(ctx, v)
 }
 

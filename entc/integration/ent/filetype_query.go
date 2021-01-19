@@ -67,7 +67,7 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 		if err := ftq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := ftq.sqlQuery()
+		selector := ftq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -76,6 +76,7 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
 		)
+
 		fromU = sqlgraph.SetNeighbors(ftq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -303,7 +304,7 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 		if err := ftq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return ftq.sqlQuery(), nil
+		return ftq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -460,7 +461,7 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (ftq *FileTypeQuery) sqlQuery() *sql.Selector {
+func (ftq *FileTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ftq.driver.Dialect())
 	t1 := builder.Table(filetype.Table)
 	selector := builder.Select(t1.Columns(filetype.Columns...)...).From(t1)
@@ -755,7 +756,7 @@ func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fts.sql = fts.FileTypeQuery.sqlQuery()
+	fts.sql = fts.FileTypeQuery.sqlQuery(ctx)
 	return fts.sqlScan(ctx, v)
 }
 

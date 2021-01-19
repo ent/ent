@@ -66,7 +66,7 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := sq.gremlinQuery()
+		gremlin := sq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(spec.CardLabel).InV()
 		return fromU, nil
 	}
@@ -281,7 +281,7 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return sq.gremlinQuery(), nil
+		return sq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -306,7 +306,7 @@ func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
 
 func (sq *SpecQuery) gremlinAll(ctx context.Context) ([]*Spec, error) {
 	res := &gremlin.Response{}
-	traversal := sq.gremlinQuery()
+	traversal := sq.gremlinQuery(ctx)
 	if len(sq.fields) > 0 {
 		fields := make([]interface{}, len(sq.fields))
 		for i, f := range sq.fields {
@@ -330,7 +330,7 @@ func (sq *SpecQuery) gremlinAll(ctx context.Context) ([]*Spec, error) {
 
 func (sq *SpecQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := sq.gremlinQuery().Count().Query()
+	query, bindings := sq.gremlinQuery(ctx).Count().Query()
 	if err := sq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -339,14 +339,14 @@ func (sq *SpecQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (sq *SpecQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := sq.gremlinQuery().HasNext().Query()
+	query, bindings := sq.gremlinQuery(ctx).HasNext().Query()
 	if err := sq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (sq *SpecQuery) gremlinQuery() *dsl.Traversal {
+func (sq *SpecQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(spec.Label)
 	if sq.gremlin != nil {
 		v = sq.gremlin.Clone()
@@ -650,7 +650,7 @@ func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ss.gremlin = ss.SpecQuery.gremlinQuery()
+	ss.gremlin = ss.SpecQuery.gremlinQuery(ctx)
 	return ss.gremlinScan(ctx, v)
 }
 

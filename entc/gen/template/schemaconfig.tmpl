@@ -1,0 +1,43 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{ define "internal/schemaconfig" }}
+
+{{ with extend $ "Package" "internal" -}}
+	{{ template "header" . }}
+{{ end }}
+
+import "context"
+
+// SchemaConfig represents alternative db names
+// for all ent models that can be passed
+// at runtime.
+type SchemaConfig struct {    
+{{- range $.Nodes }}
+	{{ .Name }} string
+{{- end }}
+{{- range .M2MModels }}
+	{{ . }} string
+{{- end }}
+}
+
+type ctxkey string
+
+const key ctxkey = "schema"
+
+// SetSchemaConfig sets the schema into the context.
+func SetSchemaConfig(ctx context.Context, s SchemaConfig) context.Context {
+	return context.WithValue(ctx, key, s)
+}
+
+// SchemaConfigFromContext returns the embedded schema or
+// an empty one if not found.
+func SchemaConfigFromContext(ctx context.Context) SchemaConfig {
+	s, _ := ctx.Value(key).(SchemaConfig)
+	return s
+}
+
+{{ end }}

@@ -1106,6 +1106,15 @@ func (e Edge) Constant() string {
 // M2M indicates if this edge is M2M edge.
 func (e Edge) M2M() bool { return e.Rel.Type == M2M }
 
+// M2MModel returns the model name of a
+// M2M join table.
+func (e Edge) M2MModel() string {
+	if e.Rel.Type != M2M {
+		panic("relation is not M2M")
+	}
+	return pascal(e.Rel.Table)
+}
+
 // M2O indicates if this edge is M2O edge.
 func (e Edge) M2O() bool { return e.Rel.Type == M2O }
 

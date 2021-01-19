@@ -265,7 +265,7 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 		if err := ctq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return ctq.sqlQuery(), nil
+		return ctq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -388,7 +388,7 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (ctq *CustomTypeQuery) sqlQuery() *sql.Selector {
+func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ctq.driver.Dialect())
 	t1 := builder.Table(customtype.Table)
 	selector := builder.Select(t1.Columns(customtype.Columns...)...).From(t1)
@@ -683,7 +683,7 @@ func (cts *CustomTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cts.sql = cts.CustomTypeQuery.sqlQuery()
+	cts.sql = cts.CustomTypeQuery.sqlQuery(ctx)
 	return cts.sqlScan(ctx, v)
 }
 

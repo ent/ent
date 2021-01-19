@@ -10,7 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 
 func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.Name }}, error) {
 	res := &gremlin.Response{}
-	traversal := {{ $receiver }}.gremlinQuery()
+	traversal := {{ $receiver }}.gremlinQuery(ctx)
 	if len({{ $receiver }}.fields) > 0 {
 		fields := make([]interface{}, len({{ $receiver }}.fields))
 		for i, f := range {{ $receiver }}.fields {
@@ -34,7 +34,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context) ([]*{{ $.
 
 func ({{ $receiver }} *{{ $builder }}) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlinQuery().Count().Query()
+	query, bindings := {{ $receiver }}.gremlinQuery(ctx).Count().Query()
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -43,14 +43,14 @@ func ({{ $receiver }} *{{ $builder }}) gremlinCount(ctx context.Context) (int, e
 
 func ({{ $receiver }} *{{ $builder }}) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := {{ $receiver }}.gremlinQuery().HasNext().Query()
+	query, bindings := {{ $receiver }}.gremlinQuery(ctx).HasNext().Query()
 	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
+func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel({{ $.Package }}.Label)
 	if {{ $receiver }}.gremlin != nil {
 		v = {{ $receiver }}.gremlin.Clone()
@@ -82,7 +82,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery() *dsl.Traversal {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $receiver := $.Scope.Receiver }}
 	{{- $ident := $.Scope.Ident }}
-	gremlin := {{ $receiver }}.gremlinQuery()
+	gremlin := {{ $receiver }}.gremlinQuery(ctx)
 	{{- if $e.Bidi }}
 		{{ $ident }} = gremlin.Both({{ $.Package }}.{{ $e.LabelConstant }})
 	{{- else if $e.IsInverse }}

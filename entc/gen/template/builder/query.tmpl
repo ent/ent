@@ -15,6 +15,7 @@ import (
 	{{- range $path := $.SiblingImports }}
 		"{{ $path }}"
 	{{- end }}
+	{{ if $.FeatureEnabled "sql/schemaconfig" }}"{{ $.Config.Package }}/internal"{{ end }}
 )
 
 {{ $builder := $.QueryName }}
@@ -319,7 +320,7 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 		if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return {{ $receiver }}.{{ $.Storage }}Query(), nil
+		return {{ $receiver }}.{{ $.Storage }}Query(ctx), nil
 	}
 	return group
 }
@@ -490,7 +491,7 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v i
 	if err := {{ $selectReceiver }}.prepareQuery(ctx); err != nil {
 		return err
 	}
-	{{ $selectReceiver }}.{{ $.Storage }} = {{ $selectReceiver }}.{{ $builder }}.{{ $.Storage }}Query()
+	{{ $selectReceiver }}.{{ $.Storage }} = {{ $selectReceiver }}.{{ $builder }}.{{ $.Storage }}Query(ctx)
 	return {{ $selectReceiver }}.{{ $.Storage }}Scan(ctx, v)
 }
 

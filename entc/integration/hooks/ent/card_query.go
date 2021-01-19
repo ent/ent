@@ -67,7 +67,7 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := cq.sqlQuery()
+		selector := cq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -76,6 +76,7 @@ func (cq *CardQuery) QueryOwner() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, card.OwnerTable, card.OwnerColumn),
 		)
+
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -303,7 +304,7 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return cq.sqlQuery(), nil
+		return cq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -463,7 +464,7 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cq *CardQuery) sqlQuery() *sql.Selector {
+func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(card.Table)
 	selector := builder.Select(t1.Columns(card.Columns...)...).From(t1)
@@ -758,7 +759,7 @@ func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.CardQuery.sqlQuery()
+	cs.sql = cs.CardQuery.sqlQuery(ctx)
 	return cs.sqlScan(ctx, v)
 }
 

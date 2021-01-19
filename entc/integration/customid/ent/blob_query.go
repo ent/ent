@@ -69,7 +69,7 @@ func (bq *BlobQuery) QueryParent() *BlobQuery {
 		if err := bq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := bq.sqlQuery()
+		selector := bq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -78,6 +78,7 @@ func (bq *BlobQuery) QueryParent() *BlobQuery {
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, blob.ParentTable, blob.ParentColumn),
 		)
+
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -91,7 +92,7 @@ func (bq *BlobQuery) QueryLinks() *BlobQuery {
 		if err := bq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := bq.sqlQuery()
+		selector := bq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -100,6 +101,7 @@ func (bq *BlobQuery) QueryLinks() *BlobQuery {
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, blob.LinksTable, blob.LinksPrimaryKey...),
 		)
+
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -339,7 +341,7 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 		if err := bq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return bq.sqlQuery(), nil
+		return bq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -564,7 +566,7 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (bq *BlobQuery) sqlQuery() *sql.Selector {
+func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(bq.driver.Dialect())
 	t1 := builder.Table(blob.Table)
 	selector := builder.Select(t1.Columns(blob.Columns...)...).From(t1)
@@ -859,7 +861,7 @@ func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := bs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	bs.sql = bs.BlobQuery.sqlQuery()
+	bs.sql = bs.BlobQuery.sqlQuery(ctx)
 	return bs.sqlScan(ctx, v)
 }
 

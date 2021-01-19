@@ -266,7 +266,7 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return cq.gremlinQuery(), nil
+		return cq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -302,7 +302,7 @@ func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
 
 func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {
 	res := &gremlin.Response{}
-	traversal := cq.gremlinQuery()
+	traversal := cq.gremlinQuery(ctx)
 	if len(cq.fields) > 0 {
 		fields := make([]interface{}, len(cq.fields))
 		for i, f := range cq.fields {
@@ -326,7 +326,7 @@ func (cq *CommentQuery) gremlinAll(ctx context.Context) ([]*Comment, error) {
 
 func (cq *CommentQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().Count().Query()
+	query, bindings := cq.gremlinQuery(ctx).Count().Query()
 	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -335,14 +335,14 @@ func (cq *CommentQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (cq *CommentQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery().HasNext().Query()
+	query, bindings := cq.gremlinQuery(ctx).HasNext().Query()
 	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (cq *CommentQuery) gremlinQuery() *dsl.Traversal {
+func (cq *CommentQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(comment.Label)
 	if cq.gremlin != nil {
 		v = cq.gremlin.Clone()
@@ -646,7 +646,7 @@ func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.gremlin = cs.CommentQuery.gremlinQuery()
+	cs.gremlin = cs.CommentQuery.gremlinQuery(ctx)
 	return cs.gremlinScan(ctx, v)
 }
 
