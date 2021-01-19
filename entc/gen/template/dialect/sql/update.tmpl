@@ -24,12 +24,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			},
 		},
 	}
-	{{- /* Allow mutating the sqlgraph.UpdateSpec by ent extensions or user templates.*/}}
-	{{- with $tmpls := matchTemplate "dialect/sql/update/spec/*" }}
-		{{- range $tmpl := $tmpls }}
-			{{- xtemplate $tmpl $ }}
-		{{- end }}
-	{{- end }}
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
 		if !ok {
@@ -95,6 +89,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			_spec.Edges.Add = append(_spec.Edges.Add, edge)
 		}
 	{{- end }}
+	{{- /* Allow mutating the sqlgraph.UpdateSpec by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/update/spec/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{- if $one }}
 		{{ $ret }} = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec.Assign = {{ $ret }}.assignValues
@@ -131,6 +131,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			},
 		},
 	}
+	{{- /* Allow mutating the sqlgraph.EdgeSpec by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/defedge/spec/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{- with $.Scope.Nodes }}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
