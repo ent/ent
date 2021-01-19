@@ -66,7 +66,7 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 		if err := ftq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := ftq.gremlinQuery()
+		gremlin := ftq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(filetype.FilesLabel).InV()
 		return fromU, nil
 	}
@@ -294,7 +294,7 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 		if err := ftq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return ftq.gremlinQuery(), nil
+		return ftq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -330,7 +330,7 @@ func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
 
 func (ftq *FileTypeQuery) gremlinAll(ctx context.Context) ([]*FileType, error) {
 	res := &gremlin.Response{}
-	traversal := ftq.gremlinQuery()
+	traversal := ftq.gremlinQuery(ctx)
 	if len(ftq.fields) > 0 {
 		fields := make([]interface{}, len(ftq.fields))
 		for i, f := range ftq.fields {
@@ -354,7 +354,7 @@ func (ftq *FileTypeQuery) gremlinAll(ctx context.Context) ([]*FileType, error) {
 
 func (ftq *FileTypeQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().Count().Query()
+	query, bindings := ftq.gremlinQuery(ctx).Count().Query()
 	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -363,14 +363,14 @@ func (ftq *FileTypeQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (ftq *FileTypeQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery().HasNext().Query()
+	query, bindings := ftq.gremlinQuery(ctx).HasNext().Query()
 	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (ftq *FileTypeQuery) gremlinQuery() *dsl.Traversal {
+func (ftq *FileTypeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(filetype.Label)
 	if ftq.gremlin != nil {
 		v = ftq.gremlin.Clone()
@@ -674,7 +674,7 @@ func (fts *FileTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := fts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fts.gremlin = fts.FileTypeQuery.gremlinQuery()
+	fts.gremlin = fts.FileTypeQuery.gremlinQuery(ctx)
 	return fts.gremlinScan(ctx, v)
 }
 
