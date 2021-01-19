@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
+	"github.com/facebook/ent/entc/integration/template/ent/entpet"
 	"github.com/facebook/ent/entc/integration/template/ent/user"
 )
 
@@ -58,11 +58,11 @@ func (*Pet) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pet.FieldID, pet.FieldAge:
+		case entpet.FieldID, entpet.FieldAge:
 			values[i] = &sql.NullInt64{}
-		case pet.FieldLicensedAt:
+		case entpet.FieldLicensedAt:
 			values[i] = &sql.NullTime{}
-		case pet.ForeignKeys[0]: // user_pets
+		case entpet.ForeignKeys[0]: // user_pets
 			values[i] = &sql.NullInt64{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Pet", columns[i])
@@ -79,26 +79,26 @@ func (pe *Pet) assignValues(columns []string, values []interface{}) error {
 	}
 	for i := range columns {
 		switch columns[i] {
-		case pet.FieldID:
+		case entpet.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pe.ID = int(value.Int64)
-		case pet.FieldAge:
+		case entpet.FieldAge:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field age", values[i])
 			} else if value.Valid {
 				pe.Age = int(value.Int64)
 			}
-		case pet.FieldLicensedAt:
+		case entpet.FieldLicensedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field licensed_at", values[i])
 			} else if value.Valid {
 				pe.LicensedAt = new(time.Time)
 				*pe.LicensedAt = value.Time
 			}
-		case pet.ForeignKeys[0]:
+		case entpet.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
 			} else if value.Valid {

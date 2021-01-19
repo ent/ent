@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/facebook/ent/entc/integration/template/ent/entpet"
 	"github.com/facebook/ent/entc/integration/template/ent/group"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
 	"github.com/facebook/ent/entc/integration/template/ent/predicate"
 	"github.com/facebook/ent/entc/integration/template/ent/user"
 
@@ -543,19 +543,19 @@ func (m *PetMutation) OldLicensedAt(ctx context.Context) (v *time.Time, err erro
 // ClearLicensedAt clears the value of the "licensed_at" field.
 func (m *PetMutation) ClearLicensedAt() {
 	m.licensed_at = nil
-	m.clearedFields[pet.FieldLicensedAt] = struct{}{}
+	m.clearedFields[entpet.FieldLicensedAt] = struct{}{}
 }
 
 // LicensedAtCleared returns if the "licensed_at" field was cleared in this mutation.
 func (m *PetMutation) LicensedAtCleared() bool {
-	_, ok := m.clearedFields[pet.FieldLicensedAt]
+	_, ok := m.clearedFields[entpet.FieldLicensedAt]
 	return ok
 }
 
 // ResetLicensedAt resets all changes to the "licensed_at" field.
 func (m *PetMutation) ResetLicensedAt() {
 	m.licensed_at = nil
-	delete(m.clearedFields, pet.FieldLicensedAt)
+	delete(m.clearedFields, entpet.FieldLicensedAt)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by id.
@@ -613,10 +613,10 @@ func (m *PetMutation) Type() string {
 func (m *PetMutation) Fields() []string {
 	fields := make([]string, 0, 2)
 	if m.age != nil {
-		fields = append(fields, pet.FieldAge)
+		fields = append(fields, entpet.FieldAge)
 	}
 	if m.licensed_at != nil {
-		fields = append(fields, pet.FieldLicensedAt)
+		fields = append(fields, entpet.FieldLicensedAt)
 	}
 	return fields
 }
@@ -626,9 +626,9 @@ func (m *PetMutation) Fields() []string {
 // schema.
 func (m *PetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case pet.FieldAge:
+	case entpet.FieldAge:
 		return m.Age()
-	case pet.FieldLicensedAt:
+	case entpet.FieldLicensedAt:
 		return m.LicensedAt()
 	}
 	return nil, false
@@ -639,9 +639,9 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case pet.FieldAge:
+	case entpet.FieldAge:
 		return m.OldAge(ctx)
-	case pet.FieldLicensedAt:
+	case entpet.FieldLicensedAt:
 		return m.OldLicensedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Pet field %s", name)
@@ -652,14 +652,14 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 // type.
 func (m *PetMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case pet.FieldAge:
+	case entpet.FieldAge:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAge(v)
 		return nil
-	case pet.FieldLicensedAt:
+	case entpet.FieldLicensedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -675,7 +675,7 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 func (m *PetMutation) AddedFields() []string {
 	var fields []string
 	if m.addage != nil {
-		fields = append(fields, pet.FieldAge)
+		fields = append(fields, entpet.FieldAge)
 	}
 	return fields
 }
@@ -685,7 +685,7 @@ func (m *PetMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *PetMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case pet.FieldAge:
+	case entpet.FieldAge:
 		return m.AddedAge()
 	}
 	return nil, false
@@ -696,7 +696,7 @@ func (m *PetMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *PetMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case pet.FieldAge:
+	case entpet.FieldAge:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -711,8 +711,8 @@ func (m *PetMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *PetMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(pet.FieldLicensedAt) {
-		fields = append(fields, pet.FieldLicensedAt)
+	if m.FieldCleared(entpet.FieldLicensedAt) {
+		fields = append(fields, entpet.FieldLicensedAt)
 	}
 	return fields
 }
@@ -728,7 +728,7 @@ func (m *PetMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *PetMutation) ClearField(name string) error {
 	switch name {
-	case pet.FieldLicensedAt:
+	case entpet.FieldLicensedAt:
 		m.ClearLicensedAt()
 		return nil
 	}
@@ -739,10 +739,10 @@ func (m *PetMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PetMutation) ResetField(name string) error {
 	switch name {
-	case pet.FieldAge:
+	case entpet.FieldAge:
 		m.ResetAge()
 		return nil
-	case pet.FieldLicensedAt:
+	case entpet.FieldLicensedAt:
 		m.ResetLicensedAt()
 		return nil
 	}
@@ -753,7 +753,7 @@ func (m *PetMutation) ResetField(name string) error {
 func (m *PetMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.owner != nil {
-		edges = append(edges, pet.EdgeOwner)
+		edges = append(edges, entpet.EdgeOwner)
 	}
 	return edges
 }
@@ -762,7 +762,7 @@ func (m *PetMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *PetMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case pet.EdgeOwner:
+	case entpet.EdgeOwner:
 		if id := m.owner; id != nil {
 			return []ent.Value{*id}
 		}
@@ -788,7 +788,7 @@ func (m *PetMutation) RemovedIDs(name string) []ent.Value {
 func (m *PetMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
 	if m.clearedowner {
-		edges = append(edges, pet.EdgeOwner)
+		edges = append(edges, entpet.EdgeOwner)
 	}
 	return edges
 }
@@ -797,7 +797,7 @@ func (m *PetMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *PetMutation) EdgeCleared(name string) bool {
 	switch name {
-	case pet.EdgeOwner:
+	case entpet.EdgeOwner:
 		return m.clearedowner
 	}
 	return false
@@ -807,7 +807,7 @@ func (m *PetMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PetMutation) ClearEdge(name string) error {
 	switch name {
-	case pet.EdgeOwner:
+	case entpet.EdgeOwner:
 		m.ClearOwner()
 		return nil
 	}
@@ -818,7 +818,7 @@ func (m *PetMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PetMutation) ResetEdge(name string) error {
 	switch name {
-	case pet.EdgeOwner:
+	case entpet.EdgeOwner:
 		m.ResetOwner()
 		return nil
 	}

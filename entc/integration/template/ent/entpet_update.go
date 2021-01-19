@@ -13,7 +13,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
+	"github.com/facebook/ent/entc/integration/template/ent/entpet"
 	"github.com/facebook/ent/entc/integration/template/ent/predicate"
 	"github.com/facebook/ent/entc/integration/template/ent/user"
 	"github.com/facebook/ent/schema/field"
@@ -149,11 +149,11 @@ func (pu *PetUpdate) ExecX(ctx context.Context) {
 func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   pet.Table,
-			Columns: pet.Columns,
+			Table:   entpet.Table,
+			Columns: entpet.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: pet.FieldID,
+				Column: entpet.FieldID,
 			},
 		},
 	}
@@ -168,35 +168,35 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: pet.FieldAge,
+			Column: entpet.FieldAge,
 		})
 	}
 	if value, ok := pu.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: pet.FieldAge,
+			Column: entpet.FieldAge,
 		})
 	}
 	if value, ok := pu.mutation.LicensedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: pet.FieldLicensedAt,
+			Column: entpet.FieldLicensedAt,
 		})
 	}
 	if pu.mutation.LicensedAtCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Column: pet.FieldLicensedAt,
+			Column: entpet.FieldLicensedAt,
 		})
 	}
 	if pu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
+			Table:   entpet.OwnerTable,
+			Columns: []string{entpet.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -211,8 +211,8 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
+			Table:   entpet.OwnerTable,
+			Columns: []string{entpet.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -228,7 +228,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{pet.Label}
+			err = &NotFoundError{entpet.Label}
 		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -361,11 +361,11 @@ func (puo *PetUpdateOne) ExecX(ctx context.Context) {
 func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   pet.Table,
-			Columns: pet.Columns,
+			Table:   entpet.Table,
+			Columns: entpet.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: pet.FieldID,
+				Column: entpet.FieldID,
 			},
 		},
 	}
@@ -378,35 +378,35 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: pet.FieldAge,
+			Column: entpet.FieldAge,
 		})
 	}
 	if value, ok := puo.mutation.AddedAge(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: pet.FieldAge,
+			Column: entpet.FieldAge,
 		})
 	}
 	if value, ok := puo.mutation.LicensedAt(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: pet.FieldLicensedAt,
+			Column: entpet.FieldLicensedAt,
 		})
 	}
 	if puo.mutation.LicensedAtCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
-			Column: pet.FieldLicensedAt,
+			Column: entpet.FieldLicensedAt,
 		})
 	}
 	if puo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
+			Table:   entpet.OwnerTable,
+			Columns: []string{entpet.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -421,8 +421,8 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
+			Table:   entpet.OwnerTable,
+			Columns: []string{entpet.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -441,7 +441,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, puo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{pet.Label}
+			err = &NotFoundError{entpet.Label}
 		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

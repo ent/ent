@@ -6,6 +6,8 @@ package schema
 
 import (
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema"
+	"github.com/facebook/ent/schema/codegen"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 )
@@ -29,5 +31,12 @@ func (Pet) Edges() []ent.Edge {
 		edge.From("owner", User.Type).
 			Ref("pets").
 			Unique(),
+	}
+}
+
+// Annotations of the Pet.
+func (Pet) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		codegen.Annotation{PackageName: "entpet"},
 	}
 }

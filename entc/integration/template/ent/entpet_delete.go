@@ -12,7 +12,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
+	"github.com/facebook/ent/entc/integration/template/ent/entpet"
 	"github.com/facebook/ent/entc/integration/template/ent/predicate"
 	"github.com/facebook/ent/schema/field"
 )
@@ -71,10 +71,10 @@ func (pd *PetDelete) ExecX(ctx context.Context) int {
 func (pd *PetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: pet.Table,
+			Table: entpet.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: pet.FieldID,
+				Column: entpet.FieldID,
 			},
 		},
 	}
@@ -100,7 +100,7 @@ func (pdo *PetDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{pet.Label}
+		return &NotFoundError{entpet.Label}
 	default:
 		return nil
 	}
