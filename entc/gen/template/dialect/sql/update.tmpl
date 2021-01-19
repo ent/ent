@@ -24,6 +24,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			},
 		},
 	}
+	{{- /* Allow mutating the sqlgraph.UpdateSpec by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/update/spec/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
 		if !ok {
