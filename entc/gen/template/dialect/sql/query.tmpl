@@ -134,7 +134,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
+func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect({{ $receiver }}.driver.Dialect())
 	t1 := builder.Table({{ $.Package }}.Table)
 	selector := builder.Select(t1.Columns({{ $.Package }}.Columns...)...).From(t1)
@@ -166,7 +166,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
-	selector := {{ $receiver }}.sqlQuery()
+	selector := {{ $receiver }}.sqlQuery(ctx)
 	if err := selector.Err(); err != nil {
 		return nil, err
 	}
