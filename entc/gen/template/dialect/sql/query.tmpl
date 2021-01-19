@@ -56,6 +56,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		{{- end }}
 		return node.assignValues(columns, values)
 	}
+	{{- /* Allow mutating the sqlgraph.QuerySpec by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/spec/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -96,12 +102,6 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 		From: {{ $receiver }}.sql,
 		Unique: true,
 	}
-	{{- /* Allow mutating the sqlgraph.QuerySpec by ent extensions or user templates.*/}}
-	{{- with $tmpls := matchTemplate "dialect/sql/query/spec/*" }}
-		{{- range $tmpl := $tmpls }}
-			{{- xtemplate $tmpl $ }}
-		{{- end }}
-	{{- end }}
 	if fields := {{ $receiver }}.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
