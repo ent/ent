@@ -67,7 +67,7 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 		if err := giq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := giq.gremlinQuery()
+		gremlin := giq.gremlinQuery(ctx)
 		fromU = gremlin.InE(group.InfoLabel).OutV()
 		return fromU, nil
 	}
@@ -295,7 +295,7 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 		if err := giq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return giq.gremlinQuery(), nil
+		return giq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -331,7 +331,7 @@ func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
 
 func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error) {
 	res := &gremlin.Response{}
-	traversal := giq.gremlinQuery()
+	traversal := giq.gremlinQuery(ctx)
 	if len(giq.fields) > 0 {
 		fields := make([]interface{}, len(giq.fields))
 		for i, f := range giq.fields {
@@ -355,7 +355,7 @@ func (giq *GroupInfoQuery) gremlinAll(ctx context.Context) ([]*GroupInfo, error)
 
 func (giq *GroupInfoQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := giq.gremlinQuery().Count().Query()
+	query, bindings := giq.gremlinQuery(ctx).Count().Query()
 	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -364,14 +364,14 @@ func (giq *GroupInfoQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (giq *GroupInfoQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := giq.gremlinQuery().HasNext().Query()
+	query, bindings := giq.gremlinQuery(ctx).HasNext().Query()
 	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (giq *GroupInfoQuery) gremlinQuery() *dsl.Traversal {
+func (giq *GroupInfoQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(groupinfo.Label)
 	if giq.gremlin != nil {
 		v = giq.gremlin.Clone()
@@ -675,7 +675,7 @@ func (gis *GroupInfoSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := gis.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gis.gremlin = gis.GroupInfoQuery.gremlinQuery()
+	gis.gremlin = gis.GroupInfoQuery.gremlinQuery(ctx)
 	return gis.gremlinScan(ctx, v)
 }
 

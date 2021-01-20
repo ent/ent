@@ -67,7 +67,7 @@ func (sq *StreetQuery) QueryCity() *CityQuery {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := sq.sqlQuery()
+		selector := sq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -303,7 +303,7 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return sq.sqlQuery(), nil
+		return sq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -463,7 +463,7 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (sq *StreetQuery) sqlQuery() *sql.Selector {
+func (sq *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sq.driver.Dialect())
 	t1 := builder.Table(street.Table)
 	selector := builder.Select(t1.Columns(street.Columns...)...).From(t1)
@@ -758,7 +758,7 @@ func (ss *StreetSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ss.sql = ss.StreetQuery.sqlQuery()
+	ss.sql = ss.StreetQuery.sqlQuery(ctx)
 	return ss.sqlScan(ctx, v)
 }
 

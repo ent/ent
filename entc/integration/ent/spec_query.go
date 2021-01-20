@@ -67,7 +67,7 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := sq.sqlQuery()
+		selector := sq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -290,7 +290,7 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return sq.sqlQuery(), nil
+		return sq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -471,7 +471,7 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (sq *SpecQuery) sqlQuery() *sql.Selector {
+func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sq.driver.Dialect())
 	t1 := builder.Table(spec.Table)
 	selector := builder.Select(t1.Columns(spec.Columns...)...).From(t1)
@@ -766,7 +766,7 @@ func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ss.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ss.sql = ss.SpecQuery.sqlQuery()
+	ss.sql = ss.SpecQuery.sqlQuery(ctx)
 	return ss.sqlScan(ctx, v)
 }
 

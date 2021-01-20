@@ -266,7 +266,7 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 		if err := miq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return miq.sqlQuery(), nil
+		return miq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -389,7 +389,7 @@ func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (miq *MixinIDQuery) sqlQuery() *sql.Selector {
+func (miq *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(miq.driver.Dialect())
 	t1 := builder.Table(mixinid.Table)
 	selector := builder.Select(t1.Columns(mixinid.Columns...)...).From(t1)
@@ -684,7 +684,7 @@ func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := mis.prepareQuery(ctx); err != nil {
 		return err
 	}
-	mis.sql = mis.MixinIDQuery.sqlQuery()
+	mis.sql = mis.MixinIDQuery.sqlQuery(ctx)
 	return mis.sqlScan(ctx, v)
 }
 
