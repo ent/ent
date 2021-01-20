@@ -907,7 +907,7 @@ func (c *creator) nodes(ctx context.Context, tx dialect.ExecQuerier) error {
 		}
 	}
 	sorted := keys(columns)
-	insert := c.builder.Insert(c.Nodes[0].Table).Default().Columns(sorted...)
+	insert := c.builder.Insert(c.Nodes[0].Table).Schema(c.Nodes[0].Schema).Default().Columns(sorted...)
 	for i := range values {
 		vs := make([]interface{}, len(sorted))
 		for j, c := range sorted {
@@ -1057,7 +1057,7 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 	)
 	for _, table := range edgeKeys(tables) {
 		edges := tables[table]
-		insert := g.builder.Insert(table).Columns(edges[0].Columns...)
+		insert := g.builder.Insert(table).Schema(edges[0].Schema).Columns(edges[0].Columns...)
 		for _, edge := range edges {
 			pk1, pk2 := ids, edge.Target.Nodes
 			if edge.Inverse {
@@ -1085,7 +1085,7 @@ func (g *graph) batchAddM2M(ctx context.Context, spec *BatchCreateSpec) error {
 		for t, edges := range edges.GroupTable() {
 			insert, ok := tables[t]
 			if !ok {
-				insert = g.builder.Insert(t).Columns(edges[0].Columns...)
+				insert = g.builder.Insert(t).Schema(edges[0].Schema).Columns(edges[0].Columns...)
 			}
 			tables[t] = insert
 			if len(edges) != 1 {
@@ -1157,6 +1157,7 @@ func (g *graph) addFKEdges(ctx context.Context, ids []driver.Value, edges []*Edg
 			p = sql.InValues(edge.Target.IDSpec.Column, edge.Target.Nodes...)
 		}
 		query, args := g.builder.Update(edge.Table).
+			Schema(edge.Schema).
 			Set(edge.Columns[0], id).
 			Where(sql.And(p, sql.IsNull(edge.Columns[0]))).
 			Query()
