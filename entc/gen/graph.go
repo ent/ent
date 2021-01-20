@@ -549,6 +549,9 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 			templates = MustParse(templates.AddParseTree(name, tmpl.Tree))
 		}
 	}
+	for _, f := range g.Features {
+		external = append(external, f.GraphTemplates...)
+	}
 	return templates, external
 }
 

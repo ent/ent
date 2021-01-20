@@ -134,6 +134,14 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
+{{ template "dialect/sql/query/selector" $ }}
+
+{{ end }}
+
+{{ define "dialect/sql/query/selector" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
 func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect({{ $receiver }}.driver.Dialect())
 	t1 := builder.Table({{ $.Package }}.Table)
@@ -142,6 +150,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 		selector = {{ $receiver }}.sql
 		selector.Select(selector.Columns({{ $.Package }}.Columns...)...)
 	}
+	{{- /* Allow mutating the sql.Selector by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/selector/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	for _, p := range {{ $receiver }}.predicates {
 		p(selector)
 	}
@@ -181,6 +195,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			{{- end -}}
 		),
 	)
+	{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/path/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
@@ -202,6 +222,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			{{- end -}}
 		),
 	)
+	{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/from/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 

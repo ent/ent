@@ -169,6 +169,10 @@ var (
 		"dialect/*/import/additional/*",
 		"dialect/*/*/spec/*",
 		"dialect/*/*/*/spec/*",
+		"dialect/sql/query/path/*",
+		"dialect/sql/query/from/*",
+		"dialect/*/query/selector/*",
+		"dialect/sql/predicate/edge/*/*",
 	}
 	// templates holds the Go templates for the code generation.
 	templates *Template

@@ -43,14 +43,20 @@ var (
 		},
 	}
 
-	// FeatureCustomSchemas allows users to pass init time alternate schema names
+	// FeatureSchemaConfig allows users to pass init time alternate schema names
 	// for each ent model. This is useful if your SQL tables are spread out against
 	// multiple databases.
-	FeatureCustomSchemas = Feature{
+	FeatureSchemaConfig = Feature{
 		Name:        "sql/schemaconfig",
 		Stage:       Experimental,
 		Default:     false,
 		Description: "Allows alternate schema names for each ent model. Useful if SQL tables are spread out against multiple databases",
+		GraphTemplates: []GraphTemplate{
+			{
+				Name:   "dialect/sql/internal/schemaconfig",
+				Format: "internal/schemaconfig.go",
+			},
+		},
 		cleanup: func(c *Config) error {
 			return os.RemoveAll(filepath.Join(c.Target, "internal"))
 		},
@@ -61,7 +67,7 @@ var (
 		FeaturePrivacy,
 		FeatureEntQL,
 		FeatureSnapshot,
-		FeatureCustomSchemas,
+		FeatureSchemaConfig,
 	}
 )
 
@@ -101,6 +107,9 @@ type Feature struct {
 
 	// A Description of this feature.
 	Description string
+
+	// GraphTemplates defines optional templates to be executed on the graph.
+	GraphTemplates []GraphTemplate
 
 	// cleanup used to cleanup all changes when a feature-flag is removed.
 	// e.g. delete files from previous codegen runs.
