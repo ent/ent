@@ -165,7 +165,7 @@ var (
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
-		"dialect/additional/*",
+		"import/additional/*",
 		"dialect/*/import/additional/*",
 		"dialect/*/*/spec/*",
 		"dialect/*/*/*/spec/*",
