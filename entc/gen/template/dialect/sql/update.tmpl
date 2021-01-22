@@ -30,15 +30,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			return {{ $zero }}, &ValidationError{Name: "ID", err: fmt.Errorf("missing {{ $.Name }}.ID for update")}
 		}
 		_spec.Node.ID.Value = id
-	{{- else }}
-		if ps := {{ $mutation }}.predicates; len(ps) > 0 {
-			_spec.Predicate = func(selector *sql.Selector) {
-				for i := range ps {
-					ps[i](selector)
-				}
+	{{- end }}
+	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
 			}
 		}
-	{{- end }}
+	}
 	{{- range $f := $.Fields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {

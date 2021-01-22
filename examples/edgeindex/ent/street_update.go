@@ -299,6 +299,13 @@ func (suo *StreetUpdateOne) sqlSave(ctx context.Context) (_node *Street, err err
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Street.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if ps := suo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := suo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

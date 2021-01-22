@@ -194,6 +194,13 @@ func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Item.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if ps := iuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	_node = &Item{config: iuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
