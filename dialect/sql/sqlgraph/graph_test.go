@@ -1333,6 +1333,9 @@ func TestUpdateNode(t *testing.T) {
 					Columns: []string{"id", "name", "age"},
 					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
 				},
+				Predicate: func(s *sql.Selector) {
+					s.Where(sql.EQ("deleted", false))
+				},
 				Fields: FieldMut{
 					Add: []*FieldSpec{
 						{Column: "age", Type: field.TypeInt, Value: 1},
@@ -1344,11 +1347,11 @@ func TestUpdateNode(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`age`, ?) + ? WHERE `id` = ?")).
-					WithArgs(0, 1, 1).
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`age`, ?) + ? WHERE `id` = ? AND `deleted` = ?")).
+					WithArgs(0, 1, 1, false).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
-					WithArgs(1).
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ? AND `deleted` = ?")).
+					WithArgs(1, false).
 					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
 						AddRow(1, 31, nil))
 				mock.ExpectCommit()

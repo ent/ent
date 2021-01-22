@@ -300,6 +300,13 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Media.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if ps := muo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := muo.mutation.Source(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

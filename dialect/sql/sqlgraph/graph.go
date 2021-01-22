@@ -653,6 +653,11 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 		clearEdges = EdgeSpecs(u.Edges.Clear).GroupRel()
 	)
 	update := u.builder.Update(u.Node.Table).Schema(u.Node.Schema).Where(sql.EQ(u.Node.ID.Column, id))
+	if pred := u.Predicate; pred != nil {
+		selector := u.builder.Select().From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema))
+		pred(selector)
+		update.FromSelect(selector)
+	}
 	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
 		return err
 	}
@@ -669,6 +674,9 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	selector := u.builder.Select(u.Node.Columns...).
 		From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
 		Where(sql.EQ(u.Node.ID.Column, u.Node.ID.Value))
+	if pred := u.Predicate; pred != nil {
+		pred(selector)
+	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
