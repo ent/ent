@@ -40,7 +40,7 @@ func AllowIfAdmin() privacy.QueryMutationRule {
 }
 
 // FilterTenantRule is a query rule that filters out entities that are not in the tenant.
-func FilterTenantRule() privacy.QueryRule {
+func FilterTenantRule() privacy.QueryMutationRule {
 	type TeamsFilter interface {
 		WhereHasTenantWith(...predicate.Tenant)
 	}

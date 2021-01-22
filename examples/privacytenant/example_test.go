@@ -38,6 +38,7 @@ func Example_PrivacyTenant() {
 	// User(id=1, name=a8m, foods=[])
 	// User(id=2, name=nati, foods=[Sushi Burritos])
 	// Group(id=1, name=entgo.io)
+	// Group(id=1, name=entgo)
 }
 
 func Do(ctx context.Context, client *ent.Client) error {
@@ -88,13 +89,25 @@ func Do(ctx context.Context, client *ent.Client) error {
 	// the group and the users are connected to the same tenant.
 	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(nati).Save(admin)
 	if !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operatio to fail, since user (nati) is not connected to the same tenant")
+		return fmt.Errorf("expect operation to fail, since user (nati) is not connected to the same tenant")
 	}
 	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(nati, a8m).Save(admin)
 	if !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operatio to fail, since some users (nati) are not connected to the same tenant")
+		return fmt.Errorf("expect operation to fail, since some users (nati) are not connected to the same tenant")
 	}
 	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(a8m).Save(admin)
+	if err != nil {
+		return fmt.Errorf("expect operation to pass, but got %v", err)
+	}
+	fmt.Println(entgo)
+
+	// Expect operation to fail, because the FilterTenantRule rule makes sure
+	// that tenants can update and delete their groups.
+	err = entgo.Update().SetName("fail.go").Exec(labView)
+	if !ent.IsNotFound(err) {
+		return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub)")
+	}
+	entgo, err = entgo.Update().SetName("entgo").Save(hubView)
 	if err != nil {
 		return fmt.Errorf("expect operation to pass, but got %v", err)
 	}
