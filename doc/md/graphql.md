@@ -353,9 +353,10 @@ func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.To
 
 ## Examples
 
-The [ent-contrib](https://github.com/facebookincubator/ent-contrib) contains 2 examples at the moment:
+The [ent-contrib](https://github.com/facebookincubator/ent-contrib) contains several examples at the moment:
 1. A complete GraphQL server with a simple [Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo) with numeric ID field
 2. The same [Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todouuid) in 1, but with UUID type for the ID field
+3. The same [Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todopulid) in 1 and 2, but with a prefixed [ULID](https://github.com/ulid/spec) or `PULID` as the ID field. This example supports the Relay Node API by prefixing IDs with the entity type rather than employing the ID space partitioning in [Universal IDs](migrate.md#universal-ids).
 
 ---
 
