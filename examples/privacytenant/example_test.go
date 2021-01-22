@@ -102,7 +102,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	fmt.Println(entgo)
 
 	// Expect operation to fail, because the FilterTenantRule rule makes sure
-	// that tenants can update and delete their groups.
+	// that tenants can update and delete only their groups.
 	err = entgo.Update().SetName("fail.go").Exec(labView)
 	if !ent.IsNotFound(err) {
 		return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub)")

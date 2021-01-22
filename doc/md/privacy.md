@@ -379,7 +379,7 @@ are not connected to the same tenant.
 
 ```go
 // FilterTenantRule is a query rule that filters out entities that are not in the tenant.
-func FilterTenantRule() privacy.QueryRule {
+func FilterTenantRule() privacy.QueryMutationRule {
 	type TeamsFilter interface {
 		WhereHasTenantWith(...predicate.Tenant)
 	}
@@ -517,6 +517,48 @@ func Do(ctx context.Context, client *ent.Client) error {
 	}
 	fmt.Println(entgo)
 	return nil
+}
+```
+
+In some cases, we want to reject user operations on entities that don't belong to their tenant **without loading
+these entities from the database** (unlike the `DenyMismatchedTenants` example above). To achieve this, we can use the
+`FilterTenantRule` rule for mutations as well, but limit it to specific operations as follows:
+
+```go
+// Policy defines the privacy policy of the Group.
+func (Group) Policy() ent.Policy {
+	return privacy.Policy{
+		Mutation: privacy.MutationPolicy{
+			rule.DenyMismatchedTenants(),
+            // Limit the FilterTenantRule only for
+            // UpdateOne and DeleteOne operations.
+			privacy.OnMutationOperation(
+				rule.FilterTenantRule(),
+				ent.OpUpdateOne|ent.OpDeleteOne,
+			),
+		},
+	}
+}
+```
+
+Then, we expect the privacy-rules to take effect on the client operations.
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+    // A continuation of the code-block above.
+
+    // Expect operation to fail, because the FilterTenantRule rule makes sure
+    // that tenants can update and delete only their groups.
+    err = entgo.Update().SetName("fail.go").Exec(labView)
+    if !ent.IsNotFound(err) {
+    	return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub)")
+    }
+    entgo, err = entgo.Update().SetName("entgo").Save(hubView)
+    if err != nil {
+    	return fmt.Errorf("expect operation to pass, but got %v", err)
+    }
+    fmt.Println(entgo)
+    return nil
 }
 ```
 
