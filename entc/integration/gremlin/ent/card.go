@@ -39,9 +39,9 @@ type Card struct {
 // CardEdges holds the relations/edges for other nodes in the graph.
 type CardEdges struct {
 	// Owner holds the value of the owner edge.
-	Owner *User
+	Owner *User `json:"owner,omitempty"`
 	// Spec holds the value of the spec edge.
-	Spec []*Spec
+	Spec []*Spec `json:"spec,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool

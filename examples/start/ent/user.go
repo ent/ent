@@ -31,9 +31,9 @@ type User struct {
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Cars holds the value of the cars edge.
-	Cars []*Car
+	Cars []*Car `json:"cars,omitempty"`
 	// Groups holds the value of the groups edge.
-	Groups []*Group
+	Groups []*Group `json:"groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool

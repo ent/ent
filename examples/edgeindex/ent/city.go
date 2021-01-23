@@ -29,7 +29,7 @@ type City struct {
 // CityEdges holds the relations/edges for other nodes in the graph.
 type CityEdges struct {
 	// Streets holds the value of the streets edge.
-	Streets []*Street
+	Streets []*Street `json:"streets,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool

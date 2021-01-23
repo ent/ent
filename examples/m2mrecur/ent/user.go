@@ -31,9 +31,9 @@ type User struct {
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Followers holds the value of the followers edge.
-	Followers []*User
+	Followers []*User `json:"followers,omitempty"`
 	// Following holds the value of the following edge.
-	Following []*User
+	Following []*User `json:"following,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool

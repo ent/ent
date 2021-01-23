@@ -52,27 +52,27 @@ type User struct {
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Card holds the value of the card edge.
-	Card *Card
+	Card *Card `json:"card,omitempty"`
 	// Pets holds the value of the pets edge.
-	Pets []*Pet
+	Pets []*Pet `json:"pets,omitempty"`
 	// Files holds the value of the files edge.
-	Files []*File
+	Files []*File `json:"files,omitempty"`
 	// Groups holds the value of the groups edge.
-	Groups []*Group
+	Groups []*Group `json:"groups,omitempty"`
 	// Friends holds the value of the friends edge.
-	Friends []*User
+	Friends []*User `json:"friends,omitempty"`
 	// Followers holds the value of the followers edge.
-	Followers []*User
+	Followers []*User `json:"followers,omitempty"`
 	// Following holds the value of the following edge.
-	Following []*User
+	Following []*User `json:"following,omitempty"`
 	// Team holds the value of the team edge.
-	Team *Pet
+	Team *Pet `json:"team,omitempty"`
 	// Spouse holds the value of the spouse edge.
-	Spouse *User
+	Spouse *User `json:"spouse,omitempty"`
 	// Children holds the value of the children edge.
-	Children []*User
+	Children []*User `json:"children,omitempty"`
 	// Parent holds the value of the parent edge.
-	Parent *User
+	Parent *User `json:"parent,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [11]bool

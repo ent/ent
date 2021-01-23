@@ -246,7 +246,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Owner:       t,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
 		// Inverse only.
@@ -260,7 +260,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     e.RefName,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
 		// Inverse and assoc.
@@ -276,7 +276,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     ref.Name,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			}, &Edge{
 				def:         e,
@@ -285,7 +285,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Name:        ref.Name,
 				Unique:      ref.Unique,
 				Optional:    !ref.Required,
-				StructTag:   ref.Tag,
+				StructTag:   structTag(ref.Name, ref.Tag),
 				Annotations: ref.Annotations,
 			})
 		default:
