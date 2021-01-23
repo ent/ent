@@ -12,7 +12,9 @@ import (
 	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/entc/integration/multischema/ent"
+	"github.com/facebook/ent/entc/integration/multischema/ent/group"
 	"github.com/facebook/ent/entc/integration/multischema/ent/migrate"
+	"github.com/facebook/ent/entc/integration/multischema/ent/user"
 	"github.com/stretchr/testify/require"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -42,12 +44,15 @@ func TestMySQL(t *testing.T) {
 		client.Group.Create().SetName("GitHub"),
 		client.Group.Create().SetName("GitLab"),
 	).SaveX(ctx)
-	client.User.Create().AddPets(pedro).AddGroups(groups...).SaveX(ctx)
+	usr := client.User.Create().AddPets(pedro).AddGroups(groups...).SaveX(ctx)
 
-	// id := client.Group.Query().
-	//	Where(group.HasUsersWith(user.ID(usr.ID))).
-	//	OnlyIDX(ctx)
-	//	require.Equal(t, pedro.ID, id)
+	id := client.Group.Query().
+		Where(group.HasUsersWith(user.ID(usr.ID))).
+		Limit(1).
+		QueryUsers().
+		QueryPets().
+		OnlyIDX(ctx)
+	require.Equal(t, pedro.ID, id)
 }
 
 func setupSchema(t *testing.T, drv *sql.Driver) {

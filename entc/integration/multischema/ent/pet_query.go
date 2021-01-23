@@ -478,6 +478,8 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Select(selector.Columns(pet.Columns...)...)
 	}
 	t1.Schema(pq.schemaConfig.Pet)
+	ctx = internal.NewSchemaConfigContext(ctx, pq.schemaConfig)
+	selector.WithContext(ctx)
 	for _, p := range pq.predicates {
 		p(selector)
 	}

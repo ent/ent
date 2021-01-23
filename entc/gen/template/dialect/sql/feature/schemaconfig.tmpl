@@ -130,6 +130,8 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- $receiver := receiver $builder }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		t1.Schema({{ $receiver }}.schemaConfig.{{ $.Name }})
+		ctx = internal.NewSchemaConfigContext(ctx, {{ $receiver }}.schemaConfig)
+		selector.WithContext(ctx)
 	{{- end }}
 {{- end -}}
 
