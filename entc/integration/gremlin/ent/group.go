@@ -38,13 +38,13 @@ type Group struct {
 // GroupEdges holds the relations/edges for other nodes in the graph.
 type GroupEdges struct {
 	// Files holds the value of the files edge.
-	Files []*File
+	Files []*File `json:"files,omitempty"`
 	// Blocked holds the value of the blocked edge.
-	Blocked []*User
+	Blocked []*User `json:"blocked,omitempty"`
 	// Users holds the value of the users edge.
-	Users []*User
+	Users []*User `json:"users,omitempty"`
 	// Info holds the value of the info edge.
-	Info *GroupInfo
+	Info *GroupInfo `json:"info,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool

@@ -30,13 +30,13 @@ type Pet struct {
 // PetEdges holds the relations/edges for other nodes in the graph.
 type PetEdges struct {
 	// Owner holds the value of the owner edge.
-	Owner *User
+	Owner *User `json:"owner,omitempty"`
 	// Cars holds the value of the cars edge.
-	Cars []*Car
+	Cars []*Car `json:"cars,omitempty"`
 	// Friends holds the value of the friends edge.
-	Friends []*Pet
+	Friends []*Pet `json:"friends,omitempty"`
 	// BestFriend holds the value of the best_friend edge.
-	BestFriend *Pet
+	BestFriend *Pet `json:"best_friend,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool

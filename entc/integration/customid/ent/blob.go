@@ -30,9 +30,9 @@ type Blob struct {
 // BlobEdges holds the relations/edges for other nodes in the graph.
 type BlobEdges struct {
 	// Parent holds the value of the parent edge.
-	Parent *Blob
+	Parent *Blob `json:"parent,omitempty"`
 	// Links holds the value of the links edge.
-	Links []*Blob
+	Links []*Blob `json:"links,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool

@@ -29,9 +29,9 @@ type Team struct {
 // TeamEdges holds the relations/edges for other nodes in the graph.
 type TeamEdges struct {
 	// Tasks holds the value of the tasks edge.
-	Tasks []*Task
+	Tasks []*Task `json:"tasks,omitempty"`
 	// Users holds the value of the users edge.
-	Users []*User
+	Users []*User `json:"users,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
