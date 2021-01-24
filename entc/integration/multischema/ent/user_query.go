@@ -580,6 +580,8 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Select(selector.Columns(user.Columns...)...)
 	}
 	t1.Schema(uq.schemaConfig.User)
+	ctx = internal.NewSchemaConfigContext(ctx, uq.schemaConfig)
+	selector.WithContext(ctx)
 	for _, p := range uq.predicates {
 		p(selector)
 	}
