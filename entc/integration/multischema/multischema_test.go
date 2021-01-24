@@ -2,7 +2,7 @@
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
-package json
+package multischema
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 	"github.com/facebook/ent/entc/integration/multischema/ent"
 	"github.com/facebook/ent/entc/integration/multischema/ent/group"
 	"github.com/facebook/ent/entc/integration/multischema/ent/migrate"
+	"github.com/facebook/ent/entc/integration/multischema/ent/pet"
 	"github.com/facebook/ent/entc/integration/multischema/ent/user"
 	"github.com/stretchr/testify/require"
 
@@ -39,7 +40,7 @@ func TestMySQL(t *testing.T) {
 		Group:      "db1",
 		GroupUsers: "db2",
 	}))
-	pedro := client.Pet.Create().SaveX(ctx)
+	pedro := client.Pet.Create().SetName("Pedro").SaveX(ctx)
 	groups := client.Group.CreateBulk(
 		client.Group.Create().SetName("GitHub"),
 		client.Group.Create().SetName("GitLab"),
@@ -53,6 +54,32 @@ func TestMySQL(t *testing.T) {
 		QueryPets().
 		OnlyIDX(ctx)
 	require.Equal(t, pedro.ID, id)
+
+	affected := client.Group.
+		Update().
+		ClearUsers().
+		Where(
+			group.And(
+				group.Name(groups[0].Name),
+				group.HasUsersWith(
+					user.HasPetsWith(
+						pet.Name(pedro.Name),
+					),
+				),
+			),
+		).
+		SaveX(ctx)
+	require.Equal(t, 1, affected)
+
+	exist := groups[0].QueryUsers().ExistX(ctx)
+	require.False(t, exist)
+	exist = groups[1].QueryUsers().ExistX(ctx)
+	require.True(t, exist)
+	exist = pedro.QueryOwner().ExistX(ctx)
+	require.True(t, exist)
+	pedro = pedro.Update().ClearOwner().SaveX(ctx)
+	exist = pedro.QueryOwner().ExistX(ctx)
+	require.False(t, exist)
 }
 
 func setupSchema(t *testing.T, drv *sql.Driver) {

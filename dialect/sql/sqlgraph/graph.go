@@ -1040,7 +1040,13 @@ func (g *graph) clearM2MEdges(ctx context.Context, ids []driver.Value, edges Edg
 				}
 			}
 		}
-		query, args := g.builder.Delete(table).Where(sql.Or(preds...)).Query()
+		deleter := g.builder.Delete(table).Where(sql.Or(preds...))
+		if edges[0].Schema != "" {
+			// If the Schema field was provided to the EdgeSpec (by the
+			// generated code), it should be the same for all EdgeSpecs.
+			deleter.Schema(edges[0].Schema)
+		}
+		query, args := deleter.Query()
 		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
 			return fmt.Errorf("remove m2m edge for table %s: %v", table, err)
 		}
@@ -1057,7 +1063,12 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 	)
 	for _, table := range edgeKeys(tables) {
 		edges := tables[table]
-		insert := g.builder.Insert(table).Schema(edges[0].Schema).Columns(edges[0].Columns...)
+		insert := g.builder.Insert(table).Columns(edges[0].Columns...)
+		if edges[0].Schema != "" {
+			// If the Schema field was provided to the EdgeSpec (by the
+			// generated code), it should be the same for all EdgeSpecs.
+			insert.Schema(edges[0].Schema)
+		}
 		for _, edge := range edges {
 			pk1, pk2 := ids, edge.Target.Nodes
 			if edge.Inverse {
@@ -1085,7 +1096,12 @@ func (g *graph) batchAddM2M(ctx context.Context, spec *BatchCreateSpec) error {
 		for t, edges := range edges.GroupTable() {
 			insert, ok := tables[t]
 			if !ok {
-				insert = g.builder.Insert(t).Schema(edges[0].Schema).Columns(edges[0].Columns...)
+				insert = g.builder.Insert(t).Columns(edges[0].Columns...)
+				if edges[0].Schema != "" {
+					// If the Schema field was provided to the EdgeSpec (by the
+					// generated code), it should be the same for all EdgeSpecs.
+					insert.Schema(edges[0].Schema)
+				}
 			}
 			tables[t] = insert
 			if len(edges) != 1 {
