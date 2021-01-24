@@ -511,6 +511,8 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Select(selector.Columns(group.Columns...)...)
 	}
 	t1.Schema(gq.schemaConfig.Group)
+	ctx = internal.NewSchemaConfigContext(ctx, gq.schemaConfig)
+	selector.WithContext(ctx)
 	for _, p := range gq.predicates {
 		p(selector)
 	}
