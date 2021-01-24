@@ -27,7 +27,7 @@ type Card struct {
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"-"`
-	// Name holds the value of the "name" field.
+	// Exact name written on card
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
