@@ -49,7 +49,7 @@ var (
 		{
 			Name:   "create",
 			Cond:   notView,
-			Format: pkgf("%s_create.go"),
+			Format: typeFilename("%s_create.go"),
 			ExtendPatterns: []string{
 				"dialect/*/create/fields/additional/*",
 				"dialect/*/create_bulk/fields/additional/*",
@@ -58,27 +58,27 @@ var (
 		{
 			Name:   "update",
 			Cond:   notView,
-			Format: pkgf("%s_update.go"),
+			Format: typeFilename("%s_update.go"),
 		},
 		{
 			Name:   "delete",
 			Cond:   notView,
-			Format: pkgf("%s_delete.go"),
+			Format: typeFilename("%s_delete.go"),
 		},
 		{
 			Name:   "query",
-			Format: pkgf("%s_query.go"),
+			Format: typeFilename("%s_query.go"),
 			ExtendPatterns: []string{
 				"dialect/*/query/fields/additional/*",
 			},
 		},
 		{
 			Name:   "model",
-			Format: pkgf("%s.go"),
+			Format: typeFilename("%s.go"),
 		},
 		{
 			Name:   "where",
-			Format: pkgf("%s/where.go"),
+			Format: pkgFilename("%s/where.go"),
 			ExtendPatterns: []string{
 				"where/additional/*",
 			},
@@ -86,7 +86,7 @@ var (
 		{
 			Name: "meta",
 			Format: func(t *Type) string {
-				return fmt.Sprintf("%[1]s/%[1]s.go", t.PackageDir())
+				return fmt.Sprintf("%s/%s.go", t.Package(), t.Filename())
 			},
 			ExtendPatterns: []string{
 				"meta/additional/*",
@@ -439,7 +439,11 @@ func (d *Dependency) defaultName() (string, error) {
 	return pascal(pkg) + pascal(name), nil
 }
 
-func pkgf(s string) func(t *Type) string {
+func typeFilename(s string) func(t *Type) string {
+	return func(t *Type) string { return fmt.Sprintf(s, t.Filename()) }
+}
+
+func pkgFilename(s string) func(t *Type) string {
 	return func(t *Type) string { return fmt.Sprintf(s, t.PackageDir()) }
 }
 
