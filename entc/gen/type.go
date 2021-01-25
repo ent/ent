@@ -316,10 +316,22 @@ func (t Type) Package() string {
 		return name
 	}
 	return t.PackageDir()
+
+}
+
+// Filename returns the filename of this node.
+func (t Type) Filename() string {
+	return strings.ToLower(t.Name)
 }
 
 // PackageDir returns the name of the package directory.
-func (t Type) PackageDir() string { return strings.ToLower(t.Name) }
+func (t Type) PackageDir() string {
+	prefix := ""
+	if t.Config != nil {
+		prefix = t.Config.EntityPackagePrefix
+	}
+	return prefix + strings.ToLower(t.Name)
+}
 
 // PackageAlias returns local package name of a type if there is one.
 // A package has an alias if its generated name conflicts with
