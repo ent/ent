@@ -39,6 +39,12 @@ var (
 		Stage:       Experimental,
 		Default:     false,
 		Description: "Schema snapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852)",
+		GraphTemplates: []GraphTemplate{
+			{
+				Name:   "internal/schema",
+				Format: "internal/schema.go",
+			},
+		},
 		cleanup: func(c *Config) error {
 			return remove(filepath.Join(c.Target, "internal"), "schema.go")
 		},

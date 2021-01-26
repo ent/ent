@@ -155,13 +155,6 @@ var (
 			Name:   "runtime/pkg",
 			Format: "runtime/runtime.go",
 		},
-		{
-			Name:   "internal/schema",
-			Format: "internal/schema.go",
-			Skip: func(g *Graph) bool {
-				return !g.featureEnabled(FeatureSnapshot)
-			},
-		},
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
