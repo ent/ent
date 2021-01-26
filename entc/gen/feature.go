@@ -5,6 +5,7 @@
 package gen
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -39,7 +40,7 @@ var (
 		Default:     false,
 		Description: "Schema snapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852)",
 		cleanup: func(c *Config) error {
-			return os.RemoveAll(filepath.Join(c.Target, "internal"))
+			return remove(filepath.Join(c.Target, "internal"), "schema.go")
 		},
 	}
 
@@ -58,7 +59,7 @@ var (
 			},
 		},
 		cleanup: func(c *Config) error {
-			return os.RemoveAll(filepath.Join(c.Target, "internal"))
+			return remove(filepath.Join(c.Target, "internal"), "schemaconfig.go")
 		},
 	}
 
@@ -114,4 +115,22 @@ type Feature struct {
 	// cleanup used to cleanup all changes when a feature-flag is removed.
 	// e.g. delete files from previous codegen runs.
 	cleanup func(*Config) error
+}
+
+// remove file (if exists) and its dir if it's empty.
+func remove(dir, file string) error {
+	if err := os.Remove(filepath.Join(dir, file)); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	infos, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	if len(infos) == 0 {
+		return os.Remove(dir)
+	}
+	return nil
 }
