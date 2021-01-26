@@ -291,6 +291,7 @@ func TestGraph_Gen(t *testing.T) {
 		Storage:   drivers[0],
 		Templates: []*Template{external},
 		IDType:    &field.TypeInfo{Type: field.TypeInt},
+		Features:  AllFeatures,
 	}, &load.Schema{
 		Name: "T1",
 		Fields: []*load.Field{
@@ -315,8 +316,27 @@ func TestGraph_Gen(t *testing.T) {
 		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
 		require.NoError(err)
 	}
-	_, err = os.Stat(target + "/external.go")
+	_, err = os.Stat(filepath.Join(target, "external.go"))
 	require.NoError(err)
+
+	// Generated feature templates.
+	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "internal", "schemaconfig.go"))
+	require.NoError(err)
+	// Rerun codegen with only one feature-flag.
+	graph.Features = []Feature{FeatureSnapshot}
+	require.NoError(graph.Gen())
+	// Generated feature templates.
+	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "internal", "schemaconfig.go"))
+	require.True(os.IsNotExist(err))
+	// Rerun codegen without any feature-flags.
+	graph.Features = nil
+	require.NoError(graph.Gen())
+	_, err = os.Stat(filepath.Join(target, "internal"))
+	require.True(os.IsNotExist(err))
 }
 
 func ensureStructTag(name string) Hook {
