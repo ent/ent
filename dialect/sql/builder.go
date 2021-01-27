@@ -2221,10 +2221,7 @@ func (b *Builder) join(qs []Querier, sep string) *Builder {
 		query, args := q.Query()
 		b.WriteString(query)
 		b.args = append(b.args, args...)
-		b.total = len(b.args)
-		if ok {
-			b.total = st.Total()
-		}
+		b.total += len(args)
 	}
 	return b
 }
