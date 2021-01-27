@@ -34,7 +34,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 		constraints := make([]*constraint, 0, {{ . }})
 	{{- end }}
 	v := g.AddV({{ $.Package }}.Label)
-	{{- range $_, $f := $.Fields }}
+	{{- range $f := $.MutationFields }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			{{- if $f.Unique }}
 				constraints = append(constraints, &constraint{
@@ -45,7 +45,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 			v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, value)
 		}
 	{{- end }}
-	{{- range $_, $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		{{- $direction := "In" }}
 		{{- $name := printf "%s.%s" $.Package $e.LabelConstant }}
 		for _, id := range {{ $mutation }}.{{ $e.StructField }}IDs() {

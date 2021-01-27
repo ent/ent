@@ -36,6 +36,14 @@ func TestEdge(t *testing.T) {
 	assert.Equal("parent", e.Name)
 	assert.False(e.Required)
 
+	e = edge.To("children", Node.Type).
+		From("parent").
+		Unique().
+		Field("parent_id").
+		Descriptor()
+	assert.Equal("parent_id", e.Field)
+	assert.Empty(e.Ref.Field)
+
 	t.Log("m2m relation of the same type")
 	from := edge.To("following", User.Type).
 		From("followers").

@@ -25,7 +25,6 @@ const (
 	FieldFloats = "floats"
 	// FieldStrings holds the string denoting the strings field in the database.
 	FieldStrings = "strings"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )

@@ -19,12 +19,10 @@ const (
 	FieldName = "name"
 	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
-
 	// EdgeTeams holds the string denoting the teams edge name in mutations.
 	EdgeTeams = "teams"
 	// EdgeTasks holds the string denoting the tasks edge name in mutations.
 	EdgeTasks = "tasks"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// TeamsTable is the table the holds the teams relation/edge. The primary key declared below.

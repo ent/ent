@@ -13,7 +13,6 @@ const (
 	FieldID = "id"
 	// FieldMaxUsers holds the string denoting the max_users field in the database.
 	FieldMaxUsers = "max_users"
-
 	// Table holds the table name of the group in the database.
 	Table = "groups"
 )

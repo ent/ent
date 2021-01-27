@@ -15,10 +15,8 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeCard holds the string denoting the card edge name in mutations.
 	EdgeCard = "card"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CardTable is the table the holds the card relation/edge.

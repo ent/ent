@@ -13,12 +13,10 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// PetsTable is the table the holds the pets relation/edge.

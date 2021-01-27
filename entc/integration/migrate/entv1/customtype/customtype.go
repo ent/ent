@@ -13,7 +13,6 @@ const (
 	FieldID = "id"
 	// FieldCustom holds the string denoting the custom field in the database.
 	FieldCustom = "custom"
-
 	// Table holds the table name of the customtype in the database.
 	Table = "custom_types"
 )

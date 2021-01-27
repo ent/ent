@@ -17,7 +17,6 @@ const (
 	FieldUniqueFloat = "unique_float"
 	// FieldNillableInt holds the string denoting the nillable_int field in the database.
 	FieldNillableInt = "nillable_int"
-
 	// Table holds the table name of the comment in the database.
 	Table = "comments"
 )

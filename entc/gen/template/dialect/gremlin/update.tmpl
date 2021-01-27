@@ -65,7 +65,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{ end }}
 		trs []*dsl.Traversal
 	)
-	{{- range $_, $f := $.Fields }}
+	{{- range $f := $.MutationFields }}
 		{{- if or (not $f.Immutable) $f.UpdateDefault }}
 			if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				{{- if $f.Unique }}
@@ -93,7 +93,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- /* clear optional fields. */}}
 	{{- with $.HasOptional }}
 		var properties []interface{}
-		{{- range $_, $f := $.Fields }}
+		{{- range $f := $.MutationFields }}
 			{{- if $f.Optional }}
 				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
 					properties = append(properties, {{ $.Package }}.{{ $f.Constant }})
@@ -104,7 +104,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			v.SideEffect(__.Properties(properties...).Drop())
 		}
 	{{- end }}
-	{{- range $_, $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		{{- $direction := "In" }}
 		{{- $name := printf "%s.%s" $.Package $e.LabelConstant }}
 		{{- if $e.IsInverse }}

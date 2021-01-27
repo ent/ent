@@ -44,7 +44,7 @@ type {{ $mutation }} struct {
 	op Op
 	typ string
 	{{ $n.ID.BuilderField }} *{{ $n.ID.Type }}
-	{{- range $f := $n.Fields }}
+	{{- range $f := $n.MutationFields }}
 		{{ $f.BuilderField }} *{{ $f.Type }}
 		{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
 			add{{ $f.BuilderField }} *{{ $f.Type }}
@@ -163,7 +163,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
 		m.{{ $f.BuilderField }} = &{{ $p }}
 		{{- /* setting numeric type override previous calls to Add. */}}
-		{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+		{{- if and $f.Type.Numeric $f.ConvertedToBasic (not $f.IsEdgeField) }}
 			m.add{{ $f.BuilderField }} = nil
 		{{- end }}
 	}
@@ -194,13 +194,10 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 		return oldValue.{{ $f.StructField }}, nil
 	}
 
-	{{ if and $f.Type.Numeric $f.ConvertedToBasic }}
+	{{ if and $f.Type.Numeric $f.ConvertedToBasic (not $f.IsEdgeField) }}
 		{{ $func := print "Add" $f.StructField }}
 		// {{ $func }} adds {{ $p }} to the "{{ $f.Name }}" field.
 		func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
-			{{- if $f.HasGoType }}
-			{{- else }}
-			{{- end }}
 			if m.add{{ $f.BuilderField }} != nil {
 				*m.add{{ $f.BuilderField }} += {{ $p }}
 			} else {
@@ -223,7 +220,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
 		func (m *{{ $mutation }}) {{ $func }}() {
 			m.{{ $f.BuilderField }} = nil
-			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+			{{- if and $f.Type.Numeric $f.ConvertedToBasic (not $f.IsEdgeField) }}
 				m.add{{ $f.BuilderField }} = nil
 			{{- end }}
 			m.clearedFields[{{ $const }}] = struct{}{}
@@ -241,7 +238,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	// {{ $func }} resets all changes to the "{{ $f.Name }}" field.
 	func (m *{{ $mutation }}) {{ $func }}() {
 		m.{{ $f.BuilderField }} = nil
-		{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+		{{- if and $f.Type.Numeric $f.ConvertedToBasic (not $f.IsEdgeField) }}
 			m.add{{ $f.BuilderField }} = nil
 		{{- end }}
 		{{- if $f.Optional }}
@@ -253,19 +250,23 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 
 {{ range $e := $n.Edges }}
 	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
-	// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by id{{ if not $e.Unique }}s{{ end }}.
-	func (m *{{ $mutation }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) {
-		{{- if $e.Unique }}
-			m.{{ $e.BuilderField }} = &id
-		{{- else }}
-			if m.{{ $e.BuilderField }} == nil {
-				m.{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
-			}
-			for i := range ids {
-				m.{{ $e.BuilderField }}[ids[i]] = struct{}{}
-			}
-		{{- end }}
-	}
+	{{/* Check if this setter was already defined by the field-setters (e.g. edge-field with the same name). */}}
+	{{ $withSetGet := not $e.HasFieldSetter }}
+	{{ if $withSetGet }}
+		// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by id{{ if not $e.Unique }}s{{ end }}.
+		func (m *{{ $mutation }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) {
+			{{- if $e.Unique }}
+				m.{{ $e.BuilderField }} = &id
+			{{- else }}
+				if m.{{ $e.BuilderField }} == nil {
+					m.{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
+				}
+				for i := range ids {
+					m.{{ $e.BuilderField }}[ids[i]] = struct{}{}
+				}
+			{{- end }}
+		}
+	{{ end }}
 
 	{{ $func := $e.MutationClear }}
 	// {{ $func }} clears the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity.
@@ -279,15 +280,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 		return m.cleared{{ $e.BuilderField }}
 	}
 
-	{{ if $e.Unique }}
-		// {{ $e.StructField }}ID returns the "{{ $e.Name }}" edge ID in the mutation.
-		func (m *{{ $mutation }}) {{ $e.StructField }}ID() (id {{ $e.Type.ID.Type }}, exists bool) {
-			if m.{{ $e.BuilderField }} != nil {
-				return *m.{{ $e.BuilderField }}, true
-			}
-			return
-		}
-	{{ else }}
+	{{ if not $e.Unique }}
 		{{ $p := lower (printf "%.1s" $e.Type.Name) }}
 		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
 		// {{ $idsFunc }} removes the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by IDs.
@@ -312,12 +305,20 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 			}
 			return
 		}
+	{{ else if and $e.Unique $withSetGet }}
+		// {{ $e.StructField }}ID returns the "{{ $e.Name }}" edge ID in the mutation.
+		func (m *{{ $mutation }}) {{ $e.StructField }}ID() (id {{ $e.Type.ID.Type }}, exists bool) {
+			if m.{{ $e.BuilderField }} != nil {
+				return *m.{{ $e.BuilderField }}, true
+			}
+			return
+		}
 	{{ end }}
 
 	// {{ $e.StructField }}IDs returns the "{{ $e.Name }}" edge IDs in the mutation.
-  {{- if $e.Unique }}
-	// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-	// {{ $e.StructField }}ID instead. It exists only for internal usage by the builders.
+  	{{- if $e.Unique }}
+		// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+		// {{ $e.StructField }}ID instead. It exists only for internal usage by the builders.
 	{{- end }}
 	func (m *{{ $mutation }}) {{ $e.StructField }}IDs() (ids []{{ $e.Type.ID.Type }}) {
     	{{- if $e.Unique }}
@@ -427,7 +428,7 @@ func (m *{{ $mutation }}) AddedFields() []string {
 	{{- if $n.HasNumeric }}
 		var fields []string
 		{{- range $f := $n.Fields }}
-			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+			{{- if and $f.Type.Numeric $f.ConvertedToBasic (not $f.IsEdgeField) }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				if m.add{{ $f.BuilderField }} != nil {
 					fields = append(fields, {{ $const }})
@@ -447,7 +448,7 @@ func (m *{{ $mutation }}) AddedField(name string) (ent.Value, bool) {
 	{{- if $n.HasNumeric }}
 		switch name {
 		{{- range $f := $n.Fields }}
-			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+			{{- if and $f.Type.Numeric $f.ConvertedToBasic (not $f.IsEdgeField) }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				case {{ $const }}:
 					return m.Added{{ $f.StructField }}()
@@ -465,7 +466,7 @@ func (m *{{ $mutation }}) AddField(name string, value ent.Value) error {
 	{{- with $n.Fields }}
 		switch name {
 		{{- range $f := $n.Fields }}
-			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+			{{- if and $f.Type.Numeric $f.ConvertedToBasic (not $f.IsEdgeField) }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				case {{ $const }}:
 					v, ok := value.({{ $f.Type }})

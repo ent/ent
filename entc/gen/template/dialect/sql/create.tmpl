@@ -55,7 +55,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			_spec.ID.Value = id
 		}
 	{{- end }}
-	{{- range $f := $.Fields }}
+	{{- range $f := $.MutationFields }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 				Type: field.{{ $f.Type.ConstName }},
@@ -69,6 +69,10 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
 			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
 				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
+			{{- end }}
+			{{- if $e.OwnFK }}
+				{{- $fk := $e.ForeignKey }}
+				_node.{{ $fk.StructField }} = {{ if $fk.Field.Nillable }}&{{ end }}nodes[0]
 			{{- end }}
 			_spec.Edges = append(_spec.Edges, edge)
 		}

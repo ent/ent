@@ -21,10 +21,8 @@ const (
 	FieldType = "type"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
-
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
-
 	// FilesLabel holds the string label denoting the files edge type in the database.
 	FilesLabel = "file_type_files"
 )

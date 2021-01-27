@@ -19,12 +19,10 @@ const (
 	FieldName = "name"
 	// FieldFoods holds the string denoting the foods field in the database.
 	FieldFoods = "foods"
-
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
 	// EdgeGroups holds the string denoting the groups edge name in mutations.
 	EdgeGroups = "groups"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// TenantTable is the table the holds the tenant relation/edge.
@@ -48,7 +46,8 @@ var Columns = []string{
 	FieldFoods,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_tenant",
 }

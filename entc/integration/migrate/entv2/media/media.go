@@ -15,7 +15,6 @@ const (
 	FieldSource = "source"
 	// FieldSourceURI holds the string denoting the source_uri field in the database.
 	FieldSourceURI = "source_uri"
-
 	// Table holds the table name of the media in the database.
 	Table = "media"
 )

@@ -11,7 +11,6 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "oid"
-
 	// EdgeGroups holds the string denoting the groups edge name in mutations.
 	EdgeGroups = "groups"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
@@ -20,7 +19,6 @@ const (
 	EdgeChildren = "children"
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
-
 	// GroupFieldID holds the string denoting the ID field of the Group.
 	GroupFieldID = "id"
 	// PetFieldID holds the string denoting the ID field of the Pet.
@@ -54,7 +52,8 @@ var Columns = []string{
 	FieldID,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_children",
 }

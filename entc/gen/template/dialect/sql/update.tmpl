@@ -38,7 +38,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			}
 		}
 	}
-	{{- range $f := $.Fields }}
+	{{- range $f := $.MutationFields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -66,7 +66,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				}
 			{{- end }}
 	{{- end }}
-	{{- range $_, $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		if {{ $mutation }}.{{ $e.MutationCleared }}() {
 			{{- with extend $ "Edge" $e }}
 				{{ template "dialect/sql/defedge" . }}
