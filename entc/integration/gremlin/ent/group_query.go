@@ -70,7 +70,7 @@ func (gq *GroupQuery) QueryFiles() *FileQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := gq.gremlinQuery()
+		gremlin := gq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(group.FilesLabel).InV()
 		return fromU, nil
 	}
@@ -84,7 +84,7 @@ func (gq *GroupQuery) QueryBlocked() *UserQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := gq.gremlinQuery()
+		gremlin := gq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(group.BlockedLabel).InV()
 		return fromU, nil
 	}
@@ -98,7 +98,7 @@ func (gq *GroupQuery) QueryUsers() *UserQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := gq.gremlinQuery()
+		gremlin := gq.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.GroupsLabel).OutV()
 		return fromU, nil
 	}
@@ -112,7 +112,7 @@ func (gq *GroupQuery) QueryInfo() *GroupInfoQuery {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := gq.gremlinQuery()
+		gremlin := gq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(group.InfoLabel).InV()
 		return fromU, nil
 	}
@@ -376,7 +376,7 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return gq.gremlinQuery(), nil
+		return gq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -412,7 +412,7 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 
 func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
 	res := &gremlin.Response{}
-	traversal := gq.gremlinQuery()
+	traversal := gq.gremlinQuery(ctx)
 	if len(gq.fields) > 0 {
 		fields := make([]interface{}, len(gq.fields))
 		for i, f := range gq.fields {
@@ -436,7 +436,7 @@ func (gq *GroupQuery) gremlinAll(ctx context.Context) ([]*Group, error) {
 
 func (gq *GroupQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().Count().Query()
+	query, bindings := gq.gremlinQuery(ctx).Count().Query()
 	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -445,14 +445,14 @@ func (gq *GroupQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (gq *GroupQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := gq.gremlinQuery().HasNext().Query()
+	query, bindings := gq.gremlinQuery(ctx).HasNext().Query()
 	if err := gq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (gq *GroupQuery) gremlinQuery() *dsl.Traversal {
+func (gq *GroupQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(group.Label)
 	if gq.gremlin != nil {
 		v = gq.gremlin.Clone()
@@ -756,7 +756,7 @@ func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := gs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	gs.gremlin = gs.GroupQuery.gremlinQuery()
+	gs.gremlin = gs.GroupQuery.gremlinQuery(ctx)
 	return gs.gremlinScan(ctx, v)
 }
 

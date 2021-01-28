@@ -67,7 +67,7 @@ func (nq *NodeQuery) QueryPrev() *NodeQuery {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := nq.gremlinQuery()
+		gremlin := nq.gremlinQuery(ctx)
 		fromU = gremlin.InE(node.NextLabel).OutV()
 		return fromU, nil
 	}
@@ -81,7 +81,7 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := nq.gremlinQuery()
+		gremlin := nq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(node.NextLabel).InV()
 		return fromU, nil
 	}
@@ -321,7 +321,7 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return nq.gremlinQuery(), nil
+		return nq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -357,7 +357,7 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 
 func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
 	res := &gremlin.Response{}
-	traversal := nq.gremlinQuery()
+	traversal := nq.gremlinQuery(ctx)
 	if len(nq.fields) > 0 {
 		fields := make([]interface{}, len(nq.fields))
 		for i, f := range nq.fields {
@@ -381,7 +381,7 @@ func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
 
 func (nq *NodeQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().Count().Query()
+	query, bindings := nq.gremlinQuery(ctx).Count().Query()
 	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -390,14 +390,14 @@ func (nq *NodeQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (nq *NodeQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().HasNext().Query()
+	query, bindings := nq.gremlinQuery(ctx).HasNext().Query()
 	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (nq *NodeQuery) gremlinQuery() *dsl.Traversal {
+func (nq *NodeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(node.Label)
 	if nq.gremlin != nil {
 		v = nq.gremlin.Clone()
@@ -701,7 +701,7 @@ func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ns.gremlin = ns.NodeQuery.gremlinQuery()
+	ns.gremlin = ns.NodeQuery.gremlinQuery(ctx)
 	return ns.gremlinScan(ctx, v)
 }
 

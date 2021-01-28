@@ -265,7 +265,7 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return cq.sqlQuery(), nil
+		return cq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -388,7 +388,7 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cq *CommentQuery) sqlQuery() *sql.Selector {
+func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(comment.Table)
 	selector := builder.Select(t1.Columns(comment.Columns...)...).From(t1)
@@ -683,7 +683,7 @@ func (cs *CommentSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.CommentQuery.sqlQuery()
+	cs.sql = cs.CommentQuery.sqlQuery(ctx)
 	return cs.sqlScan(ctx, v)
 }
 

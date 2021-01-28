@@ -38,11 +38,11 @@ type File struct {
 // FileEdges holds the relations/edges for other nodes in the graph.
 type FileEdges struct {
 	// Owner holds the value of the owner edge.
-	Owner *User
+	Owner *User `json:"owner,omitempty"`
 	// Type holds the value of the type edge.
-	Type *FileType
+	Type *FileType `json:"type,omitempty"`
 	// Field holds the value of the field edge.
-	Field []*FieldType
+	Field []*FieldType `json:"field,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool

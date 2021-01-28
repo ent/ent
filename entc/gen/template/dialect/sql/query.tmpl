@@ -56,6 +56,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 		{{- end }}
 		return node.assignValues(columns, values)
 	}
+	{{- /* Allow mutating the sqlgraph.QuerySpec by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/spec/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -128,7 +134,15 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
+{{ template "dialect/sql/query/selector" $ }}
+
+{{ end }}
+
+{{ define "dialect/sql/query/selector" }}
+{{ $builder := pascal $.Scope.Builder }}
+{{ $receiver := receiver $builder }}
+
+func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect({{ $receiver }}.driver.Dialect())
 	t1 := builder.Table({{ $.Package }}.Table)
 	selector := builder.Select(t1.Columns({{ $.Package }}.Columns...)...).From(t1)
@@ -136,6 +150,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 		selector = {{ $receiver }}.sql
 		selector.Select(selector.Columns({{ $.Package }}.Columns...)...)
 	}
+	{{- /* Allow mutating the sql.Selector by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/selector/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	for _, p := range {{ $receiver }}.predicates {
 		p(selector)
 	}
@@ -160,7 +180,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
-	selector := {{ $receiver }}.sqlQuery()
+	selector := {{ $receiver }}.sqlQuery(ctx)
 	if err := selector.Err(); err != nil {
 		return nil, err
 	}
@@ -175,6 +195,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
+	{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/path/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
@@ -196,6 +222,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 			{{- end -}}
 		),
 	)
+	{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/from/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
@@ -249,6 +281,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery() *sql.Selector {
 					return nil
 				},
 			}
+			{{- /* Allow mutating the sqlgraph.EdgeQuerySpec by ent extensions or user templates.*/}}
+			{{- with $tmpls := matchTemplate "dialect/sql/query/eagerloading/spec/*" }}
+				{{- range $tmpl := $tmpls }}
+					{{- xtemplate $tmpl $ }}
+				{{- end }}
+			{{- end }}
 			if err := sqlgraph.QueryEdges(ctx, {{ $receiver }}.driver, _spec); err != nil {
 				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %v`, err)
 			}

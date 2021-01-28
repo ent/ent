@@ -29,7 +29,7 @@ type Group struct {
 	Type *string `json:"type,omitempty"`
 	// MaxUsers holds the value of the "max_users" field.
 	MaxUsers int `json:"max_users,omitempty"`
-	// Name holds the value of the "name" field.
+	// field with multiple validators
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
@@ -40,13 +40,13 @@ type Group struct {
 // GroupEdges holds the relations/edges for other nodes in the graph.
 type GroupEdges struct {
 	// Files holds the value of the files edge.
-	Files []*File
+	Files []*File `json:"files,omitempty"`
 	// Blocked holds the value of the blocked edge.
-	Blocked []*User
+	Blocked []*User `json:"blocked,omitempty"`
 	// Users holds the value of the users edge.
-	Users []*User
+	Users []*User `json:"users,omitempty"`
 	// Info holds the value of the info edge.
-	Info *GroupInfo
+	Info *GroupInfo `json:"info,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool

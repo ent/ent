@@ -246,7 +246,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Owner:       t,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
 		// Inverse only.
@@ -260,7 +260,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     e.RefName,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
 		// Inverse and assoc.
@@ -276,7 +276,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     ref.Name,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			}, &Edge{
 				def:         e,
@@ -285,7 +285,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Name:        ref.Name,
 				Unique:      ref.Unique,
 				Optional:    !ref.Required,
-				StructTag:   ref.Tag,
+				StructTag:   structTag(ref.Name, ref.Tag),
 				Annotations: ref.Annotations,
 			})
 		default:
@@ -549,6 +549,9 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 			templates = MustParse(templates.AddParseTree(name, tmpl.Tree))
 		}
 	}
+	for _, f := range g.Features {
+		external = append(external, f.GraphTemplates...)
+	}
 	return templates, external
 }
 
@@ -688,6 +691,9 @@ func catch(err *error) {
 }
 
 func extendExisting(name string) bool {
+	if match(partialPatterns[:], name) {
+		return true
+	}
 	for _, t := range Templates {
 		if match(t.ExtendPatterns, name) {
 			return true

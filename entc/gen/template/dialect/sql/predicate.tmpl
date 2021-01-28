@@ -72,6 +72,12 @@ in the LICENSE file in the root directory of this source tree.
 				{{- end -}}
 			),
 		)
+		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+		{{- with $tmpls := matchTemplate "dialect/sql/predicate/edge/has/*" }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $ }}
+			{{- end }}
+		{{- end }}
 		sqlgraph.HasNeighbors(s, step)
 	}
 {{- end }}
@@ -91,6 +97,12 @@ in the LICENSE file in the root directory of this source tree.
 				{{- end -}}
 			),
 		)
+		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+		{{- with $tmpls := matchTemplate "dialect/sql/predicate/edge/haswith/*" }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $ }}
+			{{- end }}
+		{{- end }}
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

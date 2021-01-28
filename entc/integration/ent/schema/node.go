@@ -27,10 +27,10 @@ func (Node) Fields() []ent.Field {
 func (Node) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("next", Node.Type).
-			StructTag("gqlgen:next").
+			StructTag(`gqlgen:"next"`).
 			Unique().
 			From("prev").
-			StructTag("gqlgen:prev").
+			StructTag(`gqlgen:"prev"`).
 			Unique(),
 	}
 }

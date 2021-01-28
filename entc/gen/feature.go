@@ -5,6 +5,7 @@
 package gen
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -38,8 +39,33 @@ var (
 		Stage:       Experimental,
 		Default:     false,
 		Description: "Schema snapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852)",
+		GraphTemplates: []GraphTemplate{
+			{
+				Name:   "internal/schema",
+				Format: "internal/schema.go",
+			},
+		},
 		cleanup: func(c *Config) error {
-			return os.RemoveAll(filepath.Join(c.Target, "internal"))
+			return remove(filepath.Join(c.Target, "internal"), "schema.go")
+		},
+	}
+
+	// FeatureSchemaConfig allows users to pass init time alternate schema names
+	// for each ent model. This is useful if your SQL tables are spread out against
+	// multiple databases.
+	FeatureSchemaConfig = Feature{
+		Name:        "sql/schemaconfig",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows alternate schema names for each ent model. Useful if SQL tables are spread out against multiple databases",
+		GraphTemplates: []GraphTemplate{
+			{
+				Name:   "dialect/sql/internal/schemaconfig",
+				Format: "internal/schemaconfig.go",
+			},
+		},
+		cleanup: func(c *Config) error {
+			return remove(filepath.Join(c.Target, "internal"), "schemaconfig.go")
 		},
 	}
 
@@ -48,6 +74,7 @@ var (
 		FeaturePrivacy,
 		FeatureEntQL,
 		FeatureSnapshot,
+		FeatureSchemaConfig,
 	}
 )
 
@@ -88,7 +115,28 @@ type Feature struct {
 	// A Description of this feature.
 	Description string
 
+	// GraphTemplates defines optional templates to be executed on the graph.
+	GraphTemplates []GraphTemplate
+
 	// cleanup used to cleanup all changes when a feature-flag is removed.
 	// e.g. delete files from previous codegen runs.
 	cleanup func(*Config) error
+}
+
+// remove file (if exists) and its dir if it's empty.
+func remove(dir, file string) error {
+	if err := os.Remove(filepath.Join(dir, file)); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	infos, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	if len(infos) == 0 {
+		return os.Remove(dir)
+	}
+	return nil
 }

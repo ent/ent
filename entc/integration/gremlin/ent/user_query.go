@@ -76,7 +76,7 @@ func (uq *UserQuery) QueryCard() *CardQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.CardLabel).InV()
 		return fromU, nil
 	}
@@ -90,7 +90,7 @@ func (uq *UserQuery) QueryPets() *PetQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.PetsLabel).InV()
 		return fromU, nil
 	}
@@ -104,7 +104,7 @@ func (uq *UserQuery) QueryFiles() *FileQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.FilesLabel).InV()
 		return fromU, nil
 	}
@@ -118,7 +118,7 @@ func (uq *UserQuery) QueryGroups() *GroupQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.GroupsLabel).InV()
 		return fromU, nil
 	}
@@ -132,7 +132,7 @@ func (uq *UserQuery) QueryFriends() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.Both(user.FriendsLabel)
 		return fromU, nil
 	}
@@ -146,7 +146,7 @@ func (uq *UserQuery) QueryFollowers() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.FollowingLabel).OutV()
 		return fromU, nil
 	}
@@ -160,7 +160,7 @@ func (uq *UserQuery) QueryFollowing() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.FollowingLabel).InV()
 		return fromU, nil
 	}
@@ -174,7 +174,7 @@ func (uq *UserQuery) QueryTeam() *PetQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.TeamLabel).InV()
 		return fromU, nil
 	}
@@ -188,7 +188,7 @@ func (uq *UserQuery) QuerySpouse() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.Both(user.SpouseLabel)
 		return fromU, nil
 	}
@@ -202,7 +202,7 @@ func (uq *UserQuery) QueryChildren() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.ParentLabel).OutV()
 		return fromU, nil
 	}
@@ -216,7 +216,7 @@ func (uq *UserQuery) QueryParent() *UserQuery {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.ParentLabel).InV()
 		return fromU, nil
 	}
@@ -564,7 +564,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return uq.gremlinQuery(), nil
+		return uq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -600,7 +600,7 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 
 func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
 	res := &gremlin.Response{}
-	traversal := uq.gremlinQuery()
+	traversal := uq.gremlinQuery(ctx)
 	if len(uq.fields) > 0 {
 		fields := make([]interface{}, len(uq.fields))
 		for i, f := range uq.fields {
@@ -624,7 +624,7 @@ func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
 
 func (uq *UserQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().Count().Query()
+	query, bindings := uq.gremlinQuery(ctx).Count().Query()
 	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -633,14 +633,14 @@ func (uq *UserQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (uq *UserQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().HasNext().Query()
+	query, bindings := uq.gremlinQuery(ctx).HasNext().Query()
 	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
+func (uq *UserQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(user.Label)
 	if uq.gremlin != nil {
 		v = uq.gremlin.Clone()
@@ -944,7 +944,7 @@ func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}
-	us.gremlin = us.UserQuery.gremlinQuery()
+	us.gremlin = us.UserQuery.gremlinQuery(ctx)
 	return us.gremlinScan(ctx, v)
 }
 

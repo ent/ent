@@ -68,7 +68,7 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := pq.gremlinQuery()
+		gremlin := pq.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.TeamLabel).OutV()
 		return fromU, nil
 	}
@@ -82,7 +82,7 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := pq.gremlinQuery()
+		gremlin := pq.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.PetsLabel).OutV()
 		return fromU, nil
 	}
@@ -322,7 +322,7 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return pq.gremlinQuery(), nil
+		return pq.gremlinQuery(ctx), nil
 	}
 	return group
 }
@@ -358,7 +358,7 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 
 func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
 	res := &gremlin.Response{}
-	traversal := pq.gremlinQuery()
+	traversal := pq.gremlinQuery(ctx)
 	if len(pq.fields) > 0 {
 		fields := make([]interface{}, len(pq.fields))
 		for i, f := range pq.fields {
@@ -382,7 +382,7 @@ func (pq *PetQuery) gremlinAll(ctx context.Context) ([]*Pet, error) {
 
 func (pq *PetQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().Count().Query()
+	query, bindings := pq.gremlinQuery(ctx).Count().Query()
 	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -391,14 +391,14 @@ func (pq *PetQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (pq *PetQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery().HasNext().Query()
+	query, bindings := pq.gremlinQuery(ctx).HasNext().Query()
 	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (pq *PetQuery) gremlinQuery() *dsl.Traversal {
+func (pq *PetQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(pet.Label)
 	if pq.gremlin != nil {
 		v = pq.gremlin.Clone()
@@ -702,7 +702,7 @@ func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ps.gremlin = ps.PetQuery.gremlinQuery()
+	ps.gremlin = ps.PetQuery.gremlinQuery(ctx)
 	return ps.gremlinScan(ctx, v)
 }
 

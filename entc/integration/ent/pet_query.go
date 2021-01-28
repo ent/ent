@@ -68,7 +68,7 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pq.sqlQuery()
+		selector := pq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -90,7 +90,7 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pq.sqlQuery()
+		selector := pq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -338,7 +338,7 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return pq.sqlQuery(), nil
+		return pq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -524,7 +524,7 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (pq *PetQuery) sqlQuery() *sql.Selector {
+func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
 	t1 := builder.Table(pet.Table)
 	selector := builder.Select(t1.Columns(pet.Columns...)...).From(t1)
@@ -819,7 +819,7 @@ func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ps.sql = ps.PetQuery.sqlQuery()
+	ps.sql = ps.PetQuery.sqlQuery(ctx)
 	return ps.sqlScan(ctx, v)
 }
 

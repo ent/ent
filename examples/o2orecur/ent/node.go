@@ -30,9 +30,9 @@ type Node struct {
 // NodeEdges holds the relations/edges for other nodes in the graph.
 type NodeEdges struct {
 	// Prev holds the value of the prev edge.
-	Prev *Node
+	Prev *Node `json:"prev,omitempty"`
 	// Next holds the value of the next edge.
-	Next *Node
+	Next *Node `json:"next,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool

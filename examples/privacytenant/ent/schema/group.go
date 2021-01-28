@@ -46,6 +46,10 @@ func (Group) Policy() ent.Policy {
 	return privacy.Policy{
 		Mutation: privacy.MutationPolicy{
 			rule.DenyMismatchedTenants(),
+			privacy.OnMutationOperation(
+				rule.FilterTenantRule(),
+				ent.OpUpdateOne|ent.OpDeleteOne,
+			),
 		},
 	}
 }

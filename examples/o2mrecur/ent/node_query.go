@@ -68,7 +68,7 @@ func (nq *NodeQuery) QueryParent() *NodeQuery {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := nq.sqlQuery()
+		selector := nq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -90,7 +90,7 @@ func (nq *NodeQuery) QueryChildren() *NodeQuery {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := nq.sqlQuery()
+		selector := nq.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -338,7 +338,7 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return nq.sqlQuery(), nil
+		return nq.sqlQuery(ctx), nil
 	}
 	return group
 }
@@ -528,7 +528,7 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (nq *NodeQuery) sqlQuery() *sql.Selector {
+func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(nq.driver.Dialect())
 	t1 := builder.Table(node.Table)
 	selector := builder.Select(t1.Columns(node.Columns...)...).From(t1)
@@ -823,7 +823,7 @@ func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ns.sql = ns.NodeQuery.sqlQuery()
+	ns.sql = ns.NodeQuery.sqlQuery(ctx)
 	return ns.sqlScan(ctx, v)
 }
 

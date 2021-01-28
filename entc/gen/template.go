@@ -155,13 +155,17 @@ var (
 			Name:   "runtime/pkg",
 			Format: "runtime/runtime.go",
 		},
-		{
-			Name:   "internal/schema",
-			Format: "internal/schema.go",
-			Skip: func(g *Graph) bool {
-				return !g.featureEnabled(FeatureSnapshot)
-			},
-		},
+	}
+	// patterns for extending partial-templates (included by other templates).
+	partialPatterns = [...]string{
+		"import/additional/*",
+		"dialect/*/import/additional/*",
+		"dialect/*/*/spec/*",
+		"dialect/*/*/*/spec/*",
+		"dialect/sql/query/path/*",
+		"dialect/sql/query/from/*",
+		"dialect/*/query/selector/*",
+		"dialect/sql/predicate/edge/*/*",
 	}
 	// templates holds the Go templates for the code generation.
 	templates *Template
