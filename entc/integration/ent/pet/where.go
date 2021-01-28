@@ -311,6 +311,89 @@ func UUIDNotNil() predicate.Pet {
 	})
 }
 
+// TeamID applies the EQ predicate on the TeamColumn field.
+func TeamID(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(TeamColumn), id))
+	})
+}
+
+// TeamIDEQ applies the EQ predicate on the user_team field.
+func TeamIDEQ(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(TeamColumn), id))
+	})
+}
+
+// TeamIDNEQ applies the NEQ predicate on the user_team field.
+func TeamIDNEQ(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(TeamColumn), id))
+	})
+}
+
+// TeamIDIn applies the In predicate on the user_team field.
+func TeamIDIn(ids ...int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(TeamColumn), v...))
+	})
+}
+
+// TeamIDNotIn applies the NotIn predicate on the user_team field.
+func TeamIDNotIn(ids ...int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(TeamColumn), v...))
+	})
+}
+
+// TeamIDGT applies the GT predicate on the user_team field.
+func TeamIDGT(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(TeamColumn), id))
+	})
+}
+
+// TeamIDGTE applies the GTE predicate on the user_team field.
+func TeamIDGTE(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(TeamColumn), id))
+	})
+}
+
+// TeamIDLT applies the LT predicate on the user_team field.
+func TeamIDLT(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(TeamColumn), id))
+	})
+}
+
+// TeamIDLTE applies the LTE predicate on the user_team field.
+func TeamIDLTE(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(TeamColumn), id))
+	})
+}
+
 // HasTeam applies the HasEdge predicate on the "team" edge.
 func HasTeam() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
@@ -336,6 +419,89 @@ func HasTeamWith(preds ...predicate.User) predicate.Pet {
 				p(s)
 			}
 		})
+	})
+}
+
+// OwnerID applies the EQ predicate on the OwnerColumn field.
+func OwnerID(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDEQ applies the EQ predicate on the user_pets field.
+func OwnerIDEQ(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDNEQ applies the NEQ predicate on the user_pets field.
+func OwnerIDNEQ(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDIn applies the In predicate on the user_pets field.
+func OwnerIDIn(ids ...int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(OwnerColumn), v...))
+	})
+}
+
+// OwnerIDNotIn applies the NotIn predicate on the user_pets field.
+func OwnerIDNotIn(ids ...int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(OwnerColumn), v...))
+	})
+}
+
+// OwnerIDGT applies the GT predicate on the user_pets field.
+func OwnerIDGT(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDGTE applies the GTE predicate on the user_pets field.
+func OwnerIDGTE(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDLT applies the LT predicate on the user_pets field.
+func OwnerIDLT(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDLTE applies the LTE predicate on the user_pets field.
+func OwnerIDLTE(id int) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(OwnerColumn), id))
 	})
 }
 

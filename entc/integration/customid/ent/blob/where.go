@@ -179,6 +179,89 @@ func UUIDLTE(v uuid.UUID) predicate.Blob {
 	})
 }
 
+// ParentID applies the EQ predicate on the ParentColumn field.
+func ParentID(id uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDEQ applies the EQ predicate on the blob_parent field.
+func ParentIDEQ(id uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDNEQ applies the NEQ predicate on the blob_parent field.
+func ParentIDNEQ(id uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDIn applies the In predicate on the blob_parent field.
+func ParentIDIn(ids ...uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(ParentColumn), v...))
+	})
+}
+
+// ParentIDNotIn applies the NotIn predicate on the blob_parent field.
+func ParentIDNotIn(ids ...uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(ParentColumn), v...))
+	})
+}
+
+// ParentIDGT applies the GT predicate on the blob_parent field.
+func ParentIDGT(id uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDGTE applies the GTE predicate on the blob_parent field.
+func ParentIDGTE(id uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDLT applies the LT predicate on the blob_parent field.
+func ParentIDLT(id uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDLTE applies the LTE predicate on the blob_parent field.
+func ParentIDLTE(id uuid.UUID) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(ParentColumn), id))
+	})
+}
+
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {

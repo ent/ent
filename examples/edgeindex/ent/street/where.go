@@ -213,6 +213,89 @@ func NameContainsFold(v string) predicate.Street {
 	})
 }
 
+// CityID applies the EQ predicate on the CityColumn field.
+func CityID(id int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(CityColumn), id))
+	})
+}
+
+// CityIDEQ applies the EQ predicate on the city_streets field.
+func CityIDEQ(id int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(CityColumn), id))
+	})
+}
+
+// CityIDNEQ applies the NEQ predicate on the city_streets field.
+func CityIDNEQ(id int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(CityColumn), id))
+	})
+}
+
+// CityIDIn applies the In predicate on the city_streets field.
+func CityIDIn(ids ...int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(CityColumn), v...))
+	})
+}
+
+// CityIDNotIn applies the NotIn predicate on the city_streets field.
+func CityIDNotIn(ids ...int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(CityColumn), v...))
+	})
+}
+
+// CityIDGT applies the GT predicate on the city_streets field.
+func CityIDGT(id int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(CityColumn), id))
+	})
+}
+
+// CityIDGTE applies the GTE predicate on the city_streets field.
+func CityIDGTE(id int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(CityColumn), id))
+	})
+}
+
+// CityIDLT applies the LT predicate on the city_streets field.
+func CityIDLT(id int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(CityColumn), id))
+	})
+}
+
+// CityIDLTE applies the LTE predicate on the city_streets field.
+func CityIDLTE(id int) predicate.Street {
+	return predicate.Street(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(CityColumn), id))
+	})
+}
+
 // HasCity applies the HasEdge predicate on the "city" edge.
 func HasCity() predicate.Street {
 	return predicate.Street(func(s *sql.Selector) {

@@ -296,6 +296,89 @@ func NameContainsFold(v string) predicate.User {
 	})
 }
 
+// SpouseID applies the EQ predicate on the SpouseColumn field.
+func SpouseID(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDEQ applies the EQ predicate on the user_spouse field.
+func SpouseIDEQ(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDNEQ applies the NEQ predicate on the user_spouse field.
+func SpouseIDNEQ(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDIn applies the In predicate on the user_spouse field.
+func SpouseIDIn(ids ...int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(SpouseColumn), v...))
+	})
+}
+
+// SpouseIDNotIn applies the NotIn predicate on the user_spouse field.
+func SpouseIDNotIn(ids ...int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(SpouseColumn), v...))
+	})
+}
+
+// SpouseIDGT applies the GT predicate on the user_spouse field.
+func SpouseIDGT(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDGTE applies the GTE predicate on the user_spouse field.
+func SpouseIDGTE(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDLT applies the LT predicate on the user_spouse field.
+func SpouseIDLT(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDLTE applies the LTE predicate on the user_spouse field.
+func SpouseIDLTE(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(SpouseColumn), id))
+	})
+}
+
 // HasSpouse applies the HasEdge predicate on the "spouse" edge.
 func HasSpouse() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

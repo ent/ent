@@ -178,6 +178,89 @@ func ValueLTE(v int) predicate.Node {
 	})
 }
 
+// ParentID applies the EQ predicate on the ParentColumn field.
+func ParentID(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDEQ applies the EQ predicate on the node_children field.
+func ParentIDEQ(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDNEQ applies the NEQ predicate on the node_children field.
+func ParentIDNEQ(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDIn applies the In predicate on the node_children field.
+func ParentIDIn(ids ...int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(ParentColumn), v...))
+	})
+}
+
+// ParentIDNotIn applies the NotIn predicate on the node_children field.
+func ParentIDNotIn(ids ...int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(ParentColumn), v...))
+	})
+}
+
+// ParentIDGT applies the GT predicate on the node_children field.
+func ParentIDGT(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDGTE applies the GTE predicate on the node_children field.
+func ParentIDGTE(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDLT applies the LT predicate on the node_children field.
+func ParentIDLT(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDLTE applies the LTE predicate on the node_children field.
+func ParentIDLTE(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(ParentColumn), id))
+	})
+}
+
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {

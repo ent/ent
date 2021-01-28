@@ -449,6 +449,89 @@ func HasFriendsWith(preds ...predicate.User) predicate.User {
 	})
 }
 
+// BestFriendID applies the EQ predicate on the BestFriendColumn field.
+func BestFriendID(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(BestFriendColumn), id))
+	})
+}
+
+// BestFriendIDEQ applies the EQ predicate on the user_best_friend field.
+func BestFriendIDEQ(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(BestFriendColumn), id))
+	})
+}
+
+// BestFriendIDNEQ applies the NEQ predicate on the user_best_friend field.
+func BestFriendIDNEQ(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(BestFriendColumn), id))
+	})
+}
+
+// BestFriendIDIn applies the In predicate on the user_best_friend field.
+func BestFriendIDIn(ids ...int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(BestFriendColumn), v...))
+	})
+}
+
+// BestFriendIDNotIn applies the NotIn predicate on the user_best_friend field.
+func BestFriendIDNotIn(ids ...int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(BestFriendColumn), v...))
+	})
+}
+
+// BestFriendIDGT applies the GT predicate on the user_best_friend field.
+func BestFriendIDGT(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(BestFriendColumn), id))
+	})
+}
+
+// BestFriendIDGTE applies the GTE predicate on the user_best_friend field.
+func BestFriendIDGTE(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(BestFriendColumn), id))
+	})
+}
+
+// BestFriendIDLT applies the LT predicate on the user_best_friend field.
+func BestFriendIDLT(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(BestFriendColumn), id))
+	})
+}
+
+// BestFriendIDLTE applies the LTE predicate on the user_best_friend field.
+func BestFriendIDLTE(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(BestFriendColumn), id))
+	})
+}
+
 // HasBestFriend applies the HasEdge predicate on the "best_friend" edge.
 func HasBestFriend() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

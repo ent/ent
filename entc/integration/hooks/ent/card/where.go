@@ -548,6 +548,89 @@ func InHookContainsFold(v string) predicate.Card {
 	})
 }
 
+// OwnerID applies the EQ predicate on the OwnerColumn field.
+func OwnerID(id int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDEQ applies the EQ predicate on the user_cards field.
+func OwnerIDEQ(id int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDNEQ applies the NEQ predicate on the user_cards field.
+func OwnerIDNEQ(id int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDIn applies the In predicate on the user_cards field.
+func OwnerIDIn(ids ...int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(OwnerColumn), v...))
+	})
+}
+
+// OwnerIDNotIn applies the NotIn predicate on the user_cards field.
+func OwnerIDNotIn(ids ...int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(OwnerColumn), v...))
+	})
+}
+
+// OwnerIDGT applies the GT predicate on the user_cards field.
+func OwnerIDGT(id int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDGTE applies the GTE predicate on the user_cards field.
+func OwnerIDGTE(id int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDLT applies the LT predicate on the user_cards field.
+func OwnerIDLT(id int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(OwnerColumn), id))
+	})
+}
+
+// OwnerIDLTE applies the LTE predicate on the user_cards field.
+func OwnerIDLTE(id int) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(OwnerColumn), id))
+	})
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {

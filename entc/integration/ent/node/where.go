@@ -192,6 +192,89 @@ func ValueNotNil() predicate.Node {
 	})
 }
 
+// PrevID applies the EQ predicate on the PrevColumn field.
+func PrevID(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(PrevColumn), id))
+	})
+}
+
+// PrevIDEQ applies the EQ predicate on the node_next field.
+func PrevIDEQ(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(PrevColumn), id))
+	})
+}
+
+// PrevIDNEQ applies the NEQ predicate on the node_next field.
+func PrevIDNEQ(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(PrevColumn), id))
+	})
+}
+
+// PrevIDIn applies the In predicate on the node_next field.
+func PrevIDIn(ids ...int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(PrevColumn), v...))
+	})
+}
+
+// PrevIDNotIn applies the NotIn predicate on the node_next field.
+func PrevIDNotIn(ids ...int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(PrevColumn), v...))
+	})
+}
+
+// PrevIDGT applies the GT predicate on the node_next field.
+func PrevIDGT(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(PrevColumn), id))
+	})
+}
+
+// PrevIDGTE applies the GTE predicate on the node_next field.
+func PrevIDGTE(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(PrevColumn), id))
+	})
+}
+
+// PrevIDLT applies the LT predicate on the node_next field.
+func PrevIDLT(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(PrevColumn), id))
+	})
+}
+
+// PrevIDLTE applies the LTE predicate on the node_next field.
+func PrevIDLTE(id int) predicate.Node {
+	return predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(PrevColumn), id))
+	})
+}
+
 // HasPrev applies the HasEdge predicate on the "prev" edge.
 func HasPrev() predicate.Node {
 	return predicate.Node(func(s *sql.Selector) {

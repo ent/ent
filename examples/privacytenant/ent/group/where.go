@@ -213,6 +213,89 @@ func NameContainsFold(v string) predicate.Group {
 	})
 }
 
+// TenantID applies the EQ predicate on the TenantColumn field.
+func TenantID(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(TenantColumn), id))
+	})
+}
+
+// TenantIDEQ applies the EQ predicate on the group_tenant field.
+func TenantIDEQ(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(TenantColumn), id))
+	})
+}
+
+// TenantIDNEQ applies the NEQ predicate on the group_tenant field.
+func TenantIDNEQ(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(TenantColumn), id))
+	})
+}
+
+// TenantIDIn applies the In predicate on the group_tenant field.
+func TenantIDIn(ids ...int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(TenantColumn), v...))
+	})
+}
+
+// TenantIDNotIn applies the NotIn predicate on the group_tenant field.
+func TenantIDNotIn(ids ...int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(TenantColumn), v...))
+	})
+}
+
+// TenantIDGT applies the GT predicate on the group_tenant field.
+func TenantIDGT(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(TenantColumn), id))
+	})
+}
+
+// TenantIDGTE applies the GTE predicate on the group_tenant field.
+func TenantIDGTE(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(TenantColumn), id))
+	})
+}
+
+// TenantIDLT applies the LT predicate on the group_tenant field.
+func TenantIDLT(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(TenantColumn), id))
+	})
+}
+
+// TenantIDLTE applies the LTE predicate on the group_tenant field.
+func TenantIDLTE(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(TenantColumn), id))
+	})
+}
+
 // HasTenant applies the HasEdge predicate on the "tenant" edge.
 func HasTenant() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {

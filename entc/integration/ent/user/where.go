@@ -1443,6 +1443,89 @@ func HasTeamWith(preds ...predicate.Pet) predicate.User {
 	})
 }
 
+// SpouseID applies the EQ predicate on the SpouseColumn field.
+func SpouseID(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDEQ applies the EQ predicate on the user_spouse field.
+func SpouseIDEQ(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDNEQ applies the NEQ predicate on the user_spouse field.
+func SpouseIDNEQ(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDIn applies the In predicate on the user_spouse field.
+func SpouseIDIn(ids ...int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(SpouseColumn), v...))
+	})
+}
+
+// SpouseIDNotIn applies the NotIn predicate on the user_spouse field.
+func SpouseIDNotIn(ids ...int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(SpouseColumn), v...))
+	})
+}
+
+// SpouseIDGT applies the GT predicate on the user_spouse field.
+func SpouseIDGT(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDGTE applies the GTE predicate on the user_spouse field.
+func SpouseIDGTE(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDLT applies the LT predicate on the user_spouse field.
+func SpouseIDLT(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(SpouseColumn), id))
+	})
+}
+
+// SpouseIDLTE applies the LTE predicate on the user_spouse field.
+func SpouseIDLTE(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(SpouseColumn), id))
+	})
+}
+
 // HasSpouse applies the HasEdge predicate on the "spouse" edge.
 func HasSpouse() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1496,6 +1579,89 @@ func HasChildrenWith(preds ...predicate.User) predicate.User {
 				p(s)
 			}
 		})
+	})
+}
+
+// ParentID applies the EQ predicate on the ParentColumn field.
+func ParentID(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDEQ applies the EQ predicate on the user_parent field.
+func ParentIDEQ(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDNEQ applies the NEQ predicate on the user_parent field.
+func ParentIDNEQ(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDIn applies the In predicate on the user_parent field.
+func ParentIDIn(ids ...int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(ParentColumn), v...))
+	})
+}
+
+// ParentIDNotIn applies the NotIn predicate on the user_parent field.
+func ParentIDNotIn(ids ...int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(ParentColumn), v...))
+	})
+}
+
+// ParentIDGT applies the GT predicate on the user_parent field.
+func ParentIDGT(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDGTE applies the GTE predicate on the user_parent field.
+func ParentIDGTE(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDLT applies the LT predicate on the user_parent field.
+func ParentIDLT(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(ParentColumn), id))
+	})
+}
+
+// ParentIDLTE applies the LTE predicate on the user_parent field.
+func ParentIDLTE(id int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(ParentColumn), id))
 	})
 }
 

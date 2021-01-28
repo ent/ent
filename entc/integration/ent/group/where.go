@@ -632,6 +632,89 @@ func HasUsersWith(preds ...predicate.User) predicate.Group {
 	})
 }
 
+// InfoID applies the EQ predicate on the InfoColumn field.
+func InfoID(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(InfoColumn), id))
+	})
+}
+
+// InfoIDEQ applies the EQ predicate on the group_info field.
+func InfoIDEQ(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(InfoColumn), id))
+	})
+}
+
+// InfoIDNEQ applies the NEQ predicate on the group_info field.
+func InfoIDNEQ(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(InfoColumn), id))
+	})
+}
+
+// InfoIDIn applies the In predicate on the group_info field.
+func InfoIDIn(ids ...int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(InfoColumn), v...))
+	})
+}
+
+// InfoIDNotIn applies the NotIn predicate on the group_info field.
+func InfoIDNotIn(ids ...int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(InfoColumn), v...))
+	})
+}
+
+// InfoIDGT applies the GT predicate on the group_info field.
+func InfoIDGT(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(InfoColumn), id))
+	})
+}
+
+// InfoIDGTE applies the GTE predicate on the group_info field.
+func InfoIDGTE(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(InfoColumn), id))
+	})
+}
+
+// InfoIDLT applies the LT predicate on the group_info field.
+func InfoIDLT(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(InfoColumn), id))
+	})
+}
+
+// InfoIDLTE applies the LTE predicate on the group_info field.
+func InfoIDLTE(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(InfoColumn), id))
+	})
+}
+
 // HasInfo applies the HasEdge predicate on the "info" edge.
 func HasInfo() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {

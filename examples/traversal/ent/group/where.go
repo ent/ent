@@ -241,6 +241,89 @@ func HasUsersWith(preds ...predicate.User) predicate.Group {
 	})
 }
 
+// AdminID applies the EQ predicate on the AdminColumn field.
+func AdminID(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(AdminColumn), id))
+	})
+}
+
+// AdminIDEQ applies the EQ predicate on the group_admin field.
+func AdminIDEQ(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(AdminColumn), id))
+	})
+}
+
+// AdminIDNEQ applies the NEQ predicate on the group_admin field.
+func AdminIDNEQ(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(AdminColumn), id))
+	})
+}
+
+// AdminIDIn applies the In predicate on the group_admin field.
+func AdminIDIn(ids ...int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.In(s.C(AdminColumn), v...))
+	})
+}
+
+// AdminIDNotIn applies the NotIn predicate on the group_admin field.
+func AdminIDNotIn(ids ...int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(ids) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		v := make([]interface{}, len(ids))
+		for i := range v {
+			v[i] = ids[i]
+		}
+		s.Where(sql.NotIn(s.C(AdminColumn), v...))
+	})
+}
+
+// AdminIDGT applies the GT predicate on the group_admin field.
+func AdminIDGT(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(AdminColumn), id))
+	})
+}
+
+// AdminIDGTE applies the GTE predicate on the group_admin field.
+func AdminIDGTE(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(AdminColumn), id))
+	})
+}
+
+// AdminIDLT applies the LT predicate on the group_admin field.
+func AdminIDLT(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(AdminColumn), id))
+	})
+}
+
+// AdminIDLTE applies the LTE predicate on the group_admin field.
+func AdminIDLTE(id int) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(AdminColumn), id))
+	})
+}
+
 // HasAdmin applies the HasEdge predicate on the "admin" edge.
 func HasAdmin() predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
