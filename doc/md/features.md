@@ -72,3 +72,18 @@ and use it to automatically solve merge conflicts when user's schema can't be bu
 
 This option can be added to projects using the `--feature schema/snapshot` flag, but please see
 [facebook/ent/issues/852](https://github.com/facebook/ent/issues/852) to get more context about it.
+
+#### Schema Config
+
+The `sql/schemaconfig` option lets you pass alternate SQL database names to models. This is useful when your models don't all live under one database and are spread out across different schemas.
+
+This option can be added to projects using the `--feature sql/schemaconfig` flag. Once you generate the code, you can now use a new option as such: 
+
+```golang
+c, err := ent.Open(dialect, conn, ent.AlternateSchema(ent.SchemaConfig{
+  User: "usersdb",
+  Car: "carsdb",
+}))
+c.User.Query().All(ctx) // SELECT * FROM `usersdb`.`users`
+c.Car.Query().All(ctx) // SELECT * FROM `carsdb`.`cars`
+```
