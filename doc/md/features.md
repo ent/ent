@@ -80,10 +80,10 @@ The `sql/schemaconfig` option lets you pass alternate SQL database names to mode
 This option can be added to projects using the `--feature sql/schemaconfig` flag. Once you generate the code, you can now use a new option as such: 
 
 ```golang
-c, err := ent.Open("mysql", conn, ent.AlternateSchema(ent.SchemaConfig{
+c, err := ent.Open(dialect, conn, ent.AlternateSchema(ent.SchemaConfig{
   User: "usersdb",
   Car: "carsdb",
 }))
-c.User.Query().All(ctx) // SELECT * from `usersdb`.`users`
-c.Car.Query().All(ctx) // SELECT * from `carsdb`.`cars`
+c.User.Query().All(ctx) // SELECT * FROM `usersdb`.`users`
+c.Car.Query().All(ctx) // SELECT * FROM `carsdb`.`cars`
 ```
