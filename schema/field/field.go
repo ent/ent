@@ -137,11 +137,12 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 }
 
 // Other represents a field that is not a good fit for any of the standard field types.
-// Other fields always have the GoType set
-// The SchemaType must be set because the field type cannot be inferred
+//
+// The second argument defines the GoType and must implement the ValueScanner interface.
+// The SchemaType option must be set because the field type cannot be inferred.
 // An example for defining Other field is as follows:
 //
-//	field.Other("id", uuid.New()).
+//	field.Other("link", &Link{}).
 //		SchemaType(map[string]string{
 //			dialect.MySQL:    "text",
 //			dialect.Postgres: "varchar",
@@ -305,9 +306,9 @@ func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
 // codegen extensions.
 //
 //	field.String("dir").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("DIR"),
+//		)
 //
 func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -403,9 +404,9 @@ func (b *timeBuilder) GoType(typ interface{}) *timeBuilder {
 // codegen extensions.
 //
 //	field.Time("deleted_at").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("DELETED_AT"),
+//		)
 //
 func (b *timeBuilder) Annotations(annotations ...schema.Annotation) *timeBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -495,9 +496,9 @@ func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
 // codegen extensions.
 //
 //	field.Bool("deleted").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("DELETED"),
+//		)
 //
 func (b *boolBuilder) Annotations(annotations ...schema.Annotation) *boolBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -590,12 +591,6 @@ func (b *bytesBuilder) GoType(typ interface{}) *bytesBuilder {
 
 // Annotations adds a list of annotations to the field object to be used by
 // codegen extensions.
-//
-//	field.Bytes("ip").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
-//
 func (b *bytesBuilder) Annotations(annotations ...schema.Annotation) *bytesBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -676,12 +671,6 @@ func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
 
 // Annotations adds a list of annotations to the field object to be used by
 // codegen extensions.
-//
-//	field.JSON("json").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
-//
 func (b *jsonBuilder) Annotations(annotations ...schema.Annotation) *jsonBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
@@ -795,9 +784,9 @@ func (b *enumBuilder) SchemaType(types map[string]string) *enumBuilder {
 // codegen extensions.
 //
 //	field.Enum("enum").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("ENUM"),
+//		)
 //
 func (b *enumBuilder) Annotations(annotations ...schema.Annotation) *enumBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -901,9 +890,9 @@ func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
 // codegen extensions.
 //
 //	field.UUID("id", uuid.New()).
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("ID"),
+//		)
 //
 func (b *uuidBuilder) Annotations(annotations ...schema.Annotation) *uuidBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -932,20 +921,33 @@ func (b *otherBuilder) Sensitive() *otherBuilder {
 	return b
 }
 
-// Default sets the default value of the field.
-func (b *otherBuilder) Default(s interface{}) *otherBuilder {
-	b.desc.Default = s
-	return b
-}
-
-// DefaultFunc sets the function that is applied to set the default value
-// of the field on creation. For example:
+// Default sets the default value of the field. For example:
 //
-//	field.Other("cuid").
-//		DefaultFunc(cuid.New)
+//	field.Other("link", &Link{}).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		}).
+//		// A static default value.
+//		Default(&Link{Addr: "0.0.0.0"})
 //
-func (b *otherBuilder) DefaultFunc(fn interface{}) *otherBuilder {
-	b.desc.Default = fn
+//	field.Other("link", &Link{}).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		}).
+//		// A function for generating the default value.
+//		Default(NewLink)
+//
+func (b *otherBuilder) Default(v interface{}) *otherBuilder {
+	b.desc.Default = v
+	switch fieldT, defaultT := b.desc.Info.RType.rtype, reflect.TypeOf(v); {
+	case fieldT == defaultT:
+	case defaultT.Kind() == reflect.Func:
+		b.desc.checkDefaultFunc(b.desc.Info.RType.rtype)
+	default:
+		b.desc.Err = fmt.Errorf("expect type (func() %[1]s) or (%[1]s) for other default value", b.desc.Info)
+	}
 	return b
 }
 
@@ -971,6 +973,7 @@ func (b *otherBuilder) Immutable() *otherBuilder {
 
 // Comment sets the comment of the field.
 func (b *otherBuilder) Comment(c string) *otherBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -990,7 +993,7 @@ func (b *otherBuilder) StorageKey(key string) *otherBuilder {
 // SchemaType overrides the default database type with a custom
 // schema type (per dialect) for string.
 //
-//	field.Other("name", uuid.New()).
+//	field.Other("link", Link{}).
 //		SchemaType(map[string]string{
 //			dialect.MySQL:    "text",
 //			dialect.Postgres: "varchar",
@@ -1004,10 +1007,14 @@ func (b *otherBuilder) SchemaType(types map[string]string) *otherBuilder {
 // Annotations adds a list of annotations to the field object to be used by
 // codegen extensions.
 //
-//	field.Other("other").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//	field.Other("link", &Link{}).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		}).
+//		Annotations(
+//			entgql.OrderField("LINK"),
+//		)
 //
 func (b *otherBuilder) Annotations(annotations ...schema.Annotation) *otherBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -1016,6 +1023,9 @@ func (b *otherBuilder) Annotations(annotations ...schema.Annotation) *otherBuild
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *otherBuilder) Descriptor() *Descriptor {
+	if len(b.desc.SchemaType) == 0 {
+		b.desc.Err = fmt.Errorf("expect SchemaType to be set for other field")
+	}
 	return b.desc
 }
 

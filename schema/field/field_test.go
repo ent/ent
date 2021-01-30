@@ -514,12 +514,30 @@ func TestField_Other(t *testing.T) {
 	fd := field.Other("other", &custom{}).
 		Unique().
 		Default(custom{}).
+		SchemaType(map[string]string{dialect.Postgres: "varchar"}).
 		Descriptor()
+	assert.NoError(t, fd.Err)
 	assert.Equal(t, "other", fd.Name)
 	assert.True(t, fd.Unique)
 	assert.Equal(t, "field_test.custom", fd.Info.String())
 	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
 	assert.NotNil(t, fd.Default)
+
+	fd = field.Other("other", &custom{}).
+		Descriptor()
+	assert.Error(t, fd.Err, "missing SchemaType option")
+
+	fd = field.Other("other", &custom{}).
+		SchemaType(map[string]string{dialect.Postgres: "varchar"}).
+		Default(func() custom { return custom{} }).
+		Descriptor()
+	assert.NoError(t, fd.Err)
+
+	fd = field.Other("other", &custom{}).
+		SchemaType(map[string]string{dialect.Postgres: "varchar"}).
+		Default(func() *custom { return &custom{} }).
+		Descriptor()
+	assert.Error(t, fd.Err, "invalid default value")
 }
 
 func TestTypeString(t *testing.T) {
