@@ -90,6 +90,8 @@ type FieldType struct {
 	NullStr *sql.NullString `json:"null_str,omitempty"`
 	// Link holds the value of the "link" field.
 	Link schema.Link `json:"link,omitempty"`
+	// LinkOther holds the value of the "link_other" field.
+	LinkOther schema.Link `json:"link_other,omitempty"`
 	// NullLink holds the value of the "null_link" field.
 	NullLink *schema.Link `json:"null_link,omitempty"`
 	// Active holds the value of the "active" field.
@@ -164,6 +166,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Str                   sql.NullString  `json:"str,omitempty"`
 		NullStr               *sql.NullString `json:"null_str,omitempty"`
 		Link                  schema.Link     `json:"link,omitempty"`
+		LinkOther             schema.Link     `json:"link_other,omitempty"`
 		NullLink              *schema.Link    `json:"null_link,omitempty"`
 		Active                schema.Status   `json:"active,omitempty"`
 		NullActive            *schema.Status  `json:"null_active,omitempty"`
@@ -217,6 +220,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Str = scanft.Str
 	ft.NullStr = scanft.NullStr
 	ft.Link = scanft.Link
+	ft.LinkOther = scanft.LinkOther
 	ft.NullLink = scanft.NullLink
 	ft.Active = scanft.Active
 	ft.NullActive = scanft.NullActive
@@ -337,6 +341,8 @@ func (ft *FieldType) String() string {
 	}
 	builder.WriteString(", link=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Link))
+	builder.WriteString(", link_other=")
+	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
 	if v := ft.NullLink; v != nil {
 		builder.WriteString(", null_link=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
@@ -420,6 +426,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Str                   sql.NullString  `json:"str,omitempty"`
 		NullStr               *sql.NullString `json:"null_str,omitempty"`
 		Link                  schema.Link     `json:"link,omitempty"`
+		LinkOther             schema.Link     `json:"link_other,omitempty"`
 		NullLink              *schema.Link    `json:"null_link,omitempty"`
 		Active                schema.Status   `json:"active,omitempty"`
 		NullActive            *schema.Status  `json:"null_active,omitempty"`
@@ -475,6 +482,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Str:                   v.Str,
 			NullStr:               v.NullStr,
 			Link:                  v.Link,
+			LinkOther:             v.LinkOther,
 			NullLink:              v.NullLink,
 			Active:                v.Active,
 			NullActive:            v.NullActive,

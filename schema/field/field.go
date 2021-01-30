@@ -136,6 +136,26 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 	}}
 }
 
+// Other represents a field that is not a good fit for any of the standard field types.
+// Other fields always have the GoType set
+// The SchemaType must be set because the field type cannot be inferred
+// An example for defining Other field is as follows:
+//
+//	field.Other("id", uuid.New()).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		})
+//
+func Other(name string, typ ValueScanner) *otherBuilder {
+	ob := &otherBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeOther},
+	}}
+	ob.desc.goType(typ, valueScannerType)
+	return ob
+}
+
 // stringBuilder is the builder for string fields.
 type stringBuilder struct {
 	desc *Descriptor
@@ -892,6 +912,110 @@ func (b *uuidBuilder) Annotations(annotations ...schema.Annotation) *uuidBuilder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uuidBuilder) Descriptor() *Descriptor {
+	return b.desc
+}
+
+// otherBuilder is the builder for other fields.
+type otherBuilder struct {
+	desc *Descriptor
+}
+
+// Unique makes the field unique within all vertices of this type.
+func (b *otherBuilder) Unique() *otherBuilder {
+	b.desc.Unique = true
+	return b
+}
+
+// Sensitive fields not printable and not serializable.
+func (b *otherBuilder) Sensitive() *otherBuilder {
+	b.desc.Sensitive = true
+	return b
+}
+
+// Default sets the default value of the field.
+func (b *otherBuilder) Default(s interface{}) *otherBuilder {
+	b.desc.Default = s
+	return b
+}
+
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation. For example:
+//
+//	field.Other("cuid").
+//		DefaultFunc(cuid.New)
+//
+func (b *otherBuilder) DefaultFunc(fn interface{}) *otherBuilder {
+	b.desc.Default = fn
+	return b
+}
+
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *otherBuilder) Nillable() *otherBuilder {
+	b.desc.Nillable = true
+	return b
+}
+
+// Optional indicates that this field is optional on create.
+// Unlike edges, fields are required by default.
+func (b *otherBuilder) Optional() *otherBuilder {
+	b.desc.Optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *otherBuilder) Immutable() *otherBuilder {
+	b.desc.Immutable = true
+	return b
+}
+
+// Comment sets the comment of the field.
+func (b *otherBuilder) Comment(c string) *otherBuilder {
+	return b
+}
+
+// StructTag sets the struct tag of the field.
+func (b *otherBuilder) StructTag(s string) *otherBuilder {
+	b.desc.Tag = s
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *otherBuilder) StorageKey(key string) *otherBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for string.
+//
+//	field.Other("name", uuid.New()).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		})
+//
+func (b *otherBuilder) SchemaType(types map[string]string) *otherBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Other("other").
+//		Annotations(entgql.Config{
+//			Ordered: true,
+//		})
+//
+func (b *otherBuilder) Annotations(annotations ...schema.Annotation) *otherBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *otherBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 
