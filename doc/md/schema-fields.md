@@ -54,6 +54,7 @@ The following types are currently supported by the framework:
 - `JSON` (SQL only).
 - `Enum` (SQL only).
 - `UUID` (SQL only).
+- `Other` (SQL only).
 
 <br/>
 
@@ -233,6 +234,38 @@ func (Card) Fields() []ent.Field {
 		field.Enum("role").
 			// A convertible type to string.
 			GoType(role.Unknown),
+	}
+}
+```
+
+## Other Field
+
+Other represents a field that is not a good fit for any of the standard field types.
+Examples are a Postgres Range type or Geospatial type
+
+```go
+package schema
+
+import (
+	"github.com/facebook/ent"
+	"github.com/facebook/ent/dialect"
+	"github.com/facebook/ent/schema/field"
+	
+	"github.com/jackc/pgtype"
+)
+
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Other("duration", &pgtype.Tstzrange{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "tstzrange",
+			}),
 	}
 }
 ```

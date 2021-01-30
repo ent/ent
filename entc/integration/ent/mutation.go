@@ -1265,6 +1265,7 @@ type FieldTypeMutation struct {
 	str                        *sql.NullString
 	null_str                   *sql.NullString
 	link                       *schema.Link
+	link_other                 *schema.Link
 	null_link                  *schema.Link
 	active                     *schema.Status
 	null_active                *schema.Status
@@ -3394,6 +3395,55 @@ func (m *FieldTypeMutation) ResetLink() {
 	delete(m.clearedFields, fieldtype.FieldLink)
 }
 
+// SetLinkOther sets the "link_other" field.
+func (m *FieldTypeMutation) SetLinkOther(s schema.Link) {
+	m.link_other = &s
+}
+
+// LinkOther returns the value of the "link_other" field in the mutation.
+func (m *FieldTypeMutation) LinkOther() (r schema.Link, exists bool) {
+	v := m.link_other
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLinkOther returns the old "link_other" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldLinkOther(ctx context.Context) (v schema.Link, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldLinkOther is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldLinkOther requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLinkOther: %w", err)
+	}
+	return oldValue.LinkOther, nil
+}
+
+// ClearLinkOther clears the value of the "link_other" field.
+func (m *FieldTypeMutation) ClearLinkOther() {
+	m.link_other = nil
+	m.clearedFields[fieldtype.FieldLinkOther] = struct{}{}
+}
+
+// LinkOtherCleared returns if the "link_other" field was cleared in this mutation.
+func (m *FieldTypeMutation) LinkOtherCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldLinkOther]
+	return ok
+}
+
+// ResetLinkOther resets all changes to the "link_other" field.
+func (m *FieldTypeMutation) ResetLinkOther() {
+	m.link_other = nil
+	delete(m.clearedFields, fieldtype.FieldLinkOther)
+}
+
 // SetNullLink sets the "null_link" field.
 func (m *FieldTypeMutation) SetNullLink(s schema.Link) {
 	m.null_link = &s
@@ -4284,7 +4334,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 48)
+	fields := make([]string, 0, 49)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4380,6 +4430,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	}
 	if m.link != nil {
 		fields = append(fields, fieldtype.FieldLink)
+	}
+	if m.link_other != nil {
+		fields = append(fields, fieldtype.FieldLinkOther)
 	}
 	if m.null_link != nil {
 		fields = append(fields, fieldtype.FieldNullLink)
@@ -4501,6 +4554,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.NullStr()
 	case fieldtype.FieldLink:
 		return m.Link()
+	case fieldtype.FieldLinkOther:
+		return m.LinkOther()
 	case fieldtype.FieldNullLink:
 		return m.NullLink()
 	case fieldtype.FieldActive:
@@ -4606,6 +4661,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldNullStr(ctx)
 	case fieldtype.FieldLink:
 		return m.OldLink(ctx)
+	case fieldtype.FieldLinkOther:
+		return m.OldLinkOther(ctx)
 	case fieldtype.FieldNullLink:
 		return m.OldNullLink(ctx)
 	case fieldtype.FieldActive:
@@ -4870,6 +4927,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLink(v)
+		return nil
+	case fieldtype.FieldLinkOther:
+		v, ok := value.(schema.Link)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLinkOther(v)
 		return nil
 	case fieldtype.FieldNullLink:
 		v, ok := value.(schema.Link)
@@ -5457,6 +5521,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldLink) {
 		fields = append(fields, fieldtype.FieldLink)
 	}
+	if m.FieldCleared(fieldtype.FieldLinkOther) {
+		fields = append(fields, fieldtype.FieldLinkOther)
+	}
 	if m.FieldCleared(fieldtype.FieldNullLink) {
 		fields = append(fields, fieldtype.FieldNullLink)
 	}
@@ -5596,6 +5663,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldLink:
 		m.ClearLink()
+		return nil
+	case fieldtype.FieldLinkOther:
+		m.ClearLinkOther()
 		return nil
 	case fieldtype.FieldNullLink:
 		m.ClearNullLink()
@@ -5745,6 +5815,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldLink:
 		m.ResetLink()
+		return nil
+	case fieldtype.FieldLinkOther:
+		m.ResetLinkOther()
 		return nil
 	case fieldtype.FieldNullLink:
 		m.ResetNullLink()

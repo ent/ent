@@ -28,7 +28,7 @@ type FieldType struct {
 }
 
 // Fields of the File.
-func (FieldType) Fields() []ent.Field {
+func (FieldType) Fields() []ent.Field { //nolint:funlen
 	return []ent.Field{
 		field.Int("int"),
 		field.Int8("int8"),
@@ -96,6 +96,13 @@ func (FieldType) Fields() []ent.Field {
 			Optional().
 			NotEmpty().
 			GoType(&Link{}),
+		field.Other("link_other", &Link{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "varchar",
+				dialect.MySQL:    "varchar(255)",
+				dialect.SQLite:   "varchar(255)",
+			}).
+			Optional(),
 		field.String("null_link").
 			Optional().
 			Nillable().
