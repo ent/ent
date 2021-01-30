@@ -81,9 +81,9 @@ This option can be added to projects using the `--feature sql/schemaconfig` flag
 
 ```golang
 c, err := ent.Open(dialect, conn, ent.AlternateSchema(ent.SchemaConfig{
-  User: "usersdb",
-  Car: "carsdb",
+	User: "usersdb",
+	Car: "carsdb",
 }))
 c.User.Query().All(ctx) // SELECT * FROM `usersdb`.`users`
-c.Car.Query().All(ctx) // SELECT * FROM `carsdb`.`cars`
+c.Car.Query().All(ctx) 	// SELECT * FROM `carsdb`.`cars`
 ```
