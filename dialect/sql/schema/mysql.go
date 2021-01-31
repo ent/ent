@@ -421,6 +421,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	case "varchar":
 		c.Type = field.TypeString
 		c.Size = size
+	case "text":
+		c.Size = math.MaxUint16
+		c.Type = field.TypeString
 	case "longtext":
 		c.Size = math.MaxInt32
 		c.Type = field.TypeString
