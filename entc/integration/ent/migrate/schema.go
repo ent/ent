@@ -102,6 +102,7 @@ var (
 		{Name: "str", Type: field.TypeString, Nullable: true},
 		{Name: "null_str", Type: field.TypeString, Nullable: true},
 		{Name: "link", Type: field.TypeString, Nullable: true},
+		{Name: "link_other", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)", "postgres": "varchar", "sqlite3": "varchar(255)"}},
 		{Name: "null_link", Type: field.TypeString, Nullable: true},
 		{Name: "active", Type: field.TypeBool, Nullable: true},
 		{Name: "null_active", Type: field.TypeBool, Nullable: true},
@@ -128,7 +129,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "field_types_files_field",
-				Columns: []*schema.Column{FieldTypesColumns[49]},
+				Columns: []*schema.Column{FieldTypesColumns[50]},
 
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,

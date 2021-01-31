@@ -83,6 +83,8 @@ const (
 	FieldNullStr = "null_str"
 	// FieldLink holds the string denoting the link field in the database.
 	FieldLink = "link"
+	// FieldLinkOther holds the string denoting the link_other field in the database.
+	FieldLinkOther = "link_other"
 	// FieldNullLink holds the string denoting the null_link field in the database.
 	FieldNullLink = "null_link"
 	// FieldActive holds the string denoting the active field in the database.
@@ -155,6 +157,7 @@ var Columns = []string{
 	FieldStr,
 	FieldNullStr,
 	FieldLink,
+	FieldLinkOther,
 	FieldNullLink,
 	FieldActive,
 	FieldNullActive,

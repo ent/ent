@@ -415,6 +415,12 @@ func (ftc *FieldTypeCreate) SetLink(s schema.Link) *FieldTypeCreate {
 	return ftc
 }
 
+// SetLinkOther sets the "link_other" field.
+func (ftc *FieldTypeCreate) SetLinkOther(s schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetLinkOther(s)
+	return ftc
+}
+
 // SetNullLink sets the "null_link" field.
 func (ftc *FieldTypeCreate) SetNullLink(s schema.Link) *FieldTypeCreate {
 	ftc.mutation.SetNullLink(s)
@@ -811,6 +817,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.Link(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLink, value)
+	}
+	if value, ok := ftc.mutation.LinkOther(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
 	}
 	if value, ok := ftc.mutation.NullLink(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullLink, value)

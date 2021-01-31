@@ -120,7 +120,7 @@ func (*SQLite) cType(c *Column) (t string) {
 	case field.TypeUUID:
 		t = "uuid"
 	default:
-		panic("unsupported type " + c.Type.String())
+		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type, c.Name))
 	}
 	return t
 }

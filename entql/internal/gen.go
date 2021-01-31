@@ -51,6 +51,7 @@ func main() {
 			field.TypeFloat64,
 			field.TypeString,
 			field.TypeUUID,
+			field.TypeOther,
 		},
 	}); err != nil {
 		log.Fatal("executing template:", err)
@@ -65,7 +66,7 @@ func main() {
 
 func ops(t field.Type) []string {
 	switch t {
-	case field.TypeBool, field.TypeBytes, field.TypeUUID:
+	case field.TypeBool, field.TypeBytes, field.TypeUUID, field.TypeOther:
 		return []string{"EQ", "NEQ"}
 	default:
 		return []string{"EQ", "NEQ", "LT", "LTE", "GT", "GTE"}
@@ -80,13 +81,15 @@ func ident(t field.Type) string {
 		return "time"
 	case field.TypeUUID:
 		return "value"
+	case field.TypeOther:
+		return "other"
 	default:
 		return t.String()
 	}
 }
 
 func typ(t field.Type) string {
-	if t == field.TypeUUID {
+	if t == field.TypeUUID || t == field.TypeOther {
 		return "driver.Valuer"
 	}
 	return t.String()
