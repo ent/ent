@@ -74,7 +74,7 @@ class HomeSplash extends React.Component {
     const ProjectTitle = () => (
       <div>
         <div className="projectTitleContainer">
-          <img src="https://entgo.io/assets/logo.png" />
+          <img src="https://s3.eu-central-1.amazonaws.com/entgo.io/assets/logo.png" />
           <div className="projectTitle">
             <p>{siteConfig.tagline}</p>
           </div>
@@ -115,7 +115,7 @@ class HomeSplash extends React.Component {
             </a>
           </div>
           <div className="gopherGraph">
-            <img src="https://entgo.io/assets/gopher_graph.png" />
+            <img src="https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher_graph.png" />
           </div>
           <Features />
         </div>
