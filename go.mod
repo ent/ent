@@ -7,7 +7,6 @@ require (
 	github.com/go-bindata/go-bindata v1.0.1-0.20190711162640-ee3c2418e368
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/jessevdk/go-flags v1.4.0
@@ -22,7 +21,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	go.opencensus.io v0.22.5
+	go.opencensus.io v0.22.6
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
 	golang.org/x/tools v0.0.0-20210105164027-a548c3f4af2d
 )
