@@ -10,7 +10,7 @@ are populated to the `Edges` field in the returned object.
 
 Let's give an example hows does the API look like for the following schema:
 
-![er-group-users](https://entgo.io/assets/er_user_pets_groups.png)
+![er-group-users](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/er_user_pets_groups.png)
 
 
 
