@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/examples/privacytenant/ent/tenant"
-	"github.com/facebook/ent/examples/privacytenant/ent/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/examples/privacytenant/ent/tenant"
+	"entgo.io/ent/examples/privacytenant/ent/user"
 )
 
 // User is the model entity for the User schema.

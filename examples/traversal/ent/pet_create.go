@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/traversal/ent/pet"
-	"github.com/facebook/ent/examples/traversal/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/traversal/ent/pet"
+	"entgo.io/ent/examples/traversal/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.

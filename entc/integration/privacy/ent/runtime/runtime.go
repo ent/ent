@@ -9,13 +9,13 @@ package runtime
 import (
 	"context"
 
-	"github.com/facebook/ent/entc/integration/privacy/ent/schema"
-	"github.com/facebook/ent/entc/integration/privacy/ent/task"
-	"github.com/facebook/ent/entc/integration/privacy/ent/team"
-	"github.com/facebook/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/entc/integration/privacy/ent/schema"
+	"entgo.io/ent/entc/integration/privacy/ent/task"
+	"entgo.io/ent/entc/integration/privacy/ent/team"
+	"entgo.io/ent/entc/integration/privacy/ent/user"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/privacy"
+	"entgo.io/ent"
+	"entgo.io/ent/privacy"
 )
 
 // The init function reads all schema descriptors with runtime code

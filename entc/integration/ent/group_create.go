@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/file"
-	"github.com/facebook/ent/entc/integration/ent/group"
-	"github.com/facebook/ent/entc/integration/ent/groupinfo"
-	"github.com/facebook/ent/entc/integration/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/file"
+	"entgo.io/ent/entc/integration/ent/group"
+	"entgo.io/ent/entc/integration/ent/groupinfo"
+	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.

@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/entc/integration/idtype/ent/predicate"
-	"github.com/facebook/ent/entc/integration/idtype/ent/user"
+	"entgo.io/ent/entc/integration/idtype/ent/predicate"
+	"entgo.io/ent/entc/integration/idtype/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

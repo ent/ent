@@ -10,8 +10,8 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 )
 
 // HasKey return a predicate for checking that a JSON key

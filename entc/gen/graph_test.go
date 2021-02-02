@@ -11,8 +11,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/facebook/ent/entc/load"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )

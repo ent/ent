@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/entc/integration/gremlin/ent"
+	"entgo.io/ent/entc/integration/gremlin/ent"
 )
 
 // The CardFunc type is an adapter to allow the use of ordinary

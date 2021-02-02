@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/group"
-	"github.com/facebook/ent/entc/integration/ent/groupinfo"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/group"
+	"entgo.io/ent/entc/integration/ent/groupinfo"
+	"entgo.io/ent/schema/field"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.

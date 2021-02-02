@@ -12,8 +12,8 @@ speed of data retrieval, or defining uniqueness.
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/index"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/index"
 )
 
 // User holds the schema definition for the User entity.
@@ -147,7 +147,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/edgeindex).
+The full example exists in [GitHub](https://entgo.io/ent/tree/master/examples/edgeindex).
 
 ## Dialect Support
 

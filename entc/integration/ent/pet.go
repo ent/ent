@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/ent/pet"
-	"github.com/facebook/ent/entc/integration/ent/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/ent/pet"
+	"entgo.io/ent/entc/integration/ent/user"
 	"github.com/google/uuid"
 )
 

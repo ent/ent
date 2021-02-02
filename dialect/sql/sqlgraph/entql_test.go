@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entql"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entql"
+	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

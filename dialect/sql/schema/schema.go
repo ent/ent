@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebook/ent/dialect/entsql"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema/field"
 )
 
 const (

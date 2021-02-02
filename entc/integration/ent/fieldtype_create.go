@@ -14,12 +14,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/fieldtype"
-	"github.com/facebook/ent/entc/integration/ent/role"
-	"github.com/facebook/ent/entc/integration/ent/schema"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/fieldtype"
+	"entgo.io/ent/entc/integration/ent/role"
+	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 

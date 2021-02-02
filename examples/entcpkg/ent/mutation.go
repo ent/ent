@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/examples/entcpkg/ent/predicate"
+	"entgo.io/ent"
+	"entgo.io/ent/examples/entcpkg/ent/predicate"
 )
 
 const (

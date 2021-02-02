@@ -4,7 +4,7 @@
 
 package edge
 
-import "github.com/facebook/ent/schema"
+import "entgo.io/ent/schema"
 
 // Annotation is a builtin schema annotation for
 // configuring the edges behavior in codegen.

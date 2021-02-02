@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/examples/start/ent/car"
-	"github.com/facebook/ent/examples/start/ent/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/examples/start/ent/car"
+	"entgo.io/ent/examples/start/ent/user"
 )
 
 // Car is the model entity for the Car schema.

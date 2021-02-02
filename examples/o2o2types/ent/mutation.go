@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebook/ent/examples/o2o2types/ent/card"
-	"github.com/facebook/ent/examples/o2o2types/ent/predicate"
-	"github.com/facebook/ent/examples/o2o2types/ent/user"
+	"entgo.io/ent/examples/o2o2types/ent/card"
+	"entgo.io/ent/examples/o2o2types/ent/predicate"
+	"entgo.io/ent/examples/o2o2types/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

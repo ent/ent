@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/entc/integration/multischema/ent/group"
-	"github.com/facebook/ent/entc/integration/multischema/ent/pet"
-	"github.com/facebook/ent/entc/integration/multischema/ent/predicate"
-	"github.com/facebook/ent/entc/integration/multischema/ent/user"
+	"entgo.io/ent/entc/integration/multischema/ent/group"
+	"entgo.io/ent/entc/integration/multischema/ent/pet"
+	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/entc/integration/multischema/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

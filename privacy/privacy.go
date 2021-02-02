@@ -10,7 +10,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 // List of policy decisions.

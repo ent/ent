@@ -21,11 +21,11 @@ There are 5 types of mutations:
 Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
 the same generated `UserMutation` object.
 
-However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent?tab=doc#Mutation">`ent.Mutation`<a> interface.
+However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`<a> interface.
  
 ## Hooks
 
-Hooks are functions that get an <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent?tab=doc#Mutator">`ent.Mutator`<a> and return a mutator back.
+Hooks are functions that get an <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutator">`ent.Mutator`<a> and return a mutator back.
 They function as middleware between mutators. It's similar to the popular HTTP middleware pattern.
 
 ```go
@@ -155,7 +155,7 @@ import (
     gen "<project>/ent"
     "<project>/ent/hook"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 // Card holds the schema definition for the CreditCard entity.
@@ -221,8 +221,8 @@ import (
 
 	"<project>/ent/hook"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/mixin"
 )
 
 

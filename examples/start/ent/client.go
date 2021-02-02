@@ -11,15 +11,15 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/start/ent/migrate"
+	"entgo.io/ent/examples/start/ent/migrate"
 
-	"github.com/facebook/ent/examples/start/ent/car"
-	"github.com/facebook/ent/examples/start/ent/group"
-	"github.com/facebook/ent/examples/start/ent/user"
+	"entgo.io/ent/examples/start/ent/car"
+	"entgo.io/ent/examples/start/ent/group"
+	"entgo.io/ent/examples/start/ent/user"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.

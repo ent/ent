@@ -11,11 +11,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/multischema/ent/group"
-	"github.com/facebook/ent/entc/integration/multischema/ent/pet"
-	"github.com/facebook/ent/entc/integration/multischema/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/group"
+	"entgo.io/ent/entc/integration/multischema/ent/pet"
+	"entgo.io/ent/entc/integration/multischema/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.

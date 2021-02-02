@@ -16,7 +16,7 @@ with large data-models.
 
 ## Quick Installation
 ```console
-go get github.com/facebook/ent/cmd/ent
+go get entgo.io/ent/cmd/ent
 ```
 
 For proper installation using [Go modules], visit [entgo.io website][entgo instal].

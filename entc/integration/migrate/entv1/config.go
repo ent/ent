@@ -7,8 +7,8 @@
 package entv1
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 )
 
 // Option function to configure the client.

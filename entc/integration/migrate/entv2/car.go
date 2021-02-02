@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/migrate/entv2/car"
+	"entgo.io/ent/entc/integration/migrate/entv2/user"
 )
 
 // Car is the model entity for the Car schema.

@@ -7,7 +7,7 @@ package edge
 import (
 	"reflect"
 
-	"github.com/facebook/ent/schema"
+	"entgo.io/ent/schema"
 )
 
 // A Descriptor for edge configuration.

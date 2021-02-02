@@ -5,10 +5,10 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/examples/privacytenant/ent/privacy"
-	"github.com/facebook/ent/examples/privacytenant/rule"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/examples/privacytenant/ent/privacy"
+	"entgo.io/ent/examples/privacytenant/rule"
+	"entgo.io/ent/schema/field"
 )
 
 // Tenant holds the schema definition for the Tenant entity.

@@ -11,13 +11,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/m2mrecur/ent/migrate"
+	"entgo.io/ent/examples/m2mrecur/ent/migrate"
 
-	"github.com/facebook/ent/examples/m2mrecur/ent/user"
+	"entgo.io/ent/examples/m2mrecur/ent/user"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.

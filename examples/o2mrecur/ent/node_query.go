@@ -13,11 +13,11 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2mrecur/ent/node"
-	"github.com/facebook/ent/examples/o2mrecur/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2mrecur/ent/node"
+	"entgo.io/ent/examples/o2mrecur/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // NodeQuery is the builder for querying Node entities.

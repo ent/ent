@@ -7,7 +7,7 @@ package main
 import (
 	"log"
 
-	"github.com/facebook/ent/cmd/internal/base"
+	"entgo.io/ent/cmd/internal/base"
 
 	"github.com/spf13/cobra"
 )

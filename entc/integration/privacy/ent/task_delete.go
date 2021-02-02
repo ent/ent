@@ -10,11 +10,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/privacy/ent/predicate"
-	"github.com/facebook/ent/entc/integration/privacy/ent/task"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/entc/integration/privacy/ent/task"
+	"entgo.io/ent/schema/field"
 )
 
 // TaskDelete is the builder for deleting a Task entity.

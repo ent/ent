@@ -10,10 +10,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/entc/integration/privacy/ent"
-	"github.com/facebook/ent/entql"
+	"entgo.io/ent/entc/integration/privacy/ent"
+	"entgo.io/ent/entql"
 
-	"github.com/facebook/ent/privacy"
+	"entgo.io/ent/privacy"
 )
 
 var (

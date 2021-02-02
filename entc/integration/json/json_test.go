@@ -12,14 +12,14 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/facebook/ent/entc/integration/json/ent/schema"
+	"entgo.io/ent/entc/integration/json/ent/schema"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqljson"
-	"github.com/facebook/ent/entc/integration/json/ent"
-	"github.com/facebook/ent/entc/integration/json/ent/migrate"
-	"github.com/facebook/ent/entc/integration/json/ent/user"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqljson"
+	"entgo.io/ent/entc/integration/json/ent"
+	"entgo.io/ent/entc/integration/json/ent/migrate"
+	"entgo.io/ent/entc/integration/json/ent/user"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"

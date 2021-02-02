@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/facebook/ent/entql"
+	"entgo.io/ent/entql"
 
 	"github.com/stretchr/testify/assert"
 )

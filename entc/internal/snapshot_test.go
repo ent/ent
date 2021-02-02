@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebook/ent/entc/gen"
+	"entgo.io/ent/entc/gen"
 
 	"github.com/stretchr/testify/require"
 )

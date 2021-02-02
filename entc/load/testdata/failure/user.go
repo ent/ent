@@ -5,8 +5,8 @@
 package failure
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 )
 
 type User struct {

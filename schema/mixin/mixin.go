@@ -7,9 +7,9 @@ package mixin
 import (
 	"time"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
 )
 
 // Schema is the default implementation for the ent.Mixin interface.

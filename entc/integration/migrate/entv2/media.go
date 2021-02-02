@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/media"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/migrate/entv2/media"
 )
 
 // Media is the model entity for the Media schema.

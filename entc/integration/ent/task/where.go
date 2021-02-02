@@ -7,9 +7,9 @@
 package task
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/entc/integration/ent/schema"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/entc/integration/ent/schema"
 )
 
 // ID filters vertices based on their ID field.

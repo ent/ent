@@ -5,7 +5,7 @@ title: Annotations
 
 Schema annotations allow attaching metadata to schema objects like fields and edges and inject them to external templates.
 An annotation must be a Go type that is serializable to JSON raw value (e.g. struct, map or slice)
-and implement the [Annotation](https://pkg.go.dev/github.com/facebook/ent/schema?tab=doc#Annotation) interface.
+and implement the [Annotation](https://pkg.go.dev/entgo.io/ent/schema?tab=doc#Annotation) interface.
 
 The builtin annotations allow configuring the different storage drivers (like SQL) and control the code generation output. 
 
@@ -17,10 +17,10 @@ A custom table name can be provided for types using the `entsql` annotation as f
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect/entsql"
-	"github.com/facebook/ent/schema"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
 )
 
 // User holds the schema definition for the User entity.

@@ -10,11 +10,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/media"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/migrate/entv2/media"
+	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // MediaDelete is the builder for deleting a Media entity.

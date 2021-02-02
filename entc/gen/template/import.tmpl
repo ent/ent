@@ -21,8 +21,8 @@ import (
 		{{- /* Import external packages */}}
         {{- template "import/types" $ }}
 	{{- end }}
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	{{- with $.Storage }}
 		{{- range $import := .Imports }}
 			"{{ $import }}"

@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/entc/integration/multischema/ent/internal"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 )
 
 // Option function to configure the client.

@@ -7,7 +7,7 @@ package viewer
 import (
 	"context"
 
-	"github.com/facebook/ent/examples/privacytenant/ent"
+	"entgo.io/ent/examples/privacytenant/ent"
 )
 
 // Role for viewer actions.

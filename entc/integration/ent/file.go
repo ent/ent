@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/ent/file"
-	"github.com/facebook/ent/entc/integration/ent/filetype"
-	"github.com/facebook/ent/entc/integration/ent/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/ent/file"
+	"entgo.io/ent/entc/integration/ent/filetype"
+	"entgo.io/ent/entc/integration/ent/user"
 )
 
 // File is the model entity for the File schema.

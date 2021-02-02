@@ -10,10 +10,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/card"
-	"github.com/facebook/ent/entc/integration/ent/spec"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/card"
+	"entgo.io/ent/entc/integration/ent/spec"
+	"entgo.io/ent/schema/field"
 )
 
 // SpecCreate is the builder for creating a Spec entity.

@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/encoding"
-	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/encoding"
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"

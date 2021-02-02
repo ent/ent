@@ -7,7 +7,7 @@ package field_test
 import (
 	"testing"
 
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/assert"
 )

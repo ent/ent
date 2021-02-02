@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/examples/traversal/ent"
+	"entgo.io/ent/examples/traversal/ent"
 )
 
 // The GroupFunc type is an adapter to allow the use of ordinary

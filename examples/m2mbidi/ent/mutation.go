@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/examples/m2mbidi/ent/predicate"
-	"github.com/facebook/ent/examples/m2mbidi/ent/user"
+	"entgo.io/ent/examples/m2mbidi/ent/predicate"
+	"entgo.io/ent/examples/m2mbidi/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

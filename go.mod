@@ -1,4 +1,4 @@
-module github.com/facebook/ent
+module entgo.io/ent
 
 go 1.15
 

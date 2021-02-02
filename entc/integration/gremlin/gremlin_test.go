@@ -16,14 +16,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebook/ent/entc/integration/gremlin/ent"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/file"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/entc/integration/gremlin/ent"
+	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/file"
+	"entgo.io/ent/entc/integration/gremlin/ent/group"
+	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	"entgo.io/ent/entc/integration/gremlin/ent/node"
+	"entgo.io/ent/entc/integration/gremlin/ent/pet"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
 
 	"github.com/stretchr/testify/require"
 )

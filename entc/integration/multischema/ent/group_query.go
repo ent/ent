@@ -13,13 +13,13 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/multischema/ent/group"
-	"github.com/facebook/ent/entc/integration/multischema/ent/internal"
-	"github.com/facebook/ent/entc/integration/multischema/ent/predicate"
-	"github.com/facebook/ent/entc/integration/multischema/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/group"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
+	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/entc/integration/multischema/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // GroupQuery is the builder for querying Group entities.

@@ -11,7 +11,7 @@ For the purpose of the example, we'll generate the following graph:
 The first step is to generate the 3 schemas: `Pet`, `User`, `Group`.
 
 ```console
-go run github.com/facebook/ent/cmd/ent init Pet User Group
+go run entgo.io/ent/cmd/ent init Pet User Group
 ```
 
 Add the necessary fields and edges for the schemas:
@@ -213,4 +213,4 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).
+The full example exists in [GitHub](https://entgo.io/ent/tree/master/examples/traversal).

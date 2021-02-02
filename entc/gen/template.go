@@ -16,7 +16,7 @@ import (
 	"text/template"
 	"text/template/parse"
 
-	"github.com/facebook/ent/entc/gen/internal"
+	"entgo.io/ent/entc/gen/internal"
 )
 
 //go:generate go run github.com/go-bindata/go-bindata/go-bindata -o=internal/bindata.go -pkg=internal -mode=420 -modtime=1 ./template/...

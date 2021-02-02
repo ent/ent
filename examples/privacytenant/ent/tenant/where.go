@@ -7,8 +7,8 @@
 package tenant
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/examples/privacytenant/ent/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/examples/privacytenant/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

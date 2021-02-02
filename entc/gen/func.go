@@ -17,7 +17,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/schema/field"
 
 	"github.com/go-openapi/inflect"
 )

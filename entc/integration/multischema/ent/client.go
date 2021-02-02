@@ -11,15 +11,15 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/entc/integration/multischema/ent/migrate"
+	"entgo.io/ent/entc/integration/multischema/ent/migrate"
 
-	"github.com/facebook/ent/entc/integration/multischema/ent/group"
-	"github.com/facebook/ent/entc/integration/multischema/ent/pet"
-	"github.com/facebook/ent/entc/integration/multischema/ent/user"
+	"entgo.io/ent/entc/integration/multischema/ent/group"
+	"entgo.io/ent/entc/integration/multischema/ent/pet"
+	"entgo.io/ent/entc/integration/multischema/ent/user"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.

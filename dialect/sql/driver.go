@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent/dialect"
 )
 
 // Driver is a dialect.Driver implementation for SQL based databases.

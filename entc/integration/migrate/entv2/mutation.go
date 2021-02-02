@@ -11,15 +11,15 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/entc/integration/migrate/entv2/car"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/conversion"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/customtype"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/media"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/pet"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/entc/integration/migrate/entv2/car"
+	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
+	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
+	"entgo.io/ent/entc/integration/migrate/entv2/media"
+	"entgo.io/ent/entc/integration/migrate/entv2/pet"
+	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/entc/integration/migrate/entv2/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

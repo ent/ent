@@ -13,11 +13,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/schema"
-	"github.com/facebook/ent/entc/integration/template/ent/group"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
-	"github.com/facebook/ent/entc/integration/template/ent/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/entc/integration/template/ent/group"
+	"entgo.io/ent/entc/integration/template/ent/pet"
+	"entgo.io/ent/entc/integration/template/ent/user"
 
 	"golang.org/x/sync/semaphore"
 )

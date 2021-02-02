@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/traversal/ent"
-	"github.com/facebook/ent/examples/traversal/ent/group"
-	"github.com/facebook/ent/examples/traversal/ent/pet"
-	"github.com/facebook/ent/examples/traversal/ent/user"
+	"entgo.io/ent/examples/traversal/ent"
+	"entgo.io/ent/examples/traversal/ent/group"
+	"entgo.io/ent/examples/traversal/ent/pet"
+	"entgo.io/ent/examples/traversal/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"

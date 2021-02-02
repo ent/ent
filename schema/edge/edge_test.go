@@ -7,9 +7,9 @@ package edge_test
 import (
 	"testing"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema"
-	"github.com/facebook/ent/schema/edge"
+	"entgo.io/ent"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

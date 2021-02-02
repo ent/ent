@@ -11,8 +11,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/facebook/ent/entc"
-	"github.com/facebook/ent/entc/gen"
+	"entgo.io/ent/entc"
+	"entgo.io/ent/entc/gen"
 )
 
 func main() {

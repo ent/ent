@@ -10,9 +10,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/migrate/entv1/conversion"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
+	"entgo.io/ent/schema/field"
 )
 
 // ConversionCreate is the builder for creating a Conversion entity.

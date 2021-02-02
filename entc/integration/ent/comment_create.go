@@ -11,9 +11,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/comment"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/comment"
+	"entgo.io/ent/schema/field"
 )
 
 // CommentCreate is the builder for creating a Comment entity.

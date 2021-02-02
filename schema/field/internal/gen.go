@@ -13,7 +13,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/schema/field"
 )
 
 func main() {

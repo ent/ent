@@ -10,12 +10,12 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/facebook/ent/entc/integration/hooks/ent"
-	"github.com/facebook/ent/entc/integration/hooks/ent/card"
-	"github.com/facebook/ent/entc/integration/hooks/ent/enttest"
-	"github.com/facebook/ent/entc/integration/hooks/ent/hook"
-	"github.com/facebook/ent/entc/integration/hooks/ent/migrate"
-	"github.com/facebook/ent/entc/integration/hooks/ent/user"
+	"entgo.io/ent/entc/integration/hooks/ent"
+	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/enttest"
+	"entgo.io/ent/entc/integration/hooks/ent/hook"
+	"entgo.io/ent/entc/integration/hooks/ent/migrate"
+	"entgo.io/ent/entc/integration/hooks/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"

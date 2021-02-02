@@ -88,7 +88,7 @@ func VersionHook() ent.Hook {
 The preferred way for writing such an extension is to use [ent.Mixin](schema-mixin.md). Use the `Fields` option for
 setting the fields that are shared between all schemas that import the mixed-schema, and use the `Hooks` option for
 attaching a mutation-hook for all mutations that are being applied on these schemas. Here's an example, based on a
-discussion in the [repository issue-tracker](https://github.com/facebook/ent/issues/830):
+discussion in the [repository issue-tracker](https://entgo.io/ent/issues/830):
 
 ```go
 // AuditMixin implements the ent.Mixin for sharing
@@ -182,7 +182,7 @@ users := client.User.
 ```
 
 For more examples, go to the [predicates](predicates.md#custom-predicates) page, or search in the repository
-issue-tracker for more advance examples like [issue-842](https://github.com/facebook/ent/issues/842#issuecomment-707896368).
+issue-tracker for more advance examples like [issue-842](https://entgo.io/ent/issues/842#issuecomment-707896368).
 
 #### How to add custom predicates to the codegen assets?
 

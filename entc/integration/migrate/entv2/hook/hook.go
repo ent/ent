@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/entc/integration/migrate/entv2"
+	"entgo.io/ent/entc/integration/migrate/entv2"
 )
 
 // The CarFunc type is an adapter to allow the use of ordinary

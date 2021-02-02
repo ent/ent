@@ -11,8 +11,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/facebook/ent/entc/gen"
-	"github.com/facebook/ent/entc/load"
+	"entgo.io/ent/entc/gen"
+	"entgo.io/ent/entc/load"
 )
 
 // Snapshot describes the schema snapshot restore.
