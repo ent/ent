@@ -33,6 +33,6 @@ type User struct {
 	require.NoError(t, err)
 	err = CheckDir(target)
 	require.Error(t, err)
-	expected := fmt.Sprintf("vcs conflict %s/b.go:4", target)
+	expected := fmt.Sprintf("vcs conflict %s:4", filepath.Join(target, "b.go"))
 	require.EqualError(t, err, expected)
 }
