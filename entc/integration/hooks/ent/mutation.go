@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebook/ent/entc/integration/hooks/ent/card"
-	"github.com/facebook/ent/entc/integration/hooks/ent/predicate"
-	"github.com/facebook/ent/entc/integration/hooks/ent/user"
+	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/predicate"
+	"entgo.io/ent/entc/integration/hooks/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

@@ -23,8 +23,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/entc/load/internal"
+	"entgo.io/ent"
+	"entgo.io/ent/entc/load/internal"
 
 	"golang.org/x/tools/go/packages"
 )

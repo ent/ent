@@ -12,11 +12,11 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/config/ent/predicate"
-	"github.com/facebook/ent/entc/integration/config/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/config/ent/predicate"
+	"entgo.io/ent/entc/integration/config/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserQuery is the builder for querying User entities.

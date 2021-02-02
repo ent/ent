@@ -14,9 +14,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/facebook/ent/entc/gen"
-	"github.com/facebook/ent/entc/internal"
-	"github.com/facebook/ent/entc/load"
+	"entgo.io/ent/entc/gen"
+	"entgo.io/ent/entc/internal"
+	"entgo.io/ent/entc/load"
 
 	"golang.org/x/tools/go/packages"
 )

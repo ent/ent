@@ -7,8 +7,8 @@
 package mixinid
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"github.com/google/uuid"
 )
 

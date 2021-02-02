@@ -7,7 +7,7 @@
 package task
 
 import (
-	"github.com/facebook/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema"
 )
 
 const (

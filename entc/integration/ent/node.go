@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/ent/node"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/ent/node"
 )
 
 // Node is the model entity for the Node schema.

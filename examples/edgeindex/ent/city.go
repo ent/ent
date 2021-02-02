@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/examples/edgeindex/ent/city"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/examples/edgeindex/ent/city"
 )
 
 // City is the model entity for the City schema.

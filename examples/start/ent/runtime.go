@@ -7,9 +7,9 @@
 package ent
 
 import (
-	"github.com/facebook/ent/examples/start/ent/group"
-	"github.com/facebook/ent/examples/start/ent/schema"
-	"github.com/facebook/ent/examples/start/ent/user"
+	"entgo.io/ent/examples/start/ent/group"
+	"entgo.io/ent/examples/start/ent/schema"
+	"entgo.io/ent/examples/start/ent/user"
 )
 
 // The init function reads all schema descriptors with runtime code

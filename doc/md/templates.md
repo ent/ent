@@ -71,7 +71,7 @@ In order to override an existing template, use its name. For example:
 ## Annotations
 Schema annotations allow attaching metadata to fields and edges and inject them to external templates.  
 An annotation must be a Go type that is serializable to JSON raw value (e.g. struct, map or slice)
-and implement the [Annotation](https://pkg.go.dev/github.com/facebook/ent/schema?tab=doc#Annotation) interface.
+and implement the [Annotation](https://pkg.go.dev/entgo.io/ent/schema?tab=doc#Annotation) interface.
 
 Here's an example of an annotation and its usage in schema and template:
 
@@ -126,12 +126,12 @@ func (User) Fields() []ent.Field {
 
 ## Examples
 - A custom template for implementing the `Node` API for GraphQL - 
-[Github](https://github.com/facebook/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
+[Github](https://entgo.io/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
 
-- An example for executing external templates with custom functions. See  [configuration](https://github.com/facebook/ent/blob/master/examples/entcpkg/ent/entc.go) and its
-[README](https://github.com/facebook/ent/blob/master/examples/entcpkg) file.
+- An example for executing external templates with custom functions. See  [configuration](https://entgo.io/ent/blob/master/examples/entcpkg/ent/entc.go) and its
+[README](https://entgo.io/ent/blob/master/examples/entcpkg) file.
 
 ## Documentation
 
 Templates are executed on either a specific node-type or the entire schema graph. For API
-documentation, see the <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent/entc/gen?tab=doc">GoDoc<a>.
+documentation, see the <a target="_blank" href="https://pkg.go.dev/entgo.io/ent/entc/gen?tab=doc">GoDoc<a>.

@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/entc/integration/customid/ent"
+	"entgo.io/ent/entc/integration/customid/ent"
 )
 
 // The BlobFunc type is an adapter to allow the use of ordinary

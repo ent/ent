@@ -4,7 +4,7 @@
 
 package field
 
-import "github.com/facebook/ent/schema"
+import "entgo.io/ent/schema"
 
 // Annotation is a builtin schema annotation for
 // configuring the schema fields in codegen.

@@ -5,10 +5,10 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/entc/integration/privacy/ent/privacy"
-	"github.com/facebook/ent/entc/integration/privacy/rule"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	"entgo.io/ent/entc/integration/privacy/ent/privacy"
+	"entgo.io/ent/entc/integration/privacy/rule"
+	"entgo.io/ent/schema/mixin"
 )
 
 // BaseMixin for all schemas.

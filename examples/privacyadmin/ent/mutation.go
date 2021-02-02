@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/examples/privacyadmin/ent/predicate"
-	"github.com/facebook/ent/examples/privacyadmin/ent/user"
+	"entgo.io/ent/examples/privacyadmin/ent/predicate"
+	"entgo.io/ent/examples/privacyadmin/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

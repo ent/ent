@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/entc/integration/privacy/ent"
+	"entgo.io/ent/entc/integration/privacy/ent"
 )
 
 // The TaskFunc type is an adapter to allow the use of ordinary

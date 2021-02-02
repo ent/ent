@@ -68,7 +68,7 @@ In order to enable the privacy option in your code generation, enable the `priva
 ```go
 package ent
   
-//go:generate go run github.com/facebook/ent/cmd/ent generate --feature privacy ./schema
+//go:generate go run entgo.io/ent/cmd/ent generate --feature privacy ./schema
 ```
 
 It is recommended to add the [`schema/snapshot`](features.md#auto-solve-merge-conflicts) feature-flag along with the
@@ -89,9 +89,9 @@ package main
 import (
     "log"
 
-    "github.com/facebook/ent/entc"
-    "github.com/facebook/ent/entc/gen"
-    "github.com/facebookincubator/ent-contrib/entgql"
+    "entgo.io/ent/entc"
+    "entgo.io/ent/entc/gen"
+    "entgo.ioincubator/ent-contrib/entgql"
 )
 
 func main() {
@@ -132,8 +132,8 @@ After running the code-generation (with the feature-flag for privacy), we add th
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/examples/privacyadmin/ent/privacy"
+	"entgo.io/ent"
+	"entgo.io/ent/examples/privacyadmin/ent/privacy"
 )
 
 // User holds the schema definition for the User entity.
@@ -165,8 +165,8 @@ package rule
 import (
 	"context"
 
-	"github.com/facebook/ent/examples/privacyadmin/ent/privacy"
-	"github.com/facebook/ent/examples/privacyadmin/viewer"
+	"entgo.io/ent/examples/privacyadmin/ent/privacy"
+	"entgo.io/ent/examples/privacyadmin/viewer"
 )
 
 // DenyIfNoViewer is a rule that returns Deny decision if the viewer is
@@ -264,7 +264,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/privacyadmin).
+The full example exists in [GitHub](https://entgo.io/ent/tree/master/examples/privacyadmin).
 
 ### Multi Tenancy
 
@@ -273,7 +273,7 @@ The helper packages `viewer` and `rule` (as mentioned above) also exist in this 
 
 ![tenant-example](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/tenant_medium.png)
 
-Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://github.com/facebook/ent/tree/master/examples/privacytenant/ent/schema)),
+Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://entgo.io/ent/tree/master/examples/privacytenant/ent/schema)),
 and since we want to share some logic between them, we create another [mixed-in schema](schema-mixin.md) and add it to all other schemas as follows:
 
 ```go
@@ -562,6 +562,6 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/privacytenant).
+The full example exists in [GitHub](https://entgo.io/ent/tree/master/examples/privacytenant).
 
 Please note that this documentation is under active development.

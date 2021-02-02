@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/entc/integration/customid/ent"
-	"github.com/facebook/ent/entc/integration/customid/ent/pet"
-	"github.com/facebook/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/entc/integration/customid/ent"
+	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/user"
 	"github.com/go-sql-driver/mysql"
 
 	"github.com/google/uuid"

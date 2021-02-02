@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/examples/traversal/ent/group"
-	"github.com/facebook/ent/examples/traversal/ent/pet"
-	"github.com/facebook/ent/examples/traversal/ent/predicate"
-	"github.com/facebook/ent/examples/traversal/ent/user"
+	"entgo.io/ent/examples/traversal/ent/group"
+	"entgo.io/ent/examples/traversal/ent/pet"
+	"entgo.io/ent/examples/traversal/ent/predicate"
+	"entgo.io/ent/examples/traversal/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/facebook/ent/examples/start/ent/car"
-	"github.com/facebook/ent/examples/start/ent/group"
-	"github.com/facebook/ent/examples/start/ent/predicate"
-	"github.com/facebook/ent/examples/start/ent/user"
+	"entgo.io/ent/examples/start/ent/car"
+	"entgo.io/ent/examples/start/ent/group"
+	"entgo.io/ent/examples/start/ent/predicate"
+	"entgo.io/ent/examples/start/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

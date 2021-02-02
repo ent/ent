@@ -14,11 +14,11 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/facebook/ent/entc/integration/json/ent/predicate"
-	"github.com/facebook/ent/entc/integration/json/ent/schema"
-	"github.com/facebook/ent/entc/integration/json/ent/user"
+	"entgo.io/ent/entc/integration/json/ent/predicate"
+	"entgo.io/ent/entc/integration/json/ent/schema"
+	"entgo.io/ent/entc/integration/json/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

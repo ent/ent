@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebook/ent"
-	gen "github.com/facebook/ent/entc/integration/hooks/ent"
-	"github.com/facebook/ent/entc/integration/hooks/ent/card"
-	"github.com/facebook/ent/entc/integration/hooks/ent/hook"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	gen "entgo.io/ent/entc/integration/hooks/ent"
+	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/hook"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/mixin"
 )
 
 // RejectMany rejects all update operations

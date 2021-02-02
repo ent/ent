@@ -7,15 +7,15 @@
 package ent
 
 import (
-	"github.com/facebook/ent/entc/integration/privacy/ent/predicate"
-	"github.com/facebook/ent/entc/integration/privacy/ent/task"
-	"github.com/facebook/ent/entc/integration/privacy/ent/team"
-	"github.com/facebook/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/entc/integration/privacy/ent/task"
+	"entgo.io/ent/entc/integration/privacy/ent/team"
+	"entgo.io/ent/entc/integration/privacy/ent/user"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entql"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entql"
+	"entgo.io/ent/schema/field"
 )
 
 // schemaGraph holds a representation of ent/schema at runtime.

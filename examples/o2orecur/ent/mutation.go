@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/examples/o2orecur/ent/node"
-	"github.com/facebook/ent/examples/o2orecur/ent/predicate"
+	"entgo.io/ent/examples/o2orecur/ent/node"
+	"entgo.io/ent/examples/o2orecur/ent/predicate"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

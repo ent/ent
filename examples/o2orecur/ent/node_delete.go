@@ -10,11 +10,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2orecur/ent/node"
-	"github.com/facebook/ent/examples/o2orecur/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2orecur/ent/node"
+	"entgo.io/ent/examples/o2orecur/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // NodeDelete is the builder for deleting a Node entity.

@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/examples/privacytenant/ent"
+	"entgo.io/ent/examples/privacytenant/ent"
 )
 
 // The GroupFunc type is an adapter to allow the use of ordinary

@@ -4,7 +4,7 @@
 
 package schema
 
-import "github.com/facebook/ent"
+import "entgo.io/ent"
 
 // Goods holds the schema definition for the Goods entity.
 type Goods struct {

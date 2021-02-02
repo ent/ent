@@ -12,11 +12,11 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/ent/role"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/ent/role"
+	"entgo.io/ent/schema/field"
 
 	"github.com/google/uuid"
 )

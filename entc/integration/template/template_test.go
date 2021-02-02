@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/facebook/ent/entc/integration/template/ent"
-	"github.com/facebook/ent/entc/integration/template/ent/migrate"
-	"github.com/facebook/ent/entc/integration/template/ent/user"
+	"entgo.io/ent/entc/integration/template/ent"
+	"entgo.io/ent/entc/integration/template/ent/migrate"
+	"entgo.io/ent/entc/integration/template/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"

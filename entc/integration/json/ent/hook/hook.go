@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/entc/integration/json/ent"
+	"entgo.io/ent/entc/integration/json/ent"
 )
 
 // The UserFunc type is an adapter to allow the use of ordinary

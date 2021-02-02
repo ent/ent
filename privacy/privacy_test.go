@@ -9,8 +9,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/privacy"
+	"entgo.io/ent"
+	"entgo.io/ent/privacy"
 	"github.com/stretchr/testify/assert"
 )
 

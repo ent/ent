@@ -10,11 +10,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/privacytenant/ent/group"
-	"github.com/facebook/ent/examples/privacytenant/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/privacytenant/ent/group"
+	"entgo.io/ent/examples/privacytenant/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // GroupDelete is the builder for deleting a Group entity.

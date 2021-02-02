@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/examples/privacyadmin/ent"
+	"entgo.io/ent/examples/privacyadmin/ent"
 )
 
 // The UserFunc type is an adapter to allow the use of ordinary

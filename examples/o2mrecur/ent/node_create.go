@@ -11,9 +11,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2mrecur/ent/node"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2mrecur/ent/node"
+	"entgo.io/ent/schema/field"
 )
 
 // NodeCreate is the builder for creating a Node entity.

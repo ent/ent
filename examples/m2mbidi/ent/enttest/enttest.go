@@ -9,11 +9,11 @@ package enttest
 import (
 	"context"
 
-	"github.com/facebook/ent/examples/m2mbidi/ent"
+	"entgo.io/ent/examples/m2mbidi/ent"
 	// required by schema hooks.
-	_ "github.com/facebook/ent/examples/m2mbidi/ent/runtime"
+	_ "entgo.io/ent/examples/m2mbidi/ent/runtime"
 
-	"github.com/facebook/ent/dialect/sql/schema"
+	"entgo.io/ent/dialect/sql/schema"
 )
 
 type (

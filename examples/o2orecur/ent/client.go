@@ -11,13 +11,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/o2orecur/ent/migrate"
+	"entgo.io/ent/examples/o2orecur/ent/migrate"
 
-	"github.com/facebook/ent/examples/o2orecur/ent/node"
+	"entgo.io/ent/examples/o2orecur/ent/node"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.

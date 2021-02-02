@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/facebook/ent/entc/integration/ent/role"
+	"entgo.io/ent/entc/integration/ent/role"
 )
 
 const (

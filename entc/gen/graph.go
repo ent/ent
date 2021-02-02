@@ -17,9 +17,9 @@ import (
 	"runtime/debug"
 	"text/template/parse"
 
-	"github.com/facebook/ent/dialect/sql/schema"
-	"github.com/facebook/ent/entc/load"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema/field"
 
 	"golang.org/x/tools/imports"
 )

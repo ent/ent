@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/examples/o2m2types/ent"
+	"entgo.io/ent/examples/o2m2types/ent"
 )
 
 // The PetFunc type is an adapter to allow the use of ordinary

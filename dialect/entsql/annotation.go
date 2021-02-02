@@ -4,7 +4,7 @@
 
 package entsql
 
-import "github.com/facebook/ent/schema"
+import "entgo.io/ent/schema"
 
 // Annotation is a builtin schema annotation for attaching
 // SQL metadata to schema objects for both codegen and runtime.

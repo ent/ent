@@ -7,8 +7,8 @@
 package customtype
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 )
 
 // ID filters vertices based on their ID field.

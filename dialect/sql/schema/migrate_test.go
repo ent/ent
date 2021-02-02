@@ -8,8 +8,8 @@ import (
 	"context"
 	"testing"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/facebook/ent/dialect/sql"
 	"github.com/stretchr/testify/require"
 )
 

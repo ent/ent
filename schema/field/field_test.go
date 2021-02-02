@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/schema/field"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -70,7 +70,7 @@ func TestInt(t *testing.T) {
 	fd = field.Int("active").GoType(Count(0)).Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Count", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Count", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -125,7 +125,7 @@ func TestFloat(t *testing.T) {
 	fd = field.Float("active").GoType(Count(0)).Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Count", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Count", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -159,7 +159,7 @@ func TestBool(t *testing.T) {
 	fd = field.Bool("active").GoType(Status(false)).Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Status", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Status", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -326,7 +326,7 @@ func TestString(t *testing.T) {
 	}
 	fd = field.String("nullable_url").GoType(&tURL{}).Descriptor()
 	assert.Equal(t, "field_test.tURL", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.tURL", fd.Info.String())
 	assert.True(t, fd.Info.ValueScanner())
 	assert.True(t, fd.Info.Stringer())
@@ -366,7 +366,7 @@ func TestTime(t *testing.T) {
 	fd = field.Time("deleted_at").GoType(Time{}).Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Time", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Time", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -471,7 +471,7 @@ func TestField_Enums(t *testing.T) {
 	fd = field.Enum("role").GoType(Role("")).Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Role", fd.Info.Ident)
-	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
 	assert.Equal(t, "field_test.Role", fd.Info.String())
 	assert.False(t, fd.Info.Nillable)
 	assert.False(t, fd.Info.ValueScanner())
@@ -520,7 +520,7 @@ func TestField_Other(t *testing.T) {
 	assert.Equal(t, "other", fd.Name)
 	assert.True(t, fd.Unique)
 	assert.Equal(t, "field_test.custom", fd.Info.String())
-	assert.Equal(t, "github.com/facebook/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
 	assert.NotNil(t, fd.Default)
 
 	fd = field.Other("other", &custom{}).

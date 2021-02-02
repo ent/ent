@@ -17,7 +17,7 @@ const users = [
     // You will need to prepend the image path with your baseUrl
     // if it is not '/', like: '/test-site/img/image.jpg'.
     image: '/img/undraw_open_source.svg',
-    infoLink: 'https://www.facebook.com',
+    infoLink: 'https://www.faceboo.com',
     pinned: true,
   },
 ];
@@ -37,7 +37,7 @@ const siteConfig = {
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
-    {href: 'https://pkg.go.dev/github.com/facebook/ent?tab=doc', label: 'GoDoc'},
+    {href: 'https://pkg.go.dev/entgo.io/ent?tab=doc', label: 'GoDoc'},
     {href: 'https://github.com/facebook/ent', label: 'Github'},
     { blog: true, label: 'Blog' },
   ],

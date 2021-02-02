@@ -13,12 +13,12 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/json/ent/predicate"
-	"github.com/facebook/ent/entc/integration/json/ent/schema"
-	"github.com/facebook/ent/entc/integration/json/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/json/ent/predicate"
+	"entgo.io/ent/entc/integration/json/ent/schema"
+	"entgo.io/ent/entc/integration/json/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.

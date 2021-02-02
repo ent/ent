@@ -37,9 +37,9 @@ package schema
 import (
 	"time"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/mixin"
 )
 
 // -------------------------------------------------
@@ -133,8 +133,8 @@ In order to use them, add the `mixin.Time` mixin to your schema as follows:
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/mixin"
 )
 
 type Pet struct {

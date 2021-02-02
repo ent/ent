@@ -15,10 +15,10 @@ import (
 		"{{ $.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entql"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entql"
+	"entgo.io/ent/schema/field"
 )
 
 // schemaGraph holds a representation of ent/schema at runtime.

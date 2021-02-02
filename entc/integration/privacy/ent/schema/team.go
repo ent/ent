@@ -5,12 +5,12 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/entc/integration/privacy/ent/privacy"
-	"github.com/facebook/ent/entc/integration/privacy/rule"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	"entgo.io/ent/entc/integration/privacy/ent/privacy"
+	"entgo.io/ent/entc/integration/privacy/rule"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/mixin"
 )
 
 // Team defines the schema of a team.

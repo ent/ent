@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/facebook/ent/examples/m2m2types/ent/group"
-	"github.com/facebook/ent/examples/m2m2types/ent/predicate"
-	"github.com/facebook/ent/examples/m2m2types/ent/user"
+	"entgo.io/ent/examples/m2m2types/ent/group"
+	"entgo.io/ent/examples/m2m2types/ent/predicate"
+	"entgo.io/ent/examples/m2m2types/ent/user"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (

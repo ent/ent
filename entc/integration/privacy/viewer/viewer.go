@@ -7,8 +7,8 @@ package viewer
 import (
 	"context"
 
-	"github.com/facebook/ent/entc/integration/privacy/ent"
-	"github.com/facebook/ent/entc/integration/privacy/ent/team"
+	"entgo.io/ent/entc/integration/privacy/ent"
+	"entgo.io/ent/entc/integration/privacy/ent/team"
 )
 
 // Role for viewer actions.
