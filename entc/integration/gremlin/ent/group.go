@@ -28,6 +28,7 @@ type Group struct {
 	Type *string `json:"type,omitempty"`
 	// MaxUsers holds the value of the "max_users" field.
 	MaxUsers int `json:"max_users,omitempty"`
+	// Name holds the value of the "name" field.
 	// field with multiple validators
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
