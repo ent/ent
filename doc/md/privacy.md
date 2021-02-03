@@ -264,7 +264,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://entgo.io/ent/tree/master/examples/privacyadmin).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/privacyadmin).
 
 ### Multi Tenancy
 
@@ -273,7 +273,7 @@ The helper packages `viewer` and `rule` (as mentioned above) also exist in this 
 
 ![tenant-example](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/tenant_medium.png)
 
-Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://entgo.io/ent/tree/master/examples/privacytenant/ent/schema)),
+Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://github.com/facebook/ent/tree/master/examples/privacytenant/ent/schema)),
 and since we want to share some logic between them, we create another [mixed-in schema](schema-mixin.md) and add it to all other schemas as follows:
 
 ```go
@@ -562,6 +562,6 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://entgo.io/ent/tree/master/examples/privacytenant).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/privacytenant).
 
 Please note that this documentation is under active development.
