@@ -59,7 +59,7 @@ func TestSchemaConfig(t *testing.T) {
 	require.NoError(t, err)
 	ast.Inspect(f, func(n ast.Node) bool {
 		if f, ok := n.(*ast.Field); ok && len(f.Names) > 0 && f.Names[0].Name == fd.Name {
-			require.Equal(t, fd.Comment, f.Doc.Text())
+			require.Contains(t, fd.Comment, f.Doc.Text())
 			return false
 		}
 		return true
