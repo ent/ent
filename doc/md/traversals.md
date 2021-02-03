@@ -213,4 +213,4 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://entgo.io/ent/tree/master/examples/traversal).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).

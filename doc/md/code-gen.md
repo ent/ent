@@ -140,7 +140,7 @@ func main() {
 }
 ```
 
-The full example exists in [GitHub](https://entgo.io/ent/tree/master/examples/entcpkg).
+The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/entcpkg).
 
 
 ## Schema Description
