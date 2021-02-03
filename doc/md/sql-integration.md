@@ -73,8 +73,9 @@ import (
 	"<project>/ent"
 
 	"contrib.go.opencensus.io/integrations/ocsql"
-	"github.com/go-sql-driver/mysql"
+	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/go-sql-driver/mysql"
 )
 
 type connector struct {
@@ -99,8 +100,8 @@ func (connector) Driver() driver.Driver {
 func Open(dsn string) *ent.Client {
 	db := sql.OpenDB(connector{dsn})
 	// Create an ent.Driver from `db`.
-    drv := entsql.OpenDB("mysql", db)
-    return ent.NewClient(ent.Driver(drv))
+	drv := entsql.OpenDB(dialect.MySQL, db)
+	return ent.NewClient(ent.Driver(drv))
 }
 ```
 
