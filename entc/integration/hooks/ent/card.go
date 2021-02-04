@@ -23,10 +23,12 @@ type Card struct {
 	ID int `json:"id,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"number,omitempty"`
+	// Name holds the value of the "name" field.
 	// Exact name written on card
 	Name string `json:"name,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// InHook holds the value of the "in_hook" field.
 	// A mandatory field that is set by the hook
 	InHook string `json:"in_hook,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
