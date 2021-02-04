@@ -1,5 +1,7 @@
 ## ent - An Entity Framework For Go
 
+[English](README.md) | [中文](README_zh.md)
+
 <img width="50%" 
 align="right"
 style="display: block; margin:40px auto;" 
