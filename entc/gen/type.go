@@ -694,6 +694,9 @@ func ValidSchemaName(name string) error {
 	if _, ok := globalIdent[name]; ok {
 		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", name)
 	}
+	if _, ok := privateField[pkg]; ok {
+		return fmt.Errorf("schema name conflicts with ent builder fields %q", pkg)
+	}
 	return nil
 }
 
