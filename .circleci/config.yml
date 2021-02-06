@@ -30,7 +30,7 @@ jobs:
       - *mktestdir
       - run:
           name: Run linters
-          command: golangci-lint run --out-format junit-xml > ~/test-results/lint.xml
+          command: golangci-lint run --timeout 5m --out-format junit-xml > ~/test-results/lint.xml
       - *storetestdir
   unit:
     executor:
