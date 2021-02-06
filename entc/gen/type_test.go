@@ -321,3 +321,14 @@ func TestEdge(t *testing.T) {
 	require.Equal(t, "user_groups", users.Label())
 	require.Equal(t, "user_groups", groups.Label())
 }
+
+func TestValidSchemaName(t *testing.T) {
+	err := ValidSchemaName("Config")
+	require.Error(t, err)
+	err = ValidSchemaName("Mutation")
+	require.Error(t, err)
+	err = ValidSchemaName("Boring")
+	require.NoError(t, err)
+	err = ValidSchemaName("Order")
+	require.NoError(t, err)
+}
