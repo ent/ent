@@ -1372,6 +1372,24 @@ WHERE
 			wantQuery: "SELECT * FROM `users` JOIN `pets` AS `t0` ON `users`.`id` = `t0`.`owner_id` WHERE `t0`.`name` = ?",
 			wantArgs:  []interface{}{"pedro"},
 		},
+		{
+			input: func() Querier {
+				t1 := Table("users")
+				sel := Select("*").
+					From(t1).
+					Where(P(func(b *Builder) {
+						b.Join(Expr("name = $1", "pedro"))
+					})).
+					Where(P(func(b *Builder) {
+						b.Join(Expr("name = $2", "pedro"))
+					})).
+					Where(EQ("name", "pedro"))
+				sel.SetDialect(dialect.Postgres)
+				return sel
+			}(),
+			wantQuery: `SELECT * FROM "users" WHERE (name = $1 AND name = $2) AND "name" = $3`,
+			wantArgs:  []interface{}{"pedro", "pedro", "pedro"},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -1380,6 +1398,25 @@ WHERE
 			require.Equal(t, tt.wantArgs, args)
 		})
 	}
+}
+
+func TestAnd(t *testing.T) {
+	assert := require.New(t)
+
+	p1 := P(func(b *Builder) {
+		b.Join(Expr("name = $1", "pedro"))
+	})
+	p2 := P(func(b *Builder) {
+		b.Join(Expr("name = $2", "pedro"))
+	})
+
+	and := And(p1, p2)
+
+	_, _ = and.Query()
+
+	assert.Equal(1, p1.Total())
+	assert.Equal(2, p2.Total())
+	assert.Equal(2, and.Total())
 }
 
 func TestBuilder_Err(t *testing.T) {
