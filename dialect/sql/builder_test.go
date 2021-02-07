@@ -1373,22 +1373,29 @@ WHERE
 			wantArgs:  []interface{}{"pedro"},
 		},
 		{
-			input: func() Querier {
-				t1 := Table("users")
-				sel := Select("*").
-					From(t1).
-					Where(P(func(b *Builder) {
-						b.Join(Expr("name = $1", "pedro"))
-					})).
-					Where(P(func(b *Builder) {
-						b.Join(Expr("name = $2", "pedro"))
-					})).
-					Where(EQ("name", "pedro"))
-				sel.SetDialect(dialect.Postgres)
-				return sel
-			}(),
-			wantQuery: `SELECT * FROM "users" WHERE (name = $1 AND name = $2) AND "name" = $3`,
-			wantArgs:  []interface{}{"pedro", "pedro", "pedro"},
+			input: Dialect(dialect.Postgres).
+				Select("*").
+				From(Table("users")).
+				Where(P(func(b *Builder) {
+					b.Join(Expr("name = $1", "pedro"))
+				})).
+				Where(P(func(b *Builder) {
+					b.Join(Expr("name = $2", "pedro"))
+				})).
+				Where(EQ("name", "pedro")).
+				Where(
+					And(
+						In(
+							"id",
+							Select("owner_id").
+								From(Table("pets")).
+								Where(EQ("name", "luna")),
+						),
+						EQ("active", true),
+					),
+				),
+			wantQuery: `SELECT * FROM "users" WHERE ((name = $1 AND name = $2) AND "name" = $3) AND ("id" IN (SELECT "owner_id" FROM "pets" WHERE "name" = $4) AND "active" = $5)`,
+			wantArgs:  []interface{}{"pedro", "pedro", "pedro", "luna", true},
 		},
 	}
 	for i, tt := range tests {
@@ -1398,25 +1405,6 @@ WHERE
 			require.Equal(t, tt.wantArgs, args)
 		})
 	}
-}
-
-func TestAnd(t *testing.T) {
-	assert := require.New(t)
-
-	p1 := P(func(b *Builder) {
-		b.Join(Expr("name = $1", "pedro"))
-	})
-	p2 := P(func(b *Builder) {
-		b.Join(Expr("name = $2", "pedro"))
-	})
-
-	and := And(p1, p2)
-
-	_, _ = and.Query()
-
-	assert.Equal(1, p1.Total())
-	assert.Equal(2, p2.Total())
-	assert.Equal(2, and.Total())
 }
 
 func TestBuilder_Err(t *testing.T) {
