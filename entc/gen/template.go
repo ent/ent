@@ -166,6 +166,7 @@ var (
 		"dialect/sql/query/from/*",
 		"dialect/*/query/selector/*",
 		"dialect/sql/predicate/edge/*/*",
+		"model/comment/additional/*",
 	}
 	// templates holds the Go templates for the code generation.
 	templates *Template
