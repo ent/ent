@@ -365,6 +365,7 @@ We'll continue the user/cars example above by querying the inverse edge.
 
 ```go
 import (
+	"fmt"
 	"log"
 
 	"<project>/ent"
