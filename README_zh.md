@@ -20,7 +20,7 @@ ent是一个简单而又功能强大的Go语言实体框架，ent易于构建和
 go get entgo.io/ent/cmd/ent
 ```
 
-使用[Go modules]进行正确安装，请访问[entgo.io website][entgo instal]。
+请访问[entgo.io website][entgo instal]以使用[Go modules]进行正确安装。
 
 ## 文档和支持
 开发和使用ent的文档请参照： https://entgo.io
