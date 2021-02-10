@@ -180,35 +180,6 @@ jobs:
           command: gotestsum -f short-verbose --junitfile ~/test-results/pr-integration.xml -- -race -count=2 .
       - *storetestdir
 
-  docs:
-    docker:
-    - image: circleci/node
-    steps:
-    - checkout
-    - run:
-        name: Checking Docs Modified
-        command: |
-          if [[ ! $(git diff master^ --name-only doc/) ]]; then
-            echo "docs not modified; no need to deploy"
-            circleci step halt
-          fi
-    - run:
-        name: Install Dependencies
-        working_directory: ~/project/doc/website
-        command: yarn
-    - run:
-        name: Build Docs
-        working_directory: ~/project/doc/website
-        command: yarn build
-    - aws-cli/setup
-    - run:
-        name: Deploy Docs
-        working_directory: ~/project/doc/website/build/ent
-        command: aws s3 sync . s3://entgo.io --delete --exclude "assets/*"
-    - run:
-        name: Invalidate Cache
-        command: aws cloudfront create-invalidation --distribution-id $CDN_DISTRIBUTION_ID --paths "/*" | jq -M "del(.Location)"
-
 workflows:
   version: 2.1
   all:
@@ -220,7 +191,3 @@ workflows:
         filters:
           branches:
             ignore: master
-    - docs:
-        filters:
-          branches:
-            only: master
