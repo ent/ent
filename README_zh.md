@@ -25,7 +25,7 @@ go get entgo.io/ent/cmd/ent
 ## 文档和支持
 开发和使用ent的文档请参照： https://entgo.io
 
-讨论问题和支持, [创建一个issue](https://github.com/facebook/ent/issues/new/choose) 或者加入我们的Gopher Slack(Slack软件,类似于论坛)[讨论组](https://gophers.slack.com/archives/C01FMSQDT53)  
+如要讨论问题和支持, [创建一个issue](https://github.com/facebook/ent/issues/new/choose) 或者加入我们的Gopher Slack(Slack软件,类似于论坛)[讨论组](https://gophers.slack.com/archives/C01FMSQDT53)  
 
 ## 加入 ent 社区
 如果你想为`ent`做出贡献, [贡献代码](CONTRIBUTING.md) 中写了如何做出自己的贡献  
