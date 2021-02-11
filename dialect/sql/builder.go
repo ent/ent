@@ -627,6 +627,7 @@ type InsertBuilder struct {
 	conflictColumns []string
 	updateColumns   []string
 	updateValues    []interface{}
+	onConflictOp    ConflictOp
 }
 
 // Insert creates a builder for the `INSERT INTO` statement.
@@ -665,6 +666,12 @@ func (i *InsertBuilder) Columns(columns ...string) *InsertBuilder {
 // ConflictColumns sets the columns to apply the update during upsert.
 func (i *InsertBuilder) ConflictColumns(values ...string) *InsertBuilder {
 	i.conflictColumns = append(i.conflictColumns, values...)
+	return i
+}
+
+// OnConflict sets the columns to apply the update during upsert.
+func (i *InsertBuilder) OnConflict(op ConflictOp) *InsertBuilder {
+	i.onConflictOp = op
 	return i
 }
 
@@ -721,7 +728,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 	}
 
 	// Update on conflict
-	if len(i.conflictColumns) > 0 && i.postgres() {
+	if len(i.conflictColumns) > 0 {
 		switch i.Dialect() {
 		case dialect.Postgres, dialect.SQLite:
 			i.Pad().
@@ -730,19 +737,30 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 				Nested(func(b *Builder) {
 					b.IdentComma(i.conflictColumns...)
 				}).
-				Pad().
-				WriteString("DO UPDATE SET").Pad()
+				Pad()
+
+			switch i.onConflictOp {
+			case UpdateDoNothing:
+				i.WriteString("DO NOTHING")
+			case UpdateExcluded:
+				i.WriteString("DO UPDATE SET").Pad()
+				for j, c := range i.updateColumns {
+					if j > 0 {
+						i.Comma()
+					}
+					i.Ident(c).WriteOp(OpEQ).WriteString("EXCLUDED").WriteByte('.').Ident(c)
+				}
+			}
 
 		case dialect.MySQL:
+			i.WriteString("AS new")
 			i.Pad().WriteString("ON DUPLICATE KEY UPDATE").Pad()
-		}
-
-		for j, c := range i.updateColumns {
-			if j > 0 {
-				i.Comma()
+			for j, c := range i.updateColumns {
+				if j > 0 {
+					i.Comma()
+				}
+				i.Ident(c).WriteOp(OpEQ).WriteString("new").WriteByte('.').Ident(c)
 			}
-			i.Ident(c).WriteOp(OpEQ).WriteString("EXCLUDED").WriteByte('.').Ident(c)
-
 		}
 	}
 
@@ -2215,6 +2233,16 @@ var ops = [...]string{
 	OpIsNull:  "IS NULL",
 	OpNotNull: "IS NOT NULL",
 }
+
+// A ConflictOp represents a possible action to take when an insert conflict occurrs.
+type ConflictOp int
+
+// Conflict Operations
+const (
+	UpdateExcluded     = iota // Update conflict columns using EXCLUDED.column
+	UpdateDoNothing           // DO NOTHING
+	UpdateColumnValues        // Update using provided values
+)
 
 // WriteOp writes an operator to the builder.
 func (b *Builder) WriteOp(op Op) *Builder {

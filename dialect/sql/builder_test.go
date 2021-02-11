@@ -489,6 +489,13 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "email" = EXCLUDED."email"`,
 			wantArgs:  []interface{}{"1", "user@example.com"},
 		},
+
+		{
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(UpdateDoNothing).ConflictColumns("id"),
+			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO NOTHING`,
+			wantArgs:  []interface{}{"1", "user@example.com"},
+		},
+
 		{
 			input: Select().
 				From(Table("users")).
