@@ -622,6 +622,11 @@ type InsertBuilder struct {
 	defaults  string
 	returning []string
 	values    [][]interface{}
+
+	// Upsert
+	conflictColumns []string
+	updateColumns   []string
+	updateValues    []interface{}
 }
 
 // Insert creates a builder for the `INSERT INTO` statement.
@@ -654,6 +659,19 @@ func (i *InsertBuilder) Set(column string, v interface{}) *InsertBuilder {
 // Columns sets the columns of the insert statement.
 func (i *InsertBuilder) Columns(columns ...string) *InsertBuilder {
 	i.columns = append(i.columns, columns...)
+	return i
+}
+
+// ConflictColumns sets the columns to apply the update during upsert.
+func (i *InsertBuilder) ConflictColumns(values ...string) *InsertBuilder {
+	i.conflictColumns = append(i.conflictColumns, values...)
+	return i
+}
+
+// UpdateSet sets a column and a its value for use on upsert
+func (i *InsertBuilder) UpdateSet(column string, v interface{}) *InsertBuilder {
+	i.updateColumns = append(i.updateColumns, column)
+	i.updateValues = append(i.updateValues, v)
 	return i
 }
 
@@ -701,6 +719,33 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 			})
 		}
 	}
+
+	// Update on conflict
+	if len(i.conflictColumns) > 0 && i.postgres() {
+		switch i.Dialect() {
+		case dialect.Postgres, dialect.SQLite:
+			i.Pad().
+				WriteString("ON CONFLICT").
+				Pad().
+				Nested(func(b *Builder) {
+					b.IdentComma(i.conflictColumns...)
+				}).
+				Pad().
+				WriteString("DO UPDATE SET").Pad()
+
+		case dialect.MySQL:
+			i.Pad().WriteString("ON DUPLICATE KEY UPDATE").Pad()
+		}
+
+		for j, c := range i.updateColumns {
+			if j > 0 {
+				i.Comma()
+			}
+			i.Ident(c).WriteOp(OpEQ).WriteString("EXCLUDED").WriteByte('.').Ident(c)
+
+		}
+	}
+
 	if len(i.returning) > 0 && i.postgres() {
 		i.WriteString(" RETURNING ")
 		i.IdentComma(i.returning...)

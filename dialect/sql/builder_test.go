@@ -485,6 +485,11 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki", "ariel", 0, 1e5, 1, 2},
 		},
 		{
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").ConflictColumns("id").UpdateSet("email", "user-1@example.com"),
+			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "email" = EXCLUDED."email"`,
+			wantArgs:  []interface{}{"1", "user@example.com"},
+		},
+		{
 			input: Select().
 				From(Table("users")).
 				Where(EQ("name", "Alex")),
@@ -1314,13 +1319,13 @@ func TestBuilder(t *testing.T) {
 				Or().
 				Where(And(NEQ("f", "f"), NEQ("g", "g"))),
 			wantQuery: strings.NewReplacer("\n", "", "\t", "").Replace(`
-SELECT * FROM "users" 
-WHERE 
+SELECT * FROM "users"
+WHERE
 	(
-		(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6))) 
-		AND 
+		(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6)))
+		AND
 		(("a" = $7 OR ("b" = $8 AND "c" = $9)) AND (NOT ("d" IS NULL OR "e" IS NOT NULL)))
-	) 
+	)
 	OR ("f" <> $10 AND "g" <> $11)`),
 			wantArgs: []interface{}{1, 2, 3, 2, 4, 5, "a", "b", "c", "f", "g"},
 		},
