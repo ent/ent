@@ -740,9 +740,9 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 				Pad()
 
 			switch i.onConflictOp {
-			case UpdateDoNothing:
+			case UpdateIgnore:
 				i.WriteString("DO NOTHING")
-			case UpdateExcluded:
+			case UpdateNewValues:
 				i.WriteString("DO UPDATE SET").Pad()
 				for j, c := range i.updateColumns {
 					if j > 0 {
@@ -754,12 +754,26 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 
 		case dialect.MySQL:
 			i.WriteString("AS new")
-			i.Pad().WriteString("ON DUPLICATE KEY UPDATE").Pad()
-			for j, c := range i.updateColumns {
-				if j > 0 {
-					i.Comma()
+			i.Pad().WriteString("ON DUPLICATE KEY UPDATE ")
+			i.WriteString("DO UPDATE SET ")
+
+			switch i.onConflictOp {
+			case UpdateIgnore:
+				for j, c := range i.updateColumns {
+					if j > 0 {
+						i.Comma()
+					}
+					// Ignore conflict by setting column to itself
+					i.Ident(c).WriteOp(OpEQ).Ident(c)
 				}
-				i.Ident(c).WriteOp(OpEQ).WriteString("new").WriteByte('.').Ident(c)
+			case UpdateNewValues:
+				for j, c := range i.updateColumns {
+					if j > 0 {
+						i.Comma()
+					}
+					// update column with the value we tried to insert
+					i.Ident(c).WriteOp(OpEQ).WriteString("new").WriteByte('.').Ident(c)
+				}
 			}
 		}
 	}
@@ -2239,9 +2253,9 @@ type ConflictOp int
 
 // Conflict Operations
 const (
-	UpdateExcluded     = iota // Update conflict columns using EXCLUDED.column
-	UpdateDoNothing           // DO NOTHING
-	UpdateColumnValues        // Update using provided values
+	UpdateNewValues    ConflictOp = iota // Update conflict columns using EXCLUDED.column
+	UpdateIgnore                         // Postgres equivelant to DO NOTHING. MySQL sets column to itself
+	UpdateColumnValues                   // Update using provided values across all rows
 )
 
 // WriteOp writes an operator to the builder.
