@@ -23,5 +23,5 @@ require (
 	github.com/stretchr/testify v1.7.0
 	go.opencensus.io v0.22.6
 	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
-	golang.org/x/tools v0.0.0-20210105164027-a548c3f4af2d
+	golang.org/x/tools v0.1.0
 )

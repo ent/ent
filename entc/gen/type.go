@@ -691,6 +691,9 @@ func ValidSchemaName(name string) error {
 	if types.Universe.Lookup(pkg) != nil {
 		return fmt.Errorf("schema lowercase name conflicts with Go predeclared identifier %q", pkg)
 	}
+	if _, ok := globalIdent[pkg]; ok {
+		return fmt.Errorf("schema lowercase name conflicts ent predeclared identifier %q", pkg)
+	}
 	if _, ok := globalIdent[name]; ok {
 		return fmt.Errorf("schema name conflicts with ent predeclared identifier %q", name)
 	}
@@ -1345,6 +1348,7 @@ var (
 		"As",
 		"Asc",
 		"Client",
+		"config",
 		"Count",
 		"Debug",
 		"Desc",

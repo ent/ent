@@ -271,6 +271,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed creating car: %v", err)
 	}
+	log.Println("car was created: ", tesla)
 
 	// Create a new car with model "Ford".
 	ford, err := client.Car.
@@ -364,6 +365,7 @@ We'll continue the user/cars example above by querying the inverse edge.
 
 ```go
 import (
+	"fmt"
 	"log"
 
 	"<project>/ent"
