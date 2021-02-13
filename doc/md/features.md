@@ -71,7 +71,7 @@ The `schema/snapshot` option tells `entc` (ent codegen) to store a snapshot of t
 and use it to automatically solve merge conflicts when user's schema can't be built.
 
 This option can be added to projects using the `--feature schema/snapshot` flag, but please see
-[facebook/ent/issues/852](https://entgo.io/ent/issues/852) to get more context about it.
+[ent/ent/issues/852](https://entgo.io/ent/issues/852) to get more context about it.
 
 #### Schema Config
 
