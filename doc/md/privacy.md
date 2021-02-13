@@ -91,7 +91,7 @@ import (
 
     "entgo.io/ent/entc"
     "entgo.io/ent/entc/gen"
-    "entgo.ioincubator/ent-contrib/entgql"
+    "entgo.io/contrib/entgql"
 )
 
 func main() {
