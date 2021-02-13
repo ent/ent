@@ -38,7 +38,7 @@ const siteConfig = {
   headerLinks: [
     {doc: 'getting-started', label: 'Docs'},
     {href: 'https://pkg.go.dev/entgo.io/ent?tab=doc', label: 'GoDoc'},
-    {href: 'https://github.com/facebook/ent', label: 'Github'},
+    {href: 'https://github.com/ent/ent', label: 'Github'},
     { blog: true, label: 'Blog' },
   ],
 
@@ -142,7 +142,7 @@ const siteConfig = {
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
   //   repoUrl: 'https://github.com/facebook/test-site',
-  gaTrackingId: 'UA-44373548-44',
+  gaTrackingId: 'UA-189726777-1',
 
   algolia: {
     apiKey: 'bfc8175da1bd5078f1c02e5c8a6fe782',
