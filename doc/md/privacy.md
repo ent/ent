@@ -91,7 +91,7 @@ import (
 
     "entgo.io/ent/entc"
     "entgo.io/ent/entc/gen"
-    "entgo.ioincubator/ent-contrib/entgql"
+    "entgo.io/contrib/entgql"
 )
 
 func main() {
@@ -107,8 +107,9 @@ func main() {
 }
 ```
 
-> You should notice that, similar to schema hooks, if you use the **`Policy`** option in your schema,
-> you **MUST** add the following import in the main package, because a circular import is possible:
+> You should notice that, similar to [schema hooks](hooks.md#hooks-registration), if you use the **`Policy`** option in your schema,
+> you **MUST** add the following import in the main package, because a circular import is possible between the schema package,
+> and the generated ent package:
 >
 > ```go
 > import _ "<project>/ent/runtime"
@@ -264,7 +265,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/privacyadmin).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/privacyadmin).
 
 ### Multi Tenancy
 
@@ -273,7 +274,7 @@ The helper packages `viewer` and `rule` (as mentioned above) also exist in this 
 
 ![tenant-example](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/tenant_medium.png)
 
-Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://github.com/facebook/ent/tree/master/examples/privacytenant/ent/schema)),
+Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://github.com/ent/ent/tree/master/examples/privacytenant/ent/schema)),
 and since we want to share some logic between them, we create another [mixed-in schema](schema-mixin.md) and add it to all other schemas as follows:
 
 ```go
@@ -562,6 +563,6 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/privacytenant).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/privacytenant).
 
 Please note that this documentation is under active development.

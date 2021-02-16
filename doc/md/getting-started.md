@@ -612,4 +612,4 @@ Now when we have a graph with data, we can run a few queries on it:
     }
     ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/start).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/start).
