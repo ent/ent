@@ -5,7 +5,7 @@ title: Privacy
 
 The `Policy` option in the schema allows configuring privacy policy for queries and mutations of entities in the database.
 
-![gopher-privacy](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-privacy-opacity.png)
+![gopher-privacy](https://entgo.io/assets/gopher-privacy-opacity.png)
 
 The main advantage of the privacy layer is that, you write the privacy policy **once** (in the schema), and it is **always**
 evaluated. No matter where queries and mutations are performed in your codebase, it will always go through the privacy layer.
@@ -24,12 +24,12 @@ in the same order they are declared in the schema.
 If all rules are evaluated without returning an error, the evaluation finishes successfully, and the executed operation 
 gets access to the target nodes.
 
-![privacy-rules](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/permission_1.png)
+![privacy-rules](https://entgo.io/assets/permission_1.png)
 
 However, if one of the evaluated rules returns an error or a `privacy.Deny` decision (see below), the executed operation
 returns an error, and it is cancelled. 
 
-![privacy-deny](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/permission_2.png)
+![privacy-deny](https://entgo.io/assets/permission_2.png)
 
 ### Privacy Rules
 
@@ -55,7 +55,7 @@ There are three types of decision that can help you control the privacy rules ev
   
 - `privacy.Skip` - Skip the current rule, and jump to the next privacy rule. This equivalent to returning a `nil` error.
 
-![privacy-allow](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/permission_3.png)
+![privacy-allow](https://entgo.io/assets/permission_3.png)
 
 Now, that we’ve covered the basic terms, let’s start writing some code.
 
@@ -272,7 +272,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 In this example, we're going to create a schema with 3 entity types - `Tenant`, `User` and `Group`.
 The helper packages `viewer` and `rule` (as mentioned above) also exist in this example to help us structure the application.
 
-![tenant-example](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/tenant_medium.png)
+![tenant-example](https://entgo.io/assets/tenant_medium.png)
 
 Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://github.com/ent/ent/tree/master/examples/privacytenant/ent/schema)),
 and since we want to share some logic between them, we create another [mixed-in schema](schema-mixin.md) and add it to all other schemas as follows:
