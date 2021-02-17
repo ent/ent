@@ -36,3 +36,16 @@ users, err := client.User.Query().
 	Order(ent.Asc(user.FieldName)).
 	All(ctx)
 ```
+
+## Edge Ordering
+
+In order to sort by fields of an edge (relation), start the traversal from the edge (you want to order by),
+apply the ordering, and then jump to the neighbours (target type).
+
+The following shows how to order the users by the `"name"` of their `"pets"` in ascending order.
+```go
+users, err := client.Pet.Query().
+	Order(ent.Asc(pet.FieldName)).
+	QueryOwner().
+	All(ctx)
+```
