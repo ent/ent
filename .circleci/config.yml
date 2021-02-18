@@ -59,7 +59,7 @@ jobs:
 
   integration:
     docker: &integration-docker
-      - image: circleci/golang
+      - image: circleci/golang:1.16
       - image: circleci/mysql:5.6.35
         environment: &mysql_env
           MYSQL_DATABASE: test
