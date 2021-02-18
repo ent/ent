@@ -11,8 +11,7 @@ aliases:
       path: ~/test-results
 
 orbs:
-  aws-cli: circleci/aws-cli@1.0.0
-  go: circleci/go@1.1.1
+  go: circleci/go@1.5.0
 
 commands:
   getmods:
