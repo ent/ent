@@ -49,7 +49,7 @@ func (User) Fields() []ent.Field {
 Indexes can be configured on composition of fields and edges. The main use-case
 is setting uniqueness on fields under a specific relation. Let's take an example:
 
-![er-city-streets](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/er_city_streets.png)
+![er-city-streets](https://entgo.io/assets/er_city_streets.png)
 
 In the example above, we have a `City` with many `Street`s, and we want to set the
 street name to be unique under each city.
@@ -147,7 +147,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/edgeindex).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/edgeindex).
 
 ## Dialect Support
 

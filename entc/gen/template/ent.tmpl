@@ -18,6 +18,11 @@ import (
 )
 
 // {{ $.Name }} is the model entity for the {{ $.Name }} schema.
+{{- with $tmpls := matchTemplate "model/comment/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 type {{ $.Name }} struct {
 	config {{ template "model/omittags" $ }}
 	// ID of the ent.

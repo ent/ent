@@ -8,6 +8,10 @@ title: Supported Dialects
 MySQL supports all the features that are mentioned in the [Migration](migrate.md) section,
 and it's being tested constantly on the following 3 versions: `5.6.35`, `5.7.26` and `8`. 
 
+## MariaDB
+
+MariaDB supports all the features that are mentioned in the [Migration](migrate.md) section,
+and it's being tested constantly on the following 2 versions: `10.2` and latest version.
 
 ## PostgreSQL
 

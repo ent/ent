@@ -126,10 +126,10 @@ func (User) Fields() []ent.Field {
 
 ## Examples
 - A custom template for implementing the `Node` API for GraphQL - 
-[Github](https://entgo.io/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
+[Github](https://github.com/ent/ent/blob/master/entc/integration/template/ent/template/node.tmpl).
 
-- An example for executing external templates with custom functions. See  [configuration](https://entgo.io/ent/blob/master/examples/entcpkg/ent/entc.go) and its
-[README](https://entgo.io/ent/blob/master/examples/entcpkg) file.
+- An example for executing external templates with custom functions. See  [configuration](https://github.com/ent/ent/blob/master/examples/entcpkg/ent/entc.go) and its
+[README](https://github.com/ent/ent/blob/master/examples/entcpkg) file.
 
 ## Documentation
 
