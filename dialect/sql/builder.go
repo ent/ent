@@ -891,6 +891,16 @@ func P(fns ...func(*Builder)) *Predicate {
 	return &Predicate{fns: fns}
 }
 
+// ExprP creates a new predicate from the given expression.
+//
+//	ExprP("A = ? AND B > ?", args...)
+//
+func ExprP(exr string, args ...interface{}) *Predicate {
+	return P(func(b *Builder) {
+		b.Join(Expr(exr, args...))
+	})
+}
+
 // Or combines all given predicates with OR between them.
 //
 //	Or(EQ("name", "foo"), EQ("name", "bar"))
