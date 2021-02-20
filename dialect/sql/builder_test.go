@@ -1376,9 +1376,7 @@ WHERE
 			input: Dialect(dialect.Postgres).
 				Select("*").
 				From(Table("users")).
-				Where(P(func(b *Builder) {
-					b.Join(Expr("name = $1", "pedro"))
-				})).
+				Where(ExprP("name = $1", "pedro")).
 				Where(P(func(b *Builder) {
 					b.Join(Expr("name = $2", "pedro"))
 				})).
