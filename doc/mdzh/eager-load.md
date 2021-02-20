@@ -7,6 +7,7 @@ title: Eager Loading
 
 `ent` supports querying entities with their associations (through their edges). The associated entities
 are populated to the `Edges` field in the returned object.
+`ent`支持查询
 
 Let's give an example hows does the API look like for the following schema:
 

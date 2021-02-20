@@ -5,21 +5,20 @@ title: Supported Dialects
 
 ## MySQL
 
-MySQL supports all the features that are mentioned in the [Migration](migrate.md) section,
-and it's being tested constantly on the following 3 versions: `5.6.35`, `5.7.26` and `8`. 
-
+MySQL支持所有的在[Migration](migrate.md)章节涉及到的特性。
+它不断地测试以下3个版本`5.6.35`, `5.7.26` 和 `8`。
 
 ## PostgreSQL
 
-PostgreSQL supports all the features that are mentioned in the [Migration](migrate.md) section,
-and it's being tested constantly on the following 3 versions: `10`, `11` and `12`. 
+PostgreSQL支持所有的在[Migration](migrate.md)章节涉及到的特性。
+它不断地测试以下3个版本`10`, `11` 和 `12`。
 
 ## SQLite
 
-SQLite supports all _"append-only"_ features mentioned in the [Migration](migrate.md) section. 
-However, dropping or modifying resources, like [drop-index](migrate.md#drop-resources) are not
-supported by default by SQLite, and will be added in the future using a [temporary table](https://www.sqlite.org/lang_altertable.html#otheralter).
+SQLite支持所有的在[Migration](migrate.md)章节涉及到的 _"append-only"_ 特性。
+然而，删除或者修改资源，像[drop-index](migrate.md#drop-resources)默认不支持SQLite，
+并将在以后的使用 [temporary table](https://www.sqlite.org/lang_altertable.html#otheralter)中添加。
 
 ## Gremlin
 
-Gremlin does not support migration nor indexes, and **<ins>it's considered experimental</ins>**.
+Gremlin不支持迁移和索引。**<ins>还在实验中</ins>**.

@@ -113,7 +113,7 @@ a8m, err := client.User.	// UserClient.
 	Save(ctx)				// Create and return.
 ```
 
-**SaveX** a pet; Unlike **Save**, **SaveX** panics if an error occurs.
+**SaveX**一个pet; 不像 **Save**, 当panics出现才使用 **SaveX**
 
 ```go
 pedro := client.Pet.	// PetClient.
@@ -138,7 +138,7 @@ pets, err := client.Pet.CreateBulk(bulk...).Save(ctx)
 
 ## 更新一个实体
 
-Update an entity that was returned from the database.
+更新一个从数据库返回的实体类
 
 ```go
 a8m, err = a8m.Update().	// User update builder.
@@ -293,12 +293,10 @@ _, err := client.File.
 
 ## 变化
 
-Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
-the same generated `UserMutation` object.
-However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`<a> interface.
+每一个生成的node类型都有自己专属的工作方式。例如所有的[`User` builders](crud.md#create-an-entity) ,共同使用相同的`UserMutation`对象。
+然而，所有的builder类型实现了通用的<a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`<a>接口
 
-For example, in order to write a generic code that apply a set of methods on both `ent.UserCreate`
-and `ent.UserUpdate`, use the `UserMutation` object:
+例如，为了写应用在`ent.UserCreate` 和`ent.UserUpdate`中的一系列方法，使用`UserMutation`对象。
 
 ```go
 func Do() {
@@ -315,9 +313,8 @@ func SetAgeName(m *ent.UserMutation) {
 }
 ```
 
-In some cases, you want to apply a set of methods on multiple types.
-For cases like this, either use the generic `ent.Mutation` interface,
-or create your own interface.
+在某些情况下，你希望在多个类型上应用一组方法。
+对于这些情况，要么使用`ent.Mutation`接口，要么创建你自己的接口。
 
 ```go
 func Do() {
