@@ -3,19 +3,18 @@ id: eager-load
 title: Eager Loading
 ---
 
-## Overview
+## 概述
 
-`ent` supports querying entities with their associations (through their edges). The associated entities
-are populated to the `Edges` field in the returned object.
-`ent`支持查询
+`ent`支持查询实体及其关联(通过`edges`)。相关的实体
+被填充到返回对象的`Edges`字段中。
 
-Let's give an example hows does the API look like for the following schema:
+看如下的例子：
 
 ![er-group-users](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/er_user_pets_groups.png)
 
 
 
-**Query all users with their pets:**
+**查询所有的用户及其他们的pet**
 ```go
 users, err := client.User.
 	Query().
@@ -47,8 +46,8 @@ for _, u := range users {
 } 
 ```
 
-Eager loading allows to query more than one association (including nested), and also
-filter, sort or limit their result. For example:
+即时加载允许查询多个关联(包括嵌套)，而且允许
+筛选、排序或限制它们的结果。例如:
 
 ```go
 admins, err := client.User.
@@ -107,15 +106,15 @@ for _, admin := range admins {
 
 ## API
 
-Each query-builder has a list of methods in the form of `With<E>(...func(<N>Query))` for each of its edges.
-`<E>` stands for the edge name (like, `WithGroups`) and `<N>` for the edge type (like, `GroupQuery`).
- 
-Note that, only SQL dialects support this feature.
+每一个query-builder的edges都有一个方法列表，形如：`With<E>(...func(<N>Query))`。
+`<E>` 表示边缘名称(如`WithGroups`)， `<N>`表示边缘类型(如`GroupQuery`)。
 
-## Implementation
+注意只有SQL方言支持这些特征。
 
-Since a query-builder can load more than one association, it's not possible to load them using one `JOIN` operation.
-Therefore, `ent` executes additional queries for loading associations. One query for `M2O/O2M` and `O2O` edges, and
-2 queries for loading `M2M` edges.
+## 实现
 
-Note that, we expect to improve this in the next versions of `ent`.
+自从query-builder能够载入超过一个关联之后，它就不能使用`JSON`操作。
+因此，`ent` 执行加载的额外查询。一个查询`M2O/O2M`和`O2O`的边缘，和
+2个加载`M2M`边缘的查询。
+
+注意，我们期待在下一个`ent`版本升级这些特性。

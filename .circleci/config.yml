@@ -11,8 +11,7 @@ aliases:
       path: ~/test-results
 
 orbs:
-  aws-cli: circleci/aws-cli@1.0.0
-  go: circleci/go@1.1.1
+  go: circleci/go@1.5.0
 
 commands:
   getmods:
@@ -35,7 +34,7 @@ jobs:
   unit:
     executor:
       name: go/default
-      tag: '1.15'
+      tag: '1.16'
     steps:
     - checkout
     - *mktestdir
@@ -60,7 +59,7 @@ jobs:
 
   integration:
     docker: &integration-docker
-      - image: circleci/golang
+      - image: circleci/golang:1.16
       - image: circleci/mysql:5.6.35
         environment: &mysql_env
           MYSQL_DATABASE: test
