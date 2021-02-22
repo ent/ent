@@ -4,28 +4,28 @@ title: Frequently Asked Questions (FAQ)
 sidebar_label: FAQ
 ---
 
-## Questions
+## 常见问题
 
-[How to create an entity from a struct `T`?](#how-to-create-an-entity-from-a-struct-t) \
-[How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator) \
-[How to write an audit-log extension?](#how-to-write-an-audit-log-extension) \
-[How to write custom predicates?](#how-to-write-custom-predicates) \
-[How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets) \
-[How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql) \
-[How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
-[How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids)
+[如何从结构体`T`中创建一个实体](#how-to-create-an-entity-from-a-struct-t) \
+[如何创建一个结构(或多样)级别的验证器?](#how-to-create-a-mutation-level-validator) \
+[如何创建一个可扩展的日志系统?](#how-to-write-an-audit-log-extension) \
+[如何写一个自定义的断言?](#how-to-write-custom-predicates) \
+[如何给代码生成器写一个自定义的断言?](#how-to-add-custom-predicates-to-the-codegen-assets) \
+[如何在PostgreSQL中定义一个网络地址字段?](#how-to-define-a-network-address-field-in-postgresql) \
+[如何给MySQL中的`DATETIME`字段定义一个时间字段?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
+[如何使用自定义的ID生成器?](#how-to-use-a-custom-generator-of-ids)
 
-## Answers
+## 回答
 
-#### How to create an entity from a struct `T`?
+#### 如何从结构体`T`中创建一个实体?
 
-The different builders don't support the option of setting the entity fields (or edges) from a given struct `T`.
-The reason is that there's no way to distinguish between zero/real values when updating the database (for example, `&ent.T{Age: 0, Name: ""}`).
-Setting these values, may set incorrect values in the database or update unnecessary columns.
+不同的构造器不支持从给定的结构体`T`中设置实体字段的选项。
+原因是因为它在更新数据库的时候没有办法区分0值和实际的值(例如：`&ent.T{Age: 0, Name: ""}`)
+设置这些值，可能在数据中设置错误的值或者更新不必要的列。
 
-However, the [external template](templates.md) option lets you extend the default code-generation assets by adding custom logic.
-For example, in order to generate a method for each of the create-builders, that accepts a struct as an input and configure the builder,
-use the following template:
+然而，这个[外部模板](templates.md)选项让你通过自定义逻辑继承默认的代码生成断言，
+例如，为了生成每个创建构造器的方法，它接受一个结构体作为输入，并且配置构造器。
+使用如下模板：
 
 ```gotemplate
 {{ range $n := $.Nodes }}
@@ -42,11 +42,10 @@ use the following template:
 {{ end }}
 ```
 
-#### How to create a mutation level validator?
+#### 如何创建一个多级验证器?
 
-In order to implement a mutation-level validator, you can either use [schema hooks](hooks.md#schema-hooks) for validating
-changes applied on one entity type, or use [transaction hooks](transactions.md#hooks) for validating mutations that being
-applied on multiple entity types (e.g. a GraphQL mutation). For example:
+为了实现多级验证器，你能够同时使用[schema hooks](hooks.md#schema-hooks)进行验证应用于一个实体类型的更改，也可以使用[transaction hooks](transactions.md#hooks)
+来验证存在的变化,应用于多种实体类型(例如，GraphQL 变化)。例如
 
 ```go
 // A VersionHook is a dummy example for a hook that validates the "version" field
@@ -83,7 +82,7 @@ func VersionHook() ent.Hook {
 }
 ```
 
-#### How to write an audit-log extension?
+#### 如何写一个可扩展的日志系统?
 
 The preferred way for writing such an extension is to use [ent.Mixin](schema-mixin.md). Use the `Fields` option for
 setting the fields that are shared between all schemas that import the mixed-schema, and use the `Hooks` option for
