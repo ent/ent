@@ -88,7 +88,7 @@ var (
 		},
 	}
 
-	// ErrConnClosed is returned by the Conns Execute method when
+	// ErrConnClosed is returned by the Conn's Execute method when
 	// the underlying gremlin server connection is closed.
 	ErrConnClosed = errors.New("gremlin: server connection closed")
 
