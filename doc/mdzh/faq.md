@@ -84,10 +84,8 @@ func VersionHook() ent.Hook {
 
 #### 如何写一个可扩展的日志系统?
 
-The preferred way for writing such an extension is to use [ent.Mixin](schema-mixin.md). Use the `Fields` option for
-setting the fields that are shared between all schemas that import the mixed-schema, and use the `Hooks` option for
-attaching a mutation-hook for all mutations that are being applied on these schemas. Here's an example, based on a
-discussion in the [repository issue-tracker](https://entgo.io/ent/issues/830):
+编写这样一个扩展的首选方法是使用[ent.Mixin]。使用`Fields`选项设置在导入混合模式的所有模式之间的共享字段。使用`Hooks`选项
+为应用于这些模式的所有变化附加一个mutation-hook,这里有个例子，基于[repository issue-tracker](https://entgo.io/ent/issues/830) 的讨论：
 
 ```go
 // AuditMixin implements the ent.Mixin for sharing
@@ -160,9 +158,9 @@ func AuditHook(next ent.Mutator) ent.Mutator {
 }
 ```
 
-#### How to write custom predicates?
+#### 如何写一个自定义断言?
 
-Users can provide custom predicates to apply on the query before it's executed. For example:
+在执行查询之前，用户可以提供自定义的断言应用于查询。例如：
 
 ```go
 pets := client.Pet.
@@ -180,14 +178,12 @@ users := client.User.
 	AllX(ctx)
 ```
 
-For more examples, go to the [predicates](predicates.md#custom-predicates) page, or search in the repository
-issue-tracker for more advance examples like [issue-842](https://entgo.io/ent/issues/842#issuecomment-707896368).
+获取更多的案例，到[predicates](predicates.md#custom-predicates) ，或者在仓库搜索更多高级的案例，如[issue-842](https://entgo.io/ent/issues/842#issuecomment-707896368).
 
-#### How to add custom predicates to the codegen assets?
+#### 如何给代码生成器写一个自定义的断言?
 
-The [template](templates.md) option enables the capability for extending or overriding the default codegen assets.
-In order to generate a type-safe predicate for the [example above](#how-to-write-custom-predicates), use the template
-option for doing it as follows:
+[template](templates.md)选项能够扩展或者覆盖默认的代码生成器断言。
+为了给[example above](#how-to-write-custom-predicates)生成类型安全的断言。使用模板选项做如下操作：
 
 ```gotemplate
 {{/* A template that adds the "<F>Glob" predicate for all string fields. */}}
@@ -208,11 +204,11 @@ option for doing it as follows:
 {{ end }}
 ```
 
-#### How to define a network address field in PostgreSQL?
+#### 如何在PostgreSQL中定义一个网络地址字段?
 
-The [GoType](http://localhost:3000/docs/schema-fields#go-type) and the [SchemaType](http://localhost:3000/docs/schema-fields#database-type)
-options allow users to define database-specific fields. For example, in order to define a
- [`macaddr`](https://www.postgresql.org/docs/13/datatype-net-types.html#DATATYPE-MACADDR) field, use the following configuration:
+[GoType](http://localhost:3000/docs/schema-fields#go-type) 和 [SchemaType](http://localhost:3000/docs/schema-fields#database-type)
+选项允许用户定义特殊的数据库字段，例如，为了定义一个 [`macaddr`](https://www.postgresql.org/docs/13/datatype-net-types.html#DATATYPE-MACADDR)字段
+使用如下配置：
 
 ```go
 func (T) Fields() []ent.Field {
@@ -253,10 +249,10 @@ func (m MAC) Value() (driver.Value, error) {
 	return m.HardwareAddr.String(), nil
 }
 ```
-Note that, if the database doesn't support the `macaddr` type (e.g. SQLite on testing), the field fallback to its
-native type (i.e. `string`).
 
-`inet` example:
+注意，如果数据库不支持`macaddr`类型（例如SQLite的测试）,这个字段回调它自己的本地类型（也就是`string`）
+
+`inet` 案例:
 
 ```go
 func (T) Fields() []ent.Field {
@@ -304,12 +300,12 @@ func (i Inet) Value() (driver.Value, error) {
 }
 ```
 
-#### How to customize time fields to type `DATETIME` in MySQL?
+#### 如何给MySQL中的`DATETIME`字段定义一个时间字段?
 
-`Time` fields use the MySQL `TIMESTAMP` type in the schema creation by default, and this type
- has a range of '1970-01-01 00:00:01' UTC to '2038-01-19 03:14:07' UTC (see, [MySQL docs](https://dev.mysql.com/doc/refman/5.6/en/datetime.html)).
+`Time`字段默认使用MySQL中的`TIMESTAMP` 类型创建。此类型的范围是'1970-01-01 00:00:01' UTC 到 '2038-01-19 03:14:07' UTC ，
+（详情请看[MySQL docs](https://dev.mysql.com/doc/refman/5.6/en/datetime.html)）
 
-In order to customize time fields for a wider range, use the MySQL `DATETIME` as follows:
+为了自定义更长的时间字段，使用MySQL的`DATETIME`。
 ```go
 field.Time("birth_date").
 	Optional().
@@ -318,21 +314,16 @@ field.Time("birth_date").
 	}),
 ```
 
-#### How to use a custom generator of IDs?
+#### 如何使用自定义的ID生成器?
 
-If you're using a custom ID generator instead of using auto-incrementing IDs in
-your database (e.g. Twitter's [Snowflake](https://github.com/twitter-archive/snowflake/tree/snowflake-2010)),
-you will need to write a custom ID field which automatically calls the generator
-on resource creation.
+如果你使用定制的ID生成器代替数据库中的自增（例如Twitter公司的[Snowflake](https://github.com/twitter-archive/snowflake/tree/snowflake-2010)）
+你将需要编写一个自定义ID字段，该字段在创建资源时自动调用生成器。
 
-To achieve this, you can either make use of `DefaultFunc` or of schema hooks -
-depending on your use case. If the generator does not return an error,
-`DefaultFunc` is more concise, whereas setting a hook on resource creation
-will allow you to capture errors as well. An example of how to use
-`DefaultFunc` can be seen in the section regarding [the ID field](schema-fields.md#id-field).
+要实现这一点，你可以使用`DefaultFunc`或schema hooks这取决于你的用例。
+如果生成器不返回错误。`DefaultFunc`会更加简洁。而在资源创建上设置一个hook也将允许你捕获错误。
+链接中展示了如何用`DefaultFunc`实现([the ID field](schema-fields.md#id-field))。
 
-Here is an example of how to use a custom generator with hooks, taking as an
-example [sonyflake](https://github.com/sony/sonyflake).
+这里的例子展示了如何使用HooK来写自定义的生成器，举个例子：[sonyflake](https://github.com/sony/sonyflake).
 
 ```go
 // BaseMixin to be shared will all different schemas.
