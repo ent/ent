@@ -174,8 +174,8 @@ func assignable(typ reflect.Type) bool {
 func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 	var (
 		scan  = &rowScan{}
-		names = make(map[string]int)
 		idx   = make([]int, 0, typ.NumField())
+		names = make(map[string]int, typ.NumField())
 	)
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
@@ -192,7 +192,7 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 		names[name] = i
 	}
 	for _, c := range columns {
-		// normalize columns if necessary, for example: COUNT(*) => count.
+		// Normalize columns if necessary, for example: COUNT(*) => count.
 		name := strings.ToLower(strings.Split(c, "(")[0])
 		i, ok := names[name]
 		if !ok {

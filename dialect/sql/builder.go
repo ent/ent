@@ -357,7 +357,7 @@ func (t *TableAlter) DropForeignKey(ident string) *TableAlter {
 // Query returns query representation of the `ALTER TABLE` statement.
 //
 //	ALTER TABLE name
-//    [alter_specification]
+//		[alter_specification]
 //
 func (t *TableAlter) Query() (string, []interface{}) {
 	t.WriteString("ALTER TABLE ")
@@ -390,7 +390,7 @@ func (i *IndexAlter) Rename(name string) *IndexAlter {
 // Query returns query representation of the `ALTER INDEX` statement.
 //
 //	ALTER INDEX name
-//    [alter_specification]
+//		[alter_specification]
 //
 func (i *IndexAlter) Query() (string, []interface{}) {
 	i.WriteString("ALTER INDEX ")
