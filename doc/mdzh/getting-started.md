@@ -4,45 +4,45 @@ title: Quick Introduction
 sidebar_label: Quick Introduction
 ---
 
-**ent** is a simple, yet powerful entity framework for Go, that makes it easy to build
-and maintain applications with large data-models and sticks with the following principles:
+**ent**是一个简单而又功能强大的Go语言实体框架，ent易于构建和维护应用程序与大数据模型。它严格遵循以下原则
 
-- Easily model database schema as a graph structure.
-- Define schema as a programmatic Go code.
-- Static typing based on code generation.
-- Database queries and graph traversals are easy to write.
-- Simple to extend and customize using Go templates.
+- 图就是代码 - 将任何数据库表建模为Go对象。
+- 轻松地遍历任何图形 - 可以轻松地运行查询、聚合和遍历任何图形结构。
+- 静态类型和显式API - 使用代码生成静态类型和显式API，查询数据更加便捷。
+- 多存储驱动程序 - 支持MySQL, PostgreSQL, SQLite 和 Gremlin。
+- 可扩展 - 简单地扩展和使用Go模板自定义。
+
 
 <br/>
 
 ![gopher-schema-as-code](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher-schema-as-code.png)
 
-## Installation
+## 下载
 
 ```console
 go get entgo.io/ent/cmd/ent
 ```
 
-After installing `ent` codegen tool, you should have it in your `PATH`.
-If you don't find it your path, you can also run: `go run entgo.io/ent/cmd/ent <command>`
+在你下载`ent`代码生成工具后，你应该有你的`PATH`。
+如果找不到你的的路径，你也可以运行`go run entgo.io/ent/cmd/ent <command>`
 
-## Setup A Go Environment
+## 设置一个Go语言环境
 
-If your project directory is outside [GOPATH](https://github.com/golang/go/wiki/GOPATH) or you are not familiar with
-GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-start) project as follows:
+如果你的项目在[GOPATH](https://github.com/golang/go/wiki/GOPATH)的外部，或者你没有相似的GOPATH，设置一个如下的[Go module](https://github.com/golang/go/wiki/Modules#quick-start)
+项目。
 
 ```console
 go mod init <project>
 ```
 
-## Create Your First Schema
+## 创建你的第一个Schema
 
-Go to the root directory of your project, and run:
+去项目根目录执行如下命令：
 
 ```console
 ent init User
 ```
-The command above will generate the schema for `User` under `<project>/ent/schema/` directory:
+命令将会在`<project>/ent/schema/` 路径下生成`User`的schema
 
 ```go
 // <project>/ent/schema/user.go
@@ -68,7 +68,7 @@ func (User) Edges() []ent.Edge {
 
 ```
 
-Add 2 fields to the `User` schema:
+添加2个字段到`User` schema:
 
 ```go
 package schema
@@ -90,13 +90,14 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-Run `go generate` from the root directory of the project as follows:
+在项目根目录下运行`go generate`命令：
 
 ```go
 go generate ./ent
 ```
 
-This produces the following files:
+运行后将会产生如下文件
+
 ```
 ent
 ├── client.go
@@ -122,9 +123,9 @@ ent
 ```
 
 
-## Create Your First Entity
+## 创建你的第一个实体
 
-To get started, create a new `ent.Client`. For this example, we will use SQLite3.
+首先，创建一个新的`ent.Client`，如下所示，我们将使用SQLite3。
 
 ```go
 package main
@@ -151,7 +152,8 @@ func main() {
 }
 ```
 
-Now, we're ready to create our user. Let's call this function `CreateUser` for the sake of example:
+现在，已经创建了我们的user，调用这个`CreateUser`函数:
+
 ```go
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
@@ -167,10 +169,9 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 }
 ```
 
-## Query Your Entities
+## 查询你的实体
 
-`ent` generates a package for each entity schema that contains its predicates, default values, validators
-and additional information about storage elements (column names, primary keys, etc).
+`ent`对于每个实体都生成包含它断言、校验、关于实体存储的附加信息的包（列名，主键等等）
 
 ```go
 package main
@@ -199,16 +200,16 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 ```
 
 
-## Add Your First Edge (Relation)
-In this part of the tutorial, we want to declare an edge (relation) to another entity in the schema.  
-Let's create 2 additional entities named `Car` and `Group` with a few fields. We use `ent` CLI
-to generate the initial schemas:
+## 添加你的第一个关系
+在这部分的内容中，我们想要声明一个在同一schema中和其他实体的关系。
+让我们创建2个名为`Car` 和 `Group`的有一些字段的实体。我们使用`ent`命令生成初始化的schema: 
 
 ```console
 go run entgo.io/ent/cmd/ent init Car Group
 ```
 
-And then we add the rest of the fields manually:
+然后手动添加其余字段：
+
 ```go
 import (
 	"regexp"
@@ -236,12 +237,11 @@ func (Group) Fields() []ent.Field {
 }
 ```
 
-Let's define our first relation. An edge from `User` to `Car` defining that a user
-can **have 1 or more** cars, but a car **has only one** owner (one-to-many relation).
+让我们定义第一个关系，从`User`到`Car`的关系，1个user有1个或者更多的cars，但是一个car仅仅只属于一个所属者。(1对多)
 
 ![er-user-cars](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_user_cars.png)
 
-Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
+让我们添加`"cars"`的关系到 `User`，然后运行`go generate ./ent`:
 
  ```go
  import (
@@ -259,7 +259,8 @@ Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
  }
  ```
 
-We continue our example by creating 2 cars and adding them to a user.
+我们继续通过2个cars添加到所属的user的例子来学习。
+
 ```go
 func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	// Create a new car with model "Tesla".
@@ -297,7 +298,9 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	return a8m, nil
 }
 ```
-But what about querying the `cars` edge (relation)? Here's how we do it:
+
+但是有关`cars`关系的查询怎么做？这里展示怎么做：
+
 ```go
 import (
 	"log"
@@ -325,18 +328,15 @@ func QueryCars(ctx context.Context, a8m *ent.User) error {
 }
 ```
 
-## Add Your First Inverse Edge (BackRef)
-Assume we have a `Car` object and we want to get its owner; the user that this car belongs to.
-For this, we have another type of edge called "inverse edge" that is defined using the `edge.From`
-function.
+## 添加第一个反向关系(BackRef)
+
+假设我们有一个`Car`对象，我们想得到它的所属者，对于这些，我们有另一种类型叫做"inverse edge"，这种类型使用`edge.From`函数被定义。
 
 ![er-cars-owner](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_cars_owner.png)
 
-The new edge created in the diagram above is translucent, to emphasize that we don't create another
-edge in the database. It's just a back-reference to the real edge (relation).
+在上图中创建的新边是半透明的，它强调我们不在数据库中创建其他关系。仅仅是对于真实关系的反向。
 
-Let's add an inverse edge named `owner` to the `Car` schema, reference it to the `cars` edge
-in the `User` schema, and run `go generate ./ent`.
+添加一个`owner` 到 `Car`的反向关系，参考它在`User` schema中到`cars`的关系。然后运行`go generate ./ent`:
 
 ```go
 import (
@@ -360,7 +360,8 @@ func (Car) Edges() []ent.Edge {
 	}
 }
 ```
-We'll continue the user/cars example above by querying the inverse edge.
+
+我们将继续通过查询user/cars的反向关系：
 
 ```go
 import (
@@ -386,16 +387,15 @@ func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 }
 ```
 
-## Create Your Second Edge
+## 创建第二个关系
 
-We'll continue our example by creating a M2M (many-to-many) relationship between users and groups.
+我们将继续我的案例，通过创建users和groups之间多对多的关系来说明。
 
 ![er-group-users](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_group_users.png)
 
-As you can see, each group entity can **have many** users, and a user can **be connected to many** groups;
-a simple "many-to-many" relationship. In the above illustration, the `Group` schema is the owner
-of the `users` edge (relation), and the `User` entity has a back-reference/inverse edge to this
-relationship named `groups`. Let's define this relationship in our schemas:
+如你所见，每个group实体**有多个**users，一个user能**被多个group关联**;
+一个简单的“多对多”的关系，在上面的图示中，`Group` schema是`users`的拥有者。`User`实体对于`groups`有一个反向的关系，
+让我们一起定义这个关系吧：
 
 - `<project>/ent/schema/group.go`:
 
@@ -437,15 +437,14 @@ relationship named `groups`. Let's define this relationship in our schemas:
 	 }
 	```
 
-We run `ent` on the schema directory to re-generate the assets.
+在schema目录下运行`ent`重新生成断言。
 ```console
 go generate ./ent
 ```
 
-## Run Your First Graph Traversal
+## 运行第一次图遍历
 
-In order to run our first graph traversal, we need to generate some data (nodes and edges, or in other words, 
-entities and relations). Let's create the following graph using the framework:
+为了运行第一次图遍历，我们需要生成一些数据（node和关系，换句话说就是实体和关系），让我们创建使用框架创建下面的图：
 
 ![re-graph](https://s3.eu-central-1.amazonaws.com/entgo.io/assets/re_graph_getting_started.png)
 
@@ -520,9 +519,9 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-Now when we have a graph with data, we can run a few queries on it:
+现在有了一个有数据的图，我们可以运行下面这些查询：
 
-1. Get all user's cars within the group named "GitHub":
+1. 在名为"Github"的group中查询user的car:
 
 	```go
 	import (
@@ -548,7 +547,7 @@ Now when we have a graph with data, we can run a few queries on it:
 	}
 	```
 
-2. Change the query above, so that the source of the traversal is the user *Ariel*:
+2. 修改上面的查询，遍历用户*Ariel*的资源:
 
 	```go
 	import (
@@ -586,7 +585,7 @@ Now when we have a graph with data, we can run a few queries on it:
 	}
 	```
 
-3. Get all groups that have users (query with a look-aside predicate):
+3. 查询所有的有用户的group(使用备用predicate进行查询):
 
 	```go
 	import (
@@ -610,4 +609,4 @@ Now when we have a graph with data, we can run a few queries on it:
     }
     ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/start).
+完整的例子在[GitHub](https://github.com/facebook/ent/tree/master/examples/start).

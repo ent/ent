@@ -4,13 +4,13 @@ title: Feature Flags
 sidebar_label: Feature Flags
 ---
 
-The framework provides a collection of code-generation features that be added or removed using flags.
+此框架提供一系列代码生产特性，这些特性可以使用标志位添加或者移除。
 
-## Usage
+## 使用
 
-Feature flags can be provided either by CLI flags or as arguments to the `gen` package. 
+特性标志位能通过CLI标识或者作为`gen`包的参数被提供。
 
-#### CLI
+#### 命令行
 
 ```console
 go run entgo.io/ent/cmd/ent generate --feature privacy,entql ./ent/schema
@@ -49,35 +49,31 @@ func main() {
 }
 ```
 
-## List of Features
+## 特性列表
 
-#### Privacy Layer
+#### 私有层
 
-The privacy layer allows configuring privacy policy for queries and mutations of entities in the database.
+私有层允许配置针对数据库实体的查询及变化的私有策略
 
-This option can be added to projects using the `--feature privacy` flag, and its full documentation exists
-in the [privacy page](privacy.md).
+这个选项能够使用`--feature privacy`标识被添加到项目。它的完整文档在[privacy page](privacy.md)。
 
-#### EntQL Filtering
+#### EntQL过滤器
 
-The `entql` option provides a generic and dynamic filtering capability at runtime for the different query builders.
+`entql`选项在运行时为不同的查询构建器提供了通用的动态过滤功能。
 
-This option can be added to projects using the `--feature entql` flag, and more information about it exists
-in the [privacy page](privacy.md#multi-tenancy).
+这个选项能够使用`--feature entql`标识被添加到项目，更多的信息在[privacy page](privacy.md#multi-tenancy)
 
-#### Auto-Solve Merge Conflicts
+#### 自动解决合并冲突
 
-The `schema/snapshot` option tells `entc` (ent codegen) to store a snapshot of the latest schema in an internal package,
-and use it to automatically solve merge conflicts when user's schema can't be built.
+`schema/snapshot`选项告诉`entc`（ent生成）在内部的包去存储最新的schema的快照，当用户的schema不能建造时，使用它会自动解决合并冲突。
 
-This option can be added to projects using the `--feature schema/snapshot` flag, but please see
-[facebook/ent/issues/852](https://entgo.io/ent/issues/852) to get more context about it.
+这个选项能够使用`--feature schema/snapshot`标识被添加到项目，但是想要获取更多的信息请看[facebook/ent/issues/852](https://entgo.io/ent/issues/852)
 
-#### Schema Config
+#### Schema配置
 
-The `sql/schemaconfig` option lets you pass alternate SQL database names to models. This is useful when your models don't all live under one database and are spread out across different schemas.
+`sql/schemaconfig`选项允许将备用sql数据库名称传递给模型。当模型不是都在一个数据库中，而是分布在不同的模式中时，这是非常有用的。
 
-This option can be added to projects using the `--feature sql/schemaconfig` flag. Once you generate the code, you can now use a new option as such: 
+这个选项能够使用`--feature sql/schemaconfig`标识被添加到项目，一旦你生成了代码，可以使用这样的新选项:
 
 ```golang
 c, err := ent.Open(dialect, conn, ent.AlternateSchema(ent.SchemaConfig{
