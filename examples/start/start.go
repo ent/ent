@@ -66,7 +66,7 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		SetName("a8m").
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed creating user: %v", err)
+		return nil, fmt.Errorf("failed creating user: %w", err)
 	}
 	log.Println("user was created: ", u)
 	return u, nil
@@ -80,7 +80,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		// or more than 1 user returned.
 		Only(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed querying user: %v", err)
+		return nil, fmt.Errorf("failed querying user: %w", err)
 	}
 	log.Println("user returned: ", u)
 	return u, nil
@@ -94,7 +94,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		SetRegisteredAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed creating car: %v", err)
+		return nil, fmt.Errorf("failed creating car: %w", err)
 	}
 
 	// creating new car with model "Ford".
@@ -104,7 +104,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		SetRegisteredAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed creating car: %v", err)
+		return nil, fmt.Errorf("failed creating car: %w", err)
 	}
 	log.Println("car was created: ", ford)
 
@@ -116,7 +116,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		AddCars(tesla, ford).
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed creating user: %v", err)
+		return nil, fmt.Errorf("failed creating user: %w", err)
 	}
 	log.Println("user was created: ", a8m)
 	return a8m, nil
@@ -125,7 +125,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 func QueryCars(ctx context.Context, a8m *ent.User) error {
 	cars, err := a8m.QueryCars().All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying user cars: %v", err)
+		return fmt.Errorf("failed querying user cars: %w", err)
 	}
 	log.Println("returned cars:", cars)
 
@@ -134,7 +134,7 @@ func QueryCars(ctx context.Context, a8m *ent.User) error {
 		Where(car.ModelEQ("Ford")).
 		Only(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying user cars: %v", err)
+		return fmt.Errorf("failed querying user cars: %w", err)
 	}
 	log.Println(ford)
 	return nil
@@ -143,14 +143,14 @@ func QueryCars(ctx context.Context, a8m *ent.User) error {
 func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 	cars, err := a8m.QueryCars().All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying user cars: %v", err)
+		return fmt.Errorf("failed querying user cars: %w", err)
 	}
 
 	// query the inverse edge.
 	for _, ca := range cars {
 		owner, err := ca.QueryOwner().Only(ctx)
 		if err != nil {
-			return fmt.Errorf("failed querying car %q owner: %v", ca.Model, err)
+			return fmt.Errorf("failed querying car %q owner: %w", ca.Model, err)
 		}
 		log.Printf("car %q owner: %q\n", ca.Model, owner.Name)
 	}
@@ -232,7 +232,7 @@ func QueryGithub(ctx context.Context, client *ent.Client) error {
 		QueryCars().                 // (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed getting cars: %v", err)
+		return fmt.Errorf("failed getting cars: %w", err)
 	}
 	log.Println("cars returned:", cars)
 	// Output: (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
@@ -259,7 +259,7 @@ func QueryArielCars(ctx context.Context, client *ent.Client) error {
 		). //
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed getting cars: %v", err)
+		return fmt.Errorf("failed getting cars: %w", err)
 	}
 	log.Println("cars returned:", cars)
 	return nil
@@ -271,7 +271,7 @@ func QueryGroupWithUsers(ctx context.Context, client *ent.Client) error {
 		Where(group.HasUsers()).
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed getting groups: %v", err)
+		return fmt.Errorf("failed getting groups: %w", err)
 	}
 	log.Println("groups returned:", groups)
 	// Output: (Group(Name=GitHub), Group(Name=GitLab),)

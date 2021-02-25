@@ -41,7 +41,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetValue(2).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating the root: %v", err)
+		return fmt.Errorf("creating the root: %w", err)
 	}
 
 	// Add additional nodes to the tree:

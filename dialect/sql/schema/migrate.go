@@ -197,7 +197,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 		default: // !exist
 			query, args := m.tBuilder(t).Query()
 			if err := tx.Exec(ctx, query, args, nil); err != nil {
-				return fmt.Errorf("create table %q: %v", t.Name, err)
+				return fmt.Errorf("create table %q: %w", t.Name, err)
 			}
 			// If global unique identifier is enabled and it's not
 			// a relation table, allocate a range for the table pk.
@@ -210,7 +210,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 			for _, idx := range t.Indexes {
 				query, args := m.addIndex(idx, t.Name).Query()
 				if err := tx.Exec(ctx, query, args, nil); err != nil {
-					return fmt.Errorf("create index %q: %v", idx.Name, err)
+					return fmt.Errorf("create index %q: %w", idx.Name, err)
 				}
 			}
 		}
@@ -243,7 +243,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 		}
 		query, args := b.Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create foreign keys for %q: %v", t.Name, err)
+			return fmt.Errorf("create foreign keys for %q: %w", t.Name, err)
 		}
 	}
 	return nil
@@ -262,7 +262,7 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 		}
 		for _, idx := range change.index.drop {
 			if err := m.dropIndex(ctx, tx, idx, table); err != nil {
-				return fmt.Errorf("drop index of table %q: %v", table, err)
+				return fmt.Errorf("drop index of table %q: %w", table, err)
 			}
 		}
 	}
@@ -275,13 +275,13 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 	for i := range queries {
 		query, args := queries[i].Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("alter table %q: %v", table, err)
+			return fmt.Errorf("alter table %q: %w", table, err)
 		}
 	}
 	for _, idx := range change.index.add {
 		query, args := m.addIndex(idx, table).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create index %q: %v", table, err)
+			return fmt.Errorf("create index %q: %w", table, err)
 		}
 	}
 	return nil
@@ -409,7 +409,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 	for _, fk := range new.ForeignKeys {
 		ok, err := m.fkExist(ctx, tx, fk.Symbol)
 		if err != nil {
-			return fmt.Errorf("checking foreign-key existence %q: %v", fk.Symbol, err)
+			return fmt.Errorf("checking foreign-key existence %q: %w", fk.Symbol, err)
 		}
 		if !ok {
 			continue
@@ -424,7 +424,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 		}
 		query, args := d.renameColumn(curr, &Column{Name: column}, newcol).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("rename column %q: %v", column, err)
+			return fmt.Errorf("rename column %q: %w", column, err)
 		}
 		prev, ok := curr.column(column)
 		if !ok {
@@ -441,7 +441,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 				idx2 := &Index{Name: newcol.Name, Unique: true, Columns: []*Column{newcol}}
 				query, args := d.renameIndex(curr, idx, idx2).Query()
 				if err := tx.Exec(ctx, query, args, nil); err != nil {
-					return fmt.Errorf("rename index %q: %v", prev.Name, err)
+					return fmt.Errorf("rename index %q: %w", prev.Name, err)
 				}
 				idx.Name = idx2.Name
 			default:
@@ -464,7 +464,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 			if idx.sameAs(idx2) {
 				query, args := d.renameIndex(curr, idx, idx2).Query()
 				if err := tx.Exec(ctx, query, args, nil); err != nil {
-					return fmt.Errorf("rename index %q: %v", idx.Name, err)
+					return fmt.Errorf("rename index %q: %w", idx.Name, err)
 				}
 				idx.Name = idx2.Name
 				break Find
@@ -500,7 +500,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
 		query, args := m.tBuilder(t).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create types table: %v", err)
+			return fmt.Errorf("create types table: %w", err)
 		}
 		return nil
 	}
@@ -508,7 +508,7 @@ func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
 	query, args := sql.Dialect(m.Dialect()).
 		Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return fmt.Errorf("query types table: %v", err)
+		return fmt.Errorf("query types table: %w", err)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, &m.typeRanges)
@@ -525,7 +525,7 @@ func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) err
 		query, args := sql.Dialect(m.Dialect()).
 			Insert(TypeTable).Columns("type").Values(t.Name).Query()
 		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("insert into type: %v", err)
+			return fmt.Errorf("insert into type: %w", err)
 		}
 		id = len(m.typeRanges)
 		m.typeRanges = append(m.typeRanges, t.Name)
@@ -552,12 +552,12 @@ func (m *Migrate) fkColumn(ctx context.Context, tx dialect.Tx, fk *ForeignKey) (
 		Query()
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return "", fmt.Errorf("reading foreign-key %q column: %v", fk.Symbol, err)
+		return "", fmt.Errorf("reading foreign-key %q column: %w", fk.Symbol, err)
 	}
 	defer rows.Close()
 	column, err := sql.ScanString(rows)
 	if err != nil {
-		return "", fmt.Errorf("scanning foreign-key %q column: %v", fk.Symbol, err)
+		return "", fmt.Errorf("scanning foreign-key %q column: %w", fk.Symbol, err)
 	}
 	return column, nil
 }
@@ -604,9 +604,9 @@ func (m *Migrate) symbol(name string) string {
 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
 func rollback(tx dialect.Tx, err error) error {
-	err = fmt.Errorf("sql/schema: %v", err)
+	err = fmt.Errorf("sql/schema: %w", err)
 	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%s: %v", err.Error(), rerr)
+		err = fmt.Errorf("%w: %v", err, rerr)
 	}
 	return err
 }
@@ -615,7 +615,7 @@ func rollback(tx dialect.Tx, err error) error {
 func exist(ctx context.Context, tx dialect.Tx, query string, args ...interface{}) (bool, error) {
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return false, fmt.Errorf("reading schema information %v", err)
+		return false, fmt.Errorf("reading schema information %w", err)
 	}
 	defer rows.Close()
 	n, err := sql.ScanInt(rows)

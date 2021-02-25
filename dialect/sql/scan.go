@@ -25,7 +25,7 @@ type ColumnScanner interface {
 func ScanOne(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
 	if err != nil {
-		return fmt.Errorf("sql/scan: failed getting column names: %v", err)
+		return fmt.Errorf("sql/scan: failed getting column names: %w", err)
 	}
 	if n := len(columns); n != 1 {
 		return fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
@@ -85,7 +85,7 @@ func ScanValue(rows ColumnScanner) (driver.Value, error) {
 func ScanSlice(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
 	if err != nil {
-		return fmt.Errorf("sql/scan: failed getting column names: %v", err)
+		return fmt.Errorf("sql/scan: failed getting column names: %w", err)
 	}
 	rv := reflect.ValueOf(v)
 	switch {
@@ -111,7 +111,7 @@ func ScanSlice(rows ColumnScanner, v interface{}) error {
 	for rows.Next() {
 		values := scan.values()
 		if err := rows.Scan(values...); err != nil {
-			return fmt.Errorf("sql/scan: failed scanning rows: %v", err)
+			return fmt.Errorf("sql/scan: failed scanning rows: %w", err)
 		}
 		vv := reflect.Append(rv, scan.value(values...))
 		rv.Set(vv)

@@ -45,23 +45,23 @@ func Do(ctx context.Context, client *ent.Client) error {
 	// Expect operation to fail, because viewer-context
 	// is missing (first mutation rule check).
 	if _, err := client.Tenant.Create().Save(ctx); !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operation to fail, but got %v", err)
+		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Deny tenant creation if the viewer is not admin.
 	viewOnly := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
 	if _, err := client.Tenant.Create().Save(viewOnly); !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operation to fail, but got %v", err)
+		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Apply the same operation with "Admin" role.
 	admin := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
 	hub, err := client.Tenant.Create().SetName("GitHub").Save(admin)
 	if err != nil {
-		return fmt.Errorf("expect operation to pass, but got %v", err)
+		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
 	fmt.Println(hub)
 	lab, err := client.Tenant.Create().SetName("GitLab").Save(admin)
 	if err != nil {
-		return fmt.Errorf("expect operation to pass, but got %v", err)
+		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
 	fmt.Println(lab)
 
@@ -97,7 +97,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	}
 	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(a8m).Save(admin)
 	if err != nil {
-		return fmt.Errorf("expect operation to pass, but got %v", err)
+		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
 	fmt.Println(entgo)
 
@@ -109,7 +109,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	}
 	entgo, err = entgo.Update().SetName("entgo").Save(hubView)
 	if err != nil {
-		return fmt.Errorf("expect operation to pass, but got %v", err)
+		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
 	fmt.Println(entgo)
 

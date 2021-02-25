@@ -64,7 +64,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		QueryGroups().
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("querying a8m groups: %v", err)
+		return fmt.Errorf("querying a8m groups: %w", err)
 	}
 	fmt.Println(groups)
 	// Output: [Group(id=1, name=GitHub) Group(id=2, name=GitLab)]
@@ -73,7 +73,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		QueryGroups().
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("querying nati groups: %v", err)
+		return fmt.Errorf("querying nati groups: %w", err)
 	}
 	fmt.Println(groups)
 	// Output: [Group(id=1, name=GitHub)]
@@ -87,7 +87,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		QueryUsers().                                            // [a8m, nati]
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("traversing the graph: %v", err)
+		return fmt.Errorf("traversing the graph: %w", err)
 	}
 	fmt.Println(users)
 	// Output: [User(id=1, age=30, name=a8m) User(id=2, age=28, name=nati)]

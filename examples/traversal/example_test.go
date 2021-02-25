@@ -67,7 +67,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 		SetName("Github").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("failed creating the group: %v", err)
+		return fmt.Errorf("failed creating the group: %w", err)
 	}
 	// Create the admin of the group.
 	// Unlike `Save`, `SaveX` panics if an error occurs.
@@ -127,7 +127,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 					QueryOwner().                // Coco's owner: Alex.
 					Only(ctx)                    // Expect only one entity to return in the query.
 	if err != nil {
-		return fmt.Errorf("failed querying the owner: %v", err)
+		return fmt.Errorf("failed querying the owner: %w", err)
 	}
 	fmt.Println(owner)
 	// Output:
@@ -148,7 +148,7 @@ func Traverse2(ctx context.Context, client *ent.Client) error {
 		).
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying the pets: %v", err)
+		return fmt.Errorf("failed querying the pets: %w", err)
 	}
 	fmt.Println(pets)
 	// Output:
@@ -160,14 +160,14 @@ func Traverse2(ctx context.Context, client *ent.Client) error {
 func GenTx(ctx context.Context, client *ent.Client) error {
 	tx, err := client.Tx(ctx)
 	if err != nil {
-		return fmt.Errorf("starting a transaction: %v", err)
+		return fmt.Errorf("starting a transaction: %w", err)
 	}
 	hub, err := tx.Group.
 		Create().
 		SetName("Github").
 		Save(ctx)
 	if err != nil {
-		return rollback(tx, fmt.Errorf("failed creating the group: %v", err))
+		return rollback(tx, fmt.Errorf("failed creating the group: %w", err))
 	}
 	// Create the admin of the group.
 	dan, err := tx.User.
@@ -237,7 +237,7 @@ func WithTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) error) 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
 func rollback(tx *ent.Tx, err error) error {
 	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%v: %v", err, rerr)
+		err = fmt.Errorf("%w: %v", err, rerr)
 	}
 	return err
 }
