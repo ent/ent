@@ -23,6 +23,8 @@ type User struct {
 	// Comment line1
 	// Comment line2
 	Name string `json:"name,omitempty"`
+	// Label holds the value of the "label" field.
+	Label string `json:"label,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -32,7 +34,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldID:
 			values[i] = &sql.NullInt64{}
-		case user.FieldName:
+		case user.FieldName, user.FieldLabel:
 			values[i] = &sql.NullString{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
@@ -60,6 +62,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				u.Name = value.String
+			}
+		case user.FieldLabel:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field label", values[i])
+			} else if value.Valid {
+				u.Label = value.String
 			}
 		}
 	}
@@ -91,6 +99,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
+	builder.WriteString(", label=")
+	builder.WriteString(u.Label)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -46,6 +46,8 @@ func (User) Fields() []ent.Field {
 				Size: 128,
 			}).Comment(`Comment line1
 Comment line2`),
+		field.String("label").
+			Optional(),
 	}
 }
 
