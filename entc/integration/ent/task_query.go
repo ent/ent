@@ -338,7 +338,7 @@ func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
 func (tq *TaskQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := tq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

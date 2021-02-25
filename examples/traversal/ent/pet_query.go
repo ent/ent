@@ -460,7 +460,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, pq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "friends": %v`, err)
+			return nil, fmt.Errorf(`query edges "friends": %w`, err)
 		}
 		query.Where(pet.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -515,7 +515,7 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := pq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

@@ -338,7 +338,7 @@ func (cq *ConversionQuery) sqlCount(ctx context.Context) (int, error) {
 func (cq *ConversionQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := cq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("entv1: check existence: %v", err)
+		return false, fmt.Errorf("entv1: check existence: %w", err)
 	}
 	return n > 0, nil
 }

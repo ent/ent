@@ -87,7 +87,7 @@ func (i *Info) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field content", values[j])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &i.Content); err != nil {
-					return fmt.Errorf("unmarshal field content: %v", err)
+					return fmt.Errorf("unmarshal field content: %w", err)
 				}
 			}
 		}

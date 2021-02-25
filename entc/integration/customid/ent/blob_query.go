@@ -486,7 +486,7 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, bq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "links": %v`, err)
+			return nil, fmt.Errorf(`query edges "links": %w`, err)
 		}
 		query.Where(blob.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -515,7 +515,7 @@ func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
 func (bq *BlobQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := bq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

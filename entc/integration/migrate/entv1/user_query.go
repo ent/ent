@@ -606,7 +606,7 @@ func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 func (uq *UserQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := uq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("entv1: check existence: %v", err)
+		return false, fmt.Errorf("entv1: check existence: %w", err)
 	}
 	return n > 0, nil
 }

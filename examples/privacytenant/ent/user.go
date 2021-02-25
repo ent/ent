@@ -111,7 +111,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field foods", values[i])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &u.Foods); err != nil {
-					return fmt.Errorf("unmarshal field foods: %v", err)
+					return fmt.Errorf("unmarshal field foods: %w", err)
 				}
 			}
 		case user.ForeignKeys[0]:

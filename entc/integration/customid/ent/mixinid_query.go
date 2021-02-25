@@ -339,7 +339,7 @@ func (miq *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 func (miq *MixinIDQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := miq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }
