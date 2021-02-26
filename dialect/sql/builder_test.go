@@ -1437,3 +1437,24 @@ func TestBuilderContext(t *testing.T) {
 		t.Fatalf("expected cloned selector context key to be %q but got %q", want, got)
 	}
 }
+
+type point struct {
+	xy []float64
+	*testing.T
+}
+
+func (p point) FormatParam(placeholder string, info *StmtInfo) string {
+	require.Equal(p.T, dialect.MySQL, info.Dialect)
+	return "ST_GeomFromWKB(" + placeholder + ")"
+}
+
+func TestParamFormatter(t *testing.T) {
+	p := point{xy: []float64{1, 2}, T: t}
+	query, args := Dialect(dialect.MySQL).
+		Select().
+		From(Table("users")).
+		Where(EQ("point", p)).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `point` = ST_GeomFromWKB(?)", query)
+	require.Equal(t, p, args[0])
+}
