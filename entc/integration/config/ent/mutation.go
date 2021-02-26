@@ -36,6 +36,7 @@ type UserMutation struct {
 	typ           string
 	id            *int
 	name          *string
+	label         *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*User, error)
@@ -176,6 +177,55 @@ func (m *UserMutation) ResetName() {
 	delete(m.clearedFields, user.FieldName)
 }
 
+// SetLabel sets the "label" field.
+func (m *UserMutation) SetLabel(s string) {
+	m.label = &s
+}
+
+// Label returns the value of the "label" field in the mutation.
+func (m *UserMutation) Label() (r string, exists bool) {
+	v := m.label
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLabel returns the old "label" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldLabel(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldLabel is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldLabel requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLabel: %w", err)
+	}
+	return oldValue.Label, nil
+}
+
+// ClearLabel clears the value of the "label" field.
+func (m *UserMutation) ClearLabel() {
+	m.label = nil
+	m.clearedFields[user.FieldLabel] = struct{}{}
+}
+
+// LabelCleared returns if the "label" field was cleared in this mutation.
+func (m *UserMutation) LabelCleared() bool {
+	_, ok := m.clearedFields[user.FieldLabel]
+	return ok
+}
+
+// ResetLabel resets all changes to the "label" field.
+func (m *UserMutation) ResetLabel() {
+	m.label = nil
+	delete(m.clearedFields, user.FieldLabel)
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
@@ -190,9 +240,12 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
+	}
+	if m.label != nil {
+		fields = append(fields, user.FieldLabel)
 	}
 	return fields
 }
@@ -204,6 +257,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldName:
 		return m.Name()
+	case user.FieldLabel:
+		return m.Label()
 	}
 	return nil, false
 }
@@ -215,6 +270,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case user.FieldName:
 		return m.OldName(ctx)
+	case user.FieldLabel:
+		return m.OldLabel(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -230,6 +287,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case user.FieldLabel:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLabel(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -264,6 +328,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldName) {
 		fields = append(fields, user.FieldName)
 	}
+	if m.FieldCleared(user.FieldLabel) {
+		fields = append(fields, user.FieldLabel)
+	}
 	return fields
 }
 
@@ -281,6 +348,9 @@ func (m *UserMutation) ClearField(name string) error {
 	case user.FieldName:
 		m.ClearName()
 		return nil
+	case user.FieldLabel:
+		m.ClearLabel()
+		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
@@ -291,6 +361,9 @@ func (m *UserMutation) ResetField(name string) error {
 	switch name {
 	case user.FieldName:
 		m.ResetName()
+		return nil
+	case user.FieldLabel:
+		m.ResetLabel()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

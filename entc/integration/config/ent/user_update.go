@@ -50,6 +50,26 @@ func (uu *UserUpdate) ClearName() *UserUpdate {
 	return uu
 }
 
+// SetLabel sets the "label" field.
+func (uu *UserUpdate) SetLabel(s string) *UserUpdate {
+	uu.mutation.SetLabel(s)
+	return uu
+}
+
+// SetNillableLabel sets the "label" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableLabel(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetLabel(*s)
+	}
+	return uu
+}
+
+// ClearLabel clears the value of the "label" field.
+func (uu *UserUpdate) ClearLabel() *UserUpdate {
+	uu.mutation.ClearLabel()
+	return uu
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -137,6 +157,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldName,
 		})
 	}
+	if value, ok := uu.mutation.Label(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldLabel,
+		})
+	}
+	if uu.mutation.LabelCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldLabel,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -172,6 +205,26 @@ func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 // ClearName clears the value of the "name" field.
 func (uuo *UserUpdateOne) ClearName() *UserUpdateOne {
 	uuo.mutation.ClearName()
+	return uuo
+}
+
+// SetLabel sets the "label" field.
+func (uuo *UserUpdateOne) SetLabel(s string) *UserUpdateOne {
+	uuo.mutation.SetLabel(s)
+	return uuo
+}
+
+// SetNillableLabel sets the "label" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableLabel(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetLabel(*s)
+	}
+	return uuo
+}
+
+// ClearLabel clears the value of the "label" field.
+func (uuo *UserUpdateOne) ClearLabel() *UserUpdateOne {
+	uuo.mutation.ClearLabel()
 	return uuo
 }
 
@@ -265,6 +318,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldName,
+		})
+	}
+	if value, ok := uuo.mutation.Label(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldLabel,
+		})
+	}
+	if uuo.mutation.LabelCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldLabel,
 		})
 	}
 	_node = &User{config: uuo.config}

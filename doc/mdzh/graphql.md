@@ -3,16 +3,16 @@ id: graphql
 title: GraphQL Integration
 ---
 
-The `ent` framework provides an integration with GraphQL through the [99designs/gqlgen](https://github.com/99designs/gqlgen)
-library using the [external templates](templates.md) option (i.e. it can be extended to support other libraries).
+`ent`框架通过[99designs/gqlgen](https://github.com/99designs/gqlgen) 提供图的集成。
+库使用[external templates](templates.md) 选项（也就是说它能够继承支持其他库）
 
-## Quick Introduction
+## 快速开始
 
-In order to enable the [`entgql`](https://github.com/facebookincubator/ent-contrib/tree/master/entgql) extension to your
-project, you need to use the `entc` (ent codegen) package as described [here](code-gen.md#use-entc-as-a-package).
-Follow these 3 steps to enable it to your project:
+为了使[`entgql`](https://github.com/facebookincubator/ent-contrib/tree/master/entgql)扩展到你的项目可以使用，你需要使用 `entc`包，
+介绍在[here](code-gen.md#use-entc-as-a-package)。
+以下三个步骤使它在你的项目中可用。
 
-1\. Create a new Go file named `ent/entc.go`, and paste the following content:
+1\. 创建一个名为`ent/entc.go`的Go文件，粘贴以下内容。
 
 ```go
 // +build ignore
@@ -37,7 +37,7 @@ func main() {
 }
 ```
 
-2\. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
+2\. 编辑`ent/generate.go`并执行：
 
 ```go
 package ent
@@ -45,28 +45,25 @@ package ent
 //go:generate go run entc.go
 ```
 
-Note that `ent/entc.go` is ignored using a build tag, and it's executed by the `go generate` command
-through the `generate.go` file. The full example can be found in the [ent-contrib repository](https://github.com/facebookincubator/ent-contrib/blob/master/entgql/internal/todo).
+注意`ent/entc.go`使用build是被忽略的，它通过`go generate`命令执行。
+完整的案例在[ent-contrib repository](https://github.com/facebookincubator/ent-contrib/blob/master/entgql/internal/todo).
 
-
-3\. Run codegen for your ent project:
+3\. 在你的ent项目下执行如下命令：
 
 ```console
 go generate ./...
 ```
 
-After running codegen, the following add-ons will be added to your project.
+在执行完成后，以下程序将添加到项目中
 
 ## Node API
 
-A new file named `ent/node.go` was created that implements the [Relay Node interface](https://relay.dev/docs/en/graphql-server-specification.html#object-identification).
+一个新的名为`ent/node.go`的文件被创建，它实现了[Relay Node interface](https://relay.dev/docs/en/graphql-server-specification.html#object-identification)接口。
 
-In order to use the new generated `ent.Noder` interface in the [GraphQL resolver](https://gqlgen.com/reference/resolvers/),
-add the `Node` method to the query resolver, and look at the [configuration](#gql-configuration) section to understand
-how to use it.
+为了在[GraphQL resolver](https://gqlgen.com/reference/resolvers/)中使用新生成的`ent.Noder`接口，
+添加`Node`方法到查询resolver中，请查看[configuration](#gql-configuration)去理解怎么使用。
 
-If you are using the [Universal IDs](migrate.md#universal-ids) option in the schema migration, the NodeType is derived
-from the id value and can be used as follows:
+如果在schema 迁移使用[Universal IDs](migrate.md#universal-ids)，NodeType派生自id值，可以如下使用:
 
 ```go
 func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
@@ -74,7 +71,7 @@ func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
 }
 ```
 
-However, if you use a custom format for the global unique identifiers, you can control the NodeType as follows:
+然而，如果你使用自定义的全局唯一标识，你能够控制NodeType：
 
 ```go
 func (r *queryResolver) Node(ctx context.Context, guid string) (ent.Noder, error) {
@@ -84,9 +81,9 @@ func (r *queryResolver) Node(ctx context.Context, guid string) (ent.Noder, error
 ```
 
 
-## GQL Configuration
+## GQL配置
 
-Here's a configuration example for a todo app as exists in [ent-contrib/entgql/todo](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo).
+这里有一些APP配置的案例[ent-contrib/entgql/todo](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo).
 
 ```yaml
 schema:
@@ -112,31 +109,30 @@ models:
       - entgo.io/contrib/entgql/internal/todo/ent.Noder
 ```
 
-## Pagination
+## 分区
 
-The pagination template adds a pagination support according to the _Relay Cursor Connections Spec_. More info
-about the Relay Spec can be found in its [website](https://relay.dev/graphql/connections.htm).
+分区模板添加了根据 _Relay Cursor Connections Spec_ 分页支持。更多关于Relay Spec的信息在[website](https://relay.dev/graphql/connections.htm).
 
-## Connection Ordering
+## 连接顺序
 
-The ordering option allows us to apply an ordering on the edges returned from a connection.
+顺序选项允许我们对连接返回的关系应用排序。
 
-### Usage Notes
+### 使用笔记
 
-- The generated types will be `autobind`ed to GraphQL types if a naming convention is preserved (see example below).
-- Ordering can only be defined on ent fields (no edges).
-- Ordering fields should normally be [indexed](schema-indexes.md) to avoid full table DB scan.
-- Pagination queries can be sorted by a single field (no order by ... then by ... semantics).
+- 如果保留了命名约定，生成类型将被`autobind`到GraphQL类型
+- 排序仅仅能够被定义在ent字段（无关系的）
+- 排序字段通常要设置索引[indexed](schema-indexes.md)，避免全表扫描
+- 分页查询能够通过单个字段排序
 
-### Example
+### 案例
 
-Let's go over the steps needed in order to add ordering to an existing GraphQL type.
-The code example is based on a todo-app that can be found in [ent-contrib/entql/todo](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo).
+让我们回顾一下向现有的GraphQL类型添加排序所需的步骤。
+代码案例在[ent-contrib/entql/todo](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo)
 
-### Defining order fields in ent/schema
+### 在ent/schema中定义要排序的字段
 
-Ordering can be defined on any comparable field of ent by annotating it with `entgql.Annotation`.
-Note that the given `OrderField` name must match its enum value in graphql schema.
+通过`entgql.Annotation`注释，排序能够被定义在ent中任可比较的字段中
+注意`OrderField`必须匹配它在graphql schema中的枚举值
 ```go
 func (Todo) Fields() []ent.Field {
     return []ent.Field{
@@ -167,11 +163,11 @@ func (Todo) Fields() []ent.Field {
     }
 }
 ```
-That's all the schema changes required, make sure to run `go generate` to apply them.
+所有schema的改变都是需要的，确保运行`go generate`应用它们：
 
-### Define ordering types in GraphQL schema
+### 在GraphQL schema中定义排序类型
 
-Next we need to define the ordering types in graphql schema:
+下一步我们需要在GraphQL schema中定义排序类型
 ```graphql
 enum OrderDirection {
   ASC
@@ -190,10 +186,10 @@ input TodoOrder {
   field: TodoOrderField
 }
 ```
-Note that the naming must take the form of `<T>OrderField` / `<T>Order` for `autobind`ing to the generated ent types.
-Alternatively [@goModel](https://gqlgen.com/config/#inline-config-with-directives) directive can be used for manual type binding.
+注意这些命名必须要用`<T>OrderField` / `<T>Order`去生成ent类型。
+[@goModel](https://gqlgen.com/config/#inline-config-with-directives) 指令可以通过手动类型去绑定
 
-### Adding orderBy argument to the pagination query
+### 添加orderBy参数给分页查询
 ```graphql
 type Query {
   todos(
@@ -205,11 +201,11 @@ type Query {
   ): TodoConnection
 }
 ```
-That's all for the GraphQL schema changes, let's run `gqlgen` code generation.
+这就是所有GraphQL schema的改变，让我们运行：`gqlgen`生成代码
 
-### Update the underlying resolver
+### 更新依赖resolver
 
-Head over to the Todo resolver and update it to pass `orderBy` argument to `.Paginate()` call:
+从头去做resolver，更新`orderBy`参数到`.Paginate()`调用。
 
 ```go
 func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder) (*ent.TodoConnection, error) {
@@ -234,13 +230,12 @@ query {
 }
 ```
 
-## Fields Collection
+## 字段集合
 
-The collection template adds support for automatic [GraphQL fields collection](https://spec.graphql.org/June2018/#sec-Field-Collection)
-for ent-edges using eager-loading. That means, if a query asks for nodes and their edges, entgql will add automatically [`With<E>`](eager-load.md#api)
-steps to the root query, and as a result, the client will execute constant number of queries to the database - and it works recursively.
+集合模板添加支持了自动[GraphQL fields collection](https://spec.graphql.org/June2018/#sec-Field-Collection)，对于ent-关系使用了贪婪加载。
+这意味着，如果一个查询访问节点和它们的关系，entgql将会自动添加[`With<E>`](eager-load.md#api)步骤到root查询，最后，客户端将对数据库执行固定数量的查询——并且递归工作。
 
-For example, given this GraphQL query:
+例子，给一个GraphQL查询：
 
 ```graphql
 query {
@@ -262,12 +257,12 @@ query {
 }
 ```
 
-The client will execute 1 query for getting the users, 1 for getting the photos, and another 2 for getting the posts,
-and their comments (4 in total). This logic works both for root queries/resolvers and for the node(s) API.
+客户端将执行1个查询去获取用户，1个获取照片，其他2个获取文章和他们的评论（总共4个）。
+这些逻辑工作同时支持root的queries/resolvers和node(s)API。
 
-### Schema configuration
+### Schema 配置
 
-In order to configure this option to specific edges, use the `entgql.Annotation` as follows:
+为了配置这些选项给特殊的关系，使用`entgql.Annotation`：
 
 ```go
 func (Todo) Edges() []ent.Edge {
@@ -287,9 +282,9 @@ func (Todo) Edges() []ent.Edge {
 }
 ```
 
-### Usage and Configuration
+### 使用和配置
 
-The GraphQL extension generates also edge-resolvers for the nodes under the `edge.go` file as follows:
+GraphQL扩展还为节点生成边缘解析器，文件如下：
 ```go
 func (t *Todo) Children(ctx context.Context) ([]*Todo, error) {
 	result, err := t.Edges.ChildrenOrErr()
@@ -300,8 +295,8 @@ func (t *Todo) Children(ctx context.Context) ([]*Todo, error) {
 }
 ```
 
-However, if you need to explicitly write these resolvers by hand, you can add the
-[`forceResolver`](https://gqlgen.com/master/config#inline-config-with-directives) option to your GraphQL schema:
+然而，如果你想明确的写一些解析器，你可以添加[`forceResolver`](https://gqlgen.com/master/config#inline-config-with-directives)
+选项到你的GraphQL schema：
 
 ```graphql
 type Todo implements Node {
@@ -310,7 +305,7 @@ type Todo implements Node {
 }
 ```
 
-Then, you can implement it on your type resolver.
+然后，你可以实现自己的解析器
 
 ```go
 func (r *todoResolver) Children(ctx context.Context, obj *ent.Todo) ([]*ent.Todo, error) {
@@ -319,25 +314,23 @@ func (r *todoResolver) Children(ctx context.Context, obj *ent.Todo) ([]*ent.Todo
 }
 ```
 
-## Enum Implementation
+## Enum实现
 
-The enum template implements the MarshalGQL/UnmarshalGQL methods for enums generated by ent.
+enum模板为ent生成的enum实现了MarshalGQL/UnmarshalGQL方法
 
-## Transactional Mutations
+## 事务变化
 
-The `entgql.Transactioner` handler executes each GraphQL mutation in a transaction. The injected client for the resolver
-is a [transactional `ent.Client`](transactions.md#transactional-client).
-Hence, code that uses `ent.Client` won't need to be changed. In order to use it, follow these steps:
+`entgql.Transactioner`处理器执行每个在事务的GraphQL变化，对于解析器注入的客户端是一个[transactional `ent.Client`](transactions.md#transactional-client).
+因此，代码使用`ent.Client`不需要被改变，使用如下：
 
-
-1\. In the GraphQL server initialization, use the `entgql.Transactioner` handler as follows:
+1\. 在GraphQL server初始化，使用`entgql.Transactioner` 处理器
 
 ```go
 srv := handler.NewDefaultServer(todo.NewSchema(client))
 srv.Use(entgql.Transactioner{TxOpener: client})
 ```
 
-2\. And then, in the GraphQL mutations, use the client from context as follows:
+2\. 然后，在GraphQL变化使用来自context的client
 ```go
 func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.Todo, error) {
 	client := ent.FromContext(ctx)
@@ -351,14 +344,14 @@ func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.To
 }
 ```
 
-## Examples
+## 案例
 
-The [ent-contrib](https://github.com/facebookincubator/ent-contrib) contains several examples at the moment:
-1. A complete GraphQL server with a simple [Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo) with numeric ID field
-2. The same [Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todouuid) in 1, but with UUID type for the ID field
-3. The same [Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todopulid) in 1 and 2, but with a prefixed [ULID](https://github.com/ulid/spec) or `PULID` as the ID field. This example supports the Relay Node API by prefixing IDs with the entity type rather than employing the ID space partitioning in [Universal IDs](migrate.md#universal-ids).
+1. 一个完整的GraphQL server。[Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo)有数据ID字段的。
+2. 和[Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todouuid)1相似，但是ID字段是UUID
+3. 和[Todo App](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todouuid)1、2相似。但是有前缀 [ULID](https://github.com/ulid/spec) 或者
+`PULID`作为ID字段。这个示例支持中继节点API，方法是使用实体类型作为ID的前缀，而不是使用在[Universal IDs](migrate.md#universal-ids)ID空间分区.
 
 ---
 
-Please note that this documentation is under development. All code parts reside in [ent-contrib/entgql](https://github.com/facebookincubator/ent-contrib/tree/master/entgql),
-and an example of a todo-app can be found in [ent-contrib/entql/todo](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo).
+请注意这些文档都是依赖于开发，所有的代码部分属于[ent-contrib/entgql](https://github.com/facebookincubator/ent-contrib/tree/master/entgql)，
+这个todo-app的例子在[ent-contrib/entql/todo](https://github.com/facebookincubator/ent-contrib/tree/master/entgql/internal/todo).
