@@ -36,6 +36,20 @@ func (uc *UserCreate) SetNillableName(s *string) *UserCreate {
 	return uc
 }
 
+// SetLabel sets the "label" field.
+func (uc *UserCreate) SetLabel(s string) *UserCreate {
+	uc.mutation.SetLabel(s)
+	return uc
+}
+
+// SetNillableLabel sets the "label" field if the given value is not nil.
+func (uc *UserCreate) SetNillableLabel(s *string) *UserCreate {
+	if s != nil {
+		uc.SetLabel(*s)
+	}
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -133,6 +147,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := uc.mutation.Label(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldLabel,
+		})
+		_node.Label = value
 	}
 	return _node, _spec
 }

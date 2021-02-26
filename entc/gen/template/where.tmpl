@@ -35,12 +35,13 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ end }}
 
 {{ range $f := $.Fields }}
+	{{ $func := $f.StructField }}
 	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
 	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
 	{{ $comparable := $f.ConvertedToBasic }}
-	{{- if and $hasP $comparable }}
+	{{ $undeclared := (and (ne $func "Label") (ne $func "Hooks") (ne $func "Policy")) }}
+	{{- if and $hasP $comparable $undeclared }}
 		{{ $arg := "v" }}
-		{{ $func := $f.StructField }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
 		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
 			{{- if $f.HasGoType }}

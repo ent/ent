@@ -266,6 +266,8 @@ func (d *MySQL) cType(c *Column) (t string) {
 		t = fmt.Sprintf("enum(%s)", strings.Join(values, ", "))
 	case field.TypeUUID:
 		t = "char(36) binary"
+	case field.TypeOther:
+		t = c.typ
 	default:
 		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type.String(), c.Name))
 	}
@@ -441,6 +443,8 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 			return fmt.Errorf("unknown char(%d) type (not a uuid)", size)
 		}
 		c.Type = field.TypeUUID
+	case "point", "geometry", "linestring", "polygon":
+		c.Type = field.TypeOther
 	default:
 		return fmt.Errorf("unknown column type %q for version %q", parts[0], d.version)
 	}

@@ -17,6 +17,7 @@ var (
 	UsersColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "label", Type: field.TypeString, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "Users" table.
 	UsersTable = &schema.Table{
