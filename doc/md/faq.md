@@ -13,7 +13,8 @@ sidebar_label: FAQ
 [How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets) \
 [How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql) \
 [How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
-[How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids)
+[How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids) \
+[How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)
 
 ## Answers
 
@@ -211,7 +212,7 @@ option for doing it as follows:
 
 #### How to define a network address field in PostgreSQL?
 
-The [GoType](http://localhost:3000/docs/schema-fields#go-type) and the [SchemaType](http://localhost:3000/docs/schema-fields#database-type)
+The [GoType](schema-fields.md#go-type) and the [SchemaType](schema-fields.md#database-type)
 options allow users to define database-specific fields. For example, in order to define a
  [`macaddr`](https://www.postgresql.org/docs/13/datatype-net-types.html#DATATYPE-MACADDR) field, use the following configuration:
 
@@ -390,3 +391,75 @@ func (User) Mixin() []ent.Mixin {
 }
 ```
 
+#### How to define a spatial data type field in MySQL?
+
+The [GoType](schema-fields.md#go-type) and the [SchemaType](schema-fields.md#database-type)
+options allow users to define database-specific fields. For example, in order to define a
+[`POINT`](https://dev.mysql.com/doc/refman/8.0/en/spatial-type-overview.html) field, use the following configuration:
+
+```go
+// Fields of the Location.
+func (Location) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+		field.Other("coords", &Point{}).
+			SchemaType(Point{}.SchemaType()),
+	}
+}
+```
+
+```go
+package schema
+
+import (
+	"database/sql/driver"
+	"fmt"
+
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"github.com/paulmach/orb"
+	"github.com/paulmach/orb/encoding/wkb"
+)
+
+// A Point consists of (X,Y) or (Lat, Lon) coordinates
+// and it is stored in MySQL the POINT spatial data type.
+type Point [2]float64
+
+// Scan implements the Scanner interface.
+func (p *Point) Scan(value interface{}) error {
+	bin, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("invalid binary value for point")
+	}
+	var op orb.Point
+	if err := wkb.Scanner(&op).Scan(bin[4:]); err != nil {
+		return err
+	}
+	p[0], p[1] = op.X(), op.Y()
+	return nil
+}
+
+// Value implements the driver Valuer interface.
+func (p Point) Value() (driver.Value, error) {
+	op := orb.Point{p[0], p[1]}
+	return wkb.Value(op).Value()
+}
+
+// FormatParam implements the sql.ParamFormatter interface to tell the SQL
+// builder that the placeholder for a Point parameter needs to be formatted.
+func (p Point) FormatParam(placeholder string, info *sql.StmtInfo) string {
+	if info.Dialect == dialect.MySQL {
+		return "ST_GeomFromWKB(" + placeholder + ")"
+	}
+	return placeholder
+}
+
+// SchemaType defines the schema-type of the Point object.
+func (Point) SchemaType() map[string]string {
+	return map[string]string{
+		dialect.MySQL: "POINT",
+	}
+}
+```
+
+A full example exists in the [example repository](https://github.com/a8m/entspatial).
