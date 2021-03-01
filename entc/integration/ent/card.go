@@ -25,6 +25,8 @@ type Card struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// Balance holds the value of the "balance" field.
+	Balance float64 `json:"balance,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"-"`
 	// Name holds the value of the "name" field.
@@ -78,6 +80,8 @@ func (*Card) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case card.FieldBalance:
+			values[i] = &sql.NullFloat64{}
 		case card.FieldID:
 			values[i] = &sql.NullInt64{}
 		case card.FieldNumber, card.FieldName:
@@ -118,6 +122,12 @@ func (c *Card) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				c.UpdateTime = value.Time
+			}
+		case card.FieldBalance:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field balance", values[i])
+			} else if value.Valid {
+				c.Balance = value.Float64
 			}
 		case card.FieldNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -180,6 +190,8 @@ func (c *Card) String() string {
 	builder.WriteString(c.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", balance=")
+	builder.WriteString(fmt.Sprintf("%v", c.Balance))
 	builder.WriteString(", number=")
 	builder.WriteString(c.Number)
 	builder.WriteString(", name=")

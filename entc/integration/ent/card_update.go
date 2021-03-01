@@ -32,6 +32,27 @@ func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return cu
 }
 
+// SetBalance sets the "balance" field.
+func (cu *CardUpdate) SetBalance(f float64) *CardUpdate {
+	cu.mutation.ResetBalance()
+	cu.mutation.SetBalance(f)
+	return cu
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableBalance(f *float64) *CardUpdate {
+	if f != nil {
+		cu.SetBalance(*f)
+	}
+	return cu
+}
+
+// AddBalance adds f to the "balance" field.
+func (cu *CardUpdate) AddBalance(f float64) *CardUpdate {
+	cu.mutation.AddBalance(f)
+	return cu
+}
+
 // SetName sets the "name" field.
 func (cu *CardUpdate) SetName(s string) *CardUpdate {
 	cu.mutation.SetName(s)
@@ -219,6 +240,20 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: card.FieldUpdateTime,
 		})
 	}
+	if value, ok := cu.mutation.Balance(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
+		})
+	}
+	if value, ok := cu.mutation.AddedBalance(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
+		})
+	}
 	if value, ok := cu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -337,6 +372,27 @@ type CardUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *CardMutation
+}
+
+// SetBalance sets the "balance" field.
+func (cuo *CardUpdateOne) SetBalance(f float64) *CardUpdateOne {
+	cuo.mutation.ResetBalance()
+	cuo.mutation.SetBalance(f)
+	return cuo
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableBalance(f *float64) *CardUpdateOne {
+	if f != nil {
+		cuo.SetBalance(*f)
+	}
+	return cuo
+}
+
+// AddBalance adds f to the "balance" field.
+func (cuo *CardUpdateOne) AddBalance(f float64) *CardUpdateOne {
+	cuo.mutation.AddBalance(f)
+	return cuo
 }
 
 // SetName sets the "name" field.
@@ -529,6 +585,20 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: card.FieldUpdateTime,
+		})
+	}
+	if value, ok := cuo.mutation.Balance(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
+		})
+	}
+	if value, ok := cuo.mutation.AddedBalance(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
 		})
 	}
 	if value, ok := cuo.mutation.Name(); ok {

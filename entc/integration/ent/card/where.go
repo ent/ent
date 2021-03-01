@@ -111,6 +111,13 @@ func UpdateTime(v time.Time) predicate.Card {
 	})
 }
 
+// Balance applies equality check predicate on the "balance" field. It's identical to BalanceEQ.
+func Balance(v float64) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBalance), v))
+	})
+}
+
 // Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
 func Number(v string) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
@@ -274,6 +281,82 @@ func UpdateTimeLT(v time.Time) predicate.Card {
 func UpdateTimeLTE(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
+	})
+}
+
+// BalanceEQ applies the EQ predicate on the "balance" field.
+func BalanceEQ(v float64) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBalance), v))
+	})
+}
+
+// BalanceNEQ applies the NEQ predicate on the "balance" field.
+func BalanceNEQ(v float64) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBalance), v))
+	})
+}
+
+// BalanceIn applies the In predicate on the "balance" field.
+func BalanceIn(vs ...float64) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldBalance), v...))
+	})
+}
+
+// BalanceNotIn applies the NotIn predicate on the "balance" field.
+func BalanceNotIn(vs ...float64) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldBalance), v...))
+	})
+}
+
+// BalanceGT applies the GT predicate on the "balance" field.
+func BalanceGT(v float64) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBalance), v))
+	})
+}
+
+// BalanceGTE applies the GTE predicate on the "balance" field.
+func BalanceGTE(v float64) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBalance), v))
+	})
+}
+
+// BalanceLT applies the LT predicate on the "balance" field.
+func BalanceLT(v float64) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBalance), v))
+	})
+}
+
+// BalanceLTE applies the LTE predicate on the "balance" field.
+func BalanceLTE(v float64) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBalance), v))
 	})
 }
 

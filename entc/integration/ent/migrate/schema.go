@@ -17,6 +17,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "balance", Type: field.TypeFloat64, Default: 0},
 		{Name: "number", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "user_card", Type: field.TypeInt, Unique: true, Nullable: true},
@@ -29,7 +30,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:  "cards_users_card",
-				Columns: []*schema.Column{CardsColumns[5]},
+				Columns: []*schema.Column{CardsColumns[6]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -44,12 +45,12 @@ var (
 			{
 				Name:    "card_number",
 				Unique:  false,
-				Columns: []*schema.Column{CardsColumns[3]},
+				Columns: []*schema.Column{CardsColumns[4]},
 			},
 			{
 				Name:    "card_id_name_number",
 				Unique:  false,
-				Columns: []*schema.Column{CardsColumns[0], CardsColumns[4], CardsColumns[3]},
+				Columns: []*schema.Column{CardsColumns[0], CardsColumns[5], CardsColumns[4]},
 			},
 		},
 	}
