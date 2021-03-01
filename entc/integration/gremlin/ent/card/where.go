@@ -100,6 +100,13 @@ func UpdateTime(v time.Time) predicate.Card {
 	})
 }
 
+// Balance applies equality check predicate on the "balance" field. It's identical to BalanceEQ.
+func Balance(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.EQ(v))
+	})
+}
+
 // Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
 func Number(v string) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
@@ -239,6 +246,70 @@ func UpdateTimeLT(v time.Time) predicate.Card {
 func UpdateTimeLTE(v time.Time) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUpdateTime, p.LTE(v))
+	})
+}
+
+// BalanceEQ applies the EQ predicate on the "balance" field.
+func BalanceEQ(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.EQ(v))
+	})
+}
+
+// BalanceNEQ applies the NEQ predicate on the "balance" field.
+func BalanceNEQ(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.NEQ(v))
+	})
+}
+
+// BalanceIn applies the In predicate on the "balance" field.
+func BalanceIn(vs ...float64) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.Within(v...))
+	})
+}
+
+// BalanceNotIn applies the NotIn predicate on the "balance" field.
+func BalanceNotIn(vs ...float64) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.Without(v...))
+	})
+}
+
+// BalanceGT applies the GT predicate on the "balance" field.
+func BalanceGT(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.GT(v))
+	})
+}
+
+// BalanceGTE applies the GTE predicate on the "balance" field.
+func BalanceGTE(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.GTE(v))
+	})
+}
+
+// BalanceLT applies the LT predicate on the "balance" field.
+func BalanceLT(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.LT(v))
+	})
+}
+
+// BalanceLTE applies the LTE predicate on the "balance" field.
+func BalanceLTE(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.LTE(v))
 	})
 }
 

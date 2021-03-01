@@ -68,6 +68,8 @@ type CardMutation struct {
 	id            *int
 	create_time   *time.Time
 	update_time   *time.Time
+	balance       *float64
+	addbalance    *float64
 	number        *string
 	name          *string
 	clearedFields map[string]struct{}
@@ -230,6 +232,62 @@ func (m *CardMutation) OldUpdateTime(ctx context.Context) (v time.Time, err erro
 // ResetUpdateTime resets all changes to the "update_time" field.
 func (m *CardMutation) ResetUpdateTime() {
 	m.update_time = nil
+}
+
+// SetBalance sets the "balance" field.
+func (m *CardMutation) SetBalance(f float64) {
+	m.balance = &f
+	m.addbalance = nil
+}
+
+// Balance returns the value of the "balance" field in the mutation.
+func (m *CardMutation) Balance() (r float64, exists bool) {
+	v := m.balance
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBalance returns the old "balance" field's value of the Card entity.
+// If the Card object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CardMutation) OldBalance(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldBalance is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldBalance requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBalance: %w", err)
+	}
+	return oldValue.Balance, nil
+}
+
+// AddBalance adds f to the "balance" field.
+func (m *CardMutation) AddBalance(f float64) {
+	if m.addbalance != nil {
+		*m.addbalance += f
+	} else {
+		m.addbalance = &f
+	}
+}
+
+// AddedBalance returns the value that was added to the "balance" field in this mutation.
+func (m *CardMutation) AddedBalance() (r float64, exists bool) {
+	v := m.addbalance
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBalance resets all changes to the "balance" field.
+func (m *CardMutation) ResetBalance() {
+	m.balance = nil
+	m.addbalance = nil
 }
 
 // SetNumber sets the "number" field.
@@ -423,12 +481,15 @@ func (m *CardMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CardMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.create_time != nil {
 		fields = append(fields, card.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, card.FieldUpdateTime)
+	}
+	if m.balance != nil {
+		fields = append(fields, card.FieldBalance)
 	}
 	if m.number != nil {
 		fields = append(fields, card.FieldNumber)
@@ -448,6 +509,8 @@ func (m *CardMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case card.FieldUpdateTime:
 		return m.UpdateTime()
+	case card.FieldBalance:
+		return m.Balance()
 	case card.FieldNumber:
 		return m.Number()
 	case card.FieldName:
@@ -465,6 +528,8 @@ func (m *CardMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreateTime(ctx)
 	case card.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case card.FieldBalance:
+		return m.OldBalance(ctx)
 	case card.FieldNumber:
 		return m.OldNumber(ctx)
 	case card.FieldName:
@@ -492,6 +557,13 @@ func (m *CardMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUpdateTime(v)
 		return nil
+	case card.FieldBalance:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBalance(v)
+		return nil
 	case card.FieldNumber:
 		v, ok := value.(string)
 		if !ok {
@@ -513,13 +585,21 @@ func (m *CardMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *CardMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addbalance != nil {
+		fields = append(fields, card.FieldBalance)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *CardMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case card.FieldBalance:
+		return m.AddedBalance()
+	}
 	return nil, false
 }
 
@@ -528,6 +608,13 @@ func (m *CardMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *CardMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case card.FieldBalance:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBalance(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Card numeric field %s", name)
 }
@@ -569,6 +656,9 @@ func (m *CardMutation) ResetField(name string) error {
 		return nil
 	case card.FieldUpdateTime:
 		m.ResetUpdateTime()
+		return nil
+	case card.FieldBalance:
+		m.ResetBalance()
 		return nil
 	case card.FieldNumber:
 		m.ResetNumber()

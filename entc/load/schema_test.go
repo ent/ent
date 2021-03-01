@@ -268,9 +268,12 @@ func (WithDefaults) Fields() []ent.Field {
 		field.Time("updated_at").
 			UpdateDefault(time.Now),
 		// see issue #1146
-		field.Int("int_default_func").DefaultFunc(func() int {
-			return 1e9
-		}),
+		field.Int("int_default_func").
+			DefaultFunc(func() int {
+				return 1e9
+			}),
+		field.Float("balance").
+			Default(0),
 	}
 }
 
@@ -300,6 +303,7 @@ func TestMarshalDefaults(t *testing.T) {
 	require.True(t, schema.Fields[4].UpdateDefault)
 	require.True(t, schema.Fields[5].Default)
 	require.Equal(t, schema.Fields[5].DefaultKind, reflect.Func)
+	require.True(t, schema.Fields[6].Default)
 }
 
 type TimeMixin struct {

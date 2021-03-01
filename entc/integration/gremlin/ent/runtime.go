@@ -40,12 +40,16 @@ func init() {
 	card.DefaultUpdateTime = cardDescUpdateTime.Default.(func() time.Time)
 	// card.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	card.UpdateDefaultUpdateTime = cardDescUpdateTime.UpdateDefault.(func() time.Time)
+	// cardDescBalance is the schema descriptor for balance field.
+	cardDescBalance := cardFields[0].Descriptor()
+	// card.DefaultBalance holds the default value on creation for the balance field.
+	card.DefaultBalance = cardDescBalance.Default.(float64)
 	// cardDescNumber is the schema descriptor for number field.
-	cardDescNumber := cardFields[0].Descriptor()
+	cardDescNumber := cardFields[1].Descriptor()
 	// card.NumberValidator is a validator for the "number" field. It is called by the builders before save.
 	card.NumberValidator = cardDescNumber.Validators[0].(func(string) error)
 	// cardDescName is the schema descriptor for name field.
-	cardDescName := cardFields[1].Descriptor()
+	cardDescName := cardFields[2].Descriptor()
 	// card.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	card.NameValidator = cardDescName.Validators[0].(func(string) error)
 	fieldtypeFields := schema.FieldType{}.Fields()
