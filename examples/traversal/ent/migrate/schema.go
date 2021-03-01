@@ -25,9 +25,8 @@ var (
 		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "groups_users_admin",
-				Columns: []*schema.Column{GroupsColumns[2]},
-
+				Symbol:     "groups_users_admin",
+				Columns:    []*schema.Column{GroupsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -46,9 +45,8 @@ var (
 		PrimaryKey: []*schema.Column{PetsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "pets_users_pets",
-				Columns: []*schema.Column{PetsColumns[2]},
-
+				Symbol:     "pets_users_pets",
+				Columns:    []*schema.Column{PetsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -79,16 +77,14 @@ var (
 		PrimaryKey: []*schema.Column{GroupUsersColumns[0], GroupUsersColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "group_users_group_id",
-				Columns: []*schema.Column{GroupUsersColumns[0]},
-
+				Symbol:     "group_users_group_id",
+				Columns:    []*schema.Column{GroupUsersColumns[0]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "group_users_user_id",
-				Columns: []*schema.Column{GroupUsersColumns[1]},
-
+				Symbol:     "group_users_user_id",
+				Columns:    []*schema.Column{GroupUsersColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -106,16 +102,14 @@ var (
 		PrimaryKey: []*schema.Column{PetFriendsColumns[0], PetFriendsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "pet_friends_pet_id",
-				Columns: []*schema.Column{PetFriendsColumns[0]},
-
+				Symbol:     "pet_friends_pet_id",
+				Columns:    []*schema.Column{PetFriendsColumns[0]},
 				RefColumns: []*schema.Column{PetsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "pet_friends_friend_id",
-				Columns: []*schema.Column{PetFriendsColumns[1]},
-
+				Symbol:     "pet_friends_friend_id",
+				Columns:    []*schema.Column{PetFriendsColumns[1]},
 				RefColumns: []*schema.Column{PetsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -133,16 +127,14 @@ var (
 		PrimaryKey: []*schema.Column{UserFriendsColumns[0], UserFriendsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "user_friends_user_id",
-				Columns: []*schema.Column{UserFriendsColumns[0]},
-
+				Symbol:     "user_friends_user_id",
+				Columns:    []*schema.Column{UserFriendsColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "user_friends_friend_id",
-				Columns: []*schema.Column{UserFriendsColumns[1]},
-
+				Symbol:     "user_friends_friend_id",
+				Columns:    []*schema.Column{UserFriendsColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

@@ -381,7 +381,8 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Card)
 		for i := range nodes {
-			if fk := nodes[i].user_cards; fk != nil {
+			fk := nodes[i].user_cards
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}

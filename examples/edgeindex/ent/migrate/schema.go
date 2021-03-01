@@ -37,9 +37,8 @@ var (
 		PrimaryKey: []*schema.Column{StreetsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "streets_cities_streets",
-				Columns: []*schema.Column{StreetsColumns[2]},
-
+				Symbol:     "streets_cities_streets",
+				Columns:    []*schema.Column{StreetsColumns[2]},
 				RefColumns: []*schema.Column{CitiesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

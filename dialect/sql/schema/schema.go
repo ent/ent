@@ -66,6 +66,12 @@ func (t *Table) AddColumn(c *Column) *Table {
 	return t
 }
 
+// HasColumn reports if the table contains a column with the given name.
+func (t *Table) HasColumn(name string) bool {
+	_, ok := t.columns[name]
+	return ok
+}
+
 // SetAnnotation the entsql.Annotation on the table.
 func (t *Table) SetAnnotation(ant *entsql.Annotation) *Table {
 	t.Annotation = ant

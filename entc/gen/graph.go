@@ -330,6 +330,7 @@ func resolve(t *Type) error {
 			if ref.Type != t {
 				return fmt.Errorf("mismatch type for back-ref %q of %s.%s <-> %s.%s", e.Inverse, t.Name, e.Name, e.Type.Name, ref.Name)
 			}
+			e.Ref, ref.Ref = ref, e
 			table := t.Table()
 			// Name the foreign-key column in a format that wouldn't change even if an inverse
 			// edge is dropped (or added). The format is: "<Edge-Owner>_<Edge-Name>".
@@ -405,19 +406,19 @@ func (g *Graph) Tables() (all []*schema.Table) {
 		all = append(all, table)
 	}
 	for _, n := range g.Nodes {
-		// Foreign key + reference or a join table.
+		// Foreign key and a reference, or a join table.
 		for _, e := range n.Edges {
 			if e.IsInverse() {
 				continue
 			}
 			switch e.Rel.Type {
 			case O2O, O2M:
-				// "owner" is the table that owns the relations (we set the foreign-key on)
+				// The "owner" is the table that owns the relation (we set the foreign-key on)
 				// and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
 				pk := ref.PrimaryKey[0]
 				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, Nullable: true}
-				owner.AddColumn(column)
+				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
 					OnDelete:   schema.SetNull,
@@ -429,7 +430,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
 				pk := ref.PrimaryKey[0]
 				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Nullable: true}
-				owner.AddColumn(column)
+				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
 					OnDelete:   schema.SetNull,
@@ -481,6 +482,13 @@ func (g *Graph) Tables() (all []*schema.Table) {
 		}
 	}
 	return
+}
+
+// mayAddColumn adds the given column if it doesn't already exist in the table.
+func mayAddColumn(t *schema.Table, c *schema.Column) {
+	if !t.HasColumn(c.Name) {
+		t.AddColumn(c)
+	}
 }
 
 // SupportMigrate reports if the codegen supports schema migration.

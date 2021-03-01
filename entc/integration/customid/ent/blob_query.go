@@ -418,7 +418,8 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 		ids := make([]uuid.UUID, 0, len(nodes))
 		nodeids := make(map[uuid.UUID][]*Blob)
 		for i := range nodes {
-			if fk := nodes[i].blob_parent; fk != nil {
+			fk := nodes[i].blob_parent
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
