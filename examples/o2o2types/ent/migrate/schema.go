@@ -26,9 +26,8 @@ var (
 		PrimaryKey: []*schema.Column{CardsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "cards_users_card",
-				Columns: []*schema.Column{CardsColumns[3]},
-
+				Symbol:     "cards_users_card",
+				Columns:    []*schema.Column{CardsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

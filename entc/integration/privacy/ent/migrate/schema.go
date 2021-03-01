@@ -28,9 +28,8 @@ var (
 		PrimaryKey: []*schema.Column{TasksColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "tasks_users_tasks",
-				Columns: []*schema.Column{TasksColumns[5]},
-
+				Symbol:     "tasks_users_tasks",
+				Columns:    []*schema.Column{TasksColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -73,16 +72,14 @@ var (
 		PrimaryKey: []*schema.Column{TaskTeamsColumns[0], TaskTeamsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "task_teams_task_id",
-				Columns: []*schema.Column{TaskTeamsColumns[0]},
-
+				Symbol:     "task_teams_task_id",
+				Columns:    []*schema.Column{TaskTeamsColumns[0]},
 				RefColumns: []*schema.Column{TasksColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "task_teams_team_id",
-				Columns: []*schema.Column{TaskTeamsColumns[1]},
-
+				Symbol:     "task_teams_team_id",
+				Columns:    []*schema.Column{TaskTeamsColumns[1]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -100,16 +97,14 @@ var (
 		PrimaryKey: []*schema.Column{UserTeamsColumns[0], UserTeamsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "user_teams_user_id",
-				Columns: []*schema.Column{UserTeamsColumns[0]},
-
+				Symbol:     "user_teams_user_id",
+				Columns:    []*schema.Column{UserTeamsColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "user_teams_team_id",
-				Columns: []*schema.Column{UserTeamsColumns[1]},
-
+				Symbol:     "user_teams_team_id",
+				Columns:    []*schema.Column{UserTeamsColumns[1]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

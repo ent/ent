@@ -25,9 +25,8 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "users_users_spouse",
-				Columns: []*schema.Column{UsersColumns[2]},
-
+				Symbol:     "users_users_spouse",
+				Columns:    []*schema.Column{UsersColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -45,16 +44,14 @@ var (
 		PrimaryKey: []*schema.Column{UserFollowingColumns[0], UserFollowingColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "user_following_user_id",
-				Columns: []*schema.Column{UserFollowingColumns[0]},
-
+				Symbol:     "user_following_user_id",
+				Columns:    []*schema.Column{UserFollowingColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "user_following_follower_id",
-				Columns: []*schema.Column{UserFollowingColumns[1]},
-
+				Symbol:     "user_following_follower_id",
+				Columns:    []*schema.Column{UserFollowingColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

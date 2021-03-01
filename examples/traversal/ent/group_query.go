@@ -482,7 +482,8 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Group)
 		for i := range nodes {
-			if fk := nodes[i].group_admin; fk != nil {
+			fk := nodes[i].group_admin
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}

@@ -381,7 +381,8 @@ func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*Car)
 		for i := range nodes {
-			if fk := nodes[i].pet_cars; fk != nil {
+			fk := nodes[i].pet_cars
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}

@@ -381,7 +381,8 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Street)
 		for i := range nodes {
-			if fk := nodes[i].city_streets; fk != nil {
+			fk := nodes[i].city_streets
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}

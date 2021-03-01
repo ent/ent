@@ -24,9 +24,8 @@ var (
 		PrimaryKey: []*schema.Column{CarsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "cars_users_car",
-				Columns: []*schema.Column{CarsColumns[1]},
-
+				Symbol:     "cars_users_car",
+				Columns:    []*schema.Column{CarsColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -86,16 +85,14 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "users_users_children",
-				Columns: []*schema.Column{UsersColumns[10]},
-
+				Symbol:     "users_users_children",
+				Columns:    []*schema.Column{UsersColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "users_users_spouse",
-				Columns: []*schema.Column{UsersColumns[11]},
-
+				Symbol:     "users_users_spouse",
+				Columns:    []*schema.Column{UsersColumns[11]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

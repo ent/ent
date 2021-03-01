@@ -417,7 +417,8 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
-			if fk := nodes[i].user_team; fk != nil {
+			fk := nodes[i].user_team
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -442,7 +443,8 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
-			if fk := nodes[i].user_pets; fk != nil {
+			fk := nodes[i].user_pets
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}

@@ -100,6 +100,10 @@ type (
 		Unique bool
 		// Inverse holds the name of the reference edge declared in the schema.
 		Inverse string
+		// Ref points to the reference edge. For Inverse edges (edge.From),
+		// its points to the Assoc (edge.To). For Assoc edges, it points to
+		// the inverse edge if it exists.
+		Ref *Edge
 		// Owner holds the type of the edge-owner. For assoc-edges it's the
 		// type that holds the edge, for inverse-edges, it's the assoc type.
 		Owner *Type
@@ -131,6 +135,8 @@ type (
 		// Columns holds the relation column in the relation table above.
 		// In O2M, M2O and O2O, this the first element.
 		Columns []string
+		// foreign-key information for non-M2M edges.
+		fk *ForeignKey
 	}
 
 	// Index represents a database index used for either increasing speed
@@ -252,7 +258,7 @@ func (t Type) Receiver() string {
 	return receiver(t.Name)
 }
 
-// HasAssoc returns true if this type has an assoc-edge (non-inverse)
+// HasAssoc returns true if this type has an assoc-edge (edge.To)
 // with the given name. faster than map access for most cases.
 func (t Type) HasAssoc(name string) (*Edge, bool) {
 	for _, e := range t.Edges {
@@ -433,7 +439,7 @@ func (t Type) MutableFields() []*Field {
 	return fields
 }
 
-// EnumFields returns the types's enum fields.
+// EnumFields returns the enum fields of the schema, if any.
 func (t Type) EnumFields() []*Field {
 	var fields []*Field
 	for _, f := range t.Fields {
@@ -442,6 +448,19 @@ func (t Type) EnumFields() []*Field {
 		}
 	}
 	return fields
+}
+
+// FieldBy returns the first field that the given function returns true on it.
+func (t Type) FieldBy(fn func(*Field) bool) (*Field, bool) {
+	if fn(t.ID) {
+		return t.ID, true
+	}
+	for _, f := range t.Fields {
+		if fn(f) {
+			return f, true
+		}
+	}
+	return nil, false
 }
 
 // NumM2M returns the type's many-to-many edge count
@@ -540,9 +559,9 @@ func (t *Type) resolveFKs() error {
 		if e.IsInverse() || e.M2M() {
 			continue
 		}
-		refid := t.ID
+		owner, refid := e.Type, t.ID
 		if e.OwnFK() {
-			refid = e.Type.ID
+			owner, refid = t, e.Type.ID
 		}
 		fk := &ForeignKey{
 			Edge: e,
@@ -555,16 +574,26 @@ func (t *Type) resolveFKs() error {
 				UserDefined: refid.UserDefined,
 			},
 		}
-		if e.OwnFK() {
-			t.addFK(fk)
+		// Update the foreign-key info in the assoc-edge
+		// and the inverse-edge if it exists (it's optional).
+		e.Rel.fk = fk
+		if e.Ref != nil {
+			e.Ref.Rel.fk = fk
+		}
+		// Special case for checking if the FK is already defined
+		// in the field list (see issue 1288).
+		if fd, ok := e.Type.FieldBy(func(f *Field) bool {
+			return f.StorageKey() == e.Rel.Column()
+		}); ok {
+			fk.Field = fd
 		} else {
-			e.Type.addFK(fk)
+			owner.addFK(fk)
 		}
 	}
 	return nil
 }
 
-// AddForeignKey adds a foreign-key for the type if it doesn't exist.
+// addFK adds a foreign-key for the type if it doesn't exist.
 func (t *Type) addFK(fk *ForeignKey) {
 	if _, ok := t.foreignKeys[fk.Field.Name]; ok {
 		return
@@ -1176,10 +1205,32 @@ func (e Edge) StructField() string {
 	return pascal(e.Name)
 }
 
-// StructFKField returns the struct member for holding the edge
-// foreign-key in the model.
-func (e Edge) StructFKField() string {
-	return builderField(e.Rel.Column())
+// StructFKField returns the struct member name that holds the
+// field of edge foreign-key in the generated struct.
+func (e Edge) StructFKField() (string, error) {
+	f, err := e.FKField()
+	if err != nil {
+		return "", err
+	}
+	owner := e.Type
+	if e.OwnFK() {
+		owner = e.Owner
+	}
+	// If the foreign-key field is pointing to an existing struct/schema field.
+	// For example, using the PK field as the FK (e.g. see issue 1288).
+	if _, ok := owner.fields[f.Name]; ok || f.Name == e.Owner.ID.Name {
+		return f.StructField(), nil
+	}
+	return builderField(e.Rel.Column()), nil
+}
+
+// FKField returns the field holding the edge foreign-key in the generated struct.
+func (e Edge) FKField() (*Field, error) {
+	fk := e.Rel.fk
+	if fk == nil {
+		return nil, fmt.Errorf("edge %q without foreign-key", e.Name)
+	}
+	return fk.Field, nil
 }
 
 // OwnFK indicates if the foreign-key of this edge is owned by the edge

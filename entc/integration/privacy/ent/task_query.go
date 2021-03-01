@@ -489,7 +489,8 @@ func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Task)
 		for i := range nodes {
-			if fk := nodes[i].user_tasks; fk != nil {
+			fk := nodes[i].user_tasks
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}

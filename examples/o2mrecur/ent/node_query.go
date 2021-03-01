@@ -417,7 +417,8 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Node)
 		for i := range nodes {
-			if fk := nodes[i].node_children; fk != nil {
+			fk := nodes[i].node_children
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}

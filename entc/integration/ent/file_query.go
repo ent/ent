@@ -456,7 +456,8 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*File)
 		for i := range nodes {
-			if fk := nodes[i].user_files; fk != nil {
+			fk := nodes[i].user_files
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -481,7 +482,8 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*File)
 		for i := range nodes {
-			if fk := nodes[i].file_type_files; fk != nil {
+			fk := nodes[i].file_type_files
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
