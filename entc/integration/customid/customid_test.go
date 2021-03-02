@@ -134,11 +134,15 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, pedro.ID, bee.Edges.Owner.ID)
 
 	pets = client.Pet.CreateBulk(
-		client.Pet.Create().SetID("luna").SetOwner(a8m),
-		client.Pet.Create().SetID("layla").SetOwner(a8m),
+		client.Pet.Create().SetID("luna").SetOwner(a8m).AddFriends(xabi),
+		client.Pet.Create().SetID("layla").SetOwner(a8m).AddFriendIDs(pedro.ID),
+		client.Pet.Create().AddFriends(pedro, xabi),
 	).SaveX(ctx)
 	require.Equal(t, "luna", pets[0].ID)
+	require.Equal(t, xabi.ID, pets[0].QueryFriends().OnlyIDX(ctx))
 	require.Equal(t, "layla", pets[1].ID)
+	require.Equal(t, pedro.ID, pets[1].QueryFriends().OnlyIDX(ctx))
+	require.Equal(t, []string{"pedro", "xabi"}, pets[2].QueryFriends().Order(ent.Asc(pet.FieldID)).IDsX(ctx))
 
 	u1, u2 := uuid.New(), uuid.New()
 	blobs := client.Blob.CreateBulk(
