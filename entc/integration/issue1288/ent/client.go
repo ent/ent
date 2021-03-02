@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/issue1288/ent/migrate"
 
+	"entgo.io/ent/entc/integration/issue1288/ent/info"
 	"entgo.io/ent/entc/integration/issue1288/ent/metadata"
 	"entgo.io/ent/entc/integration/issue1288/ent/user"
 
@@ -26,6 +27,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Info is the client for interacting with the Info builders.
+	Info *InfoClient
 	// Metadata is the client for interacting with the Metadata builders.
 	Metadata *MetadataClient
 	// User is the client for interacting with the User builders.
@@ -43,6 +46,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Info = NewInfoClient(c.config)
 	c.Metadata = NewMetadataClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -78,6 +82,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:      ctx,
 		config:   cfg,
+		Info:     NewInfoClient(cfg),
 		Metadata: NewMetadataClient(cfg),
 		User:     NewUserClient(cfg),
 	}, nil
@@ -98,6 +103,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		config:   cfg,
+		Info:     NewInfoClient(cfg),
 		Metadata: NewMetadataClient(cfg),
 		User:     NewUserClient(cfg),
 	}, nil
@@ -106,7 +112,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Metadata.
+//		Info.
 //		Query().
 //		Count(ctx)
 //
@@ -129,8 +135,113 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Info.Use(hooks...)
 	c.Metadata.Use(hooks...)
 	c.User.Use(hooks...)
+}
+
+// InfoClient is a client for the Info schema.
+type InfoClient struct {
+	config
+}
+
+// NewInfoClient returns a client for the Info from the given config.
+func NewInfoClient(c config) *InfoClient {
+	return &InfoClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `info.Hooks(f(g(h())))`.
+func (c *InfoClient) Use(hooks ...Hook) {
+	c.hooks.Info = append(c.hooks.Info, hooks...)
+}
+
+// Create returns a create builder for Info.
+func (c *InfoClient) Create() *InfoCreate {
+	mutation := newInfoMutation(c.config, OpCreate)
+	return &InfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Info entities.
+func (c *InfoClient) CreateBulk(builders ...*InfoCreate) *InfoCreateBulk {
+	return &InfoCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Info.
+func (c *InfoClient) Update() *InfoUpdate {
+	mutation := newInfoMutation(c.config, OpUpdate)
+	return &InfoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InfoClient) UpdateOne(i *Info) *InfoUpdateOne {
+	mutation := newInfoMutation(c.config, OpUpdateOne, withInfo(i))
+	return &InfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InfoClient) UpdateOneID(id int) *InfoUpdateOne {
+	mutation := newInfoMutation(c.config, OpUpdateOne, withInfoID(id))
+	return &InfoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Info.
+func (c *InfoClient) Delete() *InfoDelete {
+	mutation := newInfoMutation(c.config, OpDelete)
+	return &InfoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *InfoClient) DeleteOne(i *Info) *InfoDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *InfoClient) DeleteOneID(id int) *InfoDeleteOne {
+	builder := c.Delete().Where(info.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InfoDeleteOne{builder}
+}
+
+// Query returns a query builder for Info.
+func (c *InfoClient) Query() *InfoQuery {
+	return &InfoQuery{config: c.config}
+}
+
+// Get returns a Info entity by its id.
+func (c *InfoClient) Get(ctx context.Context, id int) (*Info, error) {
+	return c.Query().Where(info.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InfoClient) GetX(ctx context.Context, id int) *Info {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Info.
+func (c *InfoClient) QueryUser(i *Info) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(info.Table, info.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, info.UserTable, info.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InfoClient) Hooks() []Hook {
+	return c.hooks.Info
 }
 
 // MetadataClient is a client for the Metadata schema.
@@ -329,6 +440,22 @@ func (c *UserClient) QueryMetadata(u *User) *MetadataQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(metadata.Table, metadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.MetadataTable, user.MetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInfo queries the info edge of a User.
+func (c *UserClient) QueryInfo(u *User) *InfoQuery {
+	query := &InfoQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(info.Table, info.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.InfoTable, user.InfoColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

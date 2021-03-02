@@ -8,9 +8,11 @@ package ent
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 
+	"entgo.io/ent/entc/integration/issue1288/ent/info"
 	"entgo.io/ent/entc/integration/issue1288/ent/metadata"
 	"entgo.io/ent/entc/integration/issue1288/ent/predicate"
 	"entgo.io/ent/entc/integration/issue1288/ent/user"
@@ -27,9 +29,372 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeInfo     = "Info"
 	TypeMetadata = "Metadata"
 	TypeUser     = "User"
 )
+
+// InfoMutation represents an operation that mutates the Info nodes in the graph.
+type InfoMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	content       *json.RawMessage
+	clearedFields map[string]struct{}
+	user          *int
+	cleareduser   bool
+	done          bool
+	oldValue      func(context.Context) (*Info, error)
+	predicates    []predicate.Info
+}
+
+var _ ent.Mutation = (*InfoMutation)(nil)
+
+// infoOption allows management of the mutation configuration using functional options.
+type infoOption func(*InfoMutation)
+
+// newInfoMutation creates new mutation for the Info entity.
+func newInfoMutation(c config, op Op, opts ...infoOption) *InfoMutation {
+	m := &InfoMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeInfo,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withInfoID sets the ID field of the mutation.
+func withInfoID(id int) infoOption {
+	return func(m *InfoMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Info
+		)
+		m.oldValue = func(ctx context.Context) (*Info, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Info.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withInfo sets the old Info of the mutation.
+func withInfo(node *Info) infoOption {
+	return func(m *InfoMutation) {
+		m.oldValue = func(context.Context) (*Info, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m InfoMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m InfoMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Info entities.
+func (m *InfoMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
+func (m *InfoMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetContent sets the "content" field.
+func (m *InfoMutation) SetContent(jm json.RawMessage) {
+	m.content = &jm
+}
+
+// Content returns the value of the "content" field in the mutation.
+func (m *InfoMutation) Content() (r json.RawMessage, exists bool) {
+	v := m.content
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContent returns the old "content" field's value of the Info entity.
+// If the Info object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *InfoMutation) OldContent(ctx context.Context) (v json.RawMessage, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldContent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldContent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContent: %w", err)
+	}
+	return oldValue.Content, nil
+}
+
+// ResetContent resets all changes to the "content" field.
+func (m *InfoMutation) ResetContent() {
+	m.content = nil
+}
+
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *InfoMutation) SetUserID(id int) {
+	m.user = &id
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *InfoMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared returns if the "user" edge to the User entity was cleared.
+func (m *InfoMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *InfoMutation) UserID() (id int, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *InfoMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *InfoMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
+// Op returns the operation name.
+func (m *InfoMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Info).
+func (m *InfoMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *InfoMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.content != nil {
+		fields = append(fields, info.FieldContent)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *InfoMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case info.FieldContent:
+		return m.Content()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *InfoMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case info.FieldContent:
+		return m.OldContent(ctx)
+	}
+	return nil, fmt.Errorf("unknown Info field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *InfoMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case info.FieldContent:
+		v, ok := value.(json.RawMessage)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContent(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Info field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *InfoMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *InfoMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *InfoMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Info numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *InfoMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *InfoMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *InfoMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Info nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *InfoMutation) ResetField(name string) error {
+	switch name {
+	case info.FieldContent:
+		m.ResetContent()
+		return nil
+	}
+	return fmt.Errorf("unknown Info field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *InfoMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.user != nil {
+		edges = append(edges, info.EdgeUser)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *InfoMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case info.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *InfoMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *InfoMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *InfoMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareduser {
+		edges = append(edges, info.EdgeUser)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *InfoMutation) EdgeCleared(name string) bool {
+	switch name {
+	case info.EdgeUser:
+		return m.cleareduser
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *InfoMutation) ClearEdge(name string) error {
+	switch name {
+	case info.EdgeUser:
+		m.ClearUser()
+		return nil
+	}
+	return fmt.Errorf("unknown Info unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *InfoMutation) ResetEdge(name string) error {
+	switch name {
+	case info.EdgeUser:
+		m.ResetUser()
+		return nil
+	}
+	return fmt.Errorf("unknown Info edge %s", name)
+}
 
 // MetadataMutation represents an operation that mutates the Metadata nodes in the graph.
 type MetadataMutation struct {
@@ -439,6 +804,9 @@ type UserMutation struct {
 	clearedFields   map[string]struct{}
 	metadata        *int
 	clearedmetadata bool
+	info            map[int]struct{}
+	removedinfo     map[int]struct{}
+	clearedinfo     bool
 	done            bool
 	oldValue        func(context.Context) (*User, error)
 	predicates      []predicate.User
@@ -604,6 +972,59 @@ func (m *UserMutation) ResetMetadata() {
 	m.clearedmetadata = false
 }
 
+// AddInfoIDs adds the "info" edge to the Info entity by ids.
+func (m *UserMutation) AddInfoIDs(ids ...int) {
+	if m.info == nil {
+		m.info = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.info[ids[i]] = struct{}{}
+	}
+}
+
+// ClearInfo clears the "info" edge to the Info entity.
+func (m *UserMutation) ClearInfo() {
+	m.clearedinfo = true
+}
+
+// InfoCleared returns if the "info" edge to the Info entity was cleared.
+func (m *UserMutation) InfoCleared() bool {
+	return m.clearedinfo
+}
+
+// RemoveInfoIDs removes the "info" edge to the Info entity by IDs.
+func (m *UserMutation) RemoveInfoIDs(ids ...int) {
+	if m.removedinfo == nil {
+		m.removedinfo = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removedinfo[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedInfo returns the removed IDs of the "info" edge to the Info entity.
+func (m *UserMutation) RemovedInfoIDs() (ids []int) {
+	for id := range m.removedinfo {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// InfoIDs returns the "info" edge IDs in the mutation.
+func (m *UserMutation) InfoIDs() (ids []int) {
+	for id := range m.info {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetInfo resets all changes to the "info" edge.
+func (m *UserMutation) ResetInfo() {
+	m.info = nil
+	m.clearedinfo = false
+	m.removedinfo = nil
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
@@ -717,9 +1138,12 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.metadata != nil {
 		edges = append(edges, user.EdgeMetadata)
+	}
+	if m.info != nil {
+		edges = append(edges, user.EdgeInfo)
 	}
 	return edges
 }
@@ -732,13 +1156,22 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 		if id := m.metadata; id != nil {
 			return []ent.Value{*id}
 		}
+	case user.EdgeInfo:
+		ids := make([]ent.Value, 0, len(m.info))
+		for id := range m.info {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedinfo != nil {
+		edges = append(edges, user.EdgeInfo)
+	}
 	return edges
 }
 
@@ -746,15 +1179,24 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case user.EdgeInfo:
+		ids := make([]ent.Value, 0, len(m.removedinfo))
+		for id := range m.removedinfo {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedmetadata {
 		edges = append(edges, user.EdgeMetadata)
+	}
+	if m.clearedinfo {
+		edges = append(edges, user.EdgeInfo)
 	}
 	return edges
 }
@@ -765,6 +1207,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
 	case user.EdgeMetadata:
 		return m.clearedmetadata
+	case user.EdgeInfo:
+		return m.clearedinfo
 	}
 	return false
 }
@@ -786,6 +1230,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
 	case user.EdgeMetadata:
 		m.ResetMetadata()
+		return nil
+	case user.EdgeInfo:
+		m.ResetInfo()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)

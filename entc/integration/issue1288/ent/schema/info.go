@@ -5,28 +5,28 @@
 package schema
 
 import (
+	"encoding/json"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
-// User holds the schema definition for the User entity.
-type User struct {
+// Info holds the schema definition for the Info entity.
+type Info struct {
 	ent.Schema
 }
 
-func (User) Fields() []ent.Field {
+func (Info) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id"),
-		field.String("name"),
+		field.JSON("content", json.RawMessage{}),
 	}
 }
-func (User) Edges() []ent.Edge {
+func (Info) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("metadata", Metadata.Type).
+		edge.To("user", User.Type).
 			Unique().
 			StorageKey(edge.Column("id")),
-		edge.From("info", Info.Type).
-			Ref("user"),
 	}
 }

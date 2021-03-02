@@ -16,6 +16,8 @@ const (
 
 	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
 	EdgeMetadata = "metadata"
+	// EdgeInfo holds the string denoting the info edge name in mutations.
+	EdgeInfo = "info"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -26,6 +28,13 @@ const (
 	MetadataInverseTable = "metadata"
 	// MetadataColumn is the table column denoting the metadata relation/edge.
 	MetadataColumn = "id"
+	// InfoTable is the table the holds the info relation/edge.
+	InfoTable = "infos"
+	// InfoInverseTable is the table name for the Info entity.
+	// It exists in this package in order to avoid circular dependency with the "info" package.
+	InfoInverseTable = "infos"
+	// InfoColumn is the table column denoting the info relation/edge.
+	InfoColumn = "id"
 )
 
 // Columns holds all SQL columns for user fields.

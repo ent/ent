@@ -241,6 +241,34 @@ func HasMetadataWith(preds ...predicate.Metadata) predicate.User {
 	})
 }
 
+// HasInfo applies the HasEdge predicate on the "info" edge.
+func HasInfo() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(InfoTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, InfoTable, InfoColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasInfoWith applies the HasEdge predicate on the "info" edge with a given conditions (other predicates).
+func HasInfoWith(preds ...predicate.Info) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(InfoInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, InfoTable, InfoColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

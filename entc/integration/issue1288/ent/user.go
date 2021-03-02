@@ -31,9 +31,11 @@ type User struct {
 type UserEdges struct {
 	// Metadata holds the value of the metadata edge.
 	Metadata *Metadata `json:"metadata,omitempty"`
+	// Info holds the value of the info edge.
+	Info []*Info `json:"info,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // MetadataOrErr returns the Metadata value or an error if the edge
@@ -48,6 +50,15 @@ func (e UserEdges) MetadataOrErr() (*Metadata, error) {
 		return e.Metadata, nil
 	}
 	return nil, &NotLoadedError{edge: "metadata"}
+}
+
+// InfoOrErr returns the Info value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) InfoOrErr() ([]*Info, error) {
+	if e.loadedTypes[1] {
+		return e.Info, nil
+	}
+	return nil, &NotLoadedError{edge: "info"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -94,6 +105,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 // QueryMetadata queries the "metadata" edge of the User entity.
 func (u *User) QueryMetadata() *MetadataQuery {
 	return (&UserClient{config: u.config}).QueryMetadata(u)
+}
+
+// QueryInfo queries the "info" edge of the User entity.
+func (u *User) QueryInfo() *InfoQuery {
+	return (&UserClient{config: u.config}).QueryInfo(u)
 }
 
 // Update returns a builder for updating this User.
