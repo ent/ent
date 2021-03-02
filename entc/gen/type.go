@@ -738,7 +738,7 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 		err = fmt.Errorf("invalid type for field %s", f.Name)
 	case f.Nillable && !f.Optional:
 		err = fmt.Errorf("nillable field %q must be optional", f.Name)
-	case f.Unique && f.Default && f.Info.Type != field.TypeUUID:
+	case f.Unique && f.Default && f.DefaultKind != reflect.Func:
 		err = fmt.Errorf("unique field %q cannot have default value", f.Name)
 	case t.fields[f.Name] != nil:
 		err = fmt.Errorf("field %q redeclared for type %q", f.Name, t.Name)

@@ -38,7 +38,7 @@ var (
 		{Name: "before_id", Type: field.TypeFloat64, Nullable: true},
 		{Name: "after_id", Type: field.TypeFloat64, Nullable: true},
 		{Name: "model", Type: field.TypeString},
-		{Name: "pet_cars", Type: field.TypeString, Nullable: true, Size: 25},
+		{Name: "pet_cars", Type: field.TypeString, Nullable: true, Size: 36},
 	}
 	// CarsTable holds the schema information for the "cars" table.
 	CarsTable = &schema.Table{
@@ -102,8 +102,8 @@ var (
 	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString, Unique: true, Size: 25},
-		{Name: "pet_best_friend", Type: field.TypeString, Unique: true, Nullable: true, Size: 25},
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "pet_best_friend", Type: field.TypeString, Unique: true, Nullable: true, Size: 36},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
@@ -197,8 +197,8 @@ var (
 	}
 	// PetFriendsColumns holds the columns for the "pet_friends" table.
 	PetFriendsColumns = []*schema.Column{
-		{Name: "pet_id", Type: field.TypeString, Size: 25},
-		{Name: "friend_id", Type: field.TypeString, Size: 25},
+		{Name: "pet_id", Type: field.TypeString, Size: 36},
+		{Name: "friend_id", Type: field.TypeString, Size: 36},
 	}
 	// PetFriendsTable holds the schema information for the "pet_friends" table.
 	PetFriendsTable = &schema.Table{
