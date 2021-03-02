@@ -964,7 +964,10 @@ func (c *creator) batchInsert(ctx context.Context, tx dialect.ExecQuerier, inser
 		return err
 	}
 	for i, node := range c.Nodes {
-		node.ID.Value = ids[i]
+		// ID field was provided by the user.
+		if node.ID.Value == nil {
+			node.ID.Value = ids[i]
+		}
 	}
 	return nil
 }
