@@ -12,6 +12,25 @@ import (
 )
 
 var (
+	// InfosColumns holds the columns for the "infos" table.
+	InfosColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "content", Type: field.TypeJSON},
+	}
+	// InfosTable holds the schema information for the "infos" table.
+	InfosTable = &schema.Table{
+		Name:       "infos",
+		Columns:    InfosColumns,
+		PrimaryKey: []*schema.Column{InfosColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "infos_users_user",
+				Columns:    []*schema.Column{InfosColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// MetadataColumns holds the columns for the "metadata" table.
 	MetadataColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -45,11 +64,13 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		InfosTable,
 		MetadataTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	InfosTable.ForeignKeys[0].RefTable = UsersTable
 	MetadataTable.ForeignKeys[0].RefTable = UsersTable
 }

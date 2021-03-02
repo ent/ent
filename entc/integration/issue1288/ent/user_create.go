@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/issue1288/ent/info"
 	"entgo.io/ent/entc/integration/issue1288/ent/metadata"
 	"entgo.io/ent/entc/integration/issue1288/ent/user"
 	"entgo.io/ent/schema/field"
@@ -53,6 +54,21 @@ func (uc *UserCreate) SetNillableMetadataID(id *int) *UserCreate {
 // SetMetadata sets the "metadata" edge to the Metadata entity.
 func (uc *UserCreate) SetMetadata(m *Metadata) *UserCreate {
 	return uc.SetMetadataID(m.ID)
+}
+
+// AddInfoIDs adds the "info" edge to the Info entity by IDs.
+func (uc *UserCreate) AddInfoIDs(ids ...int) *UserCreate {
+	uc.mutation.AddInfoIDs(ids...)
+	return uc
+}
+
+// AddInfo adds the "info" edges to the Info entity.
+func (uc *UserCreate) AddInfo(i ...*Info) *UserCreate {
+	ids := make([]int, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return uc.AddInfoIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -161,6 +177,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.InfoIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.InfoTable,
+			Columns: []string{user.InfoColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: info.FieldID,
 				},
 			},
 		}

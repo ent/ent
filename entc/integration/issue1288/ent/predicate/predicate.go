@@ -10,6 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Info is the predicate function for info builders.
+type Info func(*sql.Selector)
+
 // Metadata is the predicate function for metadata builders.
 type Metadata func(*sql.Selector)
 

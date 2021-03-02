@@ -582,7 +582,7 @@ func (t *Type) resolveFKs() error {
 		}
 		// Special case for checking if the FK is already defined
 		// in the field list (see issue 1288).
-		if fd, ok := e.Type.FieldBy(func(f *Field) bool {
+		if fd, ok := owner.FieldBy(func(f *Field) bool {
 			return f.StorageKey() == e.Rel.Column()
 		}); ok {
 			fk.Field = fd

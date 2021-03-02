@@ -13,6 +13,19 @@ import (
 	"entgo.io/ent/entc/integration/issue1288/ent"
 )
 
+// The InfoFunc type is an adapter to allow the use of ordinary
+// function as Info mutator.
+type InfoFunc func(context.Context, *ent.InfoMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f InfoFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.InfoMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.InfoMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The MetadataFunc type is an adapter to allow the use of ordinary
 // function as Metadata mutator.
 type MetadataFunc func(context.Context, *ent.MetadataMutation) (ent.Value, error)

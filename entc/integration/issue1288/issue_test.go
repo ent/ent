@@ -6,6 +6,7 @@ package issue1288
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"entgo.io/ent/entc/integration/issue1288/ent"
@@ -25,5 +26,10 @@ func TestSchemaConfig(t *testing.T) {
 	m1 := a8m.QueryMetadata().OnlyX(ctx)
 	require.Equal(t, a8m.ID, m1.ID)
 	_, err = client.Metadata.Create().SetID(a8m.ID).SetAge(10).Save(ctx)
+	require.True(t, ent.IsConstraintError(err), "UNIQUE constraint failed: metadata.id")
+	client.Info.Create().SetUser(a8m).SetContent(json.RawMessage("{}")).SaveX(ctx)
+	inf := a8m.QueryInfo().OnlyX(ctx)
+	require.Equal(t, a8m.ID, inf.ID)
+	_, err = client.Info.Create().SetID(a8m.ID).SetContent(json.RawMessage("10")).Save(ctx)
 	require.True(t, ent.IsConstraintError(err), "UNIQUE constraint failed: metadata.id")
 }
