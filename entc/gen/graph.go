@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
 
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/tools/imports"
 )
 
@@ -654,17 +655,24 @@ func (a assets) write() error {
 
 // format runs "goimports" on all assets.
 func (a assets) format() error {
-	for _, file := range a.files {
-		path := file.path
-		src, err := imports.Process(path, file.content, nil)
-		if err != nil {
-			return fmt.Errorf("format file %s: %v", path, err)
-		}
-		if err := ioutil.WriteFile(path, src, 0644); err != nil {
-			return fmt.Errorf("write file %s: %v", path, err)
-		}
+	var eg errgroup.Group
+
+	for i := range a.files {
+		f := a.files[i]
+		eg.Go(func() error {
+			filePath := f.path
+			src, err := imports.Process(filePath, f.content, nil)
+			if err != nil {
+				return fmt.Errorf("formatting file %s: %w", filePath, err)
+			}
+			if err := ioutil.WriteFile(filePath, src, 0644); err != nil {
+				return fmt.Errorf("writing file %s: %w", filePath, err)
+			}
+			return nil
+		})
 	}
-	return nil
+
+	return eg.Wait()
 }
 
 // expect panics if the condition is false.
