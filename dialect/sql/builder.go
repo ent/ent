@@ -2184,6 +2184,23 @@ func (b *Builder) WriteOp(op Op) *Builder {
 	return b
 }
 
+type (
+	// StmtInfo holds an information regarding
+	// the statement
+	StmtInfo struct {
+		// The Dialect of the SQL driver.
+		Dialect string
+	}
+	// ParamFormatter wraps the FormatPram function.
+	ParamFormatter interface {
+		// The FormatParam function lets users to define
+		// custom placeholder formatting for their types.
+		// For example, formatting the default placeholder
+		// from '?' to 'ST_GeomFromWKB(?)' for MySQL dialect.
+		FormatParam(placeholder string, info *StmtInfo) string
+	}
+)
+
 // Arg appends an input argument to the builder.
 func (b *Builder) Arg(a interface{}) *Builder {
 	switch a := a.(type) {
@@ -2196,14 +2213,19 @@ func (b *Builder) Arg(a interface{}) *Builder {
 	}
 	b.total++
 	b.args = append(b.args, a)
-	switch {
-	case b.postgres():
+	// Default placeholder param (MySQL and SQLite).
+	param := "?"
+	if b.postgres() {
 		// PostgreSQL arguments are referenced using the syntax $n.
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
-		b.WriteString("$" + strconv.Itoa(b.total))
-	default:
-		b.WriteString("?")
+		param = "$" + strconv.Itoa(b.total)
 	}
+	if f, ok := a.(ParamFormatter); ok {
+		param = f.FormatParam(param, &StmtInfo{
+			Dialect: b.dialect,
+		})
+	}
+	b.WriteString(param)
 	return b
 }
 
