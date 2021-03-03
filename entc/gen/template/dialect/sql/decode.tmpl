@@ -98,7 +98,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		} else if value != nil && len(*value) > 0 {
 			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $field }}); err != nil {
-				return fmt.Errorf("unmarshal field {{ $f.Name }}: %v", err)
+				return fmt.Errorf("unmarshal field {{ $f.Name }}: %w", err)
 			}
 		}
 	{{- else }}

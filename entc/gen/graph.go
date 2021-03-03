@@ -658,10 +658,10 @@ func (a assets) format() error {
 		path := file.path
 		src, err := imports.Process(path, file.content, nil)
 		if err != nil {
-			return fmt.Errorf("format file %s: %v", path, err)
+			return fmt.Errorf("format file %s: %w", path, err)
 		}
 		if err := ioutil.WriteFile(path, src, 0644); err != nil {
-			return fmt.Errorf("write file %s: %v", path, err)
+			return fmt.Errorf("write file %s: %w", path, err)
 		}
 	}
 	return nil

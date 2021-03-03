@@ -338,7 +338,7 @@ func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 func (ctq *CustomTypeQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := ctq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("entv2: check existence: %v", err)
+		return false, fmt.Errorf("entv2: check existence: %w", err)
 	}
 	return n > 0, nil
 }

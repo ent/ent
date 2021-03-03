@@ -28,7 +28,7 @@ type MySQL struct {
 func (d *MySQL) init(ctx context.Context, tx dialect.Tx) error {
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, "SHOW VARIABLES LIKE 'version'", []interface{}{}, rows); err != nil {
-		return fmt.Errorf("mysql: querying mysql version %v", err)
+		return fmt.Errorf("mysql: querying mysql version %w", err)
 	}
 	defer rows.Close()
 	if !rows.Next() {
@@ -39,7 +39,7 @@ func (d *MySQL) init(ctx context.Context, tx dialect.Tx) error {
 	}
 	version := make([]string, 2)
 	if err := rows.Scan(&version[0], &version[1]); err != nil {
-		return fmt.Errorf("mysql: scanning mysql version: %v", err)
+		return fmt.Errorf("mysql: scanning mysql version: %w", err)
 	}
 	d.version = version[1]
 	return nil
@@ -74,7 +74,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 			sql.EQ("TABLE_NAME", name)),
 		).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("mysql: reading table description %v", err)
+		return nil, fmt.Errorf("mysql: reading table description %w", err)
 	}
 	// Call Close in cases of failures (Close is idempotent).
 	defer rows.Close()
@@ -82,7 +82,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	for rows.Next() {
 		c := &Column{}
 		if err := d.scanColumn(c, rows); err != nil {
-			return nil, fmt.Errorf("mysql: %v", err)
+			return nil, fmt.Errorf("mysql: %w", err)
 		}
 		if c.PrimaryKey() {
 			t.PrimaryKey = append(t.PrimaryKey, c)
@@ -93,7 +93,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 		return nil, err
 	}
 	if err := rows.Close(); err != nil {
-		return nil, fmt.Errorf("mysql: closing rows %v", err)
+		return nil, fmt.Errorf("mysql: closing rows %w", err)
 	}
 	indexes, err := d.indexes(ctx, tx, name)
 	if err != nil {
@@ -123,12 +123,12 @@ func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Ind
 		OrderBy("index_name", "seq_in_index").
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("mysql: reading index description %v", err)
+		return nil, fmt.Errorf("mysql: reading index description %w", err)
 	}
 	defer rows.Close()
 	idx, err := d.scanIndexes(rows)
 	if err != nil {
-		return nil, fmt.Errorf("mysql: %v", err)
+		return nil, fmt.Errorf("mysql: %w", err)
 	}
 	return idx, nil
 }
@@ -150,13 +150,13 @@ func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expect
 		)).
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return fmt.Errorf("mysql: query auto_increment %v", err)
+		return fmt.Errorf("mysql: query auto_increment %w", err)
 	}
 	// Call Close in cases of failures (Close is idempotent).
 	defer rows.Close()
 	actual := &sql.NullInt64{}
 	if err := sql.ScanOne(rows, actual); err != nil {
-		return fmt.Errorf("mysql: scan auto_increment %v", err)
+		return fmt.Errorf("mysql: scan auto_increment %w", err)
 	}
 	if err := rows.Close(); err != nil {
 		return err
@@ -363,7 +363,7 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		defaults sql.NullString
 	)
 	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr, &sql.NullString{}, &sql.NullString{}); err != nil {
-		return fmt.Errorf("scanning column description: %v", err)
+		return fmt.Errorf("scanning column description: %w", err)
 	}
 	c.Unique = c.UniqueKey()
 	if nullable.Valid {
@@ -470,7 +470,7 @@ func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 			seqindex int
 		)
 		if err := rows.Scan(&name, &column, &nonuniq, &seqindex); err != nil {
-			return nil, fmt.Errorf("scanning index description: %v", err)
+			return nil, fmt.Errorf("scanning index description: %w", err)
 		}
 		// Ignore primary keys.
 		if name == "PRIMARY" {
@@ -581,7 +581,7 @@ func (d *MySQL) normalizeJSON(ctx context.Context, tx dialect.Tx, t *Table) erro
 		)).
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return fmt.Errorf("mysql: query table constraints %v", err)
+		return fmt.Errorf("mysql: query table constraints %w", err)
 	}
 	// Call Close in cases of failures (Close is idempotent).
 	defer rows.Close()
@@ -630,7 +630,7 @@ func parseColumn(typ string) (parts []string, size int64, unsigned bool, err err
 		size, err = strconv.ParseInt(parts[1], 10, 64)
 	}
 	if err != nil {
-		return parts, size, unsigned, fmt.Errorf("converting %s size to int: %v", parts[0], err)
+		return parts, size, unsigned, fmt.Errorf("converting %s size to int: %w", parts[0], err)
 	}
 	return parts, size, unsigned, nil
 }
@@ -651,7 +651,7 @@ func (d *MySQL) fkNames(ctx context.Context, tx dialect.Tx, table, column string
 		rows  = &sql.Rows{}
 	)
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("mysql: reading constraint names %v", err)
+		return nil, fmt.Errorf("mysql: reading constraint names %w", err)
 	}
 	defer rows.Close()
 	if err := sql.ScanSlice(rows, &names); err != nil {

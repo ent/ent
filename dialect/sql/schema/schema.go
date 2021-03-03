@@ -215,37 +215,37 @@ func (c *Column) ScanDefault(value string) error {
 	case c.IntType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning int value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning int value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.Int64
 	case c.UintType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning uint value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning uint value for column %q: %w", c.Name, err)
 		}
 		c.Default = uint64(v.Int64)
 	case c.FloatType():
 		v := &sql.NullFloat64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning float value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning float value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.Float64
 	case c.Type == field.TypeBool:
 		v := &sql.NullBool{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning bool value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning bool value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.Bool
 	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning string value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning string value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.String
 	case c.Type == field.TypeJSON:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning json value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning json value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.String
 	default:

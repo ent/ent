@@ -554,7 +554,7 @@ func (t *Type) AddIndex(idx *load.Index) error {
 func (t *Type) resolveFKs() error {
 	for _, e := range t.Edges {
 		if err := e.setStorageKey(); err != nil {
-			return fmt.Errorf("%q edge: %v", e.Name, err)
+			return fmt.Errorf("%q edge: %w", e.Name, err)
 		}
 		if e.IsInverse() || e.M2M() {
 			continue

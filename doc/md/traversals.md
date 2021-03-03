@@ -105,7 +105,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 		SetName("Github").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("failed creating the group: %v", err)
+		return fmt.Errorf("failed creating the group: %w", err)
 	}
 	// Create the admin of the group.
 	// Unlike `Save`, `SaveX` panics if an error occurs.
@@ -175,7 +175,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 		QueryOwner().                	// Coco's owner: Alex.
 		Only(ctx)                    	// Expect only one entity to return in the query.
 	if err != nil {
-		return fmt.Errorf("failed querying the owner: %v", err)
+		return fmt.Errorf("failed querying the owner: %w", err)
 	}
 	fmt.Println(owner)
 	// Output:
@@ -204,7 +204,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 		).
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying the pets: %v", err)
+		return fmt.Errorf("failed querying the pets: %w", err)
 	}
 	fmt.Println(pets)
 	// Output:

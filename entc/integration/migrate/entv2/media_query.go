@@ -338,7 +338,7 @@ func (mq *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 func (mq *MediaQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := mq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("entv2: check existence: %v", err)
+		return false, fmt.Errorf("entv2: check existence: %w", err)
 	}
 	return n > 0, nil
 }

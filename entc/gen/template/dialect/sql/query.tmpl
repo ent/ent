@@ -84,7 +84,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
 	n, err := {{ $receiver }}.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("{{ $pkg }}: check existence: %v", err)
+		return false, fmt.Errorf("{{ $pkg }}: check existence: %w", err)
 	}
 	return n > 0, nil
 }
@@ -288,7 +288,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				{{- end }}
 			{{- end }}
 			if err := sqlgraph.QueryEdges(ctx, {{ $receiver }}.driver, _spec); err != nil {
-				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %v`, err)
+				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %w`, err)
 			}
 			query.Where({{ $e.Type.Package }}.IDIn(edgeids...))
 			neighbors, err := query.All(ctx)

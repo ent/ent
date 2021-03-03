@@ -338,7 +338,7 @@ func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 func (cq *CommentQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := cq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }
