@@ -127,6 +127,10 @@ func (t TypeInfo) Comparable() bool {
 	switch t.Type {
 	case TypeBool, TypeTime, TypeUUID, TypeEnum, TypeString:
 		return true
+	case TypeOther:
+		// Assumes the author of the type knows what they are doing and
+		// sets a reasonable schema type for the dialect used.
+		return true
 	default:
 		return t.Numeric()
 	}
