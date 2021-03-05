@@ -17,6 +17,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "balance", Type: field.TypeFloat64, Default: 0},
 		{Name: "number", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Nullable: true},
 		{Name: "user_card", Type: field.TypeInt, Unique: true, Nullable: true},
@@ -28,9 +29,8 @@ var (
 		PrimaryKey: []*schema.Column{CardsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "cards_users_card",
-				Columns: []*schema.Column{CardsColumns[5]},
-
+				Symbol:     "cards_users_card",
+				Columns:    []*schema.Column{CardsColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -44,12 +44,12 @@ var (
 			{
 				Name:    "card_number",
 				Unique:  false,
-				Columns: []*schema.Column{CardsColumns[3]},
+				Columns: []*schema.Column{CardsColumns[4]},
 			},
 			{
 				Name:    "card_id_name_number",
 				Unique:  false,
-				Columns: []*schema.Column{CardsColumns[0], CardsColumns[4], CardsColumns[3]},
+				Columns: []*schema.Column{CardsColumns[0], CardsColumns[5], CardsColumns[4]},
 			},
 		},
 	}
@@ -128,9 +128,8 @@ var (
 		PrimaryKey: []*schema.Column{FieldTypesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "field_types_files_field",
-				Columns: []*schema.Column{FieldTypesColumns[50]},
-
+				Symbol:     "field_types_files_field",
+				Columns:    []*schema.Column{FieldTypesColumns[50]},
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -155,23 +154,20 @@ var (
 		PrimaryKey: []*schema.Column{FilesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "files_file_types_files",
-				Columns: []*schema.Column{FilesColumns[6]},
-
+				Symbol:     "files_file_types_files",
+				Columns:    []*schema.Column{FilesColumns[6]},
 				RefColumns: []*schema.Column{FileTypesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "files_groups_files",
-				Columns: []*schema.Column{FilesColumns[7]},
-
+				Symbol:     "files_groups_files",
+				Columns:    []*schema.Column{FilesColumns[7]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "files_users_files",
-				Columns: []*schema.Column{FilesColumns[8]},
-
+				Symbol:     "files_users_files",
+				Columns:    []*schema.Column{FilesColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -246,9 +242,8 @@ var (
 		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "groups_group_infos_info",
-				Columns: []*schema.Column{GroupsColumns[6]},
-
+				Symbol:     "groups_group_infos_info",
+				Columns:    []*schema.Column{GroupsColumns[6]},
 				RefColumns: []*schema.Column{GroupInfosColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -291,9 +286,8 @@ var (
 		PrimaryKey: []*schema.Column{NodesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "nodes_nodes_next",
-				Columns: []*schema.Column{NodesColumns[2]},
-
+				Symbol:     "nodes_nodes_next",
+				Columns:    []*schema.Column{NodesColumns[2]},
 				RefColumns: []*schema.Column{NodesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -314,16 +308,14 @@ var (
 		PrimaryKey: []*schema.Column{PetsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "pets_users_pets",
-				Columns: []*schema.Column{PetsColumns[3]},
-
+				Symbol:     "pets_users_pets",
+				Columns:    []*schema.Column{PetsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "pets_users_team",
-				Columns: []*schema.Column{PetsColumns[4]},
-
+				Symbol:     "pets_users_team",
+				Columns:    []*schema.Column{PetsColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -383,23 +375,20 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "users_groups_blocked",
-				Columns: []*schema.Column{UsersColumns[11]},
-
+				Symbol:     "users_groups_blocked",
+				Columns:    []*schema.Column{UsersColumns[11]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "users_users_spouse",
-				Columns: []*schema.Column{UsersColumns[12]},
-
+				Symbol:     "users_users_spouse",
+				Columns:    []*schema.Column{UsersColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:  "users_users_parent",
-				Columns: []*schema.Column{UsersColumns[13]},
-
+				Symbol:     "users_users_parent",
+				Columns:    []*schema.Column{UsersColumns[13]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -417,16 +406,14 @@ var (
 		PrimaryKey: []*schema.Column{SpecCardColumns[0], SpecCardColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "spec_card_spec_id",
-				Columns: []*schema.Column{SpecCardColumns[0]},
-
+				Symbol:     "spec_card_spec_id",
+				Columns:    []*schema.Column{SpecCardColumns[0]},
 				RefColumns: []*schema.Column{SpecsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "spec_card_card_id",
-				Columns: []*schema.Column{SpecCardColumns[1]},
-
+				Symbol:     "spec_card_card_id",
+				Columns:    []*schema.Column{SpecCardColumns[1]},
 				RefColumns: []*schema.Column{CardsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -444,16 +431,14 @@ var (
 		PrimaryKey: []*schema.Column{UserGroupsColumns[0], UserGroupsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "user_groups_user_id",
-				Columns: []*schema.Column{UserGroupsColumns[0]},
-
+				Symbol:     "user_groups_user_id",
+				Columns:    []*schema.Column{UserGroupsColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "user_groups_group_id",
-				Columns: []*schema.Column{UserGroupsColumns[1]},
-
+				Symbol:     "user_groups_group_id",
+				Columns:    []*schema.Column{UserGroupsColumns[1]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -471,16 +456,14 @@ var (
 		PrimaryKey: []*schema.Column{UserFriendsColumns[0], UserFriendsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "user_friends_user_id",
-				Columns: []*schema.Column{UserFriendsColumns[0]},
-
+				Symbol:     "user_friends_user_id",
+				Columns:    []*schema.Column{UserFriendsColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "user_friends_friend_id",
-				Columns: []*schema.Column{UserFriendsColumns[1]},
-
+				Symbol:     "user_friends_friend_id",
+				Columns:    []*schema.Column{UserFriendsColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -498,16 +481,14 @@ var (
 		PrimaryKey: []*schema.Column{UserFollowingColumns[0], UserFollowingColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "user_following_user_id",
-				Columns: []*schema.Column{UserFollowingColumns[0]},
-
+				Symbol:     "user_following_user_id",
+				Columns:    []*schema.Column{UserFollowingColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "user_following_follower_id",
-				Columns: []*schema.Column{UserFollowingColumns[1]},
-
+				Symbol:     "user_following_follower_id",
+				Columns:    []*schema.Column{UserFollowingColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

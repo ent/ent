@@ -84,7 +84,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 func ({{ $receiver }} *{{ $builder }}) sqlExist(ctx context.Context) (bool, error) {
 	n, err := {{ $receiver }}.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("{{ $pkg }}: check existence: %v", err)
+		return false, fmt.Errorf("{{ $pkg }}: check existence: %w", err)
 	}
 	return n > 0, nil
 }
@@ -288,7 +288,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				{{- end }}
 			{{- end }}
 			if err := sqlgraph.QueryEdges(ctx, {{ $receiver }}.driver, _spec); err != nil {
-				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %v`, err)
+				return nil, fmt.Errorf(`query edges "{{ $e.Name }}": %w`, err)
 			}
 			query.Where({{ $e.Type.Package }}.IDIn(edgeids...))
 			neighbors, err := query.All(ctx)
@@ -308,10 +308,17 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			ids := make([]{{ $e.Type.ID.Type }}, 0, len(nodes))
 			nodeids := make(map[{{ $e.Type.ID.Type }}][]*{{ $.Name }})
 			for i := range nodes {
-				if fk := nodes[i].{{ $e.StructFKField }}; fk != nil {
-					ids = append(ids, *fk)
-					nodeids[*fk] = append(nodeids[*fk], nodes[i])
-				}
+				{{- $fk := $e.FKField }}
+				fk := nodes[i].{{ $e.StructFKField }}
+				{{- if $fk.Nillable }}
+					if fk != nil {
+						ids = append(ids, *fk)
+						nodeids[*fk] = append(nodeids[*fk], nodes[i])
+					}
+				{{- else }}
+					ids = append(ids, fk)
+					nodeids[fk] = append(nodeids[fk], nodes[i])
+				{{- end }}
 			}
 			query.Where({{ $e.Type.Package }}.IDIn(ids...))
 			neighbors, err := query.All(ctx)
@@ -321,7 +328,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			for _, n := range neighbors {
 				nodes, ok := nodeids[n.ID]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $e.StructFKField }}" returned %v`, n.ID)
+					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Name }}" returned %v`, n.ID)
 				}
 				for i := range nodes {
 					nodes[i].Edges.{{ $e.StructField }} = n
@@ -337,7 +344,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 					nodes[i].Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
 				{{- end }}
 			}
-			query.withFKs = true
+			{{- with $e.Type.ForeignKeys }}
+				query.withFKs = true
+			{{- end }}
 			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
 				s.Where(sql.InValues({{ $.Package }}.{{ $e.ColumnConstant }}, fks...))
 			}))
@@ -347,12 +356,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			}
 			for _, n := range neighbors {
 				fk := n.{{ $e.StructFKField }}
-				if fk == nil {
-					return nil, fmt.Errorf(`foreign-key "{{ $e.StructFKField }}" is nil for node %v`, n.ID)
-				}
-				node, ok := nodeids[*fk]
+				{{- $fk := $e.FKField }}
+				{{- if $fk.Nillable }}
+					if fk == nil {
+						return nil, fmt.Errorf(`foreign-key "{{ $fk.Name }}" is nil for node %v`, n.ID)
+					}
+				{{- end }}
+				node, ok := nodeids[{{ if $fk.Nillable }}*{{ end }}fk]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $e.StructFKField }}" returned %v for node %v`, *fk, n.ID)
+					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Name }}" returned %v for node %v`, {{ if $fk.Nillable }}*{{ end }}fk, n.ID)
 				}
 				node.Edges.{{ $e.StructField }} = {{ if $e.Unique }}n{{ else }}append(node.Edges.{{ $e.StructField }}, n){{ end }}
 			}

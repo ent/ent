@@ -417,7 +417,8 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Node)
 		for i := range nodes {
-			if fk := nodes[i].node_children; fk != nil {
+			fk := nodes[i].node_children
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -478,7 +479,7 @@ func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 func (nq *NodeQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := nq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

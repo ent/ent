@@ -25,9 +25,8 @@ var (
 		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "groups_tenants_tenant",
-				Columns: []*schema.Column{GroupsColumns[2]},
-
+				Symbol:     "groups_tenants_tenant",
+				Columns:    []*schema.Column{GroupsColumns[2]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -59,9 +58,8 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "users_tenants_tenant",
-				Columns: []*schema.Column{UsersColumns[3]},
-
+				Symbol:     "users_tenants_tenant",
+				Columns:    []*schema.Column{UsersColumns[3]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -79,16 +77,14 @@ var (
 		PrimaryKey: []*schema.Column{UserGroupsColumns[0], UserGroupsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "user_groups_user_id",
-				Columns: []*schema.Column{UserGroupsColumns[0]},
-
+				Symbol:     "user_groups_user_id",
+				Columns:    []*schema.Column{UserGroupsColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "user_groups_group_id",
-				Columns: []*schema.Column{UserGroupsColumns[1]},
-
+				Symbol:     "user_groups_group_id",
+				Columns:    []*schema.Column{UserGroupsColumns[1]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},

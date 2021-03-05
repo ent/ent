@@ -425,7 +425,8 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Group)
 		for i := range nodes {
-			if fk := nodes[i].group_tenant; fk != nil {
+			fk := nodes[i].group_tenant
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -492,7 +493,7 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, gq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "users": %v`, err)
+			return nil, fmt.Errorf(`query edges "users": %w`, err)
 		}
 		query.Where(user.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -521,7 +522,7 @@ func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 func (gq *GroupQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := gq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

@@ -381,7 +381,8 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Street)
 		for i := range nodes {
-			if fk := nodes[i].city_streets; fk != nil {
+			fk := nodes[i].city_streets
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -413,7 +414,7 @@ func (sq *StreetQuery) sqlCount(ctx context.Context) (int, error) {
 func (sq *StreetQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := sq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

@@ -38,7 +38,7 @@ func PkgPath(config *packages.Config, target string) (string, error) {
 	for i := 0; i < 2; i++ {
 		pkgs, err := packages.Load(config, pathCheck)
 		if err != nil {
-			return "", fmt.Errorf("load package info: %v", err)
+			return "", fmt.Errorf("load package info: %w", err)
 		}
 		if len(pkgs) == 0 || len(pkgs[0].Errors) != 0 {
 			parts = append(parts, filepath.Base(pathCheck))

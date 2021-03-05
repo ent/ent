@@ -704,11 +704,11 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 		query, args := selector.Query()
 		rows := &sql.Rows{}
 		if err := u.tx.Query(ctx, query, args, rows); err != nil {
-			return 0, fmt.Errorf("querying table %s: %v", u.Node.Table, err)
+			return 0, fmt.Errorf("querying table %s: %w", u.Node.Table, err)
 		}
 		defer rows.Close()
 		if err := sql.ScanSlice(rows, &ids); err != nil {
-			return 0, fmt.Errorf("scan node ids: %v", err)
+			return 0, fmt.Errorf("scan node ids: %w", err)
 		}
 		if err := rows.Close(); err != nil {
 			return 0, err
@@ -833,7 +833,7 @@ func (u *updater) scan(rows *sql.Rows) error {
 		return err
 	}
 	if err := rows.Scan(values...); err != nil {
-		return fmt.Errorf("failed scanning rows: %v", err)
+		return fmt.Errorf("failed scanning rows: %w", err)
 	}
 	if err := u.Assign(columns, values); err != nil {
 		return err
@@ -857,7 +857,7 @@ func (c *creator) node(ctx context.Context, tx dialect.ExecQuerier) error {
 		return err
 	}
 	if err := c.insert(ctx, tx, insert); err != nil {
-		return fmt.Errorf("insert node to table %q: %v", c.Table, err)
+		return fmt.Errorf("insert node to table %q: %w", c.Table, err)
 	}
 	if err := c.graph.addM2MEdges(ctx, []driver.Value{c.ID.Value}, edges[M2M]); err != nil {
 		return err
@@ -916,7 +916,7 @@ func (c *creator) nodes(ctx context.Context, tx dialect.ExecQuerier) error {
 		insert.Values(vs...)
 	}
 	if err := c.batchInsert(ctx, tx, insert); err != nil {
-		return fmt.Errorf("insert nodes to table %q: %v", c.Nodes[0].Table, err)
+		return fmt.Errorf("insert nodes to table %q: %w", c.Nodes[0].Table, err)
 	}
 	if err := c.batchAddM2M(ctx, c.BatchCreateSpec); err != nil {
 		return err
@@ -964,7 +964,10 @@ func (c *creator) batchInsert(ctx context.Context, tx dialect.ExecQuerier, inser
 		return err
 	}
 	for i, node := range c.Nodes {
-		node.ID.Value = ids[i]
+		// ID field was provided by the user.
+		if node.ID.Value == nil {
+			node.ID.Value = ids[i]
+		}
 	}
 	return nil
 }
@@ -1048,7 +1051,7 @@ func (g *graph) clearM2MEdges(ctx context.Context, ids []driver.Value, edges Edg
 		}
 		query, args := deleter.Query()
 		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
-			return fmt.Errorf("remove m2m edge for table %s: %v", table, err)
+			return fmt.Errorf("remove m2m edge for table %s: %w", table, err)
 		}
 	}
 	return nil
@@ -1083,7 +1086,7 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 		}
 		query, args := insert.Query()
 		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
-			return fmt.Errorf("add m2m edge for table %s: %v", table, err)
+			return fmt.Errorf("add m2m edge for table %s: %w", table, err)
 		}
 	}
 	return nil
@@ -1126,7 +1129,7 @@ func (g *graph) batchAddM2M(ctx context.Context, spec *BatchCreateSpec) error {
 			query, args = tables[table].Query()
 		)
 		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
-			return fmt.Errorf("add m2m edge for table %s: %v", table, err)
+			return fmt.Errorf("add m2m edge for table %s: %w", table, err)
 		}
 	}
 	return nil
@@ -1149,7 +1152,7 @@ func (g *graph) clearFKEdges(ctx context.Context, ids []driver.Value, edges []*E
 			Query()
 		var res sql.Result
 		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
-			return fmt.Errorf("add %s edge for table %s: %v", edge.Rel, edge.Table, err)
+			return fmt.Errorf("add %s edge for table %s: %w", edge.Rel, edge.Table, err)
 		}
 	}
 	return nil
@@ -1179,7 +1182,7 @@ func (g *graph) addFKEdges(ctx context.Context, ids []driver.Value, edges []*Edg
 			Query()
 		var res sql.Result
 		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
-			return fmt.Errorf("add %s edge for table %s: %v", edge.Rel, edge.Table, err)
+			return fmt.Errorf("add %s edge for table %s: %w", edge.Rel, edge.Table, err)
 		}
 		affected, err := res.RowsAffected()
 		if err != nil {
@@ -1201,7 +1204,7 @@ func setTableColumns(fields []*FieldSpec, edges map[Rel][]*EdgeSpec, set func(st
 		if fi.Type == field.TypeJSON {
 			buf, err := json.Marshal(value)
 			if err != nil {
-				return fmt.Errorf("marshal value for column %s: %v", fi.Column, err)
+				return fmt.Errorf("marshal value for column %s: %w", fi.Column, err)
 			}
 			// If the underlying driver does not support JSON types,
 			// driver.DefaultParameterConverter will convert it to uint8.
@@ -1283,7 +1286,7 @@ func insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.Inse
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
 func rollback(tx dialect.Tx, err error) error {
 	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%s: %v", err.Error(), rerr)
+		err = fmt.Errorf("%w: %v", err, rerr)
 	}
 	return err
 }

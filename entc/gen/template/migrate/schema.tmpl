@@ -36,7 +36,7 @@ var (
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
-				{{- with $c.Default }} Default: {{ . }},{{ end }}
+				{{- if not (isNil $c.Default) }} Default: {{ $c.Default }},{{ end }}
 				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k, $v := . }}"{{ $k }}": "{{ $v }}",{{ end }}}{{ end }}},
 			{{- end }}
 		}
@@ -53,19 +53,19 @@ var (
 				{{- end }}
 			},
 			ForeignKeys: []*schema.ForeignKey{
-				{{- range $_, $fk := $t.ForeignKeys }}
+				{{- range $fk := $t.ForeignKeys }}
 					{
 						Symbol: "{{ $fk.Symbol }}",
 						Columns: []*schema.Column{
-					  		{{- range $_, $c1 := $fk.Columns }}
+					  		{{- range $c1 := $fk.Columns }}
 								{{- range $i, $c2 := $t.Columns }}
 									{{- if eq $c1.Name $c2.Name }}{{ $columns }}[{{ $i }}],{{ end }}
 								{{- end }}
 							{{- end }}
 						},
-						{{/* postpone refrencing to avoid typechecking loops */}}
+						{{- /* postpone refrencing to avoid typechecking loops */}}
 						RefColumns: []*schema.Column{
-					  		{{- range $_, $c1 := $fk.RefColumns }}
+					  		{{- range $c1 := $fk.RefColumns }}
 								{{- range $i, $c2 := $fk.RefTable.Columns }}
 									{{- if eq $c1.Name $c2.Name }}{{ pascal $fk.RefTable.Name | printf "%sColumns" }}[{{ $i }}],{{ end }}
 								{{- end }}

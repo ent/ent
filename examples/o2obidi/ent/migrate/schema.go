@@ -26,9 +26,8 @@ var (
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "users_users_spouse",
-				Columns: []*schema.Column{UsersColumns[3]},
-
+				Symbol:     "users_users_spouse",
+				Columns:    []*schema.Column{UsersColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

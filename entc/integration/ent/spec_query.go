@@ -392,7 +392,7 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, sq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "card": %v`, err)
+			return nil, fmt.Errorf(`query edges "card": %w`, err)
 		}
 		query.Where(card.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -421,7 +421,7 @@ func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 func (sq *SpecQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := sq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

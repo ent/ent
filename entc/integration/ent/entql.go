@@ -45,6 +45,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		Fields: map[string]*sqlgraph.FieldSpec{
 			card.FieldCreateTime: {Type: field.TypeTime, Column: card.FieldCreateTime},
 			card.FieldUpdateTime: {Type: field.TypeTime, Column: card.FieldUpdateTime},
+			card.FieldBalance:    {Type: field.TypeFloat64, Column: card.FieldBalance},
 			card.FieldNumber:     {Type: field.TypeString, Column: card.FieldNumber},
 			card.FieldName:       {Type: field.TypeString, Column: card.FieldName},
 		},
@@ -676,6 +677,11 @@ func (f *CardFilter) WhereCreateTime(p entql.TimeP) {
 // WhereUpdateTime applies the entql time.Time predicate on the update_time field.
 func (f *CardFilter) WhereUpdateTime(p entql.TimeP) {
 	f.Where(p.Field(card.FieldUpdateTime))
+}
+
+// WhereBalance applies the entql float64 predicate on the balance field.
+func (f *CardFilter) WhereBalance(p entql.Float64P) {
+	f.Where(p.Field(card.FieldBalance))
 }
 
 // WhereNumber applies the entql string predicate on the number field.

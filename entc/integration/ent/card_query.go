@@ -419,7 +419,8 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Card)
 		for i := range nodes {
-			if fk := nodes[i].user_card; fk != nil {
+			fk := nodes[i].user_card
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -486,7 +487,7 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "spec": %v`, err)
+			return nil, fmt.Errorf(`query edges "spec": %w`, err)
 		}
 		query.Where(spec.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -515,7 +516,7 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := cq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

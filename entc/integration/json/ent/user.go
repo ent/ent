@@ -75,7 +75,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field t", values[i])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &u.T); err != nil {
-					return fmt.Errorf("unmarshal field t: %v", err)
+					return fmt.Errorf("unmarshal field t: %w", err)
 				}
 			}
 		case user.FieldURL:
@@ -84,7 +84,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field url", values[i])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &u.URL); err != nil {
-					return fmt.Errorf("unmarshal field url: %v", err)
+					return fmt.Errorf("unmarshal field url: %w", err)
 				}
 			}
 		case user.FieldRaw:
@@ -93,7 +93,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field raw", values[i])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &u.Raw); err != nil {
-					return fmt.Errorf("unmarshal field raw: %v", err)
+					return fmt.Errorf("unmarshal field raw: %w", err)
 				}
 			}
 		case user.FieldDirs:
@@ -102,7 +102,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field dirs", values[i])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &u.Dirs); err != nil {
-					return fmt.Errorf("unmarshal field dirs: %v", err)
+					return fmt.Errorf("unmarshal field dirs: %w", err)
 				}
 			}
 		case user.FieldInts:
@@ -111,7 +111,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field ints", values[i])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &u.Ints); err != nil {
-					return fmt.Errorf("unmarshal field ints: %v", err)
+					return fmt.Errorf("unmarshal field ints: %w", err)
 				}
 			}
 		case user.FieldFloats:
@@ -120,7 +120,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field floats", values[i])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &u.Floats); err != nil {
-					return fmt.Errorf("unmarshal field floats: %v", err)
+					return fmt.Errorf("unmarshal field floats: %w", err)
 				}
 			}
 		case user.FieldStrings:
@@ -129,7 +129,7 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field strings", values[i])
 			} else if value != nil && len(*value) > 0 {
 				if err := json.Unmarshal(*value, &u.Strings); err != nil {
-					return fmt.Errorf("unmarshal field strings: %v", err)
+					return fmt.Errorf("unmarshal field strings: %w", err)
 				}
 			}
 		}

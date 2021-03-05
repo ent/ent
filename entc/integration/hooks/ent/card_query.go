@@ -381,7 +381,8 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Card)
 		for i := range nodes {
-			if fk := nodes[i].user_cards; fk != nil {
+			fk := nodes[i].user_cards
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -413,7 +414,7 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 func (cq *CardQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := cq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

@@ -166,34 +166,34 @@ func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 		Annotations: make(map[string]interface{}),
 	}
 	if err := s.loadMixin(schema); err != nil {
-		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	// Schema annotations override mixed-in annotations.
 	for _, at := range schema.Annotations() {
 		s.addAnnotation(at)
 	}
 	if err := s.loadFields(schema); err != nil {
-		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	edges, err := safeEdges(schema)
 	if err != nil {
-		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	for _, e := range edges {
 		s.Edges = append(s.Edges, NewEdge(e.Descriptor()))
 	}
 	indexes, err := safeIndexes(schema)
 	if err != nil {
-		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	for _, idx := range indexes {
 		s.Indexes = append(s.Indexes, NewIndex(idx.Descriptor()))
 	}
 	if err := s.loadHooks(schema); err != nil {
-		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	if err := s.loadPolicy(schema); err != nil {
-		return nil, fmt.Errorf("schema %q: %v", s.Name, err)
+		return nil, fmt.Errorf("schema %q: %w", s.Name, err)
 	}
 	return json.Marshal(s)
 }
@@ -222,12 +222,12 @@ func (s *Schema) loadMixin(schema ent.Interface) error {
 		name := indirect(reflect.TypeOf(mx)).Name()
 		fields, err := safeFields(mx)
 		if err != nil {
-			return fmt.Errorf("mixin %q: %v", name, err)
+			return fmt.Errorf("mixin %q: %w", name, err)
 		}
 		for j, f := range fields {
 			sf, err := NewField(f.Descriptor())
 			if err != nil {
-				return fmt.Errorf("mixin %q: %v", name, err)
+				return fmt.Errorf("mixin %q: %w", name, err)
 			}
 			sf.Position = &Position{
 				Index:      j,
@@ -238,21 +238,21 @@ func (s *Schema) loadMixin(schema ent.Interface) error {
 		}
 		edges, err := safeEdges(mx)
 		if err != nil {
-			return fmt.Errorf("mixin %q: %v", name, err)
+			return fmt.Errorf("mixin %q: %w", name, err)
 		}
 		for _, e := range edges {
 			s.Edges = append(s.Edges, NewEdge(e.Descriptor()))
 		}
 		indexes, err := safeIndexes(mx)
 		if err != nil {
-			return fmt.Errorf("mixin %q: %v", name, err)
+			return fmt.Errorf("mixin %q: %w", name, err)
 		}
 		for _, idx := range indexes {
 			s.Indexes = append(s.Indexes, NewIndex(idx.Descriptor()))
 		}
 		hooks, err := safeHooks(mx)
 		if err != nil {
-			return fmt.Errorf("mixin %q: %v", name, err)
+			return fmt.Errorf("mixin %q: %w", name, err)
 		}
 		for j := range hooks {
 			s.Hooks = append(s.Hooks, &Position{
@@ -263,7 +263,7 @@ func (s *Schema) loadMixin(schema ent.Interface) error {
 		}
 		policy, err := safePolicy(mx)
 		if err != nil {
-			return fmt.Errorf("mixin %q: %v", name, err)
+			return fmt.Errorf("mixin %q: %w", name, err)
 		}
 		if policy != nil {
 			s.Policy = append(s.Policy, &Position{

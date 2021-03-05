@@ -54,6 +54,20 @@ func (cc *CardCreate) SetNillableUpdateTime(t *time.Time) *CardCreate {
 	return cc
 }
 
+// SetBalance sets the "balance" field.
+func (cc *CardCreate) SetBalance(f float64) *CardCreate {
+	cc.mutation.SetBalance(f)
+	return cc
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cc *CardCreate) SetNillableBalance(f *float64) *CardCreate {
+	if f != nil {
+		cc.SetBalance(*f)
+	}
+	return cc
+}
+
 // SetNumber sets the "number" field.
 func (cc *CardCreate) SetNumber(s string) *CardCreate {
 	cc.mutation.SetNumber(s)
@@ -168,6 +182,10 @@ func (cc *CardCreate) defaults() {
 		v := card.DefaultUpdateTime()
 		cc.mutation.SetUpdateTime(v)
 	}
+	if _, ok := cc.mutation.Balance(); !ok {
+		v := card.DefaultBalance
+		cc.mutation.SetBalance(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -177,6 +195,9 @@ func (cc *CardCreate) check() error {
 	}
 	if _, ok := cc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New("ent: missing required field \"update_time\"")}
+	}
+	if _, ok := cc.mutation.Balance(); !ok {
+		return &ValidationError{Name: "balance", err: errors.New("ent: missing required field \"balance\"")}
 	}
 	if _, ok := cc.mutation.Number(); !ok {
 		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
@@ -233,6 +254,14 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			Column: card.FieldUpdateTime,
 		})
 		_node.UpdateTime = value
+	}
+	if value, ok := cc.mutation.Balance(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
+		})
+		_node.Balance = value
 	}
 	if value, ok := cc.mutation.Number(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

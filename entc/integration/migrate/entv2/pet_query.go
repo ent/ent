@@ -357,7 +357,8 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
-			if fk := nodes[i].owner_id; fk != nil {
+			fk := nodes[i].owner_id
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -389,7 +390,7 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 func (pq *PetQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := pq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("entv2: check existence: %v", err)
+		return false, fmt.Errorf("entv2: check existence: %w", err)
 	}
 	return n > 0, nil
 }

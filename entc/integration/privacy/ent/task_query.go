@@ -467,7 +467,7 @@ func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, tq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "teams": %v`, err)
+			return nil, fmt.Errorf(`query edges "teams": %w`, err)
 		}
 		query.Where(team.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -489,7 +489,8 @@ func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Task)
 		for i := range nodes {
-			if fk := nodes[i].user_tasks; fk != nil {
+			fk := nodes[i].user_tasks
+			if fk != nil {
 				ids = append(ids, *fk)
 				nodeids[*fk] = append(nodeids[*fk], nodes[i])
 			}
@@ -521,7 +522,7 @@ func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
 func (tq *TaskQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := tq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("ent: check existence: %v", err)
+		return false, fmt.Errorf("ent: check existence: %w", err)
 	}
 	return n > 0, nil
 }

@@ -25,9 +25,8 @@ var (
 		PrimaryKey: []*schema.Column{NodesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "nodes_nodes_children",
-				Columns: []*schema.Column{NodesColumns[2]},
-
+				Symbol:     "nodes_nodes_children",
+				Columns:    []*schema.Column{NodesColumns[2]},
 				RefColumns: []*schema.Column{NodesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

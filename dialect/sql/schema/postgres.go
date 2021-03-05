@@ -26,7 +26,7 @@ type Postgres struct {
 func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, "SHOW server_version_num", []interface{}{}, rows); err != nil {
-		return fmt.Errorf("querying server version %v", err)
+		return fmt.Errorf("querying server version %w", err)
 	}
 	defer rows.Close()
 	if !rows.Next() {
@@ -37,7 +37,7 @@ func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 	}
 	var version string
 	if err := rows.Scan(&version); err != nil {
-		return fmt.Errorf("scanning version: %v", err)
+		return fmt.Errorf("scanning version: %w", err)
 	}
 	if len(version) < 6 {
 		return fmt.Errorf("malformed version: %s", version)
@@ -95,7 +95,7 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 			sql.EQ("table_name", name),
 		)).Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("postgres: reading table description %v", err)
+		return nil, fmt.Errorf("postgres: reading table description %w", err)
 	}
 	// Call `Close` in cases of failures (`Close` is idempotent).
 	defer rows.Close()
@@ -111,7 +111,7 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 		return nil, err
 	}
 	if err := rows.Close(); err != nil {
-		return nil, fmt.Errorf("closing rows %v", err)
+		return nil, fmt.Errorf("closing rows %w", err)
 	}
 	idxs, err := d.indexes(ctx, tx, name)
 	if err != nil {
@@ -183,7 +183,7 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 	rows := &sql.Rows{}
 	query, args := d.indexesQuery(table)
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("querying indexes for table %s: %v", table, err)
+		return nil, fmt.Errorf("querying indexes for table %s: %w", table, err)
 	}
 	defer rows.Close()
 	var (
@@ -197,7 +197,7 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 			unique, primary bool
 		)
 		if err := rows.Scan(&name, &column, &primary, &unique, &seqindex); err != nil {
-			return nil, fmt.Errorf("scanning index description: %v", err)
+			return nil, fmt.Errorf("scanning index description: %w", err)
 		}
 		// If the index is prefixed with the table, it may was added by
 		// `addIndex` and it should be trimmed. But, since entc prefixes
@@ -229,7 +229,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		udt      sql.NullString
 	)
 	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt); err != nil {
-		return fmt.Errorf("scanning column description: %v", err)
+		return fmt.Errorf("scanning column description: %w", err)
 	}
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"

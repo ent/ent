@@ -24,7 +24,7 @@ type SQLite struct {
 func (d *SQLite) init(ctx context.Context, tx dialect.Tx) error {
 	on, err := exist(ctx, tx, "PRAGMA foreign_keys")
 	if err != nil {
-		return fmt.Errorf("sqlite: check foreign_keys pragma: %v", err)
+		return fmt.Errorf("sqlite: check foreign_keys pragma: %w", err)
 	}
 	if !on {
 		// foreign_keys pragma is off, either enable it by execute "PRAGMA foreign_keys=ON"
@@ -159,7 +159,7 @@ func (d *SQLite) table(ctx context.Context, tx dialect.Tx, name string) (*Table,
 		OrderBy("pk").
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("sqlite: reading table description %v", err)
+		return nil, fmt.Errorf("sqlite: reading table description %w", err)
 	}
 	// Call Close in cases of failures (Close is idempotent).
 	defer rows.Close()
@@ -167,7 +167,7 @@ func (d *SQLite) table(ctx context.Context, tx dialect.Tx, name string) (*Table,
 	for rows.Next() {
 		c := &Column{}
 		if err := d.scanColumn(c, rows); err != nil {
-			return nil, fmt.Errorf("sqlite: %v", err)
+			return nil, fmt.Errorf("sqlite: %w", err)
 		}
 		if c.PrimaryKey() {
 			t.PrimaryKey = append(t.PrimaryKey, c)
@@ -178,7 +178,7 @@ func (d *SQLite) table(ctx context.Context, tx dialect.Tx, name string) (*Table,
 		return nil, err
 	}
 	if err := rows.Close(); err != nil {
-		return nil, fmt.Errorf("sqlite: closing rows %v", err)
+		return nil, fmt.Errorf("sqlite: closing rows %w", err)
 	}
 	indexes, err := d.indexes(ctx, tx, name)
 	if err != nil {
@@ -211,7 +211,7 @@ func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Index
 		From(sql.Table(fmt.Sprintf("pragma_index_list('%s')", name)).Unquote()).
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("reading table indexes %v", err)
+		return nil, fmt.Errorf("reading table indexes %w", err)
 	}
 	defer rows.Close()
 	var idx Indexes
@@ -219,7 +219,7 @@ func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Index
 		i := &Index{}
 		origin := sql.NullString{}
 		if err := rows.Scan(&i.Name, &i.Unique, &origin); err != nil {
-			return nil, fmt.Errorf("scanning index description %v", err)
+			return nil, fmt.Errorf("scanning index description %w", err)
 		}
 		i.primary = origin.String == "pk"
 		idx = append(idx, i)
@@ -228,7 +228,7 @@ func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Index
 		return nil, err
 	}
 	if err := rows.Close(); err != nil {
-		return nil, fmt.Errorf("closing rows %v", err)
+		return nil, fmt.Errorf("closing rows %w", err)
 	}
 	for i := range idx {
 		columns, err := d.indexColumns(ctx, tx, idx[i].Name)
@@ -253,7 +253,7 @@ func (d *SQLite) indexColumns(ctx context.Context, tx dialect.Tx, name string) (
 		OrderBy("seqno").
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("reading table indexes %v", err)
+		return nil, fmt.Errorf("reading table indexes %w", err)
 	}
 	defer rows.Close()
 	var names []string
@@ -271,7 +271,7 @@ func (d *SQLite) scanColumn(c *Column, rows *sql.Rows) error {
 		defaults sql.NullString
 	)
 	if err := rows.Scan(&c.Name, &c.typ, &notnull, &defaults, &pk); err != nil {
-		return fmt.Errorf("scanning column description: %v", err)
+		return fmt.Errorf("scanning column description: %w", err)
 	}
 	c.Nullable = notnull.Int64 == 0
 	if pk.Int64 > 0 {

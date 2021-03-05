@@ -57,6 +57,8 @@ func (Card) Annotations() []schema.Annotation {
 // Fields of the Comment.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
+		field.Float("balance").
+			Default(0),
 		field.String("number").
 			Immutable().
 			NotEmpty().

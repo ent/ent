@@ -34,6 +34,27 @@ func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return cu
 }
 
+// SetBalance sets the "balance" field.
+func (cu *CardUpdate) SetBalance(f float64) *CardUpdate {
+	cu.mutation.ResetBalance()
+	cu.mutation.SetBalance(f)
+	return cu
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableBalance(f *float64) *CardUpdate {
+	if f != nil {
+		cu.SetBalance(*f)
+	}
+	return cu
+}
+
+// AddBalance adds f to the "balance" field.
+func (cu *CardUpdate) AddBalance(f float64) *CardUpdate {
+	cu.mutation.AddBalance(f)
+	return cu
+}
+
 // SetName sets the "name" field.
 func (cu *CardUpdate) SetName(s string) *CardUpdate {
 	cu.mutation.SetName(s)
@@ -227,6 +248,12 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	if value, ok := cu.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, card.FieldUpdateTime, value)
 	}
+	if value, ok := cu.mutation.Balance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, value)
+	}
+	if value, ok := cu.mutation.AddedBalance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, __.Union(__.Values(card.FieldBalance), __.Constant(value)).Sum())
+	}
 	if value, ok := cu.mutation.Name(); ok {
 		v.Property(dsl.Single, card.FieldName, value)
 	}
@@ -275,6 +302,27 @@ type CardUpdateOne struct {
 	config
 	hooks    []Hook
 	mutation *CardMutation
+}
+
+// SetBalance sets the "balance" field.
+func (cuo *CardUpdateOne) SetBalance(f float64) *CardUpdateOne {
+	cuo.mutation.ResetBalance()
+	cuo.mutation.SetBalance(f)
+	return cuo
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableBalance(f *float64) *CardUpdateOne {
+	if f != nil {
+		cuo.SetBalance(*f)
+	}
+	return cuo
+}
+
+// AddBalance adds f to the "balance" field.
+func (cuo *CardUpdateOne) AddBalance(f float64) *CardUpdateOne {
+	cuo.mutation.AddBalance(f)
+	return cuo
 }
 
 // SetName sets the "name" field.
@@ -474,6 +522,12 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	)
 	if value, ok := cuo.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, card.FieldUpdateTime, value)
+	}
+	if value, ok := cuo.mutation.Balance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, value)
+	}
+	if value, ok := cuo.mutation.AddedBalance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, __.Union(__.Values(card.FieldBalance), __.Constant(value)).Sum())
 	}
 	if value, ok := cuo.mutation.Name(); ok {
 		v.Property(dsl.Single, card.FieldName, value)

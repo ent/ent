@@ -15,7 +15,7 @@ possible.
   - `entc/load` - `entc` loader API for loading user schemas into a Go objects at runtime.
   - `entc/gen` - The actual code generation logic resides in this package (and its `templates` package).
   - `integration` - Integration tests for `entc`.
-  
+
 - `privacy` - Runtime code for [privacy layer](https://entgo.io/docs/privacy/).
 
 - `doc` - Documentation code for `entgo.io` (uses [Docusaurus](https://docusaurus.io)).

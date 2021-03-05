@@ -59,6 +59,8 @@ func init() {
 	_ = petFields
 	// petDescID is the schema descriptor for id field.
 	petDescID := petFields[0].Descriptor()
+	// pet.DefaultID holds the default value on creation for the id field.
+	pet.DefaultID = petDescID.Default.(func() string)
 	// pet.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	pet.IDValidator = func() func(string) error {
 		validators := petDescID.Validators

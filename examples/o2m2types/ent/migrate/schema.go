@@ -25,9 +25,8 @@ var (
 		PrimaryKey: []*schema.Column{PetsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "pets_users_pets",
-				Columns: []*schema.Column{PetsColumns[2]},
-
+				Symbol:     "pets_users_pets",
+				Columns:    []*schema.Column{PetsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

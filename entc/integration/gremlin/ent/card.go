@@ -24,6 +24,8 @@ type Card struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// Balance holds the value of the "balance" field.
+	Balance float64 `json:"balance,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"-"`
 	// Name holds the value of the "name" field.
@@ -78,11 +80,12 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanc struct {
-		ID         string `json:"id,omitempty"`
-		CreateTime int64  `json:"create_time,omitempty"`
-		UpdateTime int64  `json:"update_time,omitempty"`
-		Number     string `json:"number,omitempty"`
-		Name       string `json:"name,omitempty"`
+		ID         string  `json:"id,omitempty"`
+		CreateTime int64   `json:"create_time,omitempty"`
+		UpdateTime int64   `json:"update_time,omitempty"`
+		Balance    float64 `json:"balance,omitempty"`
+		Number     string  `json:"number,omitempty"`
+		Name       string  `json:"name,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -90,6 +93,7 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 	c.ID = scanc.ID
 	c.CreateTime = time.Unix(0, scanc.CreateTime)
 	c.UpdateTime = time.Unix(0, scanc.UpdateTime)
+	c.Balance = scanc.Balance
 	c.Number = scanc.Number
 	c.Name = scanc.Name
 	return nil
@@ -132,6 +136,8 @@ func (c *Card) String() string {
 	builder.WriteString(c.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", balance=")
+	builder.WriteString(fmt.Sprintf("%v", c.Balance))
 	builder.WriteString(", number=")
 	builder.WriteString(c.Number)
 	builder.WriteString(", name=")
@@ -150,11 +156,12 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanc []struct {
-		ID         string `json:"id,omitempty"`
-		CreateTime int64  `json:"create_time,omitempty"`
-		UpdateTime int64  `json:"update_time,omitempty"`
-		Number     string `json:"number,omitempty"`
-		Name       string `json:"name,omitempty"`
+		ID         string  `json:"id,omitempty"`
+		CreateTime int64   `json:"create_time,omitempty"`
+		UpdateTime int64   `json:"update_time,omitempty"`
+		Balance    float64 `json:"balance,omitempty"`
+		Number     string  `json:"number,omitempty"`
+		Name       string  `json:"name,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -164,6 +171,7 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 			ID:         v.ID,
 			CreateTime: time.Unix(0, v.CreateTime),
 			UpdateTime: time.Unix(0, v.UpdateTime),
+			Balance:    v.Balance,
 			Number:     v.Number,
 			Name:       v.Name,
 		})
