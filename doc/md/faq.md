@@ -15,7 +15,7 @@ sidebar_label: FAQ
 [How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
 [How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids) \
 [How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql) \
-[How to define custom types in external templates?](#how-to-define-custom-types-in-in-external-templates)
+[How to define custom types in external templates?](#how-to-define-custom-types-in-external-templates)
 ## Answers
 
 #### How to create an entity from a struct `T`?
