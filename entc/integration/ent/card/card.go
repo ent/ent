@@ -25,12 +25,10 @@ const (
 	FieldNumber = "number"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeSpec holds the string denoting the spec edge name in mutations.
 	EdgeSpec = "spec"
-
 	// Table holds the table name of the card in the database.
 	Table = "cards"
 	// OwnerTable is the table the holds the owner relation/edge.
@@ -57,7 +55,8 @@ var Columns = []string{
 	FieldName,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Card type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "cards"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_card",
 }

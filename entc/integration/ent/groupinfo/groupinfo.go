@@ -15,10 +15,8 @@ const (
 	FieldDesc = "desc"
 	// FieldMaxUsers holds the string denoting the max_users field in the database.
 	FieldMaxUsers = "max_users"
-
 	// EdgeGroups holds the string denoting the groups edge name in mutations.
 	EdgeGroups = "groups"
-
 	// Table holds the table name of the groupinfo in the database.
 	Table = "group_infos"
 	// GroupsTable is the table the holds the groups relation/edge.

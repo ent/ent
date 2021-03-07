@@ -30,7 +30,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- end }}
 {{ end }}
 
-{{/* variables needed for sql dialects. */}}
+{{/* Variables needed for sql dialects. */}}
 {{ define "dialect/sql/meta/variables" }}
 	// Columns holds all SQL columns for {{ lower $.Name }} fields.
 	var Columns = []string{
@@ -39,9 +39,10 @@ in the LICENSE file in the root directory of this source tree.
 			{{ $f.Constant }},
 		{{- end }}
 	}
-	{{/* if any of the edges owns a foreign-key */}}
-	{{ with $.ForeignKeys }}
-		// ForeignKeys holds the SQL foreign-keys that are owned by the {{ $.Name }} type.
+	{{/* If any of the edges owns a foreign-key */}}
+	{{ with $.UnexportedForeignKeys }}
+		// ForeignKeys holds the SQL foreign-keys that are owned by the "{{ $.Table }}"
+		// table and are not defined as standalone fields in the schema.
 		var ForeignKeys = []string{
 			{{- range $fk := . }}
 				"{{ $fk.Edge.Rel.Column }}",
@@ -71,7 +72,7 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	{{- with $.ForeignKeys }}
+	{{- with $.UnexportedForeignKeys }}
 		for i := range ForeignKeys {
 			if column == ForeignKeys[i] {
 				return true

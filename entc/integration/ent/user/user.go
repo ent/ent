@@ -35,7 +35,6 @@ const (
 	FieldRole = "role"
 	// FieldSSOCert holds the string denoting the ssocert field in the database.
 	FieldSSOCert = "sso_cert"
-
 	// EdgeCard holds the string denoting the card edge name in mutations.
 	EdgeCard = "card"
 	// EdgePets holds the string denoting the pets edge name in mutations.
@@ -58,7 +57,6 @@ const (
 	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CardTable is the table the holds the card relation/edge.
@@ -129,7 +127,8 @@ var Columns = []string{
 	FieldSSOCert,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"group_blocked",
 	"user_spouse",

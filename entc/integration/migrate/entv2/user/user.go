@@ -41,14 +41,12 @@ const (
 	FieldStatus = "status"
 	// FieldWorkplace holds the string denoting the workplace field in the database.
 	FieldWorkplace = "workplace"
-
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
-
 	// CarFieldID holds the string denoting the ID field of the Car.
 	CarFieldID = "id"
 	// PetFieldID holds the string denoting the ID field of the Pet.

@@ -33,7 +33,6 @@ const (
 	FieldStatus = "status"
 	// FieldWorkplace holds the string denoting the workplace field in the database.
 	FieldWorkplace = "workplace"
-
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -42,7 +41,6 @@ const (
 	EdgeSpouse = "spouse"
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
-
 	// CarFieldID holds the string denoting the ID field of the Car.
 	CarFieldID = "id"
 	// Table holds the table name of the user in the database.
@@ -82,7 +80,8 @@ var Columns = []string{
 	FieldWorkplace,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_children",
 	"user_spouse",

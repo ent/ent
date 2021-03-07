@@ -17,12 +17,10 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeTenant holds the string denoting the tenant edge name in mutations.
 	EdgeTenant = "tenant"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
-
 	// Table holds the table name of the group in the database.
 	Table = "groups"
 	// TenantTable is the table the holds the tenant relation/edge.
@@ -45,7 +43,8 @@ var Columns = []string{
 	FieldName,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Group type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "groups"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"group_tenant",
 }

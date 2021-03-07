@@ -11,7 +11,6 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )

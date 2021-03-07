@@ -22,15 +22,13 @@ const (
 		// {{ $field }} holds the string denoting the {{ lower $f.Name }} field in the database.
 		{{ $field }} = "{{ $f.StorageKey }}"
 	{{- end }}
-
-	{{ range $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		{{- $edge := $e.Constant }}
 		// {{ $edge }} holds the string denoting the {{ lower $e.Name }} edge name in mutations.
 		{{ $edge }} = "{{ $e.Name }}"
 	{{- end }}
-
-	{{ $tmpl := printf "dialect/%s/meta/constants" $.Storage }}
-	{{ xtemplate $tmpl $ }}
+	{{- $tmpl := printf "dialect/%s/meta/constants" $.Storage }}
+	{{- xtemplate $tmpl $ }}
 )
 
 {{ $tmpl = printf "dialect/%s/meta/variables" $.Storage }}

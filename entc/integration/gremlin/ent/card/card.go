@@ -25,12 +25,10 @@ const (
 	FieldNumber = "number"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeSpec holds the string denoting the spec edge name in mutations.
 	EdgeSpec = "spec"
-
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
 	OwnerInverseLabel = "user_card"
 	// SpecInverseLabel holds the string label denoting the spec inverse edge type in the database.

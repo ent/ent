@@ -15,10 +15,8 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeSpouse holds the string denoting the spouse edge name in mutations.
 	EdgeSpouse = "spouse"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// SpouseTable is the table the holds the spouse relation/edge.
@@ -34,7 +32,8 @@ var Columns = []string{
 	FieldName,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_spouse",
 }

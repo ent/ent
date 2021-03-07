@@ -17,12 +17,10 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeTasks holds the string denoting the tasks edge name in mutations.
 	EdgeTasks = "tasks"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
-
 	// Table holds the table name of the team in the database.
 	Table = "teams"
 	// TasksTable is the table the holds the tasks relation/edge. The primary key declared below.

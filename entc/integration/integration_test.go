@@ -208,7 +208,7 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(usr.QueryGroups().AllX(ctx))
 	// update unknown vertex.
-	_, err := client.User.UpdateOneID(usr.ID + usr.ID).SetName("foo").Save(ctx)
+	_, err := client.User.UpdateOneID(usr.ID + math.MaxInt8).SetName("foo").Save(ctx)
 	require.Error(err)
 	require.True(ent.IsNotFound(err))
 

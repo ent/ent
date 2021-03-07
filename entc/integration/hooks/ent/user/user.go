@@ -21,14 +21,12 @@ const (
 	FieldName = "name"
 	// FieldWorth holds the string denoting the worth field in the database.
 	FieldWorth = "worth"
-
 	// EdgeCards holds the string denoting the cards edge name in mutations.
 	EdgeCards = "cards"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
 	// EdgeBestFriend holds the string denoting the best_friend edge name in mutations.
 	EdgeBestFriend = "best_friend"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CardsTable is the table the holds the cards relation/edge.
@@ -54,7 +52,8 @@ var Columns = []string{
 	FieldWorth,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_best_friend",
 }

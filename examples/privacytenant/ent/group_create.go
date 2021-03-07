@@ -183,6 +183,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.group_tenant = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := gc.mutation.UsersIDs(); len(nodes) > 0 {

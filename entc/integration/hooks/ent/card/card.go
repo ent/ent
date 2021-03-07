@@ -25,10 +25,8 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldInHook holds the string denoting the in_hook field in the database.
 	FieldInHook = "in_hook"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-
 	// Table holds the table name of the card in the database.
 	Table = "cards"
 	// OwnerTable is the table the holds the owner relation/edge.
@@ -49,7 +47,8 @@ var Columns = []string{
 	FieldInHook,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Card type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "cards"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_cards",
 }

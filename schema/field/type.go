@@ -149,6 +149,7 @@ var (
 		TypeBytes:   "[]byte",
 		TypeEnum:    "string",
 		TypeString:  "string",
+		TypeOther:   "other",
 		TypeInt:     "int",
 		TypeInt8:    "int8",
 		TypeInt16:   "int16",
@@ -161,7 +162,6 @@ var (
 		TypeUint64:  "uint64",
 		TypeFloat32: "float32",
 		TypeFloat64: "float64",
-		TypeOther:   "other",
 	}
 	constNames = [...]string{
 		TypeJSON:  "TypeJSON",

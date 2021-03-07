@@ -21,10 +21,8 @@ const (
 	FieldType = "type"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
-
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
-
 	// Table holds the table name of the filetype in the database.
 	Table = "file_types"
 	// FilesTable is the table the holds the files relation/edge.

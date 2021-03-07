@@ -111,7 +111,7 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 		check(resolve(t), "resolve %q relations", t.Name)
 	}
 	for _, t := range g.Nodes {
-		check(t.resolveFKs(), "set %q foreign-keys", t.Name)
+		check(t.setupFKs(), "set %q foreign-keys", t.Name)
 	}
 	for i := range schemas {
 		g.addIndexes(schemas[i])
@@ -279,7 +279,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			}, &Edge{
-				def:         e,
+				def:         ref,
 				Type:        typ,
 				Owner:       t,
 				Name:        ref.Name,
@@ -322,7 +322,7 @@ func resolve(t *Type) error {
 		case e.IsInverse():
 			ref, ok := e.Type.HasAssoc(e.Inverse)
 			if !ok {
-				return fmt.Errorf("edge %q is missing for inverse edge: %s.%s", e.Inverse, e.Type.Name, e.Name)
+				return fmt.Errorf("edge %q is missing for inverse edge: %s.%s(%s)", e.Inverse, t.Name, e.Name, e.Type.Name)
 			}
 			if !e.Optional && !ref.Optional {
 				return fmt.Errorf("edges cannot be required in both directions: %s.%s <-> %s.%s", t.Name, e.Name, e.Type.Name, ref.Name)
@@ -400,7 +400,9 @@ func (g *Graph) Tables() (all []*schema.Table) {
 			AddPrimary(n.ID.PK()).
 			SetAnnotation(n.EntSQL())
 		for _, f := range n.Fields {
-			table.AddColumn(f.Column())
+			if !f.IsEdgeField() {
+				table.AddColumn(f.Column())
+			}
 		}
 		tables[table.Name] = table
 		all = append(all, table)

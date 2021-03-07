@@ -13,12 +13,10 @@ const (
 	FieldID = "id"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
-
 	// EdgePrev holds the string denoting the prev edge name in mutations.
 	EdgePrev = "prev"
 	// EdgeNext holds the string denoting the next edge name in mutations.
 	EdgeNext = "next"
-
 	// PrevInverseLabel holds the string label denoting the prev inverse edge type in the database.
 	PrevInverseLabel = "node_next"
 	// NextLabel holds the string label denoting the next edge type in the database.

@@ -11,10 +11,8 @@ const (
 	Label = "car"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-
 	// UserFieldID holds the string denoting the ID field of the User.
 	UserFieldID = "oid"
 	// Table holds the table name of the car in the database.
@@ -33,7 +31,8 @@ var Columns = []string{
 	FieldID,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Car type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "cars"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_car",
 }
