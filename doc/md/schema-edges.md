@@ -885,9 +885,12 @@ func (Post) Edges() []ent.Edge {
 			Unique(),
 	}
 }
+```
 
-// UsageExample for accessing edge-fields. 
-func UsageExample(c *ent.Client) {
+The API for interacting with edge-fields is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
     p, err := c.Post.Query().
     	Where(post.AuthorID(id)).
     	OnlyX(ctx)
@@ -897,6 +900,8 @@ func UsageExample(c *ent.Client) {
     fmt.Println(p.AuthorID) // Access the "author" foreign-key.
 }
 ```
+
+Multiple examples exists in [GitHub](https://github.com/ent/ent/tree/master/entc/integration/edgefield).
 
 #### Migration To Edge Fields
 
