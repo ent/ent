@@ -33,7 +33,7 @@ type Card struct {
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
-	Edges CardEdges `json:"card_edges" mashraki:"edges"`
+	Edges CardEdges `json:"edges" mashraki:"edges"`
 
 	// StaticField defined by templates.
 	StaticField string `json:"boring,omitempty"`

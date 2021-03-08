@@ -26,8 +26,3 @@ func (Comment) Fields() []ent.Field {
 			Nillable(),
 	}
 }
-
-// Edges of the Comment.
-func (Comment) Edges() []ent.Edge {
-	return nil
-}

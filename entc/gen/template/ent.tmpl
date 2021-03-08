@@ -176,7 +176,17 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 {{ end }}
 
 {{/* A template for generating the tag of the Edges struct-field. */}}
-{{ define "model/edgetags" }}{{ with $.Annotations.Edges.StructTag }}`{{ . }}`{{ else }}`json:"edges"`{{ end }}{{ end }}
+{{- define "model/edgetags" }}
+	{{- $tag := `json:"edges"` }}
+	{{- with $.Annotations.Edges.StructTag }}
+		{{- if tagLookup . "json" }}
+			{{- $tag = . }}
+		{{- else }}
+			{{- $tag = print $tag " " . }}
+		{{- end }}
+	{{- end }}
+	{{- print "`" $tag "`" }}
+{{- end }}
 
 {{/* A template for omitting struct-tags. */}}
 {{ define "model/omittags" }}{{ with $.TagTypes }}`{{ range $i, $t := . }}{{ if ne $i 0 }} {{ end }}{{ $t }}:"-"{{ end }}`{{ end }}{{ end }}
