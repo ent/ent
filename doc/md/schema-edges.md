@@ -862,6 +862,84 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2mbidi).
 
+## Edge Field
+
+The `Field` option for edges allows users to expose foreign-keys as regular fields on the schema.
+Note that only relations that hold foreign-keys (edge-ids) are allowed to use this option.
+
+```go
+// Fields of the Post.
+func (Post) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("author_id").
+			Optional(),
+	}
+}
+
+// Edges of the Post.
+func (Post) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("author", User.Type).
+			// Bind the "author_id" field to this edge.
+			Field("author_id").
+			Unique(),
+	}
+}
+
+// UsageExample for accessing edge-fields. 
+func UsageExample(c *ent.Client) {
+    p, err := c.Post.Query().
+    	Where(post.AuthorID(id)).
+    	OnlyX(ctx)
+    if err != nil {
+        log.Fatal(err)	
+    }
+    fmt.Println(p.AuthorID) // Access the "author" foreign-key.
+}
+```
+
+#### Migration To Edge Fields
+
+As mentioned in the [StorageKey](#storagekey) section, Ent configures edge storage-keys (e.g. foreign-keys) by the
+`edge.To`. Therefore, if you want to add a field to an existing edge (already exists in the database as a column),
+you need to set it up with the `StorageKey` option as follows:
+
+```diff
+// Fields of the Post.
+func (Post) Fields() []ent.Field {
+	return []ent.Field{
++		field.Int("author_id").
++			Optional(),
+	}
+}
+
+// Edges of the Post.
+func (Post) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("author", User.Type).
++			Field("author_id").
++			StorageKey(edge.Column("post_author")).
+			Unique(),
+	}
+}
+```
+
+Alternatively, this option can be configured on the edge-field instead:
+
+```diff
+// Fields of the Post.
+func (Post) Fields() []ent.Field {
+	return []ent.Field{
++		field.Int("author_id").
++			StorageKey("post_author").
++			Optional(),
+	}
+}
+```
+
+If you're not sure how the foreign-key was named before using the edge-field option,
+check out the generated schema description in your project: `<project>/ent/migrate/schema.go`.
+
 ## Required
 
 Edges can be defined as required in the entity creation using the `Required` method on the builder.
@@ -882,7 +960,10 @@ If the example above, a card entity cannot be created without its owner.
 
 ## StorageKey
 
-Custom storage configuration can be provided for edges using the `StorageKey` method.
+By default, Ent configures edge storage-keys by the edge-owner (the schema that holds the `edge.To`), and not the by
+back-reference (`edge.From`). This is because back-references are optional and can be removed.
+
+In order to use custom storage configuration for edges, use the `StorageKey` method as follows:
 
 ```go
 // Edges of the User.
