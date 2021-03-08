@@ -20,7 +20,7 @@ and maintain applications with large data-models and sticks with the following p
 ## Installation
 
 ```console
-go install entgo.io/ent/cmd/ent@latest
+go get entgo.io/ent/cmd/ent
 ```
 
 After installing `ent` codegen tool, you should have it in your `PATH`.

@@ -9,7 +9,7 @@ The project comes with a codegen tool called `ent`. In order to install
 `ent` run the following command:
 
 ```bash
-go install entgo.io/ent/cmd/ent@latest
+go get entgo.io/ent/cmd/ent
 ``` 
 
 ## Initialize A New Schema
@@ -49,10 +49,17 @@ When working with `ent` CLI in a project, you want to make sure the version bein
 used by the CLI is **identical** to the `ent` version used by your project.
 
 One of the options for achieving this is asking `go generate` to use the version
-specified by `go install` before running `ent`.
+mentioned in the `go.mod` file when running `ent`. If your project does not use
+[Go modules](https://github.com/golang/go/wiki/Modules#quick-start), setup one as follows:
 
 ```console
-go install entgo.io/ent/cmd/ent@v0.6.0
+go mod init <project>
+```
+
+And then, re-run the following command in order to add `ent` to your `go.mod` file:
+
+```console
+go get entgo.io/ent/cmd/ent
 ```
 
 Add a `generate.go` file to your project under `<project>/ent`:
@@ -60,8 +67,7 @@ Add a `generate.go` file to your project under `<project>/ent`:
 ```go
 package ent
 
-//go:generate go install entgo.io/ent/cmd/ent@v0.6.0
-//go:generate ent generate ./schema
+//go:generate go run entgo.io/ent/cmd/ent generate ./schema
 ```
 
 Finally, you can run `go generate ./ent` from the root directory of your project
