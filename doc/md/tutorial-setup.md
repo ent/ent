@@ -44,7 +44,7 @@ After installing Ent and running `ent init`, you should have the following struc
 └── go.sum
 ```
 
-The `ent` directory holds the generated assets (next section), and the `ent/schema` directory contains your
+The `ent` directory holds the generated assets (see the next section), and the `ent/schema` directory contains your
 entity schemas.
 
 ## Code Generation
