@@ -191,4 +191,5 @@ func Example_Todo() {
 
 ---
 
-Please note that this documentation is under active development and supposed to be expanded in the near future. 
+Please note that this documentation is under active development and supposed to be expanded in the near future.
+Checkout the [Getting Started Doc](getting-started.md) for more details.
