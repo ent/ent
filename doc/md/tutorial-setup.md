@@ -72,7 +72,7 @@ func (Todo) Edges() []ent.Edge {
 }
 ```
 
-As you can see, this schema has not fields or edges. Let's run the command for generating assets to interact with
+As you can see, initially, the schema has no fields or edges defined. Let's run the command for generating assets to interact with
 the `Todo` entity:
 
 ```console
