@@ -81,8 +81,8 @@ go generate ./ent
 
 ## Create a Test Case
 
-After generating the assets, we should have a client for querying and mutating the `Todo` entities. Let's create a
-[testable example](https://blog.golang.org/examples) to check this. We'll use [SQLite](https://github.com/mattn/go-sqlite3)
+Running `go generate ./ent` invoked Ent's automatic code generation tool, which uses the schemas we define in our `schema` package to generate the actual Go code which we will now use to interact with a database. At this stage, you can find under `./ent/client.go`, client code that is capable of  querying and mutating the `Todo` entities. Let's create a
+[testable example](https://blog.golang.org/examples) to use this. We'll use [SQLite](https://github.com/mattn/go-sqlite3)
 in this test-case for testing Ent.
 
 ```console
