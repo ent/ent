@@ -35,5 +35,11 @@
       "faq",
       "feature-flags"
     ]
+  },
+  "tutorial": {
+    "Tutorial": [
+      "tutorial-setup",
+      "tutorial-todo-crud"
+    ]
   }
 }

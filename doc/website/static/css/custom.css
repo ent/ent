@@ -99,6 +99,15 @@ in the LICENSE file in the root directory of this source tree.
     .sideNavVisible .headerWrapper.wrapper header > a {
         display: none!important;
     }
+    .navigationSlider .slidingNav ul li {
+       min-width: 0!important;
+    }
+    .navigationSlider .slidingNav ul li a {
+      padding-right: 30px!important;
+    }
+  .navigationSlider .slidingNav ul li:nth-child(3) {
+    display: none;
+  }
 }
 
 
@@ -555,8 +564,7 @@ li.navSearchWrapper.reactNavSearchWrapper {
   margin-top: 0;
 }
 
-ul,
-ol {
+header ul, ol {
   margin-bottom: 0;
 }
 
@@ -639,4 +647,8 @@ input#search_input_react:focus, input#search_input_react:active {
 
 input#search_input_react::placeholder {
     color: #cccccc;
+}
+
+img#tutorial-todo-create {
+  width: 600px;
 }

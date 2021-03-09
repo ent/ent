@@ -11,7 +11,6 @@ and can contain the following configurations:
 - Entity edges (or relations), like: `User`'s groups, or `User`'s friends.
 - Database specific options, like: indexes or unique indexes.
 
-<br/>
 Here's an example of a schema:
 
 ```go

@@ -125,8 +125,7 @@ with admin role. We will create 2 additional packages for the purpose of the exa
 - `rule` - for holding the different privacy rules in our schema.
 - `viewer` - for getting and setting the user/viewer who's executing the operation. In this simple example, it can be
    either a normal user or an admin.
-    
-<br/>
+
 After running the code-generation (with the feature-flag for privacy), we add the `Policy` method with 2 generated policy rules.
 
 ```go
