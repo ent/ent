@@ -40,7 +40,7 @@ go mod init <project>
 Go to the root directory of your project, and run:
 
 ```console
-ent init User
+go run entgo.io/ent/cmd/ent init User
 ```
 The command above will generate the schema for `User` under `<project>/ent/schema/` directory:
 
