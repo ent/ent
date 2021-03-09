@@ -90,7 +90,7 @@ go get github.com/mattn/go-sqlite3
 touch example_test.go
 ```
 
-Paste the following code in `example_test.go` that creates an `ent.Client` and auto-create all schema resources
+Paste the following code in `example_test.go` that instantiates an `ent.Client` and automatically creates all schema resources
 in the database (tables, columns, etc).
 
 ```go
