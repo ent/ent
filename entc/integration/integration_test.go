@@ -1362,7 +1362,6 @@ func ConstraintChecks(t *testing.T, client *ent.Client) {
 
 	client.FileType.Create().SetName("a unique name").SaveX(context.Background())
 	_, err = client.FileType.Create().SetName("a unique name").Save(context.Background())
-	t.Logf("err %T %+v", err, err)
 	require.True(t, sqlgraph.IsConstraintError(err))
 	require.False(t, sqlgraph.IsForeignKeyConstraintError(err))
 	require.True(t, sqlgraph.IsUniqueConstraintError(err))
