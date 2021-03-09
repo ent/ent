@@ -12,7 +12,7 @@ Before we get started, make sure you have the following prerequisites installed 
 - [Go](https://golang.org/doc/install)
 - [Docker](https://docs.docker.com/get-docker) (optional)
 
-After installing these dependencies, we create a directory for the project and initialize a Go module.
+After installing these dependencies, create a directory for the project and initialize a Go module:
 
 ```console
 mkdir todo
