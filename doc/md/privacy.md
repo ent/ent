@@ -68,7 +68,7 @@ In order to enable the privacy option in your code generation, enable the `priva
 ```go
 package ent
   
-//go:generate go run entgo.io/ent/cmd/ent generate --feature privacy ./schema
+//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature privacy ./schema
 ```
 
 It is recommended to add the [`schema/snapshot`](features.md#auto-solve-merge-conflicts) feature-flag along with the
