@@ -4,10 +4,10 @@ title: Setting Up
 sidebar_label: Setting Up
 ---
 
-This guide is intended for first-time users who want instructions how to set up an Ent project from scratch.
-Before we get started, make sure you have the following dependencies.
+This guide is intended for first-time users who want instructions on how to set up an Ent project from scratch.
+Before we get started, make sure you have the following prerequisites installed on your machine.
 
-## Dependencies
+## Prerequisites
 
 - [Go](https://golang.org/doc/install)
 - [Docker](https://docs.docker.com/get-docker) (optional)
