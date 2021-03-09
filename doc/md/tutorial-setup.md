@@ -32,7 +32,7 @@ go get entgo.io/ent/cmd/ent
 go run entgo.io/ent/cmd/ent init Todo
 ```
 
-After installing Ent and running `ent init`, you should have the following structure:
+After installing Ent and running `ent init`, your project directory should look like this:
 
 ```console
 .
