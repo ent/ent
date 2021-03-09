@@ -28,7 +28,7 @@ Run the following Go commands to install Ent, and tell it to initialize the proj
 go get entgo.io/ent/cmd/ent
 ```
 
-```go
+```console
 go run entgo.io/ent/cmd/ent init Todo
 ```
 
