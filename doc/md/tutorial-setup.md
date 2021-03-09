@@ -49,7 +49,7 @@ entity schemas.
 
 ## Code Generation
 
-The command above generated a schema named `Todo` under `todo/ent/schema/` directory:
+When we ran `ent init Todo` above, a schema named `Todo`  was created in the `todo.go` file under the`todo/ent/schema/` directory:
 
 ```go
 package schema
