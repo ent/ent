@@ -1957,7 +1957,7 @@ func TestQueryEdgesSchema(t *testing.T) {
 }
 
 func TestIsConstraintError(t *testing.T) {
-	testCases := []struct {
+	tests := []struct {
 		name               string
 		errMessage         string
 		expectedConstraint bool
@@ -2013,12 +2013,12 @@ func TestIsConstraintError(t *testing.T) {
 			expectedUnique:     true,
 		},
 	}
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			err := errors.New(testCase.errMessage)
-			require.EqualValues(t, testCase.expectedConstraint, IsConstraintError(err))
-			require.EqualValues(t, testCase.expectedFK, IsForeignKeyConstraintError(err))
-			require.EqualValues(t, testCase.expectedUnique, IsUniqueConstraintError(err))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := errors.New(tt.errMessage)
+			require.EqualValues(t, tt.expectedConstraint, IsConstraintError(err))
+			require.EqualValues(t, tt.expectedFK, IsForeignKeyConstraintError(err))
+			require.EqualValues(t, tt.expectedUnique, IsUniqueConstraintError(err))
 		})
 	}
 }
