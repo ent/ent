@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/enttest"
 	"entgo.io/ent/entc/integration/ent/file"
@@ -1357,15 +1358,15 @@ func ConstraintChecks(t *testing.T, client *ent.Client) {
 	var cerr *ent.ConstraintError
 	_, err := client.Pet.Create().SetName("orphan").SetOwnerID(0).Save(context.Background())
 	require.True(t, errors.As(err, &cerr))
-	require.True(t, cerr.IsFK())
-	require.False(t, cerr.IsUniqueness())
+	require.True(t, sqlgraph.IsForeignKeyConstraintError(err))
+	require.False(t, sqlgraph.IsUniqueConstraintError(err))
 
 	client.FileType.Create().SetName("a unique name").SaveX(context.Background())
 	_, err = client.FileType.Create().SetName("a unique name").Save(context.Background())
 	t.Logf("err %T %+v", err, err)
 	require.True(t, errors.As(err, &cerr))
-	require.False(t, cerr.IsFK())
-	require.True(t, cerr.IsUniqueness())
+	require.False(t, sqlgraph.IsForeignKeyConstraintError(err))
+	require.True(t, sqlgraph.IsUniqueConstraintError(err))
 }
 
 func drop(t *testing.T, client *ent.Client) {

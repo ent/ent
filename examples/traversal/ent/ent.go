@@ -247,18 +247,6 @@ func isSQLConstraintError(err error) (*ConstraintError, bool) {
 	return nil, false
 }
 
-// IsUniqueness reports whether the constraint that failed was a uniqueness constraint violation
-// e.g. duplicate value in unique index
-func (ce *ConstraintError) IsUniqueness() bool {
-	return sqlgraph.IsUniqueConstraintError(ce.wrap)
-}
-
-// IsFK reports whether the constraint that failed was due to a foreign key constraint violation
-// e.g. parent row does not exist.
-func (ce *ConstraintError) IsFK() bool {
-	return sqlgraph.IsForeignKeyConstraintError(ce.wrap)
-}
-
 // rollback calls tx.Rollback and wraps the given error with the rollback error if present.
 func rollback(tx dialect.Tx, err error) error {
 	if rerr := tx.Rollback(); rerr != nil {
