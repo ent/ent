@@ -7,6 +7,7 @@ package sqlgraph
 import (
 	"context"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -1953,6 +1954,69 @@ func TestQueryEdgesSchema(t *testing.T) {
 	err = QueryEdges(context.Background(), sql.OpenDB("", db), spec)
 	require.NoError(t, err)
 	require.Equal(t, [][]int64{{4, 5}, {4, 6}}, edges)
+}
+
+func TestIsConstraintError(t *testing.T) {
+	tests := []struct {
+		name               string
+		errMessage         string
+		expectedConstraint bool
+		expectedFK         bool
+		expectedUnique     bool
+	}{
+		{
+			name: "MySQL FK",
+			errMessage: `insert node to table "pets": Error 1452: Cannot add or update a child row: a foreign key` +
+				" constraint fails (`test`.`pets`, CONSTRAINT `pets_users_pets` FOREIGN KEY (`user_pets`) REFERENCES " +
+				"`users` (`id`) ON DELETE SET NULL)",
+			expectedConstraint: true,
+			expectedFK:         true,
+			expectedUnique:     false,
+		},
+		{
+			name:               "SQLite FK",
+			errMessage:         `insert node to table "pets": FOREIGN KEY constraint failed`,
+			expectedConstraint: true,
+			expectedFK:         true,
+			expectedUnique:     false,
+		},
+		{
+			name:               "Postgres FK",
+			errMessage:         `insert node to table "pets": pq: insert or update on table "pets" violates foreign key constraint "pets_users_pets"`,
+			expectedConstraint: true,
+			expectedFK:         true,
+			expectedUnique:     false,
+		},
+		{
+			name:               "MySQL Unique",
+			errMessage:         `insert node to table "file_types": UNIQUE constraint failed: file_types.name ent: constraint failed: insert node to table "file_types": UNIQUE constraint failed: file_types.name`,
+			expectedConstraint: true,
+			expectedFK:         false,
+			expectedUnique:     true,
+		},
+		{
+			name:               "SQLite Unique",
+			errMessage:         `insert node to table "file_types": UNIQUE constraint failed: file_types.name ent: constraint failed: insert node to table "file_types": UNIQUE constraint failed: file_types.name`,
+			expectedConstraint: true,
+			expectedFK:         false,
+			expectedUnique:     true,
+		},
+		{
+			name:               "Postgres Unique",
+			errMessage:         `insert node to table "file_types": pq: duplicate key value violates unique constraint "file_types_name_key" ent: constraint failed: insert node to table "file_types": pq: duplicate key value violates unique constraint "file_types_name_key"`,
+			expectedConstraint: true,
+			expectedFK:         false,
+			expectedUnique:     true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := errors.New(tt.errMessage)
+			require.EqualValues(t, tt.expectedConstraint, IsConstraintError(err))
+			require.EqualValues(t, tt.expectedFK, IsForeignKeyConstraintError(err))
+			require.EqualValues(t, tt.expectedUnique, IsUniqueConstraintError(err))
+		})
+	}
 }
 
 func escape(query string) string {
