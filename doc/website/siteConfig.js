@@ -65,21 +65,20 @@ const siteConfig = {
         theme: 'androidstudio',
         hljs: function(hljs) {
             hljs.registerLanguage('gotemplate', function(hljs) {
-                var GO_KEYWORDS = {
-                    keyword:
-                        'break default func interface select case map struct chan else goto package switch ' +
-                        'const fallthrough if range type continue for import return var go defer ' +
-                        'bool byte complex64 complex128 float32 float64 int8 int16 int32 int64 string uint8 ' +
-                        'uint16 uint32 uint64 int uint uintptr rune with define block end',
-                    literal:
-                        'true false iota nil',
-                    built_in: 'append cap close complex copy imag len make new panic print println real recover delete' +
-                        'printf fail slice dict list'
-                };
                 return {
                     name: 'GoTemplate',
                     aliases: ['gotmpl'],
-                    keywords: GO_KEYWORDS,
+                    keywords: {
+                        keyword:
+                            'break default func interface select case map struct chan else goto package switch ' +
+                            'const fallthrough if range type continue for import return var go defer ' +
+                            'bool byte complex64 complex128 float32 float64 int8 int16 int32 int64 string uint8 ' +
+                            'uint16 uint32 uint64 int uint uintptr rune with define block end',
+                        literal:
+                            'true false iota nil',
+                        built_in: 'append cap close complex copy imag len make new panic print println real recover delete' +
+                            'printf fail slice dict list'
+                    },
                     contains: [
                         hljs.COMMENT('{{-* */\\*', '\\*/ *-*}}'),
                         hljs.C_LINE_COMMENT_MODE,
@@ -95,6 +94,21 @@ const siteConfig = {
                             begin: /:=/
                         },
                     ]
+                };
+            });
+            hljs.registerLanguage('graphql', function(hljs) {
+                return {
+                    name: 'GraphQL',
+                    aliases: ['gql'],
+                    keywords: {
+                        literal: 'Boolean Cursor Float ID Int String Time false null true',
+                        keyword: '... enum fragment implements input interface mutation on query scalar schema type union',
+                    },
+                    contains: [
+                        hljs.HASH_COMMENT_MODE,
+                        hljs.QUOTE_STRING_MODE,
+                        hljs.NUMBER_MODE,
+                    ],
                 };
             });
         }

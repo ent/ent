@@ -1,7 +1,7 @@
 ---
 id: tutorial-todo-crud
-title: Queries and Mutations
-sidebar_label: Queries and Mutations
+title: Query and Mutation
+sidebar_label: Query and Mutation
 ---
 
 After setting up our project, we're ready to create our Todo list and query it.
@@ -127,15 +127,16 @@ func Example_Todo() {
 
 After connecting item-2 to item-1, we're ready to start querying our todo list. 
 
-**Query all todo items**:
+#### Query all todo items:
 
 ```go
 func Example_Todo() {
 	// ...
+
 	// Query all todo items.
 	items, err := client.Todo.Query().All(ctx)
 	if err != nil {
-		log.Fatalf("querying todos: %v", err)
+		log.Fatalf("failed querying todos: %v", err)
 	}
 	for _, t := range items {
 		fmt.Printf("%d: %q\n", t.ID, t.Text)
@@ -146,15 +147,16 @@ func Example_Todo() {
 }
 ```
 
-**Query all todo items that depend on other items**:
+#### Query all todo items that depend on other items:
 
 ```go
 func Example_Todo() {
 	// ...
+
 	// Query all todo items that depend on other items.
 	items, err := client.Todo.Query().Where(todo.HasParent()).All(ctx)
 	if err != nil {
-		log.Fatalf("querying todos: %v", err)
+		log.Fatalf("failed querying todos: %v", err)
 	}
 	for _, t := range items {
 		fmt.Printf("%d: %q\n", t.ID, t.Text)
@@ -164,11 +166,12 @@ func Example_Todo() {
 }
 ```
 
-**Query all todo items that don't depend on other items and have items that depend on them**:
+#### Query all todo items that don't depend on other items and have items that depend on them:
 
 ```go
 func Example_Todo() {
 	// ...
+
 	// Query all todo items that don't depend on other items and have items that depend them.
 	items, err := client.Todo.Query().
 		Where(
@@ -179,7 +182,7 @@ func Example_Todo() {
 		).
 		All(ctx)
 	if err != nil {
-		log.Fatalf("querying todos: %v", err)
+		log.Fatalf("failed querying todos: %v", err)
 	}
 	for _, t := range items {
 		fmt.Printf("%d: %q\n", t.ID, t.Text)
@@ -189,7 +192,23 @@ func Example_Todo() {
 }
 ```
 
----
+#### Query parent through its children:
 
-Please note that this documentation is under active development and supposed to be expanded in the near future.
-Checkout the [Getting Started Doc](getting-started.md) for more details.
+```go
+func Example_Todo() {
+	// ...
+	
+	// Get a parent item through its children and expect the
+	// query to return exactly one item.
+	parent, err := client.Todo.Query(). // Query all todos.
+		Where(todo.HasParent()).        // Filter only those with parents.
+		QueryParent().                  // Continue traversals to the parents.
+		Only(ctx)                       // Expect exactly one item.
+	if err != nil {
+		log.Fatalf("failed querying todos: %v", err)
+	}
+	fmt.Printf("%d: %q\n", parent.ID, parent.Text)
+	// Output:
+	// 1: "Add GraphQL Example"
+}
+```
