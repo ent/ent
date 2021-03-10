@@ -1966,7 +1966,7 @@ func TestIsConstraintError(t *testing.T) {
 	}{
 		{
 			name: "MySQL FK",
-			errMessage: "insert node to table \"pets\": Error 1452: Cannot add or update a child row: a foreign key" +
+			errMessage: `insert node to table "pets": Error 1452: Cannot add or update a child row: a foreign key` +
 				" constraint fails (`test`.`pets`, CONSTRAINT `pets_users_pets` FOREIGN KEY (`user_pets`) REFERENCES " +
 				"`users` (`id`) ON DELETE SET NULL)",
 			expectedConstraint: true,
@@ -1975,39 +1975,35 @@ func TestIsConstraintError(t *testing.T) {
 		},
 		{
 			name:               "SQLite FK",
-			errMessage:         "insert node to table \"pets\": FOREIGN KEY constraint failed",
+			errMessage:         `insert node to table "pets": FOREIGN KEY constraint failed`,
 			expectedConstraint: true,
 			expectedFK:         true,
 			expectedUnique:     false,
 		},
 		{
 			name:               "Postgres FK",
-			errMessage:         "insert node to table \"pets\": pq: insert or update on table \"pets\" violates foreign key constraint \"pets_users_pets\"",
+			errMessage:         `insert node to table "pets": pq: insert or update on table "pets" violates foreign key constraint "pets_users_pets"`,
 			expectedConstraint: true,
 			expectedFK:         true,
 			expectedUnique:     false,
 		},
 		{
-			name: "MySQL Unique",
-			errMessage: "insert node to table \"file_types\": UNIQUE constraint failed: file_types.name ent: constraint" +
-				" failed: insert node to table \"file_types\": UNIQUE constraint failed: file_types.name",
+			name:               "MySQL Unique",
+			errMessage:         `insert node to table "file_types": UNIQUE constraint failed: file_types.name ent: constraint failed: insert node to table "file_types": UNIQUE constraint failed: file_types.name`,
 			expectedConstraint: true,
 			expectedFK:         false,
 			expectedUnique:     true,
 		},
 		{
-			name: "SQLite Unique",
-			errMessage: "insert node to table \"file_types\": UNIQUE constraint failed: file_types.name ent: " +
-				"constraint failed: insert node to table \"file_types\": UNIQUE constraint failed: file_types.name",
+			name:               "SQLite Unique",
+			errMessage:         `insert node to table "file_types": UNIQUE constraint failed: file_types.name ent: constraint failed: insert node to table "file_types": UNIQUE constraint failed: file_types.name`,
 			expectedConstraint: true,
 			expectedFK:         false,
 			expectedUnique:     true,
 		},
 		{
-			name: "Postgres Unique",
-			errMessage: "insert node to table \"file_types\": pq: duplicate key value violates unique constraint" +
-				" \"file_types_name_key\" ent: constraint failed: insert node to table \"file_types\": " +
-				"pq: duplicate key value violates unique constraint \"file_types_name_key\"",
+			name:               "Postgres Unique",
+			errMessage:         `insert node to table "file_types": pq: duplicate key value violates unique constraint "file_types_name_key" ent: constraint failed: insert node to table "file_types": pq: duplicate key value violates unique constraint "file_types_name_key"`,
 			expectedConstraint: true,
 			expectedFK:         false,
 			expectedUnique:     true,
