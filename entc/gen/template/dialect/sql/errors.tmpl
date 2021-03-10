@@ -7,22 +7,8 @@ in the LICENSE file in the root directory of this source tree.
 {{/* custom errors and errors handlers for sql dialects */}}
 {{ define "dialect/sql/errors" }}
 func isSQLConstraintError(err error) (*ConstraintError, bool) {
-	var (
-		msg = err.Error()
-		// error format per dialect.
-		errors = [...]string{
-			"Error 1062",										// MySQL 1062 error (ER_DUP_ENTRY).
-			"UNIQUE constraint failed",							// SQLite.
-			"duplicate key value violates unique constraint",	// PostgreSQL.
-		}
-	)
-	if _, ok := err.(*sqlgraph.ConstraintError); ok {
-		return &ConstraintError{msg, err}, true
-	}
-	for i := range errors {
-		if strings.Contains(msg, errors[i]) {
-			return &ConstraintError{msg, err}, true
-		}
+	if sqlgraph.IsConstraintError(err) {
+		return &ConstraintError{err.Error(), err}, true
 	}
 	return nil, false
 }
