@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -82,6 +83,15 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// GoString implements the fmt.GoStringer interface.
+func (u *User) GoString() string {
+	json, err := json.MarshalIndent(u, "", "\t")
+	if err != nil {
+		return err.Error()
+	}
+	return string(json)
 }
 
 // Users is a parsable slice of User.
