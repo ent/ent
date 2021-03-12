@@ -161,8 +161,8 @@ type GroupCreateBulk struct {
 	builders []*GroupCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Group entities in the database.
-func (gcb *GroupCreateBulk) OnConflict() *GroupCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Group entities in the database.
+func (gcb *GroupCreateBulk) OnConflict(fields ...string) *GroupCreateBulk {
 	// for i := range gcb.builders {
 
 	// }

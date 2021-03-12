@@ -154,8 +154,8 @@ type CarCreateBulk struct {
 	builders []*CarCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Car entities in the database.
-func (ccb *CarCreateBulk) OnConflict() *CarCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Car entities in the database.
+func (ccb *CarCreateBulk) OnConflict(fields ...string) *CarCreateBulk {
 	// for i := range ccb.builders {
 
 	// }

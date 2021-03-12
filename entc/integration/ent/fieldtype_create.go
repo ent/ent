@@ -1133,8 +1133,8 @@ type FieldTypeCreateBulk struct {
 	builders []*FieldTypeCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on FieldType entities in the database.
-func (ftcb *FieldTypeCreateBulk) OnConflict() *FieldTypeCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on FieldType entities in the database.
+func (ftcb *FieldTypeCreateBulk) OnConflict(fields ...string) *FieldTypeCreateBulk {
 	// for i := range ftcb.builders {
 
 	// }

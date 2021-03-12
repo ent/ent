@@ -312,8 +312,8 @@ type ConversionCreateBulk struct {
 	builders []*ConversionCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Conversion entities in the database.
-func (ccb *ConversionCreateBulk) OnConflict() *ConversionCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Conversion entities in the database.
+func (ccb *ConversionCreateBulk) OnConflict(fields ...string) *ConversionCreateBulk {
 	// for i := range ccb.builders {
 
 	// }

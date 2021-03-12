@@ -185,8 +185,8 @@ type CardCreateBulk struct {
 	builders []*CardCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Card entities in the database.
-func (ccb *CardCreateBulk) OnConflict() *CardCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Card entities in the database.
+func (ccb *CardCreateBulk) OnConflict(fields ...string) *CardCreateBulk {
 	// for i := range ccb.builders {
 
 	// }

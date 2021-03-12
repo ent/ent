@@ -201,8 +201,8 @@ type GroupInfoCreateBulk struct {
 	builders []*GroupInfoCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on GroupInfo entities in the database.
-func (gicb *GroupInfoCreateBulk) OnConflict() *GroupInfoCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on GroupInfo entities in the database.
+func (gicb *GroupInfoCreateBulk) OnConflict(fields ...string) *GroupInfoCreateBulk {
 	// for i := range gicb.builders {
 
 	// }

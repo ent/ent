@@ -167,8 +167,8 @@ type MixinIDCreateBulk struct {
 	builders []*MixinIDCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on MixinID entities in the database.
-func (micb *MixinIDCreateBulk) OnConflict() *MixinIDCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on MixinID entities in the database.
+func (micb *MixinIDCreateBulk) OnConflict(fields ...string) *MixinIDCreateBulk {
 	// for i := range micb.builders {
 
 	// }

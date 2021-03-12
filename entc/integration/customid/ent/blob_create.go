@@ -227,8 +227,8 @@ type BlobCreateBulk struct {
 	builders []*BlobCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Blob entities in the database.
-func (bcb *BlobCreateBulk) OnConflict() *BlobCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Blob entities in the database.
+func (bcb *BlobCreateBulk) OnConflict(fields ...string) *BlobCreateBulk {
 	// for i := range bcb.builders {
 
 	// }

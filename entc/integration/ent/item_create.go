@@ -114,8 +114,8 @@ type ItemCreateBulk struct {
 	builders []*ItemCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Item entities in the database.
-func (icb *ItemCreateBulk) OnConflict() *ItemCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Item entities in the database.
+func (icb *ItemCreateBulk) OnConflict(fields ...string) *ItemCreateBulk {
 	// for i := range icb.builders {
 
 	// }

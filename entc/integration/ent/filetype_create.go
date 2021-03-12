@@ -240,8 +240,8 @@ type FileTypeCreateBulk struct {
 	builders []*FileTypeCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on FileType entities in the database.
-func (ftcb *FileTypeCreateBulk) OnConflict() *FileTypeCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on FileType entities in the database.
+func (ftcb *FileTypeCreateBulk) OnConflict(fields ...string) *FileTypeCreateBulk {
 	// for i := range ftcb.builders {
 
 	// }

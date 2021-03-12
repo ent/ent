@@ -167,8 +167,8 @@ type CityCreateBulk struct {
 	builders []*CityCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on City entities in the database.
-func (ccb *CityCreateBulk) OnConflict() *CityCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on City entities in the database.
+func (ccb *CityCreateBulk) OnConflict(fields ...string) *CityCreateBulk {
 	// for i := range ccb.builders {
 
 	// }

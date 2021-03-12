@@ -149,8 +149,8 @@ type SpecCreateBulk struct {
 	builders []*SpecCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Spec entities in the database.
-func (scb *SpecCreateBulk) OnConflict() *SpecCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Spec entities in the database.
+func (scb *SpecCreateBulk) OnConflict(fields ...string) *SpecCreateBulk {
 	// for i := range scb.builders {
 
 	// }

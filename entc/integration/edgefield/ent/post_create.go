@@ -106,6 +106,11 @@ func (pc *PostCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Post entities in the database.
+func (pc *PostCreate) OnConflict(fields ...string) *PostCreate {
+	return pc
+}
+
 func (pc *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
 	_node, _spec := pc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
@@ -165,6 +170,15 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 type PostCreateBulk struct {
 	config
 	builders []*PostCreate
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Post entities in the database.
+func (pcb *PostCreateBulk) OnConflict(fields ...string) *PostCreateBulk {
+	// for i := range pcb.builders {
+
+	// }
+
+	return pcb
 }
 
 // Save creates the Post entities in the database.

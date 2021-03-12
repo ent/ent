@@ -213,8 +213,8 @@ type NodeCreateBulk struct {
 	builders []*NodeCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Node entities in the database.
-func (ncb *NodeCreateBulk) OnConflict() *NodeCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Node entities in the database.
+func (ncb *NodeCreateBulk) OnConflict(fields ...string) *NodeCreateBulk {
 	// for i := range ncb.builders {
 
 	// }

@@ -137,8 +137,8 @@ type TenantCreateBulk struct {
 	builders []*TenantCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Tenant entities in the database.
-func (tcb *TenantCreateBulk) OnConflict() *TenantCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Tenant entities in the database.
+func (tcb *TenantCreateBulk) OnConflict(fields ...string) *TenantCreateBulk {
 	// for i := range tcb.builders {
 
 	// }

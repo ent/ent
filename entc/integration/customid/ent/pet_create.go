@@ -292,8 +292,8 @@ type PetCreateBulk struct {
 	builders []*PetCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Pet entities in the database.
-func (pcb *PetCreateBulk) OnConflict() *PetCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Pet entities in the database.
+func (pcb *PetCreateBulk) OnConflict(fields ...string) *PetCreateBulk {
 	// for i := range pcb.builders {
 
 	// }

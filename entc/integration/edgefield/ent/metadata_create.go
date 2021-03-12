@@ -129,6 +129,11 @@ func (mc *MetadataCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Metadata entities in the database.
+func (mc *MetadataCreate) OnConflict(fields ...string) *MetadataCreate {
+	return mc
+}
+
 func (mc *MetadataCreate) sqlSave(ctx context.Context) (*Metadata, error) {
 	_node, _spec := mc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
@@ -194,6 +199,15 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 type MetadataCreateBulk struct {
 	config
 	builders []*MetadataCreate
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Metadata entities in the database.
+func (mcb *MetadataCreateBulk) OnConflict(fields ...string) *MetadataCreateBulk {
+	// for i := range mcb.builders {
+
+	// }
+
+	return mcb
 }
 
 // Save creates the Metadata entities in the database.

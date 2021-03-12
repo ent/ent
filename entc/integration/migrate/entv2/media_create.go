@@ -158,8 +158,8 @@ type MediaCreateBulk struct {
 	builders []*MediaCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Media entities in the database.
-func (mcb *MediaCreateBulk) OnConflict() *MediaCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Media entities in the database.
+func (mcb *MediaCreateBulk) OnConflict(fields ...string) *MediaCreateBulk {
 	// for i := range mcb.builders {
 
 	// }

@@ -288,8 +288,8 @@ type TaskCreateBulk struct {
 	builders []*TaskCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Task entities in the database.
-func (tcb *TaskCreateBulk) OnConflict() *TaskCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Task entities in the database.
+func (tcb *TaskCreateBulk) OnConflict(fields ...string) *TaskCreateBulk {
 	// for i := range tcb.builders {
 
 	// }

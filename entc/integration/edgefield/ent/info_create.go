@@ -113,6 +113,11 @@ func (ic *InfoCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Info entities in the database.
+func (ic *InfoCreate) OnConflict(fields ...string) *InfoCreate {
+	return ic
+}
+
 func (ic *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
 	_node, _spec := ic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
@@ -178,6 +183,15 @@ func (ic *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 type InfoCreateBulk struct {
 	config
 	builders []*InfoCreate
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Info entities in the database.
+func (icb *InfoCreateBulk) OnConflict(fields ...string) *InfoCreateBulk {
+	// for i := range icb.builders {
+
+	// }
+
+	return icb
 }
 
 // Save creates the Info entities in the database.

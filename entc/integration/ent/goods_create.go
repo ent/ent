@@ -114,8 +114,8 @@ type GoodsCreateBulk struct {
 	builders []*GoodsCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Goods entities in the database.
-func (gcb *GoodsCreateBulk) OnConflict() *GoodsCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Goods entities in the database.
+func (gcb *GoodsCreateBulk) OnConflict(fields ...string) *GoodsCreateBulk {
 	// for i := range gcb.builders {
 
 	// }

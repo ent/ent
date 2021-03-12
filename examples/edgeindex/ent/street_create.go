@@ -172,8 +172,8 @@ type StreetCreateBulk struct {
 	builders []*StreetCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Street entities in the database.
-func (scb *StreetCreateBulk) OnConflict() *StreetCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Street entities in the database.
+func (scb *StreetCreateBulk) OnConflict(fields ...string) *StreetCreateBulk {
 	// for i := range scb.builders {
 
 	// }

@@ -207,8 +207,8 @@ type TeamCreateBulk struct {
 	builders []*TeamCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Team entities in the database.
-func (tcb *TeamCreateBulk) OnConflict() *TeamCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Team entities in the database.
+func (tcb *TeamCreateBulk) OnConflict(fields ...string) *TeamCreateBulk {
 	// for i := range tcb.builders {
 
 	// }

@@ -269,8 +269,8 @@ type UserCreateBulk struct {
 	builders []*UserCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on User entities in the database.
-func (ucb *UserCreateBulk) OnConflict() *UserCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on User entities in the database.
+func (ucb *UserCreateBulk) OnConflict(fields ...string) *UserCreateBulk {
 	// for i := range ucb.builders {
 
 	// }

@@ -136,8 +136,8 @@ type CustomTypeCreateBulk struct {
 	builders []*CustomTypeCreate
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on CustomType entities in the database.
-func (ctcb *CustomTypeCreateBulk) OnConflict() *CustomTypeCreateBulk {
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on CustomType entities in the database.
+func (ctcb *CustomTypeCreateBulk) OnConflict(fields ...string) *CustomTypeCreateBulk {
 	// for i := range ctcb.builders {
 
 	// }
