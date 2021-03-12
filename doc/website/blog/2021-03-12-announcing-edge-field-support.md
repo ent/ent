@@ -22,7 +22,9 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("user_name").Unique().NotEmpty(),
+		field.String("name").
+			Unique().
+			NotEmpty(),
 	}
 }
 
