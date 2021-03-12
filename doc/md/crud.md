@@ -80,7 +80,6 @@ func main() {
 }
 ```
 
-
 **Gremlin (AWS Neptune)**
 
 ```go
@@ -149,7 +148,6 @@ a8m, err = a8m.Update().	// User update builder.
 	Save(ctx)				// Save and return.
 ```
 
-
 ## Update By ID
 
 ```go
@@ -168,11 +166,11 @@ Filter using predicates.
 n, err := client.User.			// UserClient.
 	Update().					// Pet update builder.
 	Where(						//
-		user.Or(				// (age >= 30 OR name = "bar") 
+		user.Or(				// (age >= 30 OR name = "bar")
 			user.AgeEQ(30), 	//
 			user.Name("bar"),	// AND
-		),						//  
-		user.HasFollowers(),	// UserHasFollowers()  
+		),						//
+		user.HasFollowers(),	// UserHasFollowers()
 	).							//
 	SetName("foo").				// Set field name.
 	Save(ctx)					// exec and return.
@@ -183,7 +181,7 @@ Query edge-predicates.
 ```go
 n, err := client.User.			// UserClient.
 	Update().					// Pet update builder.
-	Where(						// 
+	Where(						//
 		user.HasFriendsWith(	// UserHasFriendsWith (
 			user.Or(			//   age = 20
 				user.Age(20),	//      OR
@@ -198,6 +196,7 @@ n, err := client.User.			// UserClient.
 ## Query The Graph
 
 Get all users with followers.
+
 ```go
 users, err := client.User.		// UserClient.
 	Query().					// User query builder.
@@ -206,6 +205,7 @@ users, err := client.User.		// UserClient.
 ```
 
 Get all followers of a specific user; Start the traversal from a node in the graph.
+
 ```go
 users, err := a8m.
 	QueryFollowers().
@@ -213,6 +213,7 @@ users, err := a8m.
 ```
 
 Get all pets of the followers of a user.
+
 ```go
 users, err := a8m.
 	QueryFollowers().
@@ -220,7 +221,7 @@ users, err := a8m.
 	All(ctx)
 ```
 
-More advance traversals can be found in the [next section](traversals.md). 
+More advance traversals can be found in the [next section](traversals.md).
 
 ## Field Selection
 
@@ -262,7 +263,7 @@ if err != nil {
 }
 ```
 
-## Delete One 
+## Delete One
 
 Delete an entity.
 
@@ -340,4 +341,23 @@ func SetName(m SetNamer, name string) {
     	m.SetName(name)
     }
 }
+```
+
+## Upserts
+
+Upserts are supported for Postgres, MySQL, and SQLite. You can do single or bulk upserts and define the behaviour on conflict:
+
+- Update with original values (Default)
+- Update with different values
+- Ignore changes
+
+**Upsert** a bulk of pets:
+
+```go
+names := []string{"pedro", "xabi", "layla", "pedro"}
+bulk := make([]*ent.PetCreate, len(names))
+for i, name := range names {
+  	bulk[i] = client.Pet.Create().SetName(name).SetOwner(a8m).OnConflict("name")
+}
+pets, err := client.Pet.CreateBulk(bulk...).Save(ctx)
 ```
