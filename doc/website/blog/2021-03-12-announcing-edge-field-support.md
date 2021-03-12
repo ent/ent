@@ -46,7 +46,8 @@ type Pet struct {
 // Fields of the Pet.
 func (Pet) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").NotEmpty(),
+		field.String("name").
+			NotEmpty(),
 	}
 }
 
@@ -62,24 +63,25 @@ func (Pet) Edges() []ent.Edge {
 
 The schema describes two related entities: `User` and `Pet`, with a One-to-Many edge between them: a user can own many pets and a pet can have one owner.
 
-When retrieving pets from the data storage, it is common for developers to want to access the foreign-key field on the pet.  However, because this field is created implicitly from the `owner` edge it was automatically accessible when retrieving an entity. To retrieve this from the storage a developer needed to do something like:
+When retrieving pets from the data storage, it is common for developers to want to access the foreign-key field on the pet. However, because this field is created implicitly from the `owner` edge it was automatically accessible when retrieving an entity. To retrieve this from the storage a developer needed to do something like:
 
 ```go
 func Test(t *testing.T) {
+    ctx := context.Background()
 	c := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
 	defer c.Close()
-
+	
 	// Create the User
 	u := c.User.Create().
 		SetUserName("rotem").
-		SaveX(context.Background())
+		SaveX(ctx)
 
 	// Create the Pet
 	p := c.Pet.
 		Create().
 		SetOwner(u). // Associate with the user
 		SetName("donut").
-		SaveX(context.Background())
+		SaveX(ctx)
 
 	petWithOwnerId := c.Pet.Query().
 		Where(pet.ID(p.ID)).
@@ -139,21 +141,20 @@ We can now modify our query to be much simpler:
 
 ```go
 func Test(t *testing.T) {
+	ctx := context.Background()
 	c := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
 	defer c.Close()
 
-	u := c.User.
-		Create().
+	u := c.User.Create().
 		SetUserName("rotem").
-		SaveX(context.Background())
+		SaveX(ctx)
 
-	p := c.Pet.
-		Create().
+	p := c.Pet.Create().
 		SetOwner(u).
 		SetName("donut").
-		SaveX(context.Background())
+		SaveX(ctx)
 
-	petWithOwnerId := c.Pet.GetX(context.Background(), p.ID) // <-- Simply retrieve the Pet
+	petWithOwnerId := c.Pet.GetX(ctx, p.ID) // <-- Simply retrieve the Pet
 
 	fmt.Println(petWithOwnerId.OwnerID)
 	// Output: 1
@@ -210,4 +211,4 @@ Many thanks 🙏 to all the good people who took the time to give feedback and h
 
 - Follow us on [twitter.com/entgo_io](https://twitter.com/entgo_io)
 - Subscribe to our [newsletter](https://www.getrevue.co/profile/ent)
-- Join us on #ent on the [Gophers slack](https://gophers.slack.com)
+- Join us on #ent on the [Gophers slack](https://app.slack.com/client/T029RQSE6/C01FMSQDT53)
