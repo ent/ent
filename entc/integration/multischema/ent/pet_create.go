@@ -123,6 +123,11 @@ func (pc *PetCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Pet entities in the database.
+func (pc *PetCreate) OnConflict(fields ...string) *PetCreate {
+	return pc
+}
+
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	_node, _spec := pc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
@@ -184,6 +189,15 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 type PetCreateBulk struct {
 	config
 	builders []*PetCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Pet entities in the database.
+func (pcb *PetCreateBulk) OnConflict() *PetCreateBulk {
+	// for i := range pcb.builders {
+
+	// }
+
+	return pcb
 }
 
 // Save creates the Pet entities in the database.

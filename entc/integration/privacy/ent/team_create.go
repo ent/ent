@@ -123,6 +123,11 @@ func (tc *TeamCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Team entities in the database.
+func (tc *TeamCreate) OnConflict(fields ...string) *TeamCreate {
+	return tc
+}
+
 func (tc *TeamCreate) sqlSave(ctx context.Context) (*Team, error) {
 	_node, _spec := tc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
@@ -200,6 +205,15 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 type TeamCreateBulk struct {
 	config
 	builders []*TeamCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Team entities in the database.
+func (tcb *TeamCreateBulk) OnConflict() *TeamCreateBulk {
+	// for i := range tcb.builders {
+
+	// }
+
+	return tcb
 }
 
 // Save creates the Team entities in the database.

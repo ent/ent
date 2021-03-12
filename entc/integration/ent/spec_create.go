@@ -92,6 +92,11 @@ func (sc *SpecCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Spec entities in the database.
+func (sc *SpecCreate) OnConflict(fields ...string) *SpecCreate {
+	return sc
+}
+
 func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
@@ -142,6 +147,15 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 type SpecCreateBulk struct {
 	config
 	builders []*SpecCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Spec entities in the database.
+func (scb *SpecCreateBulk) OnConflict() *SpecCreateBulk {
+	// for i := range scb.builders {
+
+	// }
+
+	return scb
 }
 
 // Save creates the Spec entities in the database.

@@ -128,6 +128,11 @@ func (gic *GroupInfoCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on GroupInfo entities in the database.
+func (gic *GroupInfoCreate) OnConflict(fields ...string) *GroupInfoCreate {
+	return gic
+}
+
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	_node, _spec := gic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
@@ -194,6 +199,15 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 type GroupInfoCreateBulk struct {
 	config
 	builders []*GroupInfoCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on GroupInfo entities in the database.
+func (gicb *GroupInfoCreateBulk) OnConflict() *GroupInfoCreateBulk {
+	// for i := range gicb.builders {
+
+	// }
+
+	return gicb
 }
 
 // Save creates the GroupInfo entities in the database.

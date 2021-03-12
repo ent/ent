@@ -703,6 +703,11 @@ func (ftc *FieldTypeCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on FieldType entities in the database.
+func (ftc *FieldTypeCreate) OnConflict(fields ...string) *FieldTypeCreate {
+	return ftc
+}
+
 func (ftc *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 	_node, _spec := ftc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
@@ -1126,6 +1131,15 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 type FieldTypeCreateBulk struct {
 	config
 	builders []*FieldTypeCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on FieldType entities in the database.
+func (ftcb *FieldTypeCreateBulk) OnConflict() *FieldTypeCreateBulk {
+	// for i := range ftcb.builders {
+
+	// }
+
+	return ftcb
 }
 
 // Save creates the FieldType entities in the database.

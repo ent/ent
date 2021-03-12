@@ -86,6 +86,11 @@ func (gc *GroupCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Group entities in the database.
+func (gc *GroupCreate) OnConflict(fields ...string) *GroupCreate {
+	return gc
+}
+
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
@@ -125,6 +130,15 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 type GroupCreateBulk struct {
 	config
 	builders []*GroupCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Group entities in the database.
+func (gcb *GroupCreateBulk) OnConflict() *GroupCreateBulk {
+	// for i := range gcb.builders {
+
+	// }
+
+	return gcb
 }
 
 // Save creates the Group entities in the database.

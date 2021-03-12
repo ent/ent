@@ -202,6 +202,11 @@ func (cc *ConversionCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Conversion entities in the database.
+func (cc *ConversionCreate) OnConflict(fields ...string) *ConversionCreate {
+	return cc
+}
+
 func (cc *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
@@ -305,6 +310,15 @@ func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 type ConversionCreateBulk struct {
 	config
 	builders []*ConversionCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Conversion entities in the database.
+func (ccb *ConversionCreateBulk) OnConflict() *ConversionCreateBulk {
+	// for i := range ccb.builders {
+
+	// }
+
+	return ccb
 }
 
 // Save creates the Conversion entities in the database.

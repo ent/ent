@@ -104,6 +104,11 @@ func (mc *MediaCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Media entities in the database.
+func (mc *MediaCreate) OnConflict(fields ...string) *MediaCreate {
+	return mc
+}
+
 func (mc *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
 	_node, _spec := mc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
@@ -151,6 +156,15 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 type MediaCreateBulk struct {
 	config
 	builders []*MediaCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Media entities in the database.
+func (mcb *MediaCreateBulk) OnConflict() *MediaCreateBulk {
+	// for i := range mcb.builders {
+
+	// }
+
+	return mcb
 }
 
 // Save creates the Media entities in the database.

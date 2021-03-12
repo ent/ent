@@ -111,6 +111,11 @@ func (mic *MixinIDCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on MixinID entities in the database.
+func (mic *MixinIDCreate) OnConflict(fields ...string) *MixinIDCreate {
+	return mic
+}
+
 func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 	_node, _spec := mic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mic.driver, _spec); err != nil {
@@ -160,6 +165,15 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 type MixinIDCreateBulk struct {
 	config
 	builders []*MixinIDCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on MixinID entities in the database.
+func (micb *MixinIDCreateBulk) OnConflict() *MixinIDCreateBulk {
+	// for i := range micb.builders {
+
+	// }
+
+	return micb
 }
 
 // Save creates the MixinID entities in the database.

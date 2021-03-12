@@ -173,6 +173,11 @@ func (cc *CardCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Card entities in the database.
+func (cc *CardCreate) OnConflict(fields ...string) *CardCreate {
+	return cc
+}
+
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
@@ -256,6 +261,15 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 type CardCreateBulk struct {
 	config
 	builders []*CardCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Card entities in the database.
+func (ccb *CardCreateBulk) OnConflict() *CardCreateBulk {
+	// for i := range ccb.builders {
+
+	// }
+
+	return ccb
 }
 
 // Save creates the Card entities in the database.

@@ -159,6 +159,11 @@ func (ftc *FileTypeCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on FileType entities in the database.
+func (ftc *FileTypeCreate) OnConflict(fields ...string) *FileTypeCreate {
+	return ftc
+}
+
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 	_node, _spec := ftc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
@@ -233,6 +238,15 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 type FileTypeCreateBulk struct {
 	config
 	builders []*FileTypeCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on FileType entities in the database.
+func (ftcb *FileTypeCreateBulk) OnConflict() *FileTypeCreateBulk {
+	// for i := range ftcb.builders {
+
+	// }
+
+	return ftcb
 }
 
 // Save creates the FileType entities in the database.

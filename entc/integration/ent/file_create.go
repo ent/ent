@@ -215,6 +215,11 @@ func (fc *FileCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on File entities in the database.
+func (fc *FileCreate) OnConflict(fields ...string) *FileCreate {
+	return fc
+}
+
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 	_node, _spec := fc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
@@ -345,6 +350,15 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 type FileCreateBulk struct {
 	config
 	builders []*FileCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on File entities in the database.
+func (fcb *FileCreateBulk) OnConflict() *FileCreateBulk {
+	// for i := range fcb.builders {
+
+	// }
+
+	return fcb
 }
 
 // Save creates the File entities in the database.

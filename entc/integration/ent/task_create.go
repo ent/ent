@@ -109,6 +109,11 @@ func (tc *TaskCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Task entities in the database.
+func (tc *TaskCreate) OnConflict(fields ...string) *TaskCreate {
+	return tc
+}
+
 func (tc *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
 	_node, _spec := tc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
@@ -148,6 +153,15 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 type TaskCreateBulk struct {
 	config
 	builders []*TaskCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Task entities in the database.
+func (tcb *TaskCreateBulk) OnConflict() *TaskCreateBulk {
+	// for i := range tcb.builders {
+
+	// }
+
+	return tcb
 }
 
 // Save creates the Task entities in the database.

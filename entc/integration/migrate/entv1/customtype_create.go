@@ -90,6 +90,11 @@ func (ctc *CustomTypeCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on CustomType entities in the database.
+func (ctc *CustomTypeCreate) OnConflict(fields ...string) *CustomTypeCreate {
+	return ctc
+}
+
 func (ctc *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
 	_node, _spec := ctc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ctc.driver, _spec); err != nil {
@@ -129,6 +134,15 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 type CustomTypeCreateBulk struct {
 	config
 	builders []*CustomTypeCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on CustomType entities in the database.
+func (ctcb *CustomTypeCreateBulk) OnConflict() *CustomTypeCreateBulk {
+	// for i := range ctcb.builders {
+
+	// }
+
+	return ctcb
 }
 
 // Save creates the CustomType entities in the database.

@@ -109,6 +109,11 @@ func (cc *CommentCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Comment entities in the database.
+func (cc *CommentCreate) OnConflict(fields ...string) *CommentCreate {
+	return cc
+}
+
 func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
@@ -164,6 +169,15 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 type CommentCreateBulk struct {
 	config
 	builders []*CommentCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Comment entities in the database.
+func (ccb *CommentCreateBulk) OnConflict() *CommentCreateBulk {
+	// for i := range ccb.builders {
+
+	// }
+
+	return ccb
 }
 
 // Save creates the Comment entities in the database.

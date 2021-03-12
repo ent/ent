@@ -76,6 +76,11 @@ func (gc *GoodsCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Goods entities in the database.
+func (gc *GoodsCreate) OnConflict(fields ...string) *GoodsCreate {
+	return gc
+}
+
 func (gc *GoodsCreate) sqlSave(ctx context.Context) (*Goods, error) {
 	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
@@ -107,6 +112,15 @@ func (gc *GoodsCreate) createSpec() (*Goods, *sqlgraph.CreateSpec) {
 type GoodsCreateBulk struct {
 	config
 	builders []*GoodsCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Goods entities in the database.
+func (gcb *GoodsCreateBulk) OnConflict() *GoodsCreateBulk {
+	// for i := range gcb.builders {
+
+	// }
+
+	return gcb
 }
 
 // Save creates the Goods entities in the database.

@@ -76,6 +76,11 @@ func (ic *ItemCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Item entities in the database.
+func (ic *ItemCreate) OnConflict(fields ...string) *ItemCreate {
+	return ic
+}
+
 func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 	_node, _spec := ic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
@@ -107,6 +112,15 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 type ItemCreateBulk struct {
 	config
 	builders []*ItemCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Item entities in the database.
+func (icb *ItemCreateBulk) OnConflict() *ItemCreateBulk {
+	// for i := range icb.builders {
+
+	// }
+
+	return icb
 }
 
 // Save creates the Item entities in the database.

@@ -96,6 +96,11 @@ func (cc *CarCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Car entities in the database.
+func (cc *CarCreate) OnConflict(fields ...string) *CarCreate {
+	return cc
+}
+
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
@@ -147,6 +152,15 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 type CarCreateBulk struct {
 	config
 	builders []*CarCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Car entities in the database.
+func (ccb *CarCreateBulk) OnConflict() *CarCreateBulk {
+	// for i := range ccb.builders {
+
+	// }
+
+	return ccb
 }
 
 // Save creates the Car entities in the database.

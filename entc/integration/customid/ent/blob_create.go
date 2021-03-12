@@ -140,6 +140,11 @@ func (bc *BlobCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Blob entities in the database.
+func (bc *BlobCreate) OnConflict(fields ...string) *BlobCreate {
+	return bc
+}
+
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 	_node, _spec := bc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
@@ -220,6 +225,15 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 type BlobCreateBulk struct {
 	config
 	builders []*BlobCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Blob entities in the database.
+func (bcb *BlobCreateBulk) OnConflict() *BlobCreateBulk {
+	// for i := range bcb.builders {
+
+	// }
+
+	return bcb
 }
 
 // Save creates the Blob entities in the database.
