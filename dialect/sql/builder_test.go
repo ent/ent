@@ -491,7 +491,7 @@ func TestBuilder(t *testing.T) {
 		},
 
 		{
-			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(UpdateDoNothing).ConflictColumns("id"),
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(UpdateIgnore).ConflictColumns("id"),
 			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO NOTHING`,
 			wantArgs:  []interface{}{"1", "user@example.com"},
 		},
