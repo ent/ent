@@ -81,13 +81,12 @@ func Test(t *testing.T) {
 		SetName("donut").
 		SaveX(context.Background())
 
-	petWithOwnerId := c.Pet.
-		Query().
+	petWithOwnerId := c.Pet.Query().
 		Where(pet.ID(p.ID)).
 		WithOwner(func(query *ent.UserQuery) {
-			query.Select("id")
+			query.Select(user.FieldID)
 		}).
-		OnlyX(context.TODO())
+		OnlyX(ctx)
 	fmt.Println(petWithOwnerId.Edges.Owner.ID)
 	// Output: 1
 }
