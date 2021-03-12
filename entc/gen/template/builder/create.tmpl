@@ -26,6 +26,7 @@ type {{ $builder }} struct {
 	config
 	mutation *{{  $.MutationName }}
 	hooks []Hook
+	conflictColumns []string
 }
 
 {{ with extend $ "Builder" $builder }}

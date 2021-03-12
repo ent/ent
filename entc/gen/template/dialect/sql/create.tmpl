@@ -11,6 +11,8 @@ in the LICENSE file in the root directory of this source tree.
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on {{ $.Name }} entities in the database.
 func ({{ $receiver }} *{{ $builder }}) OnConflict(fields ...string) *{{ $builder }} {
+	{{ $receiver }}.conflictColumns = fields
+
 	return {{ $receiver }}
 }
 
@@ -48,6 +50,11 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			},
 		}
 	)
+
+	if {{ $receiver }}.conflictColumns!=nil {
+		_spec.ConflictConstraints = {{ $receiver }}.conflictColumns
+	}
+
 	{{- /* Allow mutating the sqlgraph.CreateSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/create/spec/*" }}
 		{{- range $tmpl := $tmpls }}
