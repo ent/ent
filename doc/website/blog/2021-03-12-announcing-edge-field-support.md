@@ -70,8 +70,7 @@ func Test(t *testing.T) {
 	defer c.Close()
 
 	// Create the User
-	u := c.User.
-		Create().
+	u := c.User.Create().
 		SetUserName("rotem").
 		SaveX(context.Background())
 
