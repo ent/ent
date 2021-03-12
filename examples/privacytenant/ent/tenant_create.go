@@ -91,6 +91,11 @@ func (tc *TenantCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Tenant entities in the database.
+func (tc *TenantCreate) OnConflict(fields ...string) *TenantCreate {
+	return tc
+}
+
 func (tc *TenantCreate) sqlSave(ctx context.Context) (*Tenant, error) {
 	_node, _spec := tc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
@@ -130,6 +135,15 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 type TenantCreateBulk struct {
 	config
 	builders []*TenantCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Tenant entities in the database.
+func (tcb *TenantCreateBulk) OnConflict() *TenantCreateBulk {
+	// for i := range tcb.builders {
+
+	// }
+
+	return tcb
 }
 
 // Save creates the Tenant entities in the database.

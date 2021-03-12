@@ -76,6 +76,11 @@ func (uc *UserCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on User entities in the database.
+func (uc *UserCreate) OnConflict(fields ...string) *UserCreate {
+	return uc
+}
+
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
@@ -107,6 +112,15 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on User entities in the database.
+func (ucb *UserCreateBulk) OnConflict() *UserCreateBulk {
+	// for i := range ucb.builders {
+
+	// }
+
+	return ucb
 }
 
 // Save creates the User entities in the database.

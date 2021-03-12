@@ -102,6 +102,11 @@ func (cc *CityCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on City entities in the database.
+func (cc *CityCreate) OnConflict(fields ...string) *CityCreate {
+	return cc
+}
+
 func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
@@ -160,6 +165,15 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 type CityCreateBulk struct {
 	config
 	builders []*CityCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on City entities in the database.
+func (ccb *CityCreateBulk) OnConflict() *CityCreateBulk {
+	// for i := range ccb.builders {
+
+	// }
+
+	return ccb
 }
 
 // Save creates the City entities in the database.

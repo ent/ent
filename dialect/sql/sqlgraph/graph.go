@@ -339,11 +339,12 @@ type (
 	// CreateSpec holds the information for creating
 	// a node in the graph.
 	CreateSpec struct {
-		Table  string
-		Schema string
-		ID     *FieldSpec
-		Fields []*FieldSpec
-		Edges  []*EdgeSpec
+		Table               string
+		Schema              string
+		ID                  *FieldSpec
+		Fields              []*FieldSpec
+		Edges               []*EdgeSpec
+		ConflictConstraints []string
 	}
 	// BatchCreateSpec holds the information for creating
 	// multiple nodes in the graph.

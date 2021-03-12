@@ -120,6 +120,11 @@ func (nc *NodeCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Node entities in the database.
+func (nc *NodeCreate) OnConflict(fields ...string) *NodeCreate {
+	return nc
+}
+
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	_node, _spec := nc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
@@ -198,6 +203,15 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 type NodeCreateBulk struct {
 	config
 	builders []*NodeCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Node entities in the database.
+func (ncb *NodeCreateBulk) OnConflict() *NodeCreateBulk {
+	// for i := range ncb.builders {
+
+	// }
+
+	return ncb
 }
 
 // Save creates the Node entities in the database.

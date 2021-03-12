@@ -106,6 +106,11 @@ func (sc *StreetCreate) check() error {
 	return nil
 }
 
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Street entities in the database.
+func (sc *StreetCreate) OnConflict(fields ...string) *StreetCreate {
+	return sc
+}
+
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
@@ -165,6 +170,15 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 type StreetCreateBulk struct {
 	config
 	builders []*StreetCreate
+}
+
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Street entities in the database.
+func (scb *StreetCreateBulk) OnConflict() *StreetCreateBulk {
+	// for i := range scb.builders {
+
+	// }
+
+	return scb
 }
 
 // Save creates the Street entities in the database.
