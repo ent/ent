@@ -47,8 +47,6 @@ func Test_PostgresUserUpsertBulk(t *testing.T) {
 		SetEmail("alex-test@entgo.io").
 		SetUpdateCount(2).
 		OnConflict("email")
-		// OnConflict().UpdateEmail().UpdateName()
-
 	users, err := client.Debug().User.CreateBulk(uc1, uc2, uc3).Save(ctx)
 
 	require.NoError(t, err)
