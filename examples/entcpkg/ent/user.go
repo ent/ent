@@ -87,11 +87,11 @@ func (u *User) String() string {
 
 // GoString implements the fmt.GoStringer interface.
 func (u *User) GoString() string {
-	json, err := json.MarshalIndent(u, "", "\t")
+	b, err := json.MarshalIndent(u, "", "\t")
 	if err != nil {
 		return err.Error()
 	}
-	return string(json)
+	return string(b)
 }
 
 // Users is a parsable slice of User.
