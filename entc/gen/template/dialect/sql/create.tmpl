@@ -98,16 +98,6 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
-
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on {{ $.Name }} entities in the database.
-func ({{ $receiver }} *{{ $builder }}) OnConflict(fields ...string) *{{ $builder }} {
-	// for i := range {{ $receiver }}.builders {
-
-	// }
-
-	return {{ $receiver }}
-}
-
 // Save creates the {{ $.Name }} entities in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }}, error) {
 	specs := make([]*sqlgraph.CreateSpec, len({{ $receiver }}.builders))
