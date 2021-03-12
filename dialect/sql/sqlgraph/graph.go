@@ -944,6 +944,11 @@ func (c *creator) setTableColumns(insert *sql.InsertBuilder, edges map[Rel][]*Ed
 // insert inserts the node to its table and sets its ID if it wasn't provided by the user.
 func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
 	var res sql.Result
+
+	if len(c.ConflictConstraints) > 0 {
+		insert.ConflictColumns(c.ConflictConstraints...).OnConflict(sql.UpdateNewValues)
+	}
+
 	// If the id field was provided by the user.
 	if c.ID.Value != nil {
 		insert.Set(c.ID.Column, c.ID.Value)
@@ -960,6 +965,14 @@ func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sq
 
 // batchInsert inserts a batch of nodes to their table and sets their ID if it wasn't provided by the user.
 func (c *creator) batchInsert(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
+	if c.Nodes[0].ConflictConstraints != nil {
+		// Bulk upserts can only update columns, either using original values (from createSpec) or new values (from upsertSpec*)
+		// DO NOTHING is not supported because unchanged records don't return IDs
+
+		// FIXME(iv) need to add DSL for bulk conflicts
+		insert.ConflictColumns(c.Nodes[0].ConflictConstraints...).OnConflict(sql.UpdateNewValues)
+	}
+
 	ids, err := insertLastIDs(ctx, tx, insert.Returning(c.Nodes[0].ID.Column))
 	if err != nil {
 		return err

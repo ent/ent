@@ -728,6 +728,16 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 	}
 
 	// Update on conflict
+	i.buildConflictHandling()
+
+	if len(i.returning) > 0 && i.postgres() {
+		i.WriteString(" RETURNING ")
+		i.IdentComma(i.returning...)
+	}
+	return i.String(), i.args
+}
+
+func (i *InsertBuilder) buildConflictHandling() {
 	if len(i.conflictColumns) > 0 {
 		switch i.Dialect() {
 		case dialect.Postgres, dialect.SQLite:
@@ -741,14 +751,21 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 
 			switch i.onConflictOp {
 			case UpdateIgnore:
-				i.WriteString("DO NOTHING")
-			case UpdateNewValues:
-				i.WriteString("DO UPDATE SET").Pad()
-				for j, c := range i.updateColumns {
+				// i.WriteString("DO NOTHING")
+				for j, c := range i.columns {
 					if j > 0 {
 						i.Comma()
 					}
-					i.Ident(c).WriteOp(OpEQ).WriteString("EXCLUDED").WriteByte('.').Ident(c)
+					// Ignore conflict by setting column to itself
+					i.Ident(c).WriteOp(OpEQ).Ident(c)
+				}
+			case UpdateNewValues:
+				i.WriteString("DO UPDATE SET").Pad()
+				for j, c := range i.columns {
+					if j > 0 {
+						i.Comma()
+					}
+					i.Ident(c).WriteOp(OpEQ).Ident("excluded").WriteByte('.').Ident(c)
 				}
 			}
 
@@ -759,7 +776,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 
 			switch i.onConflictOp {
 			case UpdateIgnore:
-				for j, c := range i.updateColumns {
+				for j, c := range i.columns {
 					if j > 0 {
 						i.Comma()
 					}
@@ -767,7 +784,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 					i.Ident(c).WriteOp(OpEQ).Ident(c)
 				}
 			case UpdateNewValues:
-				for j, c := range i.updateColumns {
+				for j, c := range i.columns {
 					if j > 0 {
 						i.Comma()
 					}
@@ -777,12 +794,6 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 			}
 		}
 	}
-
-	if len(i.returning) > 0 && i.postgres() {
-		i.WriteString(" RETURNING ")
-		i.IdentComma(i.returning...)
-	}
-	return i.String(), i.args
 }
 
 // UpdateBuilder is a builder for `UPDATE` statement.
