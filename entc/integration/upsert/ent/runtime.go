@@ -17,4 +17,8 @@ func init() {
 	userDescEmail := userFields[0].Descriptor()
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
+	// userDescUpdateCount is the schema descriptor for updateCount field.
+	userDescUpdateCount := userFields[1].Descriptor()
+	// user.DefaultUpdateCount holds the default value on creation for the updateCount field.
+	user.DefaultUpdateCount = userDescUpdateCount.Default.(int)
 }

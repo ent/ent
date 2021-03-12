@@ -12,6 +12,7 @@ var (
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "update_count", Type: field.TypeInt, Default: 0},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

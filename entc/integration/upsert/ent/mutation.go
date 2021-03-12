@@ -28,14 +28,16 @@ const (
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	email         *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op             Op
+	typ            string
+	id             *int
+	email          *string
+	updateCount    *int
+	addupdateCount *int
+	clearedFields  map[string]struct{}
+	done           bool
+	oldValue       func(context.Context) (*User, error)
+	predicates     []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -153,6 +155,62 @@ func (m *UserMutation) ResetEmail() {
 	m.email = nil
 }
 
+// SetUpdateCount sets the "updateCount" field.
+func (m *UserMutation) SetUpdateCount(i int) {
+	m.updateCount = &i
+	m.addupdateCount = nil
+}
+
+// UpdateCount returns the value of the "updateCount" field in the mutation.
+func (m *UserMutation) UpdateCount() (r int, exists bool) {
+	v := m.updateCount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateCount returns the old "updateCount" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldUpdateCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpdateCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpdateCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateCount: %w", err)
+	}
+	return oldValue.UpdateCount, nil
+}
+
+// AddUpdateCount adds i to the "updateCount" field.
+func (m *UserMutation) AddUpdateCount(i int) {
+	if m.addupdateCount != nil {
+		*m.addupdateCount += i
+	} else {
+		m.addupdateCount = &i
+	}
+}
+
+// AddedUpdateCount returns the value that was added to the "updateCount" field in this mutation.
+func (m *UserMutation) AddedUpdateCount() (r int, exists bool) {
+	v := m.addupdateCount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUpdateCount resets all changes to the "updateCount" field.
+func (m *UserMutation) ResetUpdateCount() {
+	m.updateCount = nil
+	m.addupdateCount = nil
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
@@ -167,9 +225,12 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.email != nil {
 		fields = append(fields, user.FieldEmail)
+	}
+	if m.updateCount != nil {
+		fields = append(fields, user.FieldUpdateCount)
 	}
 	return fields
 }
@@ -181,6 +242,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldEmail:
 		return m.Email()
+	case user.FieldUpdateCount:
+		return m.UpdateCount()
 	}
 	return nil, false
 }
@@ -192,6 +255,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case user.FieldEmail:
 		return m.OldEmail(ctx)
+	case user.FieldUpdateCount:
+		return m.OldUpdateCount(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -208,6 +273,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEmail(v)
 		return nil
+	case user.FieldUpdateCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -215,13 +287,21 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *UserMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addupdateCount != nil {
+		fields = append(fields, user.FieldUpdateCount)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldUpdateCount:
+		return m.AddedUpdateCount()
+	}
 	return nil, false
 }
 
@@ -230,6 +310,13 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case user.FieldUpdateCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdateCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -259,6 +346,9 @@ func (m *UserMutation) ResetField(name string) error {
 	switch name {
 	case user.FieldEmail:
 		m.ResetEmail()
+		return nil
+	case user.FieldUpdateCount:
+		m.ResetUpdateCount()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

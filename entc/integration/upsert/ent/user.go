@@ -17,6 +17,8 @@ type User struct {
 	ID int `json:"id,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
+	// UpdateCount holds the value of the "updateCount" field.
+	UpdateCount int `json:"updateCount,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -24,7 +26,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID:
+		case user.FieldID, user.FieldUpdateCount:
 			values[i] = &sql.NullInt64{}
 		case user.FieldEmail:
 			values[i] = &sql.NullString{}
@@ -54,6 +56,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field email", values[i])
 			} else if value.Valid {
 				u.Email = value.String
+			}
+		case user.FieldUpdateCount:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updateCount", values[i])
+			} else if value.Valid {
+				u.UpdateCount = int(value.Int64)
 			}
 		}
 	}
@@ -85,6 +93,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
 	builder.WriteString(", email=")
 	builder.WriteString(u.Email)
+	builder.WriteString(", updateCount=")
+	builder.WriteString(fmt.Sprintf("%v", u.UpdateCount))
 	builder.WriteByte(')')
 	return builder.String()
 }

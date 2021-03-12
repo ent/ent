@@ -9,6 +9,8 @@ const (
 	FieldID = "id"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
+	// FieldUpdateCount holds the string denoting the updatecount field in the database.
+	FieldUpdateCount = "update_count"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -17,6 +19,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldEmail,
+	FieldUpdateCount,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -32,4 +35,6 @@ func ValidColumn(column string) bool {
 var (
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
+	// DefaultUpdateCount holds the default value on creation for the "updateCount" field.
+	DefaultUpdateCount int
 )

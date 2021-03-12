@@ -97,6 +97,13 @@ func Email(v string) predicate.User {
 	})
 }
 
+// UpdateCount applies equality check predicate on the "updateCount" field. It's identical to UpdateCountEQ.
+func UpdateCount(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdateCount), v))
+	})
+}
+
 // EmailEQ applies the EQ predicate on the "email" field.
 func EmailEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -205,6 +212,82 @@ func EmailEqualFold(v string) predicate.User {
 func EmailContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldEmail), v))
+	})
+}
+
+// UpdateCountEQ applies the EQ predicate on the "updateCount" field.
+func UpdateCountEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUpdateCount), v))
+	})
+}
+
+// UpdateCountNEQ applies the NEQ predicate on the "updateCount" field.
+func UpdateCountNEQ(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUpdateCount), v))
+	})
+}
+
+// UpdateCountIn applies the In predicate on the "updateCount" field.
+func UpdateCountIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUpdateCount), v...))
+	})
+}
+
+// UpdateCountNotIn applies the NotIn predicate on the "updateCount" field.
+func UpdateCountNotIn(vs ...int) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUpdateCount), v...))
+	})
+}
+
+// UpdateCountGT applies the GT predicate on the "updateCount" field.
+func UpdateCountGT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUpdateCount), v))
+	})
+}
+
+// UpdateCountGTE applies the GTE predicate on the "updateCount" field.
+func UpdateCountGTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUpdateCount), v))
+	})
+}
+
+// UpdateCountLT applies the LT predicate on the "updateCount" field.
+func UpdateCountLT(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUpdateCount), v))
+	})
+}
+
+// UpdateCountLTE applies the LTE predicate on the "updateCount" field.
+func UpdateCountLTE(v int) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUpdateCount), v))
 	})
 }
 

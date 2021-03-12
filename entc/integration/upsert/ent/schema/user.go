@@ -14,6 +14,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("email").Unique().NotEmpty(),
+		field.Int("updateCount").Default(0),
 	}
 }
 

@@ -32,6 +32,27 @@ func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
 	return uu
 }
 
+// SetUpdateCount sets the "updateCount" field.
+func (uu *UserUpdate) SetUpdateCount(i int) *UserUpdate {
+	uu.mutation.ResetUpdateCount()
+	uu.mutation.SetUpdateCount(i)
+	return uu
+}
+
+// SetNillableUpdateCount sets the "updateCount" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableUpdateCount(i *int) *UserUpdate {
+	if i != nil {
+		uu.SetUpdateCount(*i)
+	}
+	return uu
+}
+
+// AddUpdateCount adds i to the "updateCount" field.
+func (uu *UserUpdate) AddUpdateCount(i int) *UserUpdate {
+	uu.mutation.AddUpdateCount(i)
+	return uu
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -129,6 +150,20 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldEmail,
 		})
 	}
+	if value, ok := uu.mutation.UpdateCount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldUpdateCount,
+		})
+	}
+	if value, ok := uu.mutation.AddedUpdateCount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldUpdateCount,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -150,6 +185,27 @@ type UserUpdateOne struct {
 // SetEmail sets the "email" field.
 func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
 	uuo.mutation.SetEmail(s)
+	return uuo
+}
+
+// SetUpdateCount sets the "updateCount" field.
+func (uuo *UserUpdateOne) SetUpdateCount(i int) *UserUpdateOne {
+	uuo.mutation.ResetUpdateCount()
+	uuo.mutation.SetUpdateCount(i)
+	return uuo
+}
+
+// SetNillableUpdateCount sets the "updateCount" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableUpdateCount(i *int) *UserUpdateOne {
+	if i != nil {
+		uuo.SetUpdateCount(*i)
+	}
+	return uuo
+}
+
+// AddUpdateCount adds i to the "updateCount" field.
+func (uuo *UserUpdateOne) AddUpdateCount(i int) *UserUpdateOne {
+	uuo.mutation.AddUpdateCount(i)
 	return uuo
 }
 
@@ -253,6 +309,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: user.FieldEmail,
+		})
+	}
+	if value, ok := uuo.mutation.UpdateCount(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldUpdateCount,
+		})
+	}
+	if value, ok := uuo.mutation.AddedUpdateCount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldUpdateCount,
 		})
 	}
 	_node = &User{config: uuo.config}

@@ -26,6 +26,20 @@ func (uc *UserCreate) SetEmail(s string) *UserCreate {
 	return uc
 }
 
+// SetUpdateCount sets the "updateCount" field.
+func (uc *UserCreate) SetUpdateCount(i int) *UserCreate {
+	uc.mutation.SetUpdateCount(i)
+	return uc
+}
+
+// SetNillableUpdateCount sets the "updateCount" field if the given value is not nil.
+func (uc *UserCreate) SetNillableUpdateCount(i *int) *UserCreate {
+	if i != nil {
+		uc.SetUpdateCount(*i)
+	}
+	return uc
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -37,6 +51,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
+	uc.defaults()
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
 			return nil, err
@@ -75,6 +90,14 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.UpdateCount(); !ok {
+		v := user.DefaultUpdateCount
+		uc.mutation.SetUpdateCount(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Email(); !ok {
@@ -84,6 +107,9 @@ func (uc *UserCreate) check() error {
 		if err := user.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf("ent: validator failed for field \"email\": %w", err)}
 		}
+	}
+	if _, ok := uc.mutation.UpdateCount(); !ok {
+		return &ValidationError{Name: "updateCount", err: errors.New("ent: missing required field \"updateCount\"")}
 	}
 	return nil
 }
@@ -131,6 +157,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.Email = value
 	}
+	if value, ok := uc.mutation.UpdateCount(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: user.FieldUpdateCount,
+		})
+		_node.UpdateCount = value
+	}
 	return _node, _spec
 }
 
@@ -157,6 +191,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	for i := range ucb.builders {
 		func(i int, root context.Context) {
 			builder := ucb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)
 				if !ok {
