@@ -345,19 +345,24 @@ func SetName(m SetNamer, name string) {
 
 ## Upserts
 
-Upserts are supported for Postgres, MySQL, and SQLite. You can do single or bulk upserts and define the behaviour on conflict:
-
-- Update with original values (Default)
-- Update with different values
-- Ignore changes
+Upserts are supported for Postgres, MySQL, and SQLite. You can do single or bulk upserts and define the how to handle conflicts.
 
 **Upsert** a bulk of pets:
 
 ```go
-names := []string{"pedro", "xabi", "layla", "pedro"}
+pedroRecord, err:= client.Pet.Create().SetName("pedro").SetOwner(a8m).Save(ctx)
+
+names := []string{"pedro", "xabi", "layla"}
 bulk := make([]*ent.PetCreate, len(names))
 for i, name := range names {
   	bulk[i] = client.Pet.Create().SetName(name).SetOwner(a8m).OnConflict("name")
 }
 pets, err := client.Pet.CreateBulk(bulk...).Save(ctx)
+// Inserts xabi & layla. Updates pedro
 ```
+
+Confict handling modes:
+
+- Update with original values (Default)
+- Update with different values
+- Ignore changes
