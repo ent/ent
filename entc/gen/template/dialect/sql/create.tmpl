@@ -9,10 +9,10 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation"  }}
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on {{ $.Name }} entities in the database.
-func ({{ $receiver }} *{{ $builder }}) OnConflict(fields ...string) *{{ $builder }} {
-	{{ $receiver }}.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on {{ $.Name }} entities.
+func ({{ $receiver }} *{{ $builder }}) OnConflict(constraintField string, otherFields ...string) *{{ $builder }} {
+	{{ $receiver }}.constraintFields = []string{constraintField}
+	{{ $receiver }}.constraintFields = append({{ $receiver }}.constraintFields, otherFields...)
 	return {{ $receiver }}
 }
 
@@ -51,8 +51,8 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		}
 	)
 
-	if {{ $receiver }}.conflictColumns!=nil {
-		_spec.ConflictConstraints = {{ $receiver }}.conflictColumns
+	if {{ $receiver }}.constraintFields != nil {
+		_spec.ConstraintFields = {{ $receiver }}.constraintFields
 	}
 
 	{{- /* Allow mutating the sqlgraph.CreateSpec by ent extensions or user templates.*/}}
@@ -92,14 +92,38 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on {{ $.Name }} entities.
+func ({{ $receiver }} *{{ $builder }}) validateUpsertConstraints() error {
+	for _, f := range {{ $receiver }}.constraintFields {
+		if !{{ $.Package }}.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 {{ end }}
 
 {{ define "dialect/sql/create_bulk" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on {{ $.Name }} entities.
+func ({{ $receiver }} *{{ $builder }}) OnConflict(constraintField string, otherFields ...string) *{{ $builder }} {
+	{{ $receiver }}.batchConstraintFields = []string{constraintField}
+	{{ $receiver }}.batchConstraintFields = append({{ $receiver }}.batchConstraintFields, otherFields...)
+
+	return {{ $receiver }}
+}
+
 // Save creates the {{ $.Name }} entities in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }}, error) {
+	err := {{ $receiver }}.validateUpsertConstraints()
+	if err!=nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len({{ $receiver }}.builders))
 	nodes := make([]*{{ $.Name }}, len({{ $receiver }}.builders))
 	mutators := make([]Mutator, len({{ $receiver }}.builders))
@@ -124,7 +148,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 					_, err = mutators[i+1].Mutate(root, {{ $receiver }}.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, {{ $receiver }}.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, {{ $receiver }}.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: {{ $receiver }}.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -169,5 +193,16 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) []*{{ $.Name }
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted {{ $.Name }} entities.
+func ({{ $receiver }} *{{ $builder }}) validateUpsertConstraints() error {
+	for _, f := range {{ $receiver }}.batchConstraintFields {
+		if !{{ $.Package }}.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }
 {{ end }}

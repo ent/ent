@@ -30,18 +30,27 @@ func Test_SQLIte_UserUpsert(t *testing.T) {
 	defer client.Close()
 	user1, err := client.User.Create().
 		SetEmail("alex-test@entgo.io").
-		OnConflict("email").
+		OnConflict(user.FieldEmail).
 		Save(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, user1, "User record was inserted")
 
-	user2, err := client.Debug().User.Create().
-		SetEmail("alex-test@entgo.io").
-		SetUpdateCount(2).
-		OnConflict("email").
+	user2, err := client.User.Create().SetEmail("alex-test@entgo.io").SetUpdateCount(2).
+		OnConflict(user.FieldEmail).
 		Save(ctx)
 	require.NoError(t, err)
 	require.NotNil(t, user2, "User 2 record was inserted")
+}
+
+func Test_ValidateUpsertConstrains(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	defer client.Close()
+	_, err := client.User.Create().
+		SetEmail("alex-test@entgo.io").
+		OnConflict("unknownField").
+		Save(ctx)
+	require.Error(t, err, `invalid field "unknownField" for upsert conflict resolution`)
 }
 
 func Test_Postgres_UserUpsertBulk(t *testing.T) {
@@ -58,7 +67,7 @@ func Test_Postgres_UserUpsertBulk(t *testing.T) {
 	client := enttest.Open(t, dialect.Postgres, dsn+" dbname=upsert_test", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
 
-	t.Run(bulkUpsert(ctx, client))
+	t.Run(bulkUpsert(ctx, client.Debug()))
 }
 
 func Test_MySQL_UserUpsertBulk(t *testing.T) {
@@ -94,22 +103,24 @@ func Test_SQLLite_UserUpsertBulk(t *testing.T) {
 
 func bulkUpsert(ctx context.Context, client *ent.Client) (string, func(*testing.T)) {
 	return "Bulk Upsert", func(t *testing.T) {
-		_, err := client.Debug().User.Create().
+		_, err := client.User.Create().
 			SetEmail("roger-test@entgo.io").
-			OnConflict("email").
+			OnConflict(user.FieldEmail).
 			Save(ctx)
 		require.NoError(t, err)
 
-		_, err = client.Debug().User.Create().
+		_, err = client.User.Create().
 			SetEmail("alex-test@entgo.io").
-			OnConflict("email").
+			OnConflict(user.FieldEmail).
 			Save(ctx)
 		require.NoError(t, err)
 
-		users, err := client.Debug().User.CreateBulk(
-			client.User.Create().SetEmail("roger-test@entgo.io").SetUpdateCount(2).OnConflict("email"),
-			client.User.Create().SetEmail("alex-test@entgo.io").SetUpdateCount(2).OnConflict("email"),
-		).Save(ctx)
+		users, err := client.User.CreateBulk(
+			client.User.Create().SetEmail("roger-test@entgo.io").SetUpdateCount(2),
+			client.User.Create().SetEmail("alex-test@entgo.io").SetUpdateCount(2),
+		).
+			OnConflict(user.FieldEmail).
+			Save(ctx)
 
 		require.NoError(t, err)
 		require.NotNil(t, users, "User record was inserted")
