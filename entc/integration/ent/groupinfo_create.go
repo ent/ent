@@ -208,15 +208,6 @@ type GroupInfoCreateBulk struct {
 	builders []*GroupInfoCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on GroupInfo entities in the database.
-func (gicb *GroupInfoCreateBulk) OnConflict(fields ...string) *GroupInfoCreateBulk {
-	// for i := range gicb.builders {
-
-	// }
-
-	return gicb
-}
-
 // Save creates the GroupInfo entities in the database.
 func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(gicb.builders))

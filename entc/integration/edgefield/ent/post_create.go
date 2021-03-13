@@ -179,15 +179,6 @@ type PostCreateBulk struct {
 	builders []*PostCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Post entities in the database.
-func (pcb *PostCreateBulk) OnConflict(fields ...string) *PostCreateBulk {
-	// for i := range pcb.builders {
-
-	// }
-
-	return pcb
-}
-
 // Save creates the Post entities in the database.
 func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))

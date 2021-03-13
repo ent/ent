@@ -393,15 +393,6 @@ type GroupCreateBulk struct {
 	builders []*GroupCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Group entities in the database.
-func (gcb *GroupCreateBulk) OnConflict(fields ...string) *GroupCreateBulk {
-	// for i := range gcb.builders {
-
-	// }
-
-	return gcb
-}
-
 // Save creates the Group entities in the database.
 func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(gcb.builders))

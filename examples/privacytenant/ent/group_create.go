@@ -21,8 +21,9 @@ import (
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	config
-	mutation *GroupMutation
-	hooks    []Hook
+	mutation        *GroupMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.
@@ -136,6 +137,8 @@ func (gc *GroupCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Group entities in the database.
 func (gc *GroupCreate) OnConflict(fields ...string) *GroupCreate {
+	gc.conflictColumns = fields
+
 	return gc
 }
 
@@ -163,6 +166,10 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if gc.conflictColumns != nil {
+		_spec.ConflictConstraints = gc.conflictColumns
+	}
 	if value, ok := gc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -217,15 +224,6 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 type GroupCreateBulk struct {
 	config
 	builders []*GroupCreate
-}
-
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Group entities in the database.
-func (gcb *GroupCreateBulk) OnConflict(fields ...string) *GroupCreateBulk {
-	// for i := range gcb.builders {
-
-	// }
-
-	return gcb
 }
 
 // Save creates the Group entities in the database.

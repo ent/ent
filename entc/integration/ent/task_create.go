@@ -162,15 +162,6 @@ type TaskCreateBulk struct {
 	builders []*TaskCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Task entities in the database.
-func (tcb *TaskCreateBulk) OnConflict(fields ...string) *TaskCreateBulk {
-	// for i := range tcb.builders {
-
-	// }
-
-	return tcb
-}
-
 // Save creates the Task entities in the database.
 func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))

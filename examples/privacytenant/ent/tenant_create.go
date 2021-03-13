@@ -19,8 +19,9 @@ import (
 // TenantCreate is the builder for creating a Tenant entity.
 type TenantCreate struct {
 	config
-	mutation *TenantMutation
-	hooks    []Hook
+	mutation        *TenantMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.
@@ -93,6 +94,8 @@ func (tc *TenantCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Tenant entities in the database.
 func (tc *TenantCreate) OnConflict(fields ...string) *TenantCreate {
+	tc.conflictColumns = fields
+
 	return tc
 }
 
@@ -120,6 +123,10 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if tc.conflictColumns != nil {
+		_spec.ConflictConstraints = tc.conflictColumns
+	}
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -135,15 +142,6 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 type TenantCreateBulk struct {
 	config
 	builders []*TenantCreate
-}
-
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Tenant entities in the database.
-func (tcb *TenantCreateBulk) OnConflict(fields ...string) *TenantCreateBulk {
-	// for i := range tcb.builders {
-
-	// }
-
-	return tcb
 }
 
 // Save creates the Tenant entities in the database.

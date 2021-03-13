@@ -18,8 +18,9 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	mutation *UserMutation
-	hooks    []Hook
+	mutation        *UserMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -78,6 +79,8 @@ func (uc *UserCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on User entities in the database.
 func (uc *UserCreate) OnConflict(fields ...string) *UserCreate {
+	uc.conflictColumns = fields
+
 	return uc
 }
 
@@ -105,6 +108,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if uc.conflictColumns != nil {
+		_spec.ConflictConstraints = uc.conflictColumns
+	}
 	return _node, _spec
 }
 
@@ -112,15 +119,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
-}
-
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on User entities in the database.
-func (ucb *UserCreateBulk) OnConflict(fields ...string) *UserCreateBulk {
-	// for i := range ucb.builders {
-
-	// }
-
-	return ucb
 }
 
 // Save creates the User entities in the database.

@@ -220,15 +220,6 @@ type NodeCreateBulk struct {
 	builders []*NodeCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Node entities in the database.
-func (ncb *NodeCreateBulk) OnConflict(fields ...string) *NodeCreateBulk {
-	// for i := range ncb.builders {
-
-	// }
-
-	return ncb
-}
-
 // Save creates the Node entities in the database.
 func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ncb.builders))

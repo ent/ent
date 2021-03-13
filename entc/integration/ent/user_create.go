@@ -761,15 +761,6 @@ type UserCreateBulk struct {
 	builders []*UserCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on User entities in the database.
-func (ucb *UserCreateBulk) OnConflict(fields ...string) *UserCreateBulk {
-	// for i := range ucb.builders {
-
-	// }
-
-	return ucb
-}
-
 // Save creates the User entities in the database.
 func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ucb.builders))

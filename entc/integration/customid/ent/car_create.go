@@ -250,15 +250,6 @@ type CarCreateBulk struct {
 	builders []*CarCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Car entities in the database.
-func (ccb *CarCreateBulk) OnConflict(fields ...string) *CarCreateBulk {
-	// for i := range ccb.builders {
-
-	// }
-
-	return ccb
-}
-
 // Save creates the Car entities in the database.
 func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))

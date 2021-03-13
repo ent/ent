@@ -234,15 +234,6 @@ type BlobCreateBulk struct {
 	builders []*BlobCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Blob entities in the database.
-func (bcb *BlobCreateBulk) OnConflict(fields ...string) *BlobCreateBulk {
-	// for i := range bcb.builders {
-
-	// }
-
-	return bcb
-}
-
 // Save creates the Blob entities in the database.
 func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))

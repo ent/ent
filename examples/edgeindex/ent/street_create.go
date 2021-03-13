@@ -20,8 +20,9 @@ import (
 // StreetCreate is the builder for creating a Street entity.
 type StreetCreate struct {
 	config
-	mutation *StreetMutation
-	hooks    []Hook
+	mutation        *StreetMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.
@@ -108,6 +109,8 @@ func (sc *StreetCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Street entities in the database.
 func (sc *StreetCreate) OnConflict(fields ...string) *StreetCreate {
+	sc.conflictColumns = fields
+
 	return sc
 }
 
@@ -135,6 +138,10 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if sc.conflictColumns != nil {
+		_spec.ConflictConstraints = sc.conflictColumns
+	}
 	if value, ok := sc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -170,15 +177,6 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 type StreetCreateBulk struct {
 	config
 	builders []*StreetCreate
-}
-
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Street entities in the database.
-func (scb *StreetCreateBulk) OnConflict(fields ...string) *StreetCreateBulk {
-	// for i := range scb.builders {
-
-	// }
-
-	return scb
 }
 
 // Save creates the Street entities in the database.

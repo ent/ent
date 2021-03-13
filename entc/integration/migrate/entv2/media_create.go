@@ -165,15 +165,6 @@ type MediaCreateBulk struct {
 	builders []*MediaCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Media entities in the database.
-func (mcb *MediaCreateBulk) OnConflict(fields ...string) *MediaCreateBulk {
-	// for i := range mcb.builders {
-
-	// }
-
-	return mcb
-}
-
 // Save creates the Media entities in the database.
 func (mcb *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))

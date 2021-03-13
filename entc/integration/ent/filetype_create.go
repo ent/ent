@@ -247,15 +247,6 @@ type FileTypeCreateBulk struct {
 	builders []*FileTypeCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on FileType entities in the database.
-func (ftcb *FileTypeCreateBulk) OnConflict(fields ...string) *FileTypeCreateBulk {
-	// for i := range ftcb.builders {
-
-	// }
-
-	return ftcb
-}
-
 // Save creates the FileType entities in the database.
 func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ftcb.builders))

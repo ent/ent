@@ -339,15 +339,6 @@ type CardCreateBulk struct {
 	builders []*CardCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Card entities in the database.
-func (ccb *CardCreateBulk) OnConflict(fields ...string) *CardCreateBulk {
-	// for i := range ccb.builders {
-
-	// }
-
-	return ccb
-}
-
 // Save creates the Card entities in the database.
 func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))

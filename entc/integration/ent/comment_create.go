@@ -178,15 +178,6 @@ type CommentCreateBulk struct {
 	builders []*CommentCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Comment entities in the database.
-func (ccb *CommentCreateBulk) OnConflict(fields ...string) *CommentCreateBulk {
-	// for i := range ccb.builders {
-
-	// }
-
-	return ccb
-}
-
 // Save creates the Comment entities in the database.
 func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))

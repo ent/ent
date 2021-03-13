@@ -143,15 +143,6 @@ type CustomTypeCreateBulk struct {
 	builders []*CustomTypeCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on CustomType entities in the database.
-func (ctcb *CustomTypeCreateBulk) OnConflict(fields ...string) *CustomTypeCreateBulk {
-	// for i := range ctcb.builders {
-
-	// }
-
-	return ctcb
-}
-
 // Save creates the CustomType entities in the database.
 func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ctcb.builders))

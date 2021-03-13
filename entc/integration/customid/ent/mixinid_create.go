@@ -174,15 +174,6 @@ type MixinIDCreateBulk struct {
 	builders []*MixinIDCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on MixinID entities in the database.
-func (micb *MixinIDCreateBulk) OnConflict(fields ...string) *MixinIDCreateBulk {
-	// for i := range micb.builders {
-
-	// }
-
-	return micb
-}
-
 // Save creates the MixinID entities in the database.
 func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(micb.builders))

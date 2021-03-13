@@ -208,15 +208,6 @@ type MetadataCreateBulk struct {
 	builders []*MetadataCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Metadata entities in the database.
-func (mcb *MetadataCreateBulk) OnConflict(fields ...string) *MetadataCreateBulk {
-	// for i := range mcb.builders {
-
-	// }
-
-	return mcb
-}
-
 // Save creates the Metadata entities in the database.
 func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))

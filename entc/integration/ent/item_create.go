@@ -121,15 +121,6 @@ type ItemCreateBulk struct {
 	builders []*ItemCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Item entities in the database.
-func (icb *ItemCreateBulk) OnConflict(fields ...string) *ItemCreateBulk {
-	// for i := range icb.builders {
-
-	// }
-
-	return icb
-}
-
 // Save creates the Item entities in the database.
 func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(icb.builders))

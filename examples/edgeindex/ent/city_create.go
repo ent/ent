@@ -20,8 +20,9 @@ import (
 // CityCreate is the builder for creating a City entity.
 type CityCreate struct {
 	config
-	mutation *CityMutation
-	hooks    []Hook
+	mutation        *CityMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.
@@ -104,6 +105,8 @@ func (cc *CityCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on City entities in the database.
 func (cc *CityCreate) OnConflict(fields ...string) *CityCreate {
+	cc.conflictColumns = fields
+
 	return cc
 }
 
@@ -131,6 +134,10 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if cc.conflictColumns != nil {
+		_spec.ConflictConstraints = cc.conflictColumns
+	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -165,15 +172,6 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 type CityCreateBulk struct {
 	config
 	builders []*CityCreate
-}
-
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on City entities in the database.
-func (ccb *CityCreateBulk) OnConflict(fields ...string) *CityCreateBulk {
-	// for i := range ccb.builders {
-
-	// }
-
-	return ccb
 }
 
 // Save creates the City entities in the database.

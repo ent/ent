@@ -319,15 +319,6 @@ type ConversionCreateBulk struct {
 	builders []*ConversionCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Conversion entities in the database.
-func (ccb *ConversionCreateBulk) OnConflict(fields ...string) *ConversionCreateBulk {
-	// for i := range ccb.builders {
-
-	// }
-
-	return ccb
-}
-
 // Save creates the Conversion entities in the database.
 func (ccb *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))

@@ -121,15 +121,6 @@ type GoodsCreateBulk struct {
 	builders []*GoodsCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Goods entities in the database.
-func (gcb *GoodsCreateBulk) OnConflict(fields ...string) *GoodsCreateBulk {
-	// for i := range gcb.builders {
-
-	// }
-
-	return gcb
-}
-
 // Save creates the Goods entities in the database.
 func (gcb *GoodsCreateBulk) Save(ctx context.Context) ([]*Goods, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(gcb.builders))

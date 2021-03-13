@@ -202,15 +202,6 @@ type PetCreateBulk struct {
 	builders []*PetCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Pet entities in the database.
-func (pcb *PetCreateBulk) OnConflict(fields ...string) *PetCreateBulk {
-	// for i := range pcb.builders {
-
-	// }
-
-	return pcb
-}
-
 // Save creates the Pet entities in the database.
 func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))

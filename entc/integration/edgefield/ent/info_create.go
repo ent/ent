@@ -192,15 +192,6 @@ type InfoCreateBulk struct {
 	builders []*InfoCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Info entities in the database.
-func (icb *InfoCreateBulk) OnConflict(fields ...string) *InfoCreateBulk {
-	// for i := range icb.builders {
-
-	// }
-
-	return icb
-}
-
 // Save creates the Info entities in the database.
 func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(icb.builders))

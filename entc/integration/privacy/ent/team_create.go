@@ -214,15 +214,6 @@ type TeamCreateBulk struct {
 	builders []*TeamCreate
 }
 
-// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Team entities in the database.
-func (tcb *TeamCreateBulk) OnConflict(fields ...string) *TeamCreateBulk {
-	// for i := range tcb.builders {
-
-	// }
-
-	return tcb
-}
-
 // Save creates the Team entities in the database.
 func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
