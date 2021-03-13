@@ -34,10 +34,6 @@ func (gc *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
 		err  error
 		node *Goods
 	)
-	err = gc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(gc.hooks) == 0 {
 		if err = gc.check(); err != nil {
 			return nil, err
@@ -89,6 +85,10 @@ func (gc *GoodsCreate) OnConflict(constraintField string, otherFields ...string)
 }
 
 func (gc *GoodsCreate) sqlSave(ctx context.Context) (*Goods, error) {
+	err := gc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -123,8 +123,8 @@ func (gc *GoodsCreate) createSpec() (*Goods, *sqlgraph.CreateSpec) {
 // handling conflicts on Goods entities.
 func (gc *GoodsCreate) validateUpsertConstraints() error {
 	for _, f := range gc.constraintFields {
-		if !goods.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !goods.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, goods.UniqueColumns)}
 		}
 	}
 	return nil
@@ -214,8 +214,8 @@ func (gcb *GoodsCreateBulk) SaveX(ctx context.Context) []*Goods {
 // handling conflicts on batch inserted Goods entities.
 func (gcb *GoodsCreateBulk) validateUpsertConstraints() error {
 	for _, f := range gcb.batchConstraintFields {
-		if !goods.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !goods.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, goods.UniqueColumns)}
 		}
 	}
 	return nil

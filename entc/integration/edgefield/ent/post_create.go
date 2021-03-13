@@ -61,10 +61,6 @@ func (pc *PostCreate) Save(ctx context.Context) (*Post, error) {
 		err  error
 		node *Post
 	)
-	err = pc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -119,6 +115,10 @@ func (pc *PostCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (pc *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
+	err := pc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := pc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -181,8 +181,8 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 // handling conflicts on Post entities.
 func (pc *PostCreate) validateUpsertConstraints() error {
 	for _, f := range pc.constraintFields {
-		if !post.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !post.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, post.UniqueColumns)}
 		}
 	}
 	return nil
@@ -272,8 +272,8 @@ func (pcb *PostCreateBulk) SaveX(ctx context.Context) []*Post {
 // handling conflicts on batch inserted Post entities.
 func (pcb *PostCreateBulk) validateUpsertConstraints() error {
 	for _, f := range pcb.batchConstraintFields {
-		if !post.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !post.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, post.UniqueColumns)}
 		}
 	}
 	return nil

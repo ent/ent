@@ -89,10 +89,6 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 		err  error
 		node *Node
 	)
-	err = nc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(nc.hooks) == 0 {
 		if err = nc.check(); err != nil {
 			return nil, err

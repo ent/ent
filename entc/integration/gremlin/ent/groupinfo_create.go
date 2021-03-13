@@ -74,10 +74,6 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 		err  error
 		node *GroupInfo
 	)
-	err = gic.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	gic.defaults()
 	if len(gic.hooks) == 0 {
 		if err = gic.check(); err != nil {

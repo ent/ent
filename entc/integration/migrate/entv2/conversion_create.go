@@ -160,10 +160,6 @@ func (cc *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
 		err  error
 		node *Conversion
 	)
-	err = cc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
 			return nil, err
@@ -215,6 +211,10 @@ func (cc *ConversionCreate) OnConflict(constraintField string, otherFields ...st
 }
 
 func (cc *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
+	err := cc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -321,8 +321,8 @@ func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 // handling conflicts on Conversion entities.
 func (cc *ConversionCreate) validateUpsertConstraints() error {
 	for _, f := range cc.constraintFields {
-		if !conversion.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !conversion.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, conversion.UniqueColumns)}
 		}
 	}
 	return nil
@@ -412,8 +412,8 @@ func (ccb *ConversionCreateBulk) SaveX(ctx context.Context) []*Conversion {
 // handling conflicts on batch inserted Conversion entities.
 func (ccb *ConversionCreateBulk) validateUpsertConstraints() error {
 	for _, f := range ccb.batchConstraintFields {
-		if !conversion.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !conversion.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, conversion.UniqueColumns)}
 		}
 	}
 	return nil

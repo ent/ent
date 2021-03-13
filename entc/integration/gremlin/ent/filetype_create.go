@@ -87,10 +87,6 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 		err  error
 		node *FileType
 	)
-	err = ftc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	ftc.defaults()
 	if len(ftc.hooks) == 0 {
 		if err = ftc.check(); err != nil {

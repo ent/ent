@@ -42,10 +42,26 @@ var Columns = []string{
 	FieldState,
 }
 
+// Columns holds all SQL unique columns for filetype fields that can be used in conflict constraints.
+var UniqueColumns = []string{
+	FieldID,
+	FieldName,
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	return false
+}
+
+// ValidConstraintColumn reports if the column name is valid for use as a conflict column.
+func ValidConstraintColumn(column string) bool {
+	for i := range UniqueColumns {
+		if column == UniqueColumns[i] {
 			return true
 		}
 	}

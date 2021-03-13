@@ -137,10 +137,6 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 		err  error
 		node *Card
 	)
-	err = cc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	cc.defaults()
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {

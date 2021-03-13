@@ -150,10 +150,6 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 		err  error
 		node *Group
 	)
-	err = gc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	gc.defaults()
 	if len(gc.hooks) == 0 {
 		if err = gc.check(); err != nil {

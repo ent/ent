@@ -34,10 +34,6 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 		err  error
 		node *Item
 	)
-	err = ic.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err
@@ -89,6 +85,10 @@ func (ic *ItemCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
+	err := ic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := ic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -123,8 +123,8 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 // handling conflicts on Item entities.
 func (ic *ItemCreate) validateUpsertConstraints() error {
 	for _, f := range ic.constraintFields {
-		if !item.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !item.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, item.UniqueColumns)}
 		}
 	}
 	return nil
@@ -214,8 +214,8 @@ func (icb *ItemCreateBulk) SaveX(ctx context.Context) []*Item {
 // handling conflicts on batch inserted Item entities.
 func (icb *ItemCreateBulk) validateUpsertConstraints() error {
 	for _, f := range icb.batchConstraintFields {
-		if !item.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !item.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, item.UniqueColumns)}
 		}
 	}
 	return nil

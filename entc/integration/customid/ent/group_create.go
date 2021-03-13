@@ -56,10 +56,6 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 		err  error
 		node *Group
 	)
-	err = gc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(gc.hooks) == 0 {
 		if err = gc.check(); err != nil {
 			return nil, err
@@ -111,6 +107,10 @@ func (gc *GroupCreate) OnConflict(constraintField string, otherFields ...string)
 }
 
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
+	err := gc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -170,8 +170,8 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 // handling conflicts on Group entities.
 func (gc *GroupCreate) validateUpsertConstraints() error {
 	for _, f := range gc.constraintFields {
-		if !group.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !group.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, group.UniqueColumns)}
 		}
 	}
 	return nil
@@ -263,8 +263,8 @@ func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
 // handling conflicts on batch inserted Group entities.
 func (gcb *GroupCreateBulk) validateUpsertConstraints() error {
 	for _, f := range gcb.batchConstraintFields {
-		if !group.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !group.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, group.UniqueColumns)}
 		}
 	}
 	return nil

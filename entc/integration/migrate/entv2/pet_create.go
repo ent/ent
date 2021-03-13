@@ -54,10 +54,6 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 		err  error
 		node *Pet
 	)
-	err = pc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -109,6 +105,10 @@ func (pc *PetCreate) OnConflict(constraintField string, otherFields ...string) *
 }
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
+	err := pc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := pc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -163,8 +163,8 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 // handling conflicts on Pet entities.
 func (pc *PetCreate) validateUpsertConstraints() error {
 	for _, f := range pc.constraintFields {
-		if !pet.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !pet.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, pet.UniqueColumns)}
 		}
 	}
 	return nil
@@ -254,8 +254,8 @@ func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 // handling conflicts on batch inserted Pet entities.
 func (pcb *PetCreateBulk) validateUpsertConstraints() error {
 	for _, f := range pcb.batchConstraintFields {
-		if !pet.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !pet.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, pet.UniqueColumns)}
 		}
 	}
 	return nil

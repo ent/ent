@@ -155,10 +155,6 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 		err  error
 		node *File
 	)
-	err = fc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	fc.defaults()
 	if len(fc.hooks) == 0 {
 		if err = fc.check(); err != nil {

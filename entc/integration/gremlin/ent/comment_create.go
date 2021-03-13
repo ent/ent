@@ -64,10 +64,6 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 		err  error
 		node *Comment
 	)
-	err = cc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
 			return nil, err

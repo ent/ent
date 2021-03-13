@@ -54,10 +54,6 @@ func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 		err  error
 		node *MixinID
 	)
-	err = mic.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	mic.defaults()
 	if len(mic.hooks) == 0 {
 		if err = mic.check(); err != nil {
@@ -124,6 +120,10 @@ func (mic *MixinIDCreate) OnConflict(constraintField string, otherFields ...stri
 }
 
 func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
+	err := mic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := mic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mic.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -176,8 +176,8 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 // handling conflicts on MixinID entities.
 func (mic *MixinIDCreate) validateUpsertConstraints() error {
 	for _, f := range mic.constraintFields {
-		if !mixinid.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !mixinid.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, mixinid.UniqueColumns)}
 		}
 	}
 	return nil
@@ -266,8 +266,8 @@ func (micb *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
 // handling conflicts on batch inserted MixinID entities.
 func (micb *MixinIDCreateBulk) validateUpsertConstraints() error {
 	for _, f := range micb.batchConstraintFields {
-		if !mixinid.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !mixinid.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, mixinid.UniqueColumns)}
 		}
 	}
 	return nil

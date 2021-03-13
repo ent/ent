@@ -87,10 +87,6 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
-	err = uc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
 			return nil, err
@@ -150,6 +146,10 @@ func (uc *UserCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
+	err := uc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -238,8 +238,8 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 // handling conflicts on User entities.
 func (uc *UserCreate) validateUpsertConstraints() error {
 	for _, f := range uc.constraintFields {
-		if !user.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !user.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, user.UniqueColumns)}
 		}
 	}
 	return nil
@@ -329,8 +329,8 @@ func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 // handling conflicts on batch inserted User entities.
 func (ucb *UserCreateBulk) validateUpsertConstraints() error {
 	for _, f := range ucb.batchConstraintFields {
-		if !user.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !user.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, user.UniqueColumns)}
 		}
 	}
 	return nil

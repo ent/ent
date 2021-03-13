@@ -50,10 +50,6 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 		err  error
 		node *Spec
 	)
-	err = sc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err

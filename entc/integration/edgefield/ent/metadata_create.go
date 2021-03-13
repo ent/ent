@@ -75,10 +75,6 @@ func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 		err  error
 		node *Metadata
 	)
-	err = mc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	mc.defaults()
 	if len(mc.hooks) == 0 {
 		if err = mc.check(); err != nil {
@@ -142,6 +138,10 @@ func (mc *MetadataCreate) OnConflict(constraintField string, otherFields ...stri
 }
 
 func (mc *MetadataCreate) sqlSave(ctx context.Context) (*Metadata, error) {
+	err := mc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := mc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -210,8 +210,8 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 // handling conflicts on Metadata entities.
 func (mc *MetadataCreate) validateUpsertConstraints() error {
 	for _, f := range mc.constraintFields {
-		if !metadata.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !metadata.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, metadata.UniqueColumns)}
 		}
 	}
 	return nil
@@ -304,8 +304,8 @@ func (mcb *MetadataCreateBulk) SaveX(ctx context.Context) []*Metadata {
 // handling conflicts on batch inserted Metadata entities.
 func (mcb *MetadataCreateBulk) validateUpsertConstraints() error {
 	for _, f := range mcb.batchConstraintFields {
-		if !metadata.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !metadata.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, metadata.UniqueColumns)}
 		}
 	}
 	return nil

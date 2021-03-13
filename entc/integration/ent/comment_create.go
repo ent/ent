@@ -61,10 +61,6 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 		err  error
 		node *Comment
 	)
-	err = cc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
 			return nil, err
@@ -122,6 +118,10 @@ func (cc *CommentCreate) OnConflict(constraintField string, otherFields ...strin
 }
 
 func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
+	err := cc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -180,8 +180,8 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 // handling conflicts on Comment entities.
 func (cc *CommentCreate) validateUpsertConstraints() error {
 	for _, f := range cc.constraintFields {
-		if !comment.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !comment.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, comment.UniqueColumns)}
 		}
 	}
 	return nil
@@ -271,8 +271,8 @@ func (ccb *CommentCreateBulk) SaveX(ctx context.Context) []*Comment {
 // handling conflicts on batch inserted Comment entities.
 func (ccb *CommentCreateBulk) validateUpsertConstraints() error {
 	for _, f := range ccb.batchConstraintFields {
-		if !comment.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !comment.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, comment.UniqueColumns)}
 		}
 	}
 	return nil

@@ -104,10 +104,6 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 		err  error
 		node *Card
 	)
-	err = cc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	cc.defaults()
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
@@ -186,6 +182,10 @@ func (cc *CardCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
+	err := cc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -272,8 +272,8 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 // handling conflicts on Card entities.
 func (cc *CardCreate) validateUpsertConstraints() error {
 	for _, f := range cc.constraintFields {
-		if !card.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !card.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, card.UniqueColumns)}
 		}
 	}
 	return nil
@@ -364,8 +364,8 @@ func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
 // handling conflicts on batch inserted Card entities.
 func (ccb *CardCreateBulk) validateUpsertConstraints() error {
 	for _, f := range ccb.batchConstraintFields {
-		if !card.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !card.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, card.UniqueColumns)}
 		}
 	}
 	return nil

@@ -62,10 +62,6 @@ func (mc *MediaCreate) Save(ctx context.Context) (*Media, error) {
 		err  error
 		node *Media
 	)
-	err = mc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(mc.hooks) == 0 {
 		if err = mc.check(); err != nil {
 			return nil, err
@@ -117,6 +113,10 @@ func (mc *MediaCreate) OnConflict(constraintField string, otherFields ...string)
 }
 
 func (mc *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
+	err := mc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := mc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -167,8 +167,8 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 // handling conflicts on Media entities.
 func (mc *MediaCreate) validateUpsertConstraints() error {
 	for _, f := range mc.constraintFields {
-		if !media.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !media.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, media.UniqueColumns)}
 		}
 	}
 	return nil
@@ -258,8 +258,8 @@ func (mcb *MediaCreateBulk) SaveX(ctx context.Context) []*Media {
 // handling conflicts on batch inserted Media entities.
 func (mcb *MediaCreateBulk) validateUpsertConstraints() error {
 	for _, f := range mcb.batchConstraintFields {
-		if !media.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !media.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, media.UniqueColumns)}
 		}
 	}
 	return nil

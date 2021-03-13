@@ -153,10 +153,6 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 		err  error
 		node *File
 	)
-	err = fc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	fc.defaults()
 	if len(fc.hooks) == 0 {
 		if err = fc.check(); err != nil {
@@ -228,6 +224,10 @@ func (fc *FileCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
+	err := fc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := fc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -361,8 +361,8 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 // handling conflicts on File entities.
 func (fc *FileCreate) validateUpsertConstraints() error {
 	for _, f := range fc.constraintFields {
-		if !file.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !file.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, file.UniqueColumns)}
 		}
 	}
 	return nil
@@ -453,8 +453,8 @@ func (fcb *FileCreateBulk) SaveX(ctx context.Context) []*File {
 // handling conflicts on batch inserted File entities.
 func (fcb *FileCreateBulk) validateUpsertConstraints() error {
 	for _, f := range fcb.batchConstraintFields {
-		if !file.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !file.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, file.UniqueColumns)}
 		}
 	}
 	return nil

@@ -90,10 +90,6 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 		err  error
 		node *Pet
 	)
-	err = pc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err

@@ -73,10 +73,6 @@ func (tc *TeamCreate) Save(ctx context.Context) (*Team, error) {
 		err  error
 		node *Team
 	)
-	err = tc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(tc.hooks) == 0 {
 		if err = tc.check(); err != nil {
 			return nil, err
@@ -136,6 +132,10 @@ func (tc *TeamCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (tc *TeamCreate) sqlSave(ctx context.Context) (*Team, error) {
+	err := tc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := tc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -216,8 +216,8 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 // handling conflicts on Team entities.
 func (tc *TeamCreate) validateUpsertConstraints() error {
 	for _, f := range tc.constraintFields {
-		if !team.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !team.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, team.UniqueColumns)}
 		}
 	}
 	return nil
@@ -307,8 +307,8 @@ func (tcb *TeamCreateBulk) SaveX(ctx context.Context) []*Team {
 // handling conflicts on batch inserted Team entities.
 func (tcb *TeamCreateBulk) validateUpsertConstraints() error {
 	for _, f := range tcb.batchConstraintFields {
-		if !team.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !team.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, team.UniqueColumns)}
 		}
 	}
 	return nil

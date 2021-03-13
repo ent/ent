@@ -35,10 +35,6 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 		err  error
 		node *Item
 	)
-	err = ic.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err

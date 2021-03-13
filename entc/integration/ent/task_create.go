@@ -50,10 +50,6 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 		err  error
 		node *Task
 	)
-	err = tc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	tc.defaults()
 	if len(tc.hooks) == 0 {
 		if err = tc.check(); err != nil {
@@ -122,6 +118,10 @@ func (tc *TaskCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (tc *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
+	err := tc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := tc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -164,8 +164,8 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 // handling conflicts on Task entities.
 func (tc *TaskCreate) validateUpsertConstraints() error {
 	for _, f := range tc.constraintFields {
-		if !task.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !task.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, task.UniqueColumns)}
 		}
 	}
 	return nil
@@ -256,8 +256,8 @@ func (tcb *TaskCreateBulk) SaveX(ctx context.Context) []*Task {
 // handling conflicts on batch inserted Task entities.
 func (tcb *TaskCreateBulk) validateUpsertConstraints() error {
 	for _, f := range tcb.batchConstraintFields {
-		if !task.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !task.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, task.UniqueColumns)}
 		}
 	}
 	return nil

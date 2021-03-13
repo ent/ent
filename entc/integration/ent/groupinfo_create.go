@@ -71,10 +71,6 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 		err  error
 		node *GroupInfo
 	)
-	err = gic.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	gic.defaults()
 	if len(gic.hooks) == 0 {
 		if err = gic.check(); err != nil {
@@ -141,6 +137,10 @@ func (gic *GroupInfoCreate) OnConflict(constraintField string, otherFields ...st
 }
 
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
+	err := gic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := gic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -210,8 +210,8 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 // handling conflicts on GroupInfo entities.
 func (gic *GroupInfoCreate) validateUpsertConstraints() error {
 	for _, f := range gic.constraintFields {
-		if !groupinfo.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !groupinfo.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, groupinfo.UniqueColumns)}
 		}
 	}
 	return nil
@@ -302,8 +302,8 @@ func (gicb *GroupInfoCreateBulk) SaveX(ctx context.Context) []*GroupInfo {
 // handling conflicts on batch inserted GroupInfo entities.
 func (gicb *GroupInfoCreateBulk) validateUpsertConstraints() error {
 	for _, f := range gicb.batchConstraintFields {
-		if !groupinfo.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !groupinfo.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, groupinfo.UniqueColumns)}
 		}
 	}
 	return nil

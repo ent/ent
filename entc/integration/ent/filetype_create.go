@@ -85,10 +85,6 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 		err  error
 		node *FileType
 	)
-	err = ftc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	ftc.defaults()
 	if len(ftc.hooks) == 0 {
 		if err = ftc.check(); err != nil {
@@ -172,6 +168,10 @@ func (ftc *FileTypeCreate) OnConflict(constraintField string, otherFields ...str
 }
 
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
+	err := ftc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := ftc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -249,8 +249,8 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 // handling conflicts on FileType entities.
 func (ftc *FileTypeCreate) validateUpsertConstraints() error {
 	for _, f := range ftc.constraintFields {
-		if !filetype.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !filetype.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, filetype.UniqueColumns)}
 		}
 	}
 	return nil
@@ -341,8 +341,8 @@ func (ftcb *FileTypeCreateBulk) SaveX(ctx context.Context) []*FileType {
 // handling conflicts on batch inserted FileType entities.
 func (ftcb *FileTypeCreateBulk) validateUpsertConstraints() error {
 	for _, f := range ftcb.batchConstraintFields {
-		if !filetype.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !filetype.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, filetype.UniqueColumns)}
 		}
 	}
 	return nil

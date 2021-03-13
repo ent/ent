@@ -593,10 +593,6 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 		err  error
 		node *FieldType
 	)
-	err = ftc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	ftc.defaults()
 	if len(ftc.hooks) == 0 {
 		if err = ftc.check(); err != nil {

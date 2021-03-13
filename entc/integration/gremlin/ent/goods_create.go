@@ -35,10 +35,6 @@ func (gc *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
 		err  error
 		node *Goods
 	)
-	err = gc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(gc.hooks) == 0 {
 		if err = gc.check(); err != nil {
 			return nil, err

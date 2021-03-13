@@ -50,10 +50,6 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 		err  error
 		node *Spec
 	)
-	err = sc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err
@@ -105,6 +101,10 @@ func (sc *SpecCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
+	err := sc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -158,8 +158,8 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 // handling conflicts on Spec entities.
 func (sc *SpecCreate) validateUpsertConstraints() error {
 	for _, f := range sc.constraintFields {
-		if !spec.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !spec.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, spec.UniqueColumns)}
 		}
 	}
 	return nil
@@ -249,8 +249,8 @@ func (scb *SpecCreateBulk) SaveX(ctx context.Context) []*Spec {
 // handling conflicts on batch inserted Spec entities.
 func (scb *SpecCreateBulk) validateUpsertConstraints() error {
 	for _, f := range scb.batchConstraintFields {
-		if !spec.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !spec.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, spec.UniqueColumns)}
 		}
 	}
 	return nil

@@ -82,10 +82,6 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 		err  error
 		node *Blob
 	)
-	err = bc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	bc.defaults()
 	if len(bc.hooks) == 0 {
 		if err = bc.check(); err != nil {
@@ -153,6 +149,10 @@ func (bc *BlobCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
+	err := bc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := bc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -236,8 +236,8 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 // handling conflicts on Blob entities.
 func (bc *BlobCreate) validateUpsertConstraints() error {
 	for _, f := range bc.constraintFields {
-		if !blob.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !blob.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, blob.UniqueColumns)}
 		}
 	}
 	return nil
@@ -326,8 +326,8 @@ func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
 // handling conflicts on batch inserted Blob entities.
 func (bcb *BlobCreateBulk) validateUpsertConstraints() error {
 	for _, f := range bcb.batchConstraintFields {
-		if !blob.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !blob.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, blob.UniqueColumns)}
 		}
 	}
 	return nil

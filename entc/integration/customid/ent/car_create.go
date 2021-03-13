@@ -95,10 +95,6 @@ func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 		err  error
 		node *Car
 	)
-	err = cc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
 			return nil, err
@@ -168,6 +164,10 @@ func (cc *CarCreate) OnConflict(constraintField string, otherFields ...string) *
 }
 
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
+	err := cc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -252,8 +252,8 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 // handling conflicts on Car entities.
 func (cc *CarCreate) validateUpsertConstraints() error {
 	for _, f := range cc.constraintFields {
-		if !car.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !car.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, car.UniqueColumns)}
 		}
 	}
 	return nil
@@ -345,8 +345,8 @@ func (ccb *CarCreateBulk) SaveX(ctx context.Context) []*Car {
 // handling conflicts on batch inserted Car entities.
 func (ccb *CarCreateBulk) validateUpsertConstraints() error {
 	for _, f := range ccb.batchConstraintFields {
-		if !car.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !car.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, car.UniqueColumns)}
 		}
 	}
 	return nil

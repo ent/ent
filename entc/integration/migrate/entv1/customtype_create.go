@@ -48,10 +48,6 @@ func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 		err  error
 		node *CustomType
 	)
-	err = ctc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	if len(ctc.hooks) == 0 {
 		if err = ctc.check(); err != nil {
 			return nil, err
@@ -103,6 +99,10 @@ func (ctc *CustomTypeCreate) OnConflict(constraintField string, otherFields ...s
 }
 
 func (ctc *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
+	err := ctc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := ctc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ctc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -145,8 +145,8 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 // handling conflicts on CustomType entities.
 func (ctc *CustomTypeCreate) validateUpsertConstraints() error {
 	for _, f := range ctc.constraintFields {
-		if !customtype.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !customtype.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, customtype.UniqueColumns)}
 		}
 	}
 	return nil
@@ -236,8 +236,8 @@ func (ctcb *CustomTypeCreateBulk) SaveX(ctx context.Context) []*CustomType {
 // handling conflicts on batch inserted CustomType entities.
 func (ctcb *CustomTypeCreateBulk) validateUpsertConstraints() error {
 	for _, f := range ctcb.batchConstraintFields {
-		if !customtype.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !customtype.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, customtype.UniqueColumns)}
 		}
 	}
 	return nil

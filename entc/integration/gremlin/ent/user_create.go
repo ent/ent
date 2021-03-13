@@ -343,10 +343,6 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
-	err = uc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	uc.defaults()
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {

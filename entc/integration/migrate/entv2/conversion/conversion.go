@@ -47,10 +47,25 @@ var Columns = []string{
 	FieldUint64ToString,
 }
 
+// Columns holds all SQL unique columns for conversion fields that can be used in conflict constraints.
+var UniqueColumns = []string{
+	FieldID,
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	return false
+}
+
+// ValidConstraintColumn reports if the column name is valid for use as a conflict column.
+func ValidConstraintColumn(column string) bool {
+	for i := range UniqueColumns {
+		if column == UniqueColumns[i] {
 			return true
 		}
 	}
