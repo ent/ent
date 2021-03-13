@@ -20,8 +20,9 @@ import (
 // MetadataCreate is the builder for creating a Metadata entity.
 type MetadataCreate struct {
 	config
-	mutation *MetadataMutation
-	hooks    []Hook
+	mutation        *MetadataMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetAge sets the "age" field.
@@ -131,6 +132,8 @@ func (mc *MetadataCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Metadata entities in the database.
 func (mc *MetadataCreate) OnConflict(fields ...string) *MetadataCreate {
+	mc.conflictColumns = fields
+
 	return mc
 }
 
@@ -160,6 +163,10 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if mc.conflictColumns != nil {
+		_spec.ConflictConstraints = mc.conflictColumns
+	}
 	if id, ok := mc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id

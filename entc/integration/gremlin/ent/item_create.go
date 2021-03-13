@@ -19,8 +19,9 @@ import (
 // ItemCreate is the builder for creating a Item entity.
 type ItemCreate struct {
 	config
-	mutation *ItemMutation
-	hooks    []Hook
+	mutation        *ItemMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // Mutation returns the ItemMutation object of the builder.

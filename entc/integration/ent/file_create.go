@@ -22,8 +22,9 @@ import (
 // FileCreate is the builder for creating a File entity.
 type FileCreate struct {
 	config
-	mutation *FileMutation
-	hooks    []Hook
+	mutation        *FileMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetSize sets the "size" field.
@@ -217,6 +218,8 @@ func (fc *FileCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on File entities in the database.
 func (fc *FileCreate) OnConflict(fields ...string) *FileCreate {
+	fc.conflictColumns = fields
+
 	return fc
 }
 
@@ -244,6 +247,10 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if fc.conflictColumns != nil {
+		_spec.ConflictConstraints = fc.conflictColumns
+	}
 	if value, ok := fc.mutation.Size(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,

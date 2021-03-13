@@ -21,8 +21,9 @@ import (
 // TeamCreate is the builder for creating a Team entity.
 type TeamCreate struct {
 	config
-	mutation *TeamMutation
-	hooks    []Hook
+	mutation        *TeamMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.
@@ -125,6 +126,8 @@ func (tc *TeamCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Team entities in the database.
 func (tc *TeamCreate) OnConflict(fields ...string) *TeamCreate {
+	tc.conflictColumns = fields
+
 	return tc
 }
 
@@ -152,6 +155,10 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if tc.conflictColumns != nil {
+		_spec.ConflictConstraints = tc.conflictColumns
+	}
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

@@ -19,8 +19,9 @@ import (
 // CommentCreate is the builder for creating a Comment entity.
 type CommentCreate struct {
 	config
-	mutation *CommentMutation
-	hooks    []Hook
+	mutation        *CommentMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetUniqueInt sets the "unique_int" field.
@@ -111,6 +112,8 @@ func (cc *CommentCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Comment entities in the database.
 func (cc *CommentCreate) OnConflict(fields ...string) *CommentCreate {
+	cc.conflictColumns = fields
+
 	return cc
 }
 
@@ -138,6 +141,10 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if cc.conflictColumns != nil {
+		_spec.ConflictConstraints = cc.conflictColumns
+	}
 	if value, ok := cc.mutation.UniqueInt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,

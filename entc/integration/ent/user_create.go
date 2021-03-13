@@ -23,8 +23,9 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	mutation *UserMutation
-	hooks    []Hook
+	mutation        *UserMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetOptionalInt sets the "optional_int" field.
@@ -427,6 +428,8 @@ func (uc *UserCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on User entities in the database.
 func (uc *UserCreate) OnConflict(fields ...string) *UserCreate {
+	uc.conflictColumns = fields
+
 	return uc
 }
 
@@ -454,6 +457,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if uc.conflictColumns != nil {
+		_spec.ConflictConstraints = uc.conflictColumns
+	}
 	if value, ok := uc.mutation.OptionalInt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,

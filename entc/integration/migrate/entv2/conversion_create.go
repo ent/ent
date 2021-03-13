@@ -18,8 +18,9 @@ import (
 // ConversionCreate is the builder for creating a Conversion entity.
 type ConversionCreate struct {
 	config
-	mutation *ConversionMutation
-	hooks    []Hook
+	mutation        *ConversionMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.
@@ -204,6 +205,8 @@ func (cc *ConversionCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Conversion entities in the database.
 func (cc *ConversionCreate) OnConflict(fields ...string) *ConversionCreate {
+	cc.conflictColumns = fields
+
 	return cc
 }
 
@@ -231,6 +234,10 @@ func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if cc.conflictColumns != nil {
+		_spec.ConflictConstraints = cc.conflictColumns
+	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

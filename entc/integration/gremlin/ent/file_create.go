@@ -24,8 +24,9 @@ import (
 // FileCreate is the builder for creating a File entity.
 type FileCreate struct {
 	config
-	mutation *FileMutation
-	hooks    []Hook
+	mutation        *FileMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetSize sets the "size" field.

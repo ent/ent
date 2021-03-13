@@ -22,8 +22,9 @@ import (
 // CommentCreate is the builder for creating a Comment entity.
 type CommentCreate struct {
 	config
-	mutation *CommentMutation
-	hooks    []Hook
+	mutation        *CommentMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetUniqueInt sets the "unique_int" field.

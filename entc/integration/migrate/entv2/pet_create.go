@@ -19,8 +19,9 @@ import (
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	mutation *PetMutation
-	hooks    []Hook
+	mutation        *PetMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
@@ -98,6 +99,8 @@ func (pc *PetCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Pet entities in the database.
 func (pc *PetCreate) OnConflict(fields ...string) *PetCreate {
+	pc.conflictColumns = fields
+
 	return pc
 }
 
@@ -125,6 +128,10 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if pc.conflictColumns != nil {
+		_spec.ConflictConstraints = pc.conflictColumns
+	}
 	if nodes := pc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,

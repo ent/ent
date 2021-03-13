@@ -19,8 +19,9 @@ import (
 // GoodsCreate is the builder for creating a Goods entity.
 type GoodsCreate struct {
 	config
-	mutation *GoodsMutation
-	hooks    []Hook
+	mutation        *GoodsMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // Mutation returns the GoodsMutation object of the builder.

@@ -21,8 +21,9 @@ import (
 // InfoCreate is the builder for creating a Info entity.
 type InfoCreate struct {
 	config
-	mutation *InfoMutation
-	hooks    []Hook
+	mutation        *InfoMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetContent sets the "content" field.
@@ -115,6 +116,8 @@ func (ic *InfoCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Info entities in the database.
 func (ic *InfoCreate) OnConflict(fields ...string) *InfoCreate {
+	ic.conflictColumns = fields
+
 	return ic
 }
 
@@ -144,6 +147,10 @@ func (ic *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if ic.conflictColumns != nil {
+		_spec.ConflictConstraints = ic.conflictColumns
+	}
 	if id, ok := ic.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id

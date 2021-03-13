@@ -14,7 +14,6 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/entc/integration/customid/ent"
-	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 	"github.com/go-sql-driver/mysql"
@@ -87,9 +86,6 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.True(t, ent.IsConstraintError(err), "duplicate id")
 	a8m := client.User.Create().SetID(5).SaveX(ctx)
 	require.Equal(t, 5, a8m.ID)
-
-	client.Blob.Create().OnConflict(blob.UniqueUUID).Save(ctx)
-
 	hub := client.Group.Create().SetID(3).AddUsers(a8m, nat).SaveX(ctx)
 	require.Equal(t, 3, hub.ID)
 	require.Equal(t, []int{1, 5}, hub.QueryUsers().Order(ent.Asc(user.FieldID)).IDsX(ctx))

@@ -21,8 +21,9 @@ import (
 // TaskCreate is the builder for creating a Task entity.
 type TaskCreate struct {
 	config
-	mutation *TaskMutation
-	hooks    []Hook
+	mutation        *TaskMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetPriority sets the "priority" field.

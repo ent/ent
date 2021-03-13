@@ -26,8 +26,9 @@ import (
 // FieldTypeCreate is the builder for creating a FieldType entity.
 type FieldTypeCreate struct {
 	config
-	mutation *FieldTypeMutation
-	hooks    []Hook
+	mutation        *FieldTypeMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetInt sets the "int" field.
@@ -705,6 +706,8 @@ func (ftc *FieldTypeCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on FieldType entities in the database.
 func (ftc *FieldTypeCreate) OnConflict(fields ...string) *FieldTypeCreate {
+	ftc.conflictColumns = fields
+
 	return ftc
 }
 
@@ -732,6 +735,10 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if ftc.conflictColumns != nil {
+		_spec.ConflictConstraints = ftc.conflictColumns
+	}
 	if value, ok := ftc.mutation.Int(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,

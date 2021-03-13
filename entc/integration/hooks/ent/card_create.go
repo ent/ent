@@ -21,8 +21,9 @@ import (
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	config
-	mutation *CardMutation
-	hooks    []Hook
+	mutation        *CardMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetNumber sets the "number" field.
@@ -175,6 +176,8 @@ func (cc *CardCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Card entities in the database.
 func (cc *CardCreate) OnConflict(fields ...string) *CardCreate {
+	cc.conflictColumns = fields
+
 	return cc
 }
 
@@ -202,6 +205,10 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if cc.conflictColumns != nil {
+		_spec.ConflictConstraints = cc.conflictColumns
+	}
 	if value, ok := cc.mutation.Number(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

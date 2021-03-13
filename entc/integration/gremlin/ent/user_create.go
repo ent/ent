@@ -22,8 +22,9 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	mutation *UserMutation
-	hooks    []Hook
+	mutation        *UserMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetOptionalInt sets the "optional_int" field.

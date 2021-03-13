@@ -22,8 +22,9 @@ import (
 // TaskCreate is the builder for creating a Task entity.
 type TaskCreate struct {
 	config
-	mutation *TaskMutation
-	hooks    []Hook
+	mutation        *TaskMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetTitle sets the "title" field.
@@ -181,6 +182,8 @@ func (tc *TaskCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Task entities in the database.
 func (tc *TaskCreate) OnConflict(fields ...string) *TaskCreate {
+	tc.conflictColumns = fields
+
 	return tc
 }
 
@@ -208,6 +211,10 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if tc.conflictColumns != nil {
+		_spec.ConflictConstraints = tc.conflictColumns
+	}
 	if value, ok := tc.mutation.Title(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

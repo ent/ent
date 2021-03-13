@@ -21,8 +21,9 @@ import (
 // NodeCreate is the builder for creating a Node entity.
 type NodeCreate struct {
 	config
-	mutation *NodeMutation
-	hooks    []Hook
+	mutation        *NodeMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetValue sets the "value" field.

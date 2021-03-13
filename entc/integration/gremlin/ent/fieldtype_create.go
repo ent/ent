@@ -27,8 +27,9 @@ import (
 // FieldTypeCreate is the builder for creating a FieldType entity.
 type FieldTypeCreate struct {
 	config
-	mutation *FieldTypeMutation
-	hooks    []Hook
+	mutation        *FieldTypeMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetInt sets the "int" field.

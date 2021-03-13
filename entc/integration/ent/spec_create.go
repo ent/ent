@@ -19,8 +19,9 @@ import (
 // SpecCreate is the builder for creating a Spec entity.
 type SpecCreate struct {
 	config
-	mutation *SpecMutation
-	hooks    []Hook
+	mutation        *SpecMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
@@ -94,6 +95,8 @@ func (sc *SpecCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Spec entities in the database.
 func (sc *SpecCreate) OnConflict(fields ...string) *SpecCreate {
+	sc.conflictColumns = fields
+
 	return sc
 }
 
@@ -121,6 +124,10 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if sc.conflictColumns != nil {
+		_spec.ConflictConstraints = sc.conflictColumns
+	}
 	if nodes := sc.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,

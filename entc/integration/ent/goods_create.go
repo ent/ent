@@ -18,8 +18,9 @@ import (
 // GoodsCreate is the builder for creating a Goods entity.
 type GoodsCreate struct {
 	config
-	mutation *GoodsMutation
-	hooks    []Hook
+	mutation        *GoodsMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // Mutation returns the GoodsMutation object of the builder.
@@ -78,6 +79,8 @@ func (gc *GoodsCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Goods entities in the database.
 func (gc *GoodsCreate) OnConflict(fields ...string) *GoodsCreate {
+	gc.conflictColumns = fields
+
 	return gc
 }
 
@@ -105,6 +108,10 @@ func (gc *GoodsCreate) createSpec() (*Goods, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if gc.conflictColumns != nil {
+		_spec.ConflictConstraints = gc.conflictColumns
+	}
 	return _node, _spec
 }
 

@@ -19,8 +19,9 @@ import (
 // CarCreate is the builder for creating a Car entity.
 type CarCreate struct {
 	config
-	mutation *CarMutation
-	hooks    []Hook
+	mutation        *CarMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
@@ -98,6 +99,8 @@ func (cc *CarCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Car entities in the database.
 func (cc *CarCreate) OnConflict(fields ...string) *CarCreate {
+	cc.conflictColumns = fields
+
 	return cc
 }
 
@@ -125,6 +128,10 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if cc.conflictColumns != nil {
+		_spec.ConflictConstraints = cc.conflictColumns
+	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,

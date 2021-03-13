@@ -18,8 +18,9 @@ import (
 // ItemCreate is the builder for creating a Item entity.
 type ItemCreate struct {
 	config
-	mutation *ItemMutation
-	hooks    []Hook
+	mutation        *ItemMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // Mutation returns the ItemMutation object of the builder.
@@ -78,6 +79,8 @@ func (ic *ItemCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Item entities in the database.
 func (ic *ItemCreate) OnConflict(fields ...string) *ItemCreate {
+	ic.conflictColumns = fields
+
 	return ic
 }
 
@@ -105,6 +108,10 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if ic.conflictColumns != nil {
+		_spec.ConflictConstraints = ic.conflictColumns
+	}
 	return _node, _spec
 }
 

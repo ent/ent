@@ -20,8 +20,9 @@ import (
 // FileTypeCreate is the builder for creating a FileType entity.
 type FileTypeCreate struct {
 	config
-	mutation *FileTypeMutation
-	hooks    []Hook
+	mutation        *FileTypeMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.
@@ -161,6 +162,8 @@ func (ftc *FileTypeCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on FileType entities in the database.
 func (ftc *FileTypeCreate) OnConflict(fields ...string) *FileTypeCreate {
+	ftc.conflictColumns = fields
+
 	return ftc
 }
 
@@ -188,6 +191,10 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if ftc.conflictColumns != nil {
+		_spec.ConflictConstraints = ftc.conflictColumns
+	}
 	if value, ok := ftc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

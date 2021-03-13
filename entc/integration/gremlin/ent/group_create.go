@@ -24,8 +24,9 @@ import (
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	config
-	mutation *GroupMutation
-	hooks    []Hook
+	mutation        *GroupMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetActive sets the "active" field.

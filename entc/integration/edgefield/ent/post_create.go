@@ -20,8 +20,9 @@ import (
 // PostCreate is the builder for creating a Post entity.
 type PostCreate struct {
 	config
-	mutation *PostMutation
-	hooks    []Hook
+	mutation        *PostMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetText sets the "text" field.
@@ -108,6 +109,8 @@ func (pc *PostCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Post entities in the database.
 func (pc *PostCreate) OnConflict(fields ...string) *PostCreate {
+	pc.conflictColumns = fields
+
 	return pc
 }
 
@@ -135,6 +138,10 @@ func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if pc.conflictColumns != nil {
+		_spec.ConflictConstraints = pc.conflictColumns
+	}
 	if value, ok := pc.mutation.Text(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

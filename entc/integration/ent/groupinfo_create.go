@@ -20,8 +20,9 @@ import (
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
 type GroupInfoCreate struct {
 	config
-	mutation *GroupInfoMutation
-	hooks    []Hook
+	mutation        *GroupInfoMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetDesc sets the "desc" field.
@@ -130,6 +131,8 @@ func (gic *GroupInfoCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on GroupInfo entities in the database.
 func (gic *GroupInfoCreate) OnConflict(fields ...string) *GroupInfoCreate {
+	gic.conflictColumns = fields
+
 	return gic
 }
 
@@ -157,6 +160,10 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if gic.conflictColumns != nil {
+		_spec.ConflictConstraints = gic.conflictColumns
+	}
 	if value, ok := gic.mutation.Desc(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

@@ -23,8 +23,9 @@ import (
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
 type GroupInfoCreate struct {
 	config
-	mutation *GroupInfoMutation
-	hooks    []Hook
+	mutation        *GroupInfoMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetDesc sets the "desc" field.

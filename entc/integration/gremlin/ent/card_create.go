@@ -25,8 +25,9 @@ import (
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	config
-	mutation *CardMutation
-	hooks    []Hook
+	mutation        *CardMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetCreateTime sets the "create_time" field.

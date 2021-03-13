@@ -18,8 +18,9 @@ import (
 // NodeCreate is the builder for creating a Node entity.
 type NodeCreate struct {
 	config
-	mutation *NodeMutation
-	hooks    []Hook
+	mutation        *NodeMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetValue sets the "value" field.
@@ -130,6 +131,8 @@ func (nc *NodeCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Node entities in the database.
 func (nc *NodeCreate) OnConflict(fields ...string) *NodeCreate {
+	nc.conflictColumns = fields
+
 	return nc
 }
 
@@ -157,6 +160,10 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if nc.conflictColumns != nil {
+		_spec.ConflictConstraints = nc.conflictColumns
+	}
 	if value, ok := nc.mutation.Value(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,

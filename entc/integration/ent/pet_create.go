@@ -21,8 +21,9 @@ import (
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	mutation *PetMutation
-	hooks    []Hook
+	mutation        *PetMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.
@@ -134,6 +135,8 @@ func (pc *PetCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Pet entities in the database.
 func (pc *PetCreate) OnConflict(fields ...string) *PetCreate {
+	pc.conflictColumns = fields
+
 	return pc
 }
 
@@ -161,6 +164,10 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if pc.conflictColumns != nil {
+		_spec.ConflictConstraints = pc.conflictColumns
+	}
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

@@ -20,8 +20,9 @@ import (
 // BlobCreate is the builder for creating a Blob entity.
 type BlobCreate struct {
 	config
-	mutation *BlobMutation
-	hooks    []Hook
+	mutation        *BlobMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetUUID sets the "uuid" field.
@@ -142,6 +143,8 @@ func (bc *BlobCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Blob entities in the database.
 func (bc *BlobCreate) OnConflict(fields ...string) *BlobCreate {
+	bc.conflictColumns = fields
+
 	return bc
 }
 
@@ -167,6 +170,10 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if bc.conflictColumns != nil {
+		_spec.ConflictConstraints = bc.conflictColumns
+	}
 	if id, ok := bc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id

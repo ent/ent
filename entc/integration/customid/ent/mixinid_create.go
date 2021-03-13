@@ -20,8 +20,9 @@ import (
 // MixinIDCreate is the builder for creating a MixinID entity.
 type MixinIDCreate struct {
 	config
-	mutation *MixinIDMutation
-	hooks    []Hook
+	mutation        *MixinIDMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetSomeField sets the "some_field" field.
@@ -113,6 +114,8 @@ func (mic *MixinIDCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on MixinID entities in the database.
 func (mic *MixinIDCreate) OnConflict(fields ...string) *MixinIDCreate {
+	mic.conflictColumns = fields
+
 	return mic
 }
 
@@ -138,6 +141,10 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if mic.conflictColumns != nil {
+		_spec.ConflictConstraints = mic.conflictColumns
+	}
 	if id, ok := mic.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id

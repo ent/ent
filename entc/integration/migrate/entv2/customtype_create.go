@@ -18,8 +18,9 @@ import (
 // CustomTypeCreate is the builder for creating a CustomType entity.
 type CustomTypeCreate struct {
 	config
-	mutation *CustomTypeMutation
-	hooks    []Hook
+	mutation        *CustomTypeMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetCustom sets the "custom" field.
@@ -92,6 +93,8 @@ func (ctc *CustomTypeCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on CustomType entities in the database.
 func (ctc *CustomTypeCreate) OnConflict(fields ...string) *CustomTypeCreate {
+	ctc.conflictColumns = fields
+
 	return ctc
 }
 
@@ -119,6 +122,10 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if ctc.conflictColumns != nil {
+		_spec.ConflictConstraints = ctc.conflictColumns
+	}
 	if value, ok := ctc.mutation.Custom(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,

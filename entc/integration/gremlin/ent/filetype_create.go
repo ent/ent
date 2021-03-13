@@ -22,8 +22,9 @@ import (
 // FileTypeCreate is the builder for creating a FileType entity.
 type FileTypeCreate struct {
 	config
-	mutation *FileTypeMutation
-	hooks    []Hook
+	mutation        *FileTypeMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetName sets the "name" field.

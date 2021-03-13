@@ -19,8 +19,9 @@ import (
 // SpecCreate is the builder for creating a Spec entity.
 type SpecCreate struct {
 	config
-	mutation *SpecMutation
-	hooks    []Hook
+	mutation        *SpecMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.

@@ -18,8 +18,9 @@ import (
 // MediaCreate is the builder for creating a Media entity.
 type MediaCreate struct {
 	config
-	mutation *MediaMutation
-	hooks    []Hook
+	mutation        *MediaMutation
+	hooks           []Hook
+	conflictColumns []string
 }
 
 // SetSource sets the "source" field.
@@ -106,6 +107,8 @@ func (mc *MediaCreate) check() error {
 
 // OnConflict specifies how to handle inserts that conflict with a unique constraint on Media entities in the database.
 func (mc *MediaCreate) OnConflict(fields ...string) *MediaCreate {
+	mc.conflictColumns = fields
+
 	return mc
 }
 
@@ -133,6 +136,10 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+
+	if mc.conflictColumns != nil {
+		_spec.ConflictConstraints = mc.conflictColumns
+	}
 	if value, ok := mc.mutation.Source(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
