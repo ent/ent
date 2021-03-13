@@ -770,9 +770,7 @@ func (i *InsertBuilder) buildConflictHandling() {
 			}
 
 		case dialect.MySQL:
-			i.WriteString("AS new")
 			i.Pad().WriteString("ON DUPLICATE KEY UPDATE ")
-			i.WriteString("DO UPDATE SET ")
 
 			switch i.onConflictOp {
 			case UpdateIgnore:
@@ -789,7 +787,7 @@ func (i *InsertBuilder) buildConflictHandling() {
 						i.Comma()
 					}
 					// update column with the value we tried to insert
-					i.Ident(c).WriteOp(OpEQ).WriteString("new").WriteByte('.').Ident(c)
+					i.Ident(c).WriteOp(OpEQ).WriteString("VALUES(").Ident(c).WriteByte(')')
 				}
 			}
 		}
