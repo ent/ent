@@ -559,8 +559,8 @@ func TestBuilder(t *testing.T) {
 
 		{
 			id:        "example-68",
-			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(UpdateIgnore).ConflictColumns("id"),
-			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") "id" = "id", "email" = "email"`,
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("id"),
+			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "id", "email" = "email"`,
 			wantArgs:  []interface{}{"1", "user@example.com"},
 		},
 

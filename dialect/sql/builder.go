@@ -627,7 +627,7 @@ type InsertBuilder struct {
 	conflictColumns []string
 	updateColumns   []string
 	updateValues    []interface{}
-	onConflictOp    ConflictOp
+	onConflictOp    ConflictResolutionOp
 }
 
 // Insert creates a builder for the `INSERT INTO` statement.
@@ -670,7 +670,7 @@ func (i *InsertBuilder) ConflictColumns(values ...string) *InsertBuilder {
 }
 
 // OnConflict sets the columns to apply the update during upsert.
-func (i *InsertBuilder) OnConflict(op ConflictOp) *InsertBuilder {
+func (i *InsertBuilder) OnConflict(op ConflictResolutionOp) *InsertBuilder {
 	i.onConflictOp = op
 	return i
 }
@@ -750,16 +750,7 @@ func (i *InsertBuilder) buildConflictHandling() {
 				Pad()
 
 			switch i.onConflictOp {
-			case UpdateIgnore:
-				// i.WriteString("DO NOTHING")
-				for j, c := range i.columns {
-					if j > 0 {
-						i.Comma()
-					}
-					// Ignore conflict by setting column to itself
-					i.Ident(c).WriteOp(OpEQ).Ident(c)
-				}
-			case UpdateNewValues:
+			case OpResolveWithNewValues:
 				i.WriteString("DO UPDATE SET").Pad()
 				for j, c := range i.columns {
 					if j > 0 {
@@ -767,28 +758,41 @@ func (i *InsertBuilder) buildConflictHandling() {
 					}
 					i.Ident(c).WriteOp(OpEQ).Ident("excluded").WriteByte('.').Ident(c)
 				}
+			case OpResolveWithIgnore:
+				i.WriteString("DO UPDATE SET").Pad()
+				for j, c := range i.columns {
+					if j > 0 {
+						i.Comma()
+					}
+					// Ignore conflict by setting column to itself e.g. "c" = "c"
+					i.Ident(c).WriteOp(OpEQ).Ident(c)
+				}
+			case OpResolveWithAlternateValues:
+				// Not Implemented
 			}
 
 		case dialect.MySQL:
 			i.Pad().WriteString("ON DUPLICATE KEY UPDATE ")
 
 			switch i.onConflictOp {
-			case UpdateIgnore:
+			case OpResolveWithIgnore:
 				for j, c := range i.columns {
 					if j > 0 {
 						i.Comma()
 					}
-					// Ignore conflict by setting column to itself
+					// Ignore conflict by setting column to itself e.g. `c` = `c`
 					i.Ident(c).WriteOp(OpEQ).Ident(c)
 				}
-			case UpdateNewValues:
+			case OpResolveWithNewValues:
 				for j, c := range i.columns {
 					if j > 0 {
 						i.Comma()
 					}
 					// update column with the value we tried to insert
-					i.Ident(c).WriteOp(OpEQ).WriteString("VALUES(").Ident(c).WriteByte(')')
+					i.Ident(c).WriteOp(OpEQ).WriteString("VALUES").WriteByte('(').Ident(c).WriteByte(')')
 				}
+			case OpResolveWithAlternateValues:
+				// Not Implemented
 			}
 		}
 	}
@@ -2257,14 +2261,14 @@ var ops = [...]string{
 	OpNotNull: "IS NOT NULL",
 }
 
-// A ConflictOp represents a possible action to take when an insert conflict occurrs.
-type ConflictOp int
+// A ConflictResolutionOp represents a possible action to take when an insert conflict occurrs.
+type ConflictResolutionOp int
 
 // Conflict Operations
 const (
-	UpdateNewValues    ConflictOp = iota // Update conflict columns using EXCLUDED.column
-	UpdateIgnore                         // Postgres equivalent to DO NOTHING. MySQL sets column to itself
-	UpdateColumnValues                   // Update using provided values across all rows
+	OpResolveWithNewValues       ConflictResolutionOp = iota // Update conflict columns using EXCLUDED.column (postres) or c = VALUES(c) (mysql)
+	OpResolveWithIgnore                                      // Sets each column to itself to force an update and return the ID, otherwise does not change any data. This may still trigger update hooks in the database.
+	OpResolveWithAlternateValues                             // Update using provided values across all rows.
 )
 
 // WriteOp writes an operator to the builder.

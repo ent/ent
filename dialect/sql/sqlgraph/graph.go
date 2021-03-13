@@ -339,17 +339,18 @@ type (
 	// CreateSpec holds the information for creating
 	// a node in the graph.
 	CreateSpec struct {
-		Table               string
-		Schema              string
-		ID                  *FieldSpec
-		Fields              []*FieldSpec
-		Edges               []*EdgeSpec
-		ConflictConstraints []string
+		Table            string
+		Schema           string
+		ID               *FieldSpec
+		Fields           []*FieldSpec
+		Edges            []*EdgeSpec
+		ConstraintFields []string
 	}
 	// BatchCreateSpec holds the information for creating
 	// multiple nodes in the graph.
 	BatchCreateSpec struct {
-		Nodes []*CreateSpec
+		Nodes                 []*CreateSpec
+		BatchConstraintFields []string
 	}
 )
 
@@ -945,8 +946,8 @@ func (c *creator) setTableColumns(insert *sql.InsertBuilder, edges map[Rel][]*Ed
 func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
 	var res sql.Result
 
-	if len(c.ConflictConstraints) > 0 {
-		insert.ConflictColumns(c.ConflictConstraints...).OnConflict(sql.UpdateNewValues)
+	if len(c.ConstraintFields) > 0 {
+		insert.ConflictColumns(c.ConstraintFields...).OnConflict(sql.OpResolveWithNewValues)
 	}
 
 	// If the id field was provided by the user.
@@ -965,12 +966,9 @@ func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sq
 
 // batchInsert inserts a batch of nodes to their table and sets their ID if it wasn't provided by the user.
 func (c *creator) batchInsert(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
-	if c.Nodes[0].ConflictConstraints != nil {
-		// Bulk upserts can only update columns, either using original values (from createSpec) or new values (from upsertSpec*)
-		// DO NOTHING is not supported because unchanged records don't return IDs
-
-		// FIXME(iv) need to add DSL for bulk conflicts
-		insert.ConflictColumns(c.Nodes[0].ConflictConstraints...).OnConflict(sql.UpdateNewValues)
+	if c.BatchConstraintFields != nil {
+		// TODO (iv): Add a DSL method for changing conflict resolution op
+		insert.ConflictColumns(c.BatchConstraintFields...).OnConflict(sql.OpResolveWithNewValues)
 	}
 
 	ids, err := insertLastIDs(ctx, tx, insert.Returning(c.Nodes[0].ID.Column))
