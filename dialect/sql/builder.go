@@ -2263,7 +2263,7 @@ type ConflictOp int
 // Conflict Operations
 const (
 	UpdateNewValues    ConflictOp = iota // Update conflict columns using EXCLUDED.column
-	UpdateIgnore                         // Postgres equivelant to DO NOTHING. MySQL sets column to itself
+	UpdateIgnore                         // Postgres equivalent to DO NOTHING. MySQL sets column to itself
 	UpdateColumnValues                   // Update using provided values across all rows
 )
 
