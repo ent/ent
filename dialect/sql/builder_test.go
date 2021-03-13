@@ -1498,14 +1498,14 @@ func TestBuilder(t *testing.T) {
 				Or().
 				Where(And(NEQ("f", "f"), NEQ("g", "g"))),
 			wantQuery: strings.NewReplacer("\n", "", "\t", "").Replace(`
-SELECT * FROM "users"
-WHERE
-	(
-		(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6)))
-		AND
-		(("a" = $7 OR ("b" = $8 AND "c" = $9)) AND (NOT ("d" IS NULL OR "e" IS NOT NULL)))
-	)
-	OR ("f" <> $10 AND "g" <> $11)`),
+			SELECT * FROM "users"
+			 WHERE
+				 (
+					(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6)))
+					 AND
+					 (("a" = $7 OR ("b" = $8 AND "c" = $9)) AND (NOT ("d" IS NULL OR "e" IS NOT NULL)))
+				)
+				 OR ("f" <> $10 AND "g" <> $11)`),
 			wantArgs: []interface{}{1, 2, 3, 2, 4, 5, "a", "b", "c", "f", "g"},
 		},
 		{
