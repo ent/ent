@@ -20,9 +20,9 @@ import (
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	config
-	mutation        *GroupMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *GroupMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -65,6 +65,10 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 		err  error
 		node *Group
 	)
+	err = gc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	gc.defaults()
 	if len(gc.hooks) == 0 {
 		if err = gc.check(); err != nil {
@@ -120,10 +124,10 @@ func (gc *GroupCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Group entities in the database.
-func (gc *GroupCreate) OnConflict(fields ...string) *GroupCreate {
-	gc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Group entities.
+func (gc *GroupCreate) OnConflict(constraintField string, otherFields ...string) *GroupCreate {
+	gc.constraintFields = []string{constraintField}
+	gc.constraintFields = append(gc.constraintFields, otherFields...)
 	return gc
 }
 
@@ -152,8 +156,8 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if gc.conflictColumns != nil {
-		_spec.ConflictConstraints = gc.conflictColumns
+	if gc.constraintFields != nil {
+		_spec.ConstraintFields = gc.constraintFields
 	}
 	_spec.Schema = gc.schemaConfig.Group
 	if value, ok := gc.mutation.Name(); ok {
@@ -187,14 +191,39 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Group entities.
+func (gc *GroupCreate) validateUpsertConstraints() error {
+	for _, f := range gc.constraintFields {
+		if !group.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // GroupCreateBulk is the builder for creating many Group entities in bulk.
 type GroupCreateBulk struct {
 	config
-	builders []*GroupCreate
+	builders              []*GroupCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Group entities.
+func (gcb *GroupCreateBulk) OnConflict(constraintField string, otherFields ...string) *GroupCreateBulk {
+	gcb.batchConstraintFields = []string{constraintField}
+	gcb.batchConstraintFields = append(gcb.batchConstraintFields, otherFields...)
+
+	return gcb
 }
 
 // Save creates the Group entities in the database.
 func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
+	err := gcb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(gcb.builders))
 	nodes := make([]*Group, len(gcb.builders))
 	mutators := make([]Mutator, len(gcb.builders))
@@ -217,7 +246,7 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 					_, err = mutators[i+1].Mutate(root, gcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, gcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: gcb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -252,4 +281,15 @@ func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Group entities.
+func (gcb *GroupCreateBulk) validateUpsertConstraints() error {
+	for _, f := range gcb.batchConstraintFields {
+		if !group.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

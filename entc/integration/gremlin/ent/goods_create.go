@@ -19,9 +19,9 @@ import (
 // GoodsCreate is the builder for creating a Goods entity.
 type GoodsCreate struct {
 	config
-	mutation        *GoodsMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *GoodsMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // Mutation returns the GoodsMutation object of the builder.
@@ -35,6 +35,10 @@ func (gc *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
 		err  error
 		node *Goods
 	)
+	err = gc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(gc.hooks) == 0 {
 		if err = gc.check(); err != nil {
 			return nil, err
@@ -102,5 +106,6 @@ func (gc *GoodsCreate) gremlin() *dsl.Traversal {
 // GoodsCreateBulk is the builder for creating many Goods entities in bulk.
 type GoodsCreateBulk struct {
 	config
-	builders []*GoodsCreate
+	builders              []*GoodsCreate
+	batchConstraintFields []string
 }

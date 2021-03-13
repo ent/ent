@@ -19,9 +19,9 @@ import (
 // SpecCreate is the builder for creating a Spec entity.
 type SpecCreate struct {
 	config
-	mutation        *SpecMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *SpecMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
@@ -50,6 +50,10 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 		err  error
 		node *Spec
 	)
+	err = sc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err
@@ -120,5 +124,6 @@ func (sc *SpecCreate) gremlin() *dsl.Traversal {
 // SpecCreateBulk is the builder for creating many Spec entities in bulk.
 type SpecCreateBulk struct {
 	config
-	builders []*SpecCreate
+	builders              []*SpecCreate
+	batchConstraintFields []string
 }

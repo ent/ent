@@ -23,9 +23,9 @@ import (
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
 type GroupInfoCreate struct {
 	config
-	mutation        *GroupInfoMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *GroupInfoMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetDesc sets the "desc" field.
@@ -74,6 +74,10 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 		err  error
 		node *GroupInfo
 	)
+	err = gic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	gic.defaults()
 	if len(gic.hooks) == 0 {
 		if err = gic.check(); err != nil {
@@ -181,5 +185,6 @@ func (gic *GroupInfoCreate) gremlin() *dsl.Traversal {
 // GroupInfoCreateBulk is the builder for creating many GroupInfo entities in bulk.
 type GroupInfoCreateBulk struct {
 	config
-	builders []*GroupInfoCreate
+	builders              []*GroupInfoCreate
+	batchConstraintFields []string
 }

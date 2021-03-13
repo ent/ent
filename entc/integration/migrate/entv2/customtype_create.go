@@ -18,9 +18,9 @@ import (
 // CustomTypeCreate is the builder for creating a CustomType entity.
 type CustomTypeCreate struct {
 	config
-	mutation        *CustomTypeMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *CustomTypeMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetCustom sets the "custom" field.
@@ -48,6 +48,10 @@ func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 		err  error
 		node *CustomType
 	)
+	err = ctc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(ctc.hooks) == 0 {
 		if err = ctc.check(); err != nil {
 			return nil, err
@@ -91,10 +95,10 @@ func (ctc *CustomTypeCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on CustomType entities in the database.
-func (ctc *CustomTypeCreate) OnConflict(fields ...string) *CustomTypeCreate {
-	ctc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on CustomType entities.
+func (ctc *CustomTypeCreate) OnConflict(constraintField string, otherFields ...string) *CustomTypeCreate {
+	ctc.constraintFields = []string{constraintField}
+	ctc.constraintFields = append(ctc.constraintFields, otherFields...)
 	return ctc
 }
 
@@ -123,8 +127,8 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if ctc.conflictColumns != nil {
-		_spec.ConflictConstraints = ctc.conflictColumns
+	if ctc.constraintFields != nil {
+		_spec.ConstraintFields = ctc.constraintFields
 	}
 	if value, ok := ctc.mutation.Custom(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -137,14 +141,39 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on CustomType entities.
+func (ctc *CustomTypeCreate) validateUpsertConstraints() error {
+	for _, f := range ctc.constraintFields {
+		if !customtype.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // CustomTypeCreateBulk is the builder for creating many CustomType entities in bulk.
 type CustomTypeCreateBulk struct {
 	config
-	builders []*CustomTypeCreate
+	builders              []*CustomTypeCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on CustomType entities.
+func (ctcb *CustomTypeCreateBulk) OnConflict(constraintField string, otherFields ...string) *CustomTypeCreateBulk {
+	ctcb.batchConstraintFields = []string{constraintField}
+	ctcb.batchConstraintFields = append(ctcb.batchConstraintFields, otherFields...)
+
+	return ctcb
 }
 
 // Save creates the CustomType entities in the database.
 func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, error) {
+	err := ctcb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(ctcb.builders))
 	nodes := make([]*CustomType, len(ctcb.builders))
 	mutators := make([]Mutator, len(ctcb.builders))
@@ -166,7 +195,7 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 					_, err = mutators[i+1].Mutate(root, ctcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ctcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, ctcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: ctcb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -201,4 +230,15 @@ func (ctcb *CustomTypeCreateBulk) SaveX(ctx context.Context) []*CustomType {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted CustomType entities.
+func (ctcb *CustomTypeCreateBulk) validateUpsertConstraints() error {
+	for _, f := range ctcb.batchConstraintFields {
+		if !customtype.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

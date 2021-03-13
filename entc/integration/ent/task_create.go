@@ -20,9 +20,9 @@ import (
 // TaskCreate is the builder for creating a Task entity.
 type TaskCreate struct {
 	config
-	mutation        *TaskMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *TaskMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetPriority sets the "priority" field.
@@ -50,6 +50,10 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 		err  error
 		node *Task
 	)
+	err = tc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	tc.defaults()
 	if len(tc.hooks) == 0 {
 		if err = tc.check(); err != nil {
@@ -110,10 +114,10 @@ func (tc *TaskCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Task entities in the database.
-func (tc *TaskCreate) OnConflict(fields ...string) *TaskCreate {
-	tc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Task entities.
+func (tc *TaskCreate) OnConflict(constraintField string, otherFields ...string) *TaskCreate {
+	tc.constraintFields = []string{constraintField}
+	tc.constraintFields = append(tc.constraintFields, otherFields...)
 	return tc
 }
 
@@ -142,8 +146,8 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if tc.conflictColumns != nil {
-		_spec.ConflictConstraints = tc.conflictColumns
+	if tc.constraintFields != nil {
+		_spec.ConstraintFields = tc.constraintFields
 	}
 	if value, ok := tc.mutation.Priority(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -156,14 +160,39 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Task entities.
+func (tc *TaskCreate) validateUpsertConstraints() error {
+	for _, f := range tc.constraintFields {
+		if !task.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
 	config
-	builders []*TaskCreate
+	builders              []*TaskCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Task entities.
+func (tcb *TaskCreateBulk) OnConflict(constraintField string, otherFields ...string) *TaskCreateBulk {
+	tcb.batchConstraintFields = []string{constraintField}
+	tcb.batchConstraintFields = append(tcb.batchConstraintFields, otherFields...)
+
+	return tcb
 }
 
 // Save creates the Task entities in the database.
 func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
+	err := tcb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
 	nodes := make([]*Task, len(tcb.builders))
 	mutators := make([]Mutator, len(tcb.builders))
@@ -186,7 +215,7 @@ func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, tcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, tcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: tcb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -221,4 +250,15 @@ func (tcb *TaskCreateBulk) SaveX(ctx context.Context) []*Task {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Task entities.
+func (tcb *TaskCreateBulk) validateUpsertConstraints() error {
+	for _, f := range tcb.batchConstraintFields {
+		if !task.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

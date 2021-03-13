@@ -22,9 +22,9 @@ import (
 // CommentCreate is the builder for creating a Comment entity.
 type CommentCreate struct {
 	config
-	mutation        *CommentMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *CommentMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetUniqueInt sets the "unique_int" field.
@@ -64,6 +64,10 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 		err  error
 		node *Comment
 	)
+	err = cc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
 			return nil, err
@@ -166,5 +170,6 @@ func (cc *CommentCreate) gremlin() *dsl.Traversal {
 // CommentCreateBulk is the builder for creating many Comment entities in bulk.
 type CommentCreateBulk struct {
 	config
-	builders []*CommentCreate
+	builders              []*CommentCreate
+	batchConstraintFields []string
 }

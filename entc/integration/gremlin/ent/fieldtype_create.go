@@ -27,9 +27,9 @@ import (
 // FieldTypeCreate is the builder for creating a FieldType entity.
 type FieldTypeCreate struct {
 	config
-	mutation        *FieldTypeMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *FieldTypeMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetInt sets the "int" field.
@@ -593,6 +593,10 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 		err  error
 		node *FieldType
 	)
+	err = ftc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	ftc.defaults()
 	if len(ftc.hooks) == 0 {
 		if err = ftc.check(); err != nil {
@@ -876,5 +880,6 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 // FieldTypeCreateBulk is the builder for creating many FieldType entities in bulk.
 type FieldTypeCreateBulk struct {
 	config
-	builders []*FieldTypeCreate
+	builders              []*FieldTypeCreate
+	batchConstraintFields []string
 }

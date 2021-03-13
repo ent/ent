@@ -20,9 +20,9 @@ import (
 // MixinIDCreate is the builder for creating a MixinID entity.
 type MixinIDCreate struct {
 	config
-	mutation        *MixinIDMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *MixinIDMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetSomeField sets the "some_field" field.
@@ -54,6 +54,10 @@ func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 		err  error
 		node *MixinID
 	)
+	err = mic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	mic.defaults()
 	if len(mic.hooks) == 0 {
 		if err = mic.check(); err != nil {
@@ -112,10 +116,10 @@ func (mic *MixinIDCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on MixinID entities in the database.
-func (mic *MixinIDCreate) OnConflict(fields ...string) *MixinIDCreate {
-	mic.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on MixinID entities.
+func (mic *MixinIDCreate) OnConflict(constraintField string, otherFields ...string) *MixinIDCreate {
+	mic.constraintFields = []string{constraintField}
+	mic.constraintFields = append(mic.constraintFields, otherFields...)
 	return mic
 }
 
@@ -142,8 +146,8 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if mic.conflictColumns != nil {
-		_spec.ConflictConstraints = mic.conflictColumns
+	if mic.constraintFields != nil {
+		_spec.ConstraintFields = mic.constraintFields
 	}
 	if id, ok := mic.mutation.ID(); ok {
 		_node.ID = id
@@ -168,14 +172,39 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on MixinID entities.
+func (mic *MixinIDCreate) validateUpsertConstraints() error {
+	for _, f := range mic.constraintFields {
+		if !mixinid.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // MixinIDCreateBulk is the builder for creating many MixinID entities in bulk.
 type MixinIDCreateBulk struct {
 	config
-	builders []*MixinIDCreate
+	builders              []*MixinIDCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on MixinID entities.
+func (micb *MixinIDCreateBulk) OnConflict(constraintField string, otherFields ...string) *MixinIDCreateBulk {
+	micb.batchConstraintFields = []string{constraintField}
+	micb.batchConstraintFields = append(micb.batchConstraintFields, otherFields...)
+
+	return micb
 }
 
 // Save creates the MixinID entities in the database.
 func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
+	err := micb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(micb.builders))
 	nodes := make([]*MixinID, len(micb.builders))
 	mutators := make([]Mutator, len(micb.builders))
@@ -198,7 +227,7 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 					_, err = mutators[i+1].Mutate(root, micb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, micb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, micb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: micb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -231,4 +260,15 @@ func (micb *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted MixinID entities.
+func (micb *MixinIDCreateBulk) validateUpsertConstraints() error {
+	for _, f := range micb.batchConstraintFields {
+		if !mixinid.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

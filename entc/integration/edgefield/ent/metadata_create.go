@@ -20,9 +20,9 @@ import (
 // MetadataCreate is the builder for creating a Metadata entity.
 type MetadataCreate struct {
 	config
-	mutation        *MetadataMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *MetadataMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetAge sets the "age" field.
@@ -75,6 +75,10 @@ func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 		err  error
 		node *Metadata
 	)
+	err = mc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	mc.defaults()
 	if len(mc.hooks) == 0 {
 		if err = mc.check(); err != nil {
@@ -130,10 +134,10 @@ func (mc *MetadataCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Metadata entities in the database.
-func (mc *MetadataCreate) OnConflict(fields ...string) *MetadataCreate {
-	mc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Metadata entities.
+func (mc *MetadataCreate) OnConflict(constraintField string, otherFields ...string) *MetadataCreate {
+	mc.constraintFields = []string{constraintField}
+	mc.constraintFields = append(mc.constraintFields, otherFields...)
 	return mc
 }
 
@@ -164,8 +168,8 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if mc.conflictColumns != nil {
-		_spec.ConflictConstraints = mc.conflictColumns
+	if mc.constraintFields != nil {
+		_spec.ConstraintFields = mc.constraintFields
 	}
 	if id, ok := mc.mutation.ID(); ok {
 		_node.ID = id
@@ -202,14 +206,39 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Metadata entities.
+func (mc *MetadataCreate) validateUpsertConstraints() error {
+	for _, f := range mc.constraintFields {
+		if !metadata.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // MetadataCreateBulk is the builder for creating many Metadata entities in bulk.
 type MetadataCreateBulk struct {
 	config
-	builders []*MetadataCreate
+	builders              []*MetadataCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Metadata entities.
+func (mcb *MetadataCreateBulk) OnConflict(constraintField string, otherFields ...string) *MetadataCreateBulk {
+	mcb.batchConstraintFields = []string{constraintField}
+	mcb.batchConstraintFields = append(mcb.batchConstraintFields, otherFields...)
+
+	return mcb
 }
 
 // Save creates the Metadata entities in the database.
 func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
+	err := mcb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))
 	nodes := make([]*Metadata, len(mcb.builders))
 	mutators := make([]Mutator, len(mcb.builders))
@@ -232,7 +261,7 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, mcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: mcb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -269,4 +298,15 @@ func (mcb *MetadataCreateBulk) SaveX(ctx context.Context) []*Metadata {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Metadata entities.
+func (mcb *MetadataCreateBulk) validateUpsertConstraints() error {
+	for _, f := range mcb.batchConstraintFields {
+		if !metadata.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

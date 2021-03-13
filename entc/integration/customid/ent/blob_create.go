@@ -20,9 +20,9 @@ import (
 // BlobCreate is the builder for creating a Blob entity.
 type BlobCreate struct {
 	config
-	mutation        *BlobMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *BlobMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetUUID sets the "uuid" field.
@@ -82,6 +82,10 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 		err  error
 		node *Blob
 	)
+	err = bc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	bc.defaults()
 	if len(bc.hooks) == 0 {
 		if err = bc.check(); err != nil {
@@ -141,10 +145,10 @@ func (bc *BlobCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Blob entities in the database.
-func (bc *BlobCreate) OnConflict(fields ...string) *BlobCreate {
-	bc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Blob entities.
+func (bc *BlobCreate) OnConflict(constraintField string, otherFields ...string) *BlobCreate {
+	bc.constraintFields = []string{constraintField}
+	bc.constraintFields = append(bc.constraintFields, otherFields...)
 	return bc
 }
 
@@ -171,8 +175,8 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if bc.conflictColumns != nil {
-		_spec.ConflictConstraints = bc.conflictColumns
+	if bc.constraintFields != nil {
+		_spec.ConstraintFields = bc.constraintFields
 	}
 	if id, ok := bc.mutation.ID(); ok {
 		_node.ID = id
@@ -228,14 +232,39 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Blob entities.
+func (bc *BlobCreate) validateUpsertConstraints() error {
+	for _, f := range bc.constraintFields {
+		if !blob.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // BlobCreateBulk is the builder for creating many Blob entities in bulk.
 type BlobCreateBulk struct {
 	config
-	builders []*BlobCreate
+	builders              []*BlobCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Blob entities.
+func (bcb *BlobCreateBulk) OnConflict(constraintField string, otherFields ...string) *BlobCreateBulk {
+	bcb.batchConstraintFields = []string{constraintField}
+	bcb.batchConstraintFields = append(bcb.batchConstraintFields, otherFields...)
+
+	return bcb
 }
 
 // Save creates the Blob entities in the database.
 func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
+	err := bcb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
 	nodes := make([]*Blob, len(bcb.builders))
 	mutators := make([]Mutator, len(bcb.builders))
@@ -258,7 +287,7 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, bcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, bcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: bcb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -291,4 +320,15 @@ func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Blob entities.
+func (bcb *BlobCreateBulk) validateUpsertConstraints() error {
+	for _, f := range bcb.batchConstraintFields {
+		if !blob.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

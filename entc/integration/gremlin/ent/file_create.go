@@ -24,9 +24,9 @@ import (
 // FileCreate is the builder for creating a File entity.
 type FileCreate struct {
 	config
-	mutation        *FileMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *FileMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetSize sets the "size" field.
@@ -155,6 +155,10 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 		err  error
 		node *File
 	)
+	err = fc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	fc.defaults()
 	if len(fc.hooks) == 0 {
 		if err = fc.check(); err != nil {
@@ -282,5 +286,6 @@ func (fc *FileCreate) gremlin() *dsl.Traversal {
 // FileCreateBulk is the builder for creating many File entities in bulk.
 type FileCreateBulk struct {
 	config
-	builders []*FileCreate
+	builders              []*FileCreate
+	batchConstraintFields []string
 }

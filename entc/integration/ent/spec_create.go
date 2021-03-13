@@ -19,9 +19,9 @@ import (
 // SpecCreate is the builder for creating a Spec entity.
 type SpecCreate struct {
 	config
-	mutation        *SpecMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *SpecMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
@@ -50,6 +50,10 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 		err  error
 		node *Spec
 	)
+	err = sc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err
@@ -93,10 +97,10 @@ func (sc *SpecCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Spec entities in the database.
-func (sc *SpecCreate) OnConflict(fields ...string) *SpecCreate {
-	sc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Spec entities.
+func (sc *SpecCreate) OnConflict(constraintField string, otherFields ...string) *SpecCreate {
+	sc.constraintFields = []string{constraintField}
+	sc.constraintFields = append(sc.constraintFields, otherFields...)
 	return sc
 }
 
@@ -125,8 +129,8 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if sc.conflictColumns != nil {
-		_spec.ConflictConstraints = sc.conflictColumns
+	if sc.constraintFields != nil {
+		_spec.ConstraintFields = sc.constraintFields
 	}
 	if nodes := sc.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -150,14 +154,39 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Spec entities.
+func (sc *SpecCreate) validateUpsertConstraints() error {
+	for _, f := range sc.constraintFields {
+		if !spec.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // SpecCreateBulk is the builder for creating many Spec entities in bulk.
 type SpecCreateBulk struct {
 	config
-	builders []*SpecCreate
+	builders              []*SpecCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Spec entities.
+func (scb *SpecCreateBulk) OnConflict(constraintField string, otherFields ...string) *SpecCreateBulk {
+	scb.batchConstraintFields = []string{constraintField}
+	scb.batchConstraintFields = append(scb.batchConstraintFields, otherFields...)
+
+	return scb
 }
 
 // Save creates the Spec entities in the database.
 func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
+	err := scb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(scb.builders))
 	nodes := make([]*Spec, len(scb.builders))
 	mutators := make([]Mutator, len(scb.builders))
@@ -179,7 +208,7 @@ func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
 					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, scb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, scb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: scb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -214,4 +243,15 @@ func (scb *SpecCreateBulk) SaveX(ctx context.Context) []*Spec {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Spec entities.
+func (scb *SpecCreateBulk) validateUpsertConstraints() error {
+	for _, f := range scb.batchConstraintFields {
+		if !spec.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

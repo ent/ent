@@ -19,9 +19,9 @@ import (
 // ItemCreate is the builder for creating a Item entity.
 type ItemCreate struct {
 	config
-	mutation        *ItemMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *ItemMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // Mutation returns the ItemMutation object of the builder.
@@ -35,6 +35,10 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 		err  error
 		node *Item
 	)
+	err = ic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err
@@ -102,5 +106,6 @@ func (ic *ItemCreate) gremlin() *dsl.Traversal {
 // ItemCreateBulk is the builder for creating many Item entities in bulk.
 type ItemCreateBulk struct {
 	config
-	builders []*ItemCreate
+	builders              []*ItemCreate
+	batchConstraintFields []string
 }

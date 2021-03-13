@@ -21,9 +21,9 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	mutation        *UserMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *UserMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -81,6 +81,10 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
+	err = uc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	uc.defaults()
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
@@ -136,10 +140,10 @@ func (uc *UserCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on User entities in the database.
-func (uc *UserCreate) OnConflict(fields ...string) *UserCreate {
-	uc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on User entities.
+func (uc *UserCreate) OnConflict(constraintField string, otherFields ...string) *UserCreate {
+	uc.constraintFields = []string{constraintField}
+	uc.constraintFields = append(uc.constraintFields, otherFields...)
 	return uc
 }
 
@@ -168,8 +172,8 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if uc.conflictColumns != nil {
-		_spec.ConflictConstraints = uc.conflictColumns
+	if uc.constraintFields != nil {
+		_spec.ConstraintFields = uc.constraintFields
 	}
 	_spec.Schema = uc.schemaConfig.User
 	if value, ok := uc.mutation.Name(); ok {
@@ -223,14 +227,39 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on User entities.
+func (uc *UserCreate) validateUpsertConstraints() error {
+	for _, f := range uc.constraintFields {
+		if !user.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
-	builders []*UserCreate
+	builders              []*UserCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on User entities.
+func (ucb *UserCreateBulk) OnConflict(constraintField string, otherFields ...string) *UserCreateBulk {
+	ucb.batchConstraintFields = []string{constraintField}
+	ucb.batchConstraintFields = append(ucb.batchConstraintFields, otherFields...)
+
+	return ucb
 }
 
 // Save creates the User entities in the database.
 func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
+	err := ucb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(ucb.builders))
 	nodes := make([]*User, len(ucb.builders))
 	mutators := make([]Mutator, len(ucb.builders))
@@ -253,7 +282,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ucb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, ucb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: ucb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -288,4 +317,15 @@ func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted User entities.
+func (ucb *UserCreateBulk) validateUpsertConstraints() error {
+	for _, f := range ucb.batchConstraintFields {
+		if !user.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

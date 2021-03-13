@@ -22,9 +22,9 @@ import (
 // FileTypeCreate is the builder for creating a FileType entity.
 type FileTypeCreate struct {
 	config
-	mutation        *FileTypeMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *FileTypeMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -87,6 +87,10 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 		err  error
 		node *FileType
 	)
+	err = ftc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	ftc.defaults()
 	if len(ftc.hooks) == 0 {
 		if err = ftc.check(); err != nil {
@@ -218,5 +222,6 @@ func (ftc *FileTypeCreate) gremlin() *dsl.Traversal {
 // FileTypeCreateBulk is the builder for creating many FileType entities in bulk.
 type FileTypeCreateBulk struct {
 	config
-	builders []*FileTypeCreate
+	builders              []*FileTypeCreate
+	batchConstraintFields []string
 }

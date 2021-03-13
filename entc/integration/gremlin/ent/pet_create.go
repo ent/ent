@@ -24,9 +24,9 @@ import (
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	mutation        *PetMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *PetMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -90,6 +90,10 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 		err  error
 		node *Pet
 	)
+	err = pc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -188,5 +192,6 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 // PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
-	builders []*PetCreate
+	builders              []*PetCreate
+	batchConstraintFields []string
 }

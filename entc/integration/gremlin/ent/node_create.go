@@ -21,9 +21,9 @@ import (
 // NodeCreate is the builder for creating a Node entity.
 type NodeCreate struct {
 	config
-	mutation        *NodeMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *NodeMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetValue sets the "value" field.
@@ -89,6 +89,10 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 		err  error
 		node *Node
 	)
+	err = nc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(nc.hooks) == 0 {
 		if err = nc.check(); err != nil {
 			return nil, err
@@ -185,5 +189,6 @@ func (nc *NodeCreate) gremlin() *dsl.Traversal {
 // NodeCreateBulk is the builder for creating many Node entities in bulk.
 type NodeCreateBulk struct {
 	config
-	builders []*NodeCreate
+	builders              []*NodeCreate
+	batchConstraintFields []string
 }

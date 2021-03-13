@@ -20,9 +20,9 @@ import (
 // FileTypeCreate is the builder for creating a FileType entity.
 type FileTypeCreate struct {
 	config
-	mutation        *FileTypeMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *FileTypeMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -85,6 +85,10 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 		err  error
 		node *FileType
 	)
+	err = ftc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	ftc.defaults()
 	if len(ftc.hooks) == 0 {
 		if err = ftc.check(); err != nil {
@@ -160,10 +164,10 @@ func (ftc *FileTypeCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on FileType entities in the database.
-func (ftc *FileTypeCreate) OnConflict(fields ...string) *FileTypeCreate {
-	ftc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on FileType entities.
+func (ftc *FileTypeCreate) OnConflict(constraintField string, otherFields ...string) *FileTypeCreate {
+	ftc.constraintFields = []string{constraintField}
+	ftc.constraintFields = append(ftc.constraintFields, otherFields...)
 	return ftc
 }
 
@@ -192,8 +196,8 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if ftc.conflictColumns != nil {
-		_spec.ConflictConstraints = ftc.conflictColumns
+	if ftc.constraintFields != nil {
+		_spec.ConstraintFields = ftc.constraintFields
 	}
 	if value, ok := ftc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -241,14 +245,39 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on FileType entities.
+func (ftc *FileTypeCreate) validateUpsertConstraints() error {
+	for _, f := range ftc.constraintFields {
+		if !filetype.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // FileTypeCreateBulk is the builder for creating many FileType entities in bulk.
 type FileTypeCreateBulk struct {
 	config
-	builders []*FileTypeCreate
+	builders              []*FileTypeCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on FileType entities.
+func (ftcb *FileTypeCreateBulk) OnConflict(constraintField string, otherFields ...string) *FileTypeCreateBulk {
+	ftcb.batchConstraintFields = []string{constraintField}
+	ftcb.batchConstraintFields = append(ftcb.batchConstraintFields, otherFields...)
+
+	return ftcb
 }
 
 // Save creates the FileType entities in the database.
 func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
+	err := ftcb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(ftcb.builders))
 	nodes := make([]*FileType, len(ftcb.builders))
 	mutators := make([]Mutator, len(ftcb.builders))
@@ -271,7 +300,7 @@ func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 					_, err = mutators[i+1].Mutate(root, ftcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: ftcb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -306,4 +335,15 @@ func (ftcb *FileTypeCreateBulk) SaveX(ctx context.Context) []*FileType {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted FileType entities.
+func (ftcb *FileTypeCreateBulk) validateUpsertConstraints() error {
+	for _, f := range ftcb.batchConstraintFields {
+		if !filetype.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

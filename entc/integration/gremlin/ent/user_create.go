@@ -22,9 +22,9 @@ import (
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
-	mutation        *UserMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *UserMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetOptionalInt sets the "optional_int" field.
@@ -343,6 +343,10 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
+	err = uc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	uc.defaults()
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
@@ -556,5 +560,6 @@ func (uc *UserCreate) gremlin() *dsl.Traversal {
 // UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
-	builders []*UserCreate
+	builders              []*UserCreate
+	batchConstraintFields []string
 }

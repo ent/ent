@@ -18,9 +18,9 @@ import (
 // ItemCreate is the builder for creating a Item entity.
 type ItemCreate struct {
 	config
-	mutation        *ItemMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *ItemMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // Mutation returns the ItemMutation object of the builder.
@@ -34,6 +34,10 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 		err  error
 		node *Item
 	)
+	err = ic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err
@@ -77,10 +81,10 @@ func (ic *ItemCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Item entities in the database.
-func (ic *ItemCreate) OnConflict(fields ...string) *ItemCreate {
-	ic.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Item entities.
+func (ic *ItemCreate) OnConflict(constraintField string, otherFields ...string) *ItemCreate {
+	ic.constraintFields = []string{constraintField}
+	ic.constraintFields = append(ic.constraintFields, otherFields...)
 	return ic
 }
 
@@ -109,20 +113,45 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if ic.conflictColumns != nil {
-		_spec.ConflictConstraints = ic.conflictColumns
+	if ic.constraintFields != nil {
+		_spec.ConstraintFields = ic.constraintFields
 	}
 	return _node, _spec
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Item entities.
+func (ic *ItemCreate) validateUpsertConstraints() error {
+	for _, f := range ic.constraintFields {
+		if !item.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }
 
 // ItemCreateBulk is the builder for creating many Item entities in bulk.
 type ItemCreateBulk struct {
 	config
-	builders []*ItemCreate
+	builders              []*ItemCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Item entities.
+func (icb *ItemCreateBulk) OnConflict(constraintField string, otherFields ...string) *ItemCreateBulk {
+	icb.batchConstraintFields = []string{constraintField}
+	icb.batchConstraintFields = append(icb.batchConstraintFields, otherFields...)
+
+	return icb
 }
 
 // Save creates the Item entities in the database.
 func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
+	err := icb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(icb.builders))
 	nodes := make([]*Item, len(icb.builders))
 	mutators := make([]Mutator, len(icb.builders))
@@ -144,7 +173,7 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 					_, err = mutators[i+1].Mutate(root, icb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, icb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, icb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: icb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -179,4 +208,15 @@ func (icb *ItemCreateBulk) SaveX(ctx context.Context) []*Item {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Item entities.
+func (icb *ItemCreateBulk) validateUpsertConstraints() error {
+	for _, f := range icb.batchConstraintFields {
+		if !item.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

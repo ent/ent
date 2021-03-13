@@ -21,9 +21,9 @@ import (
 // InfoCreate is the builder for creating a Info entity.
 type InfoCreate struct {
 	config
-	mutation        *InfoMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *InfoMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetContent sets the "content" field.
@@ -68,6 +68,10 @@ func (ic *InfoCreate) Save(ctx context.Context) (*Info, error) {
 		err  error
 		node *Info
 	)
+	err = ic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err
@@ -114,10 +118,10 @@ func (ic *InfoCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Info entities in the database.
-func (ic *InfoCreate) OnConflict(fields ...string) *InfoCreate {
-	ic.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Info entities.
+func (ic *InfoCreate) OnConflict(constraintField string, otherFields ...string) *InfoCreate {
+	ic.constraintFields = []string{constraintField}
+	ic.constraintFields = append(ic.constraintFields, otherFields...)
 	return ic
 }
 
@@ -148,8 +152,8 @@ func (ic *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if ic.conflictColumns != nil {
-		_spec.ConflictConstraints = ic.conflictColumns
+	if ic.constraintFields != nil {
+		_spec.ConstraintFields = ic.constraintFields
 	}
 	if id, ok := ic.mutation.ID(); ok {
 		_node.ID = id
@@ -186,14 +190,39 @@ func (ic *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Info entities.
+func (ic *InfoCreate) validateUpsertConstraints() error {
+	for _, f := range ic.constraintFields {
+		if !info.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // InfoCreateBulk is the builder for creating many Info entities in bulk.
 type InfoCreateBulk struct {
 	config
-	builders []*InfoCreate
+	builders              []*InfoCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Info entities.
+func (icb *InfoCreateBulk) OnConflict(constraintField string, otherFields ...string) *InfoCreateBulk {
+	icb.batchConstraintFields = []string{constraintField}
+	icb.batchConstraintFields = append(icb.batchConstraintFields, otherFields...)
+
+	return icb
 }
 
 // Save creates the Info entities in the database.
 func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
+	err := icb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(icb.builders))
 	nodes := make([]*Info, len(icb.builders))
 	mutators := make([]Mutator, len(icb.builders))
@@ -215,7 +244,7 @@ func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 					_, err = mutators[i+1].Mutate(root, icb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, icb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, icb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: icb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -252,4 +281,15 @@ func (icb *InfoCreateBulk) SaveX(ctx context.Context) []*Info {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Info entities.
+func (icb *InfoCreateBulk) validateUpsertConstraints() error {
+	for _, f := range icb.batchConstraintFields {
+		if !info.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

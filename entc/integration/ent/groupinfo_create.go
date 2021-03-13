@@ -20,9 +20,9 @@ import (
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
 type GroupInfoCreate struct {
 	config
-	mutation        *GroupInfoMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *GroupInfoMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetDesc sets the "desc" field.
@@ -71,6 +71,10 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 		err  error
 		node *GroupInfo
 	)
+	err = gic.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	gic.defaults()
 	if len(gic.hooks) == 0 {
 		if err = gic.check(); err != nil {
@@ -129,10 +133,10 @@ func (gic *GroupInfoCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on GroupInfo entities in the database.
-func (gic *GroupInfoCreate) OnConflict(fields ...string) *GroupInfoCreate {
-	gic.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on GroupInfo entities.
+func (gic *GroupInfoCreate) OnConflict(constraintField string, otherFields ...string) *GroupInfoCreate {
+	gic.constraintFields = []string{constraintField}
+	gic.constraintFields = append(gic.constraintFields, otherFields...)
 	return gic
 }
 
@@ -161,8 +165,8 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if gic.conflictColumns != nil {
-		_spec.ConflictConstraints = gic.conflictColumns
+	if gic.constraintFields != nil {
+		_spec.ConstraintFields = gic.constraintFields
 	}
 	if value, ok := gic.mutation.Desc(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -202,14 +206,39 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on GroupInfo entities.
+func (gic *GroupInfoCreate) validateUpsertConstraints() error {
+	for _, f := range gic.constraintFields {
+		if !groupinfo.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
+}
+
 // GroupInfoCreateBulk is the builder for creating many GroupInfo entities in bulk.
 type GroupInfoCreateBulk struct {
 	config
-	builders []*GroupInfoCreate
+	builders              []*GroupInfoCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on GroupInfo entities.
+func (gicb *GroupInfoCreateBulk) OnConflict(constraintField string, otherFields ...string) *GroupInfoCreateBulk {
+	gicb.batchConstraintFields = []string{constraintField}
+	gicb.batchConstraintFields = append(gicb.batchConstraintFields, otherFields...)
+
+	return gicb
 }
 
 // Save creates the GroupInfo entities in the database.
 func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
+	err := gicb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(gicb.builders))
 	nodes := make([]*GroupInfo, len(gicb.builders))
 	mutators := make([]Mutator, len(gicb.builders))
@@ -232,7 +261,7 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 					_, err = mutators[i+1].Mutate(root, gicb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gicb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, gicb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: gicb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -267,4 +296,15 @@ func (gicb *GroupInfoCreateBulk) SaveX(ctx context.Context) []*GroupInfo {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted GroupInfo entities.
+func (gicb *GroupInfoCreateBulk) validateUpsertConstraints() error {
+	for _, f := range gicb.batchConstraintFields {
+		if !groupinfo.ValidColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		}
+	}
+	return nil
 }

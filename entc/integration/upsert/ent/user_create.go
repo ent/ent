@@ -126,10 +126,6 @@ func (uc *UserCreate) OnConflict(constraintField string, otherFields ...string) 
 }
 
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
-	err := uc.validateUpsertConstraints()
-	if err != nil {
-		return nil, err
-	}
 	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
