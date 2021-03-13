@@ -20,9 +20,9 @@ import (
 // CityCreate is the builder for creating a City entity.
 type CityCreate struct {
 	config
-	mutation        *CityMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *CityMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -103,14 +103,18 @@ func (cc *CityCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on City entities in the database.
-func (cc *CityCreate) OnConflict(fields ...string) *CityCreate {
-	cc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on City entities.
+func (cc *CityCreate) OnConflict(constraintField string, otherFields ...string) *CityCreate {
+	cc.constraintFields = []string{constraintField}
+	cc.constraintFields = append(cc.constraintFields, otherFields...)
 	return cc
 }
 
 func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
+	err := cc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -135,8 +139,8 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if cc.conflictColumns != nil {
-		_spec.ConflictConstraints = cc.conflictColumns
+	if cc.constraintFields != nil {
+		_spec.ConstraintFields = cc.constraintFields
 	}
 	if value, ok := cc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -168,14 +172,39 @@ func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on City entities.
+func (cc *CityCreate) validateUpsertConstraints() error {
+	for _, f := range cc.constraintFields {
+		if !city.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, city.UniqueColumns)}
+		}
+	}
+	return nil
+}
+
 // CityCreateBulk is the builder for creating many City entities in bulk.
 type CityCreateBulk struct {
 	config
-	builders []*CityCreate
+	builders              []*CityCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on City entities.
+func (ccb *CityCreateBulk) OnConflict(constraintField string, otherFields ...string) *CityCreateBulk {
+	ccb.batchConstraintFields = []string{constraintField}
+	ccb.batchConstraintFields = append(ccb.batchConstraintFields, otherFields...)
+
+	return ccb
 }
 
 // Save creates the City entities in the database.
 func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
+	err := ccb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*City, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))
@@ -197,7 +226,7 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: ccb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -232,4 +261,15 @@ func (ccb *CityCreateBulk) SaveX(ctx context.Context) []*City {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted City entities.
+func (ccb *CityCreateBulk) validateUpsertConstraints() error {
+	for _, f := range ccb.batchConstraintFields {
+		if !city.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, city.UniqueColumns)}
+		}
+	}
+	return nil
 }

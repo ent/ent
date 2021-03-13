@@ -20,9 +20,9 @@ import (
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	config
-	mutation        *PetMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *PetMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -122,14 +122,18 @@ func (pc *PetCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Pet entities in the database.
-func (pc *PetCreate) OnConflict(fields ...string) *PetCreate {
-	pc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Pet entities.
+func (pc *PetCreate) OnConflict(constraintField string, otherFields ...string) *PetCreate {
+	pc.constraintFields = []string{constraintField}
+	pc.constraintFields = append(pc.constraintFields, otherFields...)
 	return pc
 }
 
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
+	err := pc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := pc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -154,8 +158,8 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if pc.conflictColumns != nil {
-		_spec.ConflictConstraints = pc.conflictColumns
+	if pc.constraintFields != nil {
+		_spec.ConstraintFields = pc.constraintFields
 	}
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -207,14 +211,39 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Pet entities.
+func (pc *PetCreate) validateUpsertConstraints() error {
+	for _, f := range pc.constraintFields {
+		if !pet.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, pet.UniqueColumns)}
+		}
+	}
+	return nil
+}
+
 // PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
-	builders []*PetCreate
+	builders              []*PetCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Pet entities.
+func (pcb *PetCreateBulk) OnConflict(constraintField string, otherFields ...string) *PetCreateBulk {
+	pcb.batchConstraintFields = []string{constraintField}
+	pcb.batchConstraintFields = append(pcb.batchConstraintFields, otherFields...)
+
+	return pcb
 }
 
 // Save creates the Pet entities in the database.
 func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
+	err := pcb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
 	nodes := make([]*Pet, len(pcb.builders))
 	mutators := make([]Mutator, len(pcb.builders))
@@ -236,7 +265,7 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, pcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: pcb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -271,4 +300,15 @@ func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Pet entities.
+func (pcb *PetCreateBulk) validateUpsertConstraints() error {
+	for _, f := range pcb.batchConstraintFields {
+		if !pet.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, pet.UniqueColumns)}
+		}
+	}
+	return nil
 }

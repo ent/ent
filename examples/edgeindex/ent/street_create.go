@@ -20,9 +20,9 @@ import (
 // StreetCreate is the builder for creating a Street entity.
 type StreetCreate struct {
 	config
-	mutation        *StreetMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *StreetMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -107,14 +107,18 @@ func (sc *StreetCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Street entities in the database.
-func (sc *StreetCreate) OnConflict(fields ...string) *StreetCreate {
-	sc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Street entities.
+func (sc *StreetCreate) OnConflict(constraintField string, otherFields ...string) *StreetCreate {
+	sc.constraintFields = []string{constraintField}
+	sc.constraintFields = append(sc.constraintFields, otherFields...)
 	return sc
 }
 
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
+	err := sc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -139,8 +143,8 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if sc.conflictColumns != nil {
-		_spec.ConflictConstraints = sc.conflictColumns
+	if sc.constraintFields != nil {
+		_spec.ConstraintFields = sc.constraintFields
 	}
 	if value, ok := sc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -173,14 +177,39 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Street entities.
+func (sc *StreetCreate) validateUpsertConstraints() error {
+	for _, f := range sc.constraintFields {
+		if !street.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, street.UniqueColumns)}
+		}
+	}
+	return nil
+}
+
 // StreetCreateBulk is the builder for creating many Street entities in bulk.
 type StreetCreateBulk struct {
 	config
-	builders []*StreetCreate
+	builders              []*StreetCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Street entities.
+func (scb *StreetCreateBulk) OnConflict(constraintField string, otherFields ...string) *StreetCreateBulk {
+	scb.batchConstraintFields = []string{constraintField}
+	scb.batchConstraintFields = append(scb.batchConstraintFields, otherFields...)
+
+	return scb
 }
 
 // Save creates the Street entities in the database.
 func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
+	err := scb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(scb.builders))
 	nodes := make([]*Street, len(scb.builders))
 	mutators := make([]Mutator, len(scb.builders))
@@ -202,7 +231,7 @@ func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
 					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, scb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, scb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: scb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -237,4 +266,15 @@ func (scb *StreetCreateBulk) SaveX(ctx context.Context) []*Street {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Street entities.
+func (scb *StreetCreateBulk) validateUpsertConstraints() error {
+	for _, f := range scb.batchConstraintFields {
+		if !street.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, street.UniqueColumns)}
+		}
+	}
+	return nil
 }

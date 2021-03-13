@@ -19,9 +19,9 @@ import (
 // TenantCreate is the builder for creating a Tenant entity.
 type TenantCreate struct {
 	config
-	mutation        *TenantMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *TenantMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetName sets the "name" field.
@@ -92,14 +92,18 @@ func (tc *TenantCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Tenant entities in the database.
-func (tc *TenantCreate) OnConflict(fields ...string) *TenantCreate {
-	tc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Tenant entities.
+func (tc *TenantCreate) OnConflict(constraintField string, otherFields ...string) *TenantCreate {
+	tc.constraintFields = []string{constraintField}
+	tc.constraintFields = append(tc.constraintFields, otherFields...)
 	return tc
 }
 
 func (tc *TenantCreate) sqlSave(ctx context.Context) (*Tenant, error) {
+	err := tc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := tc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -124,8 +128,8 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if tc.conflictColumns != nil {
-		_spec.ConflictConstraints = tc.conflictColumns
+	if tc.constraintFields != nil {
+		_spec.ConstraintFields = tc.constraintFields
 	}
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -138,14 +142,39 @@ func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Tenant entities.
+func (tc *TenantCreate) validateUpsertConstraints() error {
+	for _, f := range tc.constraintFields {
+		if !tenant.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, tenant.UniqueColumns)}
+		}
+	}
+	return nil
+}
+
 // TenantCreateBulk is the builder for creating many Tenant entities in bulk.
 type TenantCreateBulk struct {
 	config
-	builders []*TenantCreate
+	builders              []*TenantCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Tenant entities.
+func (tcb *TenantCreateBulk) OnConflict(constraintField string, otherFields ...string) *TenantCreateBulk {
+	tcb.batchConstraintFields = []string{constraintField}
+	tcb.batchConstraintFields = append(tcb.batchConstraintFields, otherFields...)
+
+	return tcb
 }
 
 // Save creates the Tenant entities in the database.
 func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
+	err := tcb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
 	nodes := make([]*Tenant, len(tcb.builders))
 	mutators := make([]Mutator, len(tcb.builders))
@@ -167,7 +196,7 @@ func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
 					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, tcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, tcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: tcb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -202,4 +231,15 @@ func (tcb *TenantCreateBulk) SaveX(ctx context.Context) []*Tenant {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Tenant entities.
+func (tcb *TenantCreateBulk) validateUpsertConstraints() error {
+	for _, f := range tcb.batchConstraintFields {
+		if !tenant.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, tenant.UniqueColumns)}
+		}
+	}
+	return nil
 }

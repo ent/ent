@@ -30,6 +30,11 @@ var Columns = []string{
 	FieldName,
 }
 
+// Columns holds all SQL unique columns for user fields that can be used in conflict constraints.
+var UniqueColumns = []string{
+	FieldID,
+}
+
 var (
 	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
 	// primary key for the friends relation (M2M).
@@ -40,6 +45,16 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	return false
+}
+
+// ValidConstraintColumn reports if the column name is valid for use as a conflict column.
+func ValidConstraintColumn(column string) bool {
+	for i := range UniqueColumns {
+		if column == UniqueColumns[i] {
 			return true
 		}
 	}

@@ -19,9 +19,9 @@ import (
 // NodeCreate is the builder for creating a Node entity.
 type NodeCreate struct {
 	config
-	mutation        *NodeMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *NodeMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetValue sets the "value" field.
@@ -125,14 +125,18 @@ func (nc *NodeCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Node entities in the database.
-func (nc *NodeCreate) OnConflict(fields ...string) *NodeCreate {
-	nc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Node entities.
+func (nc *NodeCreate) OnConflict(constraintField string, otherFields ...string) *NodeCreate {
+	nc.constraintFields = []string{constraintField}
+	nc.constraintFields = append(nc.constraintFields, otherFields...)
 	return nc
 }
 
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
+	err := nc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := nc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -157,8 +161,8 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if nc.conflictColumns != nil {
-		_spec.ConflictConstraints = nc.conflictColumns
+	if nc.constraintFields != nil {
+		_spec.ConstraintFields = nc.constraintFields
 	}
 	if value, ok := nc.mutation.Value(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -210,14 +214,39 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Node entities.
+func (nc *NodeCreate) validateUpsertConstraints() error {
+	for _, f := range nc.constraintFields {
+		if !node.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, node.UniqueColumns)}
+		}
+	}
+	return nil
+}
+
 // NodeCreateBulk is the builder for creating many Node entities in bulk.
 type NodeCreateBulk struct {
 	config
-	builders []*NodeCreate
+	builders              []*NodeCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Node entities.
+func (ncb *NodeCreateBulk) OnConflict(constraintField string, otherFields ...string) *NodeCreateBulk {
+	ncb.batchConstraintFields = []string{constraintField}
+	ncb.batchConstraintFields = append(ncb.batchConstraintFields, otherFields...)
+
+	return ncb
 }
 
 // Save creates the Node entities in the database.
 func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
+	err := ncb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(ncb.builders))
 	nodes := make([]*Node, len(ncb.builders))
 	mutators := make([]Mutator, len(ncb.builders))
@@ -239,7 +268,7 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 					_, err = mutators[i+1].Mutate(root, ncb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ncb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, ncb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: ncb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -274,4 +303,15 @@ func (ncb *NodeCreateBulk) SaveX(ctx context.Context) []*Node {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Node entities.
+func (ncb *NodeCreateBulk) validateUpsertConstraints() error {
+	for _, f := range ncb.batchConstraintFields {
+		if !node.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, node.UniqueColumns)}
+		}
+	}
+	return nil
 }

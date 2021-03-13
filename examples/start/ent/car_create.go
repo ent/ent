@@ -21,9 +21,9 @@ import (
 // CarCreate is the builder for creating a Car entity.
 type CarCreate struct {
 	config
-	mutation        *CarMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *CarMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetModel sets the "model" field.
@@ -117,14 +117,18 @@ func (cc *CarCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Car entities in the database.
-func (cc *CarCreate) OnConflict(fields ...string) *CarCreate {
-	cc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Car entities.
+func (cc *CarCreate) OnConflict(constraintField string, otherFields ...string) *CarCreate {
+	cc.constraintFields = []string{constraintField}
+	cc.constraintFields = append(cc.constraintFields, otherFields...)
 	return cc
 }
 
 func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
+	err := cc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -149,8 +153,8 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if cc.conflictColumns != nil {
-		_spec.ConflictConstraints = cc.conflictColumns
+	if cc.constraintFields != nil {
+		_spec.ConstraintFields = cc.constraintFields
 	}
 	if value, ok := cc.mutation.Model(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -191,14 +195,39 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Car entities.
+func (cc *CarCreate) validateUpsertConstraints() error {
+	for _, f := range cc.constraintFields {
+		if !car.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, car.UniqueColumns)}
+		}
+	}
+	return nil
+}
+
 // CarCreateBulk is the builder for creating many Car entities in bulk.
 type CarCreateBulk struct {
 	config
-	builders []*CarCreate
+	builders              []*CarCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Car entities.
+func (ccb *CarCreateBulk) OnConflict(constraintField string, otherFields ...string) *CarCreateBulk {
+	ccb.batchConstraintFields = []string{constraintField}
+	ccb.batchConstraintFields = append(ccb.batchConstraintFields, otherFields...)
+
+	return ccb
 }
 
 // Save creates the Car entities in the database.
 func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
+	err := ccb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Car, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))
@@ -220,7 +249,7 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: ccb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -255,4 +284,15 @@ func (ccb *CarCreateBulk) SaveX(ctx context.Context) []*Car {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Car entities.
+func (ccb *CarCreateBulk) validateUpsertConstraints() error {
+	for _, f := range ccb.batchConstraintFields {
+		if !car.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, car.UniqueColumns)}
+		}
+	}
+	return nil
 }

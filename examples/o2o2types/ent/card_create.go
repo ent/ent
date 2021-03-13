@@ -21,9 +21,9 @@ import (
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	config
-	mutation        *CardMutation
-	hooks           []Hook
-	conflictColumns []string
+	mutation         *CardMutation
+	hooks            []Hook
+	constraintFields []string
 }
 
 // SetExpired sets the "expired" field.
@@ -112,14 +112,18 @@ func (cc *CardCreate) check() error {
 	return nil
 }
 
-// OnConflict specifies how to handle inserts that conflict with a unique constraint on Card entities in the database.
-func (cc *CardCreate) OnConflict(fields ...string) *CardCreate {
-	cc.conflictColumns = fields
-
+// OnConflict specifies how to handle inserts that conflict with a unique constraint on Card entities.
+func (cc *CardCreate) OnConflict(constraintField string, otherFields ...string) *CardCreate {
+	cc.constraintFields = []string{constraintField}
+	cc.constraintFields = append(cc.constraintFields, otherFields...)
 	return cc
 }
 
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
+	err := cc.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -144,8 +148,8 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		}
 	)
 
-	if cc.conflictColumns != nil {
-		_spec.ConflictConstraints = cc.conflictColumns
+	if cc.constraintFields != nil {
+		_spec.ConstraintFields = cc.constraintFields
 	}
 	if value, ok := cc.mutation.Expired(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -186,14 +190,39 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on Card entities.
+func (cc *CardCreate) validateUpsertConstraints() error {
+	for _, f := range cc.constraintFields {
+		if !card.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, card.UniqueColumns)}
+		}
+	}
+	return nil
+}
+
 // CardCreateBulk is the builder for creating many Card entities in bulk.
 type CardCreateBulk struct {
 	config
-	builders []*CardCreate
+	builders              []*CardCreate
+	batchConstraintFields []string
+}
+
+// OnConflict specifies how to handle bulk inserts that conflict with a unique constraint on Card entities.
+func (ccb *CardCreateBulk) OnConflict(constraintField string, otherFields ...string) *CardCreateBulk {
+	ccb.batchConstraintFields = []string{constraintField}
+	ccb.batchConstraintFields = append(ccb.batchConstraintFields, otherFields...)
+
+	return ccb
 }
 
 // Save creates the Card entities in the database.
 func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
+	err := ccb.validateUpsertConstraints()
+	if err != nil {
+		return nil, err
+	}
+
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Card, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))
@@ -215,7 +244,7 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs, BatchConstraintFields: ccb.batchConstraintFields}); err != nil {
 						if cerr, ok := isSQLConstraintError(err); ok {
 							err = cerr
 						}
@@ -250,4 +279,15 @@ func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
 		panic(err)
 	}
 	return v
+}
+
+// validateUpsertConstraints validates the columns specified in OnConflict are valid for
+// handling conflicts on batch inserted Card entities.
+func (ccb *CardCreateBulk) validateUpsertConstraints() error {
+	for _, f := range ccb.batchConstraintFields {
+		if !card.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, card.UniqueColumns)}
+		}
+	}
+	return nil
 }

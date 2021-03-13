@@ -39,6 +39,11 @@ var Columns = []string{
 	FieldName,
 }
 
+// Columns holds all SQL unique columns for group fields that can be used in conflict constraints.
+var UniqueColumns = []string{
+	FieldID,
+}
+
 // ForeignKeys holds the SQL foreign-keys that are owned by the "groups"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
@@ -60,6 +65,16 @@ func ValidColumn(column string) bool {
 	}
 	for i := range ForeignKeys {
 		if column == ForeignKeys[i] {
+			return true
+		}
+	}
+	return false
+}
+
+// ValidConstraintColumn reports if the column name is valid for use as a conflict column.
+func ValidConstraintColumn(column string) bool {
+	for i := range UniqueColumns {
+		if column == UniqueColumns[i] {
 			return true
 		}
 	}
