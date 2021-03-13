@@ -39,6 +39,17 @@ in the LICENSE file in the root directory of this source tree.
 			{{ $f.Constant }},
 		{{- end }}
 	}
+
+	// Columns holds all SQL unique columns for {{ lower $.Name }} fields that can be used in conflict constraints.
+	var UniqueColumns = []string{
+		{{ $.ID.Constant }},
+		{{- range $f := $.Fields }}
+			{{- if $f.Unique }}
+			{{ $f.Constant }},
+			{{- end }}
+		{{- end }}
+	}
+
 	{{/* If any of the edges owns a foreign-key */}}
 	{{ with $.UnexportedForeignKeys }}
 		// ForeignKeys holds the SQL foreign-keys that are owned by the "{{ $.Table }}"
@@ -79,6 +90,16 @@ func ValidColumn(column string) bool {
 			}
 		}
 	{{- end }}
+	return false
+}
+
+// ValidConstraintColumn reports if the column name is valid for use as a conflict column.
+func ValidConstraintColumn(column string) bool {
+	for i := range UniqueColumns {
+		if column == UniqueColumns[i] {
+			return true
+		}
+	}
 	return false
 }
 {{ end }}

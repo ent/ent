@@ -17,6 +17,10 @@ func ({{ $receiver }} *{{ $builder }}) OnConflict(constraintField string, otherF
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
+	err := {{ $receiver }}.validateUpsertConstraints()
+	if err!=nil {
+		return nil, err
+	}
 	_node, _spec := {{ $receiver }}.createSpec()
 	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		if cerr, ok := isSQLConstraintError(err); ok {
@@ -96,8 +100,8 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 // handling conflicts on {{ $.Name }} entities.
 func ({{ $receiver }} *{{ $builder }}) validateUpsertConstraints() error {
 	for _, f := range {{ $receiver }}.constraintFields {
-		if !{{ $.Package }}.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !{{ $.Package }}.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, {{ $.Package }}.UniqueColumns )}
 		}
 	}
 	return nil
@@ -199,8 +203,8 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) []*{{ $.Name }
 // handling conflicts on batch inserted {{ $.Name }} entities.
 func ({{ $receiver }} *{{ $builder }}) validateUpsertConstraints() error {
 	for _, f := range {{ $receiver }}.batchConstraintFields {
-		if !{{ $.Package }}.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution", f)}
+		if !{{ $.Package }}.ValidConstraintColumn(f) {
+			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for upsert conflict resolution, valid fields are: %+v", f, {{ $.Package }}.UniqueColumns )}
 		}
 	}
 	return nil

@@ -39,10 +39,6 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		err error
 		node *{{ $.Name }}
 	)
-	err = {{ $receiver }}.validateUpsertConstraints()
-	if err!=nil {
-		return nil, err
-	}
 	{{- if $.HasDefault }}
 		{{ $receiver }}.defaults()
 	{{- end }}
