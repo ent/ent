@@ -132,27 +132,3 @@ func bulkUpsert(ctx context.Context, client *ent.Client) (string, func(*testing.
 		require.Equal(t, 2, user2.UpdateCount, "User was updated correctly on conflict")
 	}
 }
-
-// func exmaple() {
-// client.User.Create().SetEmail("alex-test@entgo.io").SetUpdateCount(2).
-// 	// Do a custom update
-// 	OnConflict(user.FieldEmail).Update().SetEmail("another-alex@entgo.io").
-// 	Save(ctx)
-
-// client.User.Create().SetEmail("alex-test@entgo.io").SetUpdateCount(2).
-// 	// Writes each field to itself, forcing an update of the record and returning the ID
-// 	OnConflict(user.FieldEmail).Ignore().
-// 	Save(ctx)
-
-// client.User.Create().SetEmail("alex-test@entgo.io").SetUpdateCount(2).
-// 	// Default action, optional. Same as `OnConflict(user.FieldEmail).Save(ctx)`
-// 	OnConflict(user.FieldEmail).UpdateWithNewValues().
-// 	Save(ctx)
-
-// Bulk upsert syntax
-// users, err := client.User.CreateBulk(
-// 	client.User.Create().SetEmail("roger-test@entgo.io").SetUpdateCount(2),
-// 	client.User.Create().SetEmail("alex-test@entgo.io").SetUpdateCount(3),
-// ).OnConflict(user.FieldEmail).UpdateWithNewValues().
-// Save(ctx)
-// }
