@@ -1,14 +1,14 @@
 {{/* A template for adding additional config fields/options. */}}
-{{ define "dialect/sql/config/fields/boring" -}}
-	// Boring field added by a test template.
-	Boring string
+{{ define "config/fields/httpclient" -}}
+	// HTTPClient field added by a test template.
+	HTTPClient *http.Client
 {{ end }}
 
-{{ define "dialect/sql/config/options/boring" }}
-	// Boring option added by a test template.
-	func Boring() Option {
+{{ define "config/options/httpclient" }}
+	// HTTPClient option added by a test template.
+	func HTTPClient(hc *http.Client) Option {
 		return func(c *config) {
-			c.Boring = "Boring"
+			c.HTTPClient = hc
 		}
 	}
 {{ end }}
