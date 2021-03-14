@@ -7,6 +7,8 @@
 package ent
 
 import (
+	"net/http"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 )
@@ -24,8 +26,8 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
-	// Boring field added by a test template.
-	Boring string
+	// HTTPClient field added by a test template.
+	HTTPClient *http.Client
 }
 
 // hooks per client, for fast access.
@@ -66,9 +68,9 @@ func Driver(driver dialect.Driver) Option {
 	}
 }
 
-// Boring option added by a test template.
-func Boring() Option {
+// HTTPClient option added by a test template.
+func HTTPClient(hc *http.Client) Option {
 	return func(c *config) {
-		c.Boring = "Boring"
+		c.HTTPClient = hc
 	}
 }
