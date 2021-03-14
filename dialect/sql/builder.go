@@ -727,8 +727,10 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 		}
 	}
 
-	// Update on conflict
-	i.buildConflictHandling()
+	if len(i.conflictColumns) > 0 {
+		// Update on conflict
+		i.buildConflictHandling()
+	}
 
 	if len(i.returning) > 0 && i.postgres() {
 		i.WriteString(" RETURNING ")
@@ -738,63 +740,71 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 }
 
 func (i *InsertBuilder) buildConflictHandling() {
-	if len(i.conflictColumns) > 0 {
-		switch i.Dialect() {
-		case dialect.Postgres, dialect.SQLite:
-			i.Pad().
-				WriteString("ON CONFLICT").
-				Pad().
-				Nested(func(b *Builder) {
-					b.IdentComma(i.conflictColumns...)
-				}).
-				Pad()
+	switch i.Dialect() {
+	case dialect.Postgres, dialect.SQLite:
+		i.Pad().
+			WriteString("ON CONFLICT").
+			Pad().
+			Nested(func(b *Builder) {
+				b.IdentComma(i.conflictColumns...)
+			}).
+			Pad()
 
-			switch i.onConflictOp {
-			case OpResolveWithNewValues:
-				i.WriteString("DO UPDATE SET").Pad()
-				for j, c := range i.columns {
-					if j > 0 {
-						i.Comma()
-					}
-					i.Ident(c).WriteOp(OpEQ).Ident("excluded").WriteByte('.').Ident(c)
+		switch i.onConflictOp {
+		case OpResolveWithNewValues:
+			i.WriteString("DO UPDATE SET").Pad()
+			for j, c := range i.columns {
+				if j > 0 {
+					i.Comma()
 				}
-			case OpResolveWithIgnore:
-				i.WriteString("DO UPDATE SET").Pad()
-				for j, c := range i.columns {
-					if j > 0 {
-						i.Comma()
-					}
-					// Ignore conflict by setting column to itself e.g. "c" = "c"
-					i.Ident(c).WriteOp(OpEQ).Ident(c)
-				}
-			case OpResolveWithAlternateValues:
-				// Not Implemented
+				i.Ident(c).WriteOp(OpEQ).Ident("excluded").WriteByte('.').Ident(c)
 			}
-
-		case dialect.MySQL:
-			i.Pad().WriteString("ON DUPLICATE KEY UPDATE ")
-
-			switch i.onConflictOp {
-			case OpResolveWithIgnore:
-				for j, c := range i.columns {
-					if j > 0 {
-						i.Comma()
-					}
-					// Ignore conflict by setting column to itself e.g. `c` = `c`
-					i.Ident(c).WriteOp(OpEQ).Ident(c)
+		case OpResolveWithIgnore:
+			i.WriteString("DO UPDATE SET").Pad()
+			for j, c := range i.columns {
+				if j > 0 {
+					i.Comma()
 				}
-			case OpResolveWithNewValues:
-				for j, c := range i.columns {
-					if j > 0 {
-						i.Comma()
-					}
-					// update column with the value we tried to insert
-					i.Ident(c).WriteOp(OpEQ).WriteString("VALUES").WriteByte('(').Ident(c).WriteByte(')')
-				}
-			case OpResolveWithAlternateValues:
-				// Not Implemented
+				// Ignore conflict by setting column to itself e.g. "c" = "c"
+				i.Ident(c).WriteOp(OpEQ).Ident(c)
 			}
+		case OpResolveWithAlternateValues:
+			i.WriteString("DO UPDATE SET").Pad()
+			writeUpdateValues(i, i.updateColumns, i.updateValues)
 		}
+
+	case dialect.MySQL:
+		i.Pad().WriteString("ON DUPLICATE KEY UPDATE ")
+
+		switch i.onConflictOp {
+		case OpResolveWithIgnore:
+			for j, c := range i.columns {
+				if j > 0 {
+					i.Comma()
+				}
+				// Ignore conflict by setting column to itself e.g. `c` = `c`
+				i.Ident(c).WriteOp(OpEQ).Ident(c)
+			}
+		case OpResolveWithNewValues:
+			for j, c := range i.columns {
+				if j > 0 {
+					i.Comma()
+				}
+				// update column with the value we tried to insert
+				i.Ident(c).WriteOp(OpEQ).WriteString("VALUES").WriteByte('(').Ident(c).WriteByte(')')
+			}
+		case OpResolveWithAlternateValues:
+			writeUpdateValues(i, i.updateColumns, i.updateValues)
+		}
+	}
+}
+
+func writeUpdateValues(builder *InsertBuilder, columns []string, values []interface{}) {
+	for i, c := range columns {
+		if i > 0 {
+			builder.Comma()
+		}
+		builder.Ident(c).WriteString(" = ").Arg(builder.updateValues[i])
 	}
 }
 
