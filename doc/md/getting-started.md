@@ -35,6 +35,12 @@ GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-star
 go mod init <project>
 ```
 
+## For Updates and More Information
+
+> To get up to date information about new releases, tutorials and more content, you can:
+> * Follow us on [Twitter](https://twitter.com/entgo_io)
+> * Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+
 ## Create Your First Schema
 
 Go to the root directory of your project, and run:
