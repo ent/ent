@@ -118,6 +118,7 @@ func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GoodsUpdateOne is the builder for updating a single Goods entity.
 type GoodsUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *GoodsMutation
 }
@@ -125,6 +126,13 @@ type GoodsUpdateOne struct {
 // Mutation returns the GoodsMutation object of the builder.
 func (guo *GoodsUpdateOne) Mutation() *GoodsMutation {
 	return guo.mutation
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (guo *GoodsUpdateOne) Select(field string, fields ...string) *GoodsUpdateOne {
+	guo.fields = append([]string{field}, fields...)
+	return guo
 }
 
 // Save executes the query and returns the updated Goods entity.
@@ -194,6 +202,18 @@ func (guo *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Goods.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := guo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, goods.FieldID)
+		for _, f := range fields {
+			if !goods.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != goods.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := guo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

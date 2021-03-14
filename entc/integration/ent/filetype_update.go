@@ -285,6 +285,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FileTypeUpdateOne is the builder for updating a single FileType entity.
 type FileTypeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *FileTypeMutation
 }
@@ -362,6 +363,13 @@ func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return ftuo.RemoveFileIDs(ids...)
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (ftuo *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpdateOne {
+	ftuo.fields = append([]string{field}, fields...)
+	return ftuo
 }
 
 // Save executes the query and returns the updated FileType entity.
@@ -452,6 +460,18 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FileType.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := ftuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, filetype.FieldID)
+		for _, f := range fields {
+			if !filetype.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != filetype.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := ftuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

@@ -12,7 +12,7 @@ go generate ./...
 #### Running the integration tests
 
 ```
-docker-compose -f compose/docker-compose.yaml up -d --scale test=0
+docker-compose -f compose/docker-compose.yaml up -d --scale gremlin=0
 go test 
 ```
 

@@ -1553,6 +1553,7 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
 type FieldTypeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *FieldTypeMutation
 }
@@ -2582,6 +2583,13 @@ func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (ftuo *FieldTypeUpdateOne) Select(field string, fields ...string) *FieldTypeUpdateOne {
+	ftuo.fields = append([]string{field}, fields...)
+	return ftuo
+}
+
 // Save executes the query and returns the updated FieldType entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	var (
@@ -3069,7 +3077,16 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	v.ValueMap(true)
+	if len(ftuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(ftuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range ftuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

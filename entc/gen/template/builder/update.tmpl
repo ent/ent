@@ -121,6 +121,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 // {{ $onebuilder }} is the builder for updating a single {{ $.Name }} entity.
 type {{ $onebuilder }} struct {
 	config
+	fields []string
 	{{- template "update/fields" $ }}
 }
 
@@ -132,6 +133,13 @@ type {{ $onebuilder }} struct {
 {{ with extend $ "Builder" $onebuilder }}
 	{{ template "update/edges" . }}
 {{ end }}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func ({{ $receiver }} *{{ $onebuilder }}) Select(field string, fields ...string) *{{ $onebuilder }} {
+	{{ $receiver }}.fields = append([]string{field}, fields...)
+	return {{ $receiver }}
+}
 
 // Save executes the query and returns the updated {{ $.Name }} entity.
 func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name }}, error) {

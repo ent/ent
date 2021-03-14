@@ -246,6 +246,7 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 // NodeUpdateOne is the builder for updating a single Node entity.
 type NodeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *NodeMutation
 }
@@ -329,6 +330,13 @@ func (nuo *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
 // ClearNext clears the "next" edge to the Node entity.
 func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
 	nuo.mutation.ClearNext()
+	return nuo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {
+	nuo.fields = append([]string{field}, fields...)
 	return nuo
 }
 
@@ -451,7 +459,16 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
 		})
 	}
-	v.ValueMap(true)
+	if len(nuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(nuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range nuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

@@ -184,6 +184,7 @@ func (mu *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // MediaUpdateOne is the builder for updating a single Media entity.
 type MediaUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *MediaMutation
 }
@@ -231,6 +232,13 @@ func (muo *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
 // Mutation returns the MediaMutation object of the builder.
 func (muo *MediaUpdateOne) Mutation() *MediaMutation {
 	return muo.mutation
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (muo *MediaUpdateOne) Select(field string, fields ...string) *MediaUpdateOne {
+	muo.fields = append([]string{field}, fields...)
+	return muo
 }
 
 // Save executes the query and returns the updated Media entity.
@@ -300,6 +308,18 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Media.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := muo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, media.FieldID)
+		for _, f := range fields {
+			if !media.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+			}
+			if f != media.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := muo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

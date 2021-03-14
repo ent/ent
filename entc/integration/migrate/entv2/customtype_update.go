@@ -151,6 +151,7 @@ func (ctu *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CustomTypeUpdateOne is the builder for updating a single CustomType entity.
 type CustomTypeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CustomTypeMutation
 }
@@ -178,6 +179,13 @@ func (ctuo *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
 // Mutation returns the CustomTypeMutation object of the builder.
 func (ctuo *CustomTypeUpdateOne) Mutation() *CustomTypeMutation {
 	return ctuo.mutation
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (ctuo *CustomTypeUpdateOne) Select(field string, fields ...string) *CustomTypeUpdateOne {
+	ctuo.fields = append([]string{field}, fields...)
+	return ctuo
 }
 
 // Save executes the query and returns the updated CustomType entity.
@@ -247,6 +255,18 @@ func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing CustomType.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := ctuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, customtype.FieldID)
+		for _, f := range fields {
+			if !customtype.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+			}
+			if f != customtype.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := ctuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
