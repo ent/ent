@@ -14,8 +14,8 @@ sidebar_label: FAQ
 [How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql) \
 [How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
 [How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids) \
-[How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)
-
+[How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql) \
+[How to define custom types in external templates?](#how-to-define-custom-types-in-external-templates)
 ## Answers
 
 #### How to create an entity from a struct `T`?
@@ -463,3 +463,30 @@ func (Point) SchemaType() map[string]string {
 ```
 
 A full example exists in the [example repository](https://github.com/a8m/entspatial).
+
+#### How to define custom types in external templates?
+We can extend ent generated types with additional fields by defining a template called **model/fields/additional** like in this [example](https://github.com/ent/ent/blob/3ee6621194709db97e53f8ee6888593e156acc5e/examples/entcpkg/ent/template/static.tmpl). And sometimes we want to define these additional fields with our own types then we need to add the following template definitions also:
+```
+{{- define "import/additional/field_types" }}
+    "github.com/path/to/your/custom/type"
+{{- end -}}
+
+{{- define "import/additional/client_dependencies" }}
+    "github.com/path/to/your/custom/type"
+{{- end -}}
+```
+
+Full example:
+```
+{{- define "import/additional/user_types" }}
+    "github.com/path/to/your/groupcount/type"
+{{- end -}}
+
+{{ define "model/fields/additional" }}
+    {{- if eq $.Name "User" }}
+        // StaticField defined by template.
+        GroupsCount []Groupcount `json:"groups_count,omitempty"`
+    {{- end }}
+{{ end }}
+```
+**Note:** Additional import template definitions must start with **import/additional/**.
