@@ -209,6 +209,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // SpecUpdateOne is the builder for updating a single Spec entity.
 type SpecUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *SpecMutation
 }
@@ -252,6 +253,13 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 		ids[i] = c[i].ID
 	}
 	return suo.RemoveCardIDs(ids...)
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (suo *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
+	suo.fields = append([]string{field}, fields...)
+	return suo
 }
 
 // Save executes the query and returns the updated Spec entity.
@@ -321,6 +329,18 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Spec.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := suo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, spec.FieldID)
+		for _, f := range fields {
+			if !spec.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != spec.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := suo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

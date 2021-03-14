@@ -852,6 +852,7 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -1387,6 +1388,13 @@ func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 	return uuo
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	uuo.fields = append([]string{field}, fields...)
+	return uuo
+}
+
 // Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
@@ -1663,7 +1671,16 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	for _, id := range uuo.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
 	}
-	v.ValueMap(true)
+	if len(uuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(uuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range uuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

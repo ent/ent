@@ -257,6 +257,7 @@ func (giu *GroupInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GroupInfoUpdateOne is the builder for updating a single GroupInfo entity.
 type GroupInfoUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *GroupInfoMutation
 }
@@ -329,6 +330,13 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 	return giuo.RemoveGroupIDs(ids...)
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (giuo *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInfoUpdateOne {
+	giuo.fields = append([]string{field}, fields...)
+	return giuo
+}
+
 // Save executes the query and returns the updated GroupInfo entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 	var (
@@ -396,6 +404,18 @@ func (giuo *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing GroupInfo.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := giuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, groupinfo.FieldID)
+		for _, f := range fields {
+			if !groupinfo.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != groupinfo.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := giuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

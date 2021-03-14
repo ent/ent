@@ -30,6 +30,18 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			return {{ $zero }}, &ValidationError{Name: "ID", err: fmt.Errorf("missing {{ $.Name }}.ID for update")}
 		}
 		_spec.Node.ID.Value = id
+		if fields := {{ $receiver }}.fields; len(fields) > 0 {
+			_spec.Node.Columns = make([]string, 0, len(fields))
+			_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
+			for _, f := range fields {
+				if !{{ $.Package }}.ValidColumn(f) {
+					return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+				}
+				if f != {{ $.Package }}.{{ $.ID.Constant }} {
+					_spec.Node.Columns = append(_spec.Node.Columns, f)
+				}
+			}
+		}
 	{{- end }}
 	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {

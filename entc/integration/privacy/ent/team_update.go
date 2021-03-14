@@ -329,6 +329,7 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // TeamUpdateOne is the builder for updating a single Team entity.
 type TeamUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *TeamMutation
 }
@@ -416,6 +417,13 @@ func (tuo *TeamUpdateOne) RemoveUsers(u ...*User) *TeamUpdateOne {
 	return tuo.RemoveUserIDs(ids...)
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (tuo *TeamUpdateOne) Select(field string, fields ...string) *TeamUpdateOne {
+	tuo.fields = append([]string{field}, fields...)
+	return tuo
+}
+
 // Save executes the query and returns the updated Team entity.
 func (tuo *TeamUpdateOne) Save(ctx context.Context) (*Team, error) {
 	var (
@@ -499,6 +507,18 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Team.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := tuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, team.FieldID)
+		for _, f := range fields {
+			if !team.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != team.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := tuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

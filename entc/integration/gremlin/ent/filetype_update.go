@@ -249,6 +249,7 @@ func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
 // FileTypeUpdateOne is the builder for updating a single FileType entity.
 type FileTypeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *FileTypeMutation
 }
@@ -326,6 +327,13 @@ func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return ftuo.RemoveFileIDs(ids...)
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (ftuo *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpdateOne {
+	ftuo.fields = append([]string{field}, fields...)
+	return ftuo
 }
 
 // Save executes the query and returns the updated FileType entity.
@@ -457,7 +465,16 @@ func (ftuo *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(filetype.Label, filetype.FilesLabel, id)),
 		})
 	}
-	v.ValueMap(true)
+	if len(ftuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(ftuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range ftuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

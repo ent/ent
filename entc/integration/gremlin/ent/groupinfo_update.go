@@ -218,6 +218,7 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 // GroupInfoUpdateOne is the builder for updating a single GroupInfo entity.
 type GroupInfoUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *GroupInfoMutation
 }
@@ -288,6 +289,13 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 		ids[i] = g[i].ID
 	}
 	return giuo.RemoveGroupIDs(ids...)
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (giuo *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInfoUpdateOne {
+	giuo.fields = append([]string{field}, fields...)
+	return giuo
 }
 
 // Save executes the query and returns the updated GroupInfo entity.
@@ -394,7 +402,16 @@ func (giuo *GroupInfoUpdateOne) gremlin(id string) *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(groupinfo.Label, group.InfoLabel, id)),
 		})
 	}
-	v.ValueMap(true)
+	if len(giuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(giuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range giuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {
