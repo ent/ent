@@ -155,8 +155,7 @@ go generate ./...
 go run ./cmd/todo
 ```
 
-We check the process output again, but this time we'll see that the server executed only 2 queries to the database. 1
-for getting the last 10 todo items, and another for getting the parent-item of each todo-item that was returned in the
+If we check the process's output again, we will see that this time the server executed only two queries to the database. One, in order to get the last 10 todo items, and a second one for getting the parent-item of each todo-item that was returned in the
 first query.
 
 ```sql
