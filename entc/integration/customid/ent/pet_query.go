@@ -542,7 +542,6 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues(pet.FriendsPrimaryKey[0], fks...))
 			},
-
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{&sql.NullString{}, &sql.NullString{}}
 			},
@@ -561,7 +560,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
 				}
-				edgeids = append(edgeids, inValue)
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
 				edges[inValue] = append(edges[inValue], node)
 				return nil
 			},

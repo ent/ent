@@ -499,7 +499,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues(user.FollowersPrimaryKey[1], fks...))
 			},
-
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
@@ -518,7 +517,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
 				}
-				edgeids = append(edgeids, inValue)
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
 				edges[inValue] = append(edges[inValue], node)
 				return nil
 			},
@@ -563,7 +564,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues(user.FollowingPrimaryKey[0], fks...))
 			},
-
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
@@ -582,7 +582,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
 				}
-				edgeids = append(edgeids, inValue)
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
 				edges[inValue] = append(edges[inValue], node)
 				return nil
 			},

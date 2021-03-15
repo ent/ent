@@ -465,7 +465,6 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues(card.SpecPrimaryKey[1], fks...))
 			},
-
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
@@ -484,7 +483,9 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
 				}
-				edgeids = append(edgeids, inValue)
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
 				edges[inValue] = append(edges[inValue], node)
 				return nil
 			},
