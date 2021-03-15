@@ -81,7 +81,7 @@ The gqlgen package can be configured using a `gqlgen.yml` file that it automatic
 Let's add this file. Follow the comments in this file to understand what each config directive means:
 
 ```yaml
-# schema tells gqlgen when the GraphQL schema is located.
+# schema tells gqlgen where the GraphQL schema is located.
 schema:
   - todo.graphql
 
