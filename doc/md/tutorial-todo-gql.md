@@ -138,7 +138,7 @@ should look like this:
 
 ## Connect Ent to GQL
 
-After the gqlgen assets where generated, we're ready to connect Ent to gqlgen and start running our server.
+After the gqlgen assets were generated, we're ready to connect Ent to gqlgen and start running our server.
 This section contains 5 steps, follow them carefully :). 
 
 **1\.** Install the GraphQL extension for Ent
