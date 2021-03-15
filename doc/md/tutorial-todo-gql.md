@@ -279,7 +279,7 @@ You should see the interactive playground:
 
 ![tutorial-todo-playground](https://entgo.io/assets/tutorial-gql-playground.png)
 
-If you're having troubles with getting the playground, go to [first section](#clone-the-code-optional) and clone the
+If you're having troubles with getting the playground to run, go to [first section](#clone-the-code-optional) and clone the
 example repository.
 
 ## Query Todos
