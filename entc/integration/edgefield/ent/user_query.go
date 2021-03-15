@@ -619,7 +619,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodeids := make(map[int][]*User)
 		for i := range nodes {
 			fk := nodes[i].ParentID
-			ids = append(ids, fk)
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
 			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
@@ -668,7 +670,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodeids := make(map[int][]*User)
 		for i := range nodes {
 			fk := nodes[i].SpouseID
-			ids = append(ids, fk)
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
 			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))

@@ -381,11 +381,14 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Street)
 		for i := range nodes {
-			fk := nodes[i].city_streets
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].city_streets == nil {
+				continue
 			}
+			fk := *nodes[i].city_streets
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(city.IDIn(ids...))
 		neighbors, err := query.All(ctx)

@@ -489,11 +489,14 @@ func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Task)
 		for i := range nodes {
-			fk := nodes[i].user_tasks
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_tasks == nil {
+				continue
 			}
+			fk := *nodes[i].user_tasks
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)

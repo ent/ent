@@ -418,11 +418,14 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 		ids := make([]uuid.UUID, 0, len(nodes))
 		nodeids := make(map[uuid.UUID][]*Blob)
 		for i := range nodes {
-			fk := nodes[i].blob_parent
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].blob_parent == nil {
+				continue
 			}
+			fk := *nodes[i].blob_parent
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(blob.IDIn(ids...))
 		neighbors, err := query.All(ctx)

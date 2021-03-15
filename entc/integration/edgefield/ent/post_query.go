@@ -373,11 +373,14 @@ func (pq *PostQuery) sqlAll(ctx context.Context) ([]*Post, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Post)
 		for i := range nodes {
-			fk := nodes[i].AuthorID
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].AuthorID == nil {
+				continue
 			}
+			fk := *nodes[i].AuthorID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
