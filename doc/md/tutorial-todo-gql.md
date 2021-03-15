@@ -183,8 +183,8 @@ package ent
 Note that `ent/entc.go` is ignored using a build tag, and it's executed by the go generate command through the
 `generate.go` file.
 
-**4\.** In order to use only the `go generate` command for executing code-generation for both Ent and gqlgen, we create 
-a `generate.go` file (in the root of the project) with the following:
+**4\.** In order to execute `gqlgen` through `go generate`, we create a new `generate.go` file (in the root
+of the project) with the following:
 
 ```go
 package todo
@@ -192,13 +192,14 @@ package todo
 //go:generate go run github.com/99designs/gqlgen
 ```
 
-Now, running `go generate ./...` from the root of the project, should trigger both Ent codegen and gqlgen codegen.
+Now, running `go generate ./...` from the root of the project, triggers both Ent and gqlgen code generation.
 
 ```console
 go generate ./...
 ```
 
-**5\.** Change the generated `Resolver` in `resolver.go` as follows:
+**5\.** `gqlgen` allows changing the generated `Resolver` and add additional dependencies to it. Let's add
+the `ent.Client` as a dependency by pasting the following in `resolver.go`:
 
 ```go
 package todo
@@ -346,4 +347,5 @@ example repository.
 
 ---
 
-Please continue to the next section and learn how to Relay Node Interface with Ent.
+Please continue to the next section where we explain how to implement the
+[Relay Node Interface](https://relay.dev/graphql/objectidentification.htm) and learn how Ent automatically supports this.

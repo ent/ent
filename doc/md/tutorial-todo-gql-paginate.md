@@ -159,8 +159,7 @@ After changing our Ent and GraphQL schemas, we're ready to run the codegen and u
 go generate ./...
 ```
 
-If you got an error, ignore it and head over to the `Todos` resolver and update it to pass `orderBy` argument
-to `.Paginate()` call:
+Head over to the `Todos` resolver and update it to pass `orderBy` argument to `.Paginate()` call:
 
 ```go
 func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder) (*ent.TodoConnection, error) {

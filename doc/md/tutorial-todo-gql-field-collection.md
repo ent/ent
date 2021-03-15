@@ -168,4 +168,5 @@ and run the example.
 
 ---
 
-Please continue to the next section where we explain how to configure our GraphQL mutations to be transactional.
+Well done! By using `entgql.Bind()` in the Ent schema definition, we were able to greatly improve the efficiency of
+queries to our application. In the next section, we will learn how to make our GraphQL mutations transactional.

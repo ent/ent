@@ -152,4 +152,6 @@ query {
 
 ---
 
-Well done! As you can see, by changing a few lines of code our application now implements the Relay Node Interface. In the next section, we will show how to implement the Relay Cursor Connections spec using Ent which is very useful if we want our application to support slicing and pagination of query results.
+Well done! As you can see, by changing a few lines of code our application now implements the Relay Node Interface. 
+In the next section, we will show how to implement the Relay Cursor Connections spec using Ent which is very useful 
+if we want our application to support slicing and pagination of query results.
