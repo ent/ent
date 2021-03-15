@@ -322,7 +322,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent
 }
 ```
 
-Then, creating a todo item should work:
+Now, creating a todo item should work:
 
 ```graphql
 mutation CreateTodo($todo: TodoInput!) {
