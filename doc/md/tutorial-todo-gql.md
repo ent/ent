@@ -284,7 +284,7 @@ example repository.
 
 ## Query Todos
 
-If we'll try to query our todo list, we'll get an error as the resolver method was not implemented. 
+If we try to query our todo list, we'll get an error as the resolver method is not yet implemented. 
 Let's implement the resolver by replacing the `Todos` implementation in the query resolver:
 
 ```diff
