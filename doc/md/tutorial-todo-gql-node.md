@@ -37,8 +37,7 @@ go run ./cmd/todo/
 
 ## Implementation
 
-Ent supports the Node interface with its GraphQL integration, and the steps for adding this to your application are 
-very simple. We start by adding the `Node` interface to our GraphQL schema:
+Ent supports the Node interface through its GraphQL integration. By following a few simple steps you can add support for it in your application. We start by adding the `Node` interface to our GraphQL schema:
 
 ```diff
 +interface Node {
