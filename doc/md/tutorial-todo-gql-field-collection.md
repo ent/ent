@@ -135,8 +135,8 @@ func (Todo) Edges() []ent.Edge {
 }
 ```
 
-After adding these annotations, `entgql` will do the binding mentioned in the [section](#ent-solution) above, but it
-also generates edge-resolvers for the nodes under the `edge.go` file as follows:
+After adding these annotations, `entgql` will do the binding mentioned in the [section](#ent-solution) above. Additionally, it
+will also generate edge-resolvers for the nodes under the `edge.go` file:
 
 ```go
 func (t *Todo) Children(ctx context.Context) ([]*Todo, error) {
