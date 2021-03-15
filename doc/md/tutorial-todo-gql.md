@@ -308,7 +308,7 @@ query AllTodos {
 
 ## Create a Todo
 
-Same as before, if we'll try to create a todo item in GraphQL we'll get an error as the resolver was not implemented.
+Same as before, if we try to create a todo item in GraphQL, we'll get an error as the resolver is not yet implemented.
 Let's implement the resolver by changing the `CreateTodo` implementation in the mutation resolver:
 
 ```go
