@@ -24,8 +24,8 @@ go run ./cmd/todo/
 
 [gqlgen](https://gqlgen.com/) is a framework for easily generating GraphQL servers in Go. In this tutorial, we will review Ent's official integration with it.
 
-We start by creating a simple GraphQL schema for our todo list, then install the [99designs/gqlgen](https://github.com/99designs/gqlgen)
-package and configures it. Let's create a file named `todo.graphql` and paste the following:
+This tutorial begins where the previous one ended (with a working Todo-list schema). We start by creating a simple GraphQL schema for our todo list, then install the [99designs/gqlgen](https://github.com/99designs/gqlgen)
+package and configure it. Let's create a file named `todo.graphql` and paste the following:
 
 ```graphql
 # Maps a Time GraphQL scalar to a Go time.Time struct.
