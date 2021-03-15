@@ -231,5 +231,5 @@ query {
 
 ---
 
-Please continue to the next section where we explain how to implement GraphQL field collections and learn how Ent solves
+Great! With a few simple changes, our application now supports pagination! Please continue to the next section where we explain how to implement GraphQL field collections and learn how Ent solves
 the *"N+1 problem"* in GraphQL resolvers.
