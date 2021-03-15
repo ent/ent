@@ -79,7 +79,7 @@ models:
       - todo/ent/todo.Status
 ```
 
-As you can see, this is a 7 lines change. Let's run the code generation using:
+To apply these changes, we must rerun the `gqlgen` code-gen. Let's do that by running:
 
 ```console
 go generate ./...
