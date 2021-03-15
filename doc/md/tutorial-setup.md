@@ -94,7 +94,7 @@ Paste the following code in `example_test.go` that instantiates an `ent.Client` 
 in the database (tables, columns, etc).
 
 ```go
-package main
+package todo
 
 import (
 	"context"
