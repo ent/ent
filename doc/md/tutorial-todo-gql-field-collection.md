@@ -120,7 +120,7 @@ SELECT DISTINCT `todos`.`id`, `todos`.`text`, `todos`.`created_at`, `todos`.`sta
 SELECT DISTINCT `todos`.`id`, `todos`.`text`, `todos`.`created_at`, `todos`.`status`, `todos`.`priority` FROM `todos` JOIN (SELECT `todo_parent` FROM `todos` WHERE `id` = ?) AS `t1` ON `todos`.`id` = `t1`.`todo_parent` LIMIT 2
 ```
 
-Let's use Ent for auto-solve our problem. The solution is very simple as all we need to do is to add the following
+Let's see how Ent can automatically solve our problem. All we need to do is to add the following
 `entql` annotations to our edges:
 
 ```diff
@@ -170,4 +170,3 @@ and run the example.
 ---
 
 Please continue to the next section where we explain how to configure our GraphQL mutations to be transactional.
-
