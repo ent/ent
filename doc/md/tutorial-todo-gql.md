@@ -93,8 +93,8 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 
-# autobind tells gqngen to search for any type names in the GraphQL schema in the
-# provided package. If they match it will use them, otherwise it will generate new.
+# autobind tells gqlgen to search for any type names in the GraphQL schema in the
+# provided Go package. If they match it will use them, otherwise it will generate new ones.
 autobind:
   - todo/ent
 
