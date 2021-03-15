@@ -374,7 +374,9 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context) ([]*Metadata, error) {
 		nodeids := make(map[int][]*Metadata)
 		for i := range nodes {
 			fk := nodes[i].ID
-			ids = append(ids, fk)
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
 			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))

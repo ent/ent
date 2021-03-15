@@ -381,11 +381,14 @@ func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 		ids := make([]string, 0, len(nodes))
 		nodeids := make(map[string][]*Car)
 		for i := range nodes {
-			fk := nodes[i].pet_cars
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].pet_cars == nil {
+				continue
 			}
+			fk := *nodes[i].pet_cars
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(pet.IDIn(ids...))
 		neighbors, err := query.All(ctx)

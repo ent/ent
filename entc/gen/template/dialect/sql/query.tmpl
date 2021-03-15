@@ -317,16 +317,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			nodeids := make(map[{{ $e.Type.ID.Type }}][]*{{ $.Name }})
 			for i := range nodes {
 				{{- $fk := $e.ForeignKey }}
-				fk := nodes[i].{{ $fk.StructField }}
 				{{- if $fk.Field.Nillable }}
-					if fk != nil {
-						ids = append(ids, *fk)
-						nodeids[*fk] = append(nodeids[*fk], nodes[i])
+					if nodes[i].{{ $fk.StructField }} == nil {
+						continue
 					}
-				{{- else }}
-					ids = append(ids, fk)
-					nodeids[fk] = append(nodeids[fk], nodes[i])
 				{{- end }}
+				fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].{{ $fk.StructField }}
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
 			query.Where({{ $e.Type.Package }}.IDIn(ids...))
 			neighbors, err := query.All(ctx)
