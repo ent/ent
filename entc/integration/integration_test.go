@@ -1236,6 +1236,15 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		require.Len(users[0].Edges.Groups, 2)
 		require.Len(users[0].Edges.Friends, 1)
 		require.Equal(alex.Name, users[0].Edges.Friends[0].Name)
+
+		require.Equal(alex.Name, users[1].Name)
+		require.Len(users[1].Edges.Groups, 1)
+		require.Equal(hub.Name, users[1].Edges.Groups[0].Name)
+
+		require.Equal(nati.Name, users[2].Name)
+		require.Len(users[2].Edges.Groups, 1)
+		require.Equal(lab.Name, users[2].Edges.Groups[0].Name)
+
 		g1, g2 := users[0].Edges.Groups[0], users[0].Edges.Groups[1]
 		require.Equal(lab.Name, g1.Name)
 		require.Equal(hub.Name, g2.Name)

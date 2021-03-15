@@ -264,8 +264,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				Predicate: func(s *sql.Selector) {
 					s.Where(sql.InValues({{ $.Package }}.{{ $e.PKConstant }}[{{ if $e.IsInverse }}1{{ else }}0{{ end }}], fks...))
 				},
-				{{ $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.NullType }}{{ end }}
-				{{ $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.NullType }}{{ end }}
+				{{- $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.NullType }}{{ end }}
+				{{- $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.NullType }}{{ end }}
 				ScanValues: func() [2]interface{}{
 					return [2]interface{}{&{{ $out }}{}, &{{ $in }}{}}
 				},
@@ -284,7 +284,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 					if !ok {
 						return fmt.Errorf("unexpected node id in edges: %v", outValue)
 					}
-					edgeids = append(edgeids, inValue)
+					if _, ok := edges[inValue]; !ok {
+						edgeids = append(edgeids, inValue)
+					}
 					edges[inValue] = append(edges[inValue], node)
 					return nil
 				},
