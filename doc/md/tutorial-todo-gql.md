@@ -22,7 +22,7 @@ go run ./cmd/todo/
 
 ## Basic Skeleton
 
-We use the [gqlgen](https://gqlgen.com/) framework in this example as Ent provides an official integration with it.
+[gqlgen](https://gqlgen.com/) is a framework for easily generating GraphQL servers in Go. In this tutorial, we will review Ent's official integration with it.
 
 We start by creating a simple GraphQL schema for our todo list, then install the [99designs/gqlgen](https://github.com/99designs/gqlgen)
 package and configures it. Let's create a file named `todo.graphql` and paste the following:
