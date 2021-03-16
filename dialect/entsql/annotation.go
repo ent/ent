@@ -61,6 +61,18 @@ type Annotation struct {
 	// By default, this value is nil defaulting to whatever best fits each scenario.
 	//
 	Incremental *bool `json:"incremental,omitempty"`
+
+	// OnDelete specifies a custom referential action for DELETE operations on parent
+	// table that has matching rows in the child table.
+	//
+	// For example, in order to delete rows from the parent table and automatically delete
+	// their matching rows in the child table, pass the following annotation:
+	//
+	//	entsql.Annotation{
+	//		OnDelete: entsql.Cascade,
+	//	}
+	//
+	OnDelete ReferenceOption `json:"on_delete,omitempty"`
 }
 
 // Name describes the annotation name.
@@ -105,4 +117,17 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 var (
 	_ schema.Annotation = (*Annotation)(nil)
 	_ schema.Merger     = (*Annotation)(nil)
+)
+
+// ReferenceOption for constraint actions.
+type ReferenceOption string
+
+// Reference options (actions) specified by ON UPDATE and ON DELETE
+// subclauses of the FOREIGN KEY clause.
+const (
+	NoAction   ReferenceOption = "NO ACTION"
+	Restrict   ReferenceOption = "RESTRICT"
+	Cascade    ReferenceOption = "CASCADE"
+	SetNull    ReferenceOption = "SET NULL"
+	SetDefault ReferenceOption = "SET DEFAULT"
 )
