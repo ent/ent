@@ -111,6 +111,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	if s := ant.Incremental; s != nil {
 		a.Incremental = s
 	}
+	if s := ant.OnDelete; s != "" {
+		a.OnDelete = s
+	}
 	return a
 }
 
