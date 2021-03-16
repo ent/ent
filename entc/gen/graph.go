@@ -423,7 +423,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
-					OnDelete:   schema.SetNull,
+					OnDelete:   deleteAction(e),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
 					Symbol:     fmt.Sprintf("%s_%s_%s", owner.Name, ref.Name, e.Name),
@@ -435,7 +435,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
-					OnDelete:   schema.SetNull,
+					OnDelete:   deleteAction(e),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
 					Symbol:     fmt.Sprintf("%s_%s_%s", owner.Name, ref.Name, e.Name),
@@ -491,6 +491,15 @@ func mayAddColumn(t *schema.Table, c *schema.Column) {
 	if !t.HasColumn(c.Name) {
 		t.AddColumn(c)
 	}
+}
+
+// deleteAction returns the referential action for DELETE operations of the given edge.
+func deleteAction(e *Edge) schema.ReferenceOption {
+	action := schema.SetNull
+	if ant := e.EntSQL(); ant != nil && ant.OnDelete != "" {
+		action = schema.ReferenceOption(ant.OnDelete)
+	}
+	return action
 }
 
 // SupportMigrate reports if the codegen supports schema migration.

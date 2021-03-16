@@ -1440,6 +1440,11 @@ func (e Edge) StorageKey() (*edge.StorageKey, error) {
 	return assoc.def.StorageKey, nil
 }
 
+// EntSQL returns the EntSQL annotation if exists.
+func (e Edge) EntSQL() *entsql.Annotation {
+	return entsqlAnnotate(e.Annotations)
+}
+
 // Column returns the first element from the columns slice.
 func (r Relation) Column() string {
 	if len(r.Columns) == 0 {
