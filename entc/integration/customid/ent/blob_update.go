@@ -282,6 +282,7 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // BlobUpdateOne is the builder for updating a single Blob entity.
 type BlobUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *BlobMutation
 }
@@ -358,6 +359,13 @@ func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
 	return buo.RemoveLinkIDs(ids...)
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (buo *BlobUpdateOne) Select(field string, fields ...string) *BlobUpdateOne {
+	buo.fields = append([]string{field}, fields...)
+	return buo
+}
+
 // Save executes the query and returns the updated Blob entity.
 func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
 	var (
@@ -425,6 +433,18 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Blob.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := buo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, blob.FieldID)
+		for _, f := range fields {
+			if !blob.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != blob.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := buo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

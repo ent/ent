@@ -15,3 +15,11 @@ func (c *UserClient) Debug() *UserClient {
 	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
 	return &UserClient{config: cfg}
 }
+
+func (c *UserClient) DebugLog(fn func(...interface{})) *UserClient {
+	if c.debug {
+		return c
+	}
+	cfg := config{driver: dialect.Debug(c.driver, c.log), log: fn, debug: true, hooks: c.hooks}
+	return &UserClient{config: cfg}
+}

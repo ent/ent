@@ -193,6 +193,7 @@ func (iu *InfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // InfoUpdateOne is the builder for updating a single Info entity.
 type InfoUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *InfoMutation
 }
@@ -230,6 +231,13 @@ func (iuo *InfoUpdateOne) Mutation() *InfoMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (iuo *InfoUpdateOne) ClearUser() *InfoUpdateOne {
 	iuo.mutation.ClearUser()
+	return iuo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (iuo *InfoUpdateOne) Select(field string, fields ...string) *InfoUpdateOne {
+	iuo.fields = append([]string{field}, fields...)
 	return iuo
 }
 
@@ -300,6 +308,18 @@ func (iuo *InfoUpdateOne) sqlSave(ctx context.Context) (_node *Info, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Info.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := iuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, info.FieldID)
+		for _, f := range fields {
+			if !info.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != info.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := iuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

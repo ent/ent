@@ -350,6 +350,16 @@ func Select(t *testing.T, client *ent.Client) {
 			require.Zero(f.Age)
 		}
 	}
+	a8m := client.User.Create().SetName("Ariel").SetNickname("a8m").SetAge(30).SaveX(ctx)
+	require.NotEmpty(a8m.ID)
+	require.NotEmpty(a8m.Age)
+	require.NotEmpty(a8m.Name)
+	require.NotEmpty(a8m.Nickname)
+	a8m = a8m.Update().SetAge(32).Select(user.FieldAge).SaveX(ctx)
+	require.NotEmpty(a8m.ID)
+	require.NotEmpty(a8m.Age)
+	require.Empty(a8m.Name)
+	require.Empty(a8m.Nickname)
 }
 
 func Predicate(t *testing.T, client *ent.Client) {

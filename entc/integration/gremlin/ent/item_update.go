@@ -114,6 +114,7 @@ func (iu *ItemUpdate) gremlin() *dsl.Traversal {
 // ItemUpdateOne is the builder for updating a single Item entity.
 type ItemUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *ItemMutation
 }
@@ -121,6 +122,13 @@ type ItemUpdateOne struct {
 // Mutation returns the ItemMutation object of the builder.
 func (iuo *ItemUpdateOne) Mutation() *ItemMutation {
 	return iuo.mutation
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (iuo *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne {
+	iuo.fields = append([]string{field}, fields...)
+	return iuo
 }
 
 // Save executes the query and returns the updated Item entity.
@@ -199,7 +207,16 @@ func (iuo *ItemUpdateOne) gremlin(id string) *dsl.Traversal {
 	var (
 		trs []*dsl.Traversal
 	)
-	v.ValueMap(true)
+	if len(iuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(iuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range iuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

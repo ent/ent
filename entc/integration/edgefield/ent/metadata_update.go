@@ -214,6 +214,7 @@ func (mu *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // MetadataUpdateOne is the builder for updating a single Metadata entity.
 type MetadataUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *MetadataMutation
 }
@@ -266,6 +267,13 @@ func (muo *MetadataUpdateOne) Mutation() *MetadataMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (muo *MetadataUpdateOne) ClearUser() *MetadataUpdateOne {
 	muo.mutation.ClearUser()
+	return muo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (muo *MetadataUpdateOne) Select(field string, fields ...string) *MetadataUpdateOne {
+	muo.fields = append([]string{field}, fields...)
 	return muo
 }
 
@@ -336,6 +344,18 @@ func (muo *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Metadata.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := muo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, metadata.FieldID)
+		for _, f := range fields {
+			if !metadata.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != metadata.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := muo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

@@ -144,6 +144,7 @@ func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // MixinIDUpdateOne is the builder for updating a single MixinID entity.
 type MixinIDUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *MixinIDMutation
 }
@@ -163,6 +164,13 @@ func (miuo *MixinIDUpdateOne) SetMixinField(s string) *MixinIDUpdateOne {
 // Mutation returns the MixinIDMutation object of the builder.
 func (miuo *MixinIDUpdateOne) Mutation() *MixinIDMutation {
 	return miuo.mutation
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (miuo *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpdateOne {
+	miuo.fields = append([]string{field}, fields...)
+	return miuo
 }
 
 // Save executes the query and returns the updated MixinID entity.
@@ -232,6 +240,18 @@ func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing MixinID.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := miuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, mixinid.FieldID)
+		for _, f := range fields {
+			if !mixinid.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != mixinid.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := miuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

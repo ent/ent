@@ -235,6 +235,7 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *PetMutation
 }
@@ -309,6 +310,13 @@ func (puo *PetUpdateOne) ClearTeam() *PetUpdateOne {
 // ClearOwner clears the "owner" edge to the User entity.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
+	return puo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (puo *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
+	puo.fields = append([]string{field}, fields...)
 	return puo
 }
 
@@ -427,7 +435,16 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 	for _, id := range puo.mutation.OwnerIDs() {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
-	v.ValueMap(true)
+	if len(puo.fields) > 0 {
+		fields := make([]interface{}, 0, len(puo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range puo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

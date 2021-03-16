@@ -199,6 +199,7 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PostUpdateOne is the builder for updating a single Post entity.
 type PostUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *PostMutation
 }
@@ -243,6 +244,13 @@ func (puo *PostUpdateOne) Mutation() *PostMutation {
 // ClearAuthor clears the "author" edge to the User entity.
 func (puo *PostUpdateOne) ClearAuthor() *PostUpdateOne {
 	puo.mutation.ClearAuthor()
+	return puo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (puo *PostUpdateOne) Select(field string, fields ...string) *PostUpdateOne {
+	puo.fields = append([]string{field}, fields...)
 	return puo
 }
 
@@ -313,6 +321,18 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Post.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := puo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, post.FieldID)
+		for _, f := range fields {
+			if !post.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != post.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := puo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

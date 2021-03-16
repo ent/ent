@@ -14,7 +14,9 @@ sidebar_label: FAQ
 [How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql) \
 [How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
 [How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids) \
-[How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)
+[How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql) \
+[How to extend the generated models?](#how-to-extend-the-generated-models) \
+[How to extend the generated builders?](#how-to-extend-the-generated-builders)
 
 ## Answers
 
@@ -463,3 +465,71 @@ func (Point) SchemaType() map[string]string {
 ```
 
 A full example exists in the [example repository](https://github.com/a8m/entspatial).
+
+
+#### How to extend the generated models?
+
+Ent supports extending generated types (both global types and models) using custom templates. For example, in order to
+add additional struct fields or methods to the generated model, we can override the `model/fields/additional` template like in this
+[example](https://github.com/ent/ent/blob/dd4792f5b30bdd2db0d9a593a977a54cb3f0c1ce/examples/entcpkg/ent/template/static.tmpl).
+
+
+If your custom fields/methods require additional imports, you can add those imports using custom templates as well:
+
+```gotemplate
+{{- define "import/additional/field_types" -}}
+    "github.com/path/to/your/custom/type"
+{{- end -}}
+
+{{- define "import/additional/client_dependencies" -}}
+    "github.com/path/to/your/custom/type"
+{{- end -}}
+```
+
+#### How to extend the generated builders?
+
+In case you want to extend the generated client and add dependencies to all different builders under the `ent` package,
+you can use the `"config/{fields,options}/*"` templates as follows:
+
+```gotemplate
+{{/* A template for adding additional config fields/options. */}}
+{{ define "config/fields/httpclient" -}}
+	// HTTPClient field added by a test template.
+	HTTPClient *http.Client
+{{ end }}
+
+{{ define "config/options/httpclient" }}
+	// HTTPClient option added by a test template.
+	func HTTPClient(hc *http.Client) Option {
+		return func(c *config) {
+			c.HTTPClient = hc
+		}
+	}
+{{ end }}
+```
+
+Then, you can inject this new dependency to your client, and access it in all builders:
+
+```go
+func main() {
+	client, err := ent.Open(
+		"sqlite3",
+		"file:ent?mode=memory&cache=shared&_fk=1",
+		// Custom config option.
+		ent.HTTPClient(http.DefaultClient),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Close()
+	ctx := context.Background()
+	client.User.Use(func(next ent.Mutator) ent.Mutator {
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			// Access the injected HTTP client here.
+			_ = m.HTTPClient
+			return next.Mutate(ctx, m)
+		})
+	})
+	// ...
+}
+```

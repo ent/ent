@@ -263,7 +263,21 @@ if err != nil {
 }
 ```
 
-## Delete One
+
+Update an entity and return a partial of it.
+
+```go
+pedro, err := client.Pet.
+	UpdateOneID(id).
+	SetAge(9).
+	SetName("pedro").
+	// Select allows selecting one or more fields (columns) of the returned entity.
+	// The default is selecting all fields defined in the entity schema.
+	Select(pet.FieldName).
+	Save(ctx)
+```
+
+## Delete One 
 
 Delete an entity.
 
