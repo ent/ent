@@ -1314,14 +1314,24 @@ func TestBuilder(t *testing.T) {
 				Or().
 				Where(And(NEQ("f", "f"), NEQ("g", "g"))),
 			wantQuery: strings.NewReplacer("\n", "", "\t", "").Replace(`
-SELECT * FROM "users" 
-WHERE 
-	(
-		(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6))) 
-		AND 
-		(("a" = $7 OR ("b" = $8 AND "c" = $9)) AND (NOT ("d" IS NULL OR "e" IS NOT NULL)))
-	) 
-	OR ("f" <> $10 AND "g" <> $11)`),
+			SELECT * FROM "users"
+SELECT * FROM "users"
+			SELECT * FROM "users"
+			 WHERE
+WHERE
+			 WHERE
+				 (
+					(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6)))
+		(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6)))
+					(("id" = $1 AND "group_id" IN ($2, $3)) OR ("id" = $4 AND "group_id" IN ($5, $6)))
+					 AND
+		AND
+					 AND
+					 (("a" = $7 OR ("b" = $8 AND "c" = $9)) AND (NOT ("d" IS NULL OR "e" IS NOT NULL)))
+				)
+	)
+				)
+				 OR ("f" <> $10 AND "g" <> $11)`),
 			wantArgs: []interface{}{1, 2, 3, 2, 4, 5, "a", "b", "c", "f", "g"},
 		},
 		{
@@ -1394,6 +1404,42 @@ WHERE
 				),
 			wantQuery: `SELECT * FROM "users" WHERE ((name = $1 AND name = $2) AND "name" = $3) AND ("id" IN (SELECT "owner_id" FROM "pets" WHERE "name" = $4) AND "active" = $5)`,
 			wantArgs:  []interface{}{"pedro", "pedro", "pedro", "luna", true},
+		},
+		{
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").ConflictColumns("id").UpdateSet("email", "user-1@example.com"),
+			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "excluded"."id", "email" = "excluded"."email"`,
+			wantArgs:  []interface{}{"1", "user@example.com"},
+		},
+
+		{
+			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("id"),
+			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "id", "email" = "email"`,
+			wantArgs:  []interface{}{"1", "user@example.com"},
+		},
+		{
+			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithAlternateValues).UpdateSet("email", "user-1@example.com").ConflictColumns("email"),
+			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = ?",
+			wantArgs:  []interface{}{"user@example.com", "user-1@example.com"},
+		},
+		{
+			input:     Dialect(dialect.Postgres).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithAlternateValues).UpdateSet("email", "user-1@example.com").ConflictColumns("email"),
+			wantQuery: `INSERT INTO "users" ("email") VALUES ($1) ON CONFLICT ("email") DO UPDATE SET "email" = $2`,
+			wantArgs:  []interface{}{"user@example.com", "user-1@example.com"},
+		},
+		{
+			input:     Dialect(dialect.Postgres).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("email"),
+			wantQuery: `INSERT INTO "users" ("email") VALUES ($1) ON CONFLICT ("email") DO UPDATE SET "email" = "email"`,
+			wantArgs:  []interface{}{"user@example.com"},
+		},
+		{
+			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("email"),
+			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = `email`",
+			wantArgs:  []interface{}{"user@example.com"},
+		},
+		{
+			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithNewValues).ConflictColumns("email"),
+			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = VALUES(`email`)",
+			wantArgs:  []interface{}{"user@example.com"},
 		},
 	}
 	for i, tt := range tests {
