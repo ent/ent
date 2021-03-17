@@ -619,7 +619,7 @@ type InsertBuilder struct {
 	table     string
 	schema    string
 	columns   []string
-	defaults  string
+	defaults  bool
 	returning []string
 	values    [][]interface{}
 }
@@ -651,13 +651,13 @@ func (i *InsertBuilder) Set(column string, v interface{}) *InsertBuilder {
 	return i
 }
 
-// Columns sets the columns of the insert statement.
+// Columns appends columns to the INSERT statement.
 func (i *InsertBuilder) Columns(columns ...string) *InsertBuilder {
 	i.columns = append(i.columns, columns...)
 	return i
 }
 
-// Values append a value tuple for the insert statement.
+// Values appends a value tuple to the INSERT statement.
 func (i *InsertBuilder) Values(values ...interface{}) *InsertBuilder {
 	i.values = append(i.values, values)
 	return i
@@ -665,13 +665,17 @@ func (i *InsertBuilder) Values(values ...interface{}) *InsertBuilder {
 
 // Default sets the default values clause based on the dialect type.
 func (i *InsertBuilder) Default() *InsertBuilder {
+	i.defaults = true
+	return i
+}
+
+func (i *InsertBuilder) writeDefault() {
 	switch i.Dialect() {
 	case dialect.MySQL:
-		i.defaults = "VALUES ()"
+		i.WriteString("VALUES ()")
 	case dialect.SQLite, dialect.Postgres:
-		i.defaults = "DEFAULT VALUES"
+		i.WriteString("DEFAULT VALUES")
 	}
-	return i
 }
 
 // Returning adds the `RETURNING` clause to the insert statement. PostgreSQL only.
@@ -685,20 +689,16 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 	i.WriteString("INSERT INTO ")
 	i.writeSchema(i.schema)
 	i.Ident(i.table).Pad()
-	if i.defaults != "" && len(i.columns) == 0 {
-		i.WriteString(i.defaults)
+	if i.defaults && len(i.columns) == 0 {
+		i.writeDefault()
 	} else {
-		i.Nested(func(b *Builder) {
-			b.IdentComma(i.columns...)
-		})
+		i.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
 		i.WriteString(" VALUES ")
 		for j, v := range i.values {
 			if j > 0 {
 				i.Comma()
 			}
-			i.Nested(func(b *Builder) {
-				b.Args(v...)
-			})
+			i.WriteByte('(').Args(v...).WriteByte(')')
 		}
 	}
 	if len(i.returning) > 0 && i.postgres() {
@@ -2056,6 +2056,7 @@ type Builder struct {
 // Quote quotes the given identifier with the characters based
 // on the configured dialect. It defaults to "`".
 func (b *Builder) Quote(ident string) string {
+	quote := "`"
 	switch {
 	case b.postgres():
 		// If it was quoted with the wrong
@@ -2063,13 +2064,12 @@ func (b *Builder) Quote(ident string) string {
 		if strings.Contains(ident, "`") {
 			return strings.ReplaceAll(ident, "`", `"`)
 		}
-		return strconv.Quote(ident)
+		quote = `"`
 	// An identifier for unknown dialect.
 	case b.dialect == "" && strings.ContainsAny(ident, "`\""):
 		return ident
-	default:
-		return fmt.Sprintf("`%s`", ident)
 	}
+	return quote + ident + quote
 }
 
 // Ident appends the given string as an identifier.
@@ -2242,14 +2242,12 @@ func (b *Builder) Args(a ...interface{}) *Builder {
 
 // Comma adds a comma to the query.
 func (b *Builder) Comma() *Builder {
-	b.WriteString(", ")
-	return b
+	return b.WriteString(", ")
 }
 
 // Pad adds a space to the query.
 func (b *Builder) Pad() *Builder {
-	b.WriteString(" ")
-	return b
+	return b.WriteByte(' ')
 }
 
 // Join joins a list of Queries to the builder.
