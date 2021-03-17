@@ -12,6 +12,18 @@ func Test_receiver(t *testing.T) {
 		want string
 	}{
 		{
+			"[]T",
+			"t",
+		},
+		{
+			"[1]T",
+			"t",
+		},
+		{
+			"User",
+			"u",
+		},
+		{
 			"UserQuery",
 			"uq",
 		},
