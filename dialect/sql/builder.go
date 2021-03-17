@@ -2156,6 +2156,7 @@ type Builder struct {
 // Quote quotes the given identifier with the characters based
 // on the configured dialect. It defaults to "`".
 func (b *Builder) Quote(ident string) string {
+	quote := "`"
 	switch {
 	case b.postgres():
 		// If it was quoted with the wrong
@@ -2163,13 +2164,12 @@ func (b *Builder) Quote(ident string) string {
 		if strings.Contains(ident, "`") {
 			return strings.ReplaceAll(ident, "`", `"`)
 		}
-		return strconv.Quote(ident)
+		quote = `"`
 	// An identifier for unknown dialect.
 	case b.dialect == "" && strings.ContainsAny(ident, "`\""):
 		return ident
-	default:
-		return fmt.Sprintf("`%s`", ident)
 	}
+	return quote + ident + quote
 }
 
 // Ident appends the given string as an identifier.
