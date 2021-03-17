@@ -15,35 +15,35 @@ func Test_receiver(t *testing.T) {
 	}{
 		{
 			"[]T",
-			"t",
+			"_t",
 		},
 		{
 			"[1]T",
-			"t",
+			"_t",
 		},
 		{
 			"User",
-			"u",
+			"_u",
 		},
 		{
 			"UserQuery",
-			"uq",
+			"_uq",
 		},
 		{
 			"UserSelect",
-			"us",
+			"_us",
 		},
 		{
 			"OS",
-			"o",
+			"_o",
 		},
 		{
 			"OSQuery",
-			"oq",
+			"_oq",
 		},
 		{
 			"OSSelect",
-			"os",
+			"_os",
 		},
 	}
 	for _, tt := range tests {
