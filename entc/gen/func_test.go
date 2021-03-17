@@ -19,6 +19,14 @@ func Test_receiver(t *testing.T) {
 			"UserSelect",
 			"us",
 		},
+		{
+			"OSQuery",
+			"oq",
+		},
+		{
+			"OSSelect",
+			"os",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.arg, func(t *testing.T) {
