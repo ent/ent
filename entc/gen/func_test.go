@@ -75,6 +75,10 @@ func Test_snake(t *testing.T) {
 			"HTTPCode",
 			"http_code",
 		},
+		{
+			"OS",
+			"os",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.arg, func(t *testing.T) {
