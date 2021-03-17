@@ -32,6 +32,10 @@ func Test_receiver(t *testing.T) {
 			"us",
 		},
 		{
+			"OS",
+			"o",
+		},
+		{
 			"OSQuery",
 			"oq",
 		},
