@@ -67,10 +67,10 @@ const (
 	// CardColumn is the table column denoting the card relation/edge.
 	CardColumn = "user_card"
 	// PetsTable is the table the holds the pets relation/edge.
-	PetsTable = "pets"
+	PetsTable = "pet"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
-	PetsInverseTable = "pets"
+	PetsInverseTable = "pet"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "user_pets"
 	// FilesTable is the table the holds the files relation/edge.
@@ -92,10 +92,10 @@ const (
 	// FollowingTable is the table the holds the following relation/edge. The primary key declared below.
 	FollowingTable = "user_following"
 	// TeamTable is the table the holds the team relation/edge.
-	TeamTable = "pets"
+	TeamTable = "pet"
 	// TeamInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
-	TeamInverseTable = "pets"
+	TeamInverseTable = "pet"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "user_team"
 	// SpouseTable is the table the holds the spouse relation/edge.

@@ -6,6 +6,8 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -16,6 +18,13 @@ import (
 // Pet holds the schema definition for the Pet entity.
 type Pet struct {
 	ent.Schema
+}
+
+// Annotations of the Pet.
+func (Pet) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "pet"},
+	}
 }
 
 // Fields of the Pet.
