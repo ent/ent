@@ -390,9 +390,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 
 	// Drop indexes.
 	for _, idx := range curr.Indexes {
-		_, ok1 := new.fk(idx.Name)
-		_, ok2 := new.index(idx.Name)
-		if !ok1 && !ok2 {
+		if _, isFK := new.fk(idx.Name); !isFK && !new.hasIndex(idx.Name, idx.realname) {
 			change.index.drop.append(idx)
 		}
 	}
