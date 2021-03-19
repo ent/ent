@@ -1395,6 +1395,25 @@ WHERE
 			wantQuery: `SELECT * FROM "users" WHERE ((name = $1 AND name = $2) AND "name" = $3) AND ("id" IN (SELECT "owner_id" FROM "pets" WHERE "name" = $4) AND "active" = $5)`,
 			wantArgs:  []interface{}{"pedro", "pedro", "pedro", "luna", true},
 		},
+		{
+			input: func() Querier {
+				t1 := Table("users")
+				return Dialect(dialect.Postgres).
+					Select().
+					From(t1).
+					Where(ColumnsEQ(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsNEQ(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsGT(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsGTE(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsLT(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsLTE(t1.C("id1"), t1.C("id2")))
+			}(),
+			wantQuery: strings.ReplaceAll(`
+SELECT * FROM "users" 
+WHERE (((("users"."id1" = "users"."id2" AND "users"."id1" <> "users"."id2") 
+AND "users"."id1" > "users"."id2") AND "users"."id1" >= "users"."id2") 
+AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""),
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
