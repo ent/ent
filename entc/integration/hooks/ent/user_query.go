@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/hooks/ent/card"
@@ -34,6 +35,7 @@ type UserQuery struct {
 	withFriends    *UserQuery
 	withBestFriend *UserQuery
 	withFKs        bool
+	withLock       ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -413,6 +415,18 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (uq *UserQuery) LockForUpdate() *UserQuery {
+	uq.withLock = LockForUpdate
+	return uq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (uq *UserQuery) LockForShare() *UserQuery {
+	uq.withLock = LockForShare
+	return uq
+}
+
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
@@ -599,8 +613,9 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: user.FieldID,
 			},
 		},
-		From:   uq.sql,
-		Unique: true,
+		From:     uq.sql,
+		Unique:   true,
+		WithLock: uq.withLock,
 	}
 	if fields := uq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

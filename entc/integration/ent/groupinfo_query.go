@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/group"
@@ -31,6 +32,7 @@ type GroupInfoQuery struct {
 	predicates []predicate.GroupInfo
 	// eager-loading edges.
 	withGroups *GroupQuery
+	withLock   ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -342,6 +344,18 @@ func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (giq *GroupInfoQuery) LockForUpdate() *GroupInfoQuery {
+	giq.withLock = LockForUpdate
+	return giq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (giq *GroupInfoQuery) LockForShare() *GroupInfoQuery {
+	giq.withLock = LockForShare
+	return giq
+}
+
 func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 	var (
 		nodes       = []*GroupInfo{}
@@ -425,8 +439,9 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: groupinfo.FieldID,
 			},
 		},
-		From:   giq.sql,
-		Unique: true,
+		From:     giq.sql,
+		Unique:   true,
+		WithLock: giq.withLock,
 	}
 	if fields := giq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -29,6 +29,12 @@ type (
 	Mutator    = ent.Mutator
 	Mutation   = ent.Mutation
 	MutateFunc = ent.MutateFunc
+	LockType   = ent.LockType
+)
+
+const (
+	LockForUpdate = ent.LockForUpdate
+	LockForShare  = ent.LockForShare
 )
 
 // OrderFunc applies an ordering on the graph traversal.

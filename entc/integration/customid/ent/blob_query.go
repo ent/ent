@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
@@ -33,6 +34,7 @@ type BlobQuery struct {
 	withParent *BlobQuery
 	withLinks  *BlobQuery
 	withFKs    bool
+	withLock   ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -378,6 +380,18 @@ func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (bq *BlobQuery) LockForUpdate() *BlobQuery {
+	bq.withLock = LockForUpdate
+	return bq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (bq *BlobQuery) LockForShare() *BlobQuery {
+	bq.withLock = LockForShare
+	return bq
+}
+
 func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 	var (
 		nodes       = []*Blob{}
@@ -534,8 +548,9 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: blob.FieldID,
 			},
 		},
-		From:   bq.sql,
-		Unique: true,
+		From:     bq.sql,
+		Unique:   true,
+		WithLock: bq.withLock,
 	}
 	if fields := bq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/traversal/ent/pet"
@@ -33,6 +34,7 @@ type PetQuery struct {
 	withFriends *PetQuery
 	withOwner   *UserQuery
 	withFKs     bool
+	withLock    ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -378,6 +380,18 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (pq *PetQuery) LockForUpdate() *PetQuery {
+	pq.withLock = LockForUpdate
+	return pq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (pq *PetQuery) LockForShare() *PetQuery {
+	pq.withLock = LockForShare
+	return pq
+}
+
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
 		nodes       = []*Pet{}
@@ -534,8 +548,9 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: pet.FieldID,
 			},
 		},
-		From:   pq.sql,
-		Unique: true,
+		From:     pq.sql,
+		Unique:   true,
+		WithLock: pq.withLock,
 	}
 	if fields := pq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

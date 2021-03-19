@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
@@ -27,6 +28,7 @@ type MediaQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Media
+	withLock   ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -304,6 +306,18 @@ func (mq *MediaQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (mq *MediaQuery) LockForUpdate() *MediaQuery {
+	mq.withLock = LockForUpdate
+	return mq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (mq *MediaQuery) LockForShare() *MediaQuery {
+	mq.withLock = LockForShare
+	return mq
+}
+
 func (mq *MediaQuery) sqlAll(ctx context.Context) ([]*Media, error) {
 	var (
 		nodes = []*Media{}
@@ -353,8 +367,9 @@ func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: media.FieldID,
 			},
 		},
-		From:   mq.sql,
-		Unique: true,
+		From:     mq.sql,
+		Unique:   true,
+		WithLock: mq.withLock,
 	}
 	if fields := mq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

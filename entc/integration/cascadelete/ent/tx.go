@@ -10,6 +10,7 @@ import (
 	"context"
 	"sync"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 )
 
@@ -22,6 +23,9 @@ type Tx struct {
 	Post *PostClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+
+	// withLock enables locking selects.
+	withLock ent.LockType
 
 	// lazily loaded.
 	client     *Client
@@ -154,6 +158,26 @@ func (tx *Tx) Client() *Client {
 		tx.client.init()
 	})
 	return tx.client
+}
+
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (tx *Tx) LockForUpdate() *Tx {
+	if tx.withLock == ent.LockForUpdate {
+		return tx
+	}
+	txWithLock := &Tx{config: tx.config, withLock: ent.LockForUpdate}
+	txWithLock.init()
+	return txWithLock
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (tx *Tx) LockForShare() *Tx {
+	if tx.withLock == ent.LockForShare {
+		return tx
+	}
+	txWithLock := &Tx{config: tx.config, withLock: ent.LockForShare}
+	txWithLock.init()
+	return txWithLock
 }
 
 func (tx *Tx) init() {

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
@@ -33,6 +34,7 @@ type PostQuery struct {
 	// eager-loading edges.
 	withAuthor   *UserQuery
 	withComments *CommentQuery
+	withLock     ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -378,6 +380,18 @@ func (pq *PostQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (pq *PostQuery) LockForUpdate() *PostQuery {
+	pq.withLock = LockForUpdate
+	return pq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (pq *PostQuery) LockForShare() *PostQuery {
+	pq.withLock = LockForShare
+	return pq
+}
+
 func (pq *PostQuery) sqlAll(ctx context.Context) ([]*Post, error) {
 	var (
 		nodes       = []*Post{}
@@ -484,8 +498,9 @@ func (pq *PostQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: post.FieldID,
 			},
 		},
-		From:   pq.sql,
-		Unique: true,
+		From:     pq.sql,
+		Unique:   true,
+		WithLock: pq.withLock,
 	}
 	if fields := pq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

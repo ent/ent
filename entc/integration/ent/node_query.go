@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/node"
@@ -32,6 +33,7 @@ type NodeQuery struct {
 	withPrev *NodeQuery
 	withNext *NodeQuery
 	withFKs  bool
+	withLock ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -377,6 +379,18 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (nq *NodeQuery) LockForUpdate() *NodeQuery {
+	nq.withLock = LockForUpdate
+	return nq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (nq *NodeQuery) LockForShare() *NodeQuery {
+	nq.withLock = LockForShare
+	return nq
+}
+
 func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 	var (
 		nodes       = []*Node{}
@@ -496,8 +510,9 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: node.FieldID,
 			},
 		},
-		From:   nq.sql,
-		Unique: true,
+		From:     nq.sql,
+		Unique:   true,
+		WithLock: nq.withLock,
 	}
 	if fields := nq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

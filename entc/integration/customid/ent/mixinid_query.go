@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
@@ -28,6 +29,7 @@ type MixinIDQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.MixinID
+	withLock   ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -305,6 +307,18 @@ func (miq *MixinIDQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (miq *MixinIDQuery) LockForUpdate() *MixinIDQuery {
+	miq.withLock = LockForUpdate
+	return miq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (miq *MixinIDQuery) LockForShare() *MixinIDQuery {
+	miq.withLock = LockForShare
+	return miq
+}
+
 func (miq *MixinIDQuery) sqlAll(ctx context.Context) ([]*MixinID, error) {
 	var (
 		nodes = []*MixinID{}
@@ -354,8 +368,9 @@ func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: mixinid.FieldID,
 			},
 		},
-		From:   miq.sql,
-		Unique: true,
+		From:     miq.sql,
+		Unique:   true,
+		WithLock: miq.withLock,
 	}
 	if fields := miq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

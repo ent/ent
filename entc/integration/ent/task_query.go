@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
@@ -27,6 +28,7 @@ type TaskQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Task
+	withLock   ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -304,6 +306,18 @@ func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (tq *TaskQuery) LockForUpdate() *TaskQuery {
+	tq.withLock = LockForUpdate
+	return tq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (tq *TaskQuery) LockForShare() *TaskQuery {
+	tq.withLock = LockForShare
+	return tq
+}
+
 func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 	var (
 		nodes = []*Task{}
@@ -353,8 +367,9 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: task.FieldID,
 			},
 		},
-		From:   tq.sql,
-		Unique: true,
+		From:     tq.sql,
+		Unique:   true,
+		WithLock: tq.withLock,
 	}
 	if fields := tq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

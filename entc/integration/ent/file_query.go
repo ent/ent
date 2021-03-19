@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
@@ -36,6 +37,7 @@ type FileQuery struct {
 	withType  *FileTypeQuery
 	withField *FieldTypeQuery
 	withFKs   bool
+	withLock  ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -415,6 +417,18 @@ func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (fq *FileQuery) LockForUpdate() *FileQuery {
+	fq.withLock = LockForUpdate
+	return fq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (fq *FileQuery) LockForShare() *FileQuery {
+	fq.withLock = LockForShare
+	return fq
+}
+
 func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 	var (
 		nodes       = []*File{}
@@ -565,8 +579,9 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: file.FieldID,
 			},
 		},
-		From:   fq.sql,
-		Unique: true,
+		From:     fq.sql,
+		Unique:   true,
+		WithLock: fq.withLock,
 	}
 	if fields := fq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/goods"
@@ -27,6 +28,7 @@ type GoodsQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Goods
+	withLock   ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -280,6 +282,18 @@ func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (gq *GoodsQuery) LockForUpdate() *GoodsQuery {
+	gq.withLock = LockForUpdate
+	return gq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (gq *GoodsQuery) LockForShare() *GoodsQuery {
+	gq.withLock = LockForShare
+	return gq
+}
+
 func (gq *GoodsQuery) sqlAll(ctx context.Context) ([]*Goods, error) {
 	var (
 		nodes = []*Goods{}
@@ -329,8 +343,9 @@ func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: goods.FieldID,
 			},
 		},
-		From:   gq.sql,
-		Unique: true,
+		From:     gq.sql,
+		Unique:   true,
+		WithLock: gq.withLock,
 	}
 	if fields := gq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

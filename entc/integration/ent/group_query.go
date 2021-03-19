@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/file"
@@ -37,6 +38,7 @@ type GroupQuery struct {
 	withUsers   *UserQuery
 	withInfo    *GroupInfoQuery
 	withFKs     bool
+	withLock    ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -450,6 +452,18 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (gq *GroupQuery) LockForUpdate() *GroupQuery {
+	gq.withLock = LockForUpdate
+	return gq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (gq *GroupQuery) LockForShare() *GroupQuery {
+	gq.withLock = LockForShare
+	return gq
+}
+
 func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	var (
 		nodes       = []*Group{}
@@ -666,8 +680,9 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: group.FieldID,
 			},
 		},
-		From:   gq.sql,
-		Unique: true,
+		From:     gq.sql,
+		Unique:   true,
+		WithLock: gq.withLock,
 	}
 	if fields := gq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
@@ -27,6 +28,7 @@ type CustomTypeQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.CustomType
+	withLock   ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -304,6 +306,18 @@ func (ctq *CustomTypeQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (ctq *CustomTypeQuery) LockForUpdate() *CustomTypeQuery {
+	ctq.withLock = LockForUpdate
+	return ctq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (ctq *CustomTypeQuery) LockForShare() *CustomTypeQuery {
+	ctq.withLock = LockForShare
+	return ctq
+}
+
 func (ctq *CustomTypeQuery) sqlAll(ctx context.Context) ([]*CustomType, error) {
 	var (
 		nodes = []*CustomType{}
@@ -353,8 +367,9 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: customtype.FieldID,
 			},
 		},
-		From:   ctq.sql,
-		Unique: true,
+		From:     ctq.sql,
+		Unique:   true,
+		WithLock: ctq.withLock,
 	}
 	if fields := ctq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

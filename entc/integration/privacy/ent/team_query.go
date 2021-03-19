@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
@@ -33,6 +34,7 @@ type TeamQuery struct {
 	// eager-loading edges.
 	withTasks *TaskQuery
 	withUsers *UserQuery
+	withLock  ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -384,6 +386,18 @@ func (tq *TeamQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (tq *TeamQuery) LockForUpdate() *TeamQuery {
+	tq.withLock = LockForUpdate
+	return tq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (tq *TeamQuery) LockForShare() *TeamQuery {
+	tq.withLock = LockForShare
+	return tq
+}
+
 func (tq *TeamQuery) sqlAll(ctx context.Context) ([]*Team, error) {
 	var (
 		nodes       = []*Team{}
@@ -569,8 +583,9 @@ func (tq *TeamQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: team.FieldID,
 			},
 		},
-		From:   tq.sql,
-		Unique: true,
+		From:     tq.sql,
+		Unique:   true,
+		WithLock: tq.withLock,
 	}
 	if fields := tq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

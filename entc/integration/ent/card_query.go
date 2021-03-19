@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/card"
@@ -34,6 +35,7 @@ type CardQuery struct {
 	withOwner *UserQuery
 	withSpec  *SpecQuery
 	withFKs   bool
+	withLock  ent.LockType
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -379,6 +381,18 @@ func (cq *CardQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
+// LockForUpdate locks any rows read as if you issued an update for those rows.
+func (cq *CardQuery) LockForUpdate() *CardQuery {
+	cq.withLock = LockForUpdate
+	return cq
+}
+
+// LockForShare sets a shared mode lock on any rows that are read.
+func (cq *CardQuery) LockForShare() *CardQuery {
+	cq.withLock = LockForShare
+	return cq
+}
+
 func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	var (
 		nodes       = []*Card{}
@@ -535,8 +549,9 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 				Column: card.FieldID,
 			},
 		},
-		From:   cq.sql,
-		Unique: true,
+		From:     cq.sql,
+		Unique:   true,
+		WithLock: cq.withLock,
 	}
 	if fields := cq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
