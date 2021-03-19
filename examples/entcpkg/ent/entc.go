@@ -39,6 +39,7 @@ func main() {
 				Funcs(template.FuncMap{"byName": byName}).
 				ParseFiles("template/debug.tmpl")),
 		},
+		Hooks: []gen.Hook{TagFields("json")},
 	}, opts...)
 	if err != nil {
 		log.Fatalf("running ent codegen: %v", err)
@@ -53,4 +54,18 @@ func byName(g *gen.Graph, name string) (*gen.Type, error) {
 		}
 	}
 	return nil, fmt.Errorf("node %q was not found in the graph", name)
+}
+
+// TagFields tags all fields defined in the schema with the given struct-tag.
+func TagFields(name string) gen.Hook {
+	return func(next gen.Generator) gen.Generator {
+		return gen.GenerateFunc(func(g *gen.Graph) error {
+			for _, node := range g.Nodes {
+				for _, field := range node.Fields {
+					field.StructTag = fmt.Sprintf("%s:%q", name, field.Name)
+				}
+			}
+			return next.Generate(g)
+		})
+	}
 }
