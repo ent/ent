@@ -95,7 +95,14 @@ in the LICENSE file in the root directory of this source tree.
 @media only screen and (min-width: 1400px) {
 }
 
+@media only screen and (max-width: 600px) {
+  .navigationSlider .slidingNav ul li:nth-child(3) {
+    display: none;
+  }
+}
+
 @media only screen and (max-width: 500px) {
+    .blog .headerWrapper.wrapper header > a,
     .sideNavVisible .headerWrapper.wrapper header > a {
         display: none!important;
     }
@@ -105,9 +112,6 @@ in the LICENSE file in the root directory of this source tree.
     .navigationSlider .slidingNav ul li a {
       padding-right: 30px!important;
     }
-  .navigationSlider .slidingNav ul li:nth-child(3) {
-    display: none;
-  }
 }
 
 
@@ -549,9 +553,10 @@ li.navSearchWrapper.reactNavSearchWrapper {
   margin: 0 20px;
 }
 
-.blog .headerWrapper.wrapper header > a,
-.sideNavVisible .headerWrapper.wrapper header > a {
-  width: 288px;
+.fixedHeaderContainer header img {
+  margin-right: 10px;
+  padding: 10px 10px 10px 0;
+  max-width: none;
 }
 
 .navigationSlider .slidingNav ul {
