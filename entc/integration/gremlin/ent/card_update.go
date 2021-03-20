@@ -300,6 +300,7 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 // CardUpdateOne is the builder for updating a single Card entity.
 type CardUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CardMutation
 }
@@ -409,6 +410,13 @@ func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return cuo.RemoveSpecIDs(ids...)
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
 }
 
 // Save executes the query and returns the updated Card entity.
@@ -557,7 +565,16 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	for _, id := range cuo.mutation.SpecIDs() {
 		v.AddE(spec.CardLabel).From(g.V(id)).InV()
 	}
-	v.ValueMap(true)
+	if len(cuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(cuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range cuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

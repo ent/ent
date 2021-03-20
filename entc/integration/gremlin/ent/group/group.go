@@ -21,7 +21,6 @@ const (
 	FieldMaxUsers = "max_users"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
 	// EdgeBlocked holds the string denoting the blocked edge name in mutations.
@@ -30,7 +29,6 @@ const (
 	EdgeUsers = "users"
 	// EdgeInfo holds the string denoting the info edge name in mutations.
 	EdgeInfo = "info"
-
 	// FilesLabel holds the string label denoting the files edge type in the database.
 	FilesLabel = "group_files"
 	// BlockedLabel holds the string label denoting the blocked edge type in the database.

@@ -13,12 +13,10 @@ const (
 	FieldID = "id"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
-
 	// EdgePrev holds the string denoting the prev edge name in mutations.
 	EdgePrev = "prev"
 	// EdgeNext holds the string denoting the next edge name in mutations.
 	EdgeNext = "next"
-
 	// Table holds the table name of the node in the database.
 	Table = "nodes"
 	// PrevTable is the table the holds the prev relation/edge.
@@ -37,7 +35,8 @@ var Columns = []string{
 	FieldValue,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Node type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "nodes"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"node_next",
 }

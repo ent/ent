@@ -82,7 +82,7 @@ func ops(f *Field) (op []Op) {
 		op = boolOps
 	case t == field.TypeString && strings.ToLower(f.Name) != "id":
 		op = stringOps
-	case t == field.TypeEnum:
+	case t == field.TypeEnum || f.IsEdgeField():
 		op = enumOps
 	default:
 		op = numericOps

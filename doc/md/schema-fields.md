@@ -56,8 +56,6 @@ The following types are currently supported by the framework:
 - `UUID` (SQL only).
 - `Other` (SQL only).
 
-<br/>
-
 ```go
 package schema
 

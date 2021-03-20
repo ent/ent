@@ -425,11 +425,14 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*User)
 		for i := range nodes {
-			fk := nodes[i].user_tenant
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_tenant == nil {
+				continue
 			}
+			fk := *nodes[i].user_tenant
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(tenant.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -468,7 +471,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			Predicate: func(s *sql.Selector) {
 				s.Where(sql.InValues(user.GroupsPrimaryKey[0], fks...))
 			},
-
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
 			},
@@ -487,7 +489,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				if !ok {
 					return fmt.Errorf("unexpected node id in edges: %v", outValue)
 				}
-				edgeids = append(edgeids, inValue)
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
 				edges[inValue] = append(edges[inValue], node)
 				return nil
 			},

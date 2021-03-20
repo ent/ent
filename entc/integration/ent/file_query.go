@@ -456,11 +456,14 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*File)
 		for i := range nodes {
-			fk := nodes[i].user_files
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].user_files == nil {
+				continue
 			}
+			fk := *nodes[i].user_files
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(user.IDIn(ids...))
 		neighbors, err := query.All(ctx)
@@ -482,11 +485,14 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*File)
 		for i := range nodes {
-			fk := nodes[i].file_type_files
-			if fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			if nodes[i].file_type_files == nil {
+				continue
 			}
+			fk := *nodes[i].file_type_files
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
 		query.Where(filetype.IDIn(ids...))
 		neighbors, err := query.All(ctx)

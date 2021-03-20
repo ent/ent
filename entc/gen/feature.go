@@ -115,7 +115,13 @@ type Feature struct {
 	// A Description of this feature.
 	Description string
 
-	// GraphTemplates defines optional templates to be executed on the graph.
+	// Templates defines list of templates for extending or overriding the default
+	// templates. In order to write the template output to a standalone file, use
+	// the GraphTemplates below.
+	Templates []*Template
+
+	// GraphTemplates defines optional templates to be executed on the graph
+	// and will their output will be written to the configured destination.
 	GraphTemplates []GraphTemplate
 
 	// cleanup used to cleanup all changes when a feature-flag is removed.

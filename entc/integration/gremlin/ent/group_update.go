@@ -428,6 +428,7 @@ func (gu *GroupUpdate) gremlin() *dsl.Traversal {
 // GroupUpdateOne is the builder for updating a single Group entity.
 type GroupUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *GroupMutation
 }
@@ -635,6 +636,13 @@ func (guo *GroupUpdateOne) ClearInfo() *GroupUpdateOne {
 	return guo
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (guo *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOne {
+	guo.fields = append([]string{field}, fields...)
+	return guo
+}
+
 // Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	var (
@@ -812,7 +820,16 @@ func (guo *GroupUpdateOne) gremlin(id string) *dsl.Traversal {
 	for _, id := range guo.mutation.InfoIDs() {
 		v.AddE(group.InfoLabel).To(g.V(id)).OutV()
 	}
-	v.ValueMap(true)
+	if len(guo.fields) > 0 {
+		fields := make([]interface{}, 0, len(guo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range guo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

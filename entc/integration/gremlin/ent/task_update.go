@@ -159,6 +159,7 @@ func (tu *TaskUpdate) gremlin() *dsl.Traversal {
 // TaskUpdateOne is the builder for updating a single Task entity.
 type TaskUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *TaskMutation
 }
@@ -187,6 +188,13 @@ func (tuo *TaskUpdateOne) AddPriority(s schema.Priority) *TaskUpdateOne {
 // Mutation returns the TaskMutation object of the builder.
 func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
 	return tuo.mutation
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (tuo *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
+	tuo.fields = append([]string{field}, fields...)
+	return tuo
 }
 
 // Save executes the query and returns the updated Task entity.
@@ -287,7 +295,16 @@ func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := tuo.mutation.AddedPriority(); ok {
 		v.Property(dsl.Single, task.FieldPriority, __.Union(__.Values(task.FieldPriority), __.Constant(value)).Sum())
 	}
-	v.ValueMap(true)
+	if len(tuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(tuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range tuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

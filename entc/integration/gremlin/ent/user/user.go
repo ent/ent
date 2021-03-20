@@ -35,7 +35,6 @@ const (
 	FieldRole = "role"
 	// FieldSSOCert holds the string denoting the ssocert field in the database.
 	FieldSSOCert = "sso_cert"
-
 	// EdgeCard holds the string denoting the card edge name in mutations.
 	EdgeCard = "card"
 	// EdgePets holds the string denoting the pets edge name in mutations.
@@ -58,7 +57,6 @@ const (
 	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
-
 	// CardLabel holds the string label denoting the card edge type in the database.
 	CardLabel = "user_card"
 	// PetsLabel holds the string label denoting the pets edge type in the database.

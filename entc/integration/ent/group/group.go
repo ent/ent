@@ -21,7 +21,6 @@ const (
 	FieldMaxUsers = "max_users"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
 	// EdgeBlocked holds the string denoting the blocked edge name in mutations.
@@ -30,7 +29,6 @@ const (
 	EdgeUsers = "users"
 	// EdgeInfo holds the string denoting the info edge name in mutations.
 	EdgeInfo = "info"
-
 	// Table holds the table name of the group in the database.
 	Table = "groups"
 	// FilesTable is the table the holds the files relation/edge.
@@ -71,7 +69,8 @@ var Columns = []string{
 	FieldName,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Group type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "groups"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"group_info",
 }

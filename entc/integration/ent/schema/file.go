@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -16,6 +17,14 @@ import (
 // File holds the schema definition for the File entity.
 type File struct {
 	ent.Schema
+}
+
+func (File) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		edge.Annotation{
+			StructTag: `json:"file_edges"`,
+		},
+	}
 }
 
 // Fields of the File.

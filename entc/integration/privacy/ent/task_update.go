@@ -384,6 +384,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // TaskUpdateOne is the builder for updating a single Task entity.
 type TaskUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *TaskMutation
 }
@@ -506,6 +507,13 @@ func (tuo *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
 	return tuo
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (tuo *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
+	tuo.fields = append([]string{field}, fields...)
+	return tuo
+}
+
 // Save executes the query and returns the updated Task entity.
 func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 	var (
@@ -594,6 +602,18 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Task.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := tuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, task.FieldID)
+		for _, f := range fields {
+			if !task.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != task.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := tuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

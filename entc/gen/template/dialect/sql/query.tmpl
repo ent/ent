@@ -6,7 +6,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* Additional fields for the builder. */}}
 {{ define "dialect/sql/query/fields" }}
-	{{- with $.ForeignKeys }}
+	{{- with $.UnexportedForeignKeys }}
 		withFKs bool
 	{{- end }}
 {{- end }}
@@ -19,7 +19,7 @@ in the LICENSE file in the root directory of this source tree.
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name }}, error) {
 	var (
 		nodes = []*{{ $.Name }}{}
-		{{- with $.ForeignKeys }}
+		{{- with $.UnexportedForeignKeys }}
 			withFKs = {{ $receiver }}.withFKs
 		{{- end }}
 		_spec = {{ $receiver }}.querySpec()
@@ -31,7 +31,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context) ([]*{{ $.Name
 			}
 		{{- end }}
 	)
-	{{- with $.ForeignKeys }}
+	{{- with $.UnexportedForeignKeys }}
 			{{- with $.FKEdges }}
 				if {{ range $i, $e := . }}{{ if gt $i 0 }} || {{ end }}{{ $receiver }}.{{ $e.EagerLoadField }} != nil{{ end }} {
 					withFKs = true
@@ -135,6 +135,14 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 }
 
 {{ template "dialect/sql/query/selector" $ }}
+
+
+{{- /* Allow adding methods to the query-builder by ent extensions or user templates.*/}}
+{{- with $tmpls := matchTemplate "dialect/sql/query/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 {{ end }}
 
@@ -256,8 +264,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				Predicate: func(s *sql.Selector) {
 					s.Where(sql.InValues({{ $.Package }}.{{ $e.PKConstant }}[{{ if $e.IsInverse }}1{{ else }}0{{ end }}], fks...))
 				},
-				{{ $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.NullType }}{{ end }}
-				{{ $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.NullType }}{{ end }}
+				{{- $out := "sql.NullInt64" }}{{ if $.ID.UserDefined }}{{ $out = $.ID.NullType }}{{ end }}
+				{{- $in := "sql.NullInt64" }}{{ if $e.Type.ID.UserDefined }}{{ $in = $e.Type.ID.NullType }}{{ end }}
 				ScanValues: func() [2]interface{}{
 					return [2]interface{}{&{{ $out }}{}, &{{ $in }}{}}
 				},
@@ -276,7 +284,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 					if !ok {
 						return fmt.Errorf("unexpected node id in edges: %v", outValue)
 					}
-					edgeids = append(edgeids, inValue)
+					if _, ok := edges[inValue]; !ok {
+						edgeids = append(edgeids, inValue)
+					}
 					edges[inValue] = append(edges[inValue], node)
 					return nil
 				},
@@ -308,17 +318,17 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			ids := make([]{{ $e.Type.ID.Type }}, 0, len(nodes))
 			nodeids := make(map[{{ $e.Type.ID.Type }}][]*{{ $.Name }})
 			for i := range nodes {
-				{{- $fk := $e.FKField }}
-				fk := nodes[i].{{ $e.StructFKField }}
-				{{- if $fk.Nillable }}
-					if fk != nil {
-						ids = append(ids, *fk)
-						nodeids[*fk] = append(nodeids[*fk], nodes[i])
+				{{- $fk := $e.ForeignKey }}
+				{{- if $fk.Field.Nillable }}
+					if nodes[i].{{ $fk.StructField }} == nil {
+						continue
 					}
-				{{- else }}
-					ids = append(ids, fk)
-					nodeids[fk] = append(nodeids[fk], nodes[i])
 				{{- end }}
+				fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].{{ $fk.StructField }}
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
 			query.Where({{ $e.Type.Package }}.IDIn(ids...))
 			neighbors, err := query.All(ctx)
@@ -328,7 +338,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			for _, n := range neighbors {
 				nodes, ok := nodeids[n.ID]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Name }}" returned %v`, n.ID)
+					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v`, n.ID)
 				}
 				for i := range nodes {
 					nodes[i].Edges.{{ $e.StructField }} = n
@@ -344,7 +354,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 					nodes[i].Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
 				{{- end }}
 			}
-			{{- with $e.Type.ForeignKeys }}
+			{{- with $e.Type.UnexportedForeignKeys }}
 				query.withFKs = true
 			{{- end }}
 			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
@@ -355,16 +365,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				return nil, err
 			}
 			for _, n := range neighbors {
-				fk := n.{{ $e.StructFKField }}
-				{{- $fk := $e.FKField }}
-				{{- if $fk.Nillable }}
+				{{- $fk := $e.ForeignKey }}
+				fk := n.{{ $fk.StructField }}
+				{{- if $fk.Field.Nillable }}
 					if fk == nil {
-						return nil, fmt.Errorf(`foreign-key "{{ $fk.Name }}" is nil for node %v`, n.ID)
+						return nil, fmt.Errorf(`foreign-key "{{ $fk.Field.Name }}" is nil for node %v`, n.ID)
 					}
 				{{- end }}
-				node, ok := nodeids[{{ if $fk.Nillable }}*{{ end }}fk]
+				node, ok := nodeids[{{ if $fk.Field.Nillable }}*{{ end }}fk]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Name }}" returned %v for node %v`, {{ if $fk.Nillable }}*{{ end }}fk, n.ID)
+					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n.ID)
 				}
 				node.Edges.{{ $e.StructField }} = {{ if $e.Unique }}n{{ else }}append(node.Edges.{{ $e.StructField }}, n){{ end }}
 			}

@@ -230,6 +230,7 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 // CommentUpdateOne is the builder for updating a single Comment entity.
 type CommentUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CommentMutation
 }
@@ -290,6 +291,13 @@ func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
 // Mutation returns the CommentMutation object of the builder.
 func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
 	return cuo.mutation
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *CommentUpdateOne) Select(field string, fields ...string) *CommentUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
 }
 
 // Save executes the query and returns the updated Comment entity.
@@ -419,7 +427,16 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	v.ValueMap(true)
+	if len(cuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(cuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range cuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

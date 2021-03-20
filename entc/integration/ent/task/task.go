@@ -17,7 +17,6 @@ const (
 	FieldID = "id"
 	// FieldPriority holds the string denoting the priority field in the database.
 	FieldPriority = "priority"
-
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 )

@@ -27,5 +27,6 @@ func Example_EntcPkg() {
 	}
 	usr := client.User.Create().SaveX(ctx)
 	fmt.Println("boring user:", usr)
-	// Output: boring user: User(id=1)
+
+	// Output: boring user: User(id=1, name=, age=0)
 }

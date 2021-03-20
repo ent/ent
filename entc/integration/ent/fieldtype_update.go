@@ -1996,6 +1996,7 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
 type FieldTypeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *FieldTypeMutation
 }
@@ -3025,6 +3026,13 @@ func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (ftuo *FieldTypeUpdateOne) Select(field string, fields ...string) *FieldTypeUpdateOne {
+	ftuo.fields = append([]string{field}, fields...)
+	return ftuo
+}
+
 // Save executes the query and returns the updated FieldType entity.
 func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	var (
@@ -3133,6 +3141,18 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FieldType.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := ftuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.FieldID)
+		for _, f := range fields {
+			if !fieldtype.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != fieldtype.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := ftuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

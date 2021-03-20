@@ -15,7 +15,6 @@ const (
 	FieldName = "name"
 	// FieldLabel holds the string denoting the label field in the database.
 	FieldLabel = "label"
-
 	// Table holds the table name of the user in the database.
 	Table = "Users"
 )

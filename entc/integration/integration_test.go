@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/enttest"
 	"entgo.io/ent/entc/integration/ent/file"
@@ -135,6 +136,7 @@ var (
 		EagerLoading,
 		Mutation,
 		CreateBulk,
+		ConstraintChecks,
 	}
 )
 
@@ -208,7 +210,7 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(usr.QueryGroups().AllX(ctx))
 	// update unknown vertex.
-	_, err := client.User.UpdateOneID(usr.ID + usr.ID).SetName("foo").Save(ctx)
+	_, err := client.User.UpdateOneID(usr.ID + math.MaxInt8).SetName("foo").Save(ctx)
 	require.Error(err)
 	require.True(ent.IsNotFound(err))
 
@@ -348,6 +350,16 @@ func Select(t *testing.T, client *ent.Client) {
 			require.Zero(f.Age)
 		}
 	}
+	a8m := client.User.Create().SetName("Ariel").SetNickname("a8m").SetAge(30).SaveX(ctx)
+	require.NotEmpty(a8m.ID)
+	require.NotEmpty(a8m.Age)
+	require.NotEmpty(a8m.Name)
+	require.NotEmpty(a8m.Nickname)
+	a8m = a8m.Update().SetAge(32).Select(user.FieldAge).SaveX(ctx)
+	require.NotEmpty(a8m.ID)
+	require.NotEmpty(a8m.Age)
+	require.Empty(a8m.Name)
+	require.Empty(a8m.Nickname)
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
@@ -1224,6 +1236,15 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		require.Len(users[0].Edges.Groups, 2)
 		require.Len(users[0].Edges.Friends, 1)
 		require.Equal(alex.Name, users[0].Edges.Friends[0].Name)
+
+		require.Equal(alex.Name, users[1].Name)
+		require.Len(users[1].Edges.Groups, 1)
+		require.Equal(hub.Name, users[1].Edges.Groups[0].Name)
+
+		require.Equal(nati.Name, users[2].Name)
+		require.Len(users[2].Edges.Groups, 1)
+		require.Equal(lab.Name, users[2].Edges.Groups[0].Name)
+
 		g1, g2 := users[0].Edges.Groups[0], users[0].Edges.Groups[1]
 		require.Equal(lab.Name, g1.Name)
 		require.Equal(hub.Name, g2.Name)
@@ -1350,6 +1371,20 @@ func CreateBulk(t *testing.T, client *ent.Client) {
 	require.Equal(t, users[1].ID, pets[1].QueryOwner().OnlyIDX(ctx))
 	require.Equal(t, "layla", pets[2].Name)
 	require.False(t, pets[2].QueryOwner().ExistX(ctx))
+}
+
+func ConstraintChecks(t *testing.T, client *ent.Client) {
+	var cerr *ent.ConstraintError
+	_, err := client.Pet.Create().SetName("orphan").SetOwnerID(0).Save(context.Background())
+	require.True(t, errors.As(err, &cerr))
+	require.True(t, sqlgraph.IsForeignKeyConstraintError(err))
+	require.False(t, sqlgraph.IsUniqueConstraintError(err))
+
+	client.FileType.Create().SetName("a unique name").SaveX(context.Background())
+	_, err = client.FileType.Create().SetName("a unique name").Save(context.Background())
+	require.True(t, errors.As(err, &cerr))
+	require.False(t, sqlgraph.IsForeignKeyConstraintError(err))
+	require.True(t, sqlgraph.IsUniqueConstraintError(err))
 }
 
 func drop(t *testing.T, client *ent.Client) {

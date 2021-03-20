@@ -205,6 +205,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *PetMutation
 }
@@ -250,6 +251,13 @@ func (puo *PetUpdateOne) Mutation() *PetMutation {
 // ClearOwner clears the "owner" edge to the User entity.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
+	return puo
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (puo *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
+	puo.fields = append([]string{field}, fields...)
 	return puo
 }
 
@@ -320,6 +328,18 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Pet.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := puo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, pet.FieldID)
+		for _, f := range fields {
+			if !pet.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != pet.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := puo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

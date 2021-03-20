@@ -15,10 +15,8 @@ const (
 	FieldAge = "age"
 	// FieldLicensedAt holds the string denoting the licensed_at field in the database.
 	FieldLicensedAt = "licensed_at"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-
 	// Table holds the table name of the pet in the database.
 	Table = "pets"
 	// OwnerTable is the table the holds the owner relation/edge.
@@ -37,7 +35,8 @@ var Columns = []string{
 	FieldLicensedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "pets"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_pets",
 }

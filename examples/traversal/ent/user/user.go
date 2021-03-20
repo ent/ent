@@ -15,7 +15,6 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
@@ -24,7 +23,6 @@ const (
 	EdgeGroups = "groups"
 	// EdgeManage holds the string denoting the manage edge name in mutations.
 	EdgeManage = "manage"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// PetsTable is the table the holds the pets relation/edge.

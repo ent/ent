@@ -158,14 +158,20 @@ var (
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
-		"import/additional/*",
-		"dialect/*/import/additional/*",
-		"dialect/*/*/spec/*",
+		"config/*/*",
 		"dialect/*/*/*/spec/*",
-		"dialect/sql/query/path/*",
-		"dialect/sql/query/from/*",
+		"dialect/*/*/spec/*",
+		"dialect/*/config/*/*",
+		"dialect/*/import/additional/*",
 		"dialect/*/query/selector/*",
+		"dialect/sql/model/additional/*",
+		"dialect/sql/model/fields/*",
 		"dialect/sql/predicate/edge/*/*",
+		"dialect/sql/query/additional/*",
+		"dialect/sql/query/from/*",
+		"dialect/sql/query/path/*",
+		"import/additional/*",
+		"model/additional/*",
 		"model/comment/additional/*",
 	}
 	// templates holds the Go templates for the code generation.

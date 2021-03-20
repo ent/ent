@@ -25,12 +25,10 @@ const (
 	FieldStatus = "status"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
-
 	// EdgeTeams holds the string denoting the teams edge name in mutations.
 	EdgeTeams = "teams"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 	// TeamsTable is the table the holds the teams relation/edge. The primary key declared below.
@@ -56,7 +54,8 @@ var Columns = []string{
 	FieldUUID,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Task type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "tasks"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_tasks",
 }

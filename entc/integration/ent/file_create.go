@@ -296,6 +296,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.user_files = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := fc.mutation.TypeIDs(); len(nodes) > 0 {
@@ -315,6 +316,7 @@ func (fc *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.file_type_files = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := fc.mutation.FieldIDs(); len(nodes) > 0 {

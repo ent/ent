@@ -33,7 +33,7 @@ type File struct {
 	Op bool `json:"op,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FileQuery when eager-loading is set.
-	Edges           FileEdges `json:"edges"`
+	Edges           FileEdges `json:"file_edges"`
 	file_type_files *int
 	group_files     *int
 	user_files      *int

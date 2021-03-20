@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -16,9 +17,13 @@ import (
 
 // User is the model entity for the User schema.
 type User struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name"`
+	// Age holds the value of the "age" field.
+	Age int `json:"age"`
 
 	// StaticField defined by templates (titled STATICFIELD).
 	StaticField string `json:"static_field,omitempty"`
@@ -29,8 +34,10 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID:
+		case user.FieldID, user.FieldAge:
 			values[i] = &sql.NullInt64{}
+		case user.FieldName:
+			values[i] = &sql.NullString{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -52,6 +59,18 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			u.ID = int(value.Int64)
+		case user.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				u.Name = value.String
+			}
+		case user.FieldAge:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field age", values[i])
+			} else if value.Valid {
+				u.Age = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -80,8 +99,21 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", name=")
+	builder.WriteString(u.Name)
+	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("%v", u.Age))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// GoString implements the fmt.GoStringer interface.
+func (u *User) GoString() string {
+	b, err := json.MarshalIndent(u, "", "\t")
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
 }
 
 // Users is a parsable slice of User.

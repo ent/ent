@@ -11,7 +11,6 @@ const (
 	Label = "pet"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeCars holds the string denoting the cars edge name in mutations.
@@ -20,7 +19,6 @@ const (
 	EdgeFriends = "friends"
 	// EdgeBestFriend holds the string denoting the best_friend edge name in mutations.
 	EdgeBestFriend = "best_friend"
-
 	// UserFieldID holds the string denoting the ID field of the User.
 	UserFieldID = "oid"
 	// Table holds the table name of the pet in the database.
@@ -52,7 +50,8 @@ var Columns = []string{
 	FieldID,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "pets"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"pet_best_friend",
 	"user_pets",

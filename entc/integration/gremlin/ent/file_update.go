@@ -381,6 +381,7 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 // FileUpdateOne is the builder for updating a single File entity.
 type FileUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *FileMutation
 }
@@ -563,6 +564,13 @@ func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 	return fuo.RemoveFieldIDs(ids...)
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (fuo *FileUpdateOne) Select(field string, fields ...string) *FileUpdateOne {
+	fuo.fields = append([]string{field}, fields...)
+	return fuo
+}
+
 // Save executes the query and returns the updated File entity.
 func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 	var (
@@ -719,7 +727,16 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
 		})
 	}
-	v.ValueMap(true)
+	if len(fuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(fuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range fuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

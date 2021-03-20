@@ -1,4 +1,7 @@
 ## ent - An Entity Framework For Go
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/entgo_io.svg?style=social&label=Follow%20%40entgo_io)](https://twitter.com/entgo_io)
+
+
 
 [English](README.md) | [中文](README_zh.md)
 
@@ -31,6 +34,8 @@ For discussion and support, [open an issue](https://github.com/facebook/ent/issu
 ## Join the ent Community
 In order to contribute to `ent`, see the [CONTRIBUTING](CONTRIBUTING.md) file for how to go get started.
 If your company or your product is using `ent`, please let us know by adding yourself to the [ent users page](https://github.com/facebook/ent/wiki/ent-users).
+
+For updates, follow us on Twitter at https://twitter.com/entgo_io
 
 ## About the Project
 The `ent` project was inspired by Ent, an entity framework we use internally. It is developed and maintained

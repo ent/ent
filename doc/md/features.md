@@ -33,7 +33,7 @@ import (
 
 func main() {
 	err := entc.Generate("./schema", &gen.Config{
-		Features: []*gen.Feature{
+		Features: []gen.Feature{
 			gen.FeaturePrivacy,
 			gen.FeatureEntQL,
 		},

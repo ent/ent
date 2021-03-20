@@ -161,6 +161,7 @@ func (su *SpecUpdate) gremlin() *dsl.Traversal {
 // SpecUpdateOne is the builder for updating a single Spec entity.
 type SpecUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *SpecMutation
 }
@@ -204,6 +205,13 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 		ids[i] = c[i].ID
 	}
 	return suo.RemoveCardIDs(ids...)
+}
+
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (suo *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
+	suo.fields = append([]string{field}, fields...)
+	return suo
 }
 
 // Save executes the query and returns the updated Spec entity.
@@ -292,7 +300,16 @@ func (suo *SpecUpdateOne) gremlin(id string) *dsl.Traversal {
 	for _, id := range suo.mutation.CardIDs() {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
-	v.ValueMap(true)
+	if len(suo.fields) > 0 {
+		fields := make([]interface{}, 0, len(suo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range suo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

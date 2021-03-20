@@ -15,6 +15,7 @@ type Descriptor struct {
 	Tag         string              // struct tag.
 	Type        string              // edge type.
 	Name        string              // edge name.
+	Field       string              // edge field name (e.g. foreign-key).
 	RefName     string              // ref name; inverse only.
 	Ref         *Descriptor         // edge reference; to/from of the same type.
 	Unique      bool                // unique edge.
@@ -71,6 +72,20 @@ func (b *assocBuilder) From(name string) *inverseBuilder {
 	return &inverseBuilder{desc: &Descriptor{Name: name, Type: b.desc.Type, Inverse: true, Ref: b.desc}}
 }
 
+// Field is used to bind an edge (with a foreign-key) to a field in the schema.
+//
+//	field.Int("owner_id").
+//		Optional()
+//
+//	edge.To("owner", User.Type).
+//		Field("owner_id").
+//		Unique(),
+//
+func (b *assocBuilder) Field(f string) *assocBuilder {
+	b.desc.Field = f
+	return b
+}
+
 // Comment used to put annotations on the schema.
 func (b *assocBuilder) Comment(string) *assocBuilder {
 	return b
@@ -95,9 +110,7 @@ func (b *assocBuilder) StorageKey(opts ...StorageOption) *assocBuilder {
 // codegen extensions.
 //
 //	edge.To("pets", Pet.Type).
-//		Annotations(entgql.Config{
-//			FieldName: "Pets",
-//		})
+//		Annotations(entgql.Bind())
 //
 func (b *assocBuilder) Annotations(annotations ...schema.Annotation) *assocBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -145,15 +158,28 @@ func (b *inverseBuilder) Comment(string) *inverseBuilder {
 	return b
 }
 
+// Field is used to bind an edge (with a foreign-key) to a field in the schema.
+//
+//	field.Int("owner_id").
+//		Optional()
+//
+//	edge.From("owner", User.Type).
+//		Ref("pets").
+//		Field("owner_id").
+//		Unique(),
+//
+func (b *inverseBuilder) Field(f string) *inverseBuilder {
+	b.desc.Field = f
+	return b
+}
+
 // Annotations adds a list of annotations to the edge object to be used by
 // codegen extensions.
 //
 //	edge.From("owner", User.Type).
 //		Ref("pets").
 //		Unique().
-//		Annotations(entgql.Config{
-//			FieldName: "Owner",
-//		})
+//		Annotations(entgql.Bind())
 //
 func (b *inverseBuilder) Annotations(annotations ...schema.Annotation) *inverseBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)

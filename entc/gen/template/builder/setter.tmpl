@@ -29,7 +29,7 @@ in the LICENSE file in the root directory of this source tree.
 		return {{ $receiver }}
 	}
 
-	{{/* avoid generting nillable setters for nillable types. */}}
+	{{/* Avoid generting nillable setters for nillable types. */}}
 	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" $f.StructField }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
@@ -41,7 +41,7 @@ in the LICENSE file in the root directory of this source tree.
 		}
 	{{ end }}
 
-	{{ if and $f.Type.Numeric $f.ConvertedToBasic $updater }}
+	{{ if and $f.Type.Numeric $f.ConvertedToBasic $updater (not $f.IsEdgeField) }}
 		{{ $func := print "Add" $f.StructField }}
 		// {{ $func }} adds {{ $p }} to the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
@@ -62,12 +62,16 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ range $e := $.Edges }}
 	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
-	// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID{{ if not $e.Unique }}s{{ end }}.
-	func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
-		{{ $receiver }}.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
-		return {{ $receiver }}
-	}
-	{{ if and $e.Unique $e.Optional }}
+	{{/* Check if this setter was already defined by the field-setters (e.g. edge-field with the same name). */}}
+	{{ $withSetter := not $e.HasFieldSetter }}
+	{{ if $withSetter }}
+		// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID{{ if not $e.Unique }}s{{ end }}.
+		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
+			return {{ $receiver }}
+		}
+	{{ end }}
+	{{ if and $e.Unique $e.Optional $withSetter }}
 		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
 		// {{ $nillableIDsFunc }} sets the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID if the given value is not nil.
 		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {

@@ -42,7 +42,7 @@ func main() {
 ```go
 package ent
 
-//go:generate go run entc.go
+//go:generate go run -mod=mod entc.go
 ```
 
 Note that `ent/entc.go` is ignored using a build tag, and it's executed by the `go generate` command
@@ -222,12 +222,12 @@ func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int
 
 ### Use in GraphQL
 
-```text
+```graphql
 query {
-    todos(first: 3, orderBy: {direction: DESC, field: NAME}) {
+    todos(first: 3, orderBy: {direction: DESC, field: TEXT}) {
         edges {
             node {
-                name
+                text
             }
         }
     }
@@ -337,7 +337,7 @@ srv := handler.NewDefaultServer(todo.NewSchema(client))
 srv.Use(entgql.Transactioner{TxOpener: client})
 ```
 
-2\. And then, in the GraphQL mutations, use the client from context as follows:
+2\. Then, in the GraphQL mutations, use the client from context as follows:
 ```go
 func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.Todo, error) {
 	client := ent.FromContext(ctx)

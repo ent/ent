@@ -27,7 +27,7 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]interface{}, error) {
 				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }}{{ $.Package }}.{{ $c }}{{ end }}:
 					values[i] = &{{ $type }}{}
 			{{- end }}
-			{{- range $i, $fk := $.ForeignKeys }}
+			{{- range $i, $fk := $.UnexportedForeignKeys }}
 				{{- $f := $fk.Field }}
 				case {{ $.Package }}.ForeignKeys[{{ $i }}]: // {{ $f.Name }}
 					values[i] = &{{ if not $f.UserDefined }}sql.NullInt64{{ else }}{{ $f.NullType }}{{ end }}{}
@@ -66,19 +66,19 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 					{{ template "dialect/sql/decode/field" . }}
 				{{- end }}
 		{{- end }}
-		{{- range $i, $fk := $.ForeignKeys }}
+		{{- range $i, $fk := $.UnexportedForeignKeys }}
 			{{- $f := $fk.Field }}
-			case {{ $.Package }}.ForeignKeys[{{ $i }}]:
-				{{- if and $f.UserDefined (or $f.IsString $f.IsUUID) }}
-					{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver "StructField" $f.Name }}
+			case {{ if $fk.UserDefined }}{{ $.Package }}.{{ $.ID.Constant }}{{ else }}{{ $.Package }}.ForeignKeys[{{ $i }}]{{ end }}:
+				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsUUID)) }}
+					{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}
 				{{- else }}
 					if value, ok := values[{{ $idx }}].(*sql.NullInt64); !ok {
 						return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
 					} else if value.Valid {
-						{{ $receiver }}.{{ $f.Name }} = new({{ $f.Type }})
-						*{{ $receiver }}.{{ $f.Name }} = {{ $f.Type }}(value.Int64)
+						{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
+						{{ if $f.Nillable }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
 					}
 				{{- end }}
 		{{- end }}
@@ -122,12 +122,4 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 {{- end }}
 
 {{ define "dialect/sql/decode/many" }}
-{{ end }}
-
-{{/* Additional fields for the generated model for holding the foreign-keys */}}
-{{ define "dialect/sql/model/fields" }}
-	{{- range $fk := $.ForeignKeys }}
-		{{- $f := $fk.Field }}
-		{{ $f.Name }} {{ if $f.Nillable }}*{{ end }}{{ $f.Type }}
-	{{- end }}
 {{ end }}

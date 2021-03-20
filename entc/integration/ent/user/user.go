@@ -35,7 +35,6 @@ const (
 	FieldRole = "role"
 	// FieldSSOCert holds the string denoting the ssocert field in the database.
 	FieldSSOCert = "sso_cert"
-
 	// EdgeCard holds the string denoting the card edge name in mutations.
 	EdgeCard = "card"
 	// EdgePets holds the string denoting the pets edge name in mutations.
@@ -58,7 +57,6 @@ const (
 	EdgeChildren = "children"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// CardTable is the table the holds the card relation/edge.
@@ -69,10 +67,10 @@ const (
 	// CardColumn is the table column denoting the card relation/edge.
 	CardColumn = "user_card"
 	// PetsTable is the table the holds the pets relation/edge.
-	PetsTable = "pets"
+	PetsTable = "pet"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
-	PetsInverseTable = "pets"
+	PetsInverseTable = "pet"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "user_pets"
 	// FilesTable is the table the holds the files relation/edge.
@@ -94,10 +92,10 @@ const (
 	// FollowingTable is the table the holds the following relation/edge. The primary key declared below.
 	FollowingTable = "user_following"
 	// TeamTable is the table the holds the team relation/edge.
-	TeamTable = "pets"
+	TeamTable = "pet"
 	// TeamInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
-	TeamInverseTable = "pets"
+	TeamInverseTable = "pet"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "user_team"
 	// SpouseTable is the table the holds the spouse relation/edge.
@@ -129,7 +127,8 @@ var Columns = []string{
 	FieldSSOCert,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"group_blocked",
 	"user_spouse",

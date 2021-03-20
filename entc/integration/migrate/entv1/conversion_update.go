@@ -527,6 +527,7 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ConversionUpdateOne is the builder for updating a single Conversion entity.
 type ConversionUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *ConversionMutation
 }
@@ -772,6 +773,13 @@ func (cuo *ConversionUpdateOne) Mutation() *ConversionMutation {
 	return cuo.mutation
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *ConversionUpdateOne) Select(field string, fields ...string) *ConversionUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
+}
+
 // Save executes the query and returns the updated Conversion entity.
 func (cuo *ConversionUpdateOne) Save(ctx context.Context) (*Conversion, error) {
 	var (
@@ -839,6 +847,18 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Conversion.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := cuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, conversion.FieldID)
+		for _, f := range fields {
+			if !conversion.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("entv1: invalid field %q for query", f)}
+			}
+			if f != conversion.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := cuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

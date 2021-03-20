@@ -169,6 +169,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.node_children = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := nc.mutation.ChildrenIDs(); len(nodes) > 0 {

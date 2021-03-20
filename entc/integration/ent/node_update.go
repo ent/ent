@@ -285,6 +285,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // NodeUpdateOne is the builder for updating a single Node entity.
 type NodeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *NodeMutation
 }
@@ -371,6 +372,13 @@ func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
 	return nuo
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {
+	nuo.fields = append([]string{field}, fields...)
+	return nuo
+}
+
 // Save executes the query and returns the updated Node entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 	var (
@@ -438,6 +446,18 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Node.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := nuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, node.FieldID)
+		for _, f := range fields {
+			if !node.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != node.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := nuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

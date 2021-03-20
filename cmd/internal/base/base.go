@@ -240,7 +240,7 @@ const (
 	// default schema package path.
 	defaultSchema = "ent/schema"
 	// ent/generate.go file used for "go generate" command.
-	genFile = "package ent\n\n//go:generate go run entgo.io/ent/cmd/ent generate ./schema\n"
+	genFile = "package ent\n\n//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate ./schema\n"
 )
 
 // examples formats the given examples to the cli.

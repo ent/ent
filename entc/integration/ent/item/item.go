@@ -11,7 +11,6 @@ const (
 	Label = "item"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-
 	// Table holds the table name of the item in the database.
 	Table = "items"
 )

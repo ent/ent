@@ -247,6 +247,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CardUpdateOne is the builder for updating a single Card entity.
 type CardUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CardMutation
 }
@@ -321,6 +322,13 @@ func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	return cuo
 }
 
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
+}
+
 // Save executes the query and returns the updated Card entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	var (
@@ -388,6 +396,18 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Card.ID for update")}
 	}
 	_spec.Node.ID.Value = id
+	if fields := cuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, card.FieldID)
+		for _, f := range fields {
+			if !card.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != card.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
 	if ps := cuo.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
