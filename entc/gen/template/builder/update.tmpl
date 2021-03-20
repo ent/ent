@@ -214,6 +214,13 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{ xtemplate $tmpl . }}
 {{ end }}
 
+{{- /* Support adding update methods by global templates. */}}
+{{- with $tmpls := matchTemplate "update/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{ xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 {{ end }}
 
 {{/* shared struct fields between the two updaters */}}

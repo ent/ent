@@ -130,6 +130,13 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{ xtemplate $tmpl . }}
 {{ end }}
 
+{{- /* Support adding create methods by global templates. */}}
+{{- with $tmpls := matchTemplate "create/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{ xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 {{ $bulk := printf "%sCreateBulk" (pascal $.Name) }}
 {{ $receiver = receiver $bulk }}
 
