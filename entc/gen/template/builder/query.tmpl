@@ -378,6 +378,15 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 	{{ xtemplate $tmpl . }}
 {{ end }}
 
+{{- /* Support adding query methods by global templates. In order to generate dialect-sepcific methods,
+ prefix this template with "dialect/{{ .Storage }}". For example: "dialect/sql/query/additional/*". */}}
+{{- with $tmpls := matchTemplate "query/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{ xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
+
 {{/* groupby builder */}}
 
 {{ $groupReceiver := receiver $groupBuilder }}
