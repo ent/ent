@@ -128,8 +128,9 @@ func (t TypeInfo) Comparable() bool {
 	case TypeBool, TypeTime, TypeUUID, TypeEnum, TypeString:
 		return true
 	case TypeOther:
-		// Assumes the author of the type knows what they are doing and
-		// sets a reasonable schema type for the dialect used.
+		// Always accept custom types as comparable on the database side.
+		// In the future, we should consider adding an interface to let
+		// custom types tell if they are comparable or not (see #1304).
 		return true
 	default:
 		return t.Numeric()
