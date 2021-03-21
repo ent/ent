@@ -750,9 +750,9 @@ func (i *InsertBuilder) buildConflictHandling() {
 			}).
 			Pad()
 
+		i.WriteString("DO UPDATE SET ")
 		switch i.onConflictOp {
 		case OpResolveWithNewValues:
-			i.WriteString("DO UPDATE SET").Pad()
 			for j, c := range i.columns {
 				if j > 0 {
 					i.Comma()
@@ -760,16 +760,14 @@ func (i *InsertBuilder) buildConflictHandling() {
 				i.Ident(c).WriteOp(OpEQ).Ident("excluded").WriteByte('.').Ident(c)
 			}
 		case OpResolveWithIgnore:
-			i.WriteString("DO UPDATE SET").Pad()
 			for j, c := range i.columns {
 				if j > 0 {
 					i.Comma()
 				}
-				// Ignore conflict by setting column to itself e.g. "c" = "c"
+				// Ignore conflict by setting column to itself e.g. "c" = "c".
 				i.Ident(c).WriteOp(OpEQ).Ident(c)
 			}
 		case OpResolveWithAlternateValues:
-			i.WriteString("DO UPDATE SET").Pad()
 			writeUpdateValues(i, i.updateColumns, i.updateValues)
 		}
 
