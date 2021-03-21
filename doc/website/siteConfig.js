@@ -130,6 +130,11 @@ const siteConfig = {
     // Open Graph and Twitter card images.
     ogImage: 'img/undraw_online.svg',
     twitterImage: 'img/undraw_tweetstorm.svg',
+    twitter: true,
+    twitterUsername: 'entgo_io',
+    slackChannel: 'https://app.slack.com/client/T029RQSE6/C01FMSQDT53',
+    newsletter: 'https://www.getrevue.co/profile/ent',
+    githubRepo: 'https://github.com/ent/ent',
 
     // For sites with a sizable amount of content, set collapsible to true.
     // Expand/collapse the links and subcategories under categories.
@@ -140,10 +145,6 @@ const siteConfig = {
 
     // Show documentation's last update time.
     // enableUpdateTime: true,
-
-    // You may provide arbitrary config keys to be used as needed by your
-    // template. For example, if you need your repo's URL...
-    //   repoUrl: 'https://github.com/facebook/test-site',
     gaTrackingId: 'UA-189726777-1',
 
     algolia: {
