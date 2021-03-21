@@ -759,9 +759,9 @@ func (i *InsertBuilder) buildConflictHandling() {
 			Nested(func(b *Builder) {
 				b.IdentComma(i.conflictColumns...)
 			}).
-			Pad()
+			Pad().
+			WriteString("DO UPDATE SET ")
 
-		i.WriteString("DO UPDATE SET ")
 		switch i.onConflictOp {
 		case OpResolveWithNewValues:
 			for j, c := range i.columns {
@@ -771,13 +771,7 @@ func (i *InsertBuilder) buildConflictHandling() {
 				i.Ident(c).WriteOp(OpEQ).Ident("excluded").WriteByte('.').Ident(c)
 			}
 		case OpResolveWithIgnore:
-			for j, c := range i.columns {
-				if j > 0 {
-					i.Comma()
-				}
-				// Ignore conflict by setting column to itself e.g. "c" = "c".
-				i.Ident(c).WriteOp(OpEQ).Ident(c)
-			}
+			writeIgnoreValues(i)
 		case OpResolveWithAlternateValues:
 			writeUpdateValues(i, i.updateColumns, i.updateValues)
 		}
@@ -787,13 +781,7 @@ func (i *InsertBuilder) buildConflictHandling() {
 
 		switch i.onConflictOp {
 		case OpResolveWithIgnore:
-			for j, c := range i.columns {
-				if j > 0 {
-					i.Comma()
-				}
-				// Ignore conflict by setting column to itself e.g. `c` = `c`
-				i.Ident(c).WriteOp(OpEQ).Ident(c)
-			}
+			writeIgnoreValues(i)
 		case OpResolveWithNewValues:
 			for j, c := range i.columns {
 				if j > 0 {
@@ -814,6 +802,17 @@ func writeUpdateValues(builder *InsertBuilder, columns []string, values []interf
 			builder.Comma()
 		}
 		builder.Ident(c).WriteString(" = ").Arg(builder.updateValues[i])
+	}
+}
+
+// writeIgnoreValues ignores conflicts by setting each column to itself e.g. "c" = "c",
+// performimg an update without changing any values so that it returns the record ID.
+func writeIgnoreValues(builder *InsertBuilder) {
+	for j, c := range builder.columns {
+		if j > 0 {
+			builder.Comma()
+		}
+		builder.Ident(c).WriteOp(OpEQ).Ident(c)
 	}
 }
 
