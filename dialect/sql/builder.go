@@ -663,13 +663,25 @@ func (i *InsertBuilder) Columns(columns ...string) *InsertBuilder {
 	return i
 }
 
-// ConflictColumns sets the columns to apply the update during upsert.
+// ConflictColumns sets the unique constraints that trigger the conflict resolution on insert
+// to perform an upsert operation. The columns must have a unqiue constraint applied to trigger this behaviour.
 func (i *InsertBuilder) ConflictColumns(values ...string) *InsertBuilder {
 	i.conflictColumns = append(i.conflictColumns, values...)
 	return i
 }
 
-// OnConflict sets the columns to apply the update during upsert.
+// A ConflictResolutionOp represents a possible action to take when an insert conflict occurrs.
+type ConflictResolutionOp int
+
+// Conflict Operations
+const (
+	OpResolveWithNewValues       ConflictResolutionOp = iota // Update conflict columns using EXCLUDED.column (postres) or c = VALUES(c) (mysql)
+	OpResolveWithIgnore                                      // Sets each column to itself to force an update and return the ID, otherwise does not change any data. This may still trigger update hooks in the database.
+	OpResolveWithAlternateValues                             // Update using provided values across all rows.
+)
+
+// OnConflict sets the conflict resolution behaviour when a unique constraint
+// violation occurrs, triggering an upsert.
 func (i *InsertBuilder) OnConflict(op ConflictResolutionOp) *InsertBuilder {
 	i.onConflictOp = op
 	return i
@@ -2270,16 +2282,6 @@ var ops = [...]string{
 	OpIsNull:  "IS NULL",
 	OpNotNull: "IS NOT NULL",
 }
-
-// A ConflictResolutionOp represents a possible action to take when an insert conflict occurrs.
-type ConflictResolutionOp int
-
-// Conflict Operations
-const (
-	OpResolveWithNewValues       ConflictResolutionOp = iota // Update conflict columns using EXCLUDED.column (postres) or c = VALUES(c) (mysql)
-	OpResolveWithIgnore                                      // Sets each column to itself to force an update and return the ID, otherwise does not change any data. This may still trigger update hooks in the database.
-	OpResolveWithAlternateValues                             // Update using provided values across all rows.
-)
 
 // WriteOp writes an operator to the builder.
 func (b *Builder) WriteOp(op Op) *Builder {
