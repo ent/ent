@@ -728,7 +728,6 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 	}
 
 	if len(i.conflictColumns) > 0 {
-		// Update on conflict
 		i.buildConflictHandling()
 	}
 
