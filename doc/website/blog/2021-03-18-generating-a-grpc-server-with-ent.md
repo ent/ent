@@ -189,7 +189,7 @@ A new `generate.go` file was created with an invocation to `protoc`, the protobu
 
 - [protoc installation](https://grpc.io/docs/protoc-installation/)
 - [protoc-gen-go + protoc-gen-go-grpc installation](https://grpc.io/docs/languages/go/quickstart/)
-- Run `go get -u [entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc](http://entgo.io/contrib/entproto/cmd/entproto)` to install `protoc-gen-entgrpc`
+- Run `go get -u entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc` to install `protoc-gen-entgrpc`
 
 After installing these dependencies, we can re-run code-generation:
 
