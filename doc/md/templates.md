@@ -134,4 +134,4 @@ func (User) Fields() []ent.Field {
 ## Documentation
 
 Templates are executed on either a specific node-type or the entire schema graph. For API
-documentation, see the <a target="_blank" href="https://pkg.go.dev/entgo.io/ent/entc/gen?tab=doc">GoDoc<a>.
+documentation, see the <a target="_blank" href="https://pkg.go.dev/entgo.io/ent/entc/gen?tab=doc">GoDoc</a>.
