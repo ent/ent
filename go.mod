@@ -9,7 +9,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/jessevdk/go-flags v1.4.0
+	github.com/jessevdk/go-flags v1.5.0
 	github.com/json-iterator/go v1.1.10
 	github.com/lib/pq v1.10.0
 	github.com/mattn/go-sqlite3 v1.14.6
