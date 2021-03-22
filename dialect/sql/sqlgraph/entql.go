@@ -282,7 +282,7 @@ func args(b *sql.Builder, v *entql.Value) {
 		b.Arg(v.V)
 		return
 	}
-	b.Args(vs...)
+	b.WriteByte('(').Args(vs...).WriteByte(')')
 }
 
 // expect panics if the condition is false.

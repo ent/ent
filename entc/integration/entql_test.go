@@ -46,6 +46,8 @@ func EntQL(t *testing.T, client *ent.Client) {
 		entql.And(
 			entql.HasEdge("pets"),
 			entql.HasEdgeWith("friends", entql.FieldEQ("name", "nati")),
+			entql.HasEdgeWith("friends", entql.FieldIn("name", "nati")),
+			entql.HasEdgeWith("friends", entql.FieldIn("name", "nati", "a8m")),
 		),
 	)
 	require.Equal(a8m.ID, uq.OnlyIDX(ctx))
