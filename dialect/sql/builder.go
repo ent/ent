@@ -1084,6 +1084,7 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 	})
 }
 
+// ColumnsEQ appends a "=" predicate between 2 columns.
 func ColumnsEQ(col1 string, col2 string) *Predicate {
 	return P().ColumnsEQ(col1, col2)
 }
@@ -1107,6 +1108,7 @@ func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
 	})
 }
 
+// ColumnsNEQ appends a "<>" predicate between 2 columns.
 func ColumnsNEQ(col1 string, col2 string) *Predicate {
 	return P().ColumnsNEQ(col1, col2)
 }
@@ -1130,6 +1132,7 @@ func (p *Predicate) LT(col string, arg interface{}) *Predicate {
 	})
 }
 
+// ColumnsLT appends a "<" predicate between 2 columns.
 func ColumnsLT(col1 string, col2 string) *Predicate {
 	return P().ColumnsLT(col1, col2)
 }
@@ -1153,6 +1156,7 @@ func (p *Predicate) LTE(col string, arg interface{}) *Predicate {
 	})
 }
 
+// ColumnsLTE appends a "<=" predicate between 2 columns.
 func ColumnsLTE(col1 string, col2 string) *Predicate {
 	return P().ColumnsLTE(col1, col2)
 }
@@ -1176,6 +1180,7 @@ func (p *Predicate) GT(col string, arg interface{}) *Predicate {
 	})
 }
 
+// ColumnsGT appends a ">" predicate between 2 columns.
 func ColumnsGT(col1 string, col2 string) *Predicate {
 	return P().ColumnsGT(col1, col2)
 }
@@ -1199,6 +1204,7 @@ func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 	})
 }
 
+// ColumnsGTE appends a ">=" predicate between 2 columns.
 func ColumnsGTE(col1 string, col2 string) *Predicate {
 	return P().ColumnsGTE(col1, col2)
 }
