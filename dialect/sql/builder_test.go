@@ -1396,11 +1396,29 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"pedro", "pedro", "pedro", "luna", true},
 		},
 		{
+			input: func() Querier {
+				t1 := Table("users")
+				return Dialect(dialect.Postgres).
+					Select().
+					From(t1).
+					Where(ColumnsEQ(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsNEQ(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsGT(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsGTE(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsLT(t1.C("id1"), t1.C("id2"))).
+					Where(ColumnsLTE(t1.C("id1"), t1.C("id2")))
+			}(),
+			wantQuery: strings.ReplaceAll(`
+SELECT * FROM "users" 
+WHERE (((("users"."id1" = "users"."id2" AND "users"."id1" <> "users"."id2") 
+AND "users"."id1" > "users"."id2") AND "users"."id1" >= "users"."id2") 
+AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""),
+		},
+		{
 			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").ConflictColumns("id").UpdateSet("email", "user-1@example.com"),
 			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "excluded"."id", "email" = "excluded"."email"`,
 			wantArgs:  []interface{}{"1", "user@example.com"},
 		},
-
 		{
 			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("id"),
 			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "id", "email" = "email"`,

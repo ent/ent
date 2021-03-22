@@ -75,6 +75,13 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 	{{ xtemplate $tmpl . }}
 {{ end }}
 
+{{- /* Support adding delete methods by global templates. */}}
+{{- with $tmpls := matchTemplate "delete/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{ xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 {{ $onebuilder := $.DeleteOneName }}
 {{ $oneReceiver := receiver $onebuilder }}
 

@@ -139,6 +139,19 @@ func (t *Table) index(name string) (*Index, bool) {
 	return nil, false
 }
 
+// hasIndex reports if the table has at least one index that matches the given names.
+func (t *Table) hasIndex(names ...string) bool {
+	for i := range names {
+		if names[i] == "" {
+			continue
+		}
+		if _, ok := t.index(names[i]); ok {
+			return true
+		}
+	}
+	return false
+}
+
 // fk returns a table foreign-key by its symbol.
 // faster than map lookup for most cases.
 func (t *Table) fk(symbol string) (*ForeignKey, bool) {

@@ -159,6 +159,8 @@ var (
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
 		"config/*/*",
+		"create/additional/*",
+		"delete/additional/*",
 		"dialect/*/*/*/spec/*",
 		"dialect/*/*/spec/*",
 		"dialect/*/config/*/*",
@@ -173,6 +175,8 @@ var (
 		"import/additional/*",
 		"model/additional/*",
 		"model/comment/additional/*",
+		"update/additional/*",
+		"query/additional/*",
 	}
 	// templates holds the Go templates for the code generation.
 	templates *Template

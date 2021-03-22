@@ -7,6 +7,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -293,29 +294,29 @@ var (
 			},
 		},
 	}
-	// PetsColumns holds the columns for the "pets" table.
-	PetsColumns = []*schema.Column{
+	// PetColumns holds the columns for the "pet" table.
+	PetColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
-	// PetsTable holds the schema information for the "pets" table.
-	PetsTable = &schema.Table{
-		Name:       "pets",
-		Columns:    PetsColumns,
-		PrimaryKey: []*schema.Column{PetsColumns[0]},
+	// PetTable holds the schema information for the "pet" table.
+	PetTable = &schema.Table{
+		Name:       "pet",
+		Columns:    PetColumns,
+		PrimaryKey: []*schema.Column{PetColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "pets_users_pets",
-				Columns:    []*schema.Column{PetsColumns[3]},
+				Symbol:     "pet_users_pets",
+				Columns:    []*schema.Column{PetColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "pets_users_team",
-				Columns:    []*schema.Column{PetsColumns[4]},
+				Symbol:     "pet_users_team",
+				Columns:    []*schema.Column{PetColumns[4]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -324,7 +325,7 @@ var (
 			{
 				Name:    "pet_name_user_pets",
 				Unique:  false,
-				Columns: []*schema.Column{PetsColumns[1], PetsColumns[3]},
+				Columns: []*schema.Column{PetColumns[1], PetColumns[3]},
 			},
 		},
 	}
@@ -506,7 +507,7 @@ var (
 		GroupInfosTable,
 		ItemsTable,
 		NodesTable,
-		PetsTable,
+		PetTable,
 		SpecsTable,
 		TasksTable,
 		UsersTable,
@@ -525,8 +526,11 @@ func init() {
 	FilesTable.ForeignKeys[2].RefTable = UsersTable
 	GroupsTable.ForeignKeys[0].RefTable = GroupInfosTable
 	NodesTable.ForeignKeys[0].RefTable = NodesTable
-	PetsTable.ForeignKeys[0].RefTable = UsersTable
-	PetsTable.ForeignKeys[1].RefTable = UsersTable
+	PetTable.ForeignKeys[0].RefTable = UsersTable
+	PetTable.ForeignKeys[1].RefTable = UsersTable
+	PetTable.Annotation = &entsql.Annotation{
+		Table: "pet",
+	}
 	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[2].RefTable = UsersTable

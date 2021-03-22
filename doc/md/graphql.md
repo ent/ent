@@ -42,7 +42,7 @@ func main() {
 ```go
 package ent
 
-//go:generate go run entc.go
+//go:generate go run -mod=mod entc.go
 ```
 
 Note that `ent/entc.go` is ignored using a build tag, and it's executed by the `go generate` command
