@@ -25,6 +25,7 @@ type ItemQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Item
@@ -48,6 +49,13 @@ func (iq *ItemQuery) Limit(limit int) *ItemQuery {
 // Offset adds an offset step to the query.
 func (iq *ItemQuery) Offset(offset int) *ItemQuery {
 	iq.offset = &offset
+	return iq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (iq *ItemQuery) Unique(unique bool) *ItemQuery {
+	iq.unique = &unique
 	return iq
 }
 
@@ -340,7 +348,9 @@ func (iq *ItemQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	v.Dedup()
+	if unique := iq.unique; unique == nil || *unique {
+		v.Dedup()
+	}
 	return v
 }
 

@@ -25,6 +25,7 @@ type CarQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Car
@@ -51,6 +52,13 @@ func (cq *CarQuery) Limit(limit int) *CarQuery {
 // Offset adds an offset step to the query.
 func (cq *CarQuery) Offset(offset int) *CarQuery {
 	cq.offset = &offset
+	return cq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (cq *CarQuery) Unique(unique bool) *CarQuery {
+	cq.unique = &unique
 	return cq
 }
 
@@ -434,6 +442,9 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   cq.sql,
 		Unique: true,
+	}
+	if unique := cq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := cq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

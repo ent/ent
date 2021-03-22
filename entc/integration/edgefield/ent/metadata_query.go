@@ -25,6 +25,7 @@ type MetadataQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Metadata
@@ -50,6 +51,13 @@ func (mq *MetadataQuery) Limit(limit int) *MetadataQuery {
 // Offset adds an offset step to the query.
 func (mq *MetadataQuery) Offset(offset int) *MetadataQuery {
 	mq.offset = &offset
+	return mq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (mq *MetadataQuery) Unique(unique bool) *MetadataQuery {
+	mq.unique = &unique
 	return mq
 }
 
@@ -423,6 +431,9 @@ func (mq *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   mq.sql,
 		Unique: true,
+	}
+	if unique := mq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := mq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

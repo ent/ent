@@ -26,6 +26,7 @@ type FileTypeQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.FileType
@@ -51,6 +52,13 @@ func (ftq *FileTypeQuery) Limit(limit int) *FileTypeQuery {
 // Offset adds an offset step to the query.
 func (ftq *FileTypeQuery) Offset(offset int) *FileTypeQuery {
 	ftq.offset = &offset
+	return ftq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (ftq *FileTypeQuery) Unique(unique bool) *FileTypeQuery {
+	ftq.unique = &unique
 	return ftq
 }
 
@@ -427,6 +435,9 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   ftq.sql,
 		Unique: true,
+	}
+	if unique := ftq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := ftq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

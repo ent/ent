@@ -102,6 +102,9 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 		From: {{ $receiver }}.sql,
 		Unique: true,
 	}
+	if unique := {{ $receiver }}.unique; unique != nil {
+		_spec.Unique = *unique
+	}
 	if fields := {{ $receiver }}.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})

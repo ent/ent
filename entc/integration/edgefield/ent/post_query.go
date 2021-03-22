@@ -25,6 +25,7 @@ type PostQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Post
@@ -50,6 +51,13 @@ func (pq *PostQuery) Limit(limit int) *PostQuery {
 // Offset adds an offset step to the query.
 func (pq *PostQuery) Offset(offset int) *PostQuery {
 	pq.offset = &offset
+	return pq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (pq *PostQuery) Unique(unique bool) *PostQuery {
+	pq.unique = &unique
 	return pq
 }
 
@@ -426,6 +434,9 @@ func (pq *PostQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   pq.sql,
 		Unique: true,
+	}
+	if unique := pq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := pq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

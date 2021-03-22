@@ -26,6 +26,7 @@ type SpecQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Spec
@@ -51,6 +52,13 @@ func (sq *SpecQuery) Limit(limit int) *SpecQuery {
 // Offset adds an offset step to the query.
 func (sq *SpecQuery) Offset(offset int) *SpecQuery {
 	sq.offset = &offset
+	return sq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (sq *SpecQuery) Unique(unique bool) *SpecQuery {
+	sq.unique = &unique
 	return sq
 }
 
@@ -439,6 +447,9 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   sq.sql,
 		Unique: true,
+	}
+	if unique := sq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := sq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

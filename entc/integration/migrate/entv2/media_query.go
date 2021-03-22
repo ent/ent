@@ -24,6 +24,7 @@ type MediaQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Media
@@ -47,6 +48,13 @@ func (mq *MediaQuery) Limit(limit int) *MediaQuery {
 // Offset adds an offset step to the query.
 func (mq *MediaQuery) Offset(offset int) *MediaQuery {
 	mq.offset = &offset
+	return mq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (mq *MediaQuery) Unique(unique bool) *MediaQuery {
+	mq.unique = &unique
 	return mq
 }
 
@@ -355,6 +363,9 @@ func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   mq.sql,
 		Unique: true,
+	}
+	if unique := mq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := mq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

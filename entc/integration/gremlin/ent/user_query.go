@@ -25,6 +25,7 @@ type UserQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.User
@@ -60,6 +61,13 @@ func (uq *UserQuery) Limit(limit int) *UserQuery {
 // Offset adds an offset step to the query.
 func (uq *UserQuery) Offset(offset int) *UserQuery {
 	uq.offset = &offset
+	return uq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (uq *UserQuery) Unique(unique bool) *UserQuery {
+	uq.unique = &unique
 	return uq
 }
 
@@ -662,7 +670,9 @@ func (uq *UserQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	v.Dedup()
+	if unique := uq.unique; unique == nil || *unique {
+		v.Dedup()
+	}
 	return v
 }
 

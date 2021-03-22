@@ -24,6 +24,7 @@ type ConversionQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Conversion
@@ -47,6 +48,13 @@ func (cq *ConversionQuery) Limit(limit int) *ConversionQuery {
 // Offset adds an offset step to the query.
 func (cq *ConversionQuery) Offset(offset int) *ConversionQuery {
 	cq.offset = &offset
+	return cq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (cq *ConversionQuery) Unique(unique bool) *ConversionQuery {
+	cq.unique = &unique
 	return cq
 }
 
@@ -355,6 +363,9 @@ func (cq *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   cq.sql,
 		Unique: true,
+	}
+	if unique := cq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := cq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -27,6 +27,7 @@ type TaskQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Task
@@ -54,6 +55,13 @@ func (tq *TaskQuery) Limit(limit int) *TaskQuery {
 // Offset adds an offset step to the query.
 func (tq *TaskQuery) Offset(offset int) *TaskQuery {
 	tq.offset = &offset
+	return tq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (tq *TaskQuery) Unique(unique bool) *TaskQuery {
+	tq.unique = &unique
 	return tq
 }
 
@@ -543,6 +551,9 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   tq.sql,
 		Unique: true,
+	}
+	if unique := tq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := tq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

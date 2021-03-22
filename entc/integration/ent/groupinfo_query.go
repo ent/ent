@@ -26,6 +26,7 @@ type GroupInfoQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.GroupInfo
@@ -51,6 +52,13 @@ func (giq *GroupInfoQuery) Limit(limit int) *GroupInfoQuery {
 // Offset adds an offset step to the query.
 func (giq *GroupInfoQuery) Offset(offset int) *GroupInfoQuery {
 	giq.offset = &offset
+	return giq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (giq *GroupInfoQuery) Unique(unique bool) *GroupInfoQuery {
+	giq.unique = &unique
 	return giq
 }
 
@@ -427,6 +435,9 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   giq.sql,
 		Unique: true,
+	}
+	if unique := giq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := giq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

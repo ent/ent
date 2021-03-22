@@ -27,6 +27,7 @@ type TeamQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Team
@@ -53,6 +54,13 @@ func (tq *TeamQuery) Limit(limit int) *TeamQuery {
 // Offset adds an offset step to the query.
 func (tq *TeamQuery) Offset(offset int) *TeamQuery {
 	tq.offset = &offset
+	return tq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (tq *TeamQuery) Unique(unique bool) *TeamQuery {
+	tq.unique = &unique
 	return tq
 }
 
@@ -571,6 +579,9 @@ func (tq *TeamQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   tq.sql,
 		Unique: true,
+	}
+	if unique := tq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := tq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
