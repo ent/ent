@@ -24,6 +24,7 @@ type FieldTypeQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.FieldType
@@ -48,6 +49,13 @@ func (ftq *FieldTypeQuery) Limit(limit int) *FieldTypeQuery {
 // Offset adds an offset step to the query.
 func (ftq *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
 	ftq.offset = &offset
+	return ftq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (ftq *FieldTypeQuery) Unique(unique bool) *FieldTypeQuery {
+	ftq.unique = &unique
 	return ftq
 }
 
@@ -360,6 +368,9 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   ftq.sql,
 		Unique: true,
+	}
+	if unique := ftq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := ftq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -25,6 +25,7 @@ type InfoQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Info
@@ -50,6 +51,13 @@ func (iq *InfoQuery) Limit(limit int) *InfoQuery {
 // Offset adds an offset step to the query.
 func (iq *InfoQuery) Offset(offset int) *InfoQuery {
 	iq.offset = &offset
+	return iq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (iq *InfoQuery) Unique(unique bool) *InfoQuery {
+	iq.unique = &unique
 	return iq
 }
 
@@ -423,6 +431,9 @@ func (iq *InfoQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   iq.sql,
 		Unique: true,
+	}
+	if unique := iq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := iq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

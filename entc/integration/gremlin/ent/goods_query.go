@@ -25,6 +25,7 @@ type GoodsQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Goods
@@ -48,6 +49,13 @@ func (gq *GoodsQuery) Limit(limit int) *GoodsQuery {
 // Offset adds an offset step to the query.
 func (gq *GoodsQuery) Offset(offset int) *GoodsQuery {
 	gq.offset = &offset
+	return gq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (gq *GoodsQuery) Unique(unique bool) *GoodsQuery {
+	gq.unique = &unique
 	return gq
 }
 
@@ -340,7 +348,9 @@ func (gq *GoodsQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	v.Dedup()
+	if unique := gq.unique; unique == nil || *unique {
+		v.Dedup()
+	}
 	return v
 }
 

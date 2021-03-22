@@ -25,6 +25,7 @@ type {{ $builder }} struct {
 	config
 	limit		*int
 	offset		*int
+	unique		*bool
 	order		[]OrderFunc
 	fields		[]string
 	predicates 	[]predicate.{{ $.Name }}
@@ -59,6 +60,13 @@ func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} {
 // Offset adds an offset step to the query.
 func ({{ $receiver }} *{{ $builder }}) Offset(offset int) *{{ $builder }} {
 	{{ $receiver }}.offset = &offset
+	return {{ $receiver }}
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func ({{ $receiver }} *{{ $builder }}) Unique(unique bool) *{{ $builder }} {
+	{{ $receiver }}.unique = &unique
 	return {{ $receiver }}
 }
 

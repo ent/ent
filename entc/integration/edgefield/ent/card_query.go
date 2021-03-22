@@ -25,6 +25,7 @@ type CardQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Card
@@ -50,6 +51,13 @@ func (cq *CardQuery) Limit(limit int) *CardQuery {
 // Offset adds an offset step to the query.
 func (cq *CardQuery) Offset(offset int) *CardQuery {
 	cq.offset = &offset
+	return cq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (cq *CardQuery) Unique(unique bool) *CardQuery {
+	cq.unique = &unique
 	return cq
 }
 
@@ -423,6 +431,9 @@ func (cq *CardQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   cq.sql,
 		Unique: true,
+	}
+	if unique := cq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := cq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

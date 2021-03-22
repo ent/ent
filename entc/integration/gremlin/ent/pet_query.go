@@ -26,6 +26,7 @@ type PetQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Pet
@@ -52,6 +53,13 @@ func (pq *PetQuery) Limit(limit int) *PetQuery {
 // Offset adds an offset step to the query.
 func (pq *PetQuery) Offset(offset int) *PetQuery {
 	pq.offset = &offset
+	return pq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (pq *PetQuery) Unique(unique bool) *PetQuery {
+	pq.unique = &unique
 	return pq
 }
 
@@ -420,7 +428,9 @@ func (pq *PetQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	v.Dedup()
+	if unique := pq.unique; unique == nil || *unique {
+		v.Dedup()
+	}
 	return v
 }
 

@@ -26,6 +26,7 @@ type GroupQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Group
@@ -54,6 +55,13 @@ func (gq *GroupQuery) Limit(limit int) *GroupQuery {
 // Offset adds an offset step to the query.
 func (gq *GroupQuery) Offset(offset int) *GroupQuery {
 	gq.offset = &offset
+	return gq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (gq *GroupQuery) Unique(unique bool) *GroupQuery {
+	gq.unique = &unique
 	return gq
 }
 
@@ -474,7 +482,9 @@ func (gq *GroupQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	v.Dedup()
+	if unique := gq.unique; unique == nil || *unique {
+		v.Dedup()
+	}
 	return v
 }
 

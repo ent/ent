@@ -72,7 +72,9 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traver
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	v.Dedup()
+	if unique := {{ $receiver }}.unique; unique == nil || *unique {
+		v.Dedup()
+	}
 	return v
 }
 {{ end }}

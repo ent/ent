@@ -25,6 +25,7 @@ type NodeQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Node
@@ -52,6 +53,13 @@ func (nq *NodeQuery) Limit(limit int) *NodeQuery {
 // Offset adds an offset step to the query.
 func (nq *NodeQuery) Offset(offset int) *NodeQuery {
 	nq.offset = &offset
+	return nq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (nq *NodeQuery) Unique(unique bool) *NodeQuery {
+	nq.unique = &unique
 	return nq
 }
 
@@ -498,6 +506,9 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   nq.sql,
 		Unique: true,
+	}
+	if unique := nq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := nq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

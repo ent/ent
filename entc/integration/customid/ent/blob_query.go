@@ -26,6 +26,7 @@ type BlobQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Blob
@@ -53,6 +54,13 @@ func (bq *BlobQuery) Limit(limit int) *BlobQuery {
 // Offset adds an offset step to the query.
 func (bq *BlobQuery) Offset(offset int) *BlobQuery {
 	bq.offset = &offset
+	return bq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (bq *BlobQuery) Unique(unique bool) *BlobQuery {
+	bq.unique = &unique
 	return bq
 }
 
@@ -536,6 +544,9 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   bq.sql,
 		Unique: true,
+	}
+	if unique := bq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := bq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -25,6 +25,7 @@ type CommentQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Comment
@@ -50,6 +51,13 @@ func (cq *CommentQuery) Limit(limit int) *CommentQuery {
 // Offset adds an offset step to the query.
 func (cq *CommentQuery) Offset(offset int) *CommentQuery {
 	cq.offset = &offset
+	return cq
+}
+
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (cq *CommentQuery) Unique(unique bool) *CommentQuery {
+	cq.unique = &unique
 	return cq
 }
 
@@ -423,6 +431,9 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 		},
 		From:   cq.sql,
 		Unique: true,
+	}
+	if unique := cq.unique; unique != nil {
+		_spec.Unique = *unique
 	}
 	if fields := cq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
