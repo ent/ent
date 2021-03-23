@@ -1143,6 +1143,40 @@ func TestMySQL_Create(t *testing.T) {
 				mock.ExpectCommit()
 			},
 		},
+		{
+			name: "mariadb/10.1.37/create table",
+			tables: []*Table{
+				{
+					Name: "users",
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "age", Type: field.TypeInt},
+						{Name: "name", Type: field.TypeString, Unique: true},
+					},
+				},
+			},
+			options: []MigrateOption{WithGlobalUniqueID(true)},
+			before: func(mock mysqlMock) {
+				mock.start("10.1.48-MariaDB-1~bionic")
+				mock.tableExists("ent_types", false)
+				// create ent_types table.
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `ent_types`(`id` bigint unsigned AUTO_INCREMENT NOT NULL, `type` varchar(191) UNIQUE NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.tableExists("users", false)
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `age` bigint NOT NULL, `name` varchar(191) UNIQUE NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// set users id range.
+				mock.ExpectExec(escape("INSERT INTO `ent_types` (`type`) VALUES (?)")).
+					WithArgs("users").
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectExec(escape("ALTER TABLE `users` AUTO_INCREMENT = 0")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

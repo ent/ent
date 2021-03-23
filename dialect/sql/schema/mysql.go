@@ -244,7 +244,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 	case field.TypeString:
 		size := c.Size
 		if size == 0 {
-			size = c.defaultSize(d.version)
+			size = d.defaultSize(c)
 		}
 		if size <= math.MaxUint16 {
 			t = fmt.Sprintf("varchar(%d)", size)
@@ -658,4 +658,25 @@ func (d *MySQL) fkNames(ctx context.Context, tx dialect.Tx, table, column string
 		return nil, err
 	}
 	return names, nil
+}
+
+// defaultSize returns the default size for MySQL/MariaDB varchar type
+// based on column size, charset and table indexes, in order to avoid
+// index prefix key limit (767) for older versions of MySQL/MariaDB.
+func (d *MySQL) defaultSize(c *Column) int64 {
+	size := DefaultStringLen
+	version, checked := d.version, "5.7.0"
+	if v, ok := d.mariadb(); ok {
+		version, checked = v, "10.2.2"
+	}
+	switch {
+	// Version is >= 5.7 for MySQL, or >= 10.2.2 for MariaDB.
+	case compareVersions(version, checked) != -1:
+	// Column is non-unique, or not part of any index (reaching
+	// the error 1071).
+	case !c.Unique && len(c.indexes) == 0:
+	default:
+		size = 191
+	}
+	return size
 }
