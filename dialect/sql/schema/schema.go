@@ -318,22 +318,6 @@ func (c *Column) nullable(b *sql.ColumnBuilder) {
 	b.Attr(attr)
 }
 
-// defaultSize returns the default size for MySQL varchar type based
-// on column size, charset and table indexes, in order to avoid index
-// prefix key limit (767).
-func (c *Column) defaultSize(version string) int64 {
-	size := DefaultStringLen
-	switch {
-	// version is >= 5.7.
-	case compareVersions(version, "5.7.0") != -1:
-	// non-unique, or not part of any index (reaching the error 1071).
-	case !c.Unique && len(c.indexes) == 0:
-	default:
-		size = 191
-	}
-	return size
-}
-
 // scanTypeOr returns the scanning type or the given value.
 func (c *Column) scanTypeOr(t string) string {
 	if c.typ != "" {
