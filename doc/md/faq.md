@@ -6,16 +6,16 @@ sidebar_label: FAQ
 
 ## Questions
 
-[How to create an entity from a struct `T`?](#how-to-create-an-entity-from-a-struct-t) \
-[How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator) \
-[How to write an audit-log extension?](#how-to-write-an-audit-log-extension) \
-[How to write custom predicates?](#how-to-write-custom-predicates) \
-[How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets) \
-[How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql) \
-[How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql) \
-[How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids) \
-[How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql) \
-[How to extend the generated models?](#how-to-extend-the-generated-models) \
+[How to create an entity from a struct `T`?](#how-to-create-an-entity-from-a-struct-t)  
+[How to create a struct (or a mutation) level validator?](#how-to-create-a-mutation-level-validator)  
+[How to write an audit-log extension?](#how-to-write-an-audit-log-extension)  
+[How to write custom predicates?](#how-to-write-custom-predicates)  
+[How to add custom predicates to the codegen assets?](#how-to-add-custom-predicates-to-the-codegen-assets)  
+[How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql)  
+[How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql)  
+[How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids)  
+[How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)  
+[How to extend the generated models?](#how-to-extend-the-generated-models)  
 [How to extend the generated builders?](#how-to-extend-the-generated-builders)
 
 ## Answers

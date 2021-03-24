@@ -3,7 +3,7 @@ module.exports={
   "tagline": "An entity framework for Go",
   "url": "https://entgo.io",
   "baseUrl": "/",
-  "organizationName": "facebook",
+  "organizationName": "ent",
   "projectName": "ent",
   "scripts": [
     "https://buttons.github.io/buttons.js",
@@ -33,10 +33,9 @@ module.exports={
       {
         "docs": {
           "path": "../md",
-          "homePageId": "home",
           "showLastUpdateAuthor": false,
           "showLastUpdateTime": false,
-          "sidebarPath": "./sidebars.json"
+          sidebarPath: require.resolve('./sidebars.js'),
         },
         "blog": {
           "path": "blog"
@@ -49,12 +48,15 @@ module.exports={
   ],
   "plugins": [],
   "themeConfig": {
+    prism: {
+      additionalLanguages: ['gotemplate'],
+    },
     algolia: {
       apiKey: "bfc8175da1bd5078f1c02e5c8a6fe782",
       indexName: "entgo",
     },
     colorMode: {
-      disableSwitch: true,
+      disableSwitch: false,
     },
     googleAnalytics: {
       trackingID: 'UA-189726777-1',
@@ -66,27 +68,34 @@ module.exports={
       },
       "items": [
         {
-          "to": "docs/",
+          "to": "docs/getting-started",
           "label": "Docs",
           "position": "left"
         },
         {
-          "to": "docs/tutorials",
+          "to": "docs/tutorial-setup",
           "label": "Tutorials",
           "position": "left"
         },
         {
           "href": "https://pkg.go.dev/entgo.io/ent?tab=doc",
           "label": "GoDoc",
-          "position": "left"
-        },
-        {
-          "href": "https://github.com/ent/ent",
-          "label": "Github",
-          "position": "left"
+          "position": "left",
+          "className": "header-godoc-link",
         },
         {to: 'blog', label: 'Blog', position: 'left'},
-
+        {
+          href: 'https://twitter.com/entgo_io',
+          position: 'right',
+          className: 'header-twitter-link',
+          'aria-label': 'Twitter page',
+        },
+        {
+          href: 'https://github.com/ent/ent',
+          position: 'right',
+          className: 'header-github-link',
+          'aria-label': 'GitHub repository',
+        },
       ]
     },
     "image": "img/undraw_online.svg",
@@ -147,12 +156,13 @@ module.exports={
       },
       copyright: `
       Copyright © ${new Date().getFullYear()} Facebook, Inc.
-      The Go gopher was designed by <a href="http://reneefrench.blogspot.com/"> Renee French </a>.
-            The design is licensed under the Creative Commons 3.0 Attributions license. Read this 
-            <a href="https://blog.golang.org/gopher">article</a> for more details.
-            <br/>
-            Design by Moriah Rich, illustration by Ariel Mashraki.
-      `, // You can also put own HTML here.
+      The Go gopher was designed by <a href="http://reneefrench.blogspot.com/">Renee French</a>.
+      <br/>
+      The design is licensed under the Creative Commons 3.0 Attributions license. Read this 
+      <a href="https://blog.golang.org/gopher">article</a> for more details.
+      <br/>
+      Design by Moriah Rich, illustration by Ariel Mashraki.
+      `,
 
     },
     "algolia": {
