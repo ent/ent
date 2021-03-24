@@ -33,10 +33,10 @@ module.exports={
       {
         "docs": {
           "path": "../md",
-          "homePageId": "getting-started",
-          "showLastUpdateAuthor": true,
-          "showLastUpdateTime": true,
-          "sidebarPath": "../website/sidebars.json"
+          "homePageId": "home",
+          "showLastUpdateAuthor": false,
+          "showLastUpdateTime": false,
+          "sidebarPath": "./sidebars.json"
         },
         "blog": {
           "path": "blog"
@@ -71,8 +71,8 @@ module.exports={
           "position": "left"
         },
         {
-          "to": "docs/tutorial-setup",
-          "label": "Tutorial",
+          "to": "docs/tutorials",
+          "label": "Tutorials",
           "position": "left"
         },
         {
@@ -97,7 +97,7 @@ module.exports={
         {
           "title": "Docs",
           "items": [
-            {"label": "Getting Started", "to": "/docs"},
+            {"label": "Getting Started", "to": "/docs/getting-started"},
             {"label": "Schema Guide", "to": "/docs/schema-def"},
             {"label": "Code Generation", "to": "/docs/code-gen"},
             {"label": "GraphQL Integration", "to": "/docs/graphql"},
