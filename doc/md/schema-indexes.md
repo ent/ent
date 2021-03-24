@@ -49,7 +49,7 @@ func (User) Fields() []ent.Field {
 Indexes can be configured on composition of fields and edges. The main use-case
 is setting uniqueness on fields under a specific relation. Let's take an example:
 
-![er-city-streets](https://entgo.io/assets/er_city_streets.png)
+![er-city-streets](https://entgo.io/images/assets/er_city_streets.png)
 
 In the example above, we have a `City` with many `Street`s, and we want to set the
 street name to be unique under each city.

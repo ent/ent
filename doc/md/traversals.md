@@ -6,7 +6,7 @@ title: Graph Traversal
 For the purpose of the example, we'll generate the following graph:
 
 
-![er-traversal-graph](https://entgo.io/assets/er_traversal_graph.png)
+![er-traversal-graph](https://entgo.io/images/assets/er_traversal_graph.png)
 
 The first step is to generate the 3 schemas: `Pet`, `User`, `Group`.
 
@@ -157,7 +157,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 
 Let's go over a few traversals, and show the code for them:
 
-![er-traversal-graph-gopher](https://entgo.io/assets/er_traversal_graph_gopher.png)
+![er-traversal-graph-gopher](https://entgo.io/images/assets/er_traversal_graph_gopher.png)
 
 The traversal above starts from a `Group` entity, continues to its `admin` (edge),
 continues to its `friends` (edge), gets their `pets` (edge), gets each pet's `friends` (edge),
@@ -186,7 +186,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 
 What about the following traversal?
 
-![er-traversal-graph-gopher-query](https://entgo.io/assets/er_traversal_graph_gopher_query.png)
+![er-traversal-graph-gopher-query](https://entgo.io/images/assets/er_traversal_graph_gopher_query.png)
 
 We want to get all pets (entities) that have an `owner` (`edge`) that is a `friend`
 (edge) of some group `admin` (edge).
