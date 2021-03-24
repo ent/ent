@@ -22,7 +22,7 @@ title: Predicates
   - =, !=
   - =, !=, >, <, >=, <= on nested values (JSON path).
   - Contains on nested values (JSON path).
-  - HasKey, Len&lt;P>
+  - HasKey, Len<P>
 - **Optional** fields:
   - IsNil, NotNil
 
