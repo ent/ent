@@ -78,7 +78,7 @@ func Example_Todo() {
 Wonderful! We created a schema in the database with 5 columns (`id`, `text`, `created_at`, `status`, `priority`)
 and created 2 items in our todo list, by inserting 2 rows to the table.
 
-![tutorial-todo-create](https://entgo.io/assets/tutorial-todo-create-items.png)
+![tutorial-todo-create](https://entgo.io/images/assets/tutorial-todo-create-items.png)
 
 ## Add Edges To The Schema
 
@@ -109,7 +109,7 @@ go generate ./ent
 We continue our edges example, by updating the 2 todo items we just created. We define that item-2 (*"Add Tracing Example"*)
 depends on item-1 (*"Add GraphQL Example"*). 
 
-![tutorial-todo-create](https://entgo.io/assets/tutorial-todo-create-edges.png)
+![tutorial-todo-create](https://entgo.io/images/assets/tutorial-todo-create-edges.png)
 
 ```go
 func Example_Todo() {

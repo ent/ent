@@ -1,8 +1,8 @@
 ---
 title: Introducing ent
 author: Ariel Mashraki
-authorURL: https://github.com/a8m
-authorImageURL: https://avatars0.githubusercontent.com/u/7413593
+authorURL: "https://github.com/a8m"
+authorImageURL: "https://avatars0.githubusercontent.com/u/7413593"
 authorTwitter: arielmashraki
 ---
 ## The state of Go in Facebook Connectivity Tel Aviv

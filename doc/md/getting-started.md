@@ -15,7 +15,7 @@ and maintain applications with large data-models and sticks with the following p
 
 <br/>
 
-![gopher-schema-as-code](https://entgo.io/assets/gopher-schema-as-code.png)
+![gopher-schema-as-code](https://entgo.io/images/assets/gopher-schema-as-code.png)
 
 ## Installation
 
@@ -239,7 +239,7 @@ func (Group) Fields() []ent.Field {
 Let's define our first relation. An edge from `User` to `Car` defining that a user
 can **have 1 or more** cars, but a car **has only one** owner (one-to-many relation).
 
-![er-user-cars](https://entgo.io/assets/re_user_cars.png)
+![er-user-cars](https://entgo.io/images/assets/re_user_cars.png)
 
 Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
 
@@ -331,7 +331,7 @@ Assume we have a `Car` object and we want to get its owner; the user that this c
 For this, we have another type of edge called "inverse edge" that is defined using the `edge.From`
 function.
 
-![er-cars-owner](https://entgo.io/assets/re_cars_owner.png)
+![er-cars-owner](https://entgo.io/images/assets/re_cars_owner.png)
 
 The new edge created in the diagram above is translucent, to emphasize that we don't create another
 edge in the database. It's just a back-reference to the real edge (relation).
@@ -392,7 +392,7 @@ func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 
 We'll continue our example by creating a M2M (many-to-many) relationship between users and groups.
 
-![er-group-users](https://entgo.io/assets/re_group_users.png)
+![er-group-users](https://entgo.io/images/assets/re_group_users.png)
 
 As you can see, each group entity can **have many** users, and a user can **be connected to many** groups;
 a simple "many-to-many" relationship. In the above illustration, the `Group` schema is the owner
@@ -449,7 +449,7 @@ go generate ./ent
 In order to run our first graph traversal, we need to generate some data (nodes and edges, or in other words, 
 entities and relations). Let's create the following graph using the framework:
 
-![re-graph](https://entgo.io/assets/re_graph_getting_started.png)
+![re-graph](https://entgo.io/images/assets/re_graph_getting_started.png)
 
 
 ```go

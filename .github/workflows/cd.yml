@@ -28,8 +28,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-central-1
       - name: Deploy Docs
-        working-directory: doc/website/build/ent
-        run: aws s3 sync . s3://entgoio --delete --exclude "assets/*"
+        working-directory: doc/website/build
+        run: aws s3 sync . s3://entgoio --delete --exclude "images/*"
       - name: Invalidate Cache
         env:
           CDN_DISTRIBUTION_ID: ${{ secrets.CDN_DISTRIBUTION_ID }}

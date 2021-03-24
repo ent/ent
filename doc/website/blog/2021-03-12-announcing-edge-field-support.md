@@ -1,8 +1,8 @@
 ---
 title: Announcing Edge-field Support in v0.7.0
 author: Rotem Tamir
-authorURL: https://github.com/rotemtam
-authorImageURL: https://s.gravatar.com/avatar/36b3739951a27d2e37251867b7d44b1a?s=80
+authorURL: "https://github.com/rotemtam"
+authorImageURL: "https://s.gravatar.com/avatar/36b3739951a27d2e37251867b7d44b1a?s=80"
 authorTwitter: _rtam
 ---
 Over the past few months, there has been much discussion in the Ent project [issues](https://github.com/ent/ent/issues) about adding support for the retrieval of the foreign key field when retrieving entities with One-to-One or One-to-Many edges.  We are happy to announce that as of [v0.7.0](https://github.com/ent/ent/releases/tag/v0.7.0) ent supports this feature.

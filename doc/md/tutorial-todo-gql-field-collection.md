@@ -55,7 +55,7 @@ will execute a query for getting their photos (50 queries), and another query fo
 each user has exactly 10 posts. Therefore, For each post (of each user), the server will execute another query for getting
 its comments (500). That means, we have `1+50+50+500=601` queries in total.
 
-![gql-request-tree](https://entgo.io/assets/request-tree.png)
+![gql-request-tree](https://entgo.io/images/assets/request-tree.png)
 
 ## Ent Solution
 

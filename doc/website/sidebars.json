@@ -37,7 +37,7 @@
     ]
   },
   "tutorial": {
-    "Tutorial": [
+    "First Steps": [
       "tutorial-setup",
       "tutorial-todo-crud"
     ],

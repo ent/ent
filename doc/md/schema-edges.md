@@ -8,7 +8,7 @@ title: Edges
 Edges are the relations (or associations) of entities. For example, user's pets, or group's users.
 
 
-![er-group-users](https://entgo.io/assets/er_user_pets_groups.png)
+![er-group-users](https://entgo.io/images/assets/er_user_pets_groups.png)
 
 In the example above, you can see 2 relations declared using edges. Let's go over them.
 
@@ -177,7 +177,7 @@ Let's go over a few examples that show how to define different relation types us
 
 ## O2O Two Types
 
-![er-user-card](https://entgo.io/assets/er_user_card.png)
+![er-user-card](https://entgo.io/images/assets/er_user_card.png)
 
 In this example, a user **has only one** credit-card, and a card **has only one** owner.
 
@@ -256,7 +256,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 
 ## O2O Same Type
 
-![er-linked-list](https://entgo.io/assets/er_linked_list.png)
+![er-linked-list](https://entgo.io/images/assets/er_linked_list.png)
 
 In this linked-list example, we have a **recursive relation** named `next`/`prev`. Each node in the list can
 **have only one** `next` node. If a node A points (using `next`) to node B, B can get its pointer using `prev` (the back-reference edge).   
@@ -352,7 +352,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 
 ## O2O Bidirectional
 
-![er-user-spouse](https://entgo.io/assets/er_user_spouse.png)
+![er-user-spouse](https://entgo.io/images/assets/er_user_spouse.png)
 
 In this user-spouse example, we have a **symmetric O2O relation** named `spouse`. Each user can **have only one** spouse.
 If user A sets its spouse (using `spouse`) to B, B can get its spouse using the `spouse` edge.
@@ -426,7 +426,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 
 ## O2M Two Types
 
-![er-user-pets](https://entgo.io/assets/er_user_pets.png)
+![er-user-pets](https://entgo.io/images/assets/er_user_pets.png)
 
 In this user-pets example, we have a O2M relation between user and its pets.
 Each user **has many** pets, and a pet **has one** owner.
@@ -507,7 +507,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 
 ## O2M Same Type
 
-![er-tree](https://entgo.io/assets/er_tree.png)
+![er-tree](https://entgo.io/images/assets/er_tree.png)
 
 In this example, we have a recursive O2M relation between tree's nodes and their children (or their parent).  
 Each node in the tree **has many** children, and **has one** parent. If node A adds B to its children,
@@ -616,7 +616,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 
 ## M2M Two Types
 
-![er-user-groups](https://entgo.io/assets/er_user_groups.png)
+![er-user-groups](https://entgo.io/images/assets/er_user_groups.png)
 
 In this groups-users example, we have a M2M relation between groups and their users.
 Each group **has many** users, and each user can be joined to **many** groups.
@@ -708,7 +708,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 
 ## M2M Same Type
 
-![er-following-followers](https://entgo.io/assets/er_following_followers.png)
+![er-following-followers](https://entgo.io/images/assets/er_following_followers.png)
 
 In this following-followers example, we have a M2M relation between users to their followers. Each user 
 can follow **many** users, and can have **many** followers.
@@ -802,7 +802,7 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 
 ## M2M Bidirectional
 
-![er-user-friends](https://entgo.io/assets/er_user_friends.png)
+![er-user-friends](https://entgo.io/images/assets/er_user_friends.png)
 
 In this user-friends example, we have a **symmetric M2M relation** named `friends`.
 Each user can **have many** friends. If user A becomes a friend of B, B is also a friend of A.

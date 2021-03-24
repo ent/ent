@@ -9,10 +9,19 @@
  */
 
 const React = require('react');
+import LayoutProviders from '@theme/LayoutProviders';
+import Footer from '@theme/Footer';
+import Navbar from '@theme/Navbar';
 
-const CompLibrary = require('../../core/CompLibrary.js');
+const CompLibrary = {
+  Container: props => <div {...props}></div>,
+  GridBlock: props => <div {...props}></div>,
+  MarkdownBlock: props => <div {...props}></div>
+};
 
-const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
+import Layout from "@theme/Layout";
+
+const MarkdownBlock = CompLibrary.MarkdownBlock;/* Used to read markdown */
 const Container = CompLibrary.Container;
 const GridBlock = CompLibrary.GridBlock;
 
@@ -75,7 +84,7 @@ class HomeSplash extends React.Component {
     const ProjectTitle = () => (
       <div>
         <div className="projectTitleContainer">
-          <img src="https://entgo.io/assets/logo.png" />
+          <img src="https://entgo.io/images/assets/logo.png" />
           <div className="projectTitle">
             <p>{siteConfig.tagline}</p>
           </div>
@@ -116,13 +125,25 @@ class HomeSplash extends React.Component {
             </a>
           </div>
           <div className="gopherGraph">
-            <img src="https://entgo.io/assets/gopher_graph.png" />
+            <img src="https://entgo.io/images/assets/gopher_graph.png" />
           </div>
           <Features />
         </div>
       </SplashContainer>
     );
   }
+}
+
+class HomeNav extends React.Component {
+    render() {
+        return <ul className="home-nav">
+            <li className=""><a href="/docs/getting-started" target="_self">Docs</a></li>
+            <li className=""><a href="/docs/tutorial-setup" target="_self">Tutorial</a></li>
+            <li className="header-godoc-link"><a href="https://pkg.go.dev/entgo.io/ent?tab=doc" target="_blank">GoDoc</a></li>
+            <li className=""><a href="https://github.com/ent/ent" target="_blank">Github</a></li>
+            <li className=""><a href="/blog/" target="_self">Blog</a></li>
+        </ul>
+    }
 }
 
 class Index extends React.Component {
@@ -160,11 +181,20 @@ class Index extends React.Component {
     };
 
     return (
-      <div>
+      <div className={"home-splash-container section_index"}>
         <HomeSplash siteConfig={siteConfig} language={language} />
       </div>
     );
   }
 }
 
-module.exports = Index;
+export default function (props) {
+    return <LayoutProviders>
+        {/*<div className={"section_index"}>*/}
+        {/*    <Navbar/>*/}
+        {/*</div>*/}
+        <HomeNav />
+        <Index {...props} />
+        <Footer/>
+    </LayoutProviders>;
+};
