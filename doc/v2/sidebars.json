@@ -1,5 +1,8 @@
 {
   "md": {
+    "Documentation": [
+      "home"
+    ],
     "Getting Started": [
       "getting-started"
     ],
@@ -37,7 +40,10 @@
     ]
   },
   "tutorial": {
-    "Tutorial": [
+    "Home": [
+      "tutorials"
+    ],
+    "First Steps": [
       "tutorial-setup",
       "tutorial-todo-crud"
     ],
