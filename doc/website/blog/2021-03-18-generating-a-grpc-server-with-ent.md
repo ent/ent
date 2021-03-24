@@ -1,8 +1,8 @@
 ---
 title: Generate a fully-working Go gRPC server in two minutes with Ent
 author: Rotem Tamir
-authorURL: "https://github.com/rotemtam"
-authorImageURL: "https://s.gravatar.com/avatar/36b3739951a27d2e37251867b7d44b1a?s=80"
+authorURL: https://github.com/rotemtam
+authorImageURL: https://s.gravatar.com/avatar/36b3739951a27d2e37251867b7d44b1a?s=80
 authorTwitter: _rtam
 ---
 ![ent + gRPC](https://entgo.io/assets/ent-grpc.jpg)
