@@ -587,9 +587,26 @@ header ul, ol {
   margin-bottom: 0;
 }
 
+
+.homeContainer {
+  padding: 0 15% 20px;
+}
+
+.home-nav {
+  background: #3d3e3f;
+  margin: 0;
+  padding: 0 15% 20px;
+  padding-top: 110px;
+}
+
 @media only screen and (min-width: 1425px) {
   .homeContainer {
+    padding: 0 19% 20px;
+  }
+
+  .home-nav {
     padding: 0 19% 0px;
+    padding-top: 110px;
   }
 
   .fixedHeaderContainer {
@@ -696,17 +713,6 @@ img#tutorial-todo-create {
 
 .footer__copyright {
   color: hsla(0,0%,100%,.4);
-}
-
-.homeContainer {
-  padding: 0 15% 20px;
-}
-
-.home-nav {
-  background: #3d3e3f;
-  margin: 0;
-  padding: 0 15% 20px;
-  padding-top: 110px;
 }
 
 .home-nav li{
