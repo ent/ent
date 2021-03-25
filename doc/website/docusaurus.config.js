@@ -85,6 +85,12 @@ module.exports={
         },
         {to: 'blog', label: 'Blog', position: 'left'},
         {
+          href: 'https://www.getrevue.co/profile/ent',
+          position: 'right',
+          className: 'header-newsletter-link',
+          'aria-label': 'Newsletter page',
+        },
+        {
           href: 'https://twitter.com/entgo_io',
           position: 'right',
           className: 'header-twitter-link',
