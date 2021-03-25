@@ -1,5 +1,9 @@
 module.exports={
   "title": "ent",
+  "i18n": {
+    "defaultLocale": 'en',
+    "locales": ['en', 'zh', 'ja', 'he'],
+  },
   "tagline": "An entity framework for Go",
   "url": "https://entgo.io",
   "baseUrl": "/",
