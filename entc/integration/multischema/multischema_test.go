@@ -80,6 +80,9 @@ func TestMySQL(t *testing.T) {
 	pedro = pedro.Update().ClearOwner().SaveX(ctx)
 	exist = pedro.QueryOwner().ExistX(ctx)
 	require.False(t, exist)
+
+	require.Equal(t, client.User.Query().CountX(ctx), len(client.User.Query().AllX(ctx)))
+	require.Equal(t, client.Pet.Query().CountX(ctx), len(client.Pet.Query().AllX(ctx)))
 }
 
 func setupSchema(t *testing.T, drv *sql.Driver) {
