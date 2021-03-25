@@ -18,6 +18,9 @@ jobs:
       - name: Install Dependencies
         working-directory: doc/website
         run: yarn
+      - name: Sync Translation
+        working-directory: doc/website
+        run: yarn crowdin:sync
       - name: Build Docs
         working-directory: doc/website
         run: yarn build

@@ -12,6 +12,8 @@ const React = require('react');
 import LayoutProviders from '@theme/LayoutProviders';
 import Footer from '@theme/Footer';
 import Navbar from '@theme/Navbar';
+import Link from '@docusaurus/Link';
+
 
 const CompLibrary = {
   Container: props => <div {...props}></div>,
@@ -137,11 +139,11 @@ class HomeSplash extends React.Component {
 class HomeNav extends React.Component {
     render() {
         return <ul className="home-nav">
-            <li className=""><a href="/docs/getting-started" target="_self">Docs</a></li>
-            <li className=""><a href="/docs/tutorial-setup" target="_self">Tutorial</a></li>
+            <li className=""><Link to={"/docs/getting-started"}>Docs</Link></li>
+            <li className=""><Link to="/docs/tutorial-setup">Tutorial</Link></li>
             <li className="header-godoc-link"><a href="https://pkg.go.dev/entgo.io/ent?tab=doc" target="_blank">GoDoc</a></li>
             <li className=""><a href="https://github.com/ent/ent" target="_blank">Github</a></li>
-            <li className=""><a href="/blog/" target="_self">Blog</a></li>
+            <li className=""><Link to="/blog/">Blog</Link></li>
         </ul>
     }
 }
