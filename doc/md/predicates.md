@@ -103,3 +103,28 @@ users := client.User.
 	})).
 	AllX(ctx)
 ```
+
+
+Also It can be used in subquery case, for example:
+
+```sql
+SELECT DISTINCT `todos`.`id`, `todos`.`text`, `todos`.`done` 
+    FROM `todos` WHERE `todos`.`user_id` IN (
+        SELECT `id` FROM `users` WHERE `users`.`id` IN (?, ?)
+    )
+```
+
+```go
+todos := client.Todo.Query().
+    Where(func(s *sql.Selector) {
+        t := sql.Table(user.Table)
+        s.Where(
+            sql.In(
+                s.C(todo.FieldUserID),
+                sql.Select(t.C(user.FieldID)).From(t).Where(sql.In(t.C(user.FieldID), ids...)),
+            ),
+        )
+    }).
+    AllX(ctx)
+```
+
