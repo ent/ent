@@ -5,7 +5,7 @@ authorURL: "https://github.com/rotemtam"
 authorImageURL: "https://s.gravatar.com/avatar/36b3739951a27d2e37251867b7d44b1a?s=80"
 authorTwitter: _rtam
 ---
-![ent + gRPC](https://entgo.io/assets/ent-grpc.jpg)
+![ent + gRPC](https://entgo.io/images/assets/ent-grpc.jpg)
 ## Introduction
 Having entity schemas defined in a central, language-neutral format
 has [many benefits](https://rotemtam.com/2019/06/28/the-statically-typed-org/) as the scale of software engineering organizations increase. To do this, many organizations use [Protocol Buffers](https://developers.google.com/protocol-buffers) as their [interface definition language](https://en.wikipedia.org/wiki/Interface_description_language) (IDL). In addition, gRPC,
