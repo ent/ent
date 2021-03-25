@@ -1,5 +1,5 @@
 #
-# Your Crowdin credentials
+# Crowdin credentials
 #
 "project_id" : "446988"
 "api_token_env" : "CROWDIN_TOKEN"
