@@ -392,7 +392,7 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := tq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, task.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -411,7 +411,7 @@ func (tq *TaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range tq.order {
-		p(selector, task.ValidColumn)
+		p(selector)
 	}
 	if offset := tq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -677,7 +677,7 @@ func (tgb *TaskGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 	columns = append(columns, tgb.fields...)
 	for _, fn := range tgb.fns {
-		columns = append(columns, fn(selector, task.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(tgb.fields...)
 }

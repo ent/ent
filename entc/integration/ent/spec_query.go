@@ -476,7 +476,7 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := sq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, spec.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -495,7 +495,7 @@ func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range sq.order {
-		p(selector, spec.ValidColumn)
+		p(selector)
 	}
 	if offset := sq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -761,7 +761,7 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 	columns = append(columns, sgb.fields...)
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn(selector, spec.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(sgb.fields...)
 }

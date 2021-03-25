@@ -393,7 +393,7 @@ func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := miq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, mixinid.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -412,7 +412,7 @@ func (miq *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range miq.order {
-		p(selector, mixinid.ValidColumn)
+		p(selector)
 	}
 	if offset := miq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -678,7 +678,7 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(migb.fields)+len(migb.fns))
 	columns = append(columns, migb.fields...)
 	for _, fn := range migb.fns {
-		columns = append(columns, fn(selector, mixinid.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(migb.fields...)
 }

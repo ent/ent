@@ -535,7 +535,7 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := nq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, node.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -554,7 +554,7 @@ func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range nq.order {
-		p(selector, node.ValidColumn)
+		p(selector)
 	}
 	if offset := nq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -820,7 +820,7 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
 	columns = append(columns, ngb.fields...)
 	for _, fn := range ngb.fns {
-		columns = append(columns, fn(selector, node.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ngb.fields...)
 }

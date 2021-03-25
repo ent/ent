@@ -604,7 +604,7 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := fq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, file.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -623,7 +623,7 @@ func (fq *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range fq.order {
-		p(selector, file.ValidColumn)
+		p(selector)
 	}
 	if offset := fq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -889,7 +889,7 @@ func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
 	columns = append(columns, fgb.fields...)
 	for _, fn := range fgb.fns {
-		columns = append(columns, fn(selector, file.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(fgb.fields...)
 }

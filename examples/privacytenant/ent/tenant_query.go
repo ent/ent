@@ -398,7 +398,7 @@ func (tq *TenantQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := tq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, tenant.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -417,7 +417,7 @@ func (tq *TenantQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range tq.order {
-		p(selector, tenant.ValidColumn)
+		p(selector)
 	}
 	if offset := tq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -683,7 +683,7 @@ func (tgb *TenantGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 	columns = append(columns, tgb.fields...)
 	for _, fn := range tgb.fns {
-		columns = append(columns, fn(selector, tenant.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(tgb.fields...)
 }

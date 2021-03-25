@@ -136,7 +136,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	if ps := {{ $receiver }}.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, {{ $.Package }}.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -177,7 +177,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 		p(selector)
 	}
 	for _, p := range {{ $receiver }}.order {
-		p(selector, {{ $.Package }}.ValidColumn)
+		p(selector)
 	}
 	if offset := {{ $receiver }}.offset; offset != nil {
 		// limit is mandatory for offset clause. We start

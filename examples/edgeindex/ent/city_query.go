@@ -464,7 +464,7 @@ func (cq *CityQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := cq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, city.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -483,7 +483,7 @@ func (cq *CityQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range cq.order {
-		p(selector, city.ValidColumn)
+		p(selector)
 	}
 	if offset := cq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -749,7 +749,7 @@ func (cgb *CityGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 	columns = append(columns, cgb.fields...)
 	for _, fn := range cgb.fns {
-		columns = append(columns, fn(selector, city.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(cgb.fields...)
 }

@@ -666,7 +666,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := uq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, user.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -685,7 +685,7 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range uq.order {
-		p(selector, user.ValidColumn)
+		p(selector)
 	}
 	if offset := uq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -951,7 +951,7 @@ func (ugb *UserGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ugb.fields)+len(ugb.fns))
 	columns = append(columns, ugb.fields...)
 	for _, fn := range ugb.fns {
-		columns = append(columns, fn(selector, user.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ugb.fields...)
 }
