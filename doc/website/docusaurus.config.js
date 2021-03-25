@@ -85,6 +85,12 @@ module.exports={
         },
         {to: 'blog', label: 'Blog', position: 'left'},
         {
+          href: 'https://app.slack.com/client/T029RQSE6/C01FMSQDT53',
+          position: 'right',
+          className: 'header-slack-link',
+          'aria-label': 'Slack channel',
+        },
+        {
           href: 'https://www.getrevue.co/profile/ent',
           position: 'right',
           className: 'header-newsletter-link',
