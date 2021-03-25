@@ -392,7 +392,7 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := ctq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, customtype.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -411,7 +411,7 @@ func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range ctq.order {
-		p(selector, customtype.ValidColumn)
+		p(selector)
 	}
 	if offset := ctq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -677,7 +677,7 @@ func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ctgb.fields)+len(ctgb.fns))
 	columns = append(columns, ctgb.fields...)
 	for _, fn := range ctgb.fns {
-		columns = append(columns, fn(selector, customtype.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ctgb.fields...)
 }

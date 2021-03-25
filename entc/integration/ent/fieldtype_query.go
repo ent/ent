@@ -397,7 +397,7 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := ftq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, fieldtype.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -416,7 +416,7 @@ func (ftq *FieldTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range ftq.order {
-		p(selector, fieldtype.ValidColumn)
+		p(selector)
 	}
 	if offset := ftq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -682,7 +682,7 @@ func (ftgb *FieldTypeGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
 	columns = append(columns, ftgb.fields...)
 	for _, fn := range ftgb.fns {
-		columns = append(columns, fn(selector, fieldtype.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ftgb.fields...)
 }

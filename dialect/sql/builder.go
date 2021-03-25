@@ -1846,6 +1846,11 @@ func (s *Selector) Table() *SelectTable {
 	return s.from.(*SelectTable)
 }
 
+// TableName returns the name of the selected table.
+func (s *Selector) TableName() string {
+	return s.Table().name
+}
+
 // Join appends a `JOIN` clause to the statement.
 func (s *Selector) Join(t TableView) *Selector {
 	return s.join("JOIN", t)

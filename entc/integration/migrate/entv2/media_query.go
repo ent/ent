@@ -392,7 +392,7 @@ func (mq *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := mq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, media.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -411,7 +411,7 @@ func (mq *MediaQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range mq.order {
-		p(selector, media.ValidColumn)
+		p(selector)
 	}
 	if offset := mq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -677,7 +677,7 @@ func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(mgb.fields)+len(mgb.fns))
 	columns = append(columns, mgb.fields...)
 	for _, fn := range mgb.fns {
-		columns = append(columns, fn(selector, media.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(mgb.fields...)
 }

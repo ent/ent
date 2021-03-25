@@ -460,7 +460,7 @@ func (iq *InfoQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := iq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, info.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -479,7 +479,7 @@ func (iq *InfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range iq.order {
-		p(selector, info.ValidColumn)
+		p(selector)
 	}
 	if offset := iq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -745,7 +745,7 @@ func (igb *InfoGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(igb.fields)+len(igb.fns))
 	columns = append(columns, igb.fields...)
 	for _, fn := range igb.fns {
-		columns = append(columns, fn(selector, info.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(igb.fields...)
 }

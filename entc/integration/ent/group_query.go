@@ -705,7 +705,7 @@ func (gq *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := gq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, group.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -724,7 +724,7 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range gq.order {
-		p(selector, group.ValidColumn)
+		p(selector)
 	}
 	if offset := gq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -990,7 +990,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 	columns = append(columns, ggb.fields...)
 	for _, fn := range ggb.fns {
-		columns = append(columns, fn(selector, group.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(ggb.fields...)
 }

@@ -368,7 +368,7 @@ func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := iq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, item.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -387,7 +387,7 @@ func (iq *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range iq.order {
-		p(selector, item.ValidColumn)
+		p(selector)
 	}
 	if offset := iq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -653,7 +653,7 @@ func (igb *ItemGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(igb.fields)+len(igb.fns))
 	columns = append(columns, igb.fields...)
 	for _, fn := range igb.fns {
-		columns = append(columns, fn(selector, item.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(igb.fields...)
 }

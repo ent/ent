@@ -573,7 +573,7 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := bq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, blob.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -592,7 +592,7 @@ func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range bq.order {
-		p(selector, blob.ValidColumn)
+		p(selector)
 	}
 	if offset := bq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -858,7 +858,7 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
 	columns = append(columns, bgb.fields...)
 	for _, fn := range bgb.fns {
-		columns = append(columns, fn(selector, blob.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(bgb.fields...)
 }

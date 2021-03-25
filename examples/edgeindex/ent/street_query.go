@@ -471,7 +471,7 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := sq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, street.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -490,7 +490,7 @@ func (sq *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range sq.order {
-		p(selector, street.ValidColumn)
+		p(selector)
 	}
 	if offset := sq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -756,7 +756,7 @@ func (sgb *StreetGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(sgb.fields)+len(sgb.fns))
 	columns = append(columns, sgb.fields...)
 	for _, fn := range sgb.fns {
-		columns = append(columns, fn(selector, street.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(sgb.fields...)
 }

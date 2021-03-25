@@ -464,7 +464,7 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 	if ps := giq.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
-				ps[i](selector, groupinfo.ValidColumn)
+				ps[i](selector)
 			}
 		}
 	}
@@ -483,7 +483,7 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		p(selector)
 	}
 	for _, p := range giq.order {
-		p(selector, groupinfo.ValidColumn)
+		p(selector)
 	}
 	if offset := giq.offset; offset != nil {
 		// limit is mandatory for offset clause. We start
@@ -749,7 +749,7 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 	columns := make([]string, 0, len(gigb.fields)+len(gigb.fns))
 	columns = append(columns, gigb.fields...)
 	for _, fn := range gigb.fns {
-		columns = append(columns, fn(selector, groupinfo.ValidColumn))
+		columns = append(columns, fn(selector))
 	}
 	return selector.Select(columns...).GroupBy(gigb.fields...)
 }
