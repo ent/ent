@@ -569,7 +569,7 @@ header ul, ol {
 .home-nav {
   background: #3d3e3f;
   margin: 0;
-  padding: 110px 5% 20px;
+  padding: 110px 15% 20px;
 }
 
 @media only screen and (min-width: 1425px) {
@@ -578,7 +578,7 @@ header ul, ol {
   }
 
   .home-nav {
-    padding: 110px 5% 20px;
+    padding: 110px 19% 20px;
   }
 
   .fixedHeaderContainer {
