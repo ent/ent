@@ -66,12 +66,12 @@ func columnChecker(table string) func(string) error {
 	check, ok := checks[table]
 	if !ok {
 		return func(string) error {
-			return fmt.Errorf("ent: unknown table %q", table)
+			return fmt.Errorf("unknown table %q", table)
 		}
 	}
 	return func(column string) error {
 		if !check(column) {
-			return fmt.Errorf("ent: unknown column %q for table %q", column, table)
+			return fmt.Errorf("unknown column %q for table %q", column, table)
 		}
 		return nil
 	}
@@ -83,7 +83,7 @@ func Asc(fields ...string) OrderFunc {
 		check := columnChecker(s.TableName())
 		for _, f := range fields {
 			if err := check(f); err != nil {
-				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("ordering error: %w", err)})
+				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("ent: %w", err)})
 			}
 			s.OrderBy(sql.Asc(s.C(f)))
 		}
@@ -96,7 +96,7 @@ func Desc(fields ...string) OrderFunc {
 		check := columnChecker(s.TableName())
 		for _, f := range fields {
 			if err := check(f); err != nil {
-				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("ordering error: %w", err)})
+				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("ent: %w", err)})
 			}
 			s.OrderBy(sql.Desc(s.C(f)))
 		}
@@ -130,7 +130,7 @@ func Max(field string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
-			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("grouping error: %w", err)})
+			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("ent: %w", err)})
 			return ""
 		}
 		return sql.Max(s.C(field))
@@ -142,7 +142,7 @@ func Mean(field string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
-			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("grouping error: %w", err)})
+			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("ent: %w", err)})
 			return ""
 		}
 		return sql.Avg(s.C(field))
@@ -154,7 +154,7 @@ func Min(field string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
-			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("grouping error: %w", err)})
+			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("ent: %w", err)})
 			return ""
 		}
 		return sql.Min(s.C(field))
@@ -166,7 +166,7 @@ func Sum(field string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
-			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("grouping error: %w", err)})
+			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("ent: %w", err)})
 			return ""
 		}
 		return sql.Sum(s.C(field))
