@@ -57,6 +57,7 @@ module.exports = {
         'testing',
         'faq',
         'feature-flags',
+        'translations'
       ],
       collapsed: false,
     },
