@@ -580,6 +580,12 @@ func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	return ftc
 }
 
+// SetStrings sets the "strings" field.
+func (ftc *FieldTypeCreate) SetStrings(s []string) *FieldTypeCreate {
+	ftc.mutation.SetStrings(s)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -1118,6 +1124,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldUUID,
 		})
 		_node.UUID = value
+	}
+	if value, ok := ftc.mutation.Strings(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: fieldtype.FieldStrings,
+		})
+		_node.Strings = value
 	}
 	return _node, _spec
 }

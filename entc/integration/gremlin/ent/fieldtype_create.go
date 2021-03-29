@@ -581,6 +581,12 @@ func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	return ftc
 }
 
+// SetStrings sets the "strings" field.
+func (ftc *FieldTypeCreate) SetStrings(s []string) *FieldTypeCreate {
+	ftc.mutation.SetStrings(s)
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -868,6 +874,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
+	}
+	if value, ok := ftc.mutation.Strings(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStrings, value)
 	}
 	return v.ValueMap(true)
 }

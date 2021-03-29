@@ -4661,6 +4661,20 @@ func UUIDNotNil() predicate.FieldType {
 	})
 }
 
+// StringsIsNil applies the IsNil predicate on the "strings" field.
+func StringsIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStrings)))
+	})
+}
+
+// StringsNotNil applies the NotNil predicate on the "strings" field.
+func StringsNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStrings)))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.FieldType) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {

@@ -1377,6 +1377,7 @@ type FieldTypeMutation struct {
 	role                       *role.Role
 	mac                        *schema.MAC
 	uuid                       *uuid.UUID
+	strings                    *[]string
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -4410,6 +4411,55 @@ func (m *FieldTypeMutation) ResetUUID() {
 	delete(m.clearedFields, fieldtype.FieldUUID)
 }
 
+// SetStrings sets the "strings" field.
+func (m *FieldTypeMutation) SetStrings(s []string) {
+	m.strings = &s
+}
+
+// Strings returns the value of the "strings" field in the mutation.
+func (m *FieldTypeMutation) Strings() (r []string, exists bool) {
+	v := m.strings
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStrings returns the old "strings" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldStrings(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStrings is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStrings requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStrings: %w", err)
+	}
+	return oldValue.Strings, nil
+}
+
+// ClearStrings clears the value of the "strings" field.
+func (m *FieldTypeMutation) ClearStrings() {
+	m.strings = nil
+	m.clearedFields[fieldtype.FieldStrings] = struct{}{}
+}
+
+// StringsCleared returns if the "strings" field was cleared in this mutation.
+func (m *FieldTypeMutation) StringsCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldStrings]
+	return ok
+}
+
+// ResetStrings resets all changes to the "strings" field.
+func (m *FieldTypeMutation) ResetStrings() {
+	m.strings = nil
+	delete(m.clearedFields, fieldtype.FieldStrings)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -4424,7 +4474,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 49)
+	fields := make([]string, 0, 50)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4572,6 +4622,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.uuid != nil {
 		fields = append(fields, fieldtype.FieldUUID)
 	}
+	if m.strings != nil {
+		fields = append(fields, fieldtype.FieldStrings)
+	}
 	return fields
 }
 
@@ -4678,6 +4731,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.MAC()
 	case fieldtype.FieldUUID:
 		return m.UUID()
+	case fieldtype.FieldStrings:
+		return m.Strings()
 	}
 	return nil, false
 }
@@ -4785,6 +4840,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldMAC(ctx)
 	case fieldtype.FieldUUID:
 		return m.OldUUID(ctx)
+	case fieldtype.FieldStrings:
+		return m.OldStrings(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -5136,6 +5193,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUUID(v)
+		return nil
+	case fieldtype.FieldStrings:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStrings(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -5659,6 +5723,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldUUID) {
 		fields = append(fields, fieldtype.FieldUUID)
 	}
+	if m.FieldCleared(fieldtype.FieldStrings) {
+		fields = append(fields, fieldtype.FieldStrings)
+	}
 	return fields
 }
 
@@ -5801,6 +5868,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldUUID:
 		m.ClearUUID()
+		return nil
+	case fieldtype.FieldStrings:
+		m.ClearStrings()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -5956,6 +6026,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldUUID:
 		m.ResetUUID()
+		return nil
+	case fieldtype.FieldStrings:
+		m.ResetStrings()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)

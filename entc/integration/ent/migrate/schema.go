@@ -120,6 +120,7 @@ var (
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE"}, Default: "READ"},
 		{Name: "mac", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "macaddr"}},
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+		{Name: "strings", Type: field.TypeJSON, Nullable: true},
 		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
@@ -130,7 +131,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "field_types_files_field",
-				Columns:    []*schema.Column{FieldTypesColumns[50]},
+				Columns:    []*schema.Column{FieldTypesColumns[51]},
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

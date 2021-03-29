@@ -117,6 +117,8 @@ const (
 	FieldMAC = "mac"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
+	// FieldStrings holds the string denoting the strings field in the database.
+	FieldStrings = "strings"
 )
 
 var (
