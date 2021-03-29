@@ -1058,6 +1058,18 @@ func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetStrings sets the "strings" field.
+func (ftu *FieldTypeUpdate) SetStrings(s []string) *FieldTypeUpdate {
+	ftu.mutation.SetStrings(s)
+	return ftu
+}
+
+// ClearStrings clears the value of the "strings" field.
+func (ftu *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate {
+	ftu.mutation.ClearStrings()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1412,6 +1424,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
+	if value, ok := ftu.mutation.Strings(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStrings, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1541,6 +1556,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.UUIDCleared() {
 		properties = append(properties, fieldtype.FieldUUID)
+	}
+	if ftu.mutation.StringsCleared() {
+		properties = append(properties, fieldtype.FieldStrings)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -2578,6 +2596,18 @@ func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetStrings sets the "strings" field.
+func (ftuo *FieldTypeUpdateOne) SetStrings(s []string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetStrings(s)
+	return ftuo
+}
+
+// ClearStrings clears the value of the "strings" field.
+func (ftuo *FieldTypeUpdateOne) ClearStrings() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearStrings()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -2944,6 +2974,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
+	if value, ok := ftuo.mutation.Strings(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStrings, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -3073,6 +3106,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.UUIDCleared() {
 		properties = append(properties, fieldtype.FieldUUID)
+	}
+	if ftuo.mutation.StringsCleared() {
+		properties = append(properties, fieldtype.FieldStrings)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

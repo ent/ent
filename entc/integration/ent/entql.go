@@ -126,6 +126,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldRole:                  {Type: field.TypeEnum, Column: fieldtype.FieldRole},
 			fieldtype.FieldMAC:                   {Type: field.TypeString, Column: fieldtype.FieldMAC},
 			fieldtype.FieldUUID:                  {Type: field.TypeUUID, Column: fieldtype.FieldUUID},
+			fieldtype.FieldStrings:               {Type: field.TypeJSON, Column: fieldtype.FieldStrings},
 		},
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
@@ -1058,6 +1059,11 @@ func (f *FieldTypeFilter) WhereMAC(p entql.StringP) {
 // WhereUUID applies the entql [16]byte predicate on the uuid field.
 func (f *FieldTypeFilter) WhereUUID(p entql.ValueP) {
 	f.Where(p.Field(fieldtype.FieldUUID))
+}
+
+// WhereStrings applies the entql json.RawMessage predicate on the strings field.
+func (f *FieldTypeFilter) WhereStrings(p entql.BytesP) {
+	f.Where(p.Field(fieldtype.FieldStrings))
 }
 
 // addPredicate implements the predicateAdder interface.

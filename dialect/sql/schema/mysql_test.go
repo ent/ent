@@ -1085,6 +1085,28 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
+			name: "mariadb/10.3.13/create table",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "json", Type: field.TypeJSON, Nullable: true},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock mysqlMock) {
+				mock.start("10.3.13-MariaDB-1:10.3.13+maria~bionic")
+				mock.tableExists("users", false)
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `json` json NULL CHECK (JSON_VALID(`json`)), PRIMARY KEY(`id`)) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
 			name: "mariadb/10.5.8/create table",
 			tables: []*Table{
 				{
@@ -1136,10 +1158,10 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", "0", "1"))
-				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME`, `CHECK_CLAUSE` FROM `INFORMATION_SCHEMA`.`CHECK_CONSTRAINTS` WHERE `CONSTRAINT_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? AND `CONSTRAINT_NAME` IN (?, ?)")).
-					WithArgs("users", "json", "longtext").
-					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME", "CHECK_CLAUSE"}).
-						AddRow("json", "json_valid(`json`)"))
+				mock.ExpectQuery(escape("SELECT `CONSTRAINT_NAME` FROM `INFORMATION_SCHEMA`.`CHECK_CONSTRAINTS` WHERE `CONSTRAINT_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? AND `CHECK_CLAUSE` LIKE ?")).
+					WithArgs("users", "json_valid(%)").
+					WillReturnRows(sqlmock.NewRows([]string{"CONSTRAINT_NAME"}).
+						AddRow("json"))
 				mock.ExpectCommit()
 			},
 		},

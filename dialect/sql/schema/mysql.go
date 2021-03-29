@@ -6,7 +6,6 @@ package schema
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 	"strconv"
@@ -558,26 +557,22 @@ func (d *MySQL) alterColumns(table string, add, modify, drop []*Column) sql.Quer
 
 // normalizeJSON normalize MariaDB longtext columns to type JSON.
 func (d *MySQL) normalizeJSON(ctx context.Context, tx dialect.Tx, t *Table) error {
-	var (
-		names   []driver.Value
-		columns = make(map[string]*Column)
-	)
+	columns := make(map[string]*Column)
 	for _, c := range t.Columns {
 		if c.typ == "longtext" {
 			columns[c.Name] = c
-			names = append(names, c.Name)
 		}
 	}
-	if len(names) == 0 {
+	if len(columns) == 0 {
 		return nil
 	}
 	rows := &sql.Rows{}
-	query, args := sql.Select("CONSTRAINT_NAME", "CHECK_CLAUSE").
+	query, args := sql.Select("CONSTRAINT_NAME").
 		From(sql.Table("CHECK_CONSTRAINTS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			d.matchSchema("CONSTRAINT_SCHEMA"),
 			sql.EQ("TABLE_NAME", t.Name),
-			sql.InValues("CONSTRAINT_NAME", names...),
+			sql.Like("CHECK_CLAUSE", "json_valid(%)"),
 		)).
 		Query()
 	if err := tx.Query(ctx, query, args, rows); err != nil {
@@ -585,21 +580,23 @@ func (d *MySQL) normalizeJSON(ctx context.Context, tx dialect.Tx, t *Table) erro
 	}
 	// Call Close in cases of failures (Close is idempotent).
 	defer rows.Close()
-	for rows.Next() {
-		var name, check string
-		if err := rows.Scan(&name, &check); err != nil {
-			return fmt.Errorf("mysql: scan table constraints")
-		}
-		c, ok := columns[name]
-		if !ok || !strings.HasPrefix(check, "json_valid") {
-			continue
-		}
-		c.Type = field.TypeJSON
+	names := make([]string, 0, len(columns))
+	if err := sql.ScanSlice(rows, &names); err != nil {
+		return fmt.Errorf("mysql: scan table constraints: %w", err)
 	}
 	if err := rows.Err(); err != nil {
 		return err
 	}
-	return rows.Close()
+	if err := rows.Close(); err != nil {
+		return err
+	}
+	for _, name := range names {
+		c, ok := columns[name]
+		if ok {
+			c.Type = field.TypeJSON
+		}
+	}
+	return nil
 }
 
 // mariadb reports if the migration runs on MariaDB and returns the semver string.

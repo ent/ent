@@ -1056,6 +1056,18 @@ func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetStrings sets the "strings" field.
+func (ftu *FieldTypeUpdate) SetStrings(s []string) *FieldTypeUpdate {
+	ftu.mutation.SetStrings(s)
+	return ftu
+}
+
+// ClearStrings clears the value of the "strings" field.
+func (ftu *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate {
+	ftu.mutation.ClearStrings()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1980,6 +1992,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Column: fieldtype.FieldUUID,
+		})
+	}
+	if value, ok := ftu.mutation.Strings(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: fieldtype.FieldStrings,
+		})
+	}
+	if ftu.mutation.StringsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: fieldtype.FieldStrings,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -3021,6 +3046,18 @@ func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetStrings sets the "strings" field.
+func (ftuo *FieldTypeUpdateOne) SetStrings(s []string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetStrings(s)
+	return ftuo
+}
+
+// ClearStrings clears the value of the "strings" field.
+func (ftuo *FieldTypeUpdateOne) ClearStrings() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearStrings()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -3969,6 +4006,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Column: fieldtype.FieldUUID,
+		})
+	}
+	if value, ok := ftuo.mutation.Strings(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: fieldtype.FieldStrings,
+		})
+	}
+	if ftuo.mutation.StringsCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Column: fieldtype.FieldStrings,
 		})
 	}
 	_node = &FieldType{config: ftuo.config}

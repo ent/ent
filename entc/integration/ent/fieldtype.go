@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -122,7 +123,9 @@ type FieldType struct {
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
 	// UUID holds the value of the "uuid" field.
-	UUID       uuid.UUID `json:"uuid,omitempty"`
+	UUID uuid.UUID `json:"uuid,omitempty"`
+	// Strings holds the value of the "strings" field.
+	Strings    []string `json:"strings,omitempty"`
 	file_field *int
 }
 
@@ -131,7 +134,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case fieldtype.FieldIP:
+		case fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = &[]byte{}
 		case fieldtype.FieldLink, fieldtype.FieldLinkOther, fieldtype.FieldNullLink:
 			values[i] = &schema.Link{}
@@ -473,6 +476,15 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value != nil {
 				ft.UUID = *value
 			}
+		case fieldtype.FieldStrings:
+
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field strings", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &ft.Strings); err != nil {
+					return fmt.Errorf("unmarshal field strings: %w", err)
+				}
+			}
 		case fieldtype.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -624,6 +636,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
+	builder.WriteString(", strings=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Strings))
 	builder.WriteByte(')')
 	return builder.String()
 }

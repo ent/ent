@@ -162,6 +162,8 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			}),
 		field.UUID("uuid", uuid.UUID{}).
 			Optional(),
+		field.Strings("strings").
+			Optional(),
 	}
 }
 

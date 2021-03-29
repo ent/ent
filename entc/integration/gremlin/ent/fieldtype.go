@@ -124,6 +124,8 @@ type FieldType struct {
 	MAC schema.MAC `json:"mac,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
+	// Strings holds the value of the "strings" field.
+	Strings []string `json:"strings,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -183,6 +185,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Role                  role.Role       `json:"role,omitempty"`
 		MAC                   schema.MAC      `json:"mac,omitempty"`
 		UUID                  uuid.UUID       `json:"uuid,omitempty"`
+		Strings               []string        `json:"strings,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -237,6 +240,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Role = scanft.Role
 	ft.MAC = scanft.MAC
 	ft.UUID = scanft.UUID
+	ft.Strings = scanft.Strings
 	return nil
 }
 
@@ -379,6 +383,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
+	builder.WriteString(", strings=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Strings))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -443,6 +449,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Role                  role.Role       `json:"role,omitempty"`
 		MAC                   schema.MAC      `json:"mac,omitempty"`
 		UUID                  uuid.UUID       `json:"uuid,omitempty"`
+		Strings               []string        `json:"strings,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -499,6 +506,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Role:                  v.Role,
 			MAC:                   v.MAC,
 			UUID:                  v.UUID,
+			Strings:               v.Strings,
 		})
 	}
 	return nil

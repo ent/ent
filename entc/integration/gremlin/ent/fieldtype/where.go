@@ -4024,6 +4024,20 @@ func UUIDNotNil() predicate.FieldType {
 	})
 }
 
+// StringsIsNil applies the IsNil predicate on the "strings" field.
+func StringsIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldStrings)
+	})
+}
+
+// StringsNotNil applies the NotNil predicate on the "strings" field.
+func StringsNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldStrings)
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.FieldType) predicate.FieldType {
 	return predicate.FieldType(func(tr *dsl.Traversal) {

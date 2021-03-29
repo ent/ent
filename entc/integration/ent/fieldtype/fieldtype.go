@@ -117,6 +117,8 @@ const (
 	FieldMAC = "mac"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
+	// FieldStrings holds the string denoting the strings field in the database.
+	FieldStrings = "strings"
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
 )
@@ -173,6 +175,7 @@ var Columns = []string{
 	FieldRole,
 	FieldMAC,
 	FieldUUID,
+	FieldStrings,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "field_types"
