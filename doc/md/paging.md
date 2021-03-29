@@ -49,3 +49,21 @@ users, err := client.Pet.Query().
 	QueryOwner().
 	All(ctx)
 ```
+
+## Custom Ordering
+
+Custom ordering functions can be useful if you want to write your own storage-specific logic.
+
+The following shows how to order pets by their name, and their owners' name in ascending order.
+
+```go
+names, err := client.Pet.Query().
+	Order(func(s *sql.Selector) {
+		// Join with user table for ordering by owner-name and pet-name.
+		t := sql.Table(user.Table)
+		s.Join(t).On(s.C(pet.OwnerColumn), t.C(user.FieldID))
+		s.OrderBy(t.C(user.FieldName), s.C(pet.FieldName))
+	}).
+	Select(pet.FieldName).
+	Strings(ctx)
+```
