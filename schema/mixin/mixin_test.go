@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
 
 	"github.com/stretchr/testify/assert"
@@ -98,4 +99,32 @@ func TestAnnotateEdges(t *testing.T) {
 			assert.Equal(t, annotations[i], desc.Annotations[i])
 		}
 	}
+}
+
+type FooMixin struct {
+	mixin.Schema
+}
+
+func (FooMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("foo"),
+	}
+}
+
+type BarMixin struct {
+	mixin.Schema
+}
+
+func (BarMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("bar"),
+	}
+}
+
+func TestNewMixins(t *testing.T) {
+	composeMixin := mixin.NewMixins(FooMixin{}, BarMixin{})
+	fields := composeMixin.Fields()
+	require.Len(t, fields, 2)
+	require.Equal(t, "foo", fields[0].Descriptor().Name)
+	require.Equal(t, "bar", fields[1].Descriptor().Name)
 }
