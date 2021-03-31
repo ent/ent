@@ -3,6 +3,24 @@ module.exports={
   "i18n": {
     "defaultLocale": 'en',
     "locales": ['en', 'zh', 'ja', 'he'],
+    "localeConfigs": {
+      "en": {
+        "label": 'English',
+        "direction": 'ltr',
+      },
+      "zh": {
+        "label": 'Chinese',
+        "direction": 'ltr',
+      },
+      "ja": {
+        "label": 'Japanese',
+        "direction": 'ltr',
+      },
+      "he": {
+        "label": 'Hebrew',
+        "direction": 'rtl',
+      },
+    },
   },
   "tagline": "An entity framework for Go",
   "url": "https://entgo.io",
@@ -111,6 +129,16 @@ module.exports={
           position: 'right',
           className: 'header-github-link',
           'aria-label': 'GitHub repository',
+        },
+        {
+          type: 'localeDropdown',
+          position: 'right',
+          dropdownItemsAfter: [
+            {
+              to: '/docs/translations',
+              label: 'Help Us Translate',
+            },
+          ],
         },
       ]
     },
