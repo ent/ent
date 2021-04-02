@@ -5,7 +5,10 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -80,6 +83,12 @@ func (User) Fields() []ent.Field {
 		// remove the max-length constraint from varchar.
 		field.String("workplace").
 			Optional(),
+		// add a new column with generated values by the database.
+		field.Time("created_at").
+			Default(time.Now).
+			Annotations(&entsql.Annotation{
+				Default: "CURRENT_TIMESTAMP",
+			}),
 		// deleting the `address` column.
 	}
 }

@@ -8,6 +8,7 @@ package user
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
@@ -41,6 +42,8 @@ const (
 	FieldStatus = "status"
 	// FieldWorkplace holds the string denoting the workplace field in the database.
 	FieldWorkplace = "workplace"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
 	// EdgePets holds the string denoting the pets edge name in mutations.
@@ -87,6 +90,7 @@ var Columns = []string{
 	FieldState,
 	FieldStatus,
 	FieldWorkplace,
+	FieldCreatedAt,
 }
 
 var (
@@ -116,6 +120,8 @@ var (
 	DefaultBuffer func() []byte
 	// DefaultTitle holds the default value on creation for the "title" field.
 	DefaultTitle string
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
 )
 
 // MixedEnum defines the type for the "mixed_enum" enum field.

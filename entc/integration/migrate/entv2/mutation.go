@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/car"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
@@ -2457,6 +2458,7 @@ type UserMutation struct {
 	state          *user.State
 	status         *user.Status
 	workplace      *string
+	created_at     *time.Time
 	clearedFields  map[string]struct{}
 	car            map[int]struct{}
 	removedcar     map[int]struct{}
@@ -3122,6 +3124,42 @@ func (m *UserMutation) ResetWorkplace() {
 	delete(m.clearedFields, user.FieldWorkplace)
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *UserMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *UserMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
 // AddCarIDs adds the "car" edge to the Car entity by ids.
 func (m *UserMutation) AddCarIDs(ids ...int) {
 	if m.car == nil {
@@ -3281,7 +3319,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.mixed_string != nil {
 		fields = append(fields, user.FieldMixedString)
 	}
@@ -3321,6 +3359,9 @@ func (m *UserMutation) Fields() []string {
 	if m.workplace != nil {
 		fields = append(fields, user.FieldWorkplace)
 	}
+	if m.created_at != nil {
+		fields = append(fields, user.FieldCreatedAt)
+	}
 	return fields
 }
 
@@ -3355,6 +3396,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case user.FieldWorkplace:
 		return m.Workplace()
+	case user.FieldCreatedAt:
+		return m.CreatedAt()
 	}
 	return nil, false
 }
@@ -3390,6 +3433,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStatus(ctx)
 	case user.FieldWorkplace:
 		return m.OldWorkplace(ctx)
+	case user.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -3489,6 +3534,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetWorkplace(v)
+		return nil
+	case user.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -3631,6 +3683,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldWorkplace:
 		m.ResetWorkplace()
+		return nil
+	case user.FieldCreatedAt:
+		m.ResetCreatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

@@ -980,9 +980,6 @@ func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeI
 // IsEnum returns true if the field is an enum field.
 func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.TypeEnum }
 
-// IsAddable returns true if the field is an enum field.
-func (f Field) IsAddable() bool { return f.Type != nil && f.Type.Type == field.TypeEnum }
-
 // IsEdgeField reports if the given field is an edge-field (i.e. a foreign-key)
 // that was referenced by one of the edges).
 func (f Field) IsEdgeField() bool { return f.fk != nil }
@@ -1052,8 +1049,8 @@ func (f Field) NullTypeField(rec string) string {
 	return expr
 }
 
-// Column returns the table column. It sets it as a primary key (auto_increment) in case of ID field, unless stated
-// otherwise.
+// Column returns the table column. It sets it as a primary key (auto_increment)
+// in case of ID field, unless stated otherwise.
 func (f Field) Column() *schema.Column {
 	c := &schema.Column{
 		Name:     f.StorageKey(),
@@ -1070,6 +1067,11 @@ func (f Field) Column() *schema.Column {
 		if s, ok := f.DefaultValue().(string); ok {
 			c.Default = strconv.Quote(s)
 		}
+	}
+	// Override the default-value defined in the
+	// schema if it was provided by an annotation.
+	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
+		c.Default = strconv.Quote(ant.Default)
 	}
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType

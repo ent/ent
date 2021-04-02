@@ -9,6 +9,7 @@ package entv2
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
@@ -46,6 +47,8 @@ type User struct {
 	Status user.Status `json:"status,omitempty"`
 	// Workplace holds the value of the "workplace" field.
 	Workplace string `json:"workplace,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -107,6 +110,8 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullInt64{}
 		case user.FieldMixedString, user.FieldMixedEnum, user.FieldName, user.FieldNickname, user.FieldPhone, user.FieldTitle, user.FieldNewName, user.FieldState, user.FieldStatus, user.FieldWorkplace:
 			values[i] = &sql.NullString{}
+		case user.FieldCreatedAt:
+			values[i] = &sql.NullTime{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -206,6 +211,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Workplace = value.String
 			}
+		case user.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				u.CreatedAt = value.Time
+			}
 		}
 	}
 	return nil
@@ -275,6 +286,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Status))
 	builder.WriteString(", workplace=")
 	builder.WriteString(u.Workplace)
+	builder.WriteString(", created_at=")
+	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
