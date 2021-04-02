@@ -271,31 +271,32 @@ func (c *Column) ScanDefault(value string) error {
 // Note that, in SQLite if a NOT NULL constraint is specified,
 // then the column must have a default value which not NULL.
 func (c *Column) defaultValue(b *sql.ColumnBuilder) {
-	// has default, and it's supported in the database level.
-	if c.Default != nil && c.supportDefault() {
-		attr := "DEFAULT "
-		switch v := c.Default.(type) {
-		case bool:
-			attr += strconv.FormatBool(v)
-		case string:
-			// Escape single quote by replacing each with 2.
-			attr += fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
-		default:
-			attr += fmt.Sprint(v)
-		}
-		b.Attr(attr)
+	if c.Default == nil || !c.supportDefault() {
+		return
 	}
+	// Has default and the database supports adding this default.
+	attr := fmt.Sprint(c.Default)
+	switch v := c.Default.(type) {
+	case bool:
+		attr = strconv.FormatBool(v)
+	case string:
+		if t := c.Type; t != field.TypeUUID && t != field.TypeTime {
+			// Escape single quote by replacing each with 2.
+			attr = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
+		}
+	}
+	b.Attr("DEFAULT " + attr)
 }
 
 // supportDefault reports if the column type supports default value.
 func (c Column) supportDefault() bool {
-	switch {
-	case c.Type == field.TypeString || c.Type == field.TypeEnum:
+	switch t := c.Type; t {
+	case field.TypeString, field.TypeEnum:
 		return c.Size < 1<<16 // not a text.
-	case c.Type.Numeric(), c.Type == field.TypeBool:
+	case field.TypeBool, field.TypeTime, field.TypeUUID:
 		return true
 	default:
-		return false
+		return t.Numeric()
 	}
 }
 

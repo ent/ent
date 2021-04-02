@@ -290,6 +290,24 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+SQL-specific expressions like function calls can be added to default value configuration using the
+[`entsql.Annotation`](https://pkg.go.dev/entgo.io/ent@master/dialect/entsql#Annotation):
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		// Add a new field with CURRENT_TIMESTAMP
+		// as a default value to all previous rows.
+		field.Time("created_at").
+			Default(time.Now).
+			Annotations(&entsql.Annotation{
+				Default: "CURRENT_TIMESTAMP",
+			}),
+	}
+}
+```
+
 In case your `DefaultFunc` is also returning an error, it is better to handle it properly using [schema-hooks](hooks.md#schema-hooks).
 See [this FAQ](faq.md#how-to-use-a-custom-generator-of-ids) for more information. 
 

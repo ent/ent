@@ -31,7 +31,7 @@ import (
 func TestMySQL(t *testing.T) {
 	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
 		t.Run(version, func(t *testing.T) {
-			root, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/", port))
+			root, err := sql.Open(dialect.MySQL, fmt.Sprintf("root:pass@tcp(localhost:%d)/", port))
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
@@ -206,6 +206,13 @@ func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 
 func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	ctx := context.Background()
+	if dbdialect != dialect.SQLite {
+		require.True(t, client.User.Query().ExistX(ctx), "table 'users' should contain rows after running the migration")
+		users := client.User.Query().Select(user.FieldCreatedAt).AllX(ctx)
+		for i := range users {
+			require.False(t, users[i].CreatedAt.IsZero(), "default 'CURRENT_TIMESTAMP' should fill previous rows")
+		}
+	}
 	u := client.User.Create().SetAge(1).SetName("bar").SetNickname("nick_bar").SetPhone("100").SetBuffer([]byte("{}")).SetState(user.StateLoggedOut).SaveX(ctx)
 	require.Equal(t, 1, u.Age)
 	require.Equal(t, "bar", u.Name)

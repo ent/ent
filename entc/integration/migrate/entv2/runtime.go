@@ -7,6 +7,8 @@
 package entv2
 
 import (
+	"time"
+
 	"entgo.io/ent/entc/integration/migrate/entv2/schema"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 )
@@ -40,4 +42,8 @@ func init() {
 	userDescTitle := userFields[6].Descriptor()
 	// user.DefaultTitle holds the default value on creation for the title field.
 	user.DefaultTitle = userDescTitle.Default.(string)
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userFields[12].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 }

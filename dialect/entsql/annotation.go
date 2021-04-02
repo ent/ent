@@ -35,6 +35,19 @@ type Annotation struct {
 	//
 	Collation string `json:"collation,omitempty"`
 
+	// Default specifies the default value of a column. Note that using this option
+	// will override the default behavior of the code-generation. For example:
+	//
+	//	entsql.Annotation{
+	//		Default: "CURRENT_TIMESTAMP",
+	//	}
+	//
+	//	entsql.Annotation{
+	//		Default: "uuid_generate_v4()",
+	//	}
+	//
+	Default string `json:"default,omitempty"`
+
 	// Options defines the additional table options. For example:
 	//
 	//	entsql.Annotation{

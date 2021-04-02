@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/car"
@@ -167,6 +168,20 @@ func (uc *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
 	return uc
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
+	uc.mutation.SetCreatedAt(t)
+	return uc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetCreatedAt(*t)
+	}
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -294,6 +309,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultTitle
 		uc.mutation.SetTitle(v)
 	}
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		v := user.DefaultCreatedAt()
+		uc.mutation.SetCreatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -338,6 +357,9 @@ func (uc *UserCreate) check() error {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf("entv2: validator failed for field \"status\": %w", err)}
 		}
+	}
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New("entv2: missing required field \"created_at\"")}
 	}
 	return nil
 }
@@ -475,6 +497,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldWorkplace,
 		})
 		_node.Workplace = value
+	}
+	if value, ok := uc.mutation.CreatedAt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: user.FieldCreatedAt,
+		})
+		_node.CreatedAt = value
 	}
 	if nodes := uc.mutation.CarIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
