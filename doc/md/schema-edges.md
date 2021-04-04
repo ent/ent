@@ -977,9 +977,20 @@ func (User) Edges() []ent.Edge {
 		edge.To("pets", Pet.Type).
 			// Set the column name in the "pets" table for O2M relationship.
 			StorageKey(edge.Column("owner_id")),
+		edge.To("cars", Car.Type).
+			// Set the symbol of the foreign-key constraint for O2M relationship.
+			StorageKey(edge.Symbol("cars_owner_id")),
 		edge.To("friends", User.Type).
-			// Set the join-table and the column names for M2M relationship.
+			// Set the join-table, and the column names for a M2M relationship.
 			StorageKey(edge.Table("friends"), edge.Columns("user_id", "friend_id")),
+		edge.To("groups", Group.Type).
+			// Set the join-table, its column names and the symbols
+			// of the foreign-key constraints for M2M relationship.
+			StorageKey(
+				edge.Table("groups"),
+				edge.Columns("user_id", "group_id"),
+				edge.Symbols("groups_id1", "groups_id2")
+			),
 	}
 }
 ```

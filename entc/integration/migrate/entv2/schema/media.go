@@ -28,6 +28,7 @@ func (Media) Fields() []ent.Field {
 // Indexes of the Media.
 func (Media) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("source", "source_uri").Unique(),
+		index.Fields("source", "source_uri").
+			Unique(),
 	}
 }

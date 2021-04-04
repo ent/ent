@@ -194,6 +194,7 @@ func (b *inverseBuilder) Descriptor() *Descriptor {
 // StorageKey holds the configuration for edge storage-key.
 type StorageKey struct {
 	Table   string   // Table or label.
+	Symbols []string // Symbols/names of the foreign-key constraints.
 	Columns []string // Foreign-key columns.
 }
 
@@ -204,6 +205,24 @@ type StorageOption func(*StorageKey)
 func Table(name string) StorageOption {
 	return func(key *StorageKey) {
 		key.Table = name
+	}
+}
+
+// Symbol sets the symbol/name of the foreign-key constraint for O2O, O2M and M2O edges.
+// Note that, for M2M edges (2 columns and 2 constraints), use the edge.Symbols option.
+func Symbol(symbol string) StorageOption {
+	return func(key *StorageKey) {
+		key.Symbols = []string{symbol}
+	}
+}
+
+// Symbols sets the symbol/name of the foreign-key constraints for M2M edges.
+// The 1st column defines the name of the "To" edge, and the 2nd defines
+// the name of the "From" edge (inverse edge).
+// Note that, for O2O, O2M and M2O edges, use the edge.Symbol option.
+func Symbols(to, from string) StorageOption {
+	return func(key *StorageKey) {
+		key.Symbols = []string{to, from}
 	}
 }
 

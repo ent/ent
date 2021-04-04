@@ -426,7 +426,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 					OnDelete:   deleteAction(e),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
-					Symbol:     fmt.Sprintf("%s_%s_%s", owner.Name, ref.Name, e.Name),
+					Symbol:     fkSymbol(e, owner, ref),
 				})
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
@@ -438,7 +438,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 					OnDelete:   deleteAction(e),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
-					Symbol:     fmt.Sprintf("%s_%s_%s", owner.Name, ref.Name, e.Name),
+					Symbol:     fkSymbol(e, owner, ref),
 				})
 			case M2M:
 				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
@@ -452,6 +452,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 					c2.Type = ref.Type.Type
 					c2.Size = ref.size()
 				}
+				s1, s2 := fkSymbols(e, c1, c2)
 				all = append(all, &schema.Table{
 					Name:       e.Rel.Table,
 					Columns:    []*schema.Column{c1, c2},
@@ -462,14 +463,14 @@ func (g *Graph) Tables() (all []*schema.Table) {
 							OnDelete:   schema.Cascade,
 							Columns:    []*schema.Column{c1},
 							RefColumns: []*schema.Column{t1.PrimaryKey[0]},
-							Symbol:     fmt.Sprintf("%s_%s", e.Rel.Table, c1.Name),
+							Symbol:     s1,
 						},
 						{
 							RefTable:   t2,
 							OnDelete:   schema.Cascade,
 							Columns:    []*schema.Column{c2},
 							RefColumns: []*schema.Column{t2.PrimaryKey[0]},
-							Symbol:     fmt.Sprintf("%s_%s", e.Rel.Table, c2.Name),
+							Symbol:     s2,
 						},
 					},
 				})
@@ -491,6 +492,30 @@ func mayAddColumn(t *schema.Table, c *schema.Column) {
 	if !t.HasColumn(c.Name) {
 		t.AddColumn(c)
 	}
+}
+
+// fkSymbol returns the symbol of the foreign-key constraint for edges of type O2M, M2O and O2O.
+// It returns the symbol of the storage-key if it was provided, and generate custom one otherwise.
+func fkSymbol(e *Edge, ownerT, refT *schema.Table) string {
+	if k, _ := e.StorageKey(); k != nil && len(k.Symbols) == 1 {
+		return k.Symbols[0]
+	}
+	return fmt.Sprintf("%s_%s_%s", ownerT.Name, refT.Name, e.Name)
+}
+
+// fkSymbols is like fkSymbol but for M2M edges.
+func fkSymbols(e *Edge, c1, c2 *schema.Column) (string, string) {
+	s1 := fmt.Sprintf("%s_%s", e.Rel.Table, c1.Name)
+	s2 := fmt.Sprintf("%s_%s", e.Rel.Table, c2.Name)
+	if k, _ := e.StorageKey(); k != nil {
+		if len(k.Symbols) > 0 {
+			s1 = k.Symbols[0]
+		}
+		if len(k.Symbols) > 1 {
+			s2 = k.Symbols[1]
+		}
+	}
+	return s1, s2
 }
 
 // deleteAction returns the referential action for DELETE operations of the given edge.
