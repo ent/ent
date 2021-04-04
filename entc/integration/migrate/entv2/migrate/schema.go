@@ -106,7 +106,7 @@ var (
 		PrimaryKey: []*schema.Column{PetsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "pets_users_pets",
+				Symbol:     "user_pet_id",
 				Columns:    []*schema.Column{PetsColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -157,13 +157,13 @@ var (
 		PrimaryKey: []*schema.Column{FriendsColumns[0], FriendsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "friends_user",
+				Symbol:     "user_friend_id1",
 				Columns:    []*schema.Column{FriendsColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "friends_friend",
+				Symbol:     "user_friend_id2",
 				Columns:    []*schema.Column{FriendsColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
