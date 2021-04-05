@@ -62,7 +62,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 				Value: value,
 				Column: {{ $.Package }}.{{ $f.Constant }},
 			})
-			_node.{{ $f.StructField }} = {{ if $f.Nillable }}&{{ end }}value
+			_node.{{ $f.StructField }} = {{ if $f.NillableValue }}&{{ end }}value
 		}
 	{{- end }}
 	{{- range $e := $.Edges }}
@@ -72,7 +72,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			{{- end }}
 			{{- if $e.OwnFK }}
 				{{- $fk := $e.ForeignKey }}
-				_node.{{ $fk.StructField }} = {{ if $fk.Field.Nillable }}&{{ end }}nodes[0]
+				_node.{{ $fk.StructField }} = {{ if $fk.Field.NillableValue }}&{{ end }}nodes[0]
 			{{- end }}
 			_spec.Edges = append(_spec.Edges, edge)
 		}

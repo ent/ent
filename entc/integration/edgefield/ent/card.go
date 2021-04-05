@@ -56,7 +56,7 @@ func (*Card) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case card.FieldID, card.FieldOwnerID:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Card", columns[i])
 		}

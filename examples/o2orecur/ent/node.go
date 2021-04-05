@@ -72,9 +72,9 @@ func (*Node) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case node.FieldID, node.FieldValue:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case node.ForeignKeys[0]: // node_next
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Node", columns[i])
 		}

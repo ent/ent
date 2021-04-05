@@ -61,13 +61,13 @@ func (*Car) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case car.FieldBeforeID, car.FieldAfterID:
-			values[i] = &sql.NullFloat64{}
+			values[i] = new(sql.NullFloat64)
 		case car.FieldID:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case car.FieldModel:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case car.ForeignKeys[0]: // pet_cars
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Car", columns[i])
 		}

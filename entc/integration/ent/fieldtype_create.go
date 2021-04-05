@@ -284,20 +284,6 @@ func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreat
 	return ftc
 }
 
-// SetDuration sets the "duration" field.
-func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
-	ftc.mutation.SetDuration(t)
-	return ftc
-}
-
-// SetNillableDuration sets the "duration" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableDuration(t *time.Duration) *FieldTypeCreate {
-	if t != nil {
-		ftc.SetDuration(*t)
-	}
-	return ftc
-}
-
 // SetState sets the "state" field.
 func (ftc *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
 	ftc.mutation.SetState(f)
@@ -368,6 +354,40 @@ func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
 	return ftc
 }
 
+// SetLinkOther sets the "link_other" field.
+func (ftc *FieldTypeCreate) SetLinkOther(s *schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetLinkOther(s)
+	return ftc
+}
+
+// SetMAC sets the "mac" field.
+func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
+	ftc.mutation.SetMAC(s)
+	return ftc
+}
+
+// SetNillableMAC sets the "mac" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableMAC(s *schema.MAC) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetMAC(*s)
+	}
+	return ftc
+}
+
+// SetDuration sets the "duration" field.
+func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
+	ftc.mutation.SetDuration(t)
+	return ftc
+}
+
+// SetNillableDuration sets the "duration" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableDuration(t *time.Duration) *FieldTypeCreate {
+	if t != nil {
+		ftc.SetDuration(*t)
+	}
+	return ftc
+}
+
 // SetDir sets the "dir" field.
 func (ftc *FieldTypeCreate) SetDir(h http.Dir) *FieldTypeCreate {
 	ftc.mutation.SetDir(h)
@@ -402,8 +422,16 @@ func (ftc *FieldTypeCreate) SetStr(ss sql.NullString) *FieldTypeCreate {
 	return ftc
 }
 
+// SetNillableStr sets the "str" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableStr(ss *sql.NullString) *FieldTypeCreate {
+	if ss != nil {
+		ftc.SetStr(*ss)
+	}
+	return ftc
+}
+
 // SetNullStr sets the "null_str" field.
-func (ftc *FieldTypeCreate) SetNullStr(ss sql.NullString) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullStr(ss *sql.NullString) *FieldTypeCreate {
 	ftc.mutation.SetNullStr(ss)
 	return ftc
 }
@@ -414,14 +442,16 @@ func (ftc *FieldTypeCreate) SetLink(s schema.Link) *FieldTypeCreate {
 	return ftc
 }
 
-// SetLinkOther sets the "link_other" field.
-func (ftc *FieldTypeCreate) SetLinkOther(s schema.Link) *FieldTypeCreate {
-	ftc.mutation.SetLinkOther(s)
+// SetNillableLink sets the "link" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableLink(s *schema.Link) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetLink(*s)
+	}
 	return ftc
 }
 
 // SetNullLink sets the "null_link" field.
-func (ftc *FieldTypeCreate) SetNullLink(s schema.Link) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullLink(s *schema.Link) *FieldTypeCreate {
 	ftc.mutation.SetNullLink(s)
 	return ftc
 }
@@ -455,13 +485,13 @@ func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCr
 }
 
 // SetDeleted sets the "deleted" field.
-func (ftc *FieldTypeCreate) SetDeleted(sb sql.NullBool) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetDeleted(sb *sql.NullBool) *FieldTypeCreate {
 	ftc.mutation.SetDeleted(sb)
 	return ftc
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (ftc *FieldTypeCreate) SetDeletedAt(st sql.NullTime) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetDeletedAt(st *sql.NullTime) *FieldTypeCreate {
 	ftc.mutation.SetDeletedAt(st)
 	return ftc
 }
@@ -473,7 +503,7 @@ func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (ftc *FieldTypeCreate) SetNullInt64(si sql.NullInt64) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullInt64(si *sql.NullInt64) *FieldTypeCreate {
 	ftc.mutation.SetNullInt64(si)
 	return ftc
 }
@@ -549,7 +579,7 @@ func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTy
 }
 
 // SetNullFloat sets the "null_float" field.
-func (ftc *FieldTypeCreate) SetNullFloat(sf sql.NullFloat64) *FieldTypeCreate {
+func (ftc *FieldTypeCreate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeCreate {
 	ftc.mutation.SetNullFloat(sf)
 	return ftc
 }
@@ -568,12 +598,6 @@ func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	return ftc
 }
 
-// SetMAC sets the "mac" field.
-func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
-	ftc.mutation.SetMAC(s)
-	return ftc
-}
-
 // SetUUID sets the "uuid" field.
 func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	ftc.mutation.SetUUID(u)
@@ -583,6 +607,54 @@ func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 // SetStrings sets the "strings" field.
 func (ftc *FieldTypeCreate) SetStrings(s []string) *FieldTypeCreate {
 	ftc.mutation.SetStrings(s)
+	return ftc
+}
+
+// SetPair sets the "pair" field.
+func (ftc *FieldTypeCreate) SetPair(s schema.Pair) *FieldTypeCreate {
+	ftc.mutation.SetPair(s)
+	return ftc
+}
+
+// SetNillablePair sets the "pair" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillablePair(s *schema.Pair) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetPair(*s)
+	}
+	return ftc
+}
+
+// SetNilPair sets the "nil_pair" field.
+func (ftc *FieldTypeCreate) SetNilPair(s *schema.Pair) *FieldTypeCreate {
+	ftc.mutation.SetNilPair(s)
+	return ftc
+}
+
+// SetVstring sets the "vstring" field.
+func (ftc *FieldTypeCreate) SetVstring(ss schema.VString) *FieldTypeCreate {
+	ftc.mutation.SetVstring(ss)
+	return ftc
+}
+
+// SetNillableVstring sets the "vstring" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableVstring(ss *schema.VString) *FieldTypeCreate {
+	if ss != nil {
+		ftc.SetVstring(*ss)
+	}
+	return ftc
+}
+
+// SetTriple sets the "triple" field.
+func (ftc *FieldTypeCreate) SetTriple(s schema.Triple) *FieldTypeCreate {
+	ftc.mutation.SetTriple(s)
+	return ftc
+}
+
+// SetNillableTriple sets the "triple" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableTriple(s *schema.Triple) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetTriple(*s)
+	}
 	return ftc
 }
 
@@ -638,6 +710,10 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 
 // defaults sets the default values of the builder before save.
 func (ftc *FieldTypeCreate) defaults() {
+	if _, ok := ftc.mutation.Dir(); !ok {
+		v := fieldtype.DefaultDir()
+		ftc.mutation.SetDir(v)
+	}
 	if _, ok := ftc.mutation.Str(); !ok {
 		v := fieldtype.DefaultStr()
 		ftc.mutation.SetStr(v)
@@ -653,6 +729,18 @@ func (ftc *FieldTypeCreate) defaults() {
 	if _, ok := ftc.mutation.Role(); !ok {
 		v := fieldtype.DefaultRole
 		ftc.mutation.SetRole(v)
+	}
+	if _, ok := ftc.mutation.Pair(); !ok {
+		v := fieldtype.DefaultPair()
+		ftc.mutation.SetPair(v)
+	}
+	if _, ok := ftc.mutation.Vstring(); !ok {
+		v := fieldtype.DefaultVstring()
+		ftc.mutation.SetVstring(v)
+	}
+	if _, ok := ftc.mutation.Triple(); !ok {
+		v := fieldtype.DefaultTriple()
+		ftc.mutation.SetTriple(v)
 	}
 }
 
@@ -683,6 +771,14 @@ func (ftc *FieldTypeCreate) check() error {
 			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
 		}
 	}
+	if v, ok := ftc.mutation.MAC(); ok {
+		if err := fieldtype.MACValidator(v.String()); err != nil {
+			return &ValidationError{Name: "mac", err: fmt.Errorf("ent: validator failed for field \"mac\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.Dir(); !ok {
+		return &ValidationError{Name: "dir", err: errors.New("ent: missing required field \"dir\"")}
+	}
 	if v, ok := ftc.mutation.Ndir(); ok {
 		if err := fieldtype.NdirValidator(string(v)); err != nil {
 			return &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
@@ -701,10 +797,14 @@ func (ftc *FieldTypeCreate) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
-	if v, ok := ftc.mutation.MAC(); ok {
-		if err := fieldtype.MACValidator(v.String()); err != nil {
-			return &ValidationError{Name: "mac", err: fmt.Errorf("ent: validator failed for field \"mac\": %w", err)}
-		}
+	if _, ok := ftc.mutation.Pair(); !ok {
+		return &ValidationError{Name: "pair", err: errors.New("ent: missing required field \"pair\"")}
+	}
+	if _, ok := ftc.mutation.Vstring(); !ok {
+		return &ValidationError{Name: "vstring", err: errors.New("ent: missing required field \"vstring\"")}
+	}
+	if _, ok := ftc.mutation.Triple(); !ok {
+		return &ValidationError{Name: "triple", err: errors.New("ent: missing required field \"triple\"")}
 	}
 	return nil
 }
@@ -901,14 +1001,6 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		})
 		_node.OptionalUint64 = value
 	}
-	if value, ok := ftc.mutation.Duration(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: fieldtype.FieldDuration,
-		})
-		_node.Duration = value
-	}
 	if value, ok := ftc.mutation.State(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
@@ -949,6 +1041,30 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		})
 		_node.Decimal = value
 	}
+	if value, ok := ftc.mutation.LinkOther(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldLinkOther,
+		})
+		_node.LinkOther = value
+	}
+	if value, ok := ftc.mutation.MAC(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldMAC,
+		})
+		_node.MAC = value
+	}
+	if value, ok := ftc.mutation.Duration(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: fieldtype.FieldDuration,
+		})
+		_node.Duration = value
+	}
 	if value, ok := ftc.mutation.Dir(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -979,7 +1095,7 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: fieldtype.FieldNullStr,
 		})
-		_node.NullStr = &value
+		_node.NullStr = value
 	}
 	if value, ok := ftc.mutation.Link(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -989,21 +1105,13 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		})
 		_node.Link = value
 	}
-	if value, ok := ftc.mutation.LinkOther(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeOther,
-			Value:  value,
-			Column: fieldtype.FieldLinkOther,
-		})
-		_node.LinkOther = value
-	}
 	if value, ok := ftc.mutation.NullLink(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
 			Column: fieldtype.FieldNullLink,
 		})
-		_node.NullLink = &value
+		_node.NullLink = value
 	}
 	if value, ok := ftc.mutation.Active(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -1109,14 +1217,6 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		})
 		_node.Role = value
 	}
-	if value, ok := ftc.mutation.MAC(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: fieldtype.FieldMAC,
-		})
-		_node.MAC = value
-	}
 	if value, ok := ftc.mutation.UUID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
@@ -1132,6 +1232,38 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldStrings,
 		})
 		_node.Strings = value
+	}
+	if value, ok := ftc.mutation.Pair(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldPair,
+		})
+		_node.Pair = value
+	}
+	if value, ok := ftc.mutation.NilPair(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldNilPair,
+		})
+		_node.NilPair = value
+	}
+	if value, ok := ftc.mutation.Vstring(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldVstring,
+		})
+		_node.Vstring = value
+	}
+	if value, ok := ftc.mutation.Triple(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldTriple,
+		})
+		_node.Triple = value
 	}
 	return _node, _spec
 }

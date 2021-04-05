@@ -9,9 +9,11 @@ package fieldtype
 import (
 	"fmt"
 	"net"
+	"net/http"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/role"
+	"entgo.io/ent/entc/integration/ent/schema"
 )
 
 const (
@@ -61,8 +63,6 @@ const (
 	FieldOptionalUint32 = "optional_uint32"
 	// FieldOptionalUint64 holds the string denoting the optional_uint64 field in the database.
 	FieldOptionalUint64 = "optional_uint64"
-	// FieldDuration holds the string denoting the duration field in the database.
-	FieldDuration = "duration"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldOptionalFloat holds the string denoting the optional_float field in the database.
@@ -73,6 +73,12 @@ const (
 	FieldDatetime = "datetime"
 	// FieldDecimal holds the string denoting the decimal field in the database.
 	FieldDecimal = "decimal"
+	// FieldLinkOther holds the string denoting the link_other field in the database.
+	FieldLinkOther = "link_other"
+	// FieldMAC holds the string denoting the mac field in the database.
+	FieldMAC = "mac"
+	// FieldDuration holds the string denoting the duration field in the database.
+	FieldDuration = "duration"
 	// FieldDir holds the string denoting the dir field in the database.
 	FieldDir = "dir"
 	// FieldNdir holds the string denoting the ndir field in the database.
@@ -83,8 +89,6 @@ const (
 	FieldNullStr = "null_str"
 	// FieldLink holds the string denoting the link field in the database.
 	FieldLink = "link"
-	// FieldLinkOther holds the string denoting the link_other field in the database.
-	FieldLinkOther = "link_other"
 	// FieldNullLink holds the string denoting the null_link field in the database.
 	FieldNullLink = "null_link"
 	// FieldActive holds the string denoting the active field in the database.
@@ -113,12 +117,18 @@ const (
 	FieldNullFloat = "null_float"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
-	// FieldMAC holds the string denoting the mac field in the database.
-	FieldMAC = "mac"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
 	// FieldStrings holds the string denoting the strings field in the database.
 	FieldStrings = "strings"
+	// FieldPair holds the string denoting the pair field in the database.
+	FieldPair = "pair"
+	// FieldNilPair holds the string denoting the nil_pair field in the database.
+	FieldNilPair = "nil_pair"
+	// FieldVstring holds the string denoting the vstring field in the database.
+	FieldVstring = "vstring"
+	// FieldTriple holds the string denoting the triple field in the database.
+	FieldTriple = "triple"
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
 )
@@ -147,18 +157,19 @@ var Columns = []string{
 	FieldOptionalUint16,
 	FieldOptionalUint32,
 	FieldOptionalUint64,
-	FieldDuration,
 	FieldState,
 	FieldOptionalFloat,
 	FieldOptionalFloat32,
 	FieldDatetime,
 	FieldDecimal,
+	FieldLinkOther,
+	FieldMAC,
+	FieldDuration,
 	FieldDir,
 	FieldNdir,
 	FieldStr,
 	FieldNullStr,
 	FieldLink,
-	FieldLinkOther,
 	FieldNullLink,
 	FieldActive,
 	FieldNullActive,
@@ -173,9 +184,12 @@ var Columns = []string{
 	FieldSchemaFloat32,
 	FieldNullFloat,
 	FieldRole,
-	FieldMAC,
 	FieldUUID,
 	FieldStrings,
+	FieldPair,
+	FieldNilPair,
+	FieldVstring,
+	FieldTriple,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "field_types"
@@ -202,18 +216,26 @@ func ValidColumn(column string) bool {
 var (
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	ValidateOptionalInt32Validator func(int32) error
+	// MACValidator is a validator for the "mac" field. It is called by the builders before save.
+	MACValidator func(string) error
+	// DefaultDir holds the default value on creation for the "dir" field.
+	DefaultDir func() http.Dir
 	// NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
 	NdirValidator func(string) error
 	// DefaultStr holds the default value on creation for the "str" field.
 	DefaultStr func() sql.NullString
 	// DefaultNullStr holds the default value on creation for the "null_str" field.
-	DefaultNullStr func() sql.NullString
+	DefaultNullStr func() *sql.NullString
 	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	LinkValidator func(string) error
 	// DefaultIP holds the default value on creation for the "ip" field.
 	DefaultIP func() net.IP
-	// MACValidator is a validator for the "mac" field. It is called by the builders before save.
-	MACValidator func(string) error
+	// DefaultPair holds the default value on creation for the "pair" field.
+	DefaultPair func() schema.Pair
+	// DefaultVstring holds the default value on creation for the "vstring" field.
+	DefaultVstring func() schema.VString
+	// DefaultTriple holds the default value on creation for the "triple" field.
+	DefaultTriple func() schema.Triple
 )
 
 // State defines the type for the "state" enum field.

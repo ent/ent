@@ -25,12 +25,12 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 			{{- range $type, $columns := $ctypes }}
 				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }}{{ $.Package }}.{{ $c }}{{ end }}:
-					values[i] = &{{ $type }}{}
+					values[i] = new({{ $type }})
 			{{- end }}
 			{{- range $i, $fk := $.UnexportedForeignKeys }}
 				{{- $f := $fk.Field }}
 				case {{ $.Package }}.ForeignKeys[{{ $i }}]: // {{ $f.Name }}
-					values[i] = &{{ if not $f.UserDefined }}sql.NullInt64{{ else }}{{ $f.NullType }}{{ end }}{}
+					values[i] = new({{ if not $f.UserDefined }}sql.NullInt64{{ else }}{{ $f.NullType }}{{ end }})
 			{{- end }}
 			default:
 				return nil, fmt.Errorf("unexpected column %q for type {{ $.Name }}", columns[i])
@@ -78,7 +78,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 						return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
 					} else if value.Valid {
 						{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
-						{{ if $f.Nillable }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
+						{{ if and $f.Nillable (not $f.Type.Nillable) }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
 					}
 				{{- end }}
 		{{- end }}
@@ -107,7 +107,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		{{- if and (not $f.Type.ValueScanner) (hasPrefix $nulltype "sql") }}
 			} else if value.Valid {
-				{{- if $f.Nillable }}
+				{{- if $f.NillableValue }}
 					{{ $ret }}.{{ $field }} = new({{ $f.Type }})
 					*{{ $ret }}.{{ $field }} = {{ $f.NullTypeField "value" }}
 				{{- else }}
@@ -115,7 +115,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 				{{- end }}
 		{{- else }}
 			} else if value != nil {
-				{{ $ret }}.{{ $field }} = {{ if not $f.Nillable }}*{{ end }}value
+				{{ $ret }}.{{ $field }} = {{ if and (not $f.Nillable) (not $f.Type.RType.IsPtr) }}*{{ end }}value
 		{{- end }}
 		}
 	{{- end }}

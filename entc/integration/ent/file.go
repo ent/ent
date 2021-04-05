@@ -95,17 +95,17 @@ func (*File) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case file.FieldOp:
-			values[i] = &sql.NullBool{}
+			values[i] = new(sql.NullBool)
 		case file.FieldID, file.FieldSize:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case file.FieldName, file.FieldUser, file.FieldGroup:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case file.ForeignKeys[0]: // file_type_files
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case file.ForeignKeys[1]: // group_files
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case file.ForeignKeys[2]: // user_files
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
 		}

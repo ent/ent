@@ -67,9 +67,9 @@ func (*Blob) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case blob.FieldID, blob.FieldUUID:
-			values[i] = &uuid.UUID{}
+			values[i] = new(uuid.UUID)
 		case blob.ForeignKeys[0]: // blob_parent
-			values[i] = &uuid.UUID{}
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Blob", columns[i])
 		}

@@ -66,13 +66,13 @@ func (*Card) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case card.FieldID:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case card.FieldNumber, card.FieldName, card.FieldInHook:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case card.FieldCreatedAt:
-			values[i] = &sql.NullTime{}
+			values[i] = new(sql.NullTime)
 		case card.ForeignKeys[0]: // user_cards
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Card", columns[i])
 		}
