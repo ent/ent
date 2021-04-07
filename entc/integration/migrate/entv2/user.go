@@ -105,13 +105,13 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldBuffer, user.FieldBlob:
-			values[i] = &[]byte{}
+			values[i] = new([]byte)
 		case user.FieldID, user.FieldAge:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case user.FieldMixedString, user.FieldMixedEnum, user.FieldName, user.FieldNickname, user.FieldPhone, user.FieldTitle, user.FieldNewName, user.FieldState, user.FieldStatus, user.FieldWorkplace:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
-			values[i] = &sql.NullTime{}
+			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}

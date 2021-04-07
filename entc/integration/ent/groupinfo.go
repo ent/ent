@@ -52,9 +52,9 @@ func (*GroupInfo) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case groupinfo.FieldID, groupinfo.FieldMaxUsers:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case groupinfo.FieldDesc:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type GroupInfo", columns[i])
 		}

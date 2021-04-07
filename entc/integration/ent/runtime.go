@@ -8,6 +8,7 @@ package ent
 
 import (
 	"net"
+	"net/http"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -58,30 +59,46 @@ func init() {
 	fieldtypeDescValidateOptionalInt32 := fieldtypeFields[15].Descriptor()
 	// fieldtype.ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	fieldtype.ValidateOptionalInt32Validator = fieldtypeDescValidateOptionalInt32.Validators[0].(func(int32) error)
+	// fieldtypeDescMAC is the schema descriptor for mac field.
+	fieldtypeDescMAC := fieldtypeFields[27].Descriptor()
+	// fieldtype.MACValidator is a validator for the "mac" field. It is called by the builders before save.
+	fieldtype.MACValidator = fieldtypeDescMAC.Validators[0].(func(string) error)
+	// fieldtypeDescDir is the schema descriptor for dir field.
+	fieldtypeDescDir := fieldtypeFields[29].Descriptor()
+	// fieldtype.DefaultDir holds the default value on creation for the dir field.
+	fieldtype.DefaultDir = fieldtypeDescDir.Default.(func() http.Dir)
 	// fieldtypeDescNdir is the schema descriptor for ndir field.
-	fieldtypeDescNdir := fieldtypeFields[28].Descriptor()
+	fieldtypeDescNdir := fieldtypeFields[30].Descriptor()
 	// fieldtype.NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
 	fieldtype.NdirValidator = fieldtypeDescNdir.Validators[0].(func(string) error)
 	// fieldtypeDescStr is the schema descriptor for str field.
-	fieldtypeDescStr := fieldtypeFields[29].Descriptor()
+	fieldtypeDescStr := fieldtypeFields[31].Descriptor()
 	// fieldtype.DefaultStr holds the default value on creation for the str field.
 	fieldtype.DefaultStr = fieldtypeDescStr.Default.(func() sql.NullString)
 	// fieldtypeDescNullStr is the schema descriptor for null_str field.
-	fieldtypeDescNullStr := fieldtypeFields[30].Descriptor()
+	fieldtypeDescNullStr := fieldtypeFields[32].Descriptor()
 	// fieldtype.DefaultNullStr holds the default value on creation for the null_str field.
-	fieldtype.DefaultNullStr = fieldtypeDescNullStr.Default.(func() sql.NullString)
+	fieldtype.DefaultNullStr = fieldtypeDescNullStr.Default.(func() *sql.NullString)
 	// fieldtypeDescLink is the schema descriptor for link field.
-	fieldtypeDescLink := fieldtypeFields[31].Descriptor()
+	fieldtypeDescLink := fieldtypeFields[33].Descriptor()
 	// fieldtype.LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	fieldtype.LinkValidator = fieldtypeDescLink.Validators[0].(func(string) error)
 	// fieldtypeDescIP is the schema descriptor for ip field.
-	fieldtypeDescIP := fieldtypeFields[38].Descriptor()
+	fieldtypeDescIP := fieldtypeFields[39].Descriptor()
 	// fieldtype.DefaultIP holds the default value on creation for the ip field.
 	fieldtype.DefaultIP = fieldtypeDescIP.Default.(func() net.IP)
-	// fieldtypeDescMAC is the schema descriptor for mac field.
-	fieldtypeDescMAC := fieldtypeFields[47].Descriptor()
-	// fieldtype.MACValidator is a validator for the "mac" field. It is called by the builders before save.
-	fieldtype.MACValidator = fieldtypeDescMAC.Validators[0].(func(string) error)
+	// fieldtypeDescPair is the schema descriptor for pair field.
+	fieldtypeDescPair := fieldtypeFields[50].Descriptor()
+	// fieldtype.DefaultPair holds the default value on creation for the pair field.
+	fieldtype.DefaultPair = fieldtypeDescPair.Default.(func() schema.Pair)
+	// fieldtypeDescVstring is the schema descriptor for vstring field.
+	fieldtypeDescVstring := fieldtypeFields[52].Descriptor()
+	// fieldtype.DefaultVstring holds the default value on creation for the vstring field.
+	fieldtype.DefaultVstring = fieldtypeDescVstring.Default.(func() schema.VString)
+	// fieldtypeDescTriple is the schema descriptor for triple field.
+	fieldtypeDescTriple := fieldtypeFields[53].Descriptor()
+	// fieldtype.DefaultTriple holds the default value on creation for the triple field.
+	fieldtype.DefaultTriple = fieldtypeDescTriple.Default.(func() schema.Triple)
 	fileFields := schema.File{}.Fields()
 	_ = fileFields
 	// fileDescSize is the schema descriptor for size field.

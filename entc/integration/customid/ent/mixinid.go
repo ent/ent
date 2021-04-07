@@ -32,9 +32,9 @@ func (*MixinID) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case mixinid.FieldSomeField, mixinid.FieldMixinField:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case mixinid.FieldID:
-			values[i] = &uuid.UUID{}
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type MixinID", columns[i])
 		}

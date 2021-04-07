@@ -1056,12 +1056,12 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 	tv := indirect(t)
 	info := &TypeInfo{
 		Type:    d.Info.Type,
-		Ident:   tv.String(),
+		Ident:   t.String(),
 		PkgPath: tv.PkgPath(),
 		RType: &RType{
-			rtype:   tv,
+			rtype:   t,
+			Kind:    t.Kind(),
 			Name:    tv.Name(),
-			Kind:    tv.Kind(),
 			PkgPath: tv.PkgPath(),
 			Methods: make(map[string]struct{ In, Out []*RType }, t.NumMethod()),
 		},
@@ -1070,8 +1070,10 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
-	switch {
-	case t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
+	switch pt := reflect.PtrTo(t); {
+	case pt.Implements(valueScannerType):
+		t = pt
+		fallthrough
 	case t.Implements(valueScannerType):
 		n := t.NumMethod()
 		for i := 0; i < n; i++ {
@@ -1088,11 +1090,9 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 			}
 			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
 		}
+	case t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
 	default:
 		d.Err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
-		if pt := reflect.PtrTo(t); pt.Implements(valueScannerType) {
-			d.Err = fmt.Errorf("%s. Use %s instead", d.Err, pt)
-		}
 	}
 	d.Info = info
 }
@@ -1120,6 +1120,7 @@ var (
 	bytesType        = reflect.TypeOf([]byte(nil))
 	timeType         = reflect.TypeOf(time.Time{})
 	stringType       = reflect.TypeOf("")
+	valuerType       = reflect.TypeOf((*driver.Valuer)(nil)).Elem()
 	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
 )
 

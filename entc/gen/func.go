@@ -76,12 +76,15 @@ var (
 // ops returns all operations for given field.
 func ops(f *Field) (op []Op) {
 	switch t := f.Type.Type; {
-	case f.HasGoType() && !f.ConvertedToBasic():
+	case f.HasGoType() && !f.ConvertedToBasic() && !f.Type.Valuer():
 	case t == field.TypeJSON:
 	case t == field.TypeBool:
 		op = boolOps
 	case t == field.TypeString && strings.ToLower(f.Name) != "id":
 		op = stringOps
+		if f.HasGoType() && !f.ConvertedToBasic() && f.Type.Valuer() {
+			op = numericOps
+		}
 	case t == field.TypeEnum || f.IsEdgeField():
 		op = enumOps
 	default:

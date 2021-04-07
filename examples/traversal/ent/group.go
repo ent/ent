@@ -68,11 +68,11 @@ func (*Group) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case group.FieldID:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		case group.FieldName:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case group.ForeignKeys[0]: // group_admin
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Group", columns[i])
 		}

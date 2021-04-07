@@ -61,12 +61,14 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNillableInt64(math.MinInt64).
 		SetDir("dir").
 		SetNdir("ndir").
-		SetNullStr(sql.NullString{String: "not-default", Valid: true}).
+		SetNullStr(&sql.NullString{String: "not-default", Valid: true}).
 		SetLink(schema.Link{URL: link}).
-		SetLinkOther(schema.Link{URL: link}).
-		SetNullLink(schema.Link{URL: link}).
+		SetLinkOther(&schema.Link{URL: link}).
+		SetNullLink(&schema.Link{URL: link}).
 		SetRole(role.Admin).
 		SetDuration(time.Hour).
+		SetPair(schema.Pair{K: []byte("K"), V: []byte("V")}).
+		SetNilPair(&schema.Pair{K: []byte("K"), V: []byte("V")}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)
@@ -90,6 +92,8 @@ func Types(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	dt, err := time.Parse(time.RFC3339, "1906-01-02T00:00:00+00:00")
 	require.NoError(err)
+	require.Equal(schema.Pair{K: []byte("K"), V: []byte("V")}, ft.Pair)
+	require.Equal(&schema.Pair{K: []byte("K"), V: []byte("V")}, ft.NilPair)
 
 	ft = ft.Update().
 		SetInt(1).
@@ -110,14 +114,16 @@ func Types(t *testing.T, client *ent.Client) {
 		SetDir("dir").
 		SetNdir("ndir").
 		SetStr(sql.NullString{String: "str", Valid: true}).
-		SetNullStr(sql.NullString{String: "str", Valid: true}).
+		SetNullStr(&sql.NullString{String: "str", Valid: true}).
 		SetLink(schema.Link{URL: link}).
-		SetNullLink(schema.Link{URL: link}).
-		SetLinkOther(schema.Link{URL: link}).
+		SetNullLink(&schema.Link{URL: link}).
+		SetLinkOther(&schema.Link{URL: link}).
 		SetSchemaInt(64).
 		SetSchemaInt8(8).
 		SetSchemaInt64(64).
 		SetMAC(schema.MAC{HardwareAddr: mac}).
+		SetPair(schema.Pair{K: []byte("K1"), V: []byte("V1")}).
+		SetNilPair(&schema.Pair{K: []byte("K1"), V: []byte("V1")}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -142,6 +148,8 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(schema.Int8(8), ft.SchemaInt8)
 	require.Equal(schema.Int64(64), ft.SchemaInt64)
 	require.Equal(mac.String(), ft.MAC.String())
+	require.Equal(schema.Pair{K: []byte("K1"), V: []byte("V1")}, ft.Pair)
+	require.Equal(&schema.Pair{K: []byte("K1"), V: []byte("V1")}, ft.NilPair)
 
 	exists, err := client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour * 2)).Exist(ctx)
 	require.NoError(err)

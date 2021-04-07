@@ -29,7 +29,7 @@ func (*Group) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case group.FieldID, group.FieldMaxUsers:
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Group", columns[i])
 		}

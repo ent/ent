@@ -1006,10 +1006,16 @@ func (f Field) Comment() string {
 	return ""
 }
 
+// NillableValue reports if the field holds a Go value (not a pointer), but the field is nillable.
+// It's used by the templates to prefix values with pointer operators (e.g. &intValue or *intValue).
+func (f Field) NillableValue() bool {
+	return f.Nillable && !f.Type.RType.IsPtr()
+}
+
 // NullType returns the sql null-type for optional and nullable fields.
 func (f Field) NullType() string {
 	if f.Type.ValueScanner() {
-		return f.Type.String()
+		return f.Type.RType.String()
 	}
 	switch f.Type.Type {
 	case field.TypeJSON, field.TypeBytes:
@@ -1144,9 +1150,12 @@ func (f Field) ConvertedToBasic() bool {
 }
 
 var (
-	nullBoolType   = reflect.TypeOf(sql.NullBool{})
-	nullTimeType   = reflect.TypeOf(sql.NullTime{})
-	nullStringType = reflect.TypeOf(sql.NullString{})
+	nullBoolType    = reflect.TypeOf(sql.NullBool{})
+	nullBoolPType   = reflect.TypeOf((*sql.NullBool)(nil))
+	nullTimeType    = reflect.TypeOf(sql.NullTime{})
+	nullTimePType   = reflect.TypeOf((*sql.NullTime)(nil))
+	nullStringType  = reflect.TypeOf(sql.NullString{})
+	nullStringPType = reflect.TypeOf((*sql.NullString)(nil))
 )
 
 // BasicType returns a Go expression for the given identifier
@@ -1168,7 +1177,7 @@ func (f Field) BasicType(ident string) (expr string) {
 		switch {
 		case rt.Kind == reflect.Bool:
 			expr = fmt.Sprintf("bool(%s)", ident)
-		case rt.TypeEqual(nullBoolType):
+		case rt.TypeEqual(nullBoolType) || rt.TypeEqual(nullBoolPType):
 			expr = fmt.Sprintf("%s.Bool", ident)
 		}
 	case field.TypeBytes:
@@ -1177,7 +1186,7 @@ func (f Field) BasicType(ident string) (expr string) {
 		}
 	case field.TypeTime:
 		switch {
-		case rt.TypeEqual(nullTimeType):
+		case rt.TypeEqual(nullTimeType) || rt.TypeEqual(nullTimePType):
 			expr = fmt.Sprintf("%s.Time", ident)
 		case rt.Kind == reflect.Struct:
 			expr = fmt.Sprintf("time.Time(%s)", ident)
@@ -1188,7 +1197,7 @@ func (f Field) BasicType(ident string) (expr string) {
 			expr = fmt.Sprintf("string(%s)", ident)
 		case t.Stringer():
 			expr = fmt.Sprintf("%s.String()", ident)
-		case rt.TypeEqual(nullStringType):
+		case rt.TypeEqual(nullStringType) || rt.TypeEqual(nullStringPType):
 			expr = fmt.Sprintf("%s.String", ident)
 		}
 	default:

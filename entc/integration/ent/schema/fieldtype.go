@@ -5,11 +5,14 @@
 package schema
 
 import (
+	"bytes"
 	"database/sql/driver"
+	"encoding/gob"
 	"fmt"
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"entgo.io/ent"
@@ -30,35 +33,63 @@ type FieldType struct {
 // Fields of the File.
 func (FieldType) Fields() []ent.Field { //nolint:funlen
 	return []ent.Field{
+		// ----------------------------------------------------------------------------
+		// Basic types
+
 		field.Int("int"),
 		field.Int8("int8"),
 		field.Int16("int16"),
 		field.Int32("int32"),
 		field.Int64("int64"),
-		field.Int("optional_int").Optional(),
-		field.Int8("optional_int8").Optional(),
-		field.Int16("optional_int16").Optional(),
-		field.Int32("optional_int32").Optional(),
-		field.Int64("optional_int64").Optional(),
-		field.Int("nillable_int").Optional().Nillable(),
-		field.Int8("nillable_int8").Optional().Nillable(),
-		field.Int16("nillable_int16").Optional().Nillable(),
-		field.Int32("nillable_int32").Optional().Nillable(),
-		field.Int64("nillable_int64").Optional().Nillable(),
-		field.Int32("validate_optional_int32").Optional().Max(100),
-		field.Uint("optional_uint").Optional(),
-		field.Uint8("optional_uint8").Optional(),
-		field.Uint16("optional_uint16").Optional(),
-		field.Uint32("optional_uint32").Optional(),
-		field.Uint64("optional_uint64").Optional(),
-		field.Int64("duration").
-			GoType(time.Duration(0)).
+		field.Int("optional_int").
+			Optional(),
+		field.Int8("optional_int8").
+			Optional(),
+		field.Int16("optional_int16").
+			Optional(),
+		field.Int32("optional_int32").
+			Optional(),
+		field.Int64("optional_int64").
+			Optional(),
+		field.Int("nillable_int").
+			Optional().
+			Nillable(),
+		field.Int8("nillable_int8").
+			Optional().
+			Nillable(),
+		field.Int16("nillable_int16").
+			Optional().
+			Nillable(),
+		field.Int32("nillable_int32").
+			Optional().
+			Nillable(),
+		field.Int64("nillable_int64").
+			Optional().
+			Nillable(),
+		field.Int32("validate_optional_int32").
+			Optional().
+			Max(100),
+		field.Uint("optional_uint").
+			Optional(),
+		field.Uint8("optional_uint8").
+			Optional(),
+		field.Uint16("optional_uint16").
+			Optional(),
+		field.Uint32("optional_uint32").
+			Optional(),
+		field.Uint64("optional_uint64").
 			Optional(),
 		field.Enum("state").
 			Values("on", "off").
 			Optional(),
-		field.Float("optional_float").Optional(),
-		field.Float32("optional_float32").Optional(),
+		field.Float("optional_float").
+			Optional(),
+		field.Float32("optional_float32").
+			Optional(),
+
+		// ----------------------------------------------------------------------------
+		// Dialect-specific types
+
 		field.Time("datetime").
 			Optional().
 			SchemaType(map[string]string{
@@ -71,31 +102,6 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 				dialect.MySQL:    "decimal(6,2)",
 				dialect.Postgres: "numeric",
 			}),
-		field.String("dir").
-			Optional().
-			GoType(http.Dir("dir")),
-		field.String("ndir").
-			Optional().
-			Nillable().
-			NotEmpty().
-			GoType(http.Dir("ndir")),
-		field.String("str").
-			Optional().
-			GoType(&sql.NullString{}).
-			DefaultFunc(func() sql.NullString {
-				return sql.NullString{String: "default", Valid: true}
-			}),
-		field.String("null_str").
-			Optional().
-			Nillable().
-			GoType(&sql.NullString{}).
-			DefaultFunc(func() sql.NullString {
-				return sql.NullString{String: "default", Valid: true}
-			}),
-		field.String("link").
-			Optional().
-			NotEmpty().
-			GoType(&Link{}),
 		field.Other("link_other", &Link{}).
 			SchemaType(map[string]string{
 				dialect.Postgres: "varchar",
@@ -103,6 +109,50 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 				dialect.SQLite:   "varchar(255)",
 			}).
 			Optional(),
+		field.String("mac").
+			Optional().
+			GoType(MAC{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "macaddr",
+			}).
+			Validate(func(s string) error {
+				_, err := net.ParseMAC(s)
+				return err
+			}),
+
+		// ----------------------------------------------------------------------------
+		// Custom Go types
+
+		field.Int64("duration").
+			GoType(time.Duration(0)).
+			Optional(),
+		field.String("dir").
+			GoType(http.Dir("dir")).
+			DefaultFunc(func() http.Dir {
+				return "unknown"
+			}),
+		field.String("ndir").
+			Optional().
+			Nillable().
+			NotEmpty().
+			GoType(http.Dir("ndir")),
+		field.String("str").
+			Optional().
+			GoType(sql.NullString{}).
+			DefaultFunc(func() sql.NullString {
+				return sql.NullString{String: "default", Valid: true}
+			}),
+		field.String("null_str").
+			Optional().
+			Nillable().
+			GoType(&sql.NullString{}).
+			DefaultFunc(func() *sql.NullString {
+				return &sql.NullString{String: "default", Valid: true}
+			}),
+		field.String("link").
+			Optional().
+			NotEmpty().
+			GoType(Link{}),
 		field.String("null_link").
 			Optional().
 			Nillable().
@@ -150,21 +200,99 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		field.Enum("role").
 			Default(string(role.Read)).
 			GoType(role.Role("role")),
-		field.String("mac").
-			Optional().
-			GoType(&MAC{}).
-			SchemaType(map[string]string{
-				dialect.Postgres: "macaddr",
-			}).
-			Validate(func(s string) error {
-				_, err := net.ParseMAC(s)
-				return err
-			}),
 		field.UUID("uuid", uuid.UUID{}).
 			Optional(),
 		field.Strings("strings").
 			Optional(),
+		field.Bytes("pair").
+			GoType(Pair{}).
+			DefaultFunc(func() Pair {
+				return Pair{K: []byte("K"), V: []byte("V")}
+			}),
+		field.Bytes("nil_pair").
+			GoType(&Pair{}).
+			Optional().
+			Nillable(),
+		field.String("vstring").
+			GoType(VString("")).
+			DefaultFunc(func() VString {
+				return "value scanner string"
+			}),
+		field.String("triple").
+			GoType(Triple{}).
+			DefaultFunc(func() Triple {
+				return Triple{E: [3]string{"A", "B", "C"}}
+			}),
 	}
+}
+
+type VString string
+
+func (s *VString) Scan(v interface{}) (err error) {
+	switch v := v.(type) {
+	case nil:
+	case string:
+		*s = VString(v)
+	case []byte:
+		*s = VString(v)
+	default:
+		err = fmt.Errorf("unexpected type %T", v)
+	}
+	return
+}
+
+func (s VString) Value() (driver.Value, error) {
+	return string(s), nil
+}
+
+type Triple struct {
+	E [3]string
+}
+
+// Value implements the driver Valuer interface.
+func (t Triple) Value() (driver.Value, error) {
+	return fmt.Sprintf("(%s,%s,%s)", t.E[0], t.E[1], t.E[2]), nil
+}
+
+// Scan implements the Scanner interface.
+func (t *Triple) Scan(value interface{}) (err error) {
+	switch v := value.(type) {
+	case nil:
+	case []byte:
+		es := strings.Split(strings.TrimPrefix(string(v), "()"), ",")
+		t.E[0], t.E[1], t.E[2] = es[0], es[1], es[2]
+	case string:
+		es := strings.Split(strings.TrimPrefix(v, "()"), ",")
+		t.E[0], t.E[1], t.E[2] = es[0], es[1], es[2]
+	default:
+		err = fmt.Errorf("unexpected type %T", v)
+	}
+	return
+}
+
+type Pair struct {
+	K, V []byte
+}
+
+// Value implements the driver Valuer interface.
+func (p Pair) Value() (driver.Value, error) {
+	var b bytes.Buffer
+	if err := gob.NewEncoder(&b).Encode(p); err != nil {
+		return nil, err
+	}
+	return b.Bytes(), nil
+}
+
+// Scan implements the Scanner interface.
+func (p *Pair) Scan(value interface{}) (err error) {
+	switch v := value.(type) {
+	case nil:
+	case []byte:
+		err = gob.NewDecoder(bytes.NewBuffer(v)).Decode(p)
+	default:
+		err = fmt.Errorf("unexpected type %T", v)
+	}
+	return
 }
 
 type (

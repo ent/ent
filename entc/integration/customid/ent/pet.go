@@ -94,11 +94,11 @@ func (*Pet) scanValues(columns []string) ([]interface{}, error) {
 	for i := range columns {
 		switch columns[i] {
 		case pet.FieldID:
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case pet.ForeignKeys[0]: // pet_best_friend
-			values[i] = &sql.NullString{}
+			values[i] = new(sql.NullString)
 		case pet.ForeignKeys[1]: // user_pets
-			values[i] = &sql.NullInt64{}
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Pet", columns[i])
 		}
