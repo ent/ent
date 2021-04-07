@@ -576,7 +576,6 @@ func (x *Hi) Scan(src interface{}) error {
 	}
 	return fmt.Errorf("unexpected type %T", src)
 }
-
 ```
 
 We add a new `field.Bytes` to our schema, setting the generated protobuf struct as its underlying `GoType`:
