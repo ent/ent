@@ -584,7 +584,8 @@ We add a new `field.Bytes` to our schema, setting the generated protobuf struct 
 // Fields of the Message.
 func (Message) Fields() []ent.Field {
 	return []ent.Field{
-		field.Bytes("hi").GoType(&pb.Hi{}),
+		field.Bytes("hi").
+			GoType(&pb.Hi{}),
 	}
 }
 ```
