@@ -28,5 +28,6 @@ for one of the languages, please ping us via the slack channel.
 
 ## Important Guidelines
 
-- Most documents begin with a line: “id: <something>” - this should NEVER be translated and will actually break the website build if it is.
-- The website build is sensitive to closing of HTML elements, if HTML is needed within the translation it must be closed, or self-closing. (I.e do not leave a dangling <br>, make it <br/>
+- Most documents begin with a line: `id: <document-id>` - this should NEVER be translated and will actually break the website build if it is.
+- The website build is sensitive to closing of HTML elements, if HTML is needed within the translation it must be closed,
+  or self-closing (i.e. do not leave a dangling `<br>`, make it `<br/>`).
