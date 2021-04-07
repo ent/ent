@@ -538,6 +538,12 @@ func main() {
 
 #### How to store Protobuf objects in a BLOB column?
 
+:::info
+This solution relies on a recent bugfix that is currently available on the `master` branch and
+will be released in `v.0.8.0`
+:::
+
+
 Assuming we have a Protobuf message defined:
 ```protobuf
 syntax = "proto3";
