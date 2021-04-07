@@ -16,7 +16,8 @@ sidebar_label: FAQ
 [How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids)  
 [How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)  
 [How to extend the generated models?](#how-to-extend-the-generated-models)  
-[How to extend the generated builders?](#how-to-extend-the-generated-builders)
+[How to extend the generated builders?](#how-to-extend-the-generated-builders)   
+[How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)
 
 ## Answers
 
@@ -532,4 +533,90 @@ func main() {
 	})
 	// ...
 }
+```
+
+
+#### How to store Protobuf objects in a BLOB column?
+
+:::info
+This solution relies on a recent bugfix that is currently available on the `master` branch and
+will be released in `v.0.8.0`
+:::
+
+
+Assuming we have a Protobuf message defined:
+```protobuf
+syntax = "proto3";
+
+package pb;
+
+option go_package = "project/pb";
+
+message Hi {
+  string Greeting = 1;
+}
+```
+
+We add receiver methods to the generated protobuf struct such that it implements [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner)
+
+```go
+func (x *Hi) Value() (driver.Value, error) {
+	return proto.Marshal(x)
+}
+
+func (x *Hi) Scan(src interface{}) error {
+	if src == nil {
+		return nil
+	}
+	if b, ok := src.([]byte); ok {
+		if err := proto.Unmarshal(b, x); err != nil {
+			return err
+		}
+		return nil
+	}
+	return fmt.Errorf("unexpected type %T", src)
+}
+```
+
+We add a new `field.Bytes` to our schema, setting the generated protobuf struct as its underlying `GoType`:
+
+```go
+// Fields of the Message.
+func (Message) Fields() []ent.Field {
+	return []ent.Field{
+		field.Bytes("hi").
+			GoType(&pb.Hi{}),
+	}
+}
+```
+
+Test that it works:
+
+```go
+package main
+
+import (
+	"context"
+	"project/ent/enttest"
+	"project/pb"
+	"testing"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+)
+
+func Test(t *testing.T) {
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+
+	msg := client.Message.Create().
+		SetHi(&pb.Hi{
+			Greeting: "hello",
+		}).
+		SaveX(context.TODO())
+
+	ret := client.Message.GetX(context.TODO(), msg.ID)
+	require.Equal(t, "hello", ret.Hi.Greeting)
+}
+
 ```
