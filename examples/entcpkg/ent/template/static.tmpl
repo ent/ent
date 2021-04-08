@@ -7,6 +7,6 @@
 	{{- if eq $.Name "User" }}
 		{{- /* A usage of an external function. */ -}}
 		// StaticField defined by templates (titled {{ title "staticField" }}).
-		StaticField string `json:"static_field,omitempty"`
+		StaticField string `json:"static_field,omitempty"{{ with $.Config.Annotations.RQL }} {{ .StructTag }}:"static_field"{{ end }}`
 	{{- end }}
 {{ end }}

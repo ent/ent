@@ -111,7 +111,7 @@ func (c *Config) load() (string, error) {
 	if pkgs[0].PkgPath != entInterface.PkgPath() {
 		entPkg, pkg = pkgs[1], pkgs[0]
 	}
-	names := make([]string, 0)
+	var names []string
 	iface := entPkg.Types.Scope().Lookup(entInterface.Name()).Type().Underlying().(*types.Interface)
 	for k, v := range pkg.TypesInfo.Defs {
 		typ, ok := v.(*types.TypeName)

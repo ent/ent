@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
+	"entgo.io/ent/schema"
 )
 
 func main() {
@@ -22,6 +23,7 @@ func main() {
 	// rest are provided with the `Templates` option.
 	opts := []entc.Option{
 		entc.TemplateFiles("template/stringer.tmpl"),
+		entc.Annotations(Annotation{StructTag: "rql"}),
 	}
 	err := entc.Generate("./schema", &gen.Config{
 		Header: `
@@ -69,3 +71,17 @@ func TagFields(name string) gen.Hook {
 		})
 	}
 }
+
+const AnnotationName = "RQL"
+
+// Annotation defines a custom annotation
+// to be inject globally to all templates.
+type Annotation struct {
+	StructTag string
+}
+
+func (Annotation) Name() string {
+	return AnnotationName
+}
+
+var _ schema.Annotation = (*Annotation)(nil)

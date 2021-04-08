@@ -26,7 +26,7 @@ type User struct {
 	Age int `json:"age"`
 
 	// StaticField defined by templates (titled STATICFIELD).
-	StaticField string `json:"static_field,omitempty"`
+	StaticField string `json:"static_field,omitempty" rql:"static_field"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
