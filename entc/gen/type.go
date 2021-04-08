@@ -1396,6 +1396,11 @@ func (e Edge) MutationClear() string {
 	return name
 }
 
+// MutationRemove returns the method name for removing edge ids.
+func (e Edge) MutationRemove() string {
+	return "Remove" + pascal(rules.Singularize(e.Name)) + "IDs"
+}
+
 // MutationCleared returns the method name for indicating if the edge
 // was cleared in the mutation. The default name is "<EdgeName>Cleared".
 // If the the method conflicts with the mutation methods, add "Edge" the

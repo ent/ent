@@ -282,9 +282,8 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 
 	{{ if not $e.Unique }}
 		{{ $p := lower (printf "%.1s" $e.Type.Name) }}
-		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
-		// {{ $idsFunc }} removes the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by IDs.
-		func (m *{{ $mutation }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) {
+		// {{ $e.MutationRemove }} removes the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by IDs.
+		func (m *{{ $mutation }}) {{ $e.MutationRemove }}(ids ...{{ $e.Type.ID.Type }}) {
 			if m.removed{{ $e.BuilderField }} == nil {
 				m.removed{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
 			}
