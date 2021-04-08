@@ -12,43 +12,28 @@ import (
 type DriverAction string
 
 const (
-	DriverActionTx      DriverAction = "Tx"
-	DriverActionBeginTx DriverAction = "BeginTx"
-	DriverActionExec    DriverAction = "Exec"
-	DriverActionQuery   DriverAction = "Query"
-)
-
-type TxAction string
-
-const (
-	TxActionExec     TxAction = "Exec"
-	TxActionQuery    TxAction = "Query"
-	TxActionCommit   TxAction = "Commit"
-	TxActionRollback TxAction = "Rollback"
+	DriverActionTx         DriverAction = "Tx"
+	DriverActionBeginTx    DriverAction = "BeginTx"
+	DriverActionTxCommit   DriverAction = "Tx.Commit"
+	DriverActionTxRollback DriverAction = "Tx.Rollback"
+	DriverActionExec       DriverAction = "Exec"
+	DriverActionQuery      DriverAction = "Query"
 )
 
 type LogEntry struct {
-	Action   DriverAction
-	TxAction TxAction
-	TxID     string
-	TxOpt    *sql.TxOptions
-	Query    string
-	Args     interface{}
+	Action DriverAction
+	TxID   string
+	TxOpt  *sql.TxOptions
+	Query  string
+	Args   interface{}
 }
 
 func (l LogEntry) String() string {
-	switch l.TxAction {
-	case TxActionExec:
-		fallthrough
-	case TxActionQuery:
-		return fmt.Sprintf("%s(%s).%s: query=%v args=%v", l.Action, l.TxID, l.TxAction, l.Query, l.Args)
-	case TxActionCommit:
-		return fmt.Sprintf("%s(%s): committed", l.Action, l.TxID)
-	case TxActionRollback:
-		return fmt.Sprintf("%s(%s): rollbacked", l.Action, l.TxID)
-	}
-
 	switch l.Action {
+	case DriverActionTxCommit:
+		return fmt.Sprintf("Tx(%s): committed", l.TxID)
+	case DriverActionTxRollback:
+		return fmt.Sprintf("Tx(%s): rollbacked", l.TxID)
 	case DriverActionTx:
 		fallthrough
 	case DriverActionBeginTx:
@@ -56,7 +41,11 @@ func (l LogEntry) String() string {
 	case DriverActionExec:
 		fallthrough
 	case DriverActionQuery:
-		return fmt.Sprintf("driver.%s: query=%v args=%v", l.Action, l.Query, l.Args)
+		if l.TxID != "" {
+			return fmt.Sprintf("Tx(%s).%s: query=%v args=%v", l.TxID, l.Action, l.Query, l.Args)
+		} else {
+			return fmt.Sprintf("driver.%s: query=%v args=%v", l.Action, l.Query, l.Args)
+		}
 	}
 
 	panic(fmt.Errorf("no log action was specified"))

@@ -153,12 +153,11 @@ type DebugTx struct {
 // Exec logs its params and calls the underlying transaction Exec method.
 func (d *DebugTx) Exec(ctx context.Context, query string, args, v interface{}) error {
 	d.log(ctx, LogEntry{
-		Action:   DriverActionTx,
-		TxAction: TxActionExec,
-		TxID:     d.id,
-		TxOpt:    d.opts,
-		Query:    query,
-		Args:     args,
+		Action: DriverActionExec,
+		TxID:   d.id,
+		TxOpt:  d.opts,
+		Query:  query,
+		Args:   args,
 	})
 	return d.Tx.Exec(ctx, query, args, v)
 }
@@ -166,12 +165,11 @@ func (d *DebugTx) Exec(ctx context.Context, query string, args, v interface{}) e
 // Query logs its params and calls the underlying transaction Query method.
 func (d *DebugTx) Query(ctx context.Context, query string, args, v interface{}) error {
 	d.log(ctx, LogEntry{
-		Action:   DriverActionTx,
-		TxAction: TxActionQuery,
-		TxID:     d.id,
-		TxOpt:    d.opts,
-		Query:    query,
-		Args:     args,
+		Action: DriverActionQuery,
+		TxID:   d.id,
+		TxOpt:  d.opts,
+		Query:  query,
+		Args:   args,
 	})
 	return d.Tx.Query(ctx, query, args, v)
 }
@@ -179,10 +177,9 @@ func (d *DebugTx) Query(ctx context.Context, query string, args, v interface{}) 
 // Commit logs this step and calls the underlying transaction Commit method.
 func (d *DebugTx) Commit() error {
 	d.log(d.ctx, LogEntry{
-		Action:   DriverActionTx,
-		TxAction: TxActionCommit,
-		TxID:     d.id,
-		TxOpt:    d.opts,
+		Action: DriverActionTxCommit,
+		TxID:   d.id,
+		TxOpt:  d.opts,
 	})
 	return d.Tx.Commit()
 }
@@ -190,10 +187,9 @@ func (d *DebugTx) Commit() error {
 // Rollback logs this step and calls the underlying transaction Rollback method.
 func (d *DebugTx) Rollback() error {
 	d.log(d.ctx, LogEntry{
-		Action:   DriverActionTx,
-		TxAction: TxActionRollback,
-		TxID:     d.id,
-		TxOpt:    d.opts,
+		Action: DriverActionTxRollback,
+		TxID:   d.id,
+		TxOpt:  d.opts,
 	})
 	return d.Tx.Rollback()
 }
