@@ -26,7 +26,7 @@ const (
 type logEntry struct {
 	Action   DriverAction
 	TxAction TxAction
-	TxId     string
+	TxID     string
 	TxOpt    *sql.TxOptions
 	Query    string
 	Args     interface{}
@@ -37,18 +37,18 @@ func (l logEntry) String() string {
 	case TxActionExec:
 		fallthrough
 	case TxActionQuery:
-		return fmt.Sprintf("%s(%s).%s: query=%v args=%v", l.Action, l.TxId, l.TxAction, l.Query, l.Args)
+		return fmt.Sprintf("%s(%s).%s: query=%v args=%v", l.Action, l.TxID, l.TxAction, l.Query, l.Args)
 	case TxActionCommit:
-		return fmt.Sprintf("%s(%s): committed", l.Action, l.TxId)
+		return fmt.Sprintf("%s(%s): committed", l.Action, l.TxID)
 	case TxActionRollback:
-		return fmt.Sprintf("%s(%s): rollbacked", l.Action, l.TxId)
+		return fmt.Sprintf("%s(%s): rollbacked", l.Action, l.TxID)
 	}
 
 	switch l.Action {
 	case DriverActionTx:
 		fallthrough
 	case DriverActionBeginTx:
-		return fmt.Sprintf("driver.%s(%s): started", l.Action, l.TxId)
+		return fmt.Sprintf("driver.%s(%s): started", l.Action, l.TxID)
 	case DriverActionExec:
 		fallthrough
 	case DriverActionQuery:

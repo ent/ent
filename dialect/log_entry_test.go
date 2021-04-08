@@ -28,14 +28,14 @@ func Test_logEntry_String(t *testing.T) {
 		{
 			entry: logEntry{
 				Action: DriverActionTx,
-				TxId:   "tx-id",
+				TxID:   "tx-id",
 			},
 			want: "driver.Tx(tx-id): started",
 		},
 		{
 			entry: logEntry{
 				Action: DriverActionBeginTx,
-				TxId:   "tx-id",
+				TxID:   "tx-id",
 			},
 			want: "driver.BeginTx(tx-id): started",
 		},
@@ -43,7 +43,7 @@ func Test_logEntry_String(t *testing.T) {
 			entry: logEntry{
 				Action:   DriverActionTx,
 				TxAction: TxActionExec,
-				TxId:     "tx-id",
+				TxID:     "tx-id",
 				Query:    "SELECT * FROM nothing WHERE id = ?",
 				Args:     []interface{}{1},
 			},
@@ -53,7 +53,7 @@ func Test_logEntry_String(t *testing.T) {
 			entry: logEntry{
 				Action:   DriverActionTx,
 				TxAction: TxActionQuery,
-				TxId:     "tx-id",
+				TxID:     "tx-id",
 				Query:    "SELECT * FROM nothing WHERE id = ?",
 				Args:     []interface{}{1},
 			},
@@ -63,7 +63,7 @@ func Test_logEntry_String(t *testing.T) {
 			entry: logEntry{
 				Action:   DriverActionTx,
 				TxAction: TxActionCommit,
-				TxId:     "tx-id",
+				TxID:     "tx-id",
 			},
 			want: "Tx(tx-id): committed",
 		},
@@ -71,7 +71,7 @@ func Test_logEntry_String(t *testing.T) {
 			entry: logEntry{
 				Action:   DriverActionTx,
 				TxAction: TxActionRollback,
-				TxId:     "tx-id",
+				TxID:     "tx-id",
 			},
 			want: "Tx(tx-id): rollbacked",
 		},

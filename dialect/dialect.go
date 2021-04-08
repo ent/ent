@@ -116,7 +116,7 @@ func (d *DebugDriver) Tx(ctx context.Context) (Tx, error) {
 	id := uuid.New().String()
 	d.log(ctx, logEntry{
 		Action: DriverActionTx,
-		TxId:   id,
+		TxID:   id,
 	})
 	return &DebugTx{tx, id, d.log, ctx, nil}, nil
 }
@@ -136,7 +136,7 @@ func (d *DebugDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, err
 	id := uuid.New().String()
 	d.log(ctx, logEntry{
 		Action: DriverActionBeginTx,
-		TxId:   id,
+		TxID:   id,
 	})
 	return &DebugTx{tx, id, d.log, ctx, opts}, nil
 }
@@ -155,7 +155,7 @@ func (d *DebugTx) Exec(ctx context.Context, query string, args, v interface{}) e
 	d.log(ctx, logEntry{
 		Action:   DriverActionTx,
 		TxAction: TxActionExec,
-		TxId:     d.id,
+		TxID:     d.id,
 		TxOpt:    d.opts,
 		Query:    query,
 		Args:     args,
@@ -168,7 +168,7 @@ func (d *DebugTx) Query(ctx context.Context, query string, args, v interface{}) 
 	d.log(ctx, logEntry{
 		Action:   DriverActionTx,
 		TxAction: TxActionQuery,
-		TxId:     d.id,
+		TxID:     d.id,
 		TxOpt:    d.opts,
 		Query:    query,
 		Args:     args,
@@ -181,7 +181,7 @@ func (d *DebugTx) Commit() error {
 	d.log(d.ctx, logEntry{
 		Action:   DriverActionTx,
 		TxAction: TxActionCommit,
-		TxId:     d.id,
+		TxID:     d.id,
 		TxOpt:    d.opts,
 	})
 	return d.Tx.Commit()
@@ -192,7 +192,7 @@ func (d *DebugTx) Rollback() error {
 	d.log(d.ctx, logEntry{
 		Action:   DriverActionTx,
 		TxAction: TxActionRollback,
-		TxId:     d.id,
+		TxID:     d.id,
 		TxOpt:    d.opts,
 	})
 	return d.Tx.Rollback()
