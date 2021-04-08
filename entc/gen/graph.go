@@ -55,6 +55,24 @@ type (
 
 		// Hooks holds an optional list of Hooks to apply on the graph before/after the code-generation.
 		Hooks []Hook
+
+		// Annotations that are injected to the Config object can be accessed
+		// globally in all templates. In order to access an annotation from a
+		// graph template, do the following:
+		//
+		//	{{- with $.Annotations.GQL }}
+		//		{{/* Annotation usage goes here. */}}
+		//	{{- end }}
+		//
+		// For type templates, we access the Config field to access the global
+		// annotations, and not the type-specific annotation.
+		//
+		//	{{- with $.Config.Annotations.GQL }}
+		//		{{/* Annotation usage goes here. */}}
+		//	{{- end }}
+		//
+		// Note that the mapping is from the annotation-name (e.g. "GQL") to a JSON decoded object.
+		Annotations Annotations
 	}
 
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
@@ -89,6 +107,13 @@ type (
 	//	}
 	//
 	Hook func(Generator) Generator
+
+	// Annotations defines code generation annotations to be passed to the templates.
+	// It can be defined on most elements in the schema (node, field, edge), or globally
+	// on the Config object.
+	// The mapping is from the annotation name (e.g. "EntGQL") to the annotation itself.
+	// Note that, annotations that are defined in the schema must be JSON encoded/decoded.
+	Annotations map[string]interface{}
 )
 
 // Generate calls f(g).

@@ -49,7 +49,7 @@ type (
 		foreignKeys map[string]struct{}
 		// Annotations that were defined for the field in the schema.
 		// The mapping is from the Annotation.Name() to a JSON decoded object.
-		Annotations map[string]interface{}
+		Annotations Annotations
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -85,7 +85,7 @@ type (
 		UserDefined bool
 		// Annotations that were defined for the field in the schema.
 		// The mapping is from the Annotation.Name() to a JSON decoded object.
-		Annotations map[string]interface{}
+		Annotations Annotations
 		// referenced foreign-key.
 		fk *ForeignKey
 	}
@@ -124,7 +124,7 @@ type (
 		Bidi bool
 		// Annotations that were defined for the edge in the schema.
 		// The mapping is from the Annotation.Name() to a JSON decoded object.
-		Annotations map[string]interface{}
+		Annotations Annotations
 	}
 
 	// Relation holds the relational database information for edges.

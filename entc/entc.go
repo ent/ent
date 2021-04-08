@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/entc/internal"
 	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -119,6 +120,23 @@ func FeatureNames(names ...string) Option {
 					cfg.Features = append(cfg.Features, feat)
 				}
 			}
+		}
+		return nil
+	}
+}
+
+// Annotations appends the given annotations to the codegen config.
+func Annotations(annotations ...schema.Annotation) Option {
+	return func(cfg *gen.Config) error {
+		if cfg.Annotations == nil {
+			cfg.Annotations = gen.Annotations{}
+		}
+		for _, ant := range annotations {
+			name := ant.Name()
+			if _, ok := cfg.Annotations[name]; ok {
+				return fmt.Errorf("duplicate annotations with name %q", name)
+			}
+			cfg.Annotations[name] = ant
 		}
 		return nil
 	}
