@@ -76,7 +76,7 @@ func (i *Inspector) tables(ctx context.Context) ([]string, error) {
 		rows  = &sql.Rows{}
 	)
 	if err := i.Query(ctx, query, args, rows); err != nil {
-		return nil, fmt.Errorf("mysql: reading table names %w", err)
+		return nil, fmt.Errorf("%q driver: reading table names %w", i.Dialect(), err)
 	}
 	defer rows.Close()
 	if err := sql.ScanSlice(rows, &names); err != nil {
