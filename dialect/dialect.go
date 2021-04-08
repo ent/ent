@@ -66,7 +66,7 @@ func NopTx(d Driver) Tx {
 // DebugDriver is a driver that logs all driver operations.
 type DebugDriver struct {
 	Driver                                 // underlying driver.
-	log    func(context.Context, logEntry) // log function. defaults to log.Println.
+	log    func(context.Context, LogEntry) // log function. defaults to log.Println.
 }
 
 // Debug gets a driver and an optional logging function, and returns
@@ -76,20 +76,20 @@ func Debug(d Driver, logger ...func(...interface{})) Driver {
 	if len(logger) == 1 {
 		logf = logger[0]
 	}
-	drv := &DebugDriver{d, func(_ context.Context, v logEntry) { logf(v) }}
+	drv := &DebugDriver{d, func(_ context.Context, v LogEntry) { logf(v) }}
 	return drv
 }
 
 // DebugWithContext gets a driver and a logging function, and returns
 // a new debugged-driver that prints all outgoing operations with context.
-func DebugWithContext(d Driver, logger func(context.Context, logEntry)) Driver {
+func DebugWithContext(d Driver, logger func(context.Context, LogEntry)) Driver {
 	drv := &DebugDriver{d, logger}
 	return drv
 }
 
 // Exec logs its params and calls the underlying driver Exec method.
 func (d *DebugDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
-	d.log(ctx, logEntry{
+	d.log(ctx, LogEntry{
 		Action: DriverActionExec,
 		Query:  query,
 		Args:   args,
@@ -99,7 +99,7 @@ func (d *DebugDriver) Exec(ctx context.Context, query string, args, v interface{
 
 // Query logs its params and calls the underlying driver Query method.
 func (d *DebugDriver) Query(ctx context.Context, query string, args, v interface{}) error {
-	d.log(ctx, logEntry{
+	d.log(ctx, LogEntry{
 		Action: DriverActionQuery,
 		Query:  query,
 		Args:   args,
@@ -114,7 +114,7 @@ func (d *DebugDriver) Tx(ctx context.Context) (Tx, error) {
 		return nil, err
 	}
 	id := uuid.New().String()
-	d.log(ctx, logEntry{
+	d.log(ctx, LogEntry{
 		Action: DriverActionTx,
 		TxID:   id,
 	})
@@ -134,7 +134,7 @@ func (d *DebugDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, err
 		return nil, err
 	}
 	id := uuid.New().String()
-	d.log(ctx, logEntry{
+	d.log(ctx, LogEntry{
 		Action: DriverActionBeginTx,
 		TxID:   id,
 	})
@@ -145,14 +145,14 @@ func (d *DebugDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, err
 type DebugTx struct {
 	Tx                                   // underlying transaction.
 	id   string                          // transaction logging id.
-	log  func(context.Context, logEntry) // log function. defaults to fmt.Println.
+	log  func(context.Context, LogEntry) // log function. defaults to fmt.Println.
 	ctx  context.Context                 // underlying transaction context.
 	opts *sql.TxOptions                  // underlying transaction options.
 }
 
 // Exec logs its params and calls the underlying transaction Exec method.
 func (d *DebugTx) Exec(ctx context.Context, query string, args, v interface{}) error {
-	d.log(ctx, logEntry{
+	d.log(ctx, LogEntry{
 		Action:   DriverActionTx,
 		TxAction: TxActionExec,
 		TxID:     d.id,
@@ -165,7 +165,7 @@ func (d *DebugTx) Exec(ctx context.Context, query string, args, v interface{}) e
 
 // Query logs its params and calls the underlying transaction Query method.
 func (d *DebugTx) Query(ctx context.Context, query string, args, v interface{}) error {
-	d.log(ctx, logEntry{
+	d.log(ctx, LogEntry{
 		Action:   DriverActionTx,
 		TxAction: TxActionQuery,
 		TxID:     d.id,
@@ -178,7 +178,7 @@ func (d *DebugTx) Query(ctx context.Context, query string, args, v interface{}) 
 
 // Commit logs this step and calls the underlying transaction Commit method.
 func (d *DebugTx) Commit() error {
-	d.log(d.ctx, logEntry{
+	d.log(d.ctx, LogEntry{
 		Action:   DriverActionTx,
 		TxAction: TxActionCommit,
 		TxID:     d.id,
@@ -189,7 +189,7 @@ func (d *DebugTx) Commit() error {
 
 // Rollback logs this step and calls the underlying transaction Rollback method.
 func (d *DebugTx) Rollback() error {
-	d.log(d.ctx, logEntry{
+	d.log(d.ctx, LogEntry{
 		Action:   DriverActionTx,
 		TxAction: TxActionRollback,
 		TxID:     d.id,

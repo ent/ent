@@ -23,7 +23,7 @@ const (
 	TxActionRollback TxAction = "Rollback"
 )
 
-type logEntry struct {
+type LogEntry struct {
 	Action   DriverAction
 	TxAction TxAction
 	TxID     string
@@ -32,7 +32,7 @@ type logEntry struct {
 	Args     interface{}
 }
 
-func (l logEntry) String() string {
+func (l LogEntry) String() string {
 	switch l.TxAction {
 	case TxActionExec:
 		fallthrough
