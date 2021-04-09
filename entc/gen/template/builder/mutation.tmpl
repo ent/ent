@@ -218,7 +218,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	{{ end }}
 
 	{{ if $f.Optional }}
-		{{ $func := print "Clear" $f.StructField }}
+		{{ $func := $f.MutationClear }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
 		func (m *{{ $mutation }}) {{ $func }}() {
 			m.{{ $f.BuilderField }} = nil
@@ -228,7 +228,7 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 			m.clearedFields[{{ $const }}] = struct{}{}
 		}
 
-		{{ $func = print $f.StructField "Cleared" }}
+		{{ $func = $f.MutationCleared }}
 		// {{ $func }} returns if the "{{ $f.Name }}" field was cleared in this mutation.
 		func (m *{{ $mutation }}) {{ $func }}() bool {
 			_, ok := m.clearedFields[{{ $const }}]
@@ -277,9 +277,9 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	}
 
 	{{ $func = $e.MutationCleared }}
-	// {{ $func }} returns if the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity was cleared.
+	// {{ $func }} reports if the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity was cleared.
 	func (m *{{ $mutation }}) {{ $func }}() bool {
-		return m.cleared{{ $e.BuilderField }}
+		return {{ with $e.Field }}{{ if .Optional }}m.{{ .MutationCleared }}() || {{ end }}{{ end }}m.cleared{{ $e.BuilderField }}
 	}
 
 	{{ if not $e.Unique }}

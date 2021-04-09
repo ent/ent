@@ -187,9 +187,9 @@ func (m *CardMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *CardMutation) OwnerCleared() bool {
-	return m.clearedowner
+	return m.OwnerIDCleared() || m.clearedowner
 }
 
 // OwnerIDs returns the "owner" edge IDs in the mutation.
@@ -553,7 +553,7 @@ func (m *InfoMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *InfoMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -936,7 +936,7 @@ func (m *MetadataMutation) ClearUser() {
 	m.cleareduser = true
 }
 
-// UserCleared returns if the "user" edge to the User entity was cleared.
+// UserCleared reports if the "user" edge to the User entity was cleared.
 func (m *MetadataMutation) UserCleared() bool {
 	return m.cleareduser
 }
@@ -1314,9 +1314,9 @@ func (m *PetMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *PetMutation) OwnerCleared() bool {
-	return m.clearedowner
+	return m.OwnerIDCleared() || m.clearedowner
 }
 
 // OwnerIDs returns the "owner" edge IDs in the mutation.
@@ -1718,9 +1718,9 @@ func (m *PostMutation) ClearAuthor() {
 	m.clearedauthor = true
 }
 
-// AuthorCleared returns if the "author" edge to the User entity was cleared.
+// AuthorCleared reports if the "author" edge to the User entity was cleared.
 func (m *PostMutation) AuthorCleared() bool {
-	return m.clearedauthor
+	return m.AuthorIDCleared() || m.clearedauthor
 }
 
 // AuthorIDs returns the "author" edge IDs in the mutation.
@@ -2176,7 +2176,7 @@ func (m *UserMutation) ClearPets() {
 	m.clearedpets = true
 }
 
-// PetsCleared returns if the "pets" edge to the Pet entity was cleared.
+// PetsCleared reports if the "pets" edge to the Pet entity was cleared.
 func (m *UserMutation) PetsCleared() bool {
 	return m.clearedpets
 }
@@ -2219,9 +2219,9 @@ func (m *UserMutation) ClearParent() {
 	m.clearedparent = true
 }
 
-// ParentCleared returns if the "parent" edge to the User entity was cleared.
+// ParentCleared reports if the "parent" edge to the User entity was cleared.
 func (m *UserMutation) ParentCleared() bool {
-	return m.clearedparent
+	return m.ParentIDCleared() || m.clearedparent
 }
 
 // ParentIDs returns the "parent" edge IDs in the mutation.
@@ -2255,7 +2255,7 @@ func (m *UserMutation) ClearChildren() {
 	m.clearedchildren = true
 }
 
-// ChildrenCleared returns if the "children" edge to the User entity was cleared.
+// ChildrenCleared reports if the "children" edge to the User entity was cleared.
 func (m *UserMutation) ChildrenCleared() bool {
 	return m.clearedchildren
 }
@@ -2298,9 +2298,9 @@ func (m *UserMutation) ClearSpouse() {
 	m.clearedspouse = true
 }
 
-// SpouseCleared returns if the "spouse" edge to the User entity was cleared.
+// SpouseCleared reports if the "spouse" edge to the User entity was cleared.
 func (m *UserMutation) SpouseCleared() bool {
-	return m.clearedspouse
+	return m.SpouseIDCleared() || m.clearedspouse
 }
 
 // SpouseIDs returns the "spouse" edge IDs in the mutation.
@@ -2329,7 +2329,7 @@ func (m *UserMutation) ClearCard() {
 	m.clearedcard = true
 }
 
-// CardCleared returns if the "card" edge to the Card entity was cleared.
+// CardCleared reports if the "card" edge to the Card entity was cleared.
 func (m *UserMutation) CardCleared() bool {
 	return m.clearedcard
 }
@@ -2368,7 +2368,7 @@ func (m *UserMutation) ClearMetadata() {
 	m.clearedmetadata = true
 }
 
-// MetadataCleared returns if the "metadata" edge to the Metadata entity was cleared.
+// MetadataCleared reports if the "metadata" edge to the Metadata entity was cleared.
 func (m *UserMutation) MetadataCleared() bool {
 	return m.clearedmetadata
 }
@@ -2412,7 +2412,7 @@ func (m *UserMutation) ClearInfo() {
 	m.clearedinfo = true
 }
 
-// InfoCleared returns if the "info" edge to the Info entity was cleared.
+// InfoCleared reports if the "info" edge to the Info entity was cleared.
 func (m *UserMutation) InfoCleared() bool {
 	return m.clearedinfo
 }

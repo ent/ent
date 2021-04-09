@@ -177,7 +177,7 @@ func (m *CityMutation) ClearStreets() {
 	m.clearedstreets = true
 }
 
-// StreetsCleared returns if the "streets" edge to the Street entity was cleared.
+// StreetsCleared reports if the "streets" edge to the Street entity was cleared.
 func (m *CityMutation) StreetsCleared() bool {
 	return m.clearedstreets
 }
@@ -550,7 +550,7 @@ func (m *StreetMutation) ClearCity() {
 	m.clearedcity = true
 }
 
-// CityCleared returns if the "city" edge to the City entity was cleared.
+// CityCleared reports if the "city" edge to the City entity was cleared.
 func (m *StreetMutation) CityCleared() bool {
 	return m.clearedcity
 }

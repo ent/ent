@@ -128,7 +128,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	{{- range $_, $n := $.Nodes }}
+	{{- range $n := $.Nodes }}
 		c.{{ $n.Name }}.Use(hooks...)
 	{{- end }}
 }

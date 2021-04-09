@@ -84,4 +84,8 @@ func TestEdgeField(t *testing.T) {
 	require.Equal(t, a8m.ID, inf.ID)
 	_, err = client.Info.Create().SetID(a8m.ID).SetContent(json.RawMessage("10")).Save(ctx)
 	require.True(t, ent.IsConstraintError(err), "UNIQUE constraint failed: metadata.id")
+
+	require.NotZero(t, client.Pet.Query().QueryOwner().CountX(ctx))
+	client.Pet.Update().ClearOwnerID().ExecX(ctx)
+	require.Zero(t, client.Pet.Query().QueryOwner().CountX(ctx))
 }

@@ -176,7 +176,7 @@ func (m *GroupMutation) ClearTenant() {
 	m.clearedtenant = true
 }
 
-// TenantCleared returns if the "tenant" edge to the Tenant entity was cleared.
+// TenantCleared reports if the "tenant" edge to the Tenant entity was cleared.
 func (m *GroupMutation) TenantCleared() bool {
 	return m.clearedtenant
 }
@@ -220,7 +220,7 @@ func (m *GroupMutation) ClearUsers() {
 	m.clearedusers = true
 }
 
-// UsersCleared returns if the "users" edge to the User entity was cleared.
+// UsersCleared reports if the "users" edge to the User entity was cleared.
 func (m *GroupMutation) UsersCleared() bool {
 	return m.clearedusers
 }
@@ -951,7 +951,7 @@ func (m *UserMutation) ClearTenant() {
 	m.clearedtenant = true
 }
 
-// TenantCleared returns if the "tenant" edge to the Tenant entity was cleared.
+// TenantCleared reports if the "tenant" edge to the Tenant entity was cleared.
 func (m *UserMutation) TenantCleared() bool {
 	return m.clearedtenant
 }
@@ -995,7 +995,7 @@ func (m *UserMutation) ClearGroups() {
 	m.clearedgroups = true
 }
 
-// GroupsCleared returns if the "groups" edge to the Group entity was cleared.
+// GroupsCleared reports if the "groups" edge to the Group entity was cleared.
 func (m *UserMutation) GroupsCleared() bool {
 	return m.clearedgroups
 }

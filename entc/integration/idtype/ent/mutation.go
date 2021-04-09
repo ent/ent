@@ -175,7 +175,7 @@ func (m *UserMutation) ClearSpouse() {
 	m.clearedspouse = true
 }
 
-// SpouseCleared returns if the "spouse" edge to the User entity was cleared.
+// SpouseCleared reports if the "spouse" edge to the User entity was cleared.
 func (m *UserMutation) SpouseCleared() bool {
 	return m.clearedspouse
 }
@@ -219,7 +219,7 @@ func (m *UserMutation) ClearFollowers() {
 	m.clearedfollowers = true
 }
 
-// FollowersCleared returns if the "followers" edge to the User entity was cleared.
+// FollowersCleared reports if the "followers" edge to the User entity was cleared.
 func (m *UserMutation) FollowersCleared() bool {
 	return m.clearedfollowers
 }
@@ -272,7 +272,7 @@ func (m *UserMutation) ClearFollowing() {
 	m.clearedfollowing = true
 }
 
-// FollowingCleared returns if the "following" edge to the User entity was cleared.
+// FollowingCleared reports if the "following" edge to the User entity was cleared.
 func (m *UserMutation) FollowingCleared() bool {
 	return m.clearedfollowing
 }

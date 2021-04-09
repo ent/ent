@@ -192,7 +192,7 @@ func (m *NodeMutation) ClearPrev() {
 	m.clearedprev = true
 }
 
-// PrevCleared returns if the "prev" edge to the Node entity was cleared.
+// PrevCleared reports if the "prev" edge to the Node entity was cleared.
 func (m *NodeMutation) PrevCleared() bool {
 	return m.clearedprev
 }
@@ -231,7 +231,7 @@ func (m *NodeMutation) ClearNext() {
 	m.clearednext = true
 }
 
-// NextCleared returns if the "next" edge to the Node entity was cleared.
+// NextCleared reports if the "next" edge to the Node entity was cleared.
 func (m *NodeMutation) NextCleared() bool {
 	return m.clearednext
 }

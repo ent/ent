@@ -956,6 +956,17 @@ func (f Field) MutationSet() string {
 	return name
 }
 
+// MutationClear returns the method name for clearing the field value.
+func (f Field) MutationClear() string {
+	return "Clear" + f.StructField()
+}
+
+// MutationCleared returns the method name for indicating if the field
+// was cleared in the mutation.
+func (f Field) MutationCleared() string {
+	return f.StructField() + "Cleared"
+}
+
 // IsBool returns true if the field is a bool field.
 func (f Field) IsBool() bool { return f.Type != nil && f.Type.Type == field.TypeBool }
 
@@ -1348,7 +1359,10 @@ func (e *Edge) ForeignKey() (*ForeignKey, error) {
 //
 // Note that the zero value is returned if no field was defined in the schema.
 func (e Edge) Field() *Field {
-	if fk, err := e.ForeignKey(); err == nil {
+	if !e.OwnFK() {
+		return nil
+	}
+	if fk, err := e.ForeignKey(); err == nil && fk.Field.IsEdgeField() {
 		return fk.Field
 	}
 	return nil

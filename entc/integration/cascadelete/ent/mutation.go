@@ -204,7 +204,7 @@ func (m *CommentMutation) ClearPost() {
 	m.clearedpost = true
 }
 
-// PostCleared returns if the "post" edge to the Post entity was cleared.
+// PostCleared reports if the "post" edge to the Post entity was cleared.
 func (m *CommentMutation) PostCleared() bool {
 	return m.clearedpost
 }
@@ -619,9 +619,9 @@ func (m *PostMutation) ClearAuthor() {
 	m.clearedauthor = true
 }
 
-// AuthorCleared returns if the "author" edge to the User entity was cleared.
+// AuthorCleared reports if the "author" edge to the User entity was cleared.
 func (m *PostMutation) AuthorCleared() bool {
-	return m.clearedauthor
+	return m.AuthorIDCleared() || m.clearedauthor
 }
 
 // AuthorIDs returns the "author" edge IDs in the mutation.
@@ -655,7 +655,7 @@ func (m *PostMutation) ClearComments() {
 	m.clearedcomments = true
 }
 
-// CommentsCleared returns if the "comments" edge to the Comment entity was cleared.
+// CommentsCleared reports if the "comments" edge to the Comment entity was cleared.
 func (m *PostMutation) CommentsCleared() bool {
 	return m.clearedcomments
 }
@@ -1081,7 +1081,7 @@ func (m *UserMutation) ClearPosts() {
 	m.clearedposts = true
 }
 
-// PostsCleared returns if the "posts" edge to the Post entity was cleared.
+// PostsCleared reports if the "posts" edge to the Post entity was cleared.
 func (m *UserMutation) PostsCleared() bool {
 	return m.clearedposts
 }

@@ -144,7 +144,7 @@ func (m *CarMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *CarMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
@@ -2247,7 +2247,7 @@ func (m *PetMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *PetMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
@@ -3175,7 +3175,7 @@ func (m *UserMutation) ClearCar() {
 	m.clearedcar = true
 }
 
-// CarCleared returns if the "car" edge to the Car entity was cleared.
+// CarCleared reports if the "car" edge to the Car entity was cleared.
 func (m *UserMutation) CarCleared() bool {
 	return m.clearedcar
 }
@@ -3223,7 +3223,7 @@ func (m *UserMutation) ClearPets() {
 	m.clearedpets = true
 }
 
-// PetsCleared returns if the "pets" edge to the Pet entity was cleared.
+// PetsCleared reports if the "pets" edge to the Pet entity was cleared.
 func (m *UserMutation) PetsCleared() bool {
 	return m.clearedpets
 }
@@ -3267,7 +3267,7 @@ func (m *UserMutation) ClearFriends() {
 	m.clearedfriends = true
 }
 
-// FriendsCleared returns if the "friends" edge to the User entity was cleared.
+// FriendsCleared reports if the "friends" edge to the User entity was cleared.
 func (m *UserMutation) FriendsCleared() bool {
 	return m.clearedfriends
 }
