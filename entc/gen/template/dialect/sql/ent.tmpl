@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{/* Additional fields for the generated model for holding the foreign-keys */}}
 {{ define "dialect/sql/model/fields" }}
 	{{- range $fk := $.UnexportedForeignKeys }}
