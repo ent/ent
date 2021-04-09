@@ -10,6 +10,9 @@ execution output to a file with the same name as the template. For example:
 `stringer.tmpl` - This template example will be written in a file named: `ent/stringer.go`.
 
 ```gotemplate
+{{/* The line below tells Intellij/GoLand to enable the autocompletion based on the *gen.Graph type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "stringer" }}
 
 {{/* Add the base header for the generated file */}}
@@ -110,7 +113,7 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-3\. Annotation usage in external template:
+3\. Annotation usage in external templates:
 ```gotemplate
 {{ range $node := $.Nodes }}
 	{{ range $f := $node.Fields }}
@@ -133,5 +136,22 @@ func (User) Fields() []ent.Field {
 
 ## Documentation
 
-Templates are executed on either a specific node-type or the entire schema graph. For API
+Templates are executed on either a specific node type, or the entire schema graph. For API
 documentation, see the <a target="_blank" href="https://pkg.go.dev/entgo.io/ent/entc/gen?tab=doc">GoDoc</a>.
+
+## AutoCompletion
+
+JetBrains users can add the following template annotation to enable the autocompletion in their templates:
+
+```gotemplate
+{{/* The line below tells Intellij/GoLand to enable the autocompletion based on the *gen.Graph type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{ define "template" }}
+    {{/* ... */}}
+{{ end }}
+```
+
+See it in action:
+
+![template-autocomplete](https://entgo.io/images/assets/template-autocomplete.gif)
