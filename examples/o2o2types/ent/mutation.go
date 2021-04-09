@@ -209,7 +209,7 @@ func (m *CardMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *CardMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
@@ -640,7 +640,7 @@ func (m *UserMutation) ClearCard() {
 	m.clearedcard = true
 }
 
-// CardCleared returns if the "card" edge to the Card entity was cleared.
+// CardCleared reports if the "card" edge to the Card entity was cleared.
 func (m *UserMutation) CardCleared() bool {
 	return m.clearedcard
 }

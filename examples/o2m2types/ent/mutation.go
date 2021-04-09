@@ -171,7 +171,7 @@ func (m *PetMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *PetMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
@@ -591,7 +591,7 @@ func (m *UserMutation) ClearPets() {
 	m.clearedpets = true
 }
 
-// PetsCleared returns if the "pets" edge to the Pet entity was cleared.
+// PetsCleared reports if the "pets" edge to the Pet entity was cleared.
 func (m *UserMutation) PetsCleared() bool {
 	return m.clearedpets
 }

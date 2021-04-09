@@ -296,7 +296,7 @@ func (m *CardMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *CardMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
@@ -853,7 +853,7 @@ func (m *UserMutation) ClearCards() {
 	m.clearedcards = true
 }
 
-// CardsCleared returns if the "cards" edge to the Card entity was cleared.
+// CardsCleared reports if the "cards" edge to the Card entity was cleared.
 func (m *UserMutation) CardsCleared() bool {
 	return m.clearedcards
 }
@@ -906,7 +906,7 @@ func (m *UserMutation) ClearFriends() {
 	m.clearedfriends = true
 }
 
-// FriendsCleared returns if the "friends" edge to the User entity was cleared.
+// FriendsCleared reports if the "friends" edge to the User entity was cleared.
 func (m *UserMutation) FriendsCleared() bool {
 	return m.clearedfriends
 }
@@ -954,7 +954,7 @@ func (m *UserMutation) ClearBestFriend() {
 	m.clearedbest_friend = true
 }
 
-// BestFriendCleared returns if the "best_friend" edge to the User entity was cleared.
+// BestFriendCleared reports if the "best_friend" edge to the User entity was cleared.
 func (m *UserMutation) BestFriendCleared() bool {
 	return m.clearedbest_friend
 }

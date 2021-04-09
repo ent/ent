@@ -233,7 +233,7 @@ func (m *UserMutation) ClearFriends() {
 	m.clearedfriends = true
 }
 
-// FriendsCleared returns if the "friends" edge to the User entity was cleared.
+// FriendsCleared reports if the "friends" edge to the User entity was cleared.
 func (m *UserMutation) FriendsCleared() bool {
 	return m.clearedfriends
 }

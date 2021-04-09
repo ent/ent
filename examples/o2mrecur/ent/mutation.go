@@ -193,7 +193,7 @@ func (m *NodeMutation) ClearParent() {
 	m.clearedparent = true
 }
 
-// ParentCleared returns if the "parent" edge to the Node entity was cleared.
+// ParentCleared reports if the "parent" edge to the Node entity was cleared.
 func (m *NodeMutation) ParentCleared() bool {
 	return m.clearedparent
 }
@@ -237,7 +237,7 @@ func (m *NodeMutation) ClearChildren() {
 	m.clearedchildren = true
 }
 
-// ChildrenCleared returns if the "children" edge to the Node entity was cleared.
+// ChildrenCleared reports if the "children" edge to the Node entity was cleared.
 func (m *NodeMutation) ChildrenCleared() bool {
 	return m.clearedchildren
 }

@@ -319,7 +319,7 @@ func (m *TaskMutation) ClearTeams() {
 	m.clearedteams = true
 }
 
-// TeamsCleared returns if the "teams" edge to the Team entity was cleared.
+// TeamsCleared reports if the "teams" edge to the Team entity was cleared.
 func (m *TaskMutation) TeamsCleared() bool {
 	return m.clearedteams
 }
@@ -367,7 +367,7 @@ func (m *TaskMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared returns if the "owner" edge to the User entity was cleared.
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *TaskMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
@@ -824,7 +824,7 @@ func (m *TeamMutation) ClearTasks() {
 	m.clearedtasks = true
 }
 
-// TasksCleared returns if the "tasks" edge to the Task entity was cleared.
+// TasksCleared reports if the "tasks" edge to the Task entity was cleared.
 func (m *TeamMutation) TasksCleared() bool {
 	return m.clearedtasks
 }
@@ -877,7 +877,7 @@ func (m *TeamMutation) ClearUsers() {
 	m.clearedusers = true
 }
 
-// UsersCleared returns if the "users" edge to the User entity was cleared.
+// UsersCleared reports if the "users" edge to the User entity was cleared.
 func (m *TeamMutation) UsersCleared() bool {
 	return m.clearedusers
 }
@@ -1357,7 +1357,7 @@ func (m *UserMutation) ClearTeams() {
 	m.clearedteams = true
 }
 
-// TeamsCleared returns if the "teams" edge to the Team entity was cleared.
+// TeamsCleared reports if the "teams" edge to the Team entity was cleared.
 func (m *UserMutation) TeamsCleared() bool {
 	return m.clearedteams
 }
@@ -1410,7 +1410,7 @@ func (m *UserMutation) ClearTasks() {
 	m.clearedtasks = true
 }
 
-// TasksCleared returns if the "tasks" edge to the Task entity was cleared.
+// TasksCleared reports if the "tasks" edge to the Task entity was cleared.
 func (m *UserMutation) TasksCleared() bool {
 	return m.clearedtasks
 }
