@@ -79,6 +79,7 @@ and implement the [Annotation](https://pkg.go.dev/entgo.io/ent/schema?tab=doc#An
 Here's an example of an annotation and its usage in schema and template:
 
 1\. An annotation definition:
+
 ```go
 package entgql
 
@@ -114,6 +115,7 @@ func (User) Fields() []ent.Field {
 ```
 
 3\. Annotation usage in external templates:
+
 ```gotemplate
 {{ range $node := $.Nodes }}
 	{{ range $f := $node.Fields }}
@@ -126,6 +128,69 @@ func (User) Fields() []ent.Field {
 {{ end }}
 ```
 
+## Global Annotations
+
+Global annotation is a type of annotation that is injected into the `gen.Config` object and can be accessed globally
+in all templates. For example, an annotation that holds a config file information (e.g. `gqlgen.yml` or `swagger.yml`)
+add can accessed in all templates:
+
+1\. An annotation definition:
+
+```go
+package gqlconfig
+
+import (
+	"entgo.io/ent/schema"
+	"github.com/99designs/gqlgen/codegen/config"
+)
+
+// Annotation defines a custom annotation
+// to be inject globally to all templates.
+type Annotation struct {
+    Config *config.Config
+}
+
+func (Annotation) Name() string {
+    return "GQL"
+}
+
+var _ schema.Annotation = (*Annotation)(nil)
+```
+
+2\. Annotation usage in `ent/entc.go`:
+
+```go
+func main() {
+	cfg, err := config.LoadConfig("<path to gqlgen.yml>")
+	if err != nil {
+		log.Fatalf("loading gqlgen config: %v", err)
+	}
+	opts := []entc.Option{
+		entc.TemplateDir("./template"),
+		entc.Annotations(gqlconfig.Annotation{Config: cfg}),
+	}
+	err = entc.Generate("./schema", &gen.Config{
+		Templates: entgql.AllTemplates,
+	}, opts...)
+	if err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
+}
+```
+
+3\. Annotation usage in external templates:
+
+```gotemplate
+{{- with $.Annotations.GQL.Config.StructTag }}
+    {{/* Access the GQL configuration on *gen.Graph */}}
+{{- end }}
+
+{{ range $node := $.Nodes }}
+    {{- with $node.Config.Annotations.GQL.Config.StructTag }}
+        {{/* Access the GQL configuration on *gen.Type */}}
+    {{- end }}
+{{ end }}
+```
 
 ## Examples
 - A custom template for implementing the `Node` API for GraphQL - 
