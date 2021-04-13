@@ -99,6 +99,7 @@ var (
 		{Name: "decimal", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(6,2)", "postgres": "numeric"}},
 		{Name: "link_other", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)", "postgres": "varchar", "sqlite3": "varchar(255)"}},
 		{Name: "mac", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "macaddr"}},
+		{Name: "string_array", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "blob", "postgres": "text[]", "sqlite3": "json"}},
 		{Name: "duration", Type: field.TypeInt64, Nullable: true},
 		{Name: "dir", Type: field.TypeString},
 		{Name: "ndir", Type: field.TypeString, Nullable: true},
@@ -135,7 +136,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "field_types_files_field",
-				Columns:    []*schema.Column{FieldTypesColumns[55]},
+				Columns:    []*schema.Column{FieldTypesColumns[56]},
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

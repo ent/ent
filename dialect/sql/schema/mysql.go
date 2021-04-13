@@ -677,3 +677,9 @@ func (d *MySQL) defaultSize(c *Column) int64 {
 	}
 	return size
 }
+
+// needsConversion reports if column "old" needs to be converted
+// (by table altering) to column "new".
+func (d *MySQL) needsConversion(old, new *Column) bool {
+	return d.cType(old) != d.cType(new)
+}

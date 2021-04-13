@@ -82,6 +82,8 @@ type FieldType struct {
 	LinkOther *schema.Link `json:"link_other,omitempty"`
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
+	// StringArray holds the value of the "string_array" field.
+	StringArray schema.Strings `json:"string_array,omitempty"`
 	// Duration holds the value of the "duration" field.
 	Duration time.Duration `json:"duration,omitempty"`
 	// Dir holds the value of the "dir" field.
@@ -150,6 +152,8 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(schema.MAC)
 		case fieldtype.FieldPair, fieldtype.FieldNilPair:
 			values[i] = new(schema.Pair)
+		case fieldtype.FieldStringArray:
+			values[i] = new(schema.Strings)
 		case fieldtype.FieldTriple:
 			values[i] = new(schema.Triple)
 		case fieldtype.FieldVstring:
@@ -361,6 +365,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				return fmt.Errorf("unexpected type %T for field mac", values[i])
 			} else if value != nil {
 				ft.MAC = *value
+			}
+		case fieldtype.FieldStringArray:
+			if value, ok := values[i].(*schema.Strings); !ok {
+				return fmt.Errorf("unexpected type %T for field string_array", values[i])
+			} else if value != nil {
+				ft.StringArray = *value
 			}
 		case fieldtype.FieldDuration:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -624,6 +634,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
 	builder.WriteString(", mac=")
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
+	builder.WriteString(", string_array=")
+	builder.WriteString(fmt.Sprintf("%v", ft.StringArray))
 	builder.WriteString(", duration=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Duration))
 	builder.WriteString(", dir=")

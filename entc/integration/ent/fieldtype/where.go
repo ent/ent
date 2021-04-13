@@ -290,6 +290,13 @@ func MAC(v schema.MAC) predicate.FieldType {
 	})
 }
 
+// StringArray applies equality check predicate on the "string_array" field. It's identical to StringArrayEQ.
+func StringArray(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStringArray), v))
+	})
+}
+
 // Duration applies equality check predicate on the "duration" field. It's identical to DurationEQ.
 func Duration(v time.Duration) predicate.FieldType {
 	vc := int64(v)
@@ -2928,6 +2935,96 @@ func MACContainsFold(v schema.MAC) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldMAC), vc))
+	})
+}
+
+// StringArrayEQ applies the EQ predicate on the "string_array" field.
+func StringArrayEQ(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStringArray), v))
+	})
+}
+
+// StringArrayNEQ applies the NEQ predicate on the "string_array" field.
+func StringArrayNEQ(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStringArray), v))
+	})
+}
+
+// StringArrayIn applies the In predicate on the "string_array" field.
+func StringArrayIn(vs ...schema.Strings) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStringArray), v...))
+	})
+}
+
+// StringArrayNotIn applies the NotIn predicate on the "string_array" field.
+func StringArrayNotIn(vs ...schema.Strings) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStringArray), v...))
+	})
+}
+
+// StringArrayGT applies the GT predicate on the "string_array" field.
+func StringArrayGT(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStringArray), v))
+	})
+}
+
+// StringArrayGTE applies the GTE predicate on the "string_array" field.
+func StringArrayGTE(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStringArray), v))
+	})
+}
+
+// StringArrayLT applies the LT predicate on the "string_array" field.
+func StringArrayLT(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStringArray), v))
+	})
+}
+
+// StringArrayLTE applies the LTE predicate on the "string_array" field.
+func StringArrayLTE(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStringArray), v))
+	})
+}
+
+// StringArrayIsNil applies the IsNil predicate on the "string_array" field.
+func StringArrayIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStringArray)))
+	})
+}
+
+// StringArrayNotNil applies the NotNil predicate on the "string_array" field.
+func StringArrayNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStringArray)))
 	})
 }
 

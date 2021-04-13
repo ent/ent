@@ -561,6 +561,12 @@ func TestField_Other(t *testing.T) {
 		Descriptor()
 	assert.NoError(t, fd.Err)
 
+	fd = field.Other("other", custom{}).
+		SchemaType(map[string]string{dialect.Postgres: "varchar"}).
+		Default(func() custom { return custom{} }).
+		Descriptor()
+	assert.NoError(t, fd.Err)
+
 	fd = field.Other("other", &custom{}).
 		SchemaType(map[string]string{dialect.Postgres: "varchar"}).
 		Default(func() custom { return custom{} }).

@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"unicode"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -262,6 +263,17 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeUUID
 	case "cidr", "inet", "macaddr", "macaddr8":
 		c.Type = field.TypeOther
+	case "ARRAY":
+		c.Type = field.TypeOther
+		if !udt.Valid {
+			return fmt.Errorf("missing array type for column %q", c.Name)
+		}
+		// Note that for ARRAY types, the 'udt_name' column holds the array type
+		// prefixed with '_'. For example, for 'integer[]' the result is '_int',
+		// and for 'text[N][M]' the result is also '_text'. That's because, the
+		// database ignores any size or multi-dimensions constraints.
+		c.SchemaType = map[string]string{dialect.Postgres: "ARRAY"}
+		c.typ = udt.String
 	case "USER-DEFINED":
 		c.Type = field.TypeOther
 		if !udt.Valid {
@@ -484,6 +496,13 @@ func (d *Postgres) alterColumns(table string, add, modify, drop []*Column) sql.Q
 	return sql.Queries{b}
 }
 
+// needsConversion reports if column "old" needs to be converted
+// (by table altering) to column "new".
+func (d *Postgres) needsConversion(old, new *Column) bool {
+	oldT, newT := d.cType(old), d.cType(new)
+	return oldT != newT && (oldT != "ARRAY" || !arrayType(newT))
+}
+
 // seqfunc reports if the given string is a sequence function.
 func seqfunc(defaults string) bool {
 	for _, fn := range [...]string{"currval", "lastval", "setval", "nextval"} {
@@ -492,4 +511,18 @@ func seqfunc(defaults string) bool {
 		}
 	}
 	return false
+}
+
+// arrayType reports if the given string is an array type (e.g. int[], text[2]).
+func arrayType(t string) bool {
+	i, j := strings.LastIndexByte(t, '['), strings.LastIndexByte(t, ']')
+	if i == -1 || j == -1 {
+		return false
+	}
+	for _, r := range t[i+1 : j] {
+		if !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }
