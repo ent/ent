@@ -148,7 +148,7 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 //			dialect.Postgres: "varchar",
 //		})
 //
-func Other(name string, typ ValueScanner) *otherBuilder {
+func Other(name string, typ driver.Valuer) *otherBuilder {
 	ob := &otherBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{Type: TypeOther},

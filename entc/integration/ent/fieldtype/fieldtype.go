@@ -77,6 +77,8 @@ const (
 	FieldLinkOther = "link_other"
 	// FieldMAC holds the string denoting the mac field in the database.
 	FieldMAC = "mac"
+	// FieldStringArray holds the string denoting the string_array field in the database.
+	FieldStringArray = "string_array"
 	// FieldDuration holds the string denoting the duration field in the database.
 	FieldDuration = "duration"
 	// FieldDir holds the string denoting the dir field in the database.
@@ -164,6 +166,7 @@ var Columns = []string{
 	FieldDecimal,
 	FieldLinkOther,
 	FieldMAC,
+	FieldStringArray,
 	FieldDuration,
 	FieldDir,
 	FieldNdir,

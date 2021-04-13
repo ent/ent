@@ -281,6 +281,13 @@ func MAC(v schema.MAC) predicate.FieldType {
 	})
 }
 
+// StringArray applies equality check predicate on the "string_array" field. It's identical to StringArrayEQ.
+func StringArray(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.EQ(v))
+	})
+}
+
 // Duration applies equality check predicate on the "duration" field. It's identical to DurationEQ.
 func Duration(v time.Duration) predicate.FieldType {
 	vc := int64(v)
@@ -2567,6 +2574,84 @@ func MACIsNil() predicate.FieldType {
 func MACNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldMAC)
+	})
+}
+
+// StringArrayEQ applies the EQ predicate on the "string_array" field.
+func StringArrayEQ(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.EQ(v))
+	})
+}
+
+// StringArrayNEQ applies the NEQ predicate on the "string_array" field.
+func StringArrayNEQ(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.NEQ(v))
+	})
+}
+
+// StringArrayIn applies the In predicate on the "string_array" field.
+func StringArrayIn(vs ...schema.Strings) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.Within(v...))
+	})
+}
+
+// StringArrayNotIn applies the NotIn predicate on the "string_array" field.
+func StringArrayNotIn(vs ...schema.Strings) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.Without(v...))
+	})
+}
+
+// StringArrayGT applies the GT predicate on the "string_array" field.
+func StringArrayGT(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.GT(v))
+	})
+}
+
+// StringArrayGTE applies the GTE predicate on the "string_array" field.
+func StringArrayGTE(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.GTE(v))
+	})
+}
+
+// StringArrayLT applies the LT predicate on the "string_array" field.
+func StringArrayLT(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.LT(v))
+	})
+}
+
+// StringArrayLTE applies the LTE predicate on the "string_array" field.
+func StringArrayLTE(v schema.Strings) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringArray, p.LTE(v))
+	})
+}
+
+// StringArrayIsNil applies the IsNil predicate on the "string_array" field.
+func StringArrayIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldStringArray)
+	})
+}
+
+// StringArrayNotNil applies the NotNil predicate on the "string_array" field.
+func StringArrayNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldStringArray)
 	})
 }
 

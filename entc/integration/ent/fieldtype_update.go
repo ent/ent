@@ -686,6 +686,18 @@ func (ftu *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetStringArray sets the "string_array" field.
+func (ftu *FieldTypeUpdate) SetStringArray(s schema.Strings) *FieldTypeUpdate {
+	ftu.mutation.SetStringArray(s)
+	return ftu
+}
+
+// ClearStringArray clears the value of the "string_array" field.
+func (ftu *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
+	ftu.mutation.ClearStringArray()
+	return ftu
+}
+
 // SetDuration sets the "duration" field.
 func (ftu *FieldTypeUpdate) SetDuration(t time.Duration) *FieldTypeUpdate {
 	ftu.mutation.ResetDuration()
@@ -1757,6 +1769,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldMAC,
 		})
 	}
+	if value, ok := ftu.mutation.StringArray(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldStringArray,
+		})
+	}
+	if ftu.mutation.StringArrayCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: fieldtype.FieldStringArray,
+		})
+	}
 	if value, ok := ftu.mutation.Duration(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
@@ -2773,6 +2798,18 @@ func (ftuo *FieldTypeUpdateOne) SetNillableMAC(s *schema.MAC) *FieldTypeUpdateOn
 // ClearMAC clears the value of the "mac" field.
 func (ftuo *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearMAC()
+	return ftuo
+}
+
+// SetStringArray sets the "string_array" field.
+func (ftuo *FieldTypeUpdateOne) SetStringArray(s schema.Strings) *FieldTypeUpdateOne {
+	ftuo.mutation.SetStringArray(s)
+	return ftuo
+}
+
+// ClearStringArray clears the value of the "string_array" field.
+func (ftuo *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearStringArray()
 	return ftuo
 }
 
@@ -3869,6 +3906,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: fieldtype.FieldMAC,
+		})
+	}
+	if value, ok := ftuo.mutation.StringArray(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldStringArray,
+		})
+	}
+	if ftuo.mutation.StringArrayCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: fieldtype.FieldStringArray,
 		})
 	}
 	if value, ok := ftuo.mutation.Duration(); ok {

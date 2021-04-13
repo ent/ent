@@ -82,6 +82,8 @@ type FieldType struct {
 	LinkOther *schema.Link `json:"link_other,omitempty"`
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
+	// StringArray holds the value of the "string_array" field.
+	StringArray schema.Strings `json:"string_array,omitempty"`
 	// Duration holds the value of the "duration" field.
 	Duration time.Duration `json:"duration,omitempty"`
 	// Dir holds the value of the "dir" field.
@@ -172,6 +174,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Decimal               float64          `json:"decimal,omitempty"`
 		LinkOther             *schema.Link     `json:"link_other,omitempty"`
 		MAC                   schema.MAC       `json:"mac,omitempty"`
+		StringArray           schema.Strings   `json:"string_array,omitempty"`
 		Duration              time.Duration    `json:"duration,omitempty"`
 		Dir                   http.Dir         `json:"dir,omitempty"`
 		Ndir                  *http.Dir        `json:"ndir,omitempty"`
@@ -231,6 +234,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Decimal = scanft.Decimal
 	ft.LinkOther = scanft.LinkOther
 	ft.MAC = scanft.MAC
+	ft.StringArray = scanft.StringArray
 	ft.Duration = scanft.Duration
 	ft.Dir = scanft.Dir
 	ft.Ndir = scanft.Ndir
@@ -349,6 +353,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
 	builder.WriteString(", mac=")
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
+	builder.WriteString(", string_array=")
+	builder.WriteString(fmt.Sprintf("%v", ft.StringArray))
 	builder.WriteString(", duration=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Duration))
 	builder.WriteString(", dir=")
@@ -454,6 +460,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Decimal               float64          `json:"decimal,omitempty"`
 		LinkOther             *schema.Link     `json:"link_other,omitempty"`
 		MAC                   schema.MAC       `json:"mac,omitempty"`
+		StringArray           schema.Strings   `json:"string_array,omitempty"`
 		Duration              time.Duration    `json:"duration,omitempty"`
 		Dir                   http.Dir         `json:"dir,omitempty"`
 		Ndir                  *http.Dir        `json:"ndir,omitempty"`
@@ -515,6 +522,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Decimal:               v.Decimal,
 			LinkOther:             v.LinkOther,
 			MAC:                   v.MAC,
+			StringArray:           v.StringArray,
 			Duration:              v.Duration,
 			Dir:                   v.Dir,
 			Ndir:                  v.Ndir,

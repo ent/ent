@@ -119,6 +119,13 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 				_, err := net.ParseMAC(s)
 				return err
 			}),
+		field.Other("string_array", Strings{}).
+			Optional().
+			SchemaType(map[string]string{
+				dialect.Postgres: "text[]",
+				dialect.SQLite:   "json",
+				dialect.MySQL:    "blob",
+			}),
 
 		// ----------------------------------------------------------------------------
 		// Custom Go types
@@ -224,6 +231,36 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 				return Triple{E: [3]string{"A", "B", "C"}}
 			}),
 	}
+}
+
+type Strings []string
+
+func (s *Strings) Scan(v interface{}) (err error) {
+	switch v := v.(type) {
+	case nil:
+	case []byte:
+		err = s.scan(string(v))
+	case string:
+		err = s.scan(v)
+	default:
+		err = fmt.Errorf("unexpected type %T", v)
+	}
+	return
+}
+
+func (s *Strings) scan(v string) error {
+	if v == "" {
+		return nil
+	}
+	if l := len(v); l < 2 || v[0] != '{' && v[l-1] != '}' {
+		return fmt.Errorf("unexpcted array format %q", v)
+	}
+	*s = strings.Split(v[1:len(v)-1], ",")
+	return nil
+}
+
+func (s Strings) Value() (driver.Value, error) {
+	return "{" + strings.Join(s, ",") + "}", nil
 }
 
 type VString string

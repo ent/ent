@@ -354,7 +354,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			}
 			change.index.drop.append(idx)
 		// Extending column types.
-		case m.cType(c1) != m.cType(c2):
+		case m.needsConversion(c2, c1):
 			if !c2.ConvertibleTo(c1) {
 				return nil, fmt.Errorf("changing column type for %q is invalid (%s != %s)", c1.Name, m.cType(c1), m.cType(c2))
 			}
@@ -645,6 +645,7 @@ type sqlDialect interface {
 	tBuilder(*Table) *sql.TableBuilder
 	addIndex(*Index, string) *sql.IndexBuilder
 	alterColumns(table string, add, modify, drop []*Column) sql.Queries
+	needsConversion(*Column, *Column) bool
 }
 
 type preparer interface {

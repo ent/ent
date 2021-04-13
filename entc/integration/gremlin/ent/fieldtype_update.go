@@ -688,6 +688,18 @@ func (ftu *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetStringArray sets the "string_array" field.
+func (ftu *FieldTypeUpdate) SetStringArray(s schema.Strings) *FieldTypeUpdate {
+	ftu.mutation.SetStringArray(s)
+	return ftu
+}
+
+// ClearStringArray clears the value of the "string_array" field.
+func (ftu *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
+	ftu.mutation.ClearStringArray()
+	return ftu
+}
+
 // SetDuration sets the "duration" field.
 func (ftu *FieldTypeUpdate) SetDuration(t time.Duration) *FieldTypeUpdate {
 	ftu.mutation.ResetDuration()
@@ -1415,6 +1427,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
 	}
+	if value, ok := ftu.mutation.StringArray(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
+	}
 	if value, ok := ftu.mutation.Duration(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDuration, value)
 	}
@@ -1580,6 +1595,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.MACCleared() {
 		properties = append(properties, fieldtype.FieldMAC)
+	}
+	if ftu.mutation.StringArrayCleared() {
+		properties = append(properties, fieldtype.FieldStringArray)
 	}
 	if ftu.mutation.DurationCleared() {
 		properties = append(properties, fieldtype.FieldDuration)
@@ -2307,6 +2325,18 @@ func (ftuo *FieldTypeUpdateOne) SetNillableMAC(s *schema.MAC) *FieldTypeUpdateOn
 // ClearMAC clears the value of the "mac" field.
 func (ftuo *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearMAC()
+	return ftuo
+}
+
+// SetStringArray sets the "string_array" field.
+func (ftuo *FieldTypeUpdateOne) SetStringArray(s schema.Strings) *FieldTypeUpdateOne {
+	ftuo.mutation.SetStringArray(s)
+	return ftuo
+}
+
+// ClearStringArray clears the value of the "string_array" field.
+func (ftuo *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearStringArray()
 	return ftuo
 }
 
@@ -3049,6 +3079,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
 	}
+	if value, ok := ftuo.mutation.StringArray(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
+	}
 	if value, ok := ftuo.mutation.Duration(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDuration, value)
 	}
@@ -3214,6 +3247,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.MACCleared() {
 		properties = append(properties, fieldtype.FieldMAC)
+	}
+	if ftuo.mutation.StringArrayCleared() {
+		properties = append(properties, fieldtype.FieldStringArray)
 	}
 	if ftuo.mutation.DurationCleared() {
 		properties = append(properties, fieldtype.FieldDuration)

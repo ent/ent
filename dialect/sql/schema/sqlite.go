@@ -328,3 +328,9 @@ func (d *SQLite) tables() sql.Querier {
 		From(sql.Table("sqlite_schema")).
 		Where(sql.EQ("type", "table"))
 }
+
+// needsConversion reports if column "old" needs to be converted
+// (by table altering) to column "new".
+func (d *SQLite) needsConversion(old, new *Column) bool {
+	return d.cType(old) != d.cType(new)
+}

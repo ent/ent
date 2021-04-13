@@ -69,6 +69,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetDuration(time.Hour).
 		SetPair(schema.Pair{K: []byte("K"), V: []byte("V")}).
 		SetNilPair(&schema.Pair{K: []byte("K"), V: []byte("V")}).
+		SetStringArray([]string{"foo", "bar", "baz"}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)
@@ -94,6 +95,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	require.Equal(schema.Pair{K: []byte("K"), V: []byte("V")}, ft.Pair)
 	require.Equal(&schema.Pair{K: []byte("K"), V: []byte("V")}, ft.NilPair)
+	require.EqualValues([]string{"foo", "bar", "baz"}, ft.StringArray)
 
 	ft = ft.Update().
 		SetInt(1).
@@ -124,6 +126,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetMAC(schema.MAC{HardwareAddr: mac}).
 		SetPair(schema.Pair{K: []byte("K1"), V: []byte("V1")}).
 		SetNilPair(&schema.Pair{K: []byte("K1"), V: []byte("V1")}).
+		SetStringArray([]string{"qux"}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -150,6 +153,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(mac.String(), ft.MAC.String())
 	require.Equal(schema.Pair{K: []byte("K1"), V: []byte("V1")}, ft.Pair)
 	require.Equal(&schema.Pair{K: []byte("K1"), V: []byte("V1")}, ft.NilPair)
+	require.EqualValues([]string{"qux"}, ft.StringArray)
 
 	exists, err := client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour * 2)).Exist(ctx)
 	require.NoError(err)

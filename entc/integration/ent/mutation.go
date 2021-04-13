@@ -1350,6 +1350,7 @@ type FieldTypeMutation struct {
 	adddecimal                 *float64
 	link_other                 **schema.Link
 	mac                        *schema.MAC
+	string_array               *schema.Strings
 	duration                   *time.Duration
 	addduration                *time.Duration
 	dir                        *http.Dir
@@ -3273,6 +3274,55 @@ func (m *FieldTypeMutation) ResetMAC() {
 	delete(m.clearedFields, fieldtype.FieldMAC)
 }
 
+// SetStringArray sets the "string_array" field.
+func (m *FieldTypeMutation) SetStringArray(s schema.Strings) {
+	m.string_array = &s
+}
+
+// StringArray returns the value of the "string_array" field in the mutation.
+func (m *FieldTypeMutation) StringArray() (r schema.Strings, exists bool) {
+	v := m.string_array
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStringArray returns the old "string_array" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldStringArray(ctx context.Context) (v schema.Strings, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStringArray is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStringArray requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStringArray: %w", err)
+	}
+	return oldValue.StringArray, nil
+}
+
+// ClearStringArray clears the value of the "string_array" field.
+func (m *FieldTypeMutation) ClearStringArray() {
+	m.string_array = nil
+	m.clearedFields[fieldtype.FieldStringArray] = struct{}{}
+}
+
+// StringArrayCleared returns if the "string_array" field was cleared in this mutation.
+func (m *FieldTypeMutation) StringArrayCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldStringArray]
+	return ok
+}
+
+// ResetStringArray resets all changes to the "string_array" field.
+func (m *FieldTypeMutation) ResetStringArray() {
+	m.string_array = nil
+	delete(m.clearedFields, fieldtype.FieldStringArray)
+}
+
 // SetDuration sets the "duration" field.
 func (m *FieldTypeMutation) SetDuration(t time.Duration) {
 	m.duration = &t
@@ -4622,7 +4672,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 54)
+	fields := make([]string, 0, 55)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4706,6 +4756,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	}
 	if m.mac != nil {
 		fields = append(fields, fieldtype.FieldMAC)
+	}
+	if m.string_array != nil {
+		fields = append(fields, fieldtype.FieldStringArray)
 	}
 	if m.duration != nil {
 		fields = append(fields, fieldtype.FieldDuration)
@@ -4849,6 +4902,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.LinkOther()
 	case fieldtype.FieldMAC:
 		return m.MAC()
+	case fieldtype.FieldStringArray:
+		return m.StringArray()
 	case fieldtype.FieldDuration:
 		return m.Duration()
 	case fieldtype.FieldDir:
@@ -4966,6 +5021,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldLinkOther(ctx)
 	case fieldtype.FieldMAC:
 		return m.OldMAC(ctx)
+	case fieldtype.FieldStringArray:
+		return m.OldStringArray(ctx)
 	case fieldtype.FieldDuration:
 		return m.OldDuration(ctx)
 	case fieldtype.FieldDir:
@@ -5222,6 +5279,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMAC(v)
+		return nil
+	case fieldtype.FieldStringArray:
+		v, ok := value.(schema.Strings)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStringArray(v)
 		return nil
 	case fieldtype.FieldDuration:
 		v, ok := value.(time.Duration)
@@ -5867,6 +5931,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldMAC) {
 		fields = append(fields, fieldtype.FieldMAC)
 	}
+	if m.FieldCleared(fieldtype.FieldStringArray) {
+		fields = append(fields, fieldtype.FieldStringArray)
+	}
 	if m.FieldCleared(fieldtype.FieldDuration) {
 		fields = append(fields, fieldtype.FieldDuration)
 	}
@@ -6012,6 +6079,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldMAC:
 		m.ClearMAC()
+		return nil
+	case fieldtype.FieldStringArray:
+		m.ClearStringArray()
 		return nil
 	case fieldtype.FieldDuration:
 		m.ClearDuration()
@@ -6167,6 +6237,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldMAC:
 		m.ResetMAC()
+		return nil
+	case fieldtype.FieldStringArray:
+		m.ResetStringArray()
 		return nil
 	case fieldtype.FieldDuration:
 		m.ResetDuration()

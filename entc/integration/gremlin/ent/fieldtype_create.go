@@ -375,6 +375,12 @@ func (ftc *FieldTypeCreate) SetNillableMAC(s *schema.MAC) *FieldTypeCreate {
 	return ftc
 }
 
+// SetStringArray sets the "string_array" field.
+func (ftc *FieldTypeCreate) SetStringArray(s schema.Strings) *FieldTypeCreate {
+	ftc.mutation.SetStringArray(s)
+	return ftc
+}
+
 // SetDuration sets the "duration" field.
 func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
 	ftc.mutation.SetDuration(t)
@@ -911,6 +917,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
+	}
+	if value, ok := ftc.mutation.StringArray(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
 	if value, ok := ftc.mutation.Duration(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDuration, value)

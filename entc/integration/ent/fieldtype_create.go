@@ -374,6 +374,12 @@ func (ftc *FieldTypeCreate) SetNillableMAC(s *schema.MAC) *FieldTypeCreate {
 	return ftc
 }
 
+// SetStringArray sets the "string_array" field.
+func (ftc *FieldTypeCreate) SetStringArray(s schema.Strings) *FieldTypeCreate {
+	ftc.mutation.SetStringArray(s)
+	return ftc
+}
+
 // SetDuration sets the "duration" field.
 func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
 	ftc.mutation.SetDuration(t)
@@ -1056,6 +1062,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldMAC,
 		})
 		_node.MAC = value
+	}
+	if value, ok := ftc.mutation.StringArray(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldStringArray,
+		})
+		_node.StringArray = value
 	}
 	if value, ok := ftc.mutation.Duration(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
