@@ -199,7 +199,9 @@ func (c *CityClient) DeleteOneID(id int) *CityDeleteOne {
 
 // Query returns a query builder for City.
 func (c *CityClient) Query() *CityQuery {
-	return &CityQuery{config: c.config}
+	return &CityQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a City entity by its id.
@@ -303,7 +305,9 @@ func (c *StreetClient) DeleteOneID(id int) *StreetDeleteOne {
 
 // Query returns a query builder for Street.
 func (c *StreetClient) Query() *StreetQuery {
-	return &StreetQuery{config: c.config}
+	return &StreetQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Street entity by its id.

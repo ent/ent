@@ -228,7 +228,9 @@ func (c *BlobClient) DeleteOneID(id uuid.UUID) *BlobDeleteOne {
 
 // Query returns a query builder for Blob.
 func (c *BlobClient) Query() *BlobQuery {
-	return &BlobQuery{config: c.config}
+	return &BlobQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Blob entity by its id.
@@ -348,7 +350,9 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 
 // Query returns a query builder for Car.
 func (c *CarClient) Query() *CarQuery {
-	return &CarQuery{config: c.config}
+	return &CarQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Car entity by its id.
@@ -452,7 +456,9 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 
 // Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
-	return &GroupQuery{config: c.config}
+	return &GroupQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Group entity by its id.
@@ -556,7 +562,9 @@ func (c *MixinIDClient) DeleteOneID(id uuid.UUID) *MixinIDDeleteOne {
 
 // Query returns a query builder for MixinID.
 func (c *MixinIDClient) Query() *MixinIDQuery {
-	return &MixinIDQuery{config: c.config}
+	return &MixinIDQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a MixinID entity by its id.
@@ -644,7 +652,9 @@ func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
 
 // Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
-	return &PetQuery{config: c.config}
+	return &PetQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Pet entity by its id.
@@ -796,7 +806,9 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.

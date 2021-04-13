@@ -199,7 +199,9 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 
 // Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
-	return &PetQuery{config: c.config}
+	return &PetQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Pet entity by its id.
@@ -303,7 +305,9 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.

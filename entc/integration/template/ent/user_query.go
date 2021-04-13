@@ -33,6 +33,10 @@ type UserQuery struct {
 	// eager-loading edges.
 	withPets    *PetQuery
 	withFriends *UserQuery
+
+	// additional query fields.
+	extra string
+
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

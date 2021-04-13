@@ -213,7 +213,9 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 
 // Query returns a query builder for Car.
 func (c *CarClient) Query() *CarQuery {
-	return &CarQuery{config: c.config}
+	return &CarQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Car entity by its id.
@@ -317,7 +319,9 @@ func (c *ConversionClient) DeleteOneID(id int) *ConversionDeleteOne {
 
 // Query returns a query builder for Conversion.
 func (c *ConversionClient) Query() *ConversionQuery {
-	return &ConversionQuery{config: c.config}
+	return &ConversionQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Conversion entity by its id.
@@ -405,7 +409,9 @@ func (c *CustomTypeClient) DeleteOneID(id int) *CustomTypeDeleteOne {
 
 // Query returns a query builder for CustomType.
 func (c *CustomTypeClient) Query() *CustomTypeQuery {
-	return &CustomTypeQuery{config: c.config}
+	return &CustomTypeQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a CustomType entity by its id.
@@ -493,7 +499,9 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.
