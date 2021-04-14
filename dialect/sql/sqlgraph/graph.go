@@ -671,6 +671,11 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	if err := u.setExternalEdges(ctx, []driver.Value{id}, addEdges, clearEdges); err != nil {
 		return err
 	}
+	// Ignore querying the database when there's nothing
+	// to scan into it.
+	if u.ScanValues == nil {
+		return nil
+	}
 	selector := u.builder.Select(u.Node.Columns...).
 		From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
 		Where(sql.EQ(u.Node.ID.Column, u.Node.ID.Value))
