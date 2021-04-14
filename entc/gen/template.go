@@ -91,6 +91,7 @@ var (
 			Format: "client.go",
 			ExtendPatterns: []string{
 				"client/fields/additional/*",
+				"client/query/fields/init/*",
 			},
 		},
 		{

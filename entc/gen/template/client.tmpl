@@ -206,7 +206,11 @@ func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }}
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	return &{{ $n.QueryName }}{
 	    config: c.config,
-	    {{- template "client/query/init" $n }}
+        {{- with $tmpls := matchTemplate "client/query/fields/init/*" }}
+            {{- range $tmpl := $tmpls }}
+                {{- xtemplate $tmpl $n }}
+            {{- end }}
+        {{- end }}
 	}
 }
 
