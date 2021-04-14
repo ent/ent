@@ -55,8 +55,9 @@ var (
 			Format: pkgf("%s_delete.go"),
 		},
 		{
-			Name:   "query",
-			Format: pkgf("%s_query.go"),
+			Name:           "query",
+			Format:         pkgf("%s_query.go"),
+			ExtendPatterns: []string{"dialect/*/query/fields/additional/*"},
 		},
 		{
 			Name:   "model",
@@ -90,6 +91,7 @@ var (
 			Format: "client.go",
 			ExtendPatterns: []string{
 				"client/fields/additional/*",
+				"dialect/*/query/fields/init/*",
 			},
 		},
 		{

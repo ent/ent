@@ -206,7 +206,9 @@ func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 
 // Query returns a query builder for Comment.
 func (c *CommentClient) Query() *CommentQuery {
-	return &CommentQuery{config: c.config}
+	return &CommentQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Comment entity by its id.
@@ -310,7 +312,9 @@ func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
 
 // Query returns a query builder for Post.
 func (c *PostClient) Query() *PostQuery {
-	return &PostQuery{config: c.config}
+	return &PostQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Post entity by its id.
@@ -430,7 +434,9 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.

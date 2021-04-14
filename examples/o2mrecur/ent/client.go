@@ -192,7 +192,9 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 
 // Query returns a query builder for Node.
 func (c *NodeClient) Query() *NodeQuery {
-	return &NodeQuery{config: c.config}
+	return &NodeQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Node entity by its id.

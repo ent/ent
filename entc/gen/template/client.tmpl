@@ -204,7 +204,14 @@ func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }}
 
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
-	return &{{ $n.QueryName }}{config: c.config}
+	return &{{ $n.QueryName }}{
+		config: c.config,
+		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $n }}
+			{{- end }}
+		{{- end }}
+	}
 }
 
 // Get returns a {{ $n.Name }} entity by its id.
@@ -251,6 +258,5 @@ func (c *{{ $client }}) Hooks() []Hook {
 {{ end }}
 {{ end }}
 
-{{/* A template that can be overrided in order to add additional fields to the client.*/}}
+{{/* A template that can be overridden in order to add additional fields to the client.*/}}
 {{ define "client/fields/additional" }}{{ end }}
-
