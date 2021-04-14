@@ -205,12 +205,12 @@ func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }}
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	return &{{ $n.QueryName }}{
-	    config: c.config,
-        {{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
-            {{- range $tmpl := $tmpls }}
-                {{- xtemplate $tmpl $n }}
-            {{- end }}
-        {{- end }}
+		config: c.config,
+		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $n }}
+			{{- end }}
+		{{- end }}
 	}
 }
 
