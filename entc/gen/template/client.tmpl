@@ -206,7 +206,7 @@ func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }}
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	return &{{ $n.QueryName }}{
 	    config: c.config,
-        {{- with $tmpls := matchTemplate "client/query/fields/init/*" }}
+        {{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
             {{- range $tmpl := $tmpls }}
                 {{- xtemplate $tmpl $n }}
             {{- end }}
