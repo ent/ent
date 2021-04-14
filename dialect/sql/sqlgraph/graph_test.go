@@ -1545,6 +1545,30 @@ func TestUpdateNode(t *testing.T) {
 	}
 }
 
+func TestExecUpdateNode(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectBegin()
+	mock.ExpectExec(escape("UPDATE `users` SET `age` = ?, `name` = ? WHERE `id` = ?")).
+		WithArgs(30, "Ariel", 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
+	err = UpdateNode(context.Background(), sql.OpenDB("", db), &UpdateSpec{
+		Node: &NodeSpec{
+			Table:   "users",
+			Columns: []string{"id", "name", "age"},
+			ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+		},
+		Fields: FieldMut{
+			Set: []*FieldSpec{
+				{Column: "age", Type: field.TypeInt, Value: 30},
+				{Column: "name", Type: field.TypeString, Value: "Ariel"},
+			},
+		},
+	})
+	require.NoError(t, err)
+}
+
 func TestUpdateNodes(t *testing.T) {
 	tests := []struct {
 		name         string
