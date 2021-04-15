@@ -215,6 +215,13 @@ module.exports={
     },
     "gtag": {
       "trackingID": "UA-189726777-1"
-    }
+    },
+    announcementBar: {
+      id: 'version-08', // Identify this message.
+      content: 'Version v0.8.0 has been released! <a target="_blank" rel="noopener noreferrer" href="https://github.com/ent/ent/releases/tag/v0.8.0">Read the release notes on GitHub.</a>️',
+      backgroundColor: '#fafbfc',
+      textColor: '#091E42',
+      isCloseable: true,
+    },
   }
 }
