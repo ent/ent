@@ -1023,9 +1023,12 @@ func (f Field) NillableValue() bool {
 	return f.Nillable && !f.Type.RType.IsPtr()
 }
 
-// NullType returns the sql null-type for optional and nullable fields.
-func (f Field) NullType() string {
+// ScanType returns the Go type that is used for `rows.Scan`.
+func (f Field) ScanType() string {
 	if f.Type.ValueScanner() {
+		if f.Nillable && !f.standardNullType() {
+			return "sql.NullScanner"
+		}
 		return f.Type.RType.String()
 	}
 	switch f.Type.Type {
@@ -1046,10 +1049,49 @@ func (f Field) NullType() string {
 	return f.Type.String()
 }
 
-// NullTypeField extracts the nullable type field (if exists) from the given receiver.
+// NewScanType returns an expression for creating an new object
+// to be used by the `rows.Scan` method. An sql.Scanner or a
+// nillable-type supported by the SQL driver (e.g. []byte).
+func (f Field) NewScanType() string {
+	if f.Type.ValueScanner() {
+		expr := fmt.Sprintf("new(%s)", f.Type.RType.String())
+		if f.Nillable && !f.standardNullType() {
+			expr = fmt.Sprintf("&sql.NullScanner{S: %s}", expr)
+		}
+		return expr
+	}
+	expr := f.Type.String()
+	switch f.Type.Type {
+	case field.TypeJSON, field.TypeBytes:
+		expr = "[]byte"
+	case field.TypeString, field.TypeEnum:
+		expr = "sql.NullString"
+	case field.TypeBool:
+		expr = "sql.NullBool"
+	case field.TypeTime:
+		expr = "sql.NullTime"
+	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32, field.TypeInt64,
+		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
+		expr = "sql.NullInt64"
+	case field.TypeFloat32, field.TypeFloat64:
+		expr = "sql.NullFloat64"
+	}
+	return fmt.Sprintf("new(%s)", expr)
+}
+
+// ScanTypeField extracts the nullable type field (if exists) from the given receiver.
 // It also does the type conversion if needed.
-func (f Field) NullTypeField(rec string) string {
+func (f Field) ScanTypeField(rec string) string {
 	expr := rec
+	if f.Type.ValueScanner() {
+		if f.Nillable && !f.standardNullType() {
+			return fmt.Sprintf("%s.S.(%s)", expr, f.Type)
+		}
+		if !f.Type.RType.IsPtr() {
+			expr = "*" + expr
+		}
+		return expr
+	}
 	switch f.Type.Type {
 	case field.TypeEnum:
 		expr = fmt.Sprintf("%s(%s.String)", f.Type, rec)
@@ -1064,6 +1106,29 @@ func (f Field) NullTypeField(rec string) string {
 		expr = fmt.Sprintf("%s(%s.Int64)", f.Type, rec)
 	}
 	return expr
+}
+
+// standardSQLType reports if the field is one of the standard SQL types.
+func (f Field) standardNullType() bool {
+	for _, t := range []reflect.Type{
+		nullBoolType,
+		nullBoolPType,
+		nullFloatType,
+		nullFloatPType,
+		nullInt32Type,
+		nullInt32PType,
+		nullInt64Type,
+		nullInt64PType,
+		nullTimeType,
+		nullTimePType,
+		nullStringType,
+		nullStringPType,
+	} {
+		if f.Type.RType.TypeEqual(t) {
+			return true
+		}
+	}
+	return false
 }
 
 // Column returns the table column. It sets it as a primary key (auto_increment)
@@ -1163,6 +1228,12 @@ func (f Field) ConvertedToBasic() bool {
 var (
 	nullBoolType    = reflect.TypeOf(sql.NullBool{})
 	nullBoolPType   = reflect.TypeOf((*sql.NullBool)(nil))
+	nullFloatType   = reflect.TypeOf(sql.NullFloat64{})
+	nullFloatPType  = reflect.TypeOf((*sql.NullFloat64)(nil))
+	nullInt32Type   = reflect.TypeOf(sql.NullInt32{})
+	nullInt32PType  = reflect.TypeOf((*sql.NullInt32)(nil))
+	nullInt64Type   = reflect.TypeOf(sql.NullInt64{})
+	nullInt64PType  = reflect.TypeOf((*sql.NullInt64)(nil))
 	nullTimeType    = reflect.TypeOf(sql.NullTime{})
 	nullTimePType   = reflect.TypeOf((*sql.NullTime)(nil))
 	nullStringType  = reflect.TypeOf(sql.NullString{})

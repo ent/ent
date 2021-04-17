@@ -551,7 +551,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 				s.Where(sql.InValues(pet.FriendsPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullString{}, &sql.NullString{}}
+				return [2]interface{}{new(sql.NullString), new(sql.NullString)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*sql.NullString)

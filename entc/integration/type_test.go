@@ -44,6 +44,9 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int16(16), ft.Int16)
 	require.Equal(int32(32), ft.Int32)
 	require.Equal(int64(64), ft.Int64)
+	require.Nil(ft.NullLink)
+	require.Nil(ft.NilPair)
+	require.Nil(ft.Deleted)
 
 	ft = client.FieldType.Create().
 		SetInt(1).

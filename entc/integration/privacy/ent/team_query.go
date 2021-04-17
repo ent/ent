@@ -443,7 +443,7 @@ func (tq *TeamQuery) sqlAll(ctx context.Context) ([]*Team, error) {
 				s.Where(sql.InValues(team.TasksPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*sql.NullInt64)
@@ -508,7 +508,7 @@ func (tq *TeamQuery) sqlAll(ctx context.Context) ([]*Team, error) {
 				s.Where(sql.InValues(team.UsersPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*sql.NullInt64)

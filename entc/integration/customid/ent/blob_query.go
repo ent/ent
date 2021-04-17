@@ -473,7 +473,7 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 				s.Where(sql.InValues(blob.LinksPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&uuid.UUID{}, &uuid.UUID{}}
+				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*uuid.UUID)

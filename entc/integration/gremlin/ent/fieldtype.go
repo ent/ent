@@ -381,8 +381,10 @@ func (ft *FieldType) String() string {
 		builder.WriteString(", null_active=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
-	builder.WriteString(", deleted=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Deleted))
+	if v := ft.Deleted; v != nil {
+		builder.WriteString(", deleted=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", deleted_at=")
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
 	builder.WriteString(", ip=")

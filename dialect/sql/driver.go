@@ -148,3 +148,17 @@ type (
 	// TxOptions holds the transaction options to be used in DB.BeginTx.
 	TxOptions = sql.TxOptions
 )
+
+// NullScanner represents an sql.Scanner that may be null.
+// NullScanner implements the sql.Scanner interface so it can
+// be used as a scan destination, similar to the types above.
+type NullScanner struct {
+	S     sql.Scanner
+	Valid bool // Valid is true if the Scan value is not NULL.
+}
+
+// Scan implements the Scanner interface.
+func (n *NullScanner) Scan(value interface{}) error {
+	n.Valid = value != nil
+	return n.S.Scan(value)
+}

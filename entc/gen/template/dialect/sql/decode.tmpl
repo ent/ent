@@ -9,15 +9,15 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/decode/one" }}
 {{ $receiver := $.Receiver }}
 
-{{ $idnulltype := $.ID.NullType }}{{ if not $.ID.UserDefined }}{{ $idnulltype = "sql.NullInt64" }}{{ end }}
-{{ $ctypes := dict $idnulltype (list $.ID.Constant) }}
+{{ $idscantype := $.ID.NewScanType }}{{ if not $.ID.UserDefined }}{{ $idscantype = "new(sql.NullInt64)" }}{{ end }}
+{{ $ctypes := dict $idscantype (list $.ID.Constant) }}
 {{ range $f := $.Fields }}
 	{{ $names := list }}
-	{{ if hasKey $ctypes $f.NullType }}
-		{{ $names = get $ctypes $f.NullType }}
+	{{ if hasKey $ctypes $f.NewScanType }}
+		{{ $names = get $ctypes $f.NewScanType }}
 	{{ end }}
 	{{ $names = append $names $f.Constant }}
-	{{ $ctypes = set $ctypes $f.NullType $names }}
+	{{ $ctypes = set $ctypes $f.NewScanType $names }}
 {{ end }}
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -27,12 +27,12 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 			{{- range $type, $columns := $ctypes }}
 				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }}{{ $.Package }}.{{ $c }}{{ end }}:
-					values[i] = new({{ $type }})
+					values[i] = {{ $type }}
 			{{- end }}
 			{{- range $i, $fk := $.UnexportedForeignKeys }}
 				{{- $f := $fk.Field }}
 				case {{ $.Package }}.ForeignKeys[{{ $i }}]: // {{ $f.Name }}
-					values[i] = new({{ if not $f.UserDefined }}sql.NullInt64{{ else }}{{ $f.NullType }}{{ end }})
+					values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
 			{{- end }}
 			default:
 				return nil, fmt.Errorf("unexpected column %q for type {{ $.Name }}", columns[i])
@@ -94,9 +94,9 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 	{{- $i := $.Scope.Idx -}}
 	{{- $f := $.Scope.Field -}}
 	{{- $ret := $.Scope.Rec -}}
-	{{- $field := $f.StructField }}{{ with $.Scope.StructField }}{{ $field = . }}{{ end }}
-	{{- if $f.IsJSON }}
-		if value, ok := values[{{ $i }}].(*{{ $f.NullType }}); !ok {
+	{{- $field := $f.StructField }}{{ with $.Scope.StructField }}{{ $field = . }}{{ end -}}
+	{{- if $f.IsJSON -}}
+		if value, ok := values[{{ $i }}].(*{{ $f.ScanType }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
 		} else if value != nil && len(*value) > 0 {
 			if err := json.Unmarshal(*value, &{{ $ret }}.{{ $field }}); err != nil {
@@ -104,16 +104,16 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 			}
 		}
 	{{- else }}
-		{{- $nulltype := $f.NullType -}}
-		if value, ok := values[{{ $i }}].(*{{ $nulltype }}); !ok {
+		{{- $scantype := $f.ScanType -}}
+		if value, ok := values[{{ $i }}].(*{{ $scantype }}); !ok {
 			return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[{{ $i }}])
-		{{- if and (not $f.Type.ValueScanner) (hasPrefix $nulltype "sql") }}
+		{{- if hasPrefix $scantype "sql.Null" }}
 			} else if value.Valid {
 				{{- if $f.NillableValue }}
 					{{ $ret }}.{{ $field }} = new({{ $f.Type }})
-					*{{ $ret }}.{{ $field }} = {{ $f.NullTypeField "value" }}
+					*{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
 				{{- else }}
-					{{ $ret }}.{{ $field }} = {{ $f.NullTypeField "value" }}
+					{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
 				{{- end }}
 		{{- else }}
 			} else if value != nil {

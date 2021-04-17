@@ -173,6 +173,7 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			GoType(Status(false)),
 		field.Bool("deleted").
 			Optional().
+			Nillable().
 			GoType(&sql.NullBool{}),
 		field.Time("deleted_at").
 			Optional().
