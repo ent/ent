@@ -106,7 +106,6 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				u.Name = value.String
 			}
 		case user.FieldFoods:
-
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field foods", values[i])
 			} else if value != nil && len(*value) > 0 {

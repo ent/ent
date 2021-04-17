@@ -435,7 +435,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				s.Where(sql.InValues(user.FollowersPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*sql.NullInt64)
@@ -500,7 +500,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				s.Where(sql.InValues(user.FollowingPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
 			},
 			Assign: func(out, in interface{}) error {
 				eout, ok := out.(*sql.NullInt64)

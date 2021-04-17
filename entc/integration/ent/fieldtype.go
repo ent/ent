@@ -144,13 +144,17 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case fieldtype.FieldNullLink:
+			values[i] = &sql.NullScanner{S: new(schema.Link)}
+		case fieldtype.FieldNilPair:
+			values[i] = &sql.NullScanner{S: new(schema.Pair)}
 		case fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = new([]byte)
-		case fieldtype.FieldLinkOther, fieldtype.FieldLink, fieldtype.FieldNullLink:
+		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
 			values[i] = new(schema.Link)
 		case fieldtype.FieldMAC:
 			values[i] = new(schema.MAC)
-		case fieldtype.FieldPair, fieldtype.FieldNilPair:
+		case fieldtype.FieldPair:
 			values[i] = new(schema.Pair)
 		case fieldtype.FieldStringArray:
 			values[i] = new(schema.Strings)
@@ -394,13 +398,13 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 		case fieldtype.FieldStr:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field str", values[i])
-			} else if value != nil {
+			} else if value.Valid {
 				ft.Str = *value
 			}
 		case fieldtype.FieldNullStr:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field null_str", values[i])
-			} else if value != nil {
+			} else if value.Valid {
 				ft.NullStr = value
 			}
 		case fieldtype.FieldLink:
@@ -410,10 +414,10 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				ft.Link = *value
 			}
 		case fieldtype.FieldNullLink:
-			if value, ok := values[i].(*schema.Link); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field null_link", values[i])
-			} else if value != nil {
-				ft.NullLink = value
+			} else if value.Valid {
+				ft.NullLink = value.S.(*schema.Link)
 			}
 		case fieldtype.FieldActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -431,13 +435,13 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 		case fieldtype.FieldDeleted:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted", values[i])
-			} else if value != nil {
+			} else if value.Valid {
 				ft.Deleted = value
 			}
 		case fieldtype.FieldDeletedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
-			} else if value != nil {
+			} else if value.Valid {
 				ft.DeletedAt = value
 			}
 		case fieldtype.FieldIP:
@@ -449,7 +453,7 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 		case fieldtype.FieldNullInt64:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field null_int64", values[i])
-			} else if value != nil {
+			} else if value.Valid {
 				ft.NullInt64 = value
 			}
 		case fieldtype.FieldSchemaInt:
@@ -485,7 +489,7 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 		case fieldtype.FieldNullFloat:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field null_float", values[i])
-			} else if value != nil {
+			} else if value.Valid {
 				ft.NullFloat = value
 			}
 		case fieldtype.FieldRole:
@@ -501,7 +505,6 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				ft.UUID = *value
 			}
 		case fieldtype.FieldStrings:
-
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field strings", values[i])
 			} else if value != nil && len(*value) > 0 {
@@ -516,10 +519,10 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				ft.Pair = *value
 			}
 		case fieldtype.FieldNilPair:
-			if value, ok := values[i].(*schema.Pair); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field nil_pair", values[i])
-			} else if value != nil {
-				ft.NilPair = value
+			} else if value.Valid {
+				ft.NilPair = value.S.(*schema.Pair)
 			}
 		case fieldtype.FieldVstring:
 			if value, ok := values[i].(*schema.VString); !ok {
@@ -662,8 +665,10 @@ func (ft *FieldType) String() string {
 		builder.WriteString(", null_active=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
-	builder.WriteString(", deleted=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Deleted))
+	if v := ft.Deleted; v != nil {
+		builder.WriteString(", deleted=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", deleted_at=")
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
 	builder.WriteString(", ip=")

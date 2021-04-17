@@ -207,7 +207,6 @@ module.exports={
       <br/>
       Design by Moriah Rich, illustration by Ariel Mashraki.
       `,
-
     },
     "algolia": {
       "apiKey": "bfc8175da1bd5078f1c02e5c8a6fe782",

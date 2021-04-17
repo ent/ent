@@ -82,7 +82,6 @@ func (i *Info) assignValues(columns []string, values []interface{}) error {
 			}
 			i.ID = int(value.Int64)
 		case info.FieldContent:
-
 			if value, ok := values[j].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field content", values[j])
 			} else if value != nil && len(*value) > 0 {
