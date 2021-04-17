@@ -100,6 +100,26 @@ var (
 			},
 		},
 	}
+	// NotesColumns holds the columns for the "notes" table.
+	NotesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "text", Type: field.TypeString, Nullable: true},
+		{Name: "note_children", Type: field.TypeString, Nullable: true, Size: 36},
+	}
+	// NotesTable holds the schema information for the "notes" table.
+	NotesTable = &schema.Table{
+		Name:       "notes",
+		Columns:    NotesColumns,
+		PrimaryKey: []*schema.Column{NotesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "notes_notes_children",
+				Columns:    []*schema.Column{NotesColumns[2]},
+				RefColumns: []*schema.Column{NotesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -226,6 +246,7 @@ var (
 		CarsTable,
 		GroupsTable,
 		MixinIdsTable,
+		NotesTable,
 		PetsTable,
 		UsersTable,
 		BlobLinksTable,
@@ -237,6 +258,7 @@ var (
 func init() {
 	BlobsTable.ForeignKeys[0].RefTable = BlobsTable
 	CarsTable.ForeignKeys[0].RefTable = PetsTable
+	NotesTable.ForeignKeys[0].RefTable = NotesTable
 	PetsTable.ForeignKeys[0].RefTable = PetsTable
 	PetsTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable

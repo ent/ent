@@ -174,12 +174,12 @@ func init() {
 				{{- else }}
 					{{ $name }} = func() {{ $type }} {
 						validators := {{ $desc }}.Validators
-						fns := [...]func({{ $f.Type }}) error {
+						fns := [...]func({{ $f.Type.Type }}) error {
 							{{- range $j, $n := xrange $f.Validators }}
 								validators[{{ $j }}].(func({{ $f.Type.Type }}) error),
 							{{- end }}
 						}
-						return func({{ $f.BuilderField }} {{ $f.Type }}) error {
+						return func({{ $f.BuilderField }} {{ $f.Type.Type }}) error {
 							for _, fn := range fns {
 								if err := fn({{ $f.BuilderField }}); err != nil {
 									return err

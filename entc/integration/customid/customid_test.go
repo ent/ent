@@ -151,4 +151,10 @@ func CustomID(t *testing.T, client *ent.Client) {
 	).SaveX(ctx)
 	require.Equal(t, u1, blobs[0].ID)
 	require.Equal(t, u2, blobs[1].ID)
+
+	parent := client.Note.Create().SetText("parent").SaveX(ctx)
+	require.NotEmpty(t, parent.ID)
+	require.NotEmpty(t, parent.Text)
+	child := client.Note.Create().SetText("child").SetParent(parent).SaveX(ctx)
+	require.NotEmpty(t, child.QueryParent().OnlyIDX(ctx))
 }

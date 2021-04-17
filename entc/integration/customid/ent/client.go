@@ -12,12 +12,14 @@ import (
 	"log"
 
 	"entgo.io/ent/entc/integration/customid/ent/migrate"
+	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
+	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 
@@ -39,6 +41,8 @@ type Client struct {
 	Group *GroupClient
 	// MixinID is the client for interacting with the MixinID builders.
 	MixinID *MixinIDClient
+	// Note is the client for interacting with the Note builders.
+	Note *NoteClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
@@ -60,6 +64,7 @@ func (c *Client) init() {
 	c.Car = NewCarClient(c.config)
 	c.Group = NewGroupClient(c.config)
 	c.MixinID = NewMixinIDClient(c.config)
+	c.Note = NewNoteClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -99,6 +104,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Car:     NewCarClient(cfg),
 		Group:   NewGroupClient(cfg),
 		MixinID: NewMixinIDClient(cfg),
+		Note:    NewNoteClient(cfg),
 		Pet:     NewPetClient(cfg),
 		User:    NewUserClient(cfg),
 	}, nil
@@ -123,6 +129,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Car:     NewCarClient(cfg),
 		Group:   NewGroupClient(cfg),
 		MixinID: NewMixinIDClient(cfg),
+		Note:    NewNoteClient(cfg),
 		Pet:     NewPetClient(cfg),
 		User:    NewUserClient(cfg),
 	}, nil
@@ -158,6 +165,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Car.Use(hooks...)
 	c.Group.Use(hooks...)
 	c.MixinID.Use(hooks...)
+	c.Note.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -584,6 +592,128 @@ func (c *MixinIDClient) GetX(ctx context.Context, id uuid.UUID) *MixinID {
 // Hooks returns the client hooks.
 func (c *MixinIDClient) Hooks() []Hook {
 	return c.hooks.MixinID
+}
+
+// NoteClient is a client for the Note schema.
+type NoteClient struct {
+	config
+}
+
+// NewNoteClient returns a client for the Note from the given config.
+func NewNoteClient(c config) *NoteClient {
+	return &NoteClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `note.Hooks(f(g(h())))`.
+func (c *NoteClient) Use(hooks ...Hook) {
+	c.hooks.Note = append(c.hooks.Note, hooks...)
+}
+
+// Create returns a create builder for Note.
+func (c *NoteClient) Create() *NoteCreate {
+	mutation := newNoteMutation(c.config, OpCreate)
+	return &NoteCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Note entities.
+func (c *NoteClient) CreateBulk(builders ...*NoteCreate) *NoteCreateBulk {
+	return &NoteCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Note.
+func (c *NoteClient) Update() *NoteUpdate {
+	mutation := newNoteMutation(c.config, OpUpdate)
+	return &NoteUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NoteClient) UpdateOne(n *Note) *NoteUpdateOne {
+	mutation := newNoteMutation(c.config, OpUpdateOne, withNote(n))
+	return &NoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NoteClient) UpdateOneID(id schema.NoteID) *NoteUpdateOne {
+	mutation := newNoteMutation(c.config, OpUpdateOne, withNoteID(id))
+	return &NoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Note.
+func (c *NoteClient) Delete() *NoteDelete {
+	mutation := newNoteMutation(c.config, OpDelete)
+	return &NoteDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *NoteClient) DeleteOne(n *Note) *NoteDeleteOne {
+	return c.DeleteOneID(n.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *NoteClient) DeleteOneID(id schema.NoteID) *NoteDeleteOne {
+	builder := c.Delete().Where(note.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NoteDeleteOne{builder}
+}
+
+// Query returns a query builder for Note.
+func (c *NoteClient) Query() *NoteQuery {
+	return &NoteQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Note entity by its id.
+func (c *NoteClient) Get(ctx context.Context, id schema.NoteID) (*Note, error) {
+	return c.Query().Where(note.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NoteClient) GetX(ctx context.Context, id schema.NoteID) *Note {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryParent queries the parent edge of a Note.
+func (c *NoteClient) QueryParent(n *Note) *NoteQuery {
+	query := &NoteQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := n.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(note.Table, note.FieldID, id),
+			sqlgraph.To(note.Table, note.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, note.ParentTable, note.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Note.
+func (c *NoteClient) QueryChildren(n *Note) *NoteQuery {
+	query := &NoteQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := n.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(note.Table, note.FieldID, id),
+			sqlgraph.To(note.Table, note.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, note.ChildrenTable, note.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NoteClient) Hooks() []Hook {
+	return c.hooks.Note
 }
 
 // PetClient is a client for the Pet schema.

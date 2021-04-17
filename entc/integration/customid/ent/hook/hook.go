@@ -65,6 +65,19 @@ func (f MixinIDFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The NoteFunc type is an adapter to allow the use of ordinary
+// function as Note mutator.
+type NoteFunc func(context.Context, *ent.NoteMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NoteFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.NoteMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NoteMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The PetFunc type is an adapter to allow the use of ordinary
 // function as Pet mutator.
 type PetFunc func(context.Context, *ent.PetMutation) (ent.Value, error)

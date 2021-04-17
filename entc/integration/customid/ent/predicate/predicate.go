@@ -22,6 +22,9 @@ type Group func(*sql.Selector)
 // MixinID is the predicate function for mixinid builders.
 type MixinID func(*sql.Selector)
 
+// Note is the predicate function for note builders.
+type Note func(*sql.Selector)
+
 // Pet is the predicate function for pet builders.
 type Pet func(*sql.Selector)
 
