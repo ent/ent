@@ -15,8 +15,10 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
+	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 	"github.com/google/uuid"
 
@@ -36,6 +38,7 @@ const (
 	TypeCar     = "Car"
 	TypeGroup   = "Group"
 	TypeMixinID = "MixinID"
+	TypeNote    = "Note"
 	TypePet     = "Pet"
 	TypeUser    = "User"
 )
@@ -1734,6 +1737,472 @@ func (m *MixinIDMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *MixinIDMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown MixinID edge %s", name)
+}
+
+// NoteMutation represents an operation that mutates the Note nodes in the graph.
+type NoteMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *schema.NoteID
+	text            *string
+	clearedFields   map[string]struct{}
+	parent          *schema.NoteID
+	clearedparent   bool
+	children        map[schema.NoteID]struct{}
+	removedchildren map[schema.NoteID]struct{}
+	clearedchildren bool
+	done            bool
+	oldValue        func(context.Context) (*Note, error)
+	predicates      []predicate.Note
+}
+
+var _ ent.Mutation = (*NoteMutation)(nil)
+
+// noteOption allows management of the mutation configuration using functional options.
+type noteOption func(*NoteMutation)
+
+// newNoteMutation creates new mutation for the Note entity.
+func newNoteMutation(c config, op Op, opts ...noteOption) *NoteMutation {
+	m := &NoteMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeNote,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withNoteID sets the ID field of the mutation.
+func withNoteID(id schema.NoteID) noteOption {
+	return func(m *NoteMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Note
+		)
+		m.oldValue = func(ctx context.Context) (*Note, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Note.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withNote sets the old Note of the mutation.
+func withNote(node *Note) noteOption {
+	return func(m *NoteMutation) {
+		m.oldValue = func(context.Context) (*Note, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m NoteMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m NoteMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Note entities.
+func (m *NoteMutation) SetID(id schema.NoteID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
+func (m *NoteMutation) ID() (id schema.NoteID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetText sets the "text" field.
+func (m *NoteMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *NoteMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the Note entity.
+// If the Note object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *NoteMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ClearText clears the value of the "text" field.
+func (m *NoteMutation) ClearText() {
+	m.text = nil
+	m.clearedFields[note.FieldText] = struct{}{}
+}
+
+// TextCleared returns if the "text" field was cleared in this mutation.
+func (m *NoteMutation) TextCleared() bool {
+	_, ok := m.clearedFields[note.FieldText]
+	return ok
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *NoteMutation) ResetText() {
+	m.text = nil
+	delete(m.clearedFields, note.FieldText)
+}
+
+// SetParentID sets the "parent" edge to the Note entity by id.
+func (m *NoteMutation) SetParentID(id schema.NoteID) {
+	m.parent = &id
+}
+
+// ClearParent clears the "parent" edge to the Note entity.
+func (m *NoteMutation) ClearParent() {
+	m.clearedparent = true
+}
+
+// ParentCleared reports if the "parent" edge to the Note entity was cleared.
+func (m *NoteMutation) ParentCleared() bool {
+	return m.clearedparent
+}
+
+// ParentID returns the "parent" edge ID in the mutation.
+func (m *NoteMutation) ParentID() (id schema.NoteID, exists bool) {
+	if m.parent != nil {
+		return *m.parent, true
+	}
+	return
+}
+
+// ParentIDs returns the "parent" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ParentID instead. It exists only for internal usage by the builders.
+func (m *NoteMutation) ParentIDs() (ids []schema.NoteID) {
+	if id := m.parent; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetParent resets all changes to the "parent" edge.
+func (m *NoteMutation) ResetParent() {
+	m.parent = nil
+	m.clearedparent = false
+}
+
+// AddChildIDs adds the "children" edge to the Note entity by ids.
+func (m *NoteMutation) AddChildIDs(ids ...schema.NoteID) {
+	if m.children == nil {
+		m.children = make(map[schema.NoteID]struct{})
+	}
+	for i := range ids {
+		m.children[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChildren clears the "children" edge to the Note entity.
+func (m *NoteMutation) ClearChildren() {
+	m.clearedchildren = true
+}
+
+// ChildrenCleared reports if the "children" edge to the Note entity was cleared.
+func (m *NoteMutation) ChildrenCleared() bool {
+	return m.clearedchildren
+}
+
+// RemoveChildIDs removes the "children" edge to the Note entity by IDs.
+func (m *NoteMutation) RemoveChildIDs(ids ...schema.NoteID) {
+	if m.removedchildren == nil {
+		m.removedchildren = make(map[schema.NoteID]struct{})
+	}
+	for i := range ids {
+		m.removedchildren[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChildren returns the removed IDs of the "children" edge to the Note entity.
+func (m *NoteMutation) RemovedChildrenIDs() (ids []schema.NoteID) {
+	for id := range m.removedchildren {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChildrenIDs returns the "children" edge IDs in the mutation.
+func (m *NoteMutation) ChildrenIDs() (ids []schema.NoteID) {
+	for id := range m.children {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChildren resets all changes to the "children" edge.
+func (m *NoteMutation) ResetChildren() {
+	m.children = nil
+	m.clearedchildren = false
+	m.removedchildren = nil
+}
+
+// Op returns the operation name.
+func (m *NoteMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Note).
+func (m *NoteMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *NoteMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.text != nil {
+		fields = append(fields, note.FieldText)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *NoteMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case note.FieldText:
+		return m.Text()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *NoteMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case note.FieldText:
+		return m.OldText(ctx)
+	}
+	return nil, fmt.Errorf("unknown Note field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *NoteMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case note.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Note field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *NoteMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *NoteMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *NoteMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Note numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *NoteMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(note.FieldText) {
+		fields = append(fields, note.FieldText)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *NoteMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *NoteMutation) ClearField(name string) error {
+	switch name {
+	case note.FieldText:
+		m.ClearText()
+		return nil
+	}
+	return fmt.Errorf("unknown Note nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *NoteMutation) ResetField(name string) error {
+	switch name {
+	case note.FieldText:
+		m.ResetText()
+		return nil
+	}
+	return fmt.Errorf("unknown Note field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *NoteMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.parent != nil {
+		edges = append(edges, note.EdgeParent)
+	}
+	if m.children != nil {
+		edges = append(edges, note.EdgeChildren)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *NoteMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case note.EdgeParent:
+		if id := m.parent; id != nil {
+			return []ent.Value{*id}
+		}
+	case note.EdgeChildren:
+		ids := make([]ent.Value, 0, len(m.children))
+		for id := range m.children {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *NoteMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedchildren != nil {
+		edges = append(edges, note.EdgeChildren)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *NoteMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case note.EdgeChildren:
+		ids := make([]ent.Value, 0, len(m.removedchildren))
+		for id := range m.removedchildren {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *NoteMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedparent {
+		edges = append(edges, note.EdgeParent)
+	}
+	if m.clearedchildren {
+		edges = append(edges, note.EdgeChildren)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *NoteMutation) EdgeCleared(name string) bool {
+	switch name {
+	case note.EdgeParent:
+		return m.clearedparent
+	case note.EdgeChildren:
+		return m.clearedchildren
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *NoteMutation) ClearEdge(name string) error {
+	switch name {
+	case note.EdgeParent:
+		m.ClearParent()
+		return nil
+	}
+	return fmt.Errorf("unknown Note unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *NoteMutation) ResetEdge(name string) error {
+	switch name {
+	case note.EdgeParent:
+		m.ResetParent()
+		return nil
+	case note.EdgeChildren:
+		m.ResetChildren()
+		return nil
+	}
+	return fmt.Errorf("unknown Note edge %s", name)
 }
 
 // PetMutation represents an operation that mutates the Pet nodes in the graph.

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
+	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"github.com/google/uuid"
@@ -55,6 +56,28 @@ func init() {
 	mixinidDescID := mixinidMixinFields0[0].Descriptor()
 	// mixinid.DefaultID holds the default value on creation for the id field.
 	mixinid.DefaultID = mixinidDescID.Default.(func() uuid.UUID)
+	noteFields := schema.Note{}.Fields()
+	_ = noteFields
+	// noteDescID is the schema descriptor for id field.
+	noteDescID := noteFields[0].Descriptor()
+	// note.DefaultID holds the default value on creation for the id field.
+	note.DefaultID = noteDescID.Default.(func() schema.NoteID)
+	// note.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	note.IDValidator = func() func(string) error {
+		validators := noteDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescID is the schema descriptor for id field.

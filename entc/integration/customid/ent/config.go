@@ -32,6 +32,7 @@ type hooks struct {
 	Car     []ent.Hook
 	Group   []ent.Hook
 	MixinID []ent.Hook
+	Note    []ent.Hook
 	Pet     []ent.Hook
 	User    []ent.Hook
 }
