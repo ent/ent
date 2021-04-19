@@ -885,14 +885,14 @@ func (fgb *FileGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
-	selector := fgb.sql
+	selector := fgb.sql.Select()
 	aggregation := make([]string, 0, len(fgb.fns))
 	for _, fn := range fgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.Columns()) == 0 {
+	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
 		for _, f := range fgb.fields {
 			columns = append(columns, selector.C(f))

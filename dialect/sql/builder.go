@@ -1759,6 +1759,11 @@ func (s *Selector) Select(columns ...string) *Selector {
 	return s
 }
 
+// SelectedColumns returns the selected columns of the Selector.
+func (s *Selector) SelectedColumns() []string {
+	return s.columns
+}
+
 // From sets the source of `FROM` clause.
 func (s *Selector) From(t TableView) *Selector {
 	s.from = t

@@ -649,14 +649,14 @@ func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (ggb *GoodsGroupBy) sqlQuery() *sql.Selector {
-	selector := ggb.sql
+	selector := ggb.sql.Select()
 	aggregation := make([]string, 0, len(ggb.fns))
 	for _, fn := range ggb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.Columns()) == 0 {
+	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
 		for _, f := range ggb.fields {
 			columns = append(columns, selector.C(f))

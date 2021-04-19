@@ -745,14 +745,14 @@ func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error 
 }
 
 func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
-	selector := gigb.sql
+	selector := gigb.sql.Select()
 	aggregation := make([]string, 0, len(gigb.fns))
 	for _, fn := range gigb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.Columns()) == 0 {
+	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(gigb.fields)+len(gigb.fns))
 		for _, f := range gigb.fields {
 			columns = append(columns, selector.C(f))

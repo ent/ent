@@ -854,14 +854,14 @@ func (bgb *BlobGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
-	selector := bgb.sql
+	selector := bgb.sql.Select()
 	aggregation := make([]string, 0, len(bgb.fns))
 	for _, fn := range bgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.Columns()) == 0 {
+	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
 		for _, f := range bgb.fields {
 			columns = append(columns, selector.C(f))

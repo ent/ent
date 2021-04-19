@@ -818,14 +818,14 @@ func (ngb *NoteGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (ngb *NoteGroupBy) sqlQuery() *sql.Selector {
-	selector := ngb.sql
+	selector := ngb.sql.Select()
 	aggregation := make([]string, 0, len(ngb.fns))
 	for _, fn := range ngb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.Columns()) == 0 {
+	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
 		for _, f := range ngb.fields {
 			columns = append(columns, selector.C(f))
