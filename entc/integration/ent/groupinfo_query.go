@@ -746,12 +746,23 @@ func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, v interface{}) error 
 
 func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 	selector := gigb.sql
-	columns := make([]string, 0, len(gigb.fields)+len(gigb.fns))
-	columns = append(columns, gigb.fields...)
+	aggregation := make([]string, 0, len(gigb.fns))
 	for _, fn := range gigb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(gigb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(gigb.fields)+len(gigb.fns))
+		for _, f := range gigb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(gigb.fields...)...)
 }
 
 // GroupInfoSelect is the builder for selecting fields of GroupInfo entities.

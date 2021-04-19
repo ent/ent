@@ -650,12 +650,23 @@ func (igb *ItemGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 
 func (igb *ItemGroupBy) sqlQuery() *sql.Selector {
 	selector := igb.sql
-	columns := make([]string, 0, len(igb.fields)+len(igb.fns))
-	columns = append(columns, igb.fields...)
+	aggregation := make([]string, 0, len(igb.fns))
 	for _, fn := range igb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(igb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(igb.fields)+len(igb.fns))
+		for _, f := range igb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(igb.fields...)...)
 }
 
 // ItemSelect is the builder for selecting fields of Item entities.

@@ -314,12 +314,12 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Age float64 `json:"age,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Pet.Query().
-//		GroupBy(pet.FieldName).
+//		GroupBy(pet.FieldAge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -341,11 +341,11 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Age float64 `json:"age,omitempty"`
 //	}
 //
 //	client.Pet.Query().
-//		Select(pet.FieldName).
+//		Select(pet.FieldAge).
 //		Scan(ctx, &v)
 //
 func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {

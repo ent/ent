@@ -855,12 +855,23 @@ func (bgb *BlobGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 
 func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 	selector := bgb.sql
-	columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
-	columns = append(columns, bgb.fields...)
+	aggregation := make([]string, 0, len(bgb.fns))
 	for _, fn := range bgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(bgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(bgb.fields)+len(bgb.fns))
+		for _, f := range bgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(bgb.fields...)...)
 }
 
 // BlobSelect is the builder for selecting fields of Blob entities.

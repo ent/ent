@@ -9962,6 +9962,8 @@ type PetMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	age           *float64
+	addage        *float64
 	name          *string
 	uuid          *uuid.UUID
 	clearedFields map[string]struct{}
@@ -10051,6 +10053,62 @@ func (m *PetMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// SetAge sets the "age" field.
+func (m *PetMutation) SetAge(f float64) {
+	m.age = &f
+	m.addage = nil
+}
+
+// Age returns the value of the "age" field in the mutation.
+func (m *PetMutation) Age() (r float64, exists bool) {
+	v := m.age
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAge returns the old "age" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldAge(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldAge is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldAge requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAge: %w", err)
+	}
+	return oldValue.Age, nil
+}
+
+// AddAge adds f to the "age" field.
+func (m *PetMutation) AddAge(f float64) {
+	if m.addage != nil {
+		*m.addage += f
+	} else {
+		m.addage = &f
+	}
+}
+
+// AddedAge returns the value that was added to the "age" field in this mutation.
+func (m *PetMutation) AddedAge() (r float64, exists bool) {
+	v := m.addage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAge resets all changes to the "age" field.
+func (m *PetMutation) ResetAge() {
+	m.age = nil
+	m.addage = nil
 }
 
 // SetName sets the "name" field.
@@ -10230,7 +10288,10 @@ func (m *PetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
+	if m.age != nil {
+		fields = append(fields, pet.FieldAge)
+	}
 	if m.name != nil {
 		fields = append(fields, pet.FieldName)
 	}
@@ -10245,6 +10306,8 @@ func (m *PetMutation) Fields() []string {
 // schema.
 func (m *PetMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case pet.FieldAge:
+		return m.Age()
 	case pet.FieldName:
 		return m.Name()
 	case pet.FieldUUID:
@@ -10258,6 +10321,8 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case pet.FieldAge:
+		return m.OldAge(ctx)
 	case pet.FieldName:
 		return m.OldName(ctx)
 	case pet.FieldUUID:
@@ -10271,6 +10336,13 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 // type.
 func (m *PetMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case pet.FieldAge:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAge(v)
+		return nil
 	case pet.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -10292,13 +10364,21 @@ func (m *PetMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *PetMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addage != nil {
+		fields = append(fields, pet.FieldAge)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *PetMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case pet.FieldAge:
+		return m.AddedAge()
+	}
 	return nil, false
 }
 
@@ -10307,6 +10387,13 @@ func (m *PetMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *PetMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case pet.FieldAge:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAge(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Pet numeric field %s", name)
 }
@@ -10343,6 +10430,9 @@ func (m *PetMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PetMutation) ResetField(name string) error {
 	switch name {
+	case pet.FieldAge:
+		m.ResetAge()
+		return nil
 	case pet.FieldName:
 		m.ResetName()
 		return nil

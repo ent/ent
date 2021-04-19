@@ -746,12 +746,23 @@ func (ftgb *FileTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 
 func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 	selector := ftgb.sql
-	columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
-	columns = append(columns, ftgb.fields...)
+	aggregation := make([]string, 0, len(ftgb.fns))
 	for _, fn := range ftgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(ftgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(ftgb.fields)+len(ftgb.fns))
+		for _, f := range ftgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(ftgb.fields...)...)
 }
 
 // FileTypeSelect is the builder for selecting fields of FileType entities.

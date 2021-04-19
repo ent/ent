@@ -678,12 +678,23 @@ func (ggb *GroupGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 
 func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 	selector := ggb.sql
-	columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
-	columns = append(columns, ggb.fields...)
+	aggregation := make([]string, 0, len(ggb.fns))
 	for _, fn := range ggb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(ggb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(ggb.fields)+len(ggb.fns))
+		for _, f := range ggb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(ggb.fields...)...)
 }
 
 // GroupSelect is the builder for selecting fields of Group entities.

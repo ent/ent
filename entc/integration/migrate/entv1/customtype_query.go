@@ -674,12 +674,23 @@ func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error
 
 func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 	selector := ctgb.sql
-	columns := make([]string, 0, len(ctgb.fields)+len(ctgb.fns))
-	columns = append(columns, ctgb.fields...)
+	aggregation := make([]string, 0, len(ctgb.fns))
 	for _, fn := range ctgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(ctgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(ctgb.fields)+len(ctgb.fns))
+		for _, f := range ctgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(ctgb.fields...)...)
 }
 
 // CustomTypeSelect is the builder for selecting fields of CustomType entities.

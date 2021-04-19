@@ -30,6 +30,8 @@ func (Pet) Annotations() []schema.Annotation {
 // Fields of the Pet.
 func (Pet) Fields() []ent.Field {
 	return []ent.Field{
+		field.Float("age").
+			Default(0),
 		field.String("name"),
 		field.UUID("uuid", uuid.UUID{}).
 			Optional(),

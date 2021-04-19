@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
+	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
@@ -163,6 +164,12 @@ func init() {
 	groupinfoDescMaxUsers := groupinfoFields[1].Descriptor()
 	// groupinfo.DefaultMaxUsers holds the default value on creation for the max_users field.
 	groupinfo.DefaultMaxUsers = groupinfoDescMaxUsers.Default.(int)
+	petFields := schema.Pet{}.Fields()
+	_ = petFields
+	// petDescAge is the schema descriptor for age field.
+	petDescAge := petFields[0].Descriptor()
+	// pet.DefaultAge holds the default value on creation for the age field.
+	pet.DefaultAge = petDescAge.Default.(float64)
 	taskFields := schema.Task{}.Fields()
 	_ = taskFields
 	// taskDescPriority is the schema descriptor for priority field.

@@ -819,12 +819,23 @@ func (ngb *NoteGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 
 func (ngb *NoteGroupBy) sqlQuery() *sql.Selector {
 	selector := ngb.sql
-	columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
-	columns = append(columns, ngb.fields...)
+	aggregation := make([]string, 0, len(ngb.fns))
 	for _, fn := range ngb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(ngb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(ngb.fields)+len(ngb.fns))
+		for _, f := range ngb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(ngb.fields...)...)
 }
 
 // NoteSelect is the builder for selecting fields of Note entities.
