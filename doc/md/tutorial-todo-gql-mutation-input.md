@@ -26,7 +26,6 @@ The Ent framework accepts external templates that can extend or override the def
 code generator. In the template below, we generate 2 input types (`CreateTodoInput` and `UpdateTodoInput`) for the
 GraphQL mutations, and add additional methods on the different builders to accept these objects as an input type.
 
-
 ```gotemplate
 {{ range $n := $.Nodes }}
     {{ $input := print "Create" $n.Name "Input" }}
@@ -70,7 +69,15 @@ GraphQL mutations, and add additional methods on the different builders to accep
 {{ end }}
 ```
 
-The full version of this template exists in the [repository](https://github.com/a8m/ent-graphql-example/blob/master/ent/template/mutation_input.tmpl).
+The full version of this template exists in the [github.com/a8m/ent-graphql-example/ent/template](https://github.com/a8m/ent-graphql-example/blob/master/ent/template/mutation_input.tmpl).
+
+:::info
+If you have no experience with Go templates or if you have not used it before with the Ent code generator, go to the
+[template documentation](templates.md) to learn more about it.
+
+The full documentation for the template API (Go types and functions) is available in the
+[pkg.go.dev/entgo.io/ent/entc/gen](https://pkg.go.dev/entgo.io/ent/entc/gen).
+:::
 
 Now, we tell the Ent code generator to execute this template by passing it as an argument in the `ent/entc.go` file:
 
