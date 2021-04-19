@@ -784,6 +784,38 @@ func Relation(t *testing.T, client *ent.Client) {
 	for i := range v2 {
 		require.Equal(2, v2[i].Total)
 	}
+
+	t.Log("group by a relation")
+	foo := client.User.Create().SetName("foo").SetAge(10).AddPets(
+		client.Pet.Create().SetName("a").SetAge(10).SaveX(ctx),
+		client.Pet.Create().SetName("b").SetAge(7).SaveX(ctx),
+	).SaveX(ctx)
+	bar := client.User.Create().SetName("bar").SetAge(10).AddPets(
+		client.Pet.Create().SetName("c").SetAge(14).SaveX(ctx),
+		client.Pet.Create().SetName("d").SetAge(1).SaveX(ctx),
+	).SaveX(ctx)
+
+	var v3 []struct {
+		ID      int
+		Name    string
+		Average float64
+	}
+	client.User.Query().
+		Where(user.IDIn(foo.ID, bar.ID)).
+		GroupBy(user.FieldID, user.FieldName).
+		Aggregate(func(s *entsql.Selector) string {
+			t := entsql.Table(pet.Table)
+			s.Join(t).On(s.C(user.FieldID), t.C(pet.OwnerColumn))
+			return entsql.As(entsql.Avg(t.C(pet.FieldAge)), "average")
+		}).
+		ScanX(ctx, &v3)
+	require.Len(v3, 2)
+	require.Equal(foo.ID, v3[0].ID)
+	require.Equal(foo.Name, v3[0].Name)
+	require.Equal(8.5, v3[0].Average)
+	require.Equal(bar.ID, v3[1].ID)
+	require.Equal(bar.Name, v3[1].Name)
+	require.Equal(7.5, v3[1].Average)
 }
 
 func ClearFields(t *testing.T, client *ent.Client) {

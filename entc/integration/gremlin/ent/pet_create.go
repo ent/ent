@@ -28,6 +28,20 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
+// SetAge sets the "age" field.
+func (pc *PetCreate) SetAge(f float64) *PetCreate {
+	pc.mutation.SetAge(f)
+	return pc
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (pc *PetCreate) SetNillableAge(f *float64) *PetCreate {
+	if f != nil {
+		pc.SetAge(*f)
+	}
+	return pc
+}
+
 // SetName sets the "name" field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
 	pc.mutation.SetName(s)
@@ -89,6 +103,7 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 		err  error
 		node *Pet
 	)
+	pc.defaults()
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -127,8 +142,19 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (pc *PetCreate) defaults() {
+	if _, ok := pc.mutation.Age(); !ok {
+		v := pet.DefaultAge
+		pc.mutation.SetAge(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pc *PetCreate) check() error {
+	if _, ok := pc.mutation.Age(); !ok {
+		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+	}
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
 	}
@@ -158,6 +184,9 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(pet.Label)
+	if value, ok := pc.mutation.Age(); ok {
+		v.Property(dsl.Single, pet.FieldAge, value)
+	}
 	if value, ok := pc.mutation.Name(); ok {
 		v.Property(dsl.Single, pet.FieldName, value)
 	}

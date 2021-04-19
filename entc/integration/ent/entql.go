@@ -250,6 +250,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Pet",
 		Fields: map[string]*sqlgraph.FieldSpec{
+			pet.FieldAge:  {Type: field.TypeFloat64, Column: pet.FieldAge},
 			pet.FieldName: {Type: field.TypeString, Column: pet.FieldName},
 			pet.FieldUUID: {Type: field.TypeUUID, Column: pet.FieldUUID},
 		},
@@ -1640,6 +1641,11 @@ func (f *PetFilter) Where(p entql.P) {
 // WhereID applies the entql int predicate on the id field.
 func (f *PetFilter) WhereID(p entql.IntP) {
 	f.Where(p.Field(pet.FieldID))
+}
+
+// WhereAge applies the entql float64 predicate on the age field.
+func (f *PetFilter) WhereAge(p entql.Float64P) {
+	f.Where(p.Field(pet.FieldAge))
 }
 
 // WhereName applies the entql string predicate on the name field.

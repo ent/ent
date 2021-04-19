@@ -742,12 +742,23 @@ func (mgb *MetadataGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 
 func (mgb *MetadataGroupBy) sqlQuery() *sql.Selector {
 	selector := mgb.sql
-	columns := make([]string, 0, len(mgb.fields)+len(mgb.fns))
-	columns = append(columns, mgb.fields...)
+	aggregation := make([]string, 0, len(mgb.fns))
 	for _, fn := range mgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(mgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(mgb.fields)+len(mgb.fns))
+		for _, f := range mgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(mgb.fields...)...)
 }
 
 // MetadataSelect is the builder for selecting fields of Metadata entities.

@@ -11,6 +11,8 @@ const (
 	Label = "pet"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldUUID holds the string denoting the uuid field in the database.
@@ -40,6 +42,7 @@ const (
 // Columns holds all SQL columns for pet fields.
 var Columns = []string{
 	FieldID,
+	FieldAge,
 	FieldName,
 	FieldUUID,
 }
@@ -65,5 +68,10 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultAge holds the default value on creation for the "age" field.
+	DefaultAge float64
+)
 
 // comment from another template.

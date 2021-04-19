@@ -886,12 +886,23 @@ func (fgb *FileGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 
 func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 	selector := fgb.sql
-	columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
-	columns = append(columns, fgb.fields...)
+	aggregation := make([]string, 0, len(fgb.fns))
 	for _, fn := range fgb.fns {
-		columns = append(columns, fn(selector))
+		aggregation = append(aggregation, fn(selector))
 	}
-	return selector.Select(columns...).GroupBy(fgb.fields...)
+	// If no columns were selected in a custom aggregation function, the default
+	// selection is the fields used for "group-by", and the aggregation functions.
+	if len(selector.Columns()) == 0 {
+		columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
+		for _, f := range fgb.fields {
+			columns = append(columns, selector.C(f))
+		}
+		for _, c := range aggregation {
+			columns = append(columns, c)
+		}
+		selector.Select(columns...)
+	}
+	return selector.GroupBy(selector.Columns(fgb.fields...)...)
 }
 
 // FileSelect is the builder for selecting fields of File entities.

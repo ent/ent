@@ -34,6 +34,27 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return pu
 }
 
+// SetAge sets the "age" field.
+func (pu *PetUpdate) SetAge(f float64) *PetUpdate {
+	pu.mutation.ResetAge()
+	pu.mutation.SetAge(f)
+	return pu
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableAge(f *float64) *PetUpdate {
+	if f != nil {
+		pu.SetAge(*f)
+	}
+	return pu
+}
+
+// AddAge adds f to the "age" field.
+func (pu *PetUpdate) AddAge(f float64) *PetUpdate {
+	pu.mutation.AddAge(f)
+	return pu
+}
+
 // SetName sets the "name" field.
 func (pu *PetUpdate) SetName(s string) *PetUpdate {
 	pu.mutation.SetName(s)
@@ -186,6 +207,12 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
+	if value, ok := pu.mutation.Age(); ok {
+		v.Property(dsl.Single, pet.FieldAge, value)
+	}
+	if value, ok := pu.mutation.AddedAge(); ok {
+		v.Property(dsl.Single, pet.FieldAge, __.Union(__.Values(pet.FieldAge), __.Constant(value)).Sum())
+	}
 	if value, ok := pu.mutation.Name(); ok {
 		v.Property(dsl.Single, pet.FieldName, value)
 	}
@@ -238,6 +265,27 @@ type PetUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PetMutation
+}
+
+// SetAge sets the "age" field.
+func (puo *PetUpdateOne) SetAge(f float64) *PetUpdateOne {
+	puo.mutation.ResetAge()
+	puo.mutation.SetAge(f)
+	return puo
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableAge(f *float64) *PetUpdateOne {
+	if f != nil {
+		puo.SetAge(*f)
+	}
+	return puo
+}
+
+// AddAge adds f to the "age" field.
+func (puo *PetUpdateOne) AddAge(f float64) *PetUpdateOne {
+	puo.mutation.AddAge(f)
+	return puo
 }
 
 // SetName sets the "name" field.
@@ -404,6 +452,12 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
+	if value, ok := puo.mutation.Age(); ok {
+		v.Property(dsl.Single, pet.FieldAge, value)
+	}
+	if value, ok := puo.mutation.AddedAge(); ok {
+		v.Property(dsl.Single, pet.FieldAge, __.Union(__.Values(pet.FieldAge), __.Constant(value)).Sum())
+	}
 	if value, ok := puo.mutation.Name(); ok {
 		v.Property(dsl.Single, pet.FieldName, value)
 	}

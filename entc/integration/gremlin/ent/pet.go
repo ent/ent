@@ -20,6 +20,8 @@ type Pet struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// Age holds the value of the "age" field.
+	Age float64 `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// UUID holds the value of the "uuid" field.
@@ -76,6 +78,7 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 	}
 	var scanpe struct {
 		ID   string    `json:"id,omitempty"`
+		Age  float64   `json:"age,omitempty"`
 		Name string    `json:"name,omitempty"`
 		UUID uuid.UUID `json:"uuid,omitempty"`
 	}
@@ -83,6 +86,7 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	pe.ID = scanpe.ID
+	pe.Age = scanpe.Age
 	pe.Name = scanpe.Name
 	pe.UUID = scanpe.UUID
 	return nil
@@ -121,6 +125,8 @@ func (pe *Pet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Pet(")
 	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
+	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("%v", pe.Age))
 	builder.WriteString(", name=")
 	builder.WriteString(pe.Name)
 	builder.WriteString(", uuid=")
@@ -140,6 +146,7 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 	}
 	var scanpe []struct {
 		ID   string    `json:"id,omitempty"`
+		Age  float64   `json:"age,omitempty"`
 		Name string    `json:"name,omitempty"`
 		UUID uuid.UUID `json:"uuid,omitempty"`
 	}
@@ -149,6 +156,7 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 	for _, v := range scanpe {
 		*pe = append(*pe, &Pet{
 			ID:   v.ID,
+			Age:  v.Age,
 			Name: v.Name,
 			UUID: v.UUID,
 		})
