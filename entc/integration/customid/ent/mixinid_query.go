@@ -674,14 +674,14 @@ func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
-	selector := migb.sql
+	selector := migb.sql.Select()
 	aggregation := make([]string, 0, len(migb.fns))
 	for _, fn := range migb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.Columns()) == 0 {
+	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(migb.fields)+len(migb.fns))
 		for _, f := range migb.fields {
 			columns = append(columns, selector.C(f))

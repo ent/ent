@@ -889,14 +889,14 @@ func (tgb *TeamGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (tgb *TeamGroupBy) sqlQuery() *sql.Selector {
-	selector := tgb.sql
+	selector := tgb.sql.Select()
 	aggregation := make([]string, 0, len(tgb.fns))
 	for _, fn := range tgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.Columns()) == 0 {
+	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 		for _, f := range tgb.fields {
 			columns = append(columns, selector.C(f))

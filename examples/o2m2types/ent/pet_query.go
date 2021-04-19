@@ -752,14 +752,14 @@ func (pgb *PetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 }
 
 func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
-	selector := pgb.sql
+	selector := pgb.sql.Select()
 	aggregation := make([]string, 0, len(pgb.fns))
 	for _, fn := range pgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.
-	if len(selector.Columns()) == 0 {
+	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(pgb.fields)+len(pgb.fns))
 		for _, f := range pgb.fields {
 			columns = append(columns, selector.C(f))
