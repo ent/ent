@@ -261,6 +261,8 @@ func (c *Column) ScanDefault(value string) error {
 			return fmt.Errorf("scanning json value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.String
+	case c.Type == field.TypeBytes:
+		c.Default = []byte(value)
 	default:
 		return fmt.Errorf("unsupported default type: %v", c.Type)
 	}
