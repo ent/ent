@@ -49,3 +49,9 @@ func (mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent.To
 		Save(ctx)
 }
 ```
+
+---
+
+Great! With a few lines of code, our application now supports automatic transactional mutations. Please continue to the
+next section where we explain how to extend the Ent code generator and generate [GraphQL input types](https://graphql.org/graphql-js/mutations-and-input-types/)
+for our GraphQL mutations.
