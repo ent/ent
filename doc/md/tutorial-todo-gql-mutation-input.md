@@ -51,7 +51,7 @@ GraphQL mutations, and add additional methods on the different builders to accep
         {{- range $f := $n.MutableFields }}
             {{ $f.StructField }} {{ if not $f.Type.RType.IsPtr }}*{{ end }}{{ $f.Type }}
             {{- if $f.Optional }}
-                {{ "Clear" $f.StructField }} bool
+                {{ print "Clear" $f.StructField }} bool
             {{- end }}
         {{- end }}
         {{- range $e := $n.Edges }}
