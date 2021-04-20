@@ -204,17 +204,29 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 		if len(idx) > 1 {
 			rtype = rtype.Field(idx[1]).Type
 		}
+		if !nillable(rtype) {
+			// Create a pointer to the actual reflect
+			// types to accept optional struct fields.
+			rtype = reflect.PtrTo(rtype)
+		}
 		scan.columns = append(scan.columns, rtype)
 	}
 	scan.value = func(vs ...interface{}) reflect.Value {
 		st := reflect.New(typ).Elem()
 		for i, v := range vs {
+			rv := reflect.Indirect(reflect.ValueOf(v))
+			if rv.IsNil() {
+				continue
+			}
 			idx := idxs[i]
 			rvalue := st.Field(idx[0])
 			if len(idx) > 1 {
 				rvalue = rvalue.Field(idx[1])
 			}
-			rvalue.Set(reflect.Indirect(reflect.ValueOf(v)))
+			if !nillable(rvalue.Type()) {
+				rv = reflect.Indirect(rv)
+			}
+			rvalue.Set(rv)
 		}
 		return st
 	}
@@ -230,6 +242,15 @@ func columnName(f reflect.StructField) string {
 		name = strings.Split(tag, ",")[0]
 	}
 	return name
+}
+
+// nillable reports if the reflect-type can have nil value.
+func nillable(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Interface, reflect.Slice, reflect.Map, reflect.Ptr, reflect.UnsafePointer:
+		return true
+	}
+	return false
 }
 
 // scanPtr wraps the underlying type with rowScan.
