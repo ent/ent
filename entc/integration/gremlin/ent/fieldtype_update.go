@@ -700,6 +700,26 @@ func (ftu *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetStringScanner sets the "string_scanner" field.
+func (ftu *FieldTypeUpdate) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdate {
+	ftu.mutation.SetStringScanner(ss)
+	return ftu
+}
+
+// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeUpdate {
+	if ss != nil {
+		ftu.SetStringScanner(*ss)
+	}
+	return ftu
+}
+
+// ClearStringScanner clears the value of the "string_scanner" field.
+func (ftu *FieldTypeUpdate) ClearStringScanner() *FieldTypeUpdate {
+	ftu.mutation.ClearStringScanner()
+	return ftu
+}
+
 // SetDuration sets the "duration" field.
 func (ftu *FieldTypeUpdate) SetDuration(t time.Duration) *FieldTypeUpdate {
 	ftu.mutation.ResetDuration()
@@ -1430,6 +1450,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
+	if value, ok := ftu.mutation.StringScanner(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
+	}
 	if value, ok := ftu.mutation.Duration(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDuration, value)
 	}
@@ -1598,6 +1621,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.StringArrayCleared() {
 		properties = append(properties, fieldtype.FieldStringArray)
+	}
+	if ftu.mutation.StringScannerCleared() {
+		properties = append(properties, fieldtype.FieldStringScanner)
 	}
 	if ftu.mutation.DurationCleared() {
 		properties = append(properties, fieldtype.FieldDuration)
@@ -2337,6 +2363,26 @@ func (ftuo *FieldTypeUpdateOne) SetStringArray(s schema.Strings) *FieldTypeUpdat
 // ClearStringArray clears the value of the "string_array" field.
 func (ftuo *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearStringArray()
+	return ftuo
+}
+
+// SetStringScanner sets the "string_scanner" field.
+func (ftuo *FieldTypeUpdateOne) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdateOne {
+	ftuo.mutation.SetStringScanner(ss)
+	return ftuo
+}
+
+// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeUpdateOne {
+	if ss != nil {
+		ftuo.SetStringScanner(*ss)
+	}
+	return ftuo
+}
+
+// ClearStringScanner clears the value of the "string_scanner" field.
+func (ftuo *FieldTypeUpdateOne) ClearStringScanner() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearStringScanner()
 	return ftuo
 }
 
@@ -3082,6 +3128,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
+	if value, ok := ftuo.mutation.StringScanner(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
+	}
 	if value, ok := ftuo.mutation.Duration(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDuration, value)
 	}
@@ -3250,6 +3299,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.StringArrayCleared() {
 		properties = append(properties, fieldtype.FieldStringArray)
+	}
+	if ftuo.mutation.StringScannerCleared() {
+		properties = append(properties, fieldtype.FieldStringScanner)
 	}
 	if ftuo.mutation.DurationCleared() {
 		properties = append(properties, fieldtype.FieldDuration)

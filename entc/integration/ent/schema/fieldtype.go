@@ -130,6 +130,10 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		// ----------------------------------------------------------------------------
 		// Custom Go types
 
+		field.String("string_scanner").
+			GoType(StringScanner("")).
+			Nillable().
+			Optional(),
 		field.Int64("duration").
 			GoType(time.Duration(0)).
 			Optional(),
@@ -389,4 +393,23 @@ func (m *MAC) Scan(value interface{}) (err error) {
 // Value implements the driver Valuer interface.
 func (m MAC) Value() (driver.Value, error) {
 	return m.HardwareAddr.String(), nil
+}
+
+type StringScanner string
+
+// Scan implements the Scanner interface.
+func (s *StringScanner) Scan(value interface{}) (err error) {
+	switch v := value.(type) {
+	case nil:
+	case string:
+		*s = StringScanner(v)
+	default:
+		err = fmt.Errorf("unexpected type %T", v)
+	}
+	return
+}
+
+// Value implements the driver Valuer interface.
+func (s StringScanner) Value() (driver.Value, error) {
+	return string(s), nil
 }

@@ -79,6 +79,8 @@ const (
 	FieldMAC = "mac"
 	// FieldStringArray holds the string denoting the string_array field in the database.
 	FieldStringArray = "string_array"
+	// FieldStringScanner holds the string denoting the string_scanner field in the database.
+	FieldStringScanner = "string_scanner"
 	// FieldDuration holds the string denoting the duration field in the database.
 	FieldDuration = "duration"
 	// FieldDir holds the string denoting the dir field in the database.

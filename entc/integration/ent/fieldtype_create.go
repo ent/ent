@@ -380,6 +380,20 @@ func (ftc *FieldTypeCreate) SetStringArray(s schema.Strings) *FieldTypeCreate {
 	return ftc
 }
 
+// SetStringScanner sets the "string_scanner" field.
+func (ftc *FieldTypeCreate) SetStringScanner(ss schema.StringScanner) *FieldTypeCreate {
+	ftc.mutation.SetStringScanner(ss)
+	return ftc
+}
+
+// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeCreate {
+	if ss != nil {
+		ftc.SetStringScanner(*ss)
+	}
+	return ftc
+}
+
 // SetDuration sets the "duration" field.
 func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
 	ftc.mutation.SetDuration(t)
@@ -1070,6 +1084,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldStringArray,
 		})
 		_node.StringArray = value
+	}
+	if value, ok := ftc.mutation.StringScanner(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldStringScanner,
+		})
+		_node.StringScanner = &value
 	}
 	if value, ok := ftc.mutation.Duration(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

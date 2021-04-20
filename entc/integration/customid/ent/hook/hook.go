@@ -39,6 +39,19 @@ func (f CarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 	return f(ctx, mv)
 }
 
+// The DocFunc type is an adapter to allow the use of ordinary
+// function as Doc mutator.
+type DocFunc func(context.Context, *ent.DocMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DocFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DocMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DocMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The GroupFunc type is an adapter to allow the use of ordinary
 // function as Group mutator.
 type GroupFunc func(context.Context, *ent.GroupMutation) (ent.Value, error)

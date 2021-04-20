@@ -16,6 +16,9 @@ type Blob func(*sql.Selector)
 // Car is the predicate function for car builders.
 type Car func(*sql.Selector)
 
+// Doc is the predicate function for doc builders.
+type Doc func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 

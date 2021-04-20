@@ -30,6 +30,7 @@ type config struct {
 type hooks struct {
 	Blob    []ent.Hook
 	Car     []ent.Hook
+	Doc     []ent.Hook
 	Group   []ent.Hook
 	MixinID []ent.Hook
 	Note    []ent.Hook

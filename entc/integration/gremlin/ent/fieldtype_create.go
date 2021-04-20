@@ -381,6 +381,20 @@ func (ftc *FieldTypeCreate) SetStringArray(s schema.Strings) *FieldTypeCreate {
 	return ftc
 }
 
+// SetStringScanner sets the "string_scanner" field.
+func (ftc *FieldTypeCreate) SetStringScanner(ss schema.StringScanner) *FieldTypeCreate {
+	ftc.mutation.SetStringScanner(ss)
+	return ftc
+}
+
+// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeCreate {
+	if ss != nil {
+		ftc.SetStringScanner(*ss)
+	}
+	return ftc
+}
+
 // SetDuration sets the "duration" field.
 func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
 	ftc.mutation.SetDuration(t)
@@ -920,6 +934,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
+	}
+	if value, ok := ftc.mutation.StringScanner(); ok {
+		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
 	}
 	if value, ok := ftc.mutation.Duration(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDuration, value)

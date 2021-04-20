@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
@@ -36,6 +37,7 @@ const (
 	// Node types.
 	TypeBlob    = "Blob"
 	TypeCar     = "Car"
+	TypeDoc     = "Doc"
 	TypeGroup   = "Group"
 	TypeMixinID = "MixinID"
 	TypeNote    = "Note"
@@ -1067,6 +1069,472 @@ func (m *CarMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Car edge %s", name)
+}
+
+// DocMutation represents an operation that mutates the Doc nodes in the graph.
+type DocMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *schema.DocID
+	text            *string
+	clearedFields   map[string]struct{}
+	parent          *schema.DocID
+	clearedparent   bool
+	children        map[schema.DocID]struct{}
+	removedchildren map[schema.DocID]struct{}
+	clearedchildren bool
+	done            bool
+	oldValue        func(context.Context) (*Doc, error)
+	predicates      []predicate.Doc
+}
+
+var _ ent.Mutation = (*DocMutation)(nil)
+
+// docOption allows management of the mutation configuration using functional options.
+type docOption func(*DocMutation)
+
+// newDocMutation creates new mutation for the Doc entity.
+func newDocMutation(c config, op Op, opts ...docOption) *DocMutation {
+	m := &DocMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDoc,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDocID sets the ID field of the mutation.
+func withDocID(id schema.DocID) docOption {
+	return func(m *DocMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Doc
+		)
+		m.oldValue = func(ctx context.Context) (*Doc, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Doc.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDoc sets the old Doc of the mutation.
+func withDoc(node *Doc) docOption {
+	return func(m *DocMutation) {
+		m.oldValue = func(context.Context) (*Doc, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DocMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DocMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Doc entities.
+func (m *DocMutation) SetID(id schema.DocID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID
+// is only available if it was provided to the builder.
+func (m *DocMutation) ID() (id schema.DocID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetText sets the "text" field.
+func (m *DocMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *DocMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the Doc entity.
+// If the Doc object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DocMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ClearText clears the value of the "text" field.
+func (m *DocMutation) ClearText() {
+	m.text = nil
+	m.clearedFields[doc.FieldText] = struct{}{}
+}
+
+// TextCleared returns if the "text" field was cleared in this mutation.
+func (m *DocMutation) TextCleared() bool {
+	_, ok := m.clearedFields[doc.FieldText]
+	return ok
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *DocMutation) ResetText() {
+	m.text = nil
+	delete(m.clearedFields, doc.FieldText)
+}
+
+// SetParentID sets the "parent" edge to the Doc entity by id.
+func (m *DocMutation) SetParentID(id schema.DocID) {
+	m.parent = &id
+}
+
+// ClearParent clears the "parent" edge to the Doc entity.
+func (m *DocMutation) ClearParent() {
+	m.clearedparent = true
+}
+
+// ParentCleared reports if the "parent" edge to the Doc entity was cleared.
+func (m *DocMutation) ParentCleared() bool {
+	return m.clearedparent
+}
+
+// ParentID returns the "parent" edge ID in the mutation.
+func (m *DocMutation) ParentID() (id schema.DocID, exists bool) {
+	if m.parent != nil {
+		return *m.parent, true
+	}
+	return
+}
+
+// ParentIDs returns the "parent" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ParentID instead. It exists only for internal usage by the builders.
+func (m *DocMutation) ParentIDs() (ids []schema.DocID) {
+	if id := m.parent; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetParent resets all changes to the "parent" edge.
+func (m *DocMutation) ResetParent() {
+	m.parent = nil
+	m.clearedparent = false
+}
+
+// AddChildIDs adds the "children" edge to the Doc entity by ids.
+func (m *DocMutation) AddChildIDs(ids ...schema.DocID) {
+	if m.children == nil {
+		m.children = make(map[schema.DocID]struct{})
+	}
+	for i := range ids {
+		m.children[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChildren clears the "children" edge to the Doc entity.
+func (m *DocMutation) ClearChildren() {
+	m.clearedchildren = true
+}
+
+// ChildrenCleared reports if the "children" edge to the Doc entity was cleared.
+func (m *DocMutation) ChildrenCleared() bool {
+	return m.clearedchildren
+}
+
+// RemoveChildIDs removes the "children" edge to the Doc entity by IDs.
+func (m *DocMutation) RemoveChildIDs(ids ...schema.DocID) {
+	if m.removedchildren == nil {
+		m.removedchildren = make(map[schema.DocID]struct{})
+	}
+	for i := range ids {
+		m.removedchildren[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChildren returns the removed IDs of the "children" edge to the Doc entity.
+func (m *DocMutation) RemovedChildrenIDs() (ids []schema.DocID) {
+	for id := range m.removedchildren {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChildrenIDs returns the "children" edge IDs in the mutation.
+func (m *DocMutation) ChildrenIDs() (ids []schema.DocID) {
+	for id := range m.children {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChildren resets all changes to the "children" edge.
+func (m *DocMutation) ResetChildren() {
+	m.children = nil
+	m.clearedchildren = false
+	m.removedchildren = nil
+}
+
+// Op returns the operation name.
+func (m *DocMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Doc).
+func (m *DocMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DocMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.text != nil {
+		fields = append(fields, doc.FieldText)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DocMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case doc.FieldText:
+		return m.Text()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DocMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case doc.FieldText:
+		return m.OldText(ctx)
+	}
+	return nil, fmt.Errorf("unknown Doc field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DocMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case doc.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Doc field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DocMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DocMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DocMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Doc numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DocMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(doc.FieldText) {
+		fields = append(fields, doc.FieldText)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DocMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DocMutation) ClearField(name string) error {
+	switch name {
+	case doc.FieldText:
+		m.ClearText()
+		return nil
+	}
+	return fmt.Errorf("unknown Doc nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DocMutation) ResetField(name string) error {
+	switch name {
+	case doc.FieldText:
+		m.ResetText()
+		return nil
+	}
+	return fmt.Errorf("unknown Doc field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DocMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.parent != nil {
+		edges = append(edges, doc.EdgeParent)
+	}
+	if m.children != nil {
+		edges = append(edges, doc.EdgeChildren)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DocMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case doc.EdgeParent:
+		if id := m.parent; id != nil {
+			return []ent.Value{*id}
+		}
+	case doc.EdgeChildren:
+		ids := make([]ent.Value, 0, len(m.children))
+		for id := range m.children {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DocMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedchildren != nil {
+		edges = append(edges, doc.EdgeChildren)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DocMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case doc.EdgeChildren:
+		ids := make([]ent.Value, 0, len(m.removedchildren))
+		for id := range m.removedchildren {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DocMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedparent {
+		edges = append(edges, doc.EdgeParent)
+	}
+	if m.clearedchildren {
+		edges = append(edges, doc.EdgeChildren)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DocMutation) EdgeCleared(name string) bool {
+	switch name {
+	case doc.EdgeParent:
+		return m.clearedparent
+	case doc.EdgeChildren:
+		return m.clearedchildren
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DocMutation) ClearEdge(name string) error {
+	switch name {
+	case doc.EdgeParent:
+		m.ClearParent()
+		return nil
+	}
+	return fmt.Errorf("unknown Doc unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DocMutation) ResetEdge(name string) error {
+	switch name {
+	case doc.EdgeParent:
+		m.ResetParent()
+		return nil
+	case doc.EdgeChildren:
+		m.ResetChildren()
+		return nil
+	}
+	return fmt.Errorf("unknown Doc edge %s", name)
 }
 
 // GroupMutation represents an operation that mutates the Group nodes in the graph.
