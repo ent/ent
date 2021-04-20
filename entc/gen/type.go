@@ -1084,11 +1084,11 @@ func (f Field) NewScanType() string {
 func (f Field) ScanTypeField(rec string) string {
 	expr := rec
 	if f.Type.ValueScanner() {
-		if f.Nillable && !f.standardNullType() {
-			return fmt.Sprintf("%s.S.(%s)", expr, f.Type)
-		}
 		if !f.Type.RType.IsPtr() {
 			expr = "*" + expr
+		}
+		if f.Nillable && !f.standardNullType() {
+			return fmt.Sprintf("%s.S.(*%s)", expr, f.Type.RType.String())
 		}
 		return expr
 	}

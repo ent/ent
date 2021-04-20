@@ -54,6 +54,26 @@ var (
 			},
 		},
 	}
+	// DocsColumns holds the columns for the "docs" table.
+	DocsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
+		{Name: "text", Type: field.TypeString, Nullable: true},
+		{Name: "doc_children", Type: field.TypeString, Nullable: true, Size: 36},
+	}
+	// DocsTable holds the schema information for the "docs" table.
+	DocsTable = &schema.Table{
+		Name:       "docs",
+		Columns:    DocsColumns,
+		PrimaryKey: []*schema.Column{DocsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "docs_docs_children",
+				Columns:    []*schema.Column{DocsColumns[2]},
+				RefColumns: []*schema.Column{DocsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -244,6 +264,7 @@ var (
 	Tables = []*schema.Table{
 		BlobsTable,
 		CarsTable,
+		DocsTable,
 		GroupsTable,
 		MixinIdsTable,
 		NotesTable,
@@ -258,6 +279,7 @@ var (
 func init() {
 	BlobsTable.ForeignKeys[0].RefTable = BlobsTable
 	CarsTable.ForeignKeys[0].RefTable = PetsTable
+	DocsTable.ForeignKeys[0].RefTable = DocsTable
 	NotesTable.ForeignKeys[0].RefTable = NotesTable
 	PetsTable.ForeignKeys[0].RefTable = PetsTable
 	PetsTable.ForeignKeys[1].RefTable = UsersTable

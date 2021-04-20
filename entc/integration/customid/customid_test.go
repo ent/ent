@@ -157,4 +157,10 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.NotEmpty(t, parent.Text)
 	child := client.Note.Create().SetText("child").SetParent(parent).SaveX(ctx)
 	require.NotEmpty(t, child.QueryParent().OnlyIDX(ctx))
+
+	pdoc := client.Doc.Create().SetText("parent").SaveX(ctx)
+	require.NotEmpty(t, pdoc.ID)
+	require.NotEmpty(t, pdoc.Text)
+	cdoc := client.Doc.Create().SetText("child").SetParent(pdoc).SaveX(ctx)
+	require.NotEmpty(t, cdoc.QueryParent().OnlyIDX(ctx))
 }

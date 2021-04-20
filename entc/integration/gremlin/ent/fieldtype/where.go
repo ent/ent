@@ -288,6 +288,13 @@ func StringArray(v schema.Strings) predicate.FieldType {
 	})
 }
 
+// StringScanner applies equality check predicate on the "string_scanner" field. It's identical to StringScannerEQ.
+func StringScanner(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.EQ(v))
+	})
+}
+
 // Duration applies equality check predicate on the "duration" field. It's identical to DurationEQ.
 func Duration(v time.Duration) predicate.FieldType {
 	vc := int64(v)
@@ -2652,6 +2659,108 @@ func StringArrayIsNil() predicate.FieldType {
 func StringArrayNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldStringArray)
+	})
+}
+
+// StringScannerEQ applies the EQ predicate on the "string_scanner" field.
+func StringScannerEQ(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.EQ(v))
+	})
+}
+
+// StringScannerNEQ applies the NEQ predicate on the "string_scanner" field.
+func StringScannerNEQ(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.NEQ(v))
+	})
+}
+
+// StringScannerIn applies the In predicate on the "string_scanner" field.
+func StringScannerIn(vs ...schema.StringScanner) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.Within(v...))
+	})
+}
+
+// StringScannerNotIn applies the NotIn predicate on the "string_scanner" field.
+func StringScannerNotIn(vs ...schema.StringScanner) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.Without(v...))
+	})
+}
+
+// StringScannerGT applies the GT predicate on the "string_scanner" field.
+func StringScannerGT(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.GT(v))
+	})
+}
+
+// StringScannerGTE applies the GTE predicate on the "string_scanner" field.
+func StringScannerGTE(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.GTE(v))
+	})
+}
+
+// StringScannerLT applies the LT predicate on the "string_scanner" field.
+func StringScannerLT(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.LT(v))
+	})
+}
+
+// StringScannerLTE applies the LTE predicate on the "string_scanner" field.
+func StringScannerLTE(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.LTE(v))
+	})
+}
+
+// StringScannerContains applies the Contains predicate on the "string_scanner" field.
+func StringScannerContains(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.Containing(vc))
+	})
+}
+
+// StringScannerHasPrefix applies the HasPrefix predicate on the "string_scanner" field.
+func StringScannerHasPrefix(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.StartingWith(vc))
+	})
+}
+
+// StringScannerHasSuffix applies the HasSuffix predicate on the "string_scanner" field.
+func StringScannerHasSuffix(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldStringScanner, p.EndingWith(vc))
+	})
+}
+
+// StringScannerIsNil applies the IsNil predicate on the "string_scanner" field.
+func StringScannerIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldStringScanner)
+	})
+}
+
+// StringScannerNotNil applies the NotNil predicate on the "string_scanner" field.
+func StringScannerNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldStringScanner)
 	})
 }
 

@@ -297,6 +297,13 @@ func StringArray(v schema.Strings) predicate.FieldType {
 	})
 }
 
+// StringScanner applies equality check predicate on the "string_scanner" field. It's identical to StringScannerEQ.
+func StringScanner(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStringScanner), v))
+	})
+}
+
 // Duration applies equality check predicate on the "duration" field. It's identical to DurationEQ.
 func Duration(v time.Duration) predicate.FieldType {
 	vc := int64(v)
@@ -3025,6 +3032,136 @@ func StringArrayIsNil() predicate.FieldType {
 func StringArrayNotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldStringArray)))
+	})
+}
+
+// StringScannerEQ applies the EQ predicate on the "string_scanner" field.
+func StringScannerEQ(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStringScanner), v))
+	})
+}
+
+// StringScannerNEQ applies the NEQ predicate on the "string_scanner" field.
+func StringScannerNEQ(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStringScanner), v))
+	})
+}
+
+// StringScannerIn applies the In predicate on the "string_scanner" field.
+func StringScannerIn(vs ...schema.StringScanner) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStringScanner), v...))
+	})
+}
+
+// StringScannerNotIn applies the NotIn predicate on the "string_scanner" field.
+func StringScannerNotIn(vs ...schema.StringScanner) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStringScanner), v...))
+	})
+}
+
+// StringScannerGT applies the GT predicate on the "string_scanner" field.
+func StringScannerGT(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStringScanner), v))
+	})
+}
+
+// StringScannerGTE applies the GTE predicate on the "string_scanner" field.
+func StringScannerGTE(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStringScanner), v))
+	})
+}
+
+// StringScannerLT applies the LT predicate on the "string_scanner" field.
+func StringScannerLT(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStringScanner), v))
+	})
+}
+
+// StringScannerLTE applies the LTE predicate on the "string_scanner" field.
+func StringScannerLTE(v schema.StringScanner) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStringScanner), v))
+	})
+}
+
+// StringScannerContains applies the Contains predicate on the "string_scanner" field.
+func StringScannerContains(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldStringScanner), vc))
+	})
+}
+
+// StringScannerHasPrefix applies the HasPrefix predicate on the "string_scanner" field.
+func StringScannerHasPrefix(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldStringScanner), vc))
+	})
+}
+
+// StringScannerHasSuffix applies the HasSuffix predicate on the "string_scanner" field.
+func StringScannerHasSuffix(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldStringScanner), vc))
+	})
+}
+
+// StringScannerIsNil applies the IsNil predicate on the "string_scanner" field.
+func StringScannerIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStringScanner)))
+	})
+}
+
+// StringScannerNotNil applies the NotNil predicate on the "string_scanner" field.
+func StringScannerNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStringScanner)))
+	})
+}
+
+// StringScannerEqualFold applies the EqualFold predicate on the "string_scanner" field.
+func StringScannerEqualFold(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldStringScanner), vc))
+	})
+}
+
+// StringScannerContainsFold applies the ContainsFold predicate on the "string_scanner" field.
+func StringScannerContainsFold(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldStringScanner), vc))
 	})
 }
 

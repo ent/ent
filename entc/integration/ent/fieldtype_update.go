@@ -698,6 +698,26 @@ func (ftu *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetStringScanner sets the "string_scanner" field.
+func (ftu *FieldTypeUpdate) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdate {
+	ftu.mutation.SetStringScanner(ss)
+	return ftu
+}
+
+// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeUpdate {
+	if ss != nil {
+		ftu.SetStringScanner(*ss)
+	}
+	return ftu
+}
+
+// ClearStringScanner clears the value of the "string_scanner" field.
+func (ftu *FieldTypeUpdate) ClearStringScanner() *FieldTypeUpdate {
+	ftu.mutation.ClearStringScanner()
+	return ftu
+}
+
 // SetDuration sets the "duration" field.
 func (ftu *FieldTypeUpdate) SetDuration(t time.Duration) *FieldTypeUpdate {
 	ftu.mutation.ResetDuration()
@@ -1782,6 +1802,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldStringArray,
 		})
 	}
+	if value, ok := ftu.mutation.StringScanner(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldStringScanner,
+		})
+	}
+	if ftu.mutation.StringScannerCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldStringScanner,
+		})
+	}
 	if value, ok := ftu.mutation.Duration(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt64,
@@ -2810,6 +2843,26 @@ func (ftuo *FieldTypeUpdateOne) SetStringArray(s schema.Strings) *FieldTypeUpdat
 // ClearStringArray clears the value of the "string_array" field.
 func (ftuo *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearStringArray()
+	return ftuo
+}
+
+// SetStringScanner sets the "string_scanner" field.
+func (ftuo *FieldTypeUpdateOne) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdateOne {
+	ftuo.mutation.SetStringScanner(ss)
+	return ftuo
+}
+
+// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeUpdateOne {
+	if ss != nil {
+		ftuo.SetStringScanner(*ss)
+	}
+	return ftuo
+}
+
+// ClearStringScanner clears the value of the "string_scanner" field.
+func (ftuo *FieldTypeUpdateOne) ClearStringScanner() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearStringScanner()
 	return ftuo
 }
 
@@ -3919,6 +3972,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeOther,
 			Column: fieldtype.FieldStringArray,
+		})
+	}
+	if value, ok := ftuo.mutation.StringScanner(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldStringScanner,
+		})
+	}
+	if ftuo.mutation.StringScannerCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldStringScanner,
 		})
 	}
 	if value, ok := ftuo.mutation.Duration(); ok {

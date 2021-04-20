@@ -9,6 +9,7 @@ package ent
 import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
@@ -47,6 +48,28 @@ func init() {
 	carDescID := carMixinFields0[1].Descriptor()
 	// car.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	car.IDValidator = carDescID.Validators[0].(func(int) error)
+	docFields := schema.Doc{}.Fields()
+	_ = docFields
+	// docDescID is the schema descriptor for id field.
+	docDescID := docFields[0].Descriptor()
+	// doc.DefaultID holds the default value on creation for the id field.
+	doc.DefaultID = docDescID.Default.(func() schema.DocID)
+	// doc.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	doc.IDValidator = func() func(string) error {
+		validators := docDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	mixinidMixin := schema.MixinID{}.Mixin()
 	mixinidMixinFields0 := mixinidMixin[0].Fields()
 	_ = mixinidMixinFields0

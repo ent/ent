@@ -84,6 +84,8 @@ type FieldType struct {
 	MAC schema.MAC `json:"mac,omitempty"`
 	// StringArray holds the value of the "string_array" field.
 	StringArray schema.Strings `json:"string_array,omitempty"`
+	// StringScanner holds the value of the "string_scanner" field.
+	StringScanner *schema.StringScanner `json:"string_scanner,omitempty"`
 	// Duration holds the value of the "duration" field.
 	Duration time.Duration `json:"duration,omitempty"`
 	// Dir holds the value of the "dir" field.
@@ -148,6 +150,8 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullScanner{S: new(schema.Link)}
 		case fieldtype.FieldNilPair:
 			values[i] = &sql.NullScanner{S: new(schema.Pair)}
+		case fieldtype.FieldStringScanner:
+			values[i] = &sql.NullScanner{S: new(schema.StringScanner)}
 		case fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = new([]byte)
 		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
@@ -375,6 +379,13 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				return fmt.Errorf("unexpected type %T for field string_array", values[i])
 			} else if value != nil {
 				ft.StringArray = *value
+			}
+		case fieldtype.FieldStringScanner:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field string_scanner", values[i])
+			} else if value.Valid {
+				ft.StringScanner = new(schema.StringScanner)
+				*ft.StringScanner = *value.S.(*schema.StringScanner)
 			}
 		case fieldtype.FieldDuration:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -639,6 +650,10 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", string_array=")
 	builder.WriteString(fmt.Sprintf("%v", ft.StringArray))
+	if v := ft.StringScanner; v != nil {
+		builder.WriteString(", string_scanner=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", duration=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Duration))
 	builder.WriteString(", dir=")

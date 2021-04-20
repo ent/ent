@@ -1351,6 +1351,7 @@ type FieldTypeMutation struct {
 	link_other                 **schema.Link
 	mac                        *schema.MAC
 	string_array               *schema.Strings
+	string_scanner             *schema.StringScanner
 	duration                   *time.Duration
 	addduration                *time.Duration
 	dir                        *http.Dir
@@ -3323,6 +3324,55 @@ func (m *FieldTypeMutation) ResetStringArray() {
 	delete(m.clearedFields, fieldtype.FieldStringArray)
 }
 
+// SetStringScanner sets the "string_scanner" field.
+func (m *FieldTypeMutation) SetStringScanner(ss schema.StringScanner) {
+	m.string_scanner = &ss
+}
+
+// StringScanner returns the value of the "string_scanner" field in the mutation.
+func (m *FieldTypeMutation) StringScanner() (r schema.StringScanner, exists bool) {
+	v := m.string_scanner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStringScanner returns the old "string_scanner" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldStringScanner(ctx context.Context) (v *schema.StringScanner, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldStringScanner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldStringScanner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStringScanner: %w", err)
+	}
+	return oldValue.StringScanner, nil
+}
+
+// ClearStringScanner clears the value of the "string_scanner" field.
+func (m *FieldTypeMutation) ClearStringScanner() {
+	m.string_scanner = nil
+	m.clearedFields[fieldtype.FieldStringScanner] = struct{}{}
+}
+
+// StringScannerCleared returns if the "string_scanner" field was cleared in this mutation.
+func (m *FieldTypeMutation) StringScannerCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldStringScanner]
+	return ok
+}
+
+// ResetStringScanner resets all changes to the "string_scanner" field.
+func (m *FieldTypeMutation) ResetStringScanner() {
+	m.string_scanner = nil
+	delete(m.clearedFields, fieldtype.FieldStringScanner)
+}
+
 // SetDuration sets the "duration" field.
 func (m *FieldTypeMutation) SetDuration(t time.Duration) {
 	m.duration = &t
@@ -4672,7 +4722,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 55)
+	fields := make([]string, 0, 56)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4759,6 +4809,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	}
 	if m.string_array != nil {
 		fields = append(fields, fieldtype.FieldStringArray)
+	}
+	if m.string_scanner != nil {
+		fields = append(fields, fieldtype.FieldStringScanner)
 	}
 	if m.duration != nil {
 		fields = append(fields, fieldtype.FieldDuration)
@@ -4904,6 +4957,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.MAC()
 	case fieldtype.FieldStringArray:
 		return m.StringArray()
+	case fieldtype.FieldStringScanner:
+		return m.StringScanner()
 	case fieldtype.FieldDuration:
 		return m.Duration()
 	case fieldtype.FieldDir:
@@ -5023,6 +5078,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldMAC(ctx)
 	case fieldtype.FieldStringArray:
 		return m.OldStringArray(ctx)
+	case fieldtype.FieldStringScanner:
+		return m.OldStringScanner(ctx)
 	case fieldtype.FieldDuration:
 		return m.OldDuration(ctx)
 	case fieldtype.FieldDir:
@@ -5286,6 +5343,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStringArray(v)
+		return nil
+	case fieldtype.FieldStringScanner:
+		v, ok := value.(schema.StringScanner)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStringScanner(v)
 		return nil
 	case fieldtype.FieldDuration:
 		v, ok := value.(time.Duration)
@@ -5934,6 +5998,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldStringArray) {
 		fields = append(fields, fieldtype.FieldStringArray)
 	}
+	if m.FieldCleared(fieldtype.FieldStringScanner) {
+		fields = append(fields, fieldtype.FieldStringScanner)
+	}
 	if m.FieldCleared(fieldtype.FieldDuration) {
 		fields = append(fields, fieldtype.FieldDuration)
 	}
@@ -6082,6 +6149,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldStringArray:
 		m.ClearStringArray()
+		return nil
+	case fieldtype.FieldStringScanner:
+		m.ClearStringScanner()
 		return nil
 	case fieldtype.FieldDuration:
 		m.ClearDuration()
@@ -6240,6 +6310,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldStringArray:
 		m.ResetStringArray()
+		return nil
+	case fieldtype.FieldStringScanner:
+		m.ResetStringScanner()
 		return nil
 	case fieldtype.FieldDuration:
 		m.ResetDuration()
