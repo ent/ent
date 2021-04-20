@@ -142,7 +142,8 @@ func TestScanSlice(t *testing.T) {
 func TestScanNestedStruct(t *testing.T) {
 	mock := sqlmock.NewRows([]string{"name", "age"}).
 		AddRow("foo", 1).
-		AddRow("bar", 2)
+		AddRow("bar", 2).
+		AddRow("baz", nil)
 	type T struct{ Name string }
 	var v []struct {
 		T
@@ -153,6 +154,22 @@ func TestScanNestedStruct(t *testing.T) {
 	require.Equal(t, 1, v[0].Age)
 	require.Equal(t, "bar", v[1].Name)
 	require.Equal(t, 2, v[1].Age)
+	require.Equal(t, "baz", v[2].Name)
+	require.Equal(t, 0, v[2].Age)
+
+	mock = sqlmock.NewRows([]string{"name", "age"}).
+		AddRow("foo", 1).
+		AddRow("bar", nil)
+	type T1 struct{ Name **string }
+	var v1 []struct {
+		T1
+		Age *int
+	}
+	require.NoError(t, ScanSlice(toRows(mock), &v1))
+	require.Equal(t, "foo", **v1[0].Name)
+	require.Equal(t, "bar", **v1[1].Name)
+	require.Equal(t, 1, *v1[0].Age)
+	require.Nil(t, v1[1].Age)
 }
 
 func TestScanSlicePtr(t *testing.T) {
