@@ -24,6 +24,15 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "alexsn",
+      "name": "Alex Snast",
+      "avatar_url": "https://avatars.githubusercontent.com/u/987019?v=4",
+      "profile": "https://github.com/alexsn",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
