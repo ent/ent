@@ -13,6 +13,17 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "a8m",
+      "name": "Ariel Mashraki",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7413593?v=4",
+      "profile": "http://entgo.io",
+      "contributions": [
+        "maintenance",
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
