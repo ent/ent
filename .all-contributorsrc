@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "rotemtam",
+      "name": "Rotem Tamir",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1522681?v=4",
+      "profile": "https://rotemtam.com",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "ent",
+  "projectOwner": "ent",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
