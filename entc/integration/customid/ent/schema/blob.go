@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 
@@ -22,6 +23,9 @@ func (Blob) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Default(uuid.New).
+			Annotations(entsql.Annotation{
+				Default: "uuid_generate_v4()",
+			}).
 			Unique(),
 		field.UUID("uuid", uuid.UUID{}).
 			Default(uuid.New).
