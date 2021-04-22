@@ -97,6 +97,8 @@ func TestInspector_Tables(t *testing.T) {
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 							AddRow("users_pkey", "id", "t", "t", 0))
+					mock.ExpectQuery(escape(fmt.Sprintf(fkQuery, "users"))).
+						WillReturnRows(sqlmock.NewRows([]string{"table_schema", "constraint_name", "table_name", "column_name", "foreign_table_schema", "foreign_table_name", "foreign_column_name"}))
 				},
 			},
 			tables: func() []*Table {

@@ -339,6 +339,24 @@ type ForeignKey struct {
 	OnDelete   ReferenceOption // action on delete.
 }
 
+func (fk ForeignKey) column(name string) (*Column, bool) {
+	for _, c := range fk.Columns {
+		if c.Name == name {
+			return c, true
+		}
+	}
+	return nil, false
+}
+
+func (fk ForeignKey) refColumn(name string) (*Column, bool) {
+	for _, c := range fk.RefColumns {
+		if c.Name == name {
+			return c, true
+		}
+	}
+	return nil, false
+}
+
 // DSL returns a default DSL query for a foreign-key.
 func (fk ForeignKey) DSL() *sql.ForeignKeyBuilder {
 	cols := make([]string, len(fk.Columns))
