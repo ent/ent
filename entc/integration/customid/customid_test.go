@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/customid/ent"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/user"
@@ -41,8 +42,8 @@ func TestMySQL(t *testing.T) {
 
 			cfg.DBName = "custom_id"
 			client, err := ent.Open("mysql", cfg.FormatDSN())
-			require.NoError(t, err, "connecting to json database")
-			err = client.Schema.Create(context.Background())
+			require.NoError(t, err, "connecting to custom_id database")
+			err = client.Schema.Create(context.Background(), schema.WithHooks(clearDefault))
 			require.NoError(t, err)
 			CustomID(t, client)
 		})
@@ -61,7 +62,7 @@ func TestPostgres(t *testing.T) {
 			defer db.Exec("DROP DATABASE custom_id")
 
 			client, err := ent.Open(dialect.Postgres, dsn+" dbname=custom_id")
-			require.NoError(t, err, "connecting to json database")
+			require.NoError(t, err, "connecting to custom_id database")
 			defer client.Close()
 			err = client.Schema.Create(context.Background())
 			require.NoError(t, err)
@@ -74,7 +75,7 @@ func TestSQLite(t *testing.T) {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer client.Close()
-	require.NoError(t, client.Schema.Create(context.Background()))
+	require.NoError(t, client.Schema.Create(context.Background(), schema.WithHooks(clearDefault)))
 	CustomID(t, client)
 }
 
@@ -163,4 +164,12 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.NotEmpty(t, pdoc.Text)
 	cdoc := client.Doc.Create().SetText("child").SetParent(pdoc).SaveX(ctx)
 	require.NotEmpty(t, cdoc.QueryParent().OnlyIDX(ctx))
+}
+
+// clearDefault clears the id's default for non-postgres dialects.
+func clearDefault(c schema.Creator) schema.Creator {
+	return schema.CreateFunc(func(ctx context.Context, tables ...*schema.Table) error {
+		tables[0].Columns[0].Default = nil
+		return c.Create(ctx, tables...)
+	})
 }

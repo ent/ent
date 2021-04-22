@@ -14,7 +14,7 @@ import (
 var (
 	// BlobsColumns holds the columns for the "blobs" table.
 	BlobsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true, Default: "uuid_generate_v4()"},
 		{Name: "uuid", Type: field.TypeUUID, Unique: true},
 		{Name: "blob_parent", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
