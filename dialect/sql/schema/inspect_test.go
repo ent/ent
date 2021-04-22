@@ -6,12 +6,12 @@ package schema
 
 import (
 	"context"
+	"entgo.io/ent/dialect"
 	"fmt"
 	"math"
 	"path"
 	"testing"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
 
@@ -53,7 +53,8 @@ func TestInspector_Tables(t *testing.T) {
 					mock.ExpectQuery(escape("SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA` = ?")).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"TABLE_NAME"}).
-							AddRow("users"))
+							AddRow("users").
+							AddRow("pets"))
 					mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ?")).
 						WithArgs("public", "users").
 						WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
@@ -65,12 +66,23 @@ func TestInspector_Tables(t *testing.T) {
 						WithArgs("public", "users").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
 							AddRow("PRIMARY", "id", "0", "1"))
+					mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ?")).
+						WithArgs("public", "pets").
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name"}).
+							AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "").
+							AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "").
+							AddRow("user_pets", "bigint(20)", "YES", "YES", "NULL", "", "", ""))
+					mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `non_unique`, `seq_in_index` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
+						WithArgs("public", "pets").
+						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "non_unique", "seq_in_index"}).
+							AddRow("PRIMARY", "id", "0", "1"))
 				},
 				dialect.SQLite: func(mock mysqlMock) {
 					mock.ExpectQuery(escape("SELECT `name` FROM `sqlite_schema` WHERE `type` = ?")).
 						WithArgs("table").
 						WillReturnRows(sqlmock.NewRows([]string{"name"}).
-							AddRow("users"))
+							AddRow("users").
+							AddRow("pets"))
 					mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('users') ORDER BY `pk`")).
 						WithArgs().
 						WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
@@ -80,12 +92,21 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("uuid", "uuid", 0, "NULL", 0))
 					mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
 						WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "unique"}))
+					mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('pets') ORDER BY `pk`")).
+						WithArgs().
+						WillReturnRows(sqlmock.NewRows([]string{"name", "type", "notnull", "dflt_value", "pk"}).
+							AddRow("id", "integer", 1, "NULL", 1).
+							AddRow("name", "varchar(255)", 0, "NULL", 0).
+							AddRow("user_pets", "integer", 0, "NULL", 0))
+					mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('pets')")).
+						WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "unique"}))
 				},
 				dialect.Postgres: func(mock mysqlMock) {
 					mock.ExpectQuery(escape(`SELECT "table_name" FROM "information_schema"."tables" WHERE "table_schema" = $1`)).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"name"}).
-							AddRow("users"))
+							AddRow("users").
+							AddRow("pets"))
 					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "users").
 						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
@@ -97,7 +118,19 @@ func TestInspector_Tables(t *testing.T) {
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 							AddRow("users_pkey", "id", "t", "t", 0))
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+						WithArgs("public", "pets").
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
+							AddRow("id", "bigint", "NO", "NULL", "int8").
+							AddRow("name", "character", "YES", "NULL", "bpchar").
+							AddRow("user_pets", "bigint", "YES", "NULL", "int8"))
+					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "pets"))).
+						WithArgs("public").
+						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
+							AddRow("pets_pkey", "id", "t", "t", 0))
 					mock.ExpectQuery(escape(fmt.Sprintf(fkQuery, "users"))).
+						WillReturnRows(sqlmock.NewRows([]string{"table_schema", "constraint_name", "table_name", "column_name", "foreign_table_schema", "foreign_table_name", "foreign_column_name"}))
+					mock.ExpectQuery(escape(fmt.Sprintf(fkQuery, "pets"))).
 						WillReturnRows(sqlmock.NewRows([]string{"table_schema", "constraint_name", "table_name", "column_name", "foreign_table_schema", "foreign_table_name", "foreign_column_name"}))
 				},
 			},
@@ -114,8 +147,18 @@ func TestInspector_Tables(t *testing.T) {
 						Columns:    c1,
 						PrimaryKey: c1[0:1],
 					}
+					c2 = []*Column{
+						{Name: "id", Type: field.TypeInt64, Increment: true},
+						{Name: "name", Type: field.TypeString, Size: 255, Nullable: true},
+						{Name: "user_pets", Type: field.TypeInt64, Nullable: true},
+					}
+					t2 = &Table{
+						Name:       "pets",
+						Columns:    c2,
+						PrimaryKey: c2[0:1],
+					}
 				)
-				return []*Table{t1}
+				return []*Table{t1, t2}
 			}(),
 		},
 	}
