@@ -28,11 +28,6 @@ type Inspector struct {
 	schema string
 }
 
-type sqlForeignKeyInspector interface {
-	// foreignKeys retrieves all the foreign keys present in the database
-	foreignKeys(context.Context, dialect.Tx, []*Table) (map[*Table][]*ForeignKey, error)
-}
-
 // NewInspect returns an inspector for the given SQL driver.
 func NewInspect(d dialect.Driver, opts ...InspectOption) (*Inspector, error) {
 	i := &Inspector{}
@@ -68,9 +63,11 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 		tables = append(tables, t)
 	}
 
-	fki, ok := i.sqlDialect.(interface{ foreignKeys(context.Context, dialect.Tx, *Table) ([]*ForeignKey, error) })
+	fki, ok := i.sqlDialect.(interface {
+		foreignKeys(context.Context, dialect.Tx, []*Table) (map[*Table][]*ForeignKey, error)
+	})
 	if ok {
-		allFks, err := sqlForeignKeyInspector.foreignKeys(ctx, tx, tables)
+		allFks, err := fki.foreignKeys(ctx, tx, tables)
 		for _, t := range tables {
 			if tableFks, ok := allFks[t]; ok {
 				for _, fk := range tableFks {
