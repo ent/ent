@@ -71,7 +71,6 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 	fki, ok := i.sqlDialect.(interface{ foreignKeys(context.Context, dialect.Tx, *Table) ([]*ForeignKey, error) })
 	if ok {
 		allFks, err := sqlForeignKeyInspector.foreignKeys(ctx, tx, tables)
-
 		for _, t := range tables {
 			if tableFks, ok := allFks[t]; ok {
 				for _, fk := range tableFks {
@@ -79,7 +78,6 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 				}
 			}
 		}
-
 		if err != nil {
 			return nil, err
 		}
