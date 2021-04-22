@@ -1198,6 +1198,11 @@ func (f Field) PK() *schema.Column {
 			c.Size = *f.def.Size
 		}
 	}
+	// Override the default-value defined in the
+	// schema if it was provided by an annotation.
+	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
+		c.Default = strconv.Quote(ant.Default)
+	}
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
