@@ -826,6 +826,13 @@ func (b *uuidBuilder) StorageKey(key string) *uuidBuilder {
 	return b
 }
 
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
+func (b *uuidBuilder) Nillable() *uuidBuilder {
+	b.desc.Nillable = true
+	return b
+}
+
 // Optional indicates that this field is optional on create.
 // Unlike edges, fields are required by default.
 func (b *uuidBuilder) Optional() *uuidBuilder {
