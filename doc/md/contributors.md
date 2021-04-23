@@ -28,7 +28,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/day-dreams"><img src="https://avatars.githubusercontent.com/u/24593904?v=4?s=100" width="100px;" alt=""/><br /><sub><b>zhangnan</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=day-dreams" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://github.com/uta-mori"><img src="https://avatars.githubusercontent.com/u/59682979?v=4?s=100" width="100px;" alt=""/><br /><sub><b>mori yuta</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=uta-mori" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/uta-mori"><img src="https://avatars.githubusercontent.com/u/59682979?v=4?s=100" width="100px;" alt=""/><br /><sub><b>mori yuta</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=uta-mori" title="Code">💻</a> <a href="#translation-uta-mori" title="Translation">🌍</a></td>
     <td align="center"><a href="http://lollyrock.com/"><img src="https://avatars.githubusercontent.com/u/1178413?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Christoph Hartmann</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=chris-rock" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/rubensayshi"><img src="https://avatars.githubusercontent.com/u/649160?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ruben de Vries</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=rubensayshi" title="Code">💻</a></td>
     <td align="center"><a href="https://keybase.io/ernado"><img src="https://avatars.githubusercontent.com/u/866677?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aleksandr Razumov</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=ernado" title="Code">💻</a></td>
@@ -50,6 +50,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/Bladrak"><img src="https://avatars.githubusercontent.com/u/1321977?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Hugo Briand</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=Bladrak" title="Code">💻</a></td>
     <td align="center"><a href="https://danielenman.com/"><img src="https://avatars.githubusercontent.com/u/432487?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dan Enman</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=enmand" title="Code">💻</a></td>
     <td align="center"><a href="http://www.l2junity.org/"><img src="https://avatars.githubusercontent.com/u/2185291?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rumen Nikiforov</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=UnAfraid" title="Code">💻</a></td>
+    <td align="center"><a href="https://wener.me"><img src="https://avatars.githubusercontent.com/u/1777211?v=4?s=100" width="100px;" alt=""/><br /><sub><b>陈杨文</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=wenerme" title="Code">💻</a></td>
   </tr>
 </table>
 
