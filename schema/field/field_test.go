@@ -512,6 +512,7 @@ func TestField_UUID(t *testing.T) {
 		Unique().
 		Default(uuid.New).
 		Comment("comment").
+		Nillable().
 		Descriptor()
 	assert.Equal(t, "id", fd.Name)
 	assert.True(t, fd.Unique)
@@ -520,6 +521,7 @@ func TestField_UUID(t *testing.T) {
 	assert.NotNil(t, fd.Default)
 	assert.NotEmpty(t, fd.Default.(func() uuid.UUID)())
 	assert.Equal(t, "comment", fd.Comment)
+	assert.True(t, fd.Nillable)
 
 	fd = field.UUID("id", uuid.UUID{}).
 		Default(uuid.UUID{}).
