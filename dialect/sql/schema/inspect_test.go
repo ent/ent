@@ -6,12 +6,12 @@ package schema
 
 import (
 	"context"
-	"entgo.io/ent/dialect"
 	"fmt"
 	"math"
 	"path"
 	"testing"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
 
