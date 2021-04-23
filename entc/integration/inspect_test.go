@@ -56,8 +56,8 @@ func Inspect(t *testing.T, dataSourceName string) {
 	require.Equal(t, inspectTable{
 		Name: "cards", Columns: []inspectColumn{
 			{Name: "id", Key: "PRI", Type: field.TypeInt64},
-			{Name: "create_time", Type: field.TypeTime},
-			{Name: "update_time", Type: field.TypeTime},
+			{Name: "create_time", Type: field.TypeTime, Nullable: true},
+			{Name: "update_time", Type: field.TypeTime, Nullable: true},
 			{Name: "balance", Type: field.TypeFloat64},
 			{Name: "number", Type: field.TypeString},
 			{Name: "name", Type: field.TypeString, Nullable: true},
