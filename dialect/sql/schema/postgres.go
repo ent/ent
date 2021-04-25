@@ -527,46 +527,38 @@ func arrayType(t string) bool {
 	return true
 }
 
-func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Table) (map[*Table][]*ForeignKey, error) {
-	var fks = make(map[*Table][]*ForeignKey)
-
+// foreignKeys populates the tables foreign keys using the information_schema tables
+func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Table) error {
 	var tableLookup = make(map[string]*Table)
-
 	// TODO: include schema
 	for _, t := range tables {
 		tableLookup[t.Name] = t
 	}
-
 	for _, t := range tables {
 		rows := &sql.Rows{}
 		query := fmt.Sprintf(fkQuery, t.Name)
 		if err := tx.Query(ctx, query, []interface{}{}, rows); err != nil {
-			return nil, fmt.Errorf("querying foreign keys for table %s: %w", t.Name, err)
+			return fmt.Errorf("querying foreign keys for table %s: %w", t.Name, err)
 		}
 		defer rows.Close()
-		var (
-			tableFksLookup = make(map[string]*ForeignKey)
-			// Maintain stable order
-			tableFks []*ForeignKey
-		)
+		var tableFksLookup = make(map[string]*ForeignKey)
 		for rows.Next() {
 			var tableSchema, constraintName, tableName, columnName, refTableSchema, refTableName, refColumnName string
 			if err := rows.Scan(&tableSchema, &constraintName, &tableName, &columnName, &refTableSchema, &refTableName, &refColumnName); err != nil {
-				return nil, fmt.Errorf("scanning index description: %w", err)
+				return fmt.Errorf("scanning index description: %w", err)
 			}
 			refTable := tableLookup[refTableName]
 			if refTable == nil {
-				return nil, fmt.Errorf("could not find table: %s", refTableName)
+				return fmt.Errorf("could not find table: %s", refTableName)
 			}
 			column, ok := t.column(columnName)
 			if !ok {
-				return nil, fmt.Errorf("could not find column: %s on table: %s", columnName, tableName)
+				return fmt.Errorf("could not find column: %s on table: %s", columnName, tableName)
 			}
 			refColumn, ok := refTable.column(refColumnName)
 			if !ok {
-				return nil, fmt.Errorf("could not find ref column: %s on ref table: %s", refTableName, refColumnName)
+				return fmt.Errorf("could not find ref column: %s on ref table: %s", refTableName, refColumnName)
 			}
-
 			if fk, ok := tableFksLookup[constraintName]; ok {
 				if _, ok := fk.column(columnName); !ok {
 					fk.Columns = append(fk.Columns, column)
@@ -582,15 +574,14 @@ func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Tab
 					RefColumns: []*Column{refColumn},
 				}
 				tableFksLookup[constraintName] = newFk
-				tableFks = append(tableFks, newFk)
+				t.AddForeignKey(newFk)
 			}
 		}
 		if err := rows.Err(); err != nil {
-			return nil, err
+			return err
 		}
-		fks[t] = tableFks
 	}
-	return fks, nil
+	return nil
 }
 
 // fkQuery holds a query format for retrieving

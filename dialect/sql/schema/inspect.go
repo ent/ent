@@ -64,7 +64,7 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 	}
 
 	fki, ok := i.sqlDialect.(interface {
-		foreignKeys(context.Context, dialect.Tx, []*Table) (map[*Table][]*ForeignKey, error)
+		foreignKeys(context.Context, dialect.Tx, []*Table) error
 	})
 	if ok {
 		if err := fki.foreignKeys(ctx, tx, tables); err != nil {
