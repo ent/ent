@@ -131,7 +131,7 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 			Type:     TypeUUID,
 			Nillable: true,
 			Ident:    rt.String(),
-			PkgPath:  rt.PkgPath(),
+			PkgPath:  indirect(rt).PkgPath(),
 		},
 	}}
 }
