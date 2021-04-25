@@ -523,6 +523,10 @@ func TestField_UUID(t *testing.T) {
 	assert.Equal(t, "comment", fd.Comment)
 	assert.True(t, fd.Nillable)
 
+	fd = field.UUID("id", &uuid.UUID{}).
+		Descriptor()
+	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
+
 	fd = field.UUID("id", uuid.UUID{}).
 		Default(uuid.UUID{}).
 		Descriptor()
