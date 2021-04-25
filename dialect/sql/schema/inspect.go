@@ -67,19 +67,10 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 		foreignKeys(context.Context, dialect.Tx, []*Table) (map[*Table][]*ForeignKey, error)
 	})
 	if ok {
-		allFks, err := fki.foreignKeys(ctx, tx, tables)
-		for _, t := range tables {
-			if tableFks, ok := allFks[t]; ok {
-				for _, fk := range tableFks {
-					t.AddForeignKey(fk)
-				}
-			}
-		}
-		if err != nil {
+		if err := fki.foreignKeys(ctx, tx, tables); err != nil {
 			return nil, err
 		}
 	}
-
 	return tables, nil
 }
 
