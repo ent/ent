@@ -590,7 +590,6 @@ func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Tab
 		}
 		fks[t] = tableFks
 	}
-
 	return fks, nil
 }
 
