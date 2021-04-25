@@ -129,6 +129,9 @@ func init() {
 				{{- with $ant.Options }}
 					Options: "{{ . }}",
 				{{- end }}
+				{{- with $ant.Check }}
+					Check: "{{ . }}",
+				{{- end }}
 			}
 			{{- with $ant.Incremental }}
 				{{ $table }}.Annotation.Incremental = new(bool)

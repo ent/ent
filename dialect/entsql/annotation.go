@@ -86,6 +86,14 @@ type Annotation struct {
 	//	}
 	//
 	OnDelete ReferenceOption `json:"on_delete,omitempty"`
+
+	// Check allows injecting custom "DDL" for setting the "CHECK" clause in "CREATE TABLE"
+	// table that has matching rows in the child table.
+	//	entsql.Annotation{
+	//		Check: "age < 10",
+	//	}
+	//
+	Check string `json:"check,omitempty"`
 }
 
 // Name describes the annotation name.
@@ -126,6 +134,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if s := ant.OnDelete; s != "" {
 		a.OnDelete = s
+	}
+	if s := ant.Check; s != "" {
+		a.Check = s
 	}
 	return a
 }
