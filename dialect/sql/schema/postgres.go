@@ -550,9 +550,7 @@ func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Tab
 			tableFks []*ForeignKey
 		)
 		for rows.Next() {
-			var (
-				tableSchema, constraintName, tableName, columnName, refTableSchema, refTableName, refColumnName string
-			)
+			var tableSchema, constraintName, tableName, columnName, refTableSchema, refTableName, refColumnName string
 			if err := rows.Scan(&tableSchema, &constraintName, &tableName, &columnName, &refTableSchema, &refTableName, &refColumnName); err != nil {
 				return nil, fmt.Errorf("scanning index description: %w", err)
 			}
