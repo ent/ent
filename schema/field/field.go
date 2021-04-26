@@ -1069,6 +1069,7 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 			rtype:   t,
 			Kind:    t.Kind(),
 			Name:    tv.Name(),
+			Ident:   tv.String(),
 			PkgPath: tv.PkgPath(),
 			Methods: make(map[string]struct{ In, Out []*RType }, t.NumMethod()),
 		},
@@ -1088,12 +1089,12 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 			in := make([]*RType, m.Type.NumIn()-1)
 			for j := range in {
 				arg := m.Type.In(j + 1)
-				in[j] = &RType{Name: arg.Name(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
+				in[j] = &RType{Name: arg.Name(), Ident: arg.String(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
 			}
 			out := make([]*RType, m.Type.NumOut())
 			for j := range out {
 				ret := m.Type.Out(j)
-				out[j] = &RType{Name: ret.Name(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
+				out[j] = &RType{Name: ret.Name(), Ident: ret.String(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
 			}
 			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
 		}
