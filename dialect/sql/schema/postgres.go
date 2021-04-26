@@ -526,3 +526,82 @@ func arrayType(t string) bool {
 	}
 	return true
 }
+
+// foreignKeys populates the tables foreign keys using the information_schema tables
+func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Table) error {
+	var tableLookup = make(map[string]*Table)
+	// TODO: include schema
+	for _, t := range tables {
+		tableLookup[t.Name] = t
+	}
+	for _, t := range tables {
+		rows := &sql.Rows{}
+		query := fmt.Sprintf(fkQuery, t.Name)
+		if err := tx.Query(ctx, query, []interface{}{}, rows); err != nil {
+			return fmt.Errorf("querying foreign keys for table %s: %w", t.Name, err)
+		}
+		defer rows.Close()
+		var tableFksLookup = make(map[string]*ForeignKey)
+		for rows.Next() {
+			var tableSchema, constraintName, tableName, columnName, refTableSchema, refTableName, refColumnName string
+			if err := rows.Scan(&tableSchema, &constraintName, &tableName, &columnName, &refTableSchema, &refTableName, &refColumnName); err != nil {
+				return fmt.Errorf("scanning index description: %w", err)
+			}
+			refTable := tableLookup[refTableName]
+			if refTable == nil {
+				return fmt.Errorf("could not find table: %s", refTableName)
+			}
+			column, ok := t.column(columnName)
+			if !ok {
+				return fmt.Errorf("could not find column: %s on table: %s", columnName, tableName)
+			}
+			refColumn, ok := refTable.column(refColumnName)
+			if !ok {
+				return fmt.Errorf("could not find ref column: %s on ref table: %s", refTableName, refColumnName)
+			}
+			if fk, ok := tableFksLookup[constraintName]; ok {
+				if _, ok := fk.column(columnName); !ok {
+					fk.Columns = append(fk.Columns, column)
+				}
+				if _, ok := fk.refColumn(refColumnName); !ok {
+					fk.RefColumns = append(fk.RefColumns, refColumn)
+				}
+			} else {
+				newFk := &ForeignKey{
+					Symbol:     constraintName,
+					Columns:    []*Column{column},
+					RefTable:   refTable,
+					RefColumns: []*Column{refColumn},
+				}
+				tableFksLookup[constraintName] = newFk
+				t.AddForeignKey(newFk)
+			}
+		}
+		if err := rows.Err(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// fkQuery holds a query format for retrieving
+// foreign keys of the current schema.
+const fkQuery = `
+SELECT tc.table_schema,
+       tc.constraint_name,
+       tc.table_name,
+       kcu.column_name,
+       ccu.table_schema AS foreign_table_schema,
+       ccu.table_name   AS foreign_table_name,
+       ccu.column_name  AS foreign_column_name
+FROM information_schema.table_constraints AS tc
+         JOIN information_schema.key_column_usage AS kcu
+              ON tc.constraint_name = kcu.constraint_name
+                  AND tc.table_schema = kcu.table_schema
+         JOIN information_schema.constraint_column_usage AS ccu
+              ON ccu.constraint_name = tc.constraint_name
+                  AND ccu.table_schema = tc.table_schema
+WHERE tc.constraint_type = 'FOREIGN KEY'
+  AND tc.table_name = '%s'
+order by constraint_name, kcu.ordinal_position;
+`

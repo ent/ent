@@ -62,6 +62,15 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 		}
 		tables = append(tables, t)
 	}
+
+	fki, ok := i.sqlDialect.(interface {
+		foreignKeys(context.Context, dialect.Tx, []*Table) error
+	})
+	if ok {
+		if err := fki.foreignKeys(ctx, tx, tables); err != nil {
+			return nil, err
+		}
+	}
 	return tables, nil
 }
 
