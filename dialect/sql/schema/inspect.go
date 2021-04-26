@@ -56,6 +56,9 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 	tx := dialect.NopTx(i.sqlDialect)
 	tables := make([]*Table, 0, len(names))
 	for _, name := range names {
+		if i.skipTable(ctx, name) {
+			continue
+		}
 		t, err := i.table(ctx, tx, name)
 		if err != nil {
 			return nil, err
@@ -63,6 +66,15 @@ func (i *Inspector) Tables(ctx context.Context) ([]*Table, error) {
 		tables = append(tables, t)
 	}
 	return tables, nil
+}
+
+// skipTable skip system tables
+func (i *Inspector) skipTable(ctx context.Context, name string) bool {
+	if dialect.SQLite == i.Dialect() {
+		return name == "sqlite_sequence"
+	}
+
+	return false
 }
 
 func (i *Inspector) tables(ctx context.Context) ([]string, error) {
