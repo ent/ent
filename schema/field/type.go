@@ -6,7 +6,6 @@ package field
 
 import (
 	"fmt"
-	"path"
 	"reflect"
 	"strings"
 )
@@ -187,7 +186,8 @@ var (
 // RType holds a serializable reflect.Type information of
 // Go object. Used by the entc package.
 type RType struct {
-	Name    string
+	Name    string // reflect.Type.Name
+	Ident   string // reflect.Type.String
 	Kind    reflect.Kind
 	PkgPath string
 	Methods map[string]struct{ In, Out []*RType }
@@ -206,7 +206,7 @@ func (r *RType) String() string {
 	if r.rtype != nil {
 		return r.rtype.String()
 	}
-	return path.Base(r.PkgPath) + "." + r.Name
+	return r.Ident
 }
 
 // IsPtr reports if the reflect-type is a pointer type.
