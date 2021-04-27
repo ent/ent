@@ -15,6 +15,7 @@ var (
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "number", Type: field.TypeString, Nullable: true},
 		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
@@ -25,9 +26,16 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "cards_users_card",
-				Columns:    []*schema.Column{CardsColumns[1]},
+				Columns:    []*schema.Column{CardsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "card_number_owner_id",
+				Unique:  false,
+				Columns: []*schema.Column{CardsColumns[1], CardsColumns[2]},
 			},
 		},
 	}
@@ -105,6 +113,13 @@ var (
 				Columns:    []*schema.Column{PostsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "post_author_id_text",
+				Unique:  false,
+				Columns: []*schema.Column{PostsColumns[2], PostsColumns[1]},
 			},
 		},
 	}

@@ -23,6 +23,20 @@ type CardCreate struct {
 	hooks    []Hook
 }
 
+// SetNumber sets the "number" field.
+func (cc *CardCreate) SetNumber(s string) *CardCreate {
+	cc.mutation.SetNumber(s)
+	return cc
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (cc *CardCreate) SetNillableNumber(s *string) *CardCreate {
+	if s != nil {
+		cc.SetNumber(*s)
+	}
+	return cc
+}
+
 // SetOwnerID sets the "owner_id" field.
 func (cc *CardCreate) SetOwnerID(i int) *CardCreate {
 	cc.mutation.SetOwnerID(i)
@@ -120,6 +134,14 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := cc.mutation.Number(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: card.FieldNumber,
+		})
+		_node.Number = value
+	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,

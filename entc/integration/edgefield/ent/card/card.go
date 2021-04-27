@@ -11,6 +11,8 @@ const (
 	Label = "card"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldNumber holds the string denoting the number field in the database.
+	FieldNumber = "number"
 	// FieldOwnerID holds the string denoting the owner_id field in the database.
 	FieldOwnerID = "owner_id"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
@@ -29,6 +31,7 @@ const (
 // Columns holds all SQL columns for card fields.
 var Columns = []string{
 	FieldID,
+	FieldNumber,
 	FieldOwnerID,
 }
 
