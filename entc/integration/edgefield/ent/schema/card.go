@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Card holds the schema definition for the Card entity.
@@ -18,6 +19,8 @@ type Card struct {
 // Fields of the Card.
 func (Card) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("number").
+			Optional(),
 		field.Int("owner_id").
 			Optional(),
 	}
@@ -30,5 +33,12 @@ func (Card) Edges() []ent.Edge {
 			Ref("card").
 			Field("owner_id").
 			Unique(),
+	}
+}
+
+// Indexes of the Card.
+func (Card) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("number", "owner_id"),
 	}
 }
