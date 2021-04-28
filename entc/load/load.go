@@ -2,7 +2,7 @@
 // This source code is licensed under the Apache 2.0 license found
 // in the LICENSE file in the root directory of this source tree.
 
-// Package load is the interface for loading schema package into a Go program.
+// Package load is the interface for loading an ent/schema package into a Go program.
 package load
 
 import (
@@ -29,11 +29,12 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// A SchemaSpec holds an ent.schema package that created by Load.
+// A SchemaSpec holds a serializable version of an ent.Schema
+// and its Go package information.
 type SchemaSpec struct {
 	// Schemas are the schema descriptors.
 	Schemas []*Schema
-	// PkgPath is the package path of the schema.
+	// PkgPath is the package path of the loaded ent.Schema.
 	PkgPath string
 }
 
@@ -41,8 +42,7 @@ type SchemaSpec struct {
 type Config struct {
 	// Path is the path for the schema package.
 	Path string
-	// Names are the schema names to run the code generation on.
-	// Empty means all schema in the directory.
+	// Names are the schema names to load. Empty means all schemas in the directory.
 	Names []string
 }
 
@@ -50,29 +50,29 @@ type Config struct {
 func (c *Config) Load() (*SchemaSpec, error) {
 	pkgPath, err := c.load()
 	if err != nil {
-		return nil, fmt.Errorf("load schema dir: %w", err)
+		return nil, fmt.Errorf("entc/load: load schema dir: %w", err)
 	}
 	if len(c.Names) == 0 {
-		return nil, fmt.Errorf("no schema found in: %s", c.Path)
+		return nil, fmt.Errorf("entc/load: no schema found in: %s", c.Path)
 	}
-	b := bytes.NewBuffer(nil)
-	err = buildTmpl.ExecuteTemplate(b, "main", struct {
+	var b bytes.Buffer
+	err = buildTmpl.ExecuteTemplate(&b, "main", struct {
 		*Config
 		Package string
 	}{c, pkgPath})
 	if err != nil {
-		return nil, fmt.Errorf("execute template: %w", err)
+		return nil, fmt.Errorf("entc/load: execute template: %w", err)
 	}
 	buf, err := format.Source(b.Bytes())
 	if err != nil {
-		return nil, fmt.Errorf("format template: %w", err)
+		return nil, fmt.Errorf("entc/load: format template: %w", err)
 	}
 	if err := os.MkdirAll(".entc", os.ModePerm); err != nil {
 		return nil, err
 	}
 	target := fmt.Sprintf(".entc/%s.go", filename(pkgPath))
 	if err := ioutil.WriteFile(target, buf, 0644); err != nil {
-		return nil, fmt.Errorf("write file %s: %w", target, err)
+		return nil, fmt.Errorf("entc/load: write file %s: %w", target, err)
 	}
 	defer os.RemoveAll(".entc")
 	out, err := run(target)
@@ -83,7 +83,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 	for _, line := range strings.Split(out, "\n") {
 		schema, err := UnmarshalSchema([]byte(line))
 		if err != nil {
-			return nil, fmt.Errorf("unmarshal schema %s: %w", line, err)
+			return nil, fmt.Errorf("entc/load: unmarshal schema %s: %w", line, err)
 		}
 		spec.Schemas = append(spec.Schemas, schema)
 	}
