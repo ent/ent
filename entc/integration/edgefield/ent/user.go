@@ -46,9 +46,11 @@ type UserEdges struct {
 	Metadata *Metadata `json:"metadata,omitempty"`
 	// Info holds the value of the info edge.
 	Info []*Info `json:"info,omitempty"`
+	// Rentals holds the value of the rentals edge.
+	Rentals []*Rental `json:"rentals,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [8]bool
 }
 
 // PetsOrErr returns the Pets value or an error if the edge
@@ -134,6 +136,15 @@ func (e UserEdges) InfoOrErr() ([]*Info, error) {
 	return nil, &NotLoadedError{edge: "info"}
 }
 
+// RentalsOrErr returns the Rentals value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RentalsOrErr() ([]*Rental, error) {
+	if e.loadedTypes[7] {
+		return e.Rentals, nil
+	}
+	return nil, &NotLoadedError{edge: "rentals"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -212,6 +223,11 @@ func (u *User) QueryMetadata() *MetadataQuery {
 // QueryInfo queries the "info" edge of the User entity.
 func (u *User) QueryInfo() *InfoQuery {
 	return (&UserClient{config: u.config}).QueryInfo(u)
+}
+
+// QueryRentals queries the "rentals" edge of the User entity.
+func (u *User) QueryRentals() *RentalQuery {
+	return (&UserClient{config: u.config}).QueryRentals(u)
 }
 
 // Update returns a builder for updating this User.

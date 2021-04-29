@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/pet"
+	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -145,6 +146,21 @@ func (uc *UserCreate) AddInfo(i ...*Info) *UserCreate {
 		ids[j] = i[j].ID
 	}
 	return uc.AddInfoIDs(ids...)
+}
+
+// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
+func (uc *UserCreate) AddRentalIDs(ids ...int) *UserCreate {
+	uc.mutation.AddRentalIDs(ids...)
+	return uc
+}
+
+// AddRentals adds the "rentals" edges to the Rental entity.
+func (uc *UserCreate) AddRentals(r ...*Rental) *UserCreate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uc.AddRentalIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -352,6 +368,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: info.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.RentalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RentalsTable,
+			Columns: []string{user.RentalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rental.FieldID,
 				},
 			},
 		}

@@ -14,11 +14,13 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/card"
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/pet"
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
+	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 )
 
@@ -40,11 +42,13 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		car.Table:      car.ValidColumn,
 		card.Table:     card.ValidColumn,
 		info.Table:     info.ValidColumn,
 		metadata.Table: metadata.ValidColumn,
 		pet.Table:      pet.ValidColumn,
 		post.Table:     post.ValidColumn,
+		rental.Table:   rental.ValidColumn,
 		user.Table:     user.ValidColumn,
 	}
 	check, ok := checks[table]
