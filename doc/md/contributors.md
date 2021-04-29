@@ -52,6 +52,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://www.l2junity.org/"><img src="https://avatars.githubusercontent.com/u/2185291?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rumen Nikiforov</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=UnAfraid" title="Code">💻</a></td>
     <td align="center"><a href="https://wener.me"><img src="https://avatars.githubusercontent.com/u/1777211?v=4?s=100" width="100px;" alt=""/><br /><sub><b>陈杨文</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=wenerme" title="Code">💻</a></td>
     <td align="center"><a href="https://djwong.net"><img src="https://avatars.githubusercontent.com/u/1635441?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Qiaosen (Joeson) Huang</b></sub></a><br /><a href="https://github.com/ent/ent/issues?q=author%3Ajoesonw" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/davebehr1"><img src="https://avatars.githubusercontent.com/u/16716239?v=4?s=100" width="100px;" alt=""/><br /><sub><b>AlonDavidBehr</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=davebehr1" title="Code">💻</a> <a href="https://github.com/ent/ent/pulls?q=is%3Apr+reviewed-by%3Adavebehr1" title="Reviewed Pull Requests">👀</a></td>
   </tr>
 </table>
 

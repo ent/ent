@@ -315,6 +315,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "davebehr1",
+      "name": "AlonDavidBehr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16716239?v=4",
+      "profile": "https://github.com/davebehr1",
+      "contributions": [
+        "code",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,
