@@ -87,8 +87,8 @@ type Annotation struct {
 	//
 	OnDelete ReferenceOption `json:"on_delete,omitempty"`
 
-	// Check allows injecting custom "DDL" for setting the "CHECK" clause in "CREATE TABLE"
-	// table that has matching rows in the child table.
+	// Check allows injecting custom "DDL" for setting the "CHECK" clause in "CREATE TABLE".
+	//
 	//	entsql.Annotation{
 	//		Check: "age < 10",
 	//	}
