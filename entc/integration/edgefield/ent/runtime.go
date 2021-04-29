@@ -7,7 +7,10 @@
 package ent
 
 import (
+	"time"
+
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
+	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/schema"
 )
 
@@ -21,4 +24,10 @@ func init() {
 	metadataDescAge := metadataFields[1].Descriptor()
 	// metadata.DefaultAge holds the default value on creation for the age field.
 	metadata.DefaultAge = metadataDescAge.Default.(int)
+	rentalFields := schema.Rental{}.Fields()
+	_ = rentalFields
+	// rentalDescDate is the schema descriptor for date field.
+	rentalDescDate := rentalFields[0].Descriptor()
+	// rental.DefaultDate holds the default value on creation for the date field.
+	rental.DefaultDate = rentalDescDate.Default.(func() time.Time)
 }

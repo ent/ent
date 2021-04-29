@@ -8,6 +8,9 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
+
+	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 
 	"entgo.io/ent/entc/integration/edgefield/ent"
 	"entgo.io/ent/entc/integration/edgefield/ent/migrate"
@@ -88,4 +91,18 @@ func TestEdgeField(t *testing.T) {
 	require.NotZero(t, client.Pet.Query().QueryOwner().CountX(ctx))
 	client.Pet.Update().ClearOwnerID().ExecX(ctx)
 	require.Zero(t, client.Pet.Query().QueryOwner().CountX(ctx))
+
+	require.False(t, client.Rental.Query().ExistX(ctx))
+	car1 := client.Car.Create().SetNumber("102030").SaveX(ctx)
+	car2 := client.Car.Create().SetNumber("102030").SaveX(ctx)
+	client.Rental.Create().SetUserID(a8m.ID).SetCarID(car1.ID).SaveX(ctx)
+	require.Equal(t, car1.ID, a8m.QueryRentals().QueryCar().OnlyIDX(ctx))
+	dt, err := time.Parse(time.RFC3339, "1906-01-02T00:00:00+00:00")
+	require.NoError(t, err)
+	client.Rental.Create().SetUserID(a8m.ID).SetCarID(car2.ID).SetDate(dt).SaveX(ctx)
+	require.Equal(t, 2, a8m.QueryRentals().QueryCar().CountX(ctx))
+	require.Equal(t, car2.ID, a8m.QueryRentals().Where(rental.DateLTE(dt)).QueryCar().OnlyIDX(ctx))
+	_, err = client.Rental.Create().SetUserID(a8m.ID).SetCarID(car2.ID).SetDate(dt).Save(ctx)
+	require.Error(t, err)
+	require.True(t, ent.IsConstraintError(err))
 }
