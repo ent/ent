@@ -689,7 +689,7 @@ FROM "users"
 WHERE "users"."id" IN
   (SELECT "user_groups"."user_id"
   FROM "user_groups"
-  JOIN "groups" AS "t0" ON "user_groups"."group_id" = "t0"."id" WHERE "name" = $1)`,
+  JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
 			wantArgs: []interface{}{"GitHub"},
 		},
 		{
@@ -709,7 +709,7 @@ FROM "groups"
 WHERE "groups"."id" IN
   (SELECT "user_groups"."group_id"
   FROM "user_groups"
-  JOIN "users" AS "t0" ON "user_groups"."user_id" = "t0"."id" WHERE "name" = $1)`,
+  JOIN "users" AS "t1" ON "user_groups"."user_id" = "t1"."id" WHERE "name" = $1)`,
 			wantArgs: []interface{}{"a8m"},
 		},
 		{
@@ -729,7 +729,7 @@ FROM "groups"
 WHERE "groups"."id" IN
   (SELECT "user_groups"."group_id"
   FROM "user_groups"
-  JOIN "users" AS "t0" ON "user_groups"."user_id" = "t0"."id" WHERE "name" IS NOT NULL AND "name" = $1)`,
+  JOIN "users" AS "t1" ON "user_groups"."user_id" = "t1"."id" WHERE "name" IS NOT NULL AND "name" = $1)`,
 			wantArgs: []interface{}{"a8m"},
 		},
 		{
@@ -792,7 +792,7 @@ FROM "s1"."users"
 WHERE "s1"."users"."id" IN
   (SELECT "s2"."user_groups"."user_id"
   FROM "s2"."user_groups"
-  JOIN "s3"."groups" AS "t0" ON "s2"."user_groups"."group_id" = "t0"."id" WHERE "name" = $1)`,
+  JOIN "s3"."groups" AS "t1" ON "s2"."user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
 			wantArgs: []interface{}{"GitHub"},
 		},
 	}

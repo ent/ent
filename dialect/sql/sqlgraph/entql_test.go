@@ -142,7 +142,7 @@ func TestGraph_EvalP(t *testing.T) {
 		{
 			s:         sql.Dialect(dialect.Postgres).Select().From(sql.Table("users")).Where(sql.EQ("active", true)),
 			p:         entql.HasEdgeWith("groups", entql.Or(entql.FieldEQ("name", "GitHub"), entql.FieldEQ("name", "GitLab"))),
-			wantQuery: `SELECT * FROM "users" WHERE "active" = $1 AND "users"."uid" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t0" ON "user_groups"."group_id" = "t0"."gid" WHERE "name" = $2 OR "name" = $3)`,
+			wantQuery: `SELECT * FROM "users" WHERE "active" = $1 AND "users"."uid" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."gid" WHERE "name" = $2 OR "name" = $3)`,
 			wantArgs:  []interface{}{true, "GitHub", "GitLab"},
 		},
 		{

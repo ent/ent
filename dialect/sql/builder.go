@@ -1877,7 +1877,7 @@ func (s *Selector) join(kind string, t TableView) *Selector {
 	switch view := t.(type) {
 	case *SelectTable:
 		if view.as == "" {
-			view.as = "t0"
+			view.as = "t" + strconv.Itoa(len(s.joins))
 		}
 	case *Selector:
 		if view.as == "" {
