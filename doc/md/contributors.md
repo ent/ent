@@ -54,6 +54,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://djwong.net"><img src="https://avatars.githubusercontent.com/u/1635441?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Qiaosen (Joeson) Huang</b></sub></a><br /><a href="https://github.com/ent/ent/issues?q=author%3Ajoesonw" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/davebehr1"><img src="https://avatars.githubusercontent.com/u/16716239?v=4?s=100" width="100px;" alt=""/><br /><sub><b>AlonDavidBehr</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=davebehr1" title="Code">💻</a> <a href="https://github.com/ent/ent/pulls?q=is%3Apr+reviewed-by%3Adavebehr1" title="Reviewed Pull Requests">👀</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="http://duglaser.dev"><img src="https://avatars.githubusercontent.com/u/50506482?v=4?s=100" width="100px;" alt=""/><br /><sub><b>DuGlaser</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=DuGlaser" title="Documentation">📖</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->

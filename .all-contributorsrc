@@ -326,6 +326,15 @@
         "code",
         "review"
       ]
+    },
+    {
+      "login": "DuGlaser",
+      "name": "DuGlaser",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50506482?v=4",
+      "profile": "http://duglaser.dev",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
