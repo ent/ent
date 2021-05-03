@@ -269,7 +269,7 @@ func (c *Column) ScanDefault(value string) error {
 	return nil
 }
 
-// defaultValue adds tge `DEFAULT` attribute the the column.
+// defaultValue adds the `DEFAULT` attribute to the column.
 // Note that, in SQLite if a NOT NULL constraint is specified,
 // then the column must have a default value which not NULL.
 func (c *Column) defaultValue(b *sql.ColumnBuilder) {
@@ -311,7 +311,7 @@ func (c *Column) unique(b *sql.ColumnBuilder) {
 	}
 }
 
-// nullable adds the `NULL`/`NOT NULL` attribute to the column. it is exist in
+// nullable adds the `NULL`/`NOT NULL` attribute to the column if it exists in
 // a different function to share the common declaration between the two dialects.
 func (c *Column) nullable(b *sql.ColumnBuilder) {
 	attr := Null
