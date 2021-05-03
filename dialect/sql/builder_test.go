@@ -6,6 +6,7 @@ package sql
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"strconv"
 	"strings"
@@ -1520,9 +1521,15 @@ type point struct {
 	*testing.T
 }
 
+// FormatParam implements the sql.ParamFormatter interface.
 func (p point) FormatParam(placeholder string, info *StmtInfo) string {
 	require.Equal(p.T, dialect.MySQL, info.Dialect)
 	return "ST_GeomFromWKB(" + placeholder + ")"
+}
+
+// Value implements the driver.Valuer interface.
+func (p point) Value() (driver.Value, error) {
+	return p.xy, nil
 }
 
 func TestParamFormatter(t *testing.T) {
