@@ -29,6 +29,11 @@ type Querier interface {
 	Query() (string, []interface{})
 }
 
+// querierErr allowed propagate Querier's inner error
+type querierErr interface {
+	Err() error
+}
+
 // ColumnBuilder is a builder for column definition in table creation.
 type ColumnBuilder struct {
 	Builder
@@ -2091,6 +2096,7 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString(strconv.Itoa(*s.offset))
 	}
 	s.total = b.total
+	s.AddError(b.Err())
 	return b.String(), b.args
 }
 
@@ -2326,7 +2332,10 @@ func (b *Builder) Reset() *Builder {
 
 // AddError appends an error to the builder errors.
 func (b *Builder) AddError(err error) *Builder {
-	b.errs = append(b.errs, err)
+	// allowed nil error make build process easier
+	if err != nil {
+		b.errs = append(b.errs, err)
+	}
 	return b
 }
 
@@ -2488,6 +2497,9 @@ func (b *Builder) join(qs []Querier, sep string) *Builder {
 		b.WriteString(query)
 		b.args = append(b.args, args...)
 		b.total += len(args)
+		if qe, ok := q.(querierErr); ok {
+			b.AddError(qe.Err())
+		}
 	}
 	return b
 }
