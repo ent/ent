@@ -1,27 +1,27 @@
 ---
-id: generating-ent-schemas
-title: Generating Schemas
+id: generating-ent-schemas title: Generating Schemas
 ---
 
 ## Introduction
-:::info
-This feature is experimental, APIs are subject to change in the future.
+
+:::info This feature is experimental, APIs are subject to change in the future.
 :::
 
-To facilitate the creation of tooling that generates `ent.Schema`s programmatically, `ent` supports the 
-manipulation of the `schema/` directory using the `entgo.io/contrib/schemast` package.
+To facilitate the creation of tooling that generates `ent.Schema`s programmatically, `ent` supports the manipulation of
+the `schema/` directory using the `entgo.io/contrib/schemast` package.
 
 ## API
 
 ### Loading
 
 In order to manipulate an existing schema directory we must first load it into a `schemast.Context` object:
+
 ```go
 package main
 
 import (
 	"fmt"
-	
+
 	"entgo.io/contrib/schemast"
 )
 
@@ -29,10 +29,10 @@ func main() {
 	ctx, err := schemast.Load("./ent/schema")
 	if err != nil {
 		panic(err)
-    }
+	}
 	if ctx.HasType("user") {
 		fmt.Println("schema directory contains a schema named User!")
-    }
+	}
 }
 ```
 
@@ -45,7 +45,7 @@ package main
 
 import (
 	"fmt"
-	
+
 	"entgo.io/contrib/schemast"
 )
 
@@ -53,10 +53,10 @@ func main() {
 	ctx, err := schemast.Load("./ent/schema")
 	if err != nil {
 		panic(err)
-    }
+	}
 	if err := schemast.Print("./ent/schema"); err != nil { // A no-op since we did not manipulate the Context at all.
 		panic(err)
-    }
+	}
 }
 ```
 
@@ -77,7 +77,7 @@ type Mutator interface {
 Currently, only a single type of `schemast.Mutator` is implemented, `UpsertSchema`:
 
 ```go
-package schemast 
+package schemast
 
 // UpsertSchema implements Mutator. UpsertSchema will add to the Context the type named Name if not present and rewrite
 // the type's Fields, Edges, Indexes and Annotations methods.
@@ -126,6 +126,7 @@ func main() {
 	}
 }
 ```
+
 After running this program, observe two new files exist in the schema directory: `user.go` and `team.go`:
 
 ```go
@@ -180,33 +181,36 @@ func (Team) Annotations() []schema.Annotation {
 ### Working with Edges
 
 Edges are defined in `ent` this way:
+
 ```go
 edge.To("edge_name", OtherSchema.Type)
 ```
-This syntax relies on the fact that the `OtherSchema` struct already exists when we define the edge
-so we can refer to its `Type` method. When we are generating schemas programmatically, obviously
-we need somehow to describe the edge to the code-generator before the type definitions exist. To
-do this you can do something like:
+
+This syntax relies on the fact that the `OtherSchema` struct already exists when we define the edge so we can refer to
+its `Type` method. When we are generating schemas programmatically, obviously we need somehow to describe the edge to
+the code-generator before the type definitions exist. To do this you can do something like:
 
 ```go
 type placeholder struct {
-	ent.Schema
+ent.Schema
 }
 
 func withType(e ent.Edge, typeName string) ent.Edge {
-	e.Descriptor().Type = typeName
-	return e
+e.Descriptor().Type = typeName
+return e
 }
 
 func newEdgeTo(edgeName, otherType string) ent.Edge {
-	// we pass a placeholder type to the edge constructor:
-	e := edge.To(edgeName, placeholder.Type)
-	// then we override the other type's name directly on the edge descriptor: 
-	return withType(e, otherType)
+// we pass a placeholder type to the edge constructor:
+e := edge.To(edgeName, placeholder.Type)
+// then we override the other type's name directly on the edge descriptor: 
+return withType(e, otherType)
 }
 ```
 
 ## Examples
 
-The `protoc-gen-ent` ([doc](https://github.com/ent/contrib/tree/master/entproto/cmd/protoc-gen-ent)) is a protoc plugin that programmatically generates `ent.Schema`s from .proto
-files, it uses the `schemast` to manipulate the target `schema` directory. To see how, [read the source code](https://github.com/ent/contrib/blob/master/entproto/cmd/protoc-gen-ent/main.go#L34).
+The `protoc-gen-ent` ([doc](https://github.com/ent/contrib/tree/master/entproto/cmd/protoc-gen-ent)) is a protoc plugin
+that programmatically generates `ent.Schema`s from .proto files, it uses the `schemast` to manipulate the
+target `schema` directory. To see
+how, [read the source code](https://github.com/ent/contrib/blob/master/entproto/cmd/protoc-gen-ent/main.go#L34).
