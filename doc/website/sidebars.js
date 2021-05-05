@@ -56,6 +56,7 @@ module.exports = {
         'sql-integration',
         'testing',
         'faq',
+        'generating-ent-schemas',
         'feature-flags',
         'translations',
         'contributors'
