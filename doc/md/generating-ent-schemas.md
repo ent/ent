@@ -1,11 +1,9 @@
 ---
-id: generating-ent-schemas title: Generating Schemas
+id: generating-ent-schemas
+title: Generating Schemas
 ---
 
 ## Introduction
-
-:::info This feature is experimental, APIs are subject to change in the future.
-:::
 
 To facilitate the creation of tooling that generates `ent.Schema`s programmatically, `ent` supports the manipulation of
 the `schema/` directory using the `entgo.io/contrib/schemast` package.
@@ -214,3 +212,10 @@ The `protoc-gen-ent` ([doc](https://github.com/ent/contrib/tree/master/entproto/
 that programmatically generates `ent.Schema`s from .proto files, it uses the `schemast` to manipulate the
 target `schema` directory. To see
 how, [read the source code](https://github.com/ent/contrib/blob/master/entproto/cmd/protoc-gen-ent/main.go#L34).
+
+## Caveats
+
+`schemast` is still experimental, APIs are subject to change in the future. In addition, a small portion
+of the `ent.Field` definition API is unsupported at this point in time, to see a full list of unsupported
+features see the [source code](https://github.com/ent/contrib/blob/aed7a43a3e54550c1dd9a1a066ce1236b4bae56c/schemast/field.go#L158).
+
