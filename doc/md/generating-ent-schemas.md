@@ -1,5 +1,5 @@
 ---
-id: generating-ent-schemas
+id: generating-ent-schemas 
 title: Generating Schemas
 ---
 
@@ -52,7 +52,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err := schemast.Print("./ent/schema"); err != nil { // A no-op since we did not manipulate the Context at all.
+	// A no-op since we did not manipulate the Context at all.
+	if err := schemast.Print("./ent/schema"); err != nil {
 		panic(err)
 	}
 }
@@ -77,8 +78,8 @@ Currently, only a single type of `schemast.Mutator` is implemented, `UpsertSchem
 ```go
 package schemast
 
-// UpsertSchema implements Mutator. UpsertSchema will add to the Context the type named Name if not present and rewrite
-// the type's Fields, Edges, Indexes and Annotations methods.
+// UpsertSchema implements Mutator. UpsertSchema will add to the Context the type named
+// Name if not present and rewrite the type's Fields, Edges, Indexes and Annotations methods.
 type UpsertSchema struct {
 	Name        string
 	Fields      []ent.Field
@@ -94,6 +95,8 @@ To use it:
 package main
 
 import (
+	"log"
+
 	"entgo.io/contrib/schemast"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
@@ -102,7 +105,7 @@ import (
 func main() {
 	ctx, err := schemast.Load("./ent/schema")
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed loading: %v", err)
 	}
 	mutations := []schemast.Mutator{
 		&schemast.UpsertSchema{
@@ -120,7 +123,7 @@ func main() {
 	}
 	err = schemast.Mutate(ctx, mutations...)
 	if err := ctx.Print("./ent/schema"); err != nil {
-		panic(err)
+		log.Fatalf("failed loading: %v", err)
 	}
 }
 ```
@@ -190,19 +193,19 @@ the code-generator before the type definitions exist. To do this you can do some
 
 ```go
 type placeholder struct {
-ent.Schema
+    ent.Schema
 }
 
 func withType(e ent.Edge, typeName string) ent.Edge {
-e.Descriptor().Type = typeName
-return e
+    e.Descriptor().Type = typeName
+    return e
 }
 
 func newEdgeTo(edgeName, otherType string) ent.Edge {
-// we pass a placeholder type to the edge constructor:
-e := edge.To(edgeName, placeholder.Type)
-// then we override the other type's name directly on the edge descriptor: 
-return withType(e, otherType)
+    // we pass a placeholder type to the edge constructor:
+    e := edge.To(edgeName, placeholder.Type)
+    // then we override the other type's name directly on the edge descriptor: 
+    return withType(e, otherType)
 }
 ```
 
@@ -215,7 +218,7 @@ how, [read the source code](https://github.com/ent/contrib/blob/master/entproto/
 
 ## Caveats
 
-`schemast` is still experimental, APIs are subject to change in the future. In addition, a small portion
-of the `ent.Field` definition API is unsupported at this point in time, to see a full list of unsupported
-features see the [source code](https://github.com/ent/contrib/blob/aed7a43a3e54550c1dd9a1a066ce1236b4bae56c/schemast/field.go#L158).
+`schemast` is still experimental, APIs are subject to change in the future. In addition, a small portion of
+the `ent.Field` definition API is unsupported at this point in time, to see a full list of unsupported features see
+the [source code](https://github.com/ent/contrib/blob/aed7a43a3e54550c1dd9a1a066ce1236b4bae56c/schemast/field.go#L158).
 
