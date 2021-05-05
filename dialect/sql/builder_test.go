@@ -1490,6 +1490,11 @@ func TestBuilder_Err(t *testing.T) {
 	require.EqualError(t, b.Err(), "invalid")
 	b.AddError(fmt.Errorf("unexpected"))
 	require.EqualError(t, b.Err(), "invalid; unexpected")
+	b.Where(P(func(builder *Builder) {
+		builder.AddError(fmt.Errorf("inner"))
+	}))
+	_, _ = b.Query()
+	require.EqualError(t, b.Err(), "invalid; unexpected; inner")
 }
 
 func TestSelector_OrderByExpr(t *testing.T) {
