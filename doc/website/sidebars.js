@@ -35,6 +35,7 @@ module.exports = {
         'predicates',
         'aggregate',
         'paging',
+        'generating-ent-schemas',
       ],
       collapsed: false,
     },
