@@ -58,7 +58,7 @@ message User {
 }
 ```
 
-Developers can invoke the standard `protoc` (protobuf compiler) using this plugin:
+Developers can invoke the standard `protoc` (protobuf compiler) command to use this plugin:
 
 ```shell
 protoc -I=proto/ --ent_out=. --ent_opt=schemadir=./schema proto/entpb/user.proto
