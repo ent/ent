@@ -19,6 +19,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"entgo.io/contrib/schemast"
 )
@@ -26,7 +27,7 @@ import (
 func main() {
 	ctx, err := schemast.Load("./ent/schema")
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed: %v", err)
 	}
 	if ctx.HasType("user") {
 		fmt.Println("schema directory contains a schema named User!")
@@ -42,7 +43,7 @@ To print back out our context to a target directory, use `schemast.Print`:
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"entgo.io/contrib/schemast"
 )
@@ -50,11 +51,11 @@ import (
 func main() {
 	ctx, err := schemast.Load("./ent/schema")
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed: %v", err)
 	}
 	// A no-op since we did not manipulate the Context at all.
 	if err := schemast.Print("./ent/schema"); err != nil {
-		panic(err)
+		log.Fatalf("failed: %v", err)
 	}
 }
 ```
@@ -105,7 +106,7 @@ import (
 func main() {
 	ctx, err := schemast.Load("./ent/schema")
 	if err != nil {
-		log.Fatalf("failed loading: %v", err)
+		log.Fatalf("failed: %v", err)
 	}
 	mutations := []schemast.Mutator{
 		&schemast.UpsertSchema{
@@ -123,7 +124,7 @@ func main() {
 	}
 	err = schemast.Mutate(ctx, mutations...)
 	if err := ctx.Print("./ent/schema"); err != nil {
-		log.Fatalf("failed loading: %v", err)
+		log.Fatalf("failed: %v", err)
 	}
 }
 ```
