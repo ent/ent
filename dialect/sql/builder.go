@@ -2498,7 +2498,9 @@ func (b *Builder) join(qs []Querier, sep string) *Builder {
 		b.args = append(b.args, args...)
 		b.total += len(args)
 		if qe, ok := q.(querierErr); ok {
-			b.AddError(qe.Err())
+			if err := qe.Err(); err != nil {
+				b.AddError(err)
+			}
 		}
 	}
 	return b
