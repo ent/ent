@@ -47,7 +47,7 @@ syntax = "proto3";
 
 package entpb;
 
-++import "options/opts.proto";
++import "options/opts.proto";
  
 option go_package = "github.com/yourorg/project/ent/proto/entpb";  
 
