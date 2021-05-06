@@ -52,7 +52,7 @@ package entpb;
 option go_package = "github.com/yourorg/project/ent/proto/entpb";  
 
 message User {
-++  option (ent.schema).gen = true; // <-- tell protoc-gen-ent you want to generate a schema from this message
++  option (ent.schema).gen = true; // <-- tell protoc-gen-ent you want to generate a schema from this message
   string name = 1;
   string email_address = 2;
 }
