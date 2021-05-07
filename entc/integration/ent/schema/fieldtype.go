@@ -214,6 +214,9 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			GoType(role.Role("role")),
 		field.UUID("uuid", uuid.UUID{}).
 			Optional(),
+		field.UUID("nillable_uuid", uuid.UUID{}).
+			Optional().
+			Nillable(),
 		field.Strings("strings").
 			Optional(),
 		field.Bytes("pair").

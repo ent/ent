@@ -128,6 +128,8 @@ type FieldType struct {
 	Role role.Role `json:"role,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
+	// NillableUUID holds the value of the "nillable_uuid" field.
+	NillableUUID *uuid.UUID `json:"nillable_uuid,omitempty"`
 	// Strings holds the value of the "strings" field.
 	Strings []string `json:"strings,omitempty"`
 	// Pair holds the value of the "pair" field.
@@ -152,6 +154,8 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullScanner{S: new(schema.Pair)}
 		case fieldtype.FieldStringScanner:
 			values[i] = &sql.NullScanner{S: new(schema.StringScanner)}
+		case fieldtype.FieldNillableUUID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = new([]byte)
 		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
@@ -515,6 +519,13 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value != nil {
 				ft.UUID = *value
 			}
+		case fieldtype.FieldNillableUUID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field nillable_uuid", values[i])
+			} else if value.Valid {
+				ft.NillableUUID = new(uuid.UUID)
+				*ft.NillableUUID = *value.S.(*uuid.UUID)
+			}
 		case fieldtype.FieldStrings:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field strings", values[i])
@@ -706,6 +717,10 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
+	if v := ft.NillableUUID; v != nil {
+		builder.WriteString(", nillable_uuid=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", strings=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Strings))
 	builder.WriteString(", pair=")

@@ -125,7 +125,7 @@ func Enum(name string) *enumBuilder {
 //
 func UUID(name string, typ driver.Valuer) *uuidBuilder {
 	rt := reflect.TypeOf(typ)
-	return &uuidBuilder{&Descriptor{
+	b := &uuidBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{
 			Type:     TypeUUID,
@@ -134,6 +134,8 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 			PkgPath:  indirect(rt).PkgPath(),
 		},
 	}}
+	b.desc.goType(typ, valueScannerType)
+	return b
 }
 
 // Other represents a field that is not a good fit for any of the standard field types.

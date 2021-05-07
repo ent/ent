@@ -89,15 +89,15 @@ func init() {
 	// fieldtype.DefaultIP holds the default value on creation for the ip field.
 	fieldtype.DefaultIP = fieldtypeDescIP.Default.(func() net.IP)
 	// fieldtypeDescPair is the schema descriptor for pair field.
-	fieldtypeDescPair := fieldtypeFields[52].Descriptor()
+	fieldtypeDescPair := fieldtypeFields[53].Descriptor()
 	// fieldtype.DefaultPair holds the default value on creation for the pair field.
 	fieldtype.DefaultPair = fieldtypeDescPair.Default.(func() schema.Pair)
 	// fieldtypeDescVstring is the schema descriptor for vstring field.
-	fieldtypeDescVstring := fieldtypeFields[54].Descriptor()
+	fieldtypeDescVstring := fieldtypeFields[55].Descriptor()
 	// fieldtype.DefaultVstring holds the default value on creation for the vstring field.
 	fieldtype.DefaultVstring = fieldtypeDescVstring.Default.(func() schema.VString)
 	// fieldtypeDescTriple is the schema descriptor for triple field.
-	fieldtypeDescTriple := fieldtypeFields[55].Descriptor()
+	fieldtypeDescTriple := fieldtypeFields[56].Descriptor()
 	// fieldtype.DefaultTriple holds the default value on creation for the triple field.
 	fieldtype.DefaultTriple = fieldtypeDescTriple.Default.(func() schema.Triple)
 	fileFields := schema.File{}.Fields()

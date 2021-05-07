@@ -625,6 +625,12 @@ func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	return ftc
 }
 
+// SetNillableUUID sets the "nillable_uuid" field.
+func (ftc *FieldTypeCreate) SetNillableUUID(u uuid.UUID) *FieldTypeCreate {
+	ftc.mutation.SetNillableUUID(u)
+	return ftc
+}
+
 // SetStrings sets the "strings" field.
 func (ftc *FieldTypeCreate) SetStrings(s []string) *FieldTypeCreate {
 	ftc.mutation.SetStrings(s)
@@ -1000,6 +1006,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
+	}
+	if value, ok := ftc.mutation.NillableUUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNillableUUID, value)
 	}
 	if value, ok := ftc.mutation.Strings(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStrings, value)
