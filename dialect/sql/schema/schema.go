@@ -263,8 +263,13 @@ func (c *Column) ScanDefault(value string) error {
 		c.Default = v.String
 	case c.Type == field.TypeBytes:
 		c.Default = []byte(value)
+	case c.Type == field.TypeUUID:
+		// skip function
+		if !strings.Contains(value, "()") {
+			c.Default = value
+		}
 	default:
-		return fmt.Errorf("unsupported default type: %v", c.Type)
+		return fmt.Errorf("unsupported default type: %v default to %q", c.Type, value)
 	}
 	return nil
 }
