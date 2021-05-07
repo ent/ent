@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/task"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -157,6 +158,8 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(schema.Pair{K: []byte("K1"), V: []byte("V1")}, ft.Pair)
 	require.Equal(&schema.Pair{K: []byte("K1"), V: []byte("V1")}, ft.NilPair)
 	require.EqualValues([]string{"qux"}, ft.StringArray)
+	require.Nil(ft.NillableUUID)
+	require.Equal(uuid.UUID{}, ft.UUID)
 
 	exists, err := client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour * 2)).Exist(ctx)
 	require.NoError(err)

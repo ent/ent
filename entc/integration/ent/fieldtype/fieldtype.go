@@ -123,6 +123,8 @@ const (
 	FieldRole = "role"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
+	// FieldNillableUUID holds the string denoting the nillable_uuid field in the database.
+	FieldNillableUUID = "nillable_uuid"
 	// FieldStrings holds the string denoting the strings field in the database.
 	FieldStrings = "strings"
 	// FieldPair holds the string denoting the pair field in the database.
@@ -191,6 +193,7 @@ var Columns = []string{
 	FieldNullFloat,
 	FieldRole,
 	FieldUUID,
+	FieldNillableUUID,
 	FieldStrings,
 	FieldPair,
 	FieldNilPair,

@@ -624,6 +624,12 @@ func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	return ftc
 }
 
+// SetNillableUUID sets the "nillable_uuid" field.
+func (ftc *FieldTypeCreate) SetNillableUUID(u uuid.UUID) *FieldTypeCreate {
+	ftc.mutation.SetNillableUUID(u)
+	return ftc
+}
+
 // SetStrings sets the "strings" field.
 func (ftc *FieldTypeCreate) SetStrings(s []string) *FieldTypeCreate {
 	ftc.mutation.SetStrings(s)
@@ -1260,6 +1266,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldUUID,
 		})
 		_node.UUID = value
+	}
+	if value, ok := ftc.mutation.NillableUUID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: fieldtype.FieldNillableUUID,
+		})
+		_node.NillableUUID = &value
 	}
 	if value, ok := ftc.mutation.Strings(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

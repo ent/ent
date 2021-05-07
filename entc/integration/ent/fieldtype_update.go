@@ -1106,6 +1106,18 @@ func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetNillableUUID sets the "nillable_uuid" field.
+func (ftu *FieldTypeUpdate) SetNillableUUID(u uuid.UUID) *FieldTypeUpdate {
+	ftu.mutation.SetNillableUUID(u)
+	return ftu
+}
+
+// ClearNillableUUID clears the value of the "nillable_uuid" field.
+func (ftu *FieldTypeUpdate) ClearNillableUUID() *FieldTypeUpdate {
+	ftu.mutation.ClearNillableUUID()
+	return ftu
+}
+
 // SetStrings sets the "strings" field.
 func (ftu *FieldTypeUpdate) SetStrings(s []string) *FieldTypeUpdate {
 	ftu.mutation.SetStrings(s)
@@ -2116,6 +2128,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Column: fieldtype.FieldUUID,
+		})
+	}
+	if value, ok := ftu.mutation.NillableUUID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: fieldtype.FieldNillableUUID,
+		})
+	}
+	if ftu.mutation.NillableUUIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Column: fieldtype.FieldNillableUUID,
 		})
 	}
 	if value, ok := ftu.mutation.Strings(); ok {
@@ -3254,6 +3279,18 @@ func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetNillableUUID sets the "nillable_uuid" field.
+func (ftuo *FieldTypeUpdateOne) SetNillableUUID(u uuid.UUID) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNillableUUID(u)
+	return ftuo
+}
+
+// ClearNillableUUID clears the value of the "nillable_uuid" field.
+func (ftuo *FieldTypeUpdateOne) ClearNillableUUID() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNillableUUID()
+	return ftuo
+}
+
 // SetStrings sets the "strings" field.
 func (ftuo *FieldTypeUpdateOne) SetStrings(s []string) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStrings(s)
@@ -4288,6 +4325,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Column: fieldtype.FieldUUID,
+		})
+	}
+	if value, ok := ftuo.mutation.NillableUUID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: fieldtype.FieldNillableUUID,
+		})
+	}
+	if ftuo.mutation.NillableUUIDCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Column: fieldtype.FieldNillableUUID,
 		})
 	}
 	if value, ok := ftuo.mutation.Strings(); ok {
