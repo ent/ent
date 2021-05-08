@@ -156,7 +156,8 @@ SELECT i.relname AS index_name,
        a.attname AS column_name,
        idx.indisprimary AS primary,
        idx.indisunique AS unique,
-       array_position(idx.indkey, a.attnum) as seq_in_index
+       array_position(idx.indkey, a.attnum) as seq_in_index,
+       pg_get_expr(idx.indpred, idx.indrelid) as where_clause
 FROM pg_class t,
      pg_class i,
      pg_index idx,
@@ -197,8 +198,9 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 			seqindex        int
 			name, column    string
 			unique, primary bool
+			whereClause     sql.NullString
 		)
-		if err := rows.Scan(&name, &column, &primary, &unique, &seqindex); err != nil {
+		if err := rows.Scan(&name, &column, &primary, &unique, &seqindex, &whereClause); err != nil {
 			return nil, fmt.Errorf("scanning index description: %w", err)
 		}
 		// If the index is prefixed with the table, it may was added by
@@ -208,7 +210,13 @@ func (d *Postgres) indexes(ctx context.Context, tx dialect.Tx, table string) (In
 		short := strings.TrimPrefix(name, table+"_")
 		idx, ok := names[short]
 		if !ok {
-			idx = &Index{Name: short, Unique: unique, primary: primary, realname: name}
+			idx = &Index{
+				Name:        short,
+				Unique:      unique,
+				primary:     primary,
+				realname:    name,
+				WhereClause: whereClause.String,
+			}
 			idxs = append(idxs, idx)
 			names[short] = idx
 		}
