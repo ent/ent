@@ -94,6 +94,17 @@ type Annotation struct {
 	//	}
 	//
 	Check string `json:"check,omitempty"`
+
+	// WhereClause specifies an expression to use when working with partial indexes.
+	//
+	// For example, in order to restrict an index to non-soft-deleted rows, pass
+	// the following annotation:
+	//
+	//	entsql.Annotation{
+	//		WhereClause: "deleted_at IS NOT NULL",
+	//	}
+	//
+	WhereClause string `json:"where_clause,omitempty"`
 }
 
 // Name describes the annotation name.
@@ -137,6 +148,9 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if s := ant.Check; s != "" {
 		a.Check = s
+	}
+	if s := ant.WhereClause; s != "" {
+		a.WhereClause = s
 	}
 	return a
 }
