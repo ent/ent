@@ -236,6 +236,11 @@ func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Index
 			return nil, err
 		}
 		idx[i].columns = columns
+		whereClause, err := d.indexWhereClause(ctx, tx, idx[i].Name)
+		if err != nil {
+			return nil, err
+		}
+		idx[i].WhereClause = whereClause
 		// Normalize implicit index names to ent naming convention. See:
 		// https://github.com/sqlite/sqlite/blob/e937df8/src/build.c#L3583
 		if len(columns) == 1 && strings.HasPrefix(idx[i].Name, "sqlite_autoindex_"+name) {
@@ -243,6 +248,35 @@ func (d *SQLite) indexes(ctx context.Context, tx dialect.Tx, name string) (Index
 		}
 	}
 	return idx, nil
+}
+
+// indexWhereClause returns the where clause used with the given index if any.
+func (d *SQLite) indexWhereClause(ctx context.Context, tx dialect.Tx, name string) (string, error) {
+	rows := &sql.Rows{}
+	query, args := sql.Select("sql").
+		From(sql.Table("sqlite_master").Unquote()).
+		Where(sql.EQ("name", name)).
+		Query()
+	if err := tx.Query(ctx, query, args, rows); err != nil {
+		return "", fmt.Errorf("reading index '%s' where clause %w", name, err)
+	}
+	defer rows.Close()
+	var createIndexNullableExpr sql.NullString
+	if err := sql.ScanOne(rows, &createIndexNullableExpr); err != nil {
+		return "", err
+	}
+	createIndexExpr := createIndexNullableExpr.String
+	whereClauseIndex := strings.Index(strings.ToLower(createIndexExpr), "where")
+	// There's no where clause for this index.
+	if whereClauseIndex < 0 {
+		return "", nil
+	}
+	// If there's nothing after the WHERE keyword + space character, that's an error.
+	if whereClauseIndex+6 >= len(createIndexExpr) {
+		return "", fmt.Errorf("index '%s' has a where clause without an expression: %s", name, createIndexExpr)
+	}
+	whereClause := createIndexExpr[whereClauseIndex+6:]
+	return whereClause, nil
 }
 
 // indexColumns loads index columns from index info.
