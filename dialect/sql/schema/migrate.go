@@ -9,7 +9,9 @@ import (
 	"crypto/md5"
 	"fmt"
 	"math"
+	"regexp"
 	"sort"
+	"strings"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -22,6 +24,11 @@ const (
 	// MaxTypes defines the max number of types can be created when
 	// defining universal ids. The left 16-bits are reserved.
 	MaxTypes = math.MaxUint16
+)
+
+var (
+	// whiteSpaceRegex matches all the contiguous strings of UTF-8 white spaces.
+	whiteSpaceRegex = regexp.MustCompile(`\s+`)
 )
 
 // MigrateOption allows for managing schema configuration using functional options.
@@ -381,6 +388,29 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 		switch idx2, ok := curr.index(idx1.Name); {
 		case !ok:
 			change.index.add.append(idx1)
+		// Changing index WHERE clause require drop and create.
+		case idx1.WhereClause != idx2.WhereClause:
+			// If the dialect is postgres, the where clause retrieved from DB is normalized because it is
+			// reconstructed from a "compiled" form (and will be wrapped into parenthesis), like this:
+			//     (delete_at IS NULL)
+			// To make this output comparable to what an user could write, we need to:
+			//   - Trim the user input (from idx1).
+			//   - Replace multiple sequential white space with a single space on it.
+			//   - Lower the result & the postgres out.
+			//   - And finally add wrapping parenthesis if not present.
+			if m.Dialect() == dialect.Postgres {
+				idx1WhereClause := strings.ToLower(
+					whiteSpaceRegex.ReplaceAllString(
+						strings.TrimSpace(idx1.WhereClause),
+						" "))
+				idx2WhereClause := strings.ToLower(idx2.WhereClause)
+				// Trying both cases here spares us the whole SQL parsing to determine if we should add
+				// some parenthesis before comparing.
+				if idx1WhereClause == idx2WhereClause || "("+idx1WhereClause+")" == idx2WhereClause {
+					continue
+				}
+			}
+			fallthrough
 		// Changing index cardinality require drop and create.
 		case idx1.Unique != idx2.Unique:
 			change.index.drop.append(idx2)
