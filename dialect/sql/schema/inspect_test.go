@@ -156,8 +156,8 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("uuid", "uuid", "YES", "NULL", "uuid"))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "users"))).
 						WithArgs("public").
-						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-							AddRow("users_pkey", "id", "t", "t", 0))
+						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+							AddRow("users_pkey", "id", "t", "t", 0, nil))
 					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "pets").
 						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
@@ -166,8 +166,8 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("user_pets", "bigint", "YES", "NULL", "int8"))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "pets"))).
 						WithArgs("public").
-						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-							AddRow("pets_pkey", "id", "t", "t", 0))
+						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+							AddRow("pets_pkey", "id", "t", "t", 0, nil))
 					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "groups").
 						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
@@ -175,8 +175,8 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("name", "character", "NO", "NULL", "bpchar"))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "groups"))).
 						WithArgs("public").
-						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-							AddRow("groups_pkey", "id", "t", "t", 0))
+						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+							AddRow("groups_pkey", "id", "t", "t", 0, nil))
 					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "user_groups").
 						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
@@ -184,7 +184,7 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("group_id", "bigint", "NO", "NULL", "int8"))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "user_groups"))).
 						WithArgs("public").
-						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}))
+						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}))
 					mock.ExpectQuery(escape(fmt.Sprintf(fkQuery, "users"))).
 						WillReturnRows(sqlmock.NewRows([]string{"table_schema", "constraint_name", "table_name", "column_name", "foreign_table_schema", "foreign_table_name", "foreign_column_name"}))
 					mock.ExpectQuery(escape(fmt.Sprintf(fkQuery, "pets"))).

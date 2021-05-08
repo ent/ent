@@ -197,8 +197,8 @@ func TestPostgres_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
 						AddRow("id", "bigint", "NO", "nextval('users_colname_seq'::regclass)", "int4"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectCommit()
 			},
 		},
@@ -225,8 +225,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "nextval('users_colname_seq'::regclass)", "NULL").
 						AddRow("custom", "USER-DEFINED", "NO", "NULL", "customtype"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectCommit()
 			},
 		},
@@ -274,8 +274,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("macaddr8", "macaddr8", "YES", "NULL", "macaddr8").
 						AddRow("strings", "ARRAY", "YES", "NULL", "_text"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" bigint NOT NULL, ALTER COLUMN "updated_at" TYPE timestamp with time zone, ALTER COLUMN "updated_at" DROP NOT NULL, ALTER COLUMN "deleted_at" TYPE timestamp with time zone, ALTER COLUMN "deleted_at" DROP NOT NULL`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -307,8 +307,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("name", "character", "YES", "NULL", "bpchar").
 						AddRow("doc", "jsonb", "YES", "NULL", "jsonb"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" bigint NOT NULL DEFAULT 10`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -341,8 +341,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("name", "character", "YES", "NULL", "bpchar").
 						AddRow("doc", "jsonb", "YES", "NULL", "jsonb"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "blob" bytea NOT NULL, ADD COLUMN "longblob" bytea NOT NULL`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -372,8 +372,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("name", "character", "YES", "NULL", "bpchar"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" double precision NOT NULL DEFAULT 10.1`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -403,8 +403,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("name", "character", "YES", "NULL", "bpchar"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" boolean NOT NULL DEFAULT true`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -434,8 +434,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("name", "character", "YES", "NULL", "bpchar"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "nick" varchar NOT NULL DEFAULT 'unknown'`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -464,8 +464,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("name", "character", "YES", "NULL", "bpchar"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" DROP COLUMN "name"`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -494,8 +494,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("name", "character", "NO", "NULL", "bpchar"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" ALTER COLUMN "name" TYPE varchar, ALTER COLUMN "name" DROP NOT NULL`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -524,8 +524,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("age", "bigint", "NO", "NULL", "int8"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`CREATE UNIQUE INDEX "users_age" ON "users"("age")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
@@ -554,9 +554,9 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("age", "bigint", "NO", "NULL", "int8"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0).
-						AddRow("users_age_key", "age", "f", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil).
+						AddRow("users_age_key", "age", "f", "t", 0, nil))
 				mock.ExpectCommit()
 			},
 		},
@@ -584,9 +584,9 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("age", "bigint", "NO", "NULL", "int8"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0).
-						AddRow("users_age_key", "age", "f", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil).
+						AddRow("users_age_key", "age", "f", "t", 0, nil))
 				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM "information_schema"."table_constraints" WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
 					WithArgs("UNIQUE", "users_age_key").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(1))
@@ -639,9 +639,9 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("age", "bigint", "NO", "NULL", "int8").
 						AddRow("score", "bigint", "NO", "NULL", "int8"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0).
-						AddRow("user_score", "score", "f", "f", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil).
+						AddRow("user_score", "score", "f", "f", 0, nil))
 				mock.ExpectQuery(escape(`SELECT COUNT(*) FROM "information_schema"."table_constraints" WHERE "table_schema" = CURRENT_SCHEMA() AND "constraint_type" = $1 AND "constraint_name" = $2`)).
 					WithArgs("UNIQUE", "user_score").
 					WillReturnRows(sqlmock.NewRows([]string{"count"}).
@@ -659,9 +659,9 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "NO", "NULL", "int8").
 						AddRow("score", "bigint", "NO", "NULL", "int8"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "equipment"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0).
-						AddRow("equipment_score", "score", "f", "f", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil).
+						AddRow("equipment_score", "score", "f", "f", 0, nil))
 				mock.ExpectCommit()
 			},
 		},
@@ -700,8 +700,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("id", "bigint", "YES", "NULL", "int8").
 						AddRow("name", "character", "YES", "NULL", "bpchar"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "spouse_id" bigint NULL`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.fkExists("user_spouse____________________390ed76f91d3c57cd3516e7690f621dc", false)
@@ -765,8 +765,8 @@ func TestPostgres_Create(t *testing.T) {
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name"}).
 						AddRow("id", "bigint", "YES", "NULL", "int8"))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
-					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
-						AddRow("users_pkey", "id", "t", "t", 0))
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index", "where_clause"}).
+						AddRow("users_pkey", "id", "t", "t", 0, nil))
 				// query groups table.
 				mock.tableExists("groups", false)
 				mock.ExpectExec(escape(`CREATE TABLE IF NOT EXISTS "groups"("id" bigint GENERATED BY DEFAULT AS IDENTITY NOT NULL, PRIMARY KEY("id"))`)).
