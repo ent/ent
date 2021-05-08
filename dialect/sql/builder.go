@@ -512,10 +512,11 @@ func (r *ReferenceBuilder) Query() (string, []interface{}) {
 // IndexBuilder is a builder for `CREATE INDEX` statement.
 type IndexBuilder struct {
 	Builder
-	name    string
-	unique  bool
-	table   string
-	columns []string
+	name        string
+	unique      bool
+	table       string
+	columns     []string
+	whereClause string
 }
 
 // CreateIndex creates a builder for the `CREATE INDEX` statement.
@@ -560,6 +561,13 @@ func (i *IndexBuilder) Columns(columns ...string) *IndexBuilder {
 	return i
 }
 
+// WhereClause defines the SQL expression to be used when creating a partial index.
+// Please note that this is currently only supported by Postgres and SQLite.
+func (i *IndexBuilder) WhereClause(whereClause string) *IndexBuilder {
+	i.whereClause = whereClause
+	return i
+}
+
 // Query returns query representation of a reference clause.
 func (i *IndexBuilder) Query() (string, []interface{}) {
 	i.WriteString("CREATE ")
@@ -572,6 +580,10 @@ func (i *IndexBuilder) Query() (string, []interface{}) {
 	i.Ident(i.table).Nested(func(b *Builder) {
 		b.IdentComma(i.columns...)
 	})
+	if i.whereClause != "" && (i.dialect == dialect.Postgres || i.dialect == dialect.SQLite) {
+		i.WriteString(" WHERE ")
+		i.WriteString(i.whereClause)
+	}
 	return i.String(), nil
 }
 

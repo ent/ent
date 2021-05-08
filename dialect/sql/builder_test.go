@@ -1310,6 +1310,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE INDEX "name_index" ON "users"("name")`,
 		},
 		{
+			input: Dialect(dialect.Postgres).
+				CreateIndex("name_index").
+				Table("users").
+				Column("name").
+				WhereClause("deleted_at IS NOT NULL"),
+			wantQuery: `CREATE INDEX "name_index" ON "users"("name") WHERE deleted_at IS NOT NULL`,
+		},
+		{
 			input:     CreateIndex("unique_name").Unique().Table("users").Columns("first", "last"),
 			wantQuery: "CREATE UNIQUE INDEX `unique_name` ON `users`(`first`, `last`)",
 		},
