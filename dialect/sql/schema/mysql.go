@@ -281,6 +281,8 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
 	if c.Increment {
 		b.Attr("AUTO_INCREMENT")
 	}
+
+	c.collation(b)
 	c.nullable(b)
 	c.defaultValue(b)
 	if c.Type == field.TypeJSON {

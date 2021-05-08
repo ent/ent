@@ -1155,6 +1155,11 @@ func (f Field) Column() *schema.Column {
 	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
 		c.Default = strconv.Quote(ant.Default)
 	}
+	// Override the collation defined in the
+	// schema if it was provided by an annotation.
+	if ant := f.EntSQL(); ant != nil && ant.Collation != "" {
+		c.Collation = strconv.Quote(ant.Collation)
+	}
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}

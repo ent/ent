@@ -39,6 +39,7 @@ var (
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
 				{{- if not (isNil $c.Default) }} Default: {{ $c.Default }},{{ end }}
+				{{- if ne (len $c.Collation) 0 }} Collation: {{ $c.Collation }},{{ end }}
 				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k, $v := . }}"{{ $k }}": "{{ $v }}",{{ end }}}{{ end }}},
 			{{- end }}
 		}
