@@ -407,12 +407,13 @@ func (r ReferenceOption) ConstName() string {
 
 // Index definition for table index.
 type Index struct {
-	Name     string    // index name.
-	Unique   bool      // uniqueness.
-	Columns  []*Column // actual table columns.
-	columns  []string  // columns loaded from query scan.
-	primary  bool      // primary key index.
-	realname string    // real name in the database (Postgres only).
+	Name        string    // index name.
+	Unique      bool      // uniqueness.
+	Columns     []*Column // actual table columns.
+	columns     []string  // columns loaded from query scan.
+	primary     bool      // primary key index.
+	realname    string    // real name in the database (Postgres only).
+	WhereClause string    // partial index condition (Postgres and SQLite only).
 }
 
 // Builder returns the query builder for index creation. The DSL is identical in all dialects.
