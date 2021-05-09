@@ -335,6 +335,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "shanna",
+      "name": "Shane Hanna",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28489?v=4",
+      "profile": "https://github.com/shanna",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
