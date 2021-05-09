@@ -344,6 +344,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "mahmud2011",
+      "name": "Mahmudul Haque",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5278142?v=4",
+      "profile": "https://www.linkedin.com/in/mahmud2011",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

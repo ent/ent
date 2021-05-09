@@ -57,6 +57,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="http://duglaser.dev"><img src="https://avatars.githubusercontent.com/u/50506482?v=4?s=100" width="100px;" alt=""/><br /><sub><b>DuGlaser</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=DuGlaser" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/shanna"><img src="https://avatars.githubusercontent.com/u/28489?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Shane Hanna</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=shanna" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/mahmud2011"><img src="https://avatars.githubusercontent.com/u/5278142?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mahmudul Haque</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=mahmud2011" title="Code">💻</a></td>
   </tr>
 </table>
 
