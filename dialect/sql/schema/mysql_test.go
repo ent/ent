@@ -79,6 +79,40 @@ func TestMySQL_Create(t *testing.T) {
 			},
 		},
 		{
+			name: "create new table with specific field collation",
+			tables: []*Table{
+				{
+					Name: "users",
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "address", Type: field.TypeString, Nullable: true, Collation: "utf8_unicode_ci"},
+						{Name: "age", Type: field.TypeInt},
+						{Name: "doc", Type: field.TypeJSON, Nullable: true},
+						{Name: "enums", Type: field.TypeEnum, Enums: []string{"a", "b"}},
+						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+						{Name: "datetime", Type: field.TypeTime, SchemaType: map[string]string{dialect.MySQL: "datetime"}, Default: "CURRENT_TIMESTAMP"},
+						{Name: "decimal", Type: field.TypeFloat32, SchemaType: map[string]string{dialect.MySQL: "decimal(6,2)"}},
+					},
+					Annotation: &entsql.Annotation{
+						Charset:   "utf8",
+						Collation: "utf8_general_ci",
+						Options:   "ENGINE = INNODB",
+					},
+				},
+			},
+			before: func(mock mysqlMock) {
+				mock.start("5.7.33")
+				mock.tableExists("users", false)
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `address` varchar(255) COLLATE utf8_unicode_ci NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `decimal` decimal(6,2) NOT NULL, PRIMARY KEY(`id`)) CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE = INNODB")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
 			name: "create new table 5.6",
 			tables: []*Table{
 				{
