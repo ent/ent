@@ -284,10 +284,11 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
 	if c.Increment {
 		b.Attr("AUTO_INCREMENT")
 	}
-
-	c.collation(b)
 	c.nullable(b)
 	c.defaultValue(b)
+	if c.Collation != "" {
+		b.Attr("COLLATE " + c.Collation)
+	}
 	if c.Type == field.TypeJSON {
 		// Manually add a `CHECK` clause for older versions of MariaDB for validating the
 		// JSON documents. This constraint is automatically included from version 10.4.3.

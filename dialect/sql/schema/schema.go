@@ -308,13 +308,6 @@ func (c Column) supportDefault() bool {
 	}
 }
 
-// collation adds `COLLATE collation_name`.
-func (c *Column) collation(b *sql.ColumnBuilder) {
-	if c.Collation != "" {
-		b.Attr("COLLATE " + c.Collation)
-	}
-}
-
 // unique adds the `UNIQUE` attribute if the column is a unique type.
 // it is exist in a different function to share the common declaration
 // between the two dialects.
