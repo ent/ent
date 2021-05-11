@@ -6,6 +6,7 @@ package sql
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"strconv"
 	"strings"
@@ -1210,6 +1211,29 @@ func TestBuilder(t *testing.T) {
 			}(),
 			wantQuery: `SELECT u.id, g.name FROM users u JOIN (SELECT * FROM groups g WHERE g.user_id = :1) g ON u.id = g.user_id`,
 			wantArgs:  []interface{}{10},
+    },  
+    {
+			input: func() Querier {
+				t1 := Table("users")
+				t2 := Table("groups")
+				t3 := Table("user_groups")
+				return Select(t1.C("*")).From(t1).
+					Join(t3).On(t1.C("id"), t3.C("user_id")).
+					Join(t2).On(t2.C("id"), t3.C("group_id"))
+			}(),
+			wantQuery: "SELECT `users`.* FROM `users` JOIN `user_groups` AS `t1` ON `users`.`id` = `t1`.`user_id` JOIN `groups` AS `t2` ON `t2`.`id` = `t1`.`group_id`",
+		},
+		{
+			input: func() Querier {
+				d := Dialect(dialect.Postgres)
+				t1 := d.Table("users")
+				t2 := d.Table("groups")
+				t3 := d.Table("user_groups")
+				return d.Select(t1.C("*")).From(t1).
+					Join(t3).On(t1.C("id"), t3.C("user_id")).
+					Join(t2).On(t2.C("id"), t3.C("group_id"))
+			}(),
+			wantQuery: `SELECT "users".* FROM "users" JOIN "user_groups" AS "t1" ON "users"."id" = "t1"."user_id" JOIN "groups" AS "t2" ON "t2"."id" = "t1"."group_id"`,
 		},
 		{
 			input: func() Querier {
@@ -1544,7 +1568,7 @@ func TestBuilder(t *testing.T) {
 				t3 := Select().Count().From(t1).Join(t1).On(t2.C("id"), t1.C("blocked_id"))
 				return t3.Count(Distinct(t3.Columns("id", "name")...))
 			}(),
-			wantQuery: "SELECT COUNT(DISTINCT `t0`.`id`, `t0`.`name`) FROM `users` AS `t0` JOIN `users` AS `t0` ON `groups`.`id` = `t0`.`blocked_id`",
+			wantQuery: "SELECT COUNT(DISTINCT `t1`.`id`, `t1`.`name`) FROM `users` AS `t1` JOIN `users` AS `t1` ON `groups`.`id` = `t1`.`blocked_id`",
 		},
 		{
 			input: func() Querier {
@@ -1554,7 +1578,7 @@ func TestBuilder(t *testing.T) {
 				t3 := d.Select().Count().From(t1).Join(t1).On(t2.C("id"), t1.C("blocked_id"))
 				return t3.Count(Distinct(t3.Columns("id", "name")...))
 			}(),
-			wantQuery: `SELECT COUNT(DISTINCT "t0"."id", "t0"."name") FROM "users" AS "t0" JOIN "users" AS "t0" ON "groups"."id" = "t0"."blocked_id"`,
+			wantQuery: `SELECT COUNT(DISTINCT "t1"."id", "t1"."name") FROM "users" AS "t1" JOIN "users" AS "t1" ON "groups"."id" = "t1"."blocked_id"`,
 		},
 		{
 			input:     Select(Sum("age"), Min("age")).From(Table("users")),
@@ -1807,7 +1831,7 @@ func TestBuilder(t *testing.T) {
 					Join(t4).
 					On(t1.C("id"), t4.C("id")).Limit(1)
 			}(),
-			wantQuery: `SELECT * FROM "groups" JOIN (SELECT "user_groups"."id" FROM "user_groups" JOIN "users" AS "t0" ON "user_groups"."id" = "t0"."id2" WHERE "t0"."id" = $1) AS "t1" ON "groups"."id" = "t1"."id" LIMIT 1`,
+			wantQuery: `SELECT * FROM "groups" JOIN (SELECT "user_groups"."id" FROM "user_groups" JOIN "users" AS "t1" ON "user_groups"."id" = "t1"."id2" WHERE "t1"."id" = $1) AS "t1" ON "groups"."id" = "t1"."id" LIMIT 1`,
 			wantArgs:  []interface{}{"baz"},
 		},
 		{
@@ -1979,7 +2003,7 @@ func TestBuilder(t *testing.T) {
 					})).
 					Where(EQ(t2.C("name"), "pedro"))
 			}(),
-			wantQuery: "SELECT * FROM `s1`.`users` JOIN `s2`.`pets` AS `t0` ON `s1`.`users`.`id` = `t0`.`owner_id` WHERE `t0`.`name` = ?",
+			wantQuery: "SELECT * FROM `s1`.`users` JOIN `s2`.`pets` AS `t1` ON `s1`.`users`.`id` = `t1`.`owner_id` WHERE `t1`.`name` = ?",
 			wantArgs:  []interface{}{"pedro"},
 		},
 		{
@@ -1994,7 +2018,7 @@ func TestBuilder(t *testing.T) {
 				sel.SetDialect(dialect.SQLite)
 				return sel
 			}(),
-			wantQuery: "SELECT * FROM `users` JOIN `pets` AS `t0` ON `users`.`id` = `t0`.`owner_id` WHERE `t0`.`name` = ?",
+			wantQuery: "SELECT * FROM `users` JOIN `pets` AS `t1` ON `users`.`id` = `t1`.`owner_id` WHERE `t1`.`name` = ?",
 			wantArgs:  []interface{}{"pedro"},
 		},
 		{
@@ -2091,6 +2115,11 @@ func TestBuilder_Err(t *testing.T) {
 	require.EqualError(t, b.Err(), "invalid")
 	b.AddError(fmt.Errorf("unexpected"))
 	require.EqualError(t, b.Err(), "invalid; unexpected")
+	b.Where(P(func(builder *Builder) {
+		builder.AddError(fmt.Errorf("inner"))
+	}))
+	_, _ = b.Query()
+	require.EqualError(t, b.Err(), "invalid; unexpected; inner")
 }
 
 func TestSelector_OrderByExpr(t *testing.T) {
@@ -2122,9 +2151,15 @@ type point struct {
 	*testing.T
 }
 
+// FormatParam implements the sql.ParamFormatter interface.
 func (p point) FormatParam(placeholder string, info *StmtInfo) string {
 	require.Equal(p.T, dialect.MySQL, info.Dialect)
 	return "ST_GeomFromWKB(" + placeholder + ")"
+}
+
+// Value implements the driver.Valuer interface.
+func (p point) Value() (driver.Value, error) {
+	return p.xy, nil
 }
 
 func TestParamFormatter(t *testing.T) {

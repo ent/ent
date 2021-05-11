@@ -28,11 +28,13 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
+	Car      []ent.Hook
 	Card     []ent.Hook
 	Info     []ent.Hook
 	Metadata []ent.Hook
 	Pet      []ent.Hook
 	Post     []ent.Hook
+	Rental   []ent.Hook
 	User     []ent.Hook
 }
 

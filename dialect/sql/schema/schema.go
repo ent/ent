@@ -176,6 +176,7 @@ type Column struct {
 	Nullable   bool              // null or not null attribute.
 	Default    interface{}       // default value.
 	Enums      []string          // enum values.
+	Collation  string            // collation type (utf8mb4_unicode_ci, utf8mb4_general_ci)
 	typ        string            // row column type (used for Rows.Scan).
 	indexes    Indexes           // linked indexes.
 	foreign    *ForeignKey       // linked foreign-key.
@@ -263,13 +264,18 @@ func (c *Column) ScanDefault(value string) error {
 		c.Default = v.String
 	case c.Type == field.TypeBytes:
 		c.Default = []byte(value)
+	case c.Type == field.TypeUUID:
+		// skip function
+		if !strings.Contains(value, "()") {
+			c.Default = value
+		}
 	default:
-		return fmt.Errorf("unsupported default type: %v", c.Type)
+		return fmt.Errorf("unsupported default type: %v default to %q", c.Type, value)
 	}
 	return nil
 }
 
-// defaultValue adds tge `DEFAULT` attribute the the column.
+// defaultValue adds the `DEFAULT` attribute to the column.
 // Note that, in SQLite if a NOT NULL constraint is specified,
 // then the column must have a default value which not NULL.
 func (c *Column) defaultValue(b *sql.ColumnBuilder) {
@@ -311,7 +317,7 @@ func (c *Column) unique(b *sql.ColumnBuilder) {
 	}
 }
 
-// nullable adds the `NULL`/`NOT NULL` attribute to the column. it is exist in
+// nullable adds the `NULL`/`NOT NULL` attribute to the column if it exists in
 // a different function to share the common declaration between the two dialects.
 func (c *Column) nullable(b *sql.ColumnBuilder) {
 	attr := Null

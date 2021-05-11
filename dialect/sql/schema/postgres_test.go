@@ -58,7 +58,7 @@ func TestPostgres_Create(t *testing.T) {
 					},
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeUUID, Default: "uuid_generate_v4()"},
-						{Name: "name", Type: field.TypeString, Nullable: true},
+						{Name: "name", Type: field.TypeString, Nullable: true, Collation: "he_IL"},
 						{Name: "age", Type: field.TypeInt},
 						{Name: "doc", Type: field.TypeJSON, Nullable: true},
 						{Name: "enums", Type: field.TypeEnum, Enums: []string{"a", "b"}, Default: "a"},
@@ -70,7 +70,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape(`CREATE TABLE IF NOT EXISTS "users"("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" varchar NULL, "age" bigint NOT NULL, "doc" jsonb NULL, "enums" varchar NOT NULL DEFAULT 'a', "price" numeric(5,2) NOT NULL, "strings" text[] NULL, PRIMARY KEY("id"))`)).
+				mock.ExpectExec(escape(`CREATE TABLE IF NOT EXISTS "users"("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" varchar NULL COLLATE "he_IL", "age" bigint NOT NULL, "doc" jsonb NULL, "enums" varchar NOT NULL DEFAULT 'a', "price" numeric(5,2) NOT NULL, "strings" text[] NULL, PRIMARY KEY("id"))`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

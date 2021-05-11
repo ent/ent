@@ -14,6 +14,7 @@ sidebar_label: FAQ
 [How to define a network address field in PostgreSQL?](#how-to-define-a-network-address-field-in-postgresql)  
 [How to customize time fields to type `DATETIME` in MySQL?](#how-to-customize-time-fields-to-type-datetime-in-mysql)  
 [How to use a custom generator of IDs?](#how-to-use-a-custom-generator-of-ids)  
+[How to use a custom XID globally unique ID?](#how-to-use-a-custom-xid-globally-unique-id)  
 [How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)  
 [How to extend the generated models?](#how-to-extend-the-generated-models)  
 [How to extend the generated builders?](#how-to-extend-the-generated-builders)   
@@ -377,6 +378,76 @@ func IDHook() ent.Hook {
 			is.SetID(id)
 			return next.Mutate(ctx, m)
 		})
+	}
+}
+
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Mixin of the User.
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		// Embed the BaseMixin in the user schema.
+		BaseMixin{},
+	}
+}
+```
+
+#### How to use a custom XID globally unique ID?
+
+Package [xid](https://github.com/rs/xid) is a globally unique ID generator library that uses the [Mongo Object ID](https://docs.mongodb.org/manual/reference/object-id/)
+algorithm to generate a 12 byte, 20 character ID with no configuration. The xid package comes with [database/sql](https://golang.org/pkg/database/sql) `sql.Scaner` and
+`driver.Valuer` interfaces required by Ent for serialization already implemented.
+
+To store a XID in any string field use the [GoType](schema-fields.md#go-type) schema configuration:
+
+```go
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/mixin"
+	"github.com/rs/xid"
+)
+
+// BaseMixin to be shared will all different schemas.
+type User struct {
+	mixin.Schema
+}
+
+// Fields of the Mixin.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("id").GoType(xid.ID{}).DefaultFunc(xid.New),
+		// ...
+	}
+}
+```
+
+Or as a reusable Ent [Mixin](schema-mixin.md) across multiple schema: 
+```go
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/mixin"
+	"github.com/rs/xid"
+)
+
+// BaseMixin to be shared will all different schemas.
+type BaseMixin struct {
+	mixin.Schema
+}
+
+// Fields of the Mixin.
+func (BaseMixin) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("id").GoType(xid.ID{}).DefaultFunc(xid.New),
+		// Additional base fields. Timestamps, ...
 	}
 }
 

@@ -7,6 +7,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -359,6 +360,9 @@ func (d *Postgres) addColumn(c *Column) *sql.ColumnBuilder {
 	}
 	c.nullable(b)
 	c.defaultValue(b)
+	if c.Collation != "" {
+		b.Attr("COLLATE " + strconv.Quote(c.Collation))
+	}
 	return b
 }
 
@@ -530,7 +534,6 @@ func arrayType(t string) bool {
 // foreignKeys populates the tables foreign keys using the information_schema tables
 func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Table) error {
 	var tableLookup = make(map[string]*Table)
-	// TODO: include schema
 	for _, t := range tables {
 		tableLookup[t.Name] = t
 	}

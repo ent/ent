@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"github.com/google/uuid"
 )
@@ -69,7 +70,7 @@ func (*Blob) scanValues(columns []string) ([]interface{}, error) {
 		case blob.FieldID, blob.FieldUUID:
 			values[i] = new(uuid.UUID)
 		case blob.ForeignKeys[0]: // blob_parent
-			values[i] = new(uuid.UUID)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Blob", columns[i])
 		}
@@ -98,10 +99,11 @@ func (b *Blob) assignValues(columns []string, values []interface{}) error {
 				b.UUID = *value
 			}
 		case blob.ForeignKeys[0]:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field blob_parent", values[i])
-			} else if value != nil {
-				b.blob_parent = value
+			} else if value.Valid {
+				b.blob_parent = new(uuid.UUID)
+				*b.blob_parent = *value.S.(*uuid.UUID)
 			}
 		}
 	}

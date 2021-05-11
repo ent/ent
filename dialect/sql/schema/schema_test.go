@@ -94,4 +94,10 @@ func TestColumn_ScanDefault(t *testing.T) {
 	require.NoError(t, c1.ScanDefault("false"))
 	require.Equal(t, false, c1.Default)
 	require.Error(t, c1.ScanDefault("foo"))
+
+	c1 = &Column{Type: field.TypeUUID}
+	require.NoError(t, c1.ScanDefault("gen_random_uuid()"))
+	require.Equal(t, nil, c1.Default)
+	require.NoError(t, c1.ScanDefault("00000000-0000-0000-0000-000000000000"))
+	require.Equal(t, "00000000-0000-0000-0000-000000000000", c1.Default)
 }

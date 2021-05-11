@@ -254,9 +254,12 @@ func (d *MySQL) cType(c *Column) (t string) {
 		t = c.scanTypeOr("double")
 	case field.TypeTime:
 		t = c.scanTypeOr("timestamp")
-		// In MySQL, timestamp columns are `NOT NULL` by default, and assigning NULL
-		// assigns the current_timestamp(). We avoid this if not set otherwise.
-		c.Nullable = c.Attr == ""
+		// In MySQL < v8.0.2, the TIMESTAMP column has both `DEFAULT CURRENT_TIMESTAMP` and
+		// `ON UPDATE CURRENT_TIMESTAMP` if neither is specified explicitly. this behavior is
+		// suppressed if the column is defined with a `DEFAULT` clause or with the `NULL` attribute.
+		if compareVersions(d.version, "8.0.2") == -1 && c.Default == nil {
+			c.Nullable = c.Attr == ""
+		}
 	case field.TypeEnum:
 		values := make([]string, len(c.Enums))
 		for i, e := range c.Enums {
@@ -283,6 +286,9 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
 	}
 	c.nullable(b)
 	c.defaultValue(b)
+	if c.Collation != "" {
+		b.Attr("COLLATE " + c.Collation)
+	}
 	if c.Type == field.TypeJSON {
 		// Manually add a `CHECK` clause for older versions of MariaDB for validating the
 		// JSON documents. This constraint is automatically included from version 10.4.3.

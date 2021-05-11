@@ -13,6 +13,19 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent"
 )
 
+// The CarFunc type is an adapter to allow the use of ordinary
+// function as Car mutator.
+type CarFunc func(context.Context, *ent.CarMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CarMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CarMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The CardFunc type is an adapter to allow the use of ordinary
 // function as Card mutator.
 type CardFunc func(context.Context, *ent.CardMutation) (ent.Value, error)
@@ -74,6 +87,19 @@ func (f PostFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	mv, ok := m.(*ent.PostMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PostMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The RentalFunc type is an adapter to allow the use of ordinary
+// function as Rental mutator.
+type RentalFunc func(context.Context, *ent.RentalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RentalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.RentalMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RentalMutation", m)
 	}
 	return f(ctx, mv)
 }

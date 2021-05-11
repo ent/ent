@@ -12,6 +12,18 @@ import (
 )
 
 var (
+	// CarsColumns holds the columns for the "cars" table.
+	CarsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "number", Type: field.TypeString, Nullable: true},
+	}
+	// CarsTable holds the schema information for the "cars" table.
+	CarsTable = &schema.Table{
+		Name:        "cars",
+		Columns:     CarsColumns,
+		PrimaryKey:  []*schema.Column{CarsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -123,6 +135,40 @@ var (
 			},
 		},
 	}
+	// RentalsColumns holds the columns for the "rentals" table.
+	RentalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "car_id", Type: field.TypeInt, Nullable: true},
+		{Name: "user_id", Type: field.TypeInt, Nullable: true},
+	}
+	// RentalsTable holds the schema information for the "rentals" table.
+	RentalsTable = &schema.Table{
+		Name:       "rentals",
+		Columns:    RentalsColumns,
+		PrimaryKey: []*schema.Column{RentalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "rentals_cars_rentals",
+				Columns:    []*schema.Column{RentalsColumns[2]},
+				RefColumns: []*schema.Column{CarsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "rentals_users_rentals",
+				Columns:    []*schema.Column{RentalsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "rental_car_id_user_id",
+				Unique:  true,
+				Columns: []*schema.Column{RentalsColumns[2], RentalsColumns[3]},
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -151,11 +197,13 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CarsTable,
 		CardsTable,
 		InfosTable,
 		MetadataTable,
 		PetsTable,
 		PostsTable,
+		RentalsTable,
 		UsersTable,
 	}
 )
@@ -166,6 +214,8 @@ func init() {
 	MetadataTable.ForeignKeys[0].RefTable = UsersTable
 	PetsTable.ForeignKeys[0].RefTable = UsersTable
 	PostsTable.ForeignKeys[0].RefTable = UsersTable
+	RentalsTable.ForeignKeys[0].RefTable = CarsTable
+	RentalsTable.ForeignKeys[1].RefTable = UsersTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
 	UsersTable.ForeignKeys[1].RefTable = UsersTable
 }

@@ -446,6 +446,13 @@ func UUID(v uuid.UUID) predicate.FieldType {
 	})
 }
 
+// NillableUUID applies equality check predicate on the "nillable_uuid" field. It's identical to NillableUUIDEQ.
+func NillableUUID(v uuid.UUID) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.EQ(v))
+	})
+}
+
 // Pair applies equality check predicate on the "pair" field. It's identical to PairEQ.
 func Pair(v schema.Pair) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -4397,6 +4404,84 @@ func UUIDIsNil() predicate.FieldType {
 func UUIDNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldUUID)
+	})
+}
+
+// NillableUUIDEQ applies the EQ predicate on the "nillable_uuid" field.
+func NillableUUIDEQ(v uuid.UUID) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.EQ(v))
+	})
+}
+
+// NillableUUIDNEQ applies the NEQ predicate on the "nillable_uuid" field.
+func NillableUUIDNEQ(v uuid.UUID) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.NEQ(v))
+	})
+}
+
+// NillableUUIDIn applies the In predicate on the "nillable_uuid" field.
+func NillableUUIDIn(vs ...uuid.UUID) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.Within(v...))
+	})
+}
+
+// NillableUUIDNotIn applies the NotIn predicate on the "nillable_uuid" field.
+func NillableUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.Without(v...))
+	})
+}
+
+// NillableUUIDGT applies the GT predicate on the "nillable_uuid" field.
+func NillableUUIDGT(v uuid.UUID) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.GT(v))
+	})
+}
+
+// NillableUUIDGTE applies the GTE predicate on the "nillable_uuid" field.
+func NillableUUIDGTE(v uuid.UUID) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.GTE(v))
+	})
+}
+
+// NillableUUIDLT applies the LT predicate on the "nillable_uuid" field.
+func NillableUUIDLT(v uuid.UUID) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.LT(v))
+	})
+}
+
+// NillableUUIDLTE applies the LTE predicate on the "nillable_uuid" field.
+func NillableUUIDLTE(v uuid.UUID) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNillableUUID, p.LTE(v))
+	})
+}
+
+// NillableUUIDIsNil applies the IsNil predicate on the "nillable_uuid" field.
+func NillableUUIDIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldNillableUUID)
+	})
+}
+
+// NillableUUIDNotNil applies the NotNil predicate on the "nillable_uuid" field.
+func NillableUUIDNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldNillableUUID)
 	})
 }
 

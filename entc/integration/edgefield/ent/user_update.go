@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/pet"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -169,6 +170,21 @@ func (uu *UserUpdate) AddInfo(i ...*Info) *UserUpdate {
 	return uu.AddInfoIDs(ids...)
 }
 
+// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
+func (uu *UserUpdate) AddRentalIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddRentalIDs(ids...)
+	return uu
+}
+
+// AddRentals adds the "rentals" edges to the Rental entity.
+func (uu *UserUpdate) AddRentals(r ...*Rental) *UserUpdate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.AddRentalIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -259,6 +275,27 @@ func (uu *UserUpdate) RemoveInfo(i ...*Info) *UserUpdate {
 		ids[j] = i[j].ID
 	}
 	return uu.RemoveInfoIDs(ids...)
+}
+
+// ClearRentals clears all "rentals" edges to the Rental entity.
+func (uu *UserUpdate) ClearRentals() *UserUpdate {
+	uu.mutation.ClearRentals()
+	return uu
+}
+
+// RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
+func (uu *UserUpdate) RemoveRentalIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveRentalIDs(ids...)
+	return uu
+}
+
+// RemoveRentals removes "rentals" edges to Rental entities.
+func (uu *UserUpdate) RemoveRentals(r ...*Rental) *UserUpdate {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.RemoveRentalIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -632,6 +669,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.RentalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RentalsTable,
+			Columns: []string{user.RentalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rental.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !uu.mutation.RentalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RentalsTable,
+			Columns: []string{user.RentalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rental.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RentalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RentalsTable,
+			Columns: []string{user.RentalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rental.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -786,6 +877,21 @@ func (uuo *UserUpdateOne) AddInfo(i ...*Info) *UserUpdateOne {
 	return uuo.AddInfoIDs(ids...)
 }
 
+// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
+func (uuo *UserUpdateOne) AddRentalIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddRentalIDs(ids...)
+	return uuo
+}
+
+// AddRentals adds the "rentals" edges to the Rental entity.
+func (uuo *UserUpdateOne) AddRentals(r ...*Rental) *UserUpdateOne {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.AddRentalIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -876,6 +982,27 @@ func (uuo *UserUpdateOne) RemoveInfo(i ...*Info) *UserUpdateOne {
 		ids[j] = i[j].ID
 	}
 	return uuo.RemoveInfoIDs(ids...)
+}
+
+// ClearRentals clears all "rentals" edges to the Rental entity.
+func (uuo *UserUpdateOne) ClearRentals() *UserUpdateOne {
+	uuo.mutation.ClearRentals()
+	return uuo
+}
+
+// RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
+func (uuo *UserUpdateOne) RemoveRentalIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveRentalIDs(ids...)
+	return uuo
+}
+
+// RemoveRentals removes "rentals" edges to Rental entities.
+func (uuo *UserUpdateOne) RemoveRentals(r ...*Rental) *UserUpdateOne {
+	ids := make([]int, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.RemoveRentalIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1265,6 +1392,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: info.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.RentalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RentalsTable,
+			Columns: []string{user.RentalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rental.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !uuo.mutation.RentalsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RentalsTable,
+			Columns: []string{user.RentalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rental.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RentalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RentalsTable,
+			Columns: []string{user.RentalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: rental.FieldID,
 				},
 			},
 		}

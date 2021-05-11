@@ -105,7 +105,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/12751435?v=4",
       "profile": "https://github.com/giautm",
       "contributions": [
-        "code"
+        "code",
+        "review"
       ]
     },
     {
@@ -314,6 +315,43 @@
       "profile": "https://djwong.net",
       "contributions": [
         "bug"
+      ]
+    },
+    {
+      "login": "davebehr1",
+      "name": "AlonDavidBehr",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16716239?v=4",
+      "profile": "https://github.com/davebehr1",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "DuGlaser",
+      "name": "DuGlaser",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50506482?v=4",
+      "profile": "http://duglaser.dev",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "shanna",
+      "name": "Shane Hanna",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28489?v=4",
+      "profile": "https://github.com/shanna",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "mahmud2011",
+      "name": "Mahmudul Haque",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5278142?v=4",
+      "profile": "https://www.linkedin.com/in/mahmud2011",
+      "contributions": [
+        "code"
       ]
     }
   ],

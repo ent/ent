@@ -128,6 +128,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldNullFloat:             {Type: field.TypeFloat64, Column: fieldtype.FieldNullFloat},
 			fieldtype.FieldRole:                  {Type: field.TypeEnum, Column: fieldtype.FieldRole},
 			fieldtype.FieldUUID:                  {Type: field.TypeUUID, Column: fieldtype.FieldUUID},
+			fieldtype.FieldNillableUUID:          {Type: field.TypeUUID, Column: fieldtype.FieldNillableUUID},
 			fieldtype.FieldStrings:               {Type: field.TypeJSON, Column: fieldtype.FieldStrings},
 			fieldtype.FieldPair:                  {Type: field.TypeBytes, Column: fieldtype.FieldPair},
 			fieldtype.FieldNilPair:               {Type: field.TypeBytes, Column: fieldtype.FieldNilPair},
@@ -1076,6 +1077,11 @@ func (f *FieldTypeFilter) WhereRole(p entql.StringP) {
 // WhereUUID applies the entql [16]byte predicate on the uuid field.
 func (f *FieldTypeFilter) WhereUUID(p entql.ValueP) {
 	f.Where(p.Field(fieldtype.FieldUUID))
+}
+
+// WhereNillableUUID applies the entql [16]byte predicate on the nillable_uuid field.
+func (f *FieldTypeFilter) WhereNillableUUID(p entql.ValueP) {
+	f.Where(p.Field(fieldtype.FieldNillableUUID))
 }
 
 // WhereStrings applies the entql json.RawMessage predicate on the strings field.

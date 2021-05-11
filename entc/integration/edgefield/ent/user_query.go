@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/pet"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 	"entgo.io/ent/schema/field"
 )
@@ -41,6 +42,7 @@ type UserQuery struct {
 	withCard     *CardQuery
 	withMetadata *MetadataQuery
 	withInfo     *InfoQuery
+	withRentals  *RentalQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -224,6 +226,28 @@ func (uq *UserQuery) QueryInfo() *InfoQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(info.Table, info.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.InfoTable, user.InfoColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRentals chains the current query on the "rentals" edge.
+func (uq *UserQuery) QueryRentals() *RentalQuery {
+	query := &RentalQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(rental.Table, rental.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RentalsTable, user.RentalsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -419,6 +443,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withCard:     uq.withCard.Clone(),
 		withMetadata: uq.withMetadata.Clone(),
 		withInfo:     uq.withInfo.Clone(),
+		withRentals:  uq.withRentals.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -502,6 +527,17 @@ func (uq *UserQuery) WithInfo(opts ...func(*InfoQuery)) *UserQuery {
 	return uq
 }
 
+// WithRentals tells the query-builder to eager-load the nodes that are connected to
+// the "rentals" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRentals(opts ...func(*RentalQuery)) *UserQuery {
+	query := &RentalQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRentals = query
+	return uq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -567,7 +603,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [8]bool{
 			uq.withPets != nil,
 			uq.withParent != nil,
 			uq.withChildren != nil,
@@ -575,6 +611,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			uq.withCard != nil,
 			uq.withMetadata != nil,
 			uq.withInfo != nil,
+			uq.withRentals != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -769,6 +806,31 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Info = append(node.Edges.Info, n)
+		}
+	}
+
+	if query := uq.withRentals; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Rentals = []*Rental{}
+		}
+		query.Where(predicate.Rental(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.RentalsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.UserID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Rentals = append(node.Edges.Rentals, n)
 		}
 	}
 

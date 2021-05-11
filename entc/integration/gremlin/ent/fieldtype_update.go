@@ -1108,6 +1108,18 @@ func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetNillableUUID sets the "nillable_uuid" field.
+func (ftu *FieldTypeUpdate) SetNillableUUID(u uuid.UUID) *FieldTypeUpdate {
+	ftu.mutation.SetNillableUUID(u)
+	return ftu
+}
+
+// ClearNillableUUID clears the value of the "nillable_uuid" field.
+func (ftu *FieldTypeUpdate) ClearNillableUUID() *FieldTypeUpdate {
+	ftu.mutation.ClearNillableUUID()
+	return ftu
+}
+
 // SetStrings sets the "strings" field.
 func (ftu *FieldTypeUpdate) SetStrings(s []string) *FieldTypeUpdate {
 	ftu.mutation.SetStrings(s)
@@ -1534,6 +1546,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
+	if value, ok := ftu.mutation.NillableUUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNillableUUID, value)
+	}
 	if value, ok := ftu.mutation.Strings(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStrings, value)
 	}
@@ -1681,6 +1696,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.UUIDCleared() {
 		properties = append(properties, fieldtype.FieldUUID)
+	}
+	if ftu.mutation.NillableUUIDCleared() {
+		properties = append(properties, fieldtype.FieldNillableUUID)
 	}
 	if ftu.mutation.StringsCleared() {
 		properties = append(properties, fieldtype.FieldStrings)
@@ -2774,6 +2792,18 @@ func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetNillableUUID sets the "nillable_uuid" field.
+func (ftuo *FieldTypeUpdateOne) SetNillableUUID(u uuid.UUID) *FieldTypeUpdateOne {
+	ftuo.mutation.SetNillableUUID(u)
+	return ftuo
+}
+
+// ClearNillableUUID clears the value of the "nillable_uuid" field.
+func (ftuo *FieldTypeUpdateOne) ClearNillableUUID() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearNillableUUID()
+	return ftuo
+}
+
 // SetStrings sets the "strings" field.
 func (ftuo *FieldTypeUpdateOne) SetStrings(s []string) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStrings(s)
@@ -3212,6 +3242,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
+	if value, ok := ftuo.mutation.NillableUUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldNillableUUID, value)
+	}
 	if value, ok := ftuo.mutation.Strings(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStrings, value)
 	}
@@ -3359,6 +3392,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.UUIDCleared() {
 		properties = append(properties, fieldtype.FieldUUID)
+	}
+	if ftuo.mutation.NillableUUIDCleared() {
+		properties = append(properties, fieldtype.FieldNillableUUID)
 	}
 	if ftuo.mutation.StringsCleared() {
 		properties = append(properties, fieldtype.FieldStrings)

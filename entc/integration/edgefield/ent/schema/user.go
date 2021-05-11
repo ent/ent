@@ -43,5 +43,6 @@ func (User) Edges() []ent.Edge {
 			StorageKey(edge.Column("id")),
 		edge.From("info", Info.Type).
 			Ref("user"),
+		edge.To("rentals", Rental.Type),
 	}
 }

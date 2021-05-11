@@ -29,6 +29,8 @@ const (
 	EdgeMetadata = "metadata"
 	// EdgeInfo holds the string denoting the info edge name in mutations.
 	EdgeInfo = "info"
+	// EdgeRentals holds the string denoting the rentals edge name in mutations.
+	EdgeRentals = "rentals"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// PetsTable is the table the holds the pets relation/edge.
@@ -71,6 +73,13 @@ const (
 	InfoInverseTable = "infos"
 	// InfoColumn is the table column denoting the info relation/edge.
 	InfoColumn = "id"
+	// RentalsTable is the table the holds the rentals relation/edge.
+	RentalsTable = "rentals"
+	// RentalsInverseTable is the table name for the Rental entity.
+	// It exists in this package in order to avoid circular dependency with the "rental" package.
+	RentalsInverseTable = "rentals"
+	// RentalsColumn is the table column denoting the rentals relation/edge.
+	RentalsColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
