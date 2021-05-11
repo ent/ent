@@ -101,6 +101,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE TABLE IF NOT EXISTS "users"("id" serial, "card_id" int, PRIMARY KEY("id", "name"), FOREIGN KEY("card_id") REFERENCES "cards"("id") ON DELETE SET NULL)`,
 		},
 		{
+			input: Dialect(dialect.Oracle).CreateTable("users").
+				Columns(
+					Column("id").Type("int"),
+					Column("name").Type("varchar2(100)"),
+				).PrimaryKey("id"),
+			wantQuery: `CREATE TABLE users(id int, name varchar2(100), PRIMARY KEY(id))`,
+		},
+		{
 			input: AlterTable("users").
 				AddColumn(Column("group_id").Type("int").Attr("UNIQUE")).
 				AddForeignKey(ForeignKey().Columns("group_id").
@@ -108,6 +116,20 @@ func TestBuilder(t *testing.T) {
 					OnDelete("CASCADE"),
 				),
 			wantQuery: "ALTER TABLE `users` ADD COLUMN `group_id` int UNIQUE, ADD CONSTRAINT FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`) ON DELETE CASCADE",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				AddColumn(Column("age").Type("number(3)").Attr("UNIQUE")),
+			wantQuery: "ALTER TABLE users ADD age number(3) UNIQUE",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				AddColumn(Column("group_id").Type("integer").Attr("UNIQUE")).
+				AddConstraint(Constraint("foreign_key_group_id").
+					Reference(Reference().Table("groups").Columns("id")).
+					OnDelete("CASCADE"),
+				),
+			wantQuery: "ALTER TABLE users ADD group_id integer UNIQUE CONSTRAINT foreign_key_group_id  REFERENCES groups(id) ON DELETE CASCADE",
 		},
 		{
 			input: Dialect(dialect.Postgres).AlterTable("users").
@@ -127,6 +149,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "ALTER TABLE `users` ADD COLUMN `group_id` int UNIQUE, ADD CONSTRAINT FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`)",
 		},
 		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				AddColumn(Column("group_id").Type("integer").Attr("UNIQUE")).
+				AddConstraint(Constraint("foreign_key_group_id").
+					Reference(Reference().Table("groups").Columns("id")),
+				),
+			wantQuery: "ALTER TABLE users ADD group_id integer UNIQUE CONSTRAINT foreign_key_group_id  REFERENCES groups(id)",
+		},
+		{
 			input: Dialect(dialect.Postgres).AlterTable("users").
 				AddColumn(Column("group_id").Type("int").Attr("UNIQUE")).
 				AddForeignKey(ForeignKey().Columns("group_id").
@@ -141,9 +171,41 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "ALTER TABLE `users` ADD COLUMN `age` int, ADD COLUMN `name` varchar(255)",
 		},
 		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				AddColumns(
+					Column("age").Type("integer"),
+					Column("name").Type("varchar2(255)"),
+				),
+			wantQuery: "ALTER TABLE users ADD (age integer, name varchar2(255))",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				AddColumns(
+					Column("age").Type("integer"),
+					Column("name").Type("varchar2(255)"),
+					Column("address").Type("varchar2(255)"),
+				),
+			wantQuery: "ALTER TABLE users ADD (age integer, name varchar2(255), address varchar2(255))",
+		},
+		{
 			input: AlterTable("users").
 				DropForeignKey("users_parent_id"),
 			wantQuery: "ALTER TABLE `users` DROP FOREIGN KEY `users_parent_id`",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				DropConstraint("users_parent_id"),
+			wantQuery: "ALTER TABLE users DROP CONSTRAINT users_parent_id",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				DisableConstraint("users_parent_id"),
+			wantQuery: "ALTER TABLE users DISABLE CONSTRAINT users_parent_id",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				EnableConstraint("users_parent_id"),
+			wantQuery: "ALTER TABLE users ENABLE CONSTRAINT users_parent_id",
 		},
 		{
 			input: Dialect(dialect.Postgres).AlterTable("users").
@@ -163,9 +225,21 @@ func TestBuilder(t *testing.T) {
 			wantQuery: "ALTER TABLE `users` ADD CONSTRAINT FOREIGN KEY(`group_id`) REFERENCES `groups`(`id`), ADD CONSTRAINT FOREIGN KEY(`location_id`) REFERENCES `locations`(`id`)",
 		},
 		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				AddForeignKey(ForeignKey("constraint_group_id").Columns("group_id").
+					Reference(Reference().Table("groups").Columns("id")),
+				),
+			wantQuery: "ALTER TABLE users ADD CONSTRAINT constraint_group_id FOREIGN KEY(group_id) REFERENCES groups(id)",
+		},
+		{
 			input: AlterTable("users").
 				ModifyColumn(Column("age").Type("int")),
 			wantQuery: "ALTER TABLE `users` MODIFY COLUMN `age` int",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				ModifyColumn(Column("age").Type("number")),
+			wantQuery: "ALTER TABLE users MODIFY age number",
 		},
 		{
 			input: Dialect(dialect.Postgres).AlterTable("users").
@@ -192,9 +266,27 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `ALTER TABLE "users" ALTER COLUMN "age" TYPE int, ALTER COLUMN "age" SET NOT NULL, ALTER COLUMN "name" DROP NOT NULL`,
 		},
 		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				ModifyColumns(
+					Column("age").Type("number"),
+					Column("address").Type("varchar2(255)"),
+				),
+			wantQuery: `ALTER TABLE users MODIFY (age number, address varchar2(255))`,
+		},
+		{
 			input: AlterTable("users").
 				ChangeColumn("old_age", Column("age").Type("int")),
 			wantQuery: "ALTER TABLE `users` CHANGE COLUMN `old_age` `age` int",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				RenameColumn("old_age", "age"),
+			wantQuery: "ALTER TABLE users RENAME COLUMN old_age TO age",
+		},
+		{
+			input: Dialect(dialect.Oracle).AlterTable("users").
+				Rename("user_info"),
+			wantQuery: `ALTER TABLE users RENAME TO user_info`,
 		},
 		{
 			input: Dialect(dialect.Postgres).AlterTable("users").
@@ -220,6 +312,11 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `ALTER INDEX "old" RENAME TO "new"`,
 		},
 		{
+			input: Dialect(dialect.Oracle).AlterIndex("old").
+				Rename("new"),
+			wantQuery: `ALTER INDEX old RENAME TO new`,
+		},
+		{
 			input:     Insert("users").Columns("age").Values(1),
 			wantQuery: "INSERT INTO `users` (`age`) VALUES (?)",
 			wantArgs:  []interface{}{1},
@@ -232,6 +329,16 @@ func TestBuilder(t *testing.T) {
 		{
 			input:     Dialect(dialect.Postgres).Insert("users").Columns("age").Values(1),
 			wantQuery: `INSERT INTO "users" ("age") VALUES ($1)`,
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input:     Dialect(dialect.Oracle).Insert("users").Columns("age").Values(1),
+			wantQuery: `INSERT INTO users (age) VALUES (:1)`,
+			wantArgs:  []interface{}{1},
+		},
+		{
+			input:     Dialect(dialect.Oracle).Insert("users").Columns("age").Values(1).Schema("mydb"),
+			wantQuery: "INSERT INTO mydb.users (age) VALUES (:1)",
 			wantArgs:  []interface{}{1},
 		},
 		{
@@ -262,6 +369,11 @@ func TestBuilder(t *testing.T) {
 		{
 			input:     Dialect(dialect.Postgres).Insert("users").Columns("name", "age").Values("a8m", 10),
 			wantQuery: `INSERT INTO "users" ("name", "age") VALUES ($1, $2)`,
+			wantArgs:  []interface{}{"a8m", 10},
+		},
+		{
+			input:     Dialect(dialect.Oracle).Insert("users").Columns("name", "age").Values("a8m", 10),
+			wantQuery: `INSERT INTO users (name, age) VALUES (:1, :2)`,
 			wantArgs:  []interface{}{"a8m", 10},
 		},
 		{
@@ -299,8 +411,18 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo"},
 		},
 		{
+			input:     Dialect(dialect.Oracle).Update("users").Set("name", "foo"),
+			wantQuery: `UPDATE users SET name = :1`,
+			wantArgs:  []interface{}{"foo"},
+		},
+		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Schema("mydb"),
 			wantQuery: `UPDATE "mydb"."users" SET "name" = $1`,
+			wantArgs:  []interface{}{"foo"},
+		},
+		{
+			input:     Dialect(dialect.Oracle).Update("users").Set("name", "foo").Schema("mydb"),
+			wantQuery: `UPDATE mydb.users SET name = :1`,
 			wantArgs:  []interface{}{"foo"},
 		},
 		{
@@ -319,6 +441,11 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10},
 		},
 		{
+			input:     Dialect(dialect.Oracle).Update("users").Set("name", "foo").Set("age", 10),
+			wantQuery: `UPDATE users SET name = :1, age = :2`,
+			wantArgs:  []interface{}{"foo", 10},
+		},
+		{
 			input:     Update("users").Set("name", "foo").Where(EQ("name", "bar")),
 			wantQuery: "UPDATE `users` SET `name` = ? WHERE `name` = ?",
 			wantArgs:  []interface{}{"foo", "bar"},
@@ -331,6 +458,11 @@ func TestBuilder(t *testing.T) {
 		{
 			input:     Dialect(dialect.Postgres).Update("users").Set("name", "foo").Where(EQ("name", "bar")),
 			wantQuery: `UPDATE "users" SET "name" = $1 WHERE "name" = $2`,
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input:     Dialect(dialect.Oracle).Update("users").Set("name", "foo").Where(EQ("name", "bar")),
+			wantQuery: `UPDATE users SET name = :1 WHERE name = :2`,
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -358,6 +490,11 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo"},
 		},
 		{
+			input:     Dialect(dialect.Oracle).Update("users").Set("name", "foo").SetNull("spouse_id"),
+			wantQuery: `UPDATE users SET spouse_id = NULL, name = :1`,
+			wantArgs:  []interface{}{"foo"},
+		},
+		{
 			input: Update("users").Set("name", "foo").
 				Where(EQ("name", "bar")).
 				Where(EQ("age", 20)),
@@ -371,6 +508,15 @@ func TestBuilder(t *testing.T) {
 				Where(EQ("name", "bar")).
 				Where(EQ("age", 20)),
 			wantQuery: `UPDATE "users" SET "name" = $1 WHERE "name" = $2 AND "age" = $3`,
+			wantArgs:  []interface{}{"foo", "bar", 20},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Update("users").
+				Set("name", "foo").
+				Where(EQ("name", "bar")).
+				Where(EQ("age", 20)),
+			wantQuery: `UPDATE users SET name = :1 WHERE name = :2 AND age = :3`,
 			wantArgs:  []interface{}{"foo", "bar", 20},
 		},
 		{
@@ -391,6 +537,15 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10, "bar", "baz"},
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Update("users").
+				Set("name", "foo").
+				Set("age", 10).
+				Where(Or(EQ("name", "bar"), EQ("name", "baz"))),
+			wantQuery: `UPDATE users SET name = :1, age = :2 WHERE name = :3 OR name = :4`,
+			wantArgs:  []interface{}{"foo", 10, "bar", "baz"},
+		},
+		{
 			input: Update("users").
 				Set("name", "foo").
 				Set("age", 10).
@@ -405,6 +560,15 @@ func TestBuilder(t *testing.T) {
 				Set("age", 10).
 				Where(P().EQ("name", "foo")),
 			wantQuery: `UPDATE "users" SET "name" = $1, "age" = $2 WHERE "name" = $3`,
+			wantArgs:  []interface{}{"foo", 10, "foo"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Update("users").
+				Set("name", "foo").
+				Set("age", 10).
+				Where(P().EQ("name", "foo")),
+			wantQuery: `UPDATE users SET name = :1, age = :2 WHERE name = :3`,
 			wantArgs:  []interface{}{"foo", 10, "foo"},
 		},
 		{
@@ -423,6 +587,14 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "bar", "baz", 1, 2},
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Update("users").
+				Set("name", "foo").
+				Where(And(In("name", "bar", "baz"), NotIn("age", 1, 2))),
+			wantQuery: `UPDATE users SET name = :1 WHERE name IN (:2, :3) AND age NOT IN (:4, :5)`,
+			wantArgs:  []interface{}{"foo", "bar", "baz", 1, 2},
+		},
+		{
 			input: Update("users").
 				Set("name", "foo").
 				Where(And(HasPrefix("nickname", "a8m"), Contains("lastname", "mash"))),
@@ -438,6 +610,14 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", "a8m%", "%mash%"},
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Update("users").
+				Set("name", "foo").
+				Where(And(HasPrefix("nickname", "a8m"), Contains("lastname", "mash"))),
+			wantQuery: `UPDATE users SET name = :1 WHERE nickname LIKE :2 AND lastname LIKE :3`,
+			wantArgs:  []interface{}{"foo", "a8m%", "%mash%"},
+		},
+		{
 			input: Update("users").
 				Add("age", 1).
 				Where(HasPrefix("nickname", "a8m")),
@@ -450,6 +630,14 @@ func TestBuilder(t *testing.T) {
 				Add("age", 1).
 				Where(HasPrefix("nickname", "a8m")),
 			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", $1) + $2 WHERE "nickname" LIKE $3`,
+			wantArgs:  []interface{}{0, 1, "a8m%"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Update("users").
+				Add("age", 1).
+				Where(HasPrefix("nickname", "a8m")),
+			wantQuery: `UPDATE users SET age = COALESCE(age, :1) + :2 WHERE nickname LIKE :3`,
 			wantArgs:  []interface{}{0, 1, "a8m%"},
 		},
 		{
@@ -472,6 +660,16 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki"},
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Update("users").
+				Add("age", 1).
+				Set("nickname", "a8m").
+				Add("version", 10).
+				Set("name", "mashraki"),
+			wantQuery: `UPDATE users SET age = COALESCE(age, :1) + :2, nickname = :3, version = COALESCE(version, :4) + :5, name = :6`,
+			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki"},
+		},
+		{
 			input: Dialect(dialect.Postgres).
 				Update("users").
 				Add("age", 1).
@@ -482,6 +680,19 @@ func TestBuilder(t *testing.T) {
 				Add("score", 1e5).
 				Where(Or(EQ("age", 1), EQ("age", 2))),
 			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", $1) + $2, "nickname" = $3, "version" = COALESCE("version", $4) + $5, "name" = $6, "first" = $7, "score" = COALESCE("score", $8) + $9 WHERE "age" = $10 OR "age" = $11`,
+			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki", "ariel", 0, 1e5, 1, 2},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Update("users").
+				Add("age", 1).
+				Set("nickname", "a8m").
+				Add("version", 10).
+				Set("name", "mashraki").
+				Set("first", "ariel").
+				Add("score", 1e5).
+				Where(Or(EQ("age", 1), EQ("age", 2))),
+			wantQuery: `UPDATE users SET age = COALESCE(age, :1) + :2, nickname = :3, version = COALESCE(version, :4) + :5, name = :6, first = :7, score = COALESCE(score, :8) + :9 WHERE age = :10 OR age = :11`,
 			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki", "ariel", 0, 1e5, 1, 2},
 		},
 		{
@@ -498,6 +709,12 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT * FROM "users"`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select().
+				From(Table("users")),
+			wantQuery: `SELECT * FROM users`,
+		},
+		{
 			input: Dialect(dialect.Postgres).
 				Select().
 				From(Table("users")).
@@ -506,10 +723,25 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"Ariel"},
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select().
+				From(Table("users")).
+				Where(EQ("name", "Ariel")),
+			wantQuery: `SELECT * FROM users WHERE name = :1`,
+			wantArgs:  []interface{}{"Ariel"},
+		},
+		{
 			input: Select().
 				From(Table("users")).
 				Where(Or(EQ("name", "BAR"), EQ("name", "BAZ"))),
 			wantQuery: "SELECT * FROM `users` WHERE `name` = ? OR `name` = ?",
+			wantArgs:  []interface{}{"BAR", "BAZ"},
+		},
+		{
+			input: Dialect(dialect.Oracle).Select().
+				From(Table("users")).
+				Where(Or(EQ("name", "BAR"), EQ("name", "BAZ"))),
+			wantQuery: "SELECT * FROM users WHERE name = :1 OR name = :2",
 			wantArgs:  []interface{}{"BAR", "BAZ"},
 		},
 		{
@@ -545,11 +777,24 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `DELETE FROM "users" WHERE "parent_id" IS NULL`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Delete("users").
+				Where(IsNull("parent_id")),
+			wantQuery: `DELETE FROM users WHERE parent_id IS NULL`,
+		},
+		{
 			input: Dialect(dialect.Postgres).
 				Delete("users").
 				Where(IsNull("parent_id")).
 				Schema("mydb"),
 			wantQuery: `DELETE FROM "mydb"."users" WHERE "parent_id" IS NULL`,
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Delete("users").
+				Where(IsNull("parent_id")).
+				Schema("mydb"),
+			wantQuery: `DELETE FROM mydb.users WHERE parent_id IS NULL`,
 		},
 		{
 			input: Delete("users").
@@ -562,6 +807,13 @@ func TestBuilder(t *testing.T) {
 				Delete("users").
 				Where(And(IsNull("parent_id"), NotIn("name", "foo", "bar"))),
 			wantQuery: `DELETE FROM "users" WHERE "parent_id" IS NULL AND "name" NOT IN ($1, $2)`,
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Delete("users").
+				Where(And(IsNull("parent_id"), NotIn("name", "foo", "bar"))),
+			wantQuery: `DELETE FROM users WHERE parent_id IS NULL AND name NOT IN (:1, :2)`,
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -586,6 +838,13 @@ func TestBuilder(t *testing.T) {
 				Delete("users").
 				Where(Or(NotNull("parent_id"), EQ("parent_id", 10))),
 			wantQuery: `DELETE FROM "users" WHERE "parent_id" IS NOT NULL OR "parent_id" = $1`,
+			wantArgs:  []interface{}{10},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Delete("users").
+				Where(Or(NotNull("parent_id"), EQ("parent_id", 10))),
+			wantQuery: `DELETE FROM users WHERE parent_id IS NOT NULL OR parent_id = :1`,
 			wantArgs:  []interface{}{10},
 		},
 		{
@@ -620,6 +879,22 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10, "bar", 20, "qux", 1, 2},
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Delete("users").
+				Where(
+					Or(
+						And(EQ("name", "foo"), EQ("age", 10)),
+						And(EQ("name", "bar"), EQ("age", 20)),
+						And(
+							EQ("name", "qux"),
+							Or(EQ("age", 1), EQ("age", 2)),
+						),
+					),
+				),
+			wantQuery: `DELETE FROM users WHERE (name = :1 AND age = :2) OR (name = :3 AND age = :4) OR (name = :5 AND (age = :6 OR age = :7))`,
+			wantArgs:  []interface{}{"foo", 10, "bar", 20, "qux", 1, 2},
+		},
+		{
 			input: Delete("users").
 				Where(
 					Or(
@@ -645,12 +920,29 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10, "bar", 20, "admin"},
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Delete("users").
+				Where(
+					Or(
+						And(EQ("name", "foo"), EQ("age", 10)),
+						And(EQ("name", "bar"), EQ("age", 20)),
+					),
+				).
+				Where(EQ("role", "admin")),
+			wantQuery: `DELETE FROM users WHERE ((name = :1 AND age = :2) OR (name = :3 AND age = :4)) AND role = :5`,
+			wantArgs:  []interface{}{"foo", 10, "bar", 20, "admin"},
+		},
+		{
 			input:     Select().From(Table("users")),
 			wantQuery: "SELECT * FROM `users`",
 		},
 		{
 			input:     Dialect(dialect.Postgres).Select().From(Table("users")),
 			wantQuery: `SELECT * FROM "users"`,
+		},
+		{
+			input:     Dialect(dialect.Oracle).Select().From(Table("users")),
+			wantQuery: `SELECT * FROM users`,
 		},
 		{
 			input:     Select().From(Table("users").Unquote()),
@@ -667,6 +959,10 @@ func TestBuilder(t *testing.T) {
 		{
 			input:     Dialect(dialect.Postgres).Select().From(Table("users").As("u")),
 			wantQuery: `SELECT * FROM "users" AS "u"`,
+		},
+		{
+			input:     Dialect(dialect.Oracle).Select().From(Table("users").As("u")),
+			wantQuery: `SELECT * FROM users u`,
 		},
 		{
 			input: func() Querier {
@@ -711,6 +1007,18 @@ func TestBuilder(t *testing.T) {
 			input: func() Querier {
 				t1 := Table("users").As("u")
 				t2 := Table("groups").As("g")
+				return Dialect(dialect.Oracle).
+					Select(t1.C("id"), t2.C("name")).
+					From(t1).
+					Join(t2).
+					On(t1.C("id"), t2.C("user_id"))
+			}(),
+			wantQuery: `SELECT u.id, g.name FROM users u JOIN groups g ON u.id = g.user_id`,
+		},
+		{
+			input: func() Querier {
+				t1 := Table("users").As("u")
+				t2 := Table("groups").As("g")
 				return Select(t1.C("id"), t2.C("name")).
 					From(t1).
 					Join(t2).
@@ -737,6 +1045,20 @@ func TestBuilder(t *testing.T) {
 		{
 			input: func() Querier {
 				t1 := Table("users").As("u")
+				t2 := Table("groups").As("g")
+				return Dialect(dialect.Oracle).
+					Select(t1.C("id"), t2.C("name")).
+					From(t1).
+					Join(t2).
+					On(t1.C("id"), t2.C("user_id")).
+					Where(And(EQ(t1.C("name"), "bar"), NotNull(t2.C("name"))))
+			}(),
+			wantQuery: `SELECT u.id, g.name FROM users u JOIN groups g ON u.id = g.user_id WHERE u.name = :1 AND g.name IS NOT NULL`,
+			wantArgs:  []interface{}{"bar"},
+		},
+		{
+			input: func() Querier {
+				t1 := Table("users").As("u")
 				t2 := Table("user_groups").As("ug")
 				return Select(t1.C("id"), As(Count("`*`"), "group_count")).
 					From(t1).
@@ -745,6 +1067,18 @@ func TestBuilder(t *testing.T) {
 					GroupBy(t1.C("id"))
 			}(),
 			wantQuery: "SELECT `u`.`id`, COUNT(`*`) AS `group_count` FROM `users` AS `u` LEFT JOIN `user_groups` AS `ug` ON `u`.`id` = `ug`.`user_id` GROUP BY `u`.`id`",
+		},
+		{
+			input: func() Querier {
+				t1 := Table("users").As("u")
+				t2 := Table("user_groups").As("ug")
+				return Dialect(dialect.Oracle).Select(t1.C("id"), As(Count("*"), "group_count")).
+					From(t1).
+					LeftJoin(t2).
+					On(t1.C("id"), t2.C("user_id")).
+					GroupBy(t1.C("id"))
+			}(),
+			wantQuery: "SELECT u.id, COUNT(*) AS group_count FROM users u LEFT JOIN user_groups ug ON u.id = ug.user_id GROUP BY u.id",
 		},
 		{
 			input: func() Querier {
@@ -762,6 +1096,20 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: func() Querier {
+				t1 := Table("users").As("u")
+				t2 := Table("user_groups").As("ug")
+				return Dialect(dialect.Oracle).Select(t1.C("id"), As(Count("*"), "group_count")).
+					From(t1).
+					LeftJoin(t2).
+					OnP(P(func(b *Builder) {
+						b.Ident(t1.C("id")).WriteOp(OpEQ).Ident(t2.C("user_id"))
+					})).
+					GroupBy(t1.C("id")).Clone()
+			}(),
+			wantQuery: "SELECT u.id, COUNT(*) AS group_count FROM users u LEFT JOIN user_groups ug ON u.id = ug.user_id GROUP BY u.id",
+		},
+		{
+			input: func() Querier {
 				t1 := Table("groups").As("g")
 				t2 := Table("user_groups").As("ug")
 				return Select(t1.C("id"), As(Count("`*`"), "user_count")).
@@ -771,6 +1119,18 @@ func TestBuilder(t *testing.T) {
 					GroupBy(t1.C("id"))
 			}(),
 			wantQuery: "SELECT `g`.`id`, COUNT(`*`) AS `user_count` FROM `groups` AS `g` RIGHT JOIN `user_groups` AS `ug` ON `g`.`id` = `ug`.`group_id` GROUP BY `g`.`id`",
+		},
+		{
+			input: func() Querier {
+				t1 := Table("groups").As("g")
+				t2 := Table("user_groups").As("ug")
+				return Dialect(dialect.Oracle).Select(t1.C("id"), As(Count("*"), "user_count")).
+					From(t1).
+					RightJoin(t2).
+					On(t1.C("id"), t2.C("group_id")).
+					GroupBy(t1.C("id"))
+			}(),
+			wantQuery: "SELECT g.id, COUNT(*) AS user_count FROM groups g RIGHT JOIN user_groups ug ON g.id = ug.group_id GROUP BY g.id",
 		},
 		{
 			input: func() Querier {
@@ -789,12 +1149,29 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: func() Querier {
+				t1 := Table("users").As("u")
+				return Dialect(dialect.Oracle).
+					Select(t1.Columns("name", "age")...).From(t1)
+			}(),
+			wantQuery: `SELECT u.name, u.age FROM users u`,
+		},
+		{
+			input: func() Querier {
 				t1 := Dialect(dialect.Postgres).
 					Table("users").As("u")
 				return Dialect(dialect.Postgres).
 					Select(t1.Columns("name", "age")...).From(t1)
 			}(),
 			wantQuery: `SELECT "u"."name", "u"."age" FROM "users" AS "u"`,
+		},
+		{
+			input: func() Querier {
+				t1 := Dialect(dialect.Oracle).
+					Table("users").As("u")
+				return Dialect(dialect.Oracle).
+					Select(t1.Columns("name", "age")...).From(t1)
+			}(),
+			wantQuery: `SELECT u.name, u.age FROM users u`,
 		},
 		{
 			input: func() Querier {
@@ -823,6 +1200,19 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: func() Querier {
+				d := Dialect(dialect.Oracle)
+				t1 := d.Table("users").As("u")
+				t2 := d.Select().From(Table("groups")).Where(EQ("g.user_id", 10)).As("g")
+				return d.Select(t1.C("id"), t2.C("name")).
+					From(t1).
+					Join(t2).
+					On(t1.C("id"), t2.C("user_id"))
+			}(),
+			wantQuery: `SELECT u.id, g.name FROM users u JOIN (SELECT * FROM groups g WHERE g.user_id = :1) g ON u.id = g.user_id`,
+			wantArgs:  []interface{}{10},
+		},
+		{
+			input: func() Querier {
 				selector := Select().Where(Or(EQ("name", "foo"), EQ("name", "bar")))
 				return Delete("users").FromSelect(selector)
 			}(),
@@ -840,6 +1230,15 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: func() Querier {
+				d := Dialect(dialect.Oracle)
+				selector := d.Select().Where(Or(EQ("name", "foo"), EQ("name", "bar")))
+				return d.Delete("users").FromSelect(selector)
+			}(),
+			wantQuery: `DELETE FROM users WHERE name = :1 OR name = :2`,
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: func() Querier {
 				selector := Select().From(Table("users")).As("t")
 				return selector.Select(selector.C("name"))
 			}(),
@@ -852,6 +1251,14 @@ func TestBuilder(t *testing.T) {
 				return selector.Select(selector.C("name"))
 			}(),
 			wantQuery: `SELECT "t"."name" FROM "users"`,
+		},
+		{
+			input: func() Querier {
+				selector := Dialect(dialect.Oracle).
+					Select().From(Table("users")).As("t")
+				return selector.Select(selector.C("name"))
+			}(),
+			wantQuery: `SELECT t.name FROM users t`,
 		},
 		{
 			input: func() Querier {
@@ -872,6 +1279,15 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: func() Querier {
+				d := Dialect(dialect.Oracle)
+				selector := d.Select().From(Table("groups")).Where(EQ("name", "foo"))
+				return d.Delete("users").FromSelect(selector)
+			}(),
+			wantQuery: `DELETE FROM groups WHERE name = :1`,
+			wantArgs:  []interface{}{"foo"},
+		},
+		{
+			input: func() Querier {
 				selector := Select()
 				return Delete("users").FromSelect(selector)
 			}(),
@@ -886,6 +1302,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `DELETE FROM "users"`,
 		},
 		{
+			input: func() Querier {
+				d := Dialect(dialect.Oracle)
+				selector := d.Select()
+				return d.Delete("users").FromSelect(selector)
+			}(),
+			wantQuery: `DELETE FROM users`,
+		},
+		{
 			input: Select().
 				From(Table("users")).
 				Where(Not(And(EQ("name", "foo"), EQ("age", "bar")))),
@@ -898,6 +1322,14 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				Where(Not(And(EQ("name", "foo"), EQ("age", "bar")))),
 			wantQuery: `SELECT * FROM "users" WHERE NOT ("name" = $1 AND "age" = $2)`,
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select().
+				From(Table("users")).
+				Where(Not(And(EQ("name", "foo"), EQ("age", "bar")))),
+			wantQuery: `SELECT * FROM users WHERE NOT (name = :1 AND age = :2)`,
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -916,6 +1348,14 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"bar", "baz"},
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select().
+				From(Table("users")).
+				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
+			wantQuery: `SELECT * FROM users WHERE LOWER(name) = :1 OR LOWER(name) = :2`,
+			wantArgs:  []interface{}{"bar", "baz"},
+		},
+		{
 			input: Dialect(dialect.SQLite).
 				Select().
 				From(Table("users")).
@@ -929,6 +1369,14 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				Where(And(ContainsFold("name", "Ariel"), ContainsFold("nick", "Bar"))),
 			wantQuery: `SELECT * FROM "users" WHERE "name" ILIKE $1 AND "nick" ILIKE $2`,
+			wantArgs:  []interface{}{"%ariel%", "%bar%"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select().
+				From(Table("users")).
+				Where(And(ContainsFold("name", "Ariel"), ContainsFold("nick", "Bar"))),
+			wantQuery: "SELECT * FROM users WHERE LOWER(name) LIKE :1 AND LOWER(nick) LIKE :2",
 			wantArgs:  []interface{}{"%ariel%", "%bar%"},
 		},
 		{
@@ -962,6 +1410,17 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input: func() Querier {
+				d := Dialect(dialect.Oracle)
+				s1 := d.Select().
+					From(Table("users")).
+					Where(Not(And(EQ("name", "foo"), EQ("age", "bar"))))
+				return Queries{d.With("users_view").As(s1), d.Select("name").From(Table("users_view"))}
+			}(),
+			wantQuery: `WITH users_view AS (SELECT * FROM users WHERE NOT (name = :1 AND age = :2)) SELECT name FROM users_view`,
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: func() Querier {
 				s1 := Select().From(Table("users")).Where(Not(And(EQ("name", "foo"), EQ("age", "bar")))).As("users_view")
 				return Select("name").From(s1)
 			}(),
@@ -975,6 +1434,15 @@ func TestBuilder(t *testing.T) {
 				return d.Select("name").From(s1)
 			}(),
 			wantQuery: `SELECT "name" FROM (SELECT * FROM "users" WHERE NOT ("name" = $1 AND "age" = $2)) AS "users_view"`,
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: func() Querier {
+				d := Dialect(dialect.Oracle)
+				s1 := d.Select().From(Table("users")).Where(Not(And(EQ("name", "foo"), EQ("age", "bar")))).As("users_view")
+				return d.Select("name").From(s1)
+			}(),
+			wantQuery: `SELECT name FROM (SELECT * FROM users users_view WHERE NOT (name = :1 AND age = :2)) users_view`,
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -1001,6 +1469,17 @@ func TestBuilder(t *testing.T) {
 		{
 			input: func() Querier {
 				t1 := Table("users")
+				return Dialect(dialect.Oracle).
+					Select().
+					From(t1).
+					Where(In(t1.C("id"), Select("owner_id").From(Table("pets")).Where(EQ("name", "pedro"))))
+			}(),
+			wantQuery: `SELECT * FROM users WHERE users.id IN (SELECT owner_id FROM pets WHERE name = :1)`,
+			wantArgs:  []interface{}{"pedro"},
+		},
+		{
+			input: func() Querier {
+				t1 := Table("users")
 				return Select().
 					From(t1).
 					Where(Not(In(t1.C("id"), Select("owner_id").From(Table("pets")).Where(EQ("name", "pedro")))))
@@ -1020,6 +1499,17 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"pedro"},
 		},
 		{
+			input: func() Querier {
+				t1 := Table("users")
+				return Dialect(dialect.Oracle).
+					Select().
+					From(t1).
+					Where(Not(In(t1.C("id"), Select("owner_id").From(Table("pets")).Where(EQ("name", "pedro")))))
+			}(),
+			wantQuery: `SELECT * FROM users WHERE NOT (users.id IN (SELECT owner_id FROM pets WHERE name = :1))`,
+			wantArgs:  []interface{}{"pedro"},
+		},
+		{
 			input:     Select().Count().From(Table("users")),
 			wantQuery: "SELECT COUNT(*) FROM `users`",
 		},
@@ -1029,6 +1519,11 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT COUNT(*) FROM "users"`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select().Count().From(Table("users")),
+			wantQuery: `SELECT COUNT(*) FROM users`,
+		},
+		{
 			input:     Select().Count(Distinct("id")).From(Table("users")),
 			wantQuery: "SELECT COUNT(DISTINCT `id`) FROM `users`",
 		},
@@ -1036,6 +1531,11 @@ func TestBuilder(t *testing.T) {
 			input: Dialect(dialect.Postgres).
 				Select().Count(Distinct("id")).From(Table("users")),
 			wantQuery: `SELECT COUNT(DISTINCT "id") FROM "users"`,
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select().Count(Distinct("id")).From(Table("users")),
+			wantQuery: `SELECT COUNT(DISTINCT id) FROM users`,
 		},
 		{
 			input: func() Querier {
@@ -1067,6 +1567,12 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT SUM("age"), MIN("age") FROM "users"`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select(Sum("age"), Min("age")).
+				From(Table("users")),
+			wantQuery: `SELECT SUM(age), MIN(age) FROM users`,
+		},
+		{
 			input: func() Querier {
 				t1 := Table("users").As("u")
 				return Select(As(Max(t1.C("age")), "max_age")).From(t1)
@@ -1083,6 +1589,15 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT MAX("u"."age") AS "max_age" FROM "users" AS "u"`,
 		},
 		{
+			input: func() Querier {
+				t1 := Table("users").As("u")
+				return Dialect(dialect.Oracle).
+					Select(As(Max(t1.C("age")), "max_age")).
+					From(t1)
+			}(),
+			wantQuery: `SELECT MAX(u.age) AS max_age FROM users u`,
+		},
+		{
 			input: Select("name", Count("*")).
 				From(Table("users")).
 				GroupBy("name"),
@@ -1094,6 +1609,13 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				GroupBy("name"),
 			wantQuery: `SELECT "name", COUNT(*) FROM "users" GROUP BY "name"`,
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select("name", Count("*")).
+				From(Table("users")).
+				GroupBy("name"),
+			wantQuery: `SELECT name, COUNT(*) FROM users GROUP BY name`,
 		},
 		{
 			input: Select("name", Count("*")).
@@ -1111,6 +1633,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT "name", COUNT(*) FROM "users" GROUP BY "name" ORDER BY "name"`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select("name", Count("*")).
+				From(Table("users")).
+				GroupBy("name").
+				OrderBy("name"),
+			wantQuery: `SELECT name, COUNT(*) FROM users GROUP BY name ORDER BY name`,
+		},
+		{
 			input: Select("name", "age", Count("*")).
 				From(Table("users")).
 				GroupBy("name", "age").
@@ -1126,6 +1656,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT "name", "age", COUNT(*) FROM "users" GROUP BY "name", "age" ORDER BY "name" DESC, "age"`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select("name", "age", Count("*")).
+				From(Table("users")).
+				GroupBy("name", "age").
+				OrderBy(Desc("name"), "age"),
+			wantQuery: `SELECT name, age, COUNT(*) FROM users GROUP BY name, age ORDER BY name DESC, age`,
+		},
+		{
 			input: Select("*").
 				From(Table("users")).
 				Limit(1),
@@ -1139,6 +1677,50 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT * FROM "users" LIMIT 1`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select("*").
+				From(Table("users")).
+				Limit(1),
+			wantQuery: `SELECT * FROM users WHERE ROWNUM = 1`,
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select("*").
+				From(Table("users")).
+				Where(And(EQ("age", 18), EQ("name", "wang"))).
+				Limit(1),
+			wantQuery: `SELECT * FROM users WHERE age = :1 AND name = :2 AND ROWNUM = 1`,
+			wantArgs:  []interface{}{18, "wang"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select("*").
+				From(Table("users")).
+				Where(And(EQ("age", 18), EQ("name", "wang"))).
+				Limit(10),
+			wantQuery: `SELECT * FROM users WHERE age = :1 AND name = :2 AND ROWNUM <= 10`,
+			wantArgs:  []interface{}{18, "wang"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select("t.*").
+				From(Table("users").As("t")).
+				Where(And(EQ("t.age", 18), EQ("t.name", "wang"))).
+				Limit(10).Offset(20),
+			wantQuery: `SELECT a.* FROM ( SELECT t.*,rownum rowno FROM users t WHERE t.age = :1 AND t.name = :2 AND rownum <= 20) a where a.rowno >= 10`,
+			wantArgs:  []interface{}{18, "wang"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select("t.*").
+				From(Table("users").As("t")).
+				Where(And(EQ("t.age", 18), EQ("t.name", "wang"))).
+				OrderBy("t.id ASC").
+				Limit(10).Offset(20),
+			wantQuery: `SELECT a.* FROM ( SELECT t.*,rownum rowno FROM users t WHERE t.age = :1 AND t.name = :2 AND rownum <= 20 ORDER BY t.id ASC) a where a.rowno >= 10`,
+			wantArgs:  []interface{}{18, "wang"},
+		},
+		{
 			input:     Select("age").Distinct().From(Table("users")),
 			wantQuery: "SELECT DISTINCT `age` FROM `users`",
 		},
@@ -1148,6 +1730,13 @@ func TestBuilder(t *testing.T) {
 				Distinct().
 				From(Table("users")),
 			wantQuery: `SELECT DISTINCT "age" FROM "users"`,
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select("age").
+				Distinct().
+				From(Table("users")),
+			wantQuery: `SELECT DISTINCT age FROM users`,
 		},
 		{
 			input:     Select("age", "name").From(Table("users")).Distinct().OrderBy("name"),
@@ -1162,6 +1751,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `SELECT DISTINCT "age", "name" FROM "users" ORDER BY "name"`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				Select("age", "name").
+				From(Table("users")).
+				Distinct().
+				OrderBy("name"),
+			wantQuery: `SELECT DISTINCT age, name FROM users ORDER BY name`,
+		},
+		{
 			input:     Select("age").From(Table("users")).Where(EQ("name", "foo")).Or().Where(EQ("name", "bar")),
 			wantQuery: "SELECT `age` FROM `users` WHERE `name` = ? OR `name` = ?",
 			wantArgs:  []interface{}{"foo", "bar"},
@@ -1172,6 +1769,14 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				Where(EQ("name", "foo")).Or().Where(EQ("name", "bar")),
 			wantQuery: `SELECT "age" FROM "users" WHERE "name" = $1 OR "name" = $2`,
+			wantArgs:  []interface{}{"foo", "bar"},
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				Select("age").
+				From(Table("users")).
+				Where(EQ("name", "foo")).Or().Where(EQ("name", "bar")),
+			wantQuery: `SELECT age FROM users WHERE name = :1 OR name = :2`,
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -1261,6 +1866,13 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE INDEX "name_index" ON "users"("name")`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				CreateIndex("name_index").
+				Table("users").
+				Column("name"),
+			wantQuery: `CREATE INDEX name_index ON users(name)`,
+		},
+		{
 			input:     CreateIndex("unique_name").Unique().Table("users").Columns("first", "last"),
 			wantQuery: "CREATE UNIQUE INDEX `unique_name` ON `users`(`first`, `last`)",
 		},
@@ -1273,6 +1885,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE UNIQUE INDEX "unique_name" ON "users"("first", "last")`,
 		},
 		{
+			input: Dialect(dialect.Oracle).
+				CreateIndex("unique_name").
+				Unique().
+				Table("users").
+				Columns("first", "last"),
+			wantQuery: `CREATE UNIQUE INDEX unique_name ON users(first, last)`,
+		},
+		{
 			input:     DropIndex("name_index"),
 			wantQuery: "DROP INDEX `name_index`",
 		},
@@ -1280,6 +1900,11 @@ func TestBuilder(t *testing.T) {
 			input: Dialect(dialect.Postgres).
 				DropIndex("name_index"),
 			wantQuery: `DROP INDEX "name_index"`,
+		},
+		{
+			input: Dialect(dialect.Oracle).
+				DropIndex("name_index"),
+			wantQuery: `DROP INDEX name_index`,
 		},
 		{
 			input:     DropIndex("name_index").Table("users"),

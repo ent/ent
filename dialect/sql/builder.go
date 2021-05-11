@@ -83,7 +83,12 @@ func (c *ColumnBuilder) Query() (string, []interface{}) {
 		c.Pad().WriteString(c.typ)
 	}
 	if c.attr != "" {
-		c.Pad().WriteString(c.attr)
+		if c.oracle() && strings.HasPrefix(c.attr, "NOT NULL DEFAULT") {
+			a := strings.Split(c.attr, "DEFAULT")
+			c.Pad().WriteString("DEFAULT" + a[1] + " NOT NULL")
+		} else {
+			c.Pad().WriteString(c.attr)
+		}
 	}
 	if c.fk != nil {
 		c.WriteString(" CONSTRAINT " + c.fk.symbol)
@@ -264,7 +269,25 @@ func AlterTable(name string) *TableAlter { return &TableAlter{name: name} }
 
 // AddColumn appends the `ADD COLUMN` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) AddColumn(c *ColumnBuilder) *TableAlter {
-	t.Queries = append(t.Queries, &Wrapper{"ADD COLUMN %s", c})
+	if t.oracle() {
+		t.Queries = append(t.Queries, &Wrapper{"ADD %s", c})
+	} else {
+		t.Queries = append(t.Queries, &Wrapper{"ADD COLUMN %s", c})
+	}
+	return t
+}
+
+// AddColumns appends the `ADD ` clause to the given `ALTER TABLE` statement for Oracle.
+func (t *TableAlter) AddColumns(cs ...*ColumnBuilder) *TableAlter {
+	for i, c := range cs {
+		if i == 0 {
+			t.Queries = append(t.Queries, &Wrapper{"ADD (%s,", c})
+		} else if i == len(cs)-1 {
+			t.Queries = append(t.Queries, &Wrapper{"%s)", c})
+		} else {
+			t.Queries = append(t.Queries, &Wrapper{"%s,", c})
+		}
+	}
 	return t
 }
 
@@ -274,6 +297,8 @@ func (t *TableAlter) ModifyColumn(c *ColumnBuilder) *TableAlter {
 	case t.postgres():
 		c.modify = true
 		t.Queries = append(t.Queries, &Wrapper{"ALTER COLUMN %s", c})
+	case t.oracle():
+		t.Queries = append(t.Queries, &Wrapper{"MODIFY %s", c})
 	default:
 		t.Queries = append(t.Queries, &Wrapper{"MODIFY COLUMN %s", c})
 	}
@@ -288,8 +313,20 @@ func (t *TableAlter) RenameColumn(old, new string) *TableAlter {
 
 // ModifyColumns calls ModifyColumn with each of the given builders.
 func (t *TableAlter) ModifyColumns(cs ...*ColumnBuilder) *TableAlter {
-	for _, c := range cs {
-		t.ModifyColumn(c)
+	if t.oracle() {
+		for i, c := range cs {
+			if i == 0 {
+				t.Queries = append(t.Queries, &Wrapper{"MODIFY (%s,", c})
+			} else if i == len(cs)-1 {
+				t.Queries = append(t.Queries, &Wrapper{"%s)", c})
+			} else {
+				t.Queries = append(t.Queries, &Wrapper{"%s,", c})
+			}
+		}
+	} else {
+		for _, c := range cs {
+			t.ModifyColumn(c)
+		}
 	}
 	return t
 }
@@ -310,6 +347,12 @@ func (t *TableAlter) ChangeColumn(name string, c *ColumnBuilder) *TableAlter {
 // RenameIndex appends the `RENAME INDEX` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) RenameIndex(curr, new string) *TableAlter {
 	t.Queries = append(t.Queries, Raw(fmt.Sprintf("RENAME INDEX %s TO %s", t.Quote(curr), t.Quote(new))))
+	return t
+}
+
+// Rename appends the `RENAME TO` clause to the given `ALTER TABLE` statement.
+func (t *TableAlter) Rename(name string) *TableAlter {
+	t.Queries = append(t.Queries, Raw(fmt.Sprintf("RENAME TO %s", t.Quote(name))))
 	return t
 }
 
@@ -341,6 +384,16 @@ func (t *TableAlter) AddForeignKey(fk *ForeignKeyBuilder) *TableAlter {
 	return t
 }
 
+// AddConstraint adds a foreign key constraint to the `ALTER TABLE` statement.
+func (t *TableAlter) AddConstraint(cb *ConstraintBuilder) *TableAlter {
+	if t.oracle() {
+		t.Queries = append(t.Queries, &Wrapper{"CONSTRAINT %s", cb})
+	} else {
+		t.Queries = append(t.Queries, &Wrapper{"ADD CONSTRAINT %s", cb})
+	}
+	return t
+}
+
 // DropConstraint appends the `DROP CONSTRAINT` clause to the given `ALTER TABLE` statement.
 func (t *TableAlter) DropConstraint(ident string) *TableAlter {
 	t.Queries = append(t.Queries, Raw(fmt.Sprintf("DROP CONSTRAINT %s", t.Quote(ident))))
@@ -353,6 +406,18 @@ func (t *TableAlter) DropForeignKey(ident string) *TableAlter {
 	return t
 }
 
+// EnableConstraint appends the `ENABLE CONSTRAINT` clause to the given `ALTER TABLE` statement for Oracle.
+func (t *TableAlter) EnableConstraint(ident string) *TableAlter {
+	t.Queries = append(t.Queries, Raw(fmt.Sprintf("ENABLE CONSTRAINT %s", t.Quote(ident))))
+	return t
+}
+
+// DisableConstraint appends the `ENABLE CONSTRAINT` clause to the given `ALTER TABLE` statement for Oracle.
+func (t *TableAlter) DisableConstraint(ident string) *TableAlter {
+	t.Queries = append(t.Queries, Raw(fmt.Sprintf("DISABLE CONSTRAINT %s", t.Quote(ident))))
+	return t
+}
+
 // Query returns query representation of the `ALTER TABLE` statement.
 //
 //	ALTER TABLE name
@@ -362,7 +427,11 @@ func (t *TableAlter) Query() (string, []interface{}) {
 	t.WriteString("ALTER TABLE ")
 	t.Ident(t.name)
 	t.Pad()
-	t.JoinComma(t.Queries...)
+	if t.oracle() {
+		t.JoinSpace(t.Queries...)
+	} else {
+		t.JoinComma(t.Queries...)
+	}
 	return t.String(), t.args
 }
 
@@ -397,6 +466,56 @@ func (i *IndexAlter) Query() (string, []interface{}) {
 	i.Pad()
 	i.JoinComma(i.Queries...)
 	return i.String(), i.args
+}
+
+// ConstraintBuilder is the builder for the constraint clause.
+type ConstraintBuilder struct {
+	Builder
+	symbol  string
+	actions []string
+	ref     *ReferenceBuilder
+}
+
+// ForeignKey returns a builder for the foreign-key constraint clause in create/alter table statements.
+//
+// 	Constraint("constraint_name").
+//		Reference(Reference().Table("groups").Columns("id")).
+//		OnDelete("CASCADE")
+//
+func Constraint(symbol string) *ConstraintBuilder {
+	cb := &ConstraintBuilder{}
+	cb.symbol = symbol
+	return cb
+}
+
+// Reference sets the reference clause.
+func (cb *ConstraintBuilder) Reference(r *ReferenceBuilder) *ConstraintBuilder {
+	cb.ref = r
+	return cb
+}
+
+// OnDelete sets the on delete action for this constraint.
+func (cb *ConstraintBuilder) OnDelete(action string) *ConstraintBuilder {
+	cb.actions = append(cb.actions, "ON DELETE "+action)
+	return cb
+}
+
+// OnUpdate sets the on delete action for this constraint.
+func (cb *ConstraintBuilder) OnUpdate(action string) *ConstraintBuilder {
+	cb.actions = append(cb.actions, "ON UPDATE "+action)
+	return cb
+}
+
+// Query returns query representation of a foreign key constraint.
+func (cb *ConstraintBuilder) Query() (string, []interface{}) {
+	if cb.symbol != "" {
+		cb.Ident(cb.symbol).Pad()
+	}
+	cb.Pad().Join(cb.ref)
+	for _, action := range cb.actions {
+		cb.Pad().WriteString(action)
+	}
+	return cb.String(), cb.args
 }
 
 // ForeignKeyBuilder is the builder for the foreign-key constraint clause.
@@ -722,19 +841,35 @@ func (i *InsertBuilder) Returning(columns ...string) *InsertBuilder {
 
 // Query returns query representation of an `INSERT INTO` statement.
 func (i *InsertBuilder) Query() (string, []interface{}) {
-	i.WriteString("INSERT INTO ")
-	i.writeSchema(i.schema)
-	i.Ident(i.table).Pad()
+	if i.oracle() && len(i.values) > 1 {
+		i.WriteString("INSERT ALL")
+	} else {
+		i.WriteString("INSERT INTO ")
+		i.writeSchema(i.schema)
+		i.Ident(i.table).Pad()
+	}
 	if i.defaults && len(i.columns) == 0 {
 		i.writeDefault()
 	} else {
-		i.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
-		i.WriteString(" VALUES ")
-		for j, v := range i.values {
-			if j > 0 {
-				i.Comma()
+		if i.oracle() && len(i.values) > 1 {
+			for _, v := range i.values {
+				i.WriteString(" INTO ")
+				i.writeSchema(i.schema)
+				i.Ident(i.table).Pad()
+				i.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
+				i.WriteString(" VALUES ")
+				i.WriteByte('(').Args(v...).WriteByte(')')
 			}
-			i.WriteByte('(').Args(v...).WriteByte(')')
+			i.WriteString("SELECT 1 FROM dual")
+		} else {
+			i.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
+			i.WriteString(" VALUES ")
+			for j, v := range i.values {
+				if j > 0 {
+					i.Comma()
+				}
+				i.WriteByte('(').Args(v...).WriteByte(')')
+			}
 		}
 	}
 	if len(i.conflictColumns) > 0 {
@@ -1672,7 +1807,11 @@ func (s *SelectTable) ref() string {
 	b.writeSchema(s.schema)
 	b.Ident(s.name)
 	if s.as != "" {
-		b.WriteString(" AS ")
+		if !s.oracle() {
+			b.WriteString(" AS ")
+		} else {
+			b.WriteString(" ")
+		}
 		b.Ident(s.as)
 	}
 	return b.String()
@@ -1880,7 +2019,9 @@ func (s *Selector) join(kind string, t TableView) *Selector {
 			view.as = "t0"
 		}
 	case *Selector:
-		if view.as == "" {
+		if view.as == "" && s.oracle() {
+			view.as = view.TableName()
+		} else if view.as == "" {
 			view.as = "t" + strconv.Itoa(len(s.joins))
 		}
 	}
@@ -2026,6 +2167,9 @@ func (s *Selector) Having(p *Predicate) *Selector {
 // Query returns query representation of a `SELECT` statement.
 func (s *Selector) Query() (string, []interface{}) {
 	b := s.Builder.clone()
+	if s.oracle() && s.limit != nil && s.offset != nil {
+		b.WriteString("SELECT a.* FROM ( ")
+	}
 	b.WriteString("SELECT ")
 	if s.distinct {
 		b.WriteString("DISTINCT ")
@@ -2035,17 +2179,27 @@ func (s *Selector) Query() (string, []interface{}) {
 	} else {
 		b.WriteString("*")
 	}
+	if s.oracle() && s.limit != nil && s.offset != nil {
+		b.WriteString(",rownum rowno")
+	}
 	b.WriteString(" FROM ")
 	switch t := s.from.(type) {
 	case *SelectTable:
 		t.SetDialect(s.dialect)
+		if s.oracle() && s.as != "" {
+			t.as = s.as
+		}
 		b.WriteString(t.ref())
 	case *Selector:
 		t.SetDialect(s.dialect)
 		b.Nested(func(b *Builder) {
 			b.Join(t)
 		})
-		b.WriteString(" AS ")
+		if b.oracle() {
+			b.WriteString(" ")
+		} else {
+			b.WriteString(" AS ")
+		}
 		b.Ident(t.as)
 	}
 	for _, join := range s.joins {
@@ -2059,7 +2213,11 @@ func (s *Selector) Query() (string, []interface{}) {
 			b.Nested(func(b *Builder) {
 				b.Join(view)
 			})
-			b.WriteString(" AS ")
+			if b.oracle() {
+				b.WriteString(" ")
+			} else {
+				b.WriteString(" AS ")
+			}
 			b.Ident(view.as)
 		}
 		if join.on != nil {
@@ -2070,6 +2228,15 @@ func (s *Selector) Query() (string, []interface{}) {
 	if s.where != nil {
 		b.WriteString(" WHERE ")
 		b.Join(s.where)
+		if s.oracle() && s.limit != nil && s.offset != nil {
+			b.WriteString(" AND rownum <= ")
+			b.WriteString(strconv.Itoa(*s.offset))
+		}
+	} else {
+		if s.oracle() && s.limit != nil && s.offset != nil {
+			b.WriteString(" WHERE rownum <= ")
+			b.WriteString(strconv.Itoa(*s.offset))
+		}
 	}
 	if len(s.group) > 0 {
 		b.WriteString(" GROUP BY ")
@@ -2083,12 +2250,31 @@ func (s *Selector) Query() (string, []interface{}) {
 		s.joinOrder(&b)
 	}
 	if s.limit != nil {
-		b.WriteString(" LIMIT ")
-		b.WriteString(strconv.Itoa(*s.limit))
+		if s.oracle() && s.offset == nil {
+			if s.where == nil {
+				b.WriteString(" WHERE ")
+			} else {
+				b.WriteString(" AND ")
+			}
+			if *s.limit <= 0 || *s.limit == 1 {
+				b.WriteString("ROWNUM = ")
+			} else {
+				b.WriteString("ROWNUM <= ")
+			}
+			b.WriteString(strconv.Itoa(*s.limit))
+		} else if !s.oracle() {
+			b.WriteString(" LIMIT ")
+			b.WriteString(strconv.Itoa(*s.limit))
+		}
 	}
 	if s.offset != nil {
-		b.WriteString(" OFFSET ")
-		b.WriteString(strconv.Itoa(*s.offset))
+		if s.oracle() && s.limit != nil {
+			b.WriteString(") a where a.rowno >= ")
+			b.WriteString(strconv.Itoa(*s.limit))
+		} else if !s.oracle() {
+			b.WriteString(" OFFSET ")
+			b.WriteString(strconv.Itoa(*s.offset))
+		}
 	}
 	s.total = b.total
 	return b.String(), b.args
@@ -2248,6 +2434,8 @@ func (b *Builder) Quote(ident string) string {
 			return strings.ReplaceAll(ident, "`", `"`)
 		}
 		quote = `"`
+	case b.oracle():
+		quote = ""
 	// An identifier for unknown dialect.
 	case b.dialect == "" && strings.ContainsAny(ident, "`\""):
 		return ident
@@ -2265,6 +2453,8 @@ func (b *Builder) Ident(s string) *Builder {
 		// Modifiers and aggregation functions that
 		// were called without dialect information.
 		b.WriteString(strings.ReplaceAll(s, "`", `"`))
+	case b.oracle():
+		b.WriteString(strings.ReplaceAll(s, "`", ""))
 	default:
 		b.WriteString(s)
 	}
@@ -2433,6 +2623,9 @@ func (b *Builder) Arg(a interface{}) *Builder {
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
 		param = "$" + strconv.Itoa(b.total)
 	}
+	if b.oracle() {
+		param = ":" + strconv.Itoa(b.total)
+	}
 	if f, ok := a.(ParamFormatter); ok {
 		param = f.FormatParam(param, &StmtInfo{
 			Dialect: b.dialect,
@@ -2471,6 +2664,11 @@ func (b *Builder) Join(qs ...Querier) *Builder {
 // JoinComma joins a list of Queries and adds comma between them.
 func (b *Builder) JoinComma(qs ...Querier) *Builder {
 	return b.join(qs, ", ")
+}
+
+// JoinSpace joins a list of Queries and adds space between them.
+func (b *Builder) JoinSpace(qs ...Querier) *Builder {
+	return b.join(qs, " ")
 }
 
 // join joins a list of Queries to the builder with a given separator.
@@ -2545,6 +2743,11 @@ func (b Builder) clone() Builder {
 // postgres reports if the builder dialect is PostgreSQL.
 func (b Builder) postgres() bool {
 	return b.Dialect() == dialect.Postgres
+}
+
+// oracle reports if the builder dialect is Oracle.
+func (b Builder) oracle() bool {
+	return b.Dialect() == dialect.Oracle
 }
 
 // fromIdent sets the builder dialect from the identifier format.
