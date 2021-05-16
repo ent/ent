@@ -398,36 +398,23 @@ func (User) Mixin() []ent.Mixin {
 #### How to use a custom XID globally unique ID?
 
 Package [xid](https://github.com/rs/xid) is a globally unique ID generator library that uses the [Mongo Object ID](https://docs.mongodb.org/manual/reference/object-id/)
-algorithm to generate a 12 byte, 20 character ID with no configuration. The xid package comes with [database/sql](https://golang.org/pkg/database/sql) `sql.Scaner` and
-`driver.Valuer` interfaces required by Ent for serialization already implemented.
+algorithm to generate a 12 byte, 20 character ID with no configuration. The xid package comes with [database/sql](https://golang.org/pkg/database/sql) `sql.Scanner` and `driver.Valuer` interfaces required by Ent for serialization.
 
-To store a XID in any string field use the [GoType](schema-fields.md#go-type) schema configuration:
+To store an XID in any string field use the [GoType](schema-fields.md#go-type) schema configuration:
 
 ```go
-package schema
-
-import (
-	"entgo.io/ent"
-	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/mixin"
-	"github.com/rs/xid"
-)
-
-// BaseMixin to be shared will all different schemas.
-type User struct {
-	mixin.Schema
-}
-
-// Fields of the Mixin.
-func (User) Fields() []ent.Field {
+// Fields of type T.
+func (T) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").GoType(xid.ID{}).DefaultFunc(xid.New),
-		// ...
+		field.String("id").
+			GoType(xid.ID{}).
+			DefaultFunc(xid.New),
 	}
 }
 ```
 
-Or as a reusable Ent [Mixin](schema-mixin.md) across multiple schema: 
+Or as a reusable [Mixin](schema-mixin.md) across multiple schemas: 
+
 ```go
 package schema
 
@@ -443,11 +430,12 @@ type BaseMixin struct {
 	mixin.Schema
 }
 
-// Fields of the Mixin.
+// Fields of the User.
 func (BaseMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").GoType(xid.ID{}).DefaultFunc(xid.New),
-		// Additional base fields. Timestamps, ...
+		field.String("id").
+			GoType(xid.ID{}).
+			DefaultFunc(xid.New),
 	}
 }
 
@@ -464,6 +452,8 @@ func (User) Mixin() []ent.Mixin {
 	}
 }
 ```
+
+In order to use extended identifiers (XIDs) with gqlgen, follow the configuration mentioned in the [issue tracker](https://github.com/ent/ent/issues/1526#issuecomment-831034884).
 
 #### How to define a spatial data type field in MySQL?
 
