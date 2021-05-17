@@ -44,6 +44,19 @@ func (IDConfig) Name() string {
 	return "id_config"
 }
 
+type PartialIndex struct {
+	WhereClause string
+}
+
+func (PartialIndex) Name() string {
+	return "partial_index"
+}
+
+func (p PartialIndex) Merge(ant schema.Annotation) schema.Annotation {
+	p.WhereClause = ant.(PartialIndex).WhereClause
+	return p
+}
+
 type AnnotationMixin struct {
 	mixin.Schema
 }
@@ -119,6 +132,9 @@ func (User) Indexes() []ent.Index {
 		index.Fields("name").
 			Edges("parent").
 			StorageKey("user_parent_name").
+			Annotations(&PartialIndex{
+				WhereClause: "age > 20",
+			}).
 			Unique(),
 	}
 }
@@ -218,6 +234,8 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, []string{"parent"}, schema.Indexes[1].Edges)
 		require.Equal(t, "user_parent_name", schema.Indexes[1].StorageKey)
 		require.True(t, schema.Indexes[1].Unique)
+		ant = schema.Indexes[1].Annotations["partial_index"].(map[string]interface{})
+		require.Equal(t, "age > 20", ant["WhereClause"])
 
 		require.Equal(t, "some comment", schema.Fields[0].Comment)
 		require.Empty(t, schema.Fields[1].Comment)
