@@ -35,7 +35,7 @@ entを開発・使用するためのドキュメントは、こちら。: https:
 `ent`に貢献するときは、まず[CONTRIBUTING](CONTRIBUTING.md)を参照してください。
 もし、あなたの会社や製品で`ent`を利用している場合は、[ent usersページ](https://github.com/facebook/ent/wiki/ent-users)に追記する形で、そのことをぜひ教えて下さい。
 
-最新情報については、Twitter(https://twitter.com/entgo_io)をフォローしてください。
+最新情報については、Twitter(<https://twitter.com/entgo_io>)をフォローしてください。
 
 
 
