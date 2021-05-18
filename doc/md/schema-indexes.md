@@ -149,6 +149,41 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/edgeindex).
 
+## Index On Edge Fields
+
+Currently `Edges` columns are always added after `Fields` columns. However, some indexes require these columns to come first in order to achieve specific optimizations. You can work around this problem by making use of [Edge Fields](schema-edges.md#edge-field). 
+
+```go
+// Card holds the schema definition for the Card entity.
+type Card struct {
+	ent.Schema
+}
+// Fields of the Card.
+func (Card) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("number").
+			Optional(),
+		field.Int("owner_id").
+			Optional(),
+	}
+}
+// Edges of the Card.
+func (Card) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("owner", User.Type).
+			Ref("card").
+			Field("owner_id").
+ 			Unique(),
+ 	}
+}
+// Indexes of the Card.
+func (Card) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("owner_id", "number"),
+	}
+}
+```
+
 ## Dialect Support
 
 Indexes currently support only SQL dialects, and do not support Gremlin.
