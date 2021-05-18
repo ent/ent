@@ -1351,9 +1351,18 @@ func (p *Predicate) EqualFold(col, sub string) *Predicate {
 	return p.Append(func(b *Builder) {
 		f := &Func{}
 		f.SetDialect(b.dialect)
-		f.Lower(col)
-		b.WriteString(f.String())
-		b.WriteOp(OpEQ)
+		switch b.dialect {
+		case dialect.MySQL:
+			// We assume the CHARACTER SET is configured to utf8mb4,
+			// because this how it is defined in dialect/sql/schema.
+			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci = ")
+		case dialect.Postgres:
+			b.Ident(col).WriteString(" ILIKE ")
+		default: // SQLite.
+			f.Lower(col)
+			b.WriteString(f.String())
+			b.WriteOp(OpEQ)
+		}
 		b.Arg(strings.ToLower(sub))
 	})
 }

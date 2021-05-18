@@ -936,7 +936,15 @@ func TestBuilder(t *testing.T) {
 				Select().
 				From(Table("users")).
 				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
-			wantQuery: `SELECT * FROM "users" WHERE LOWER("name") = $1 OR LOWER("name") = $2`,
+			wantQuery: `SELECT * FROM "users" WHERE "name" ILIKE $1 OR "name" ILIKE $2`,
+			wantArgs:  []interface{}{"bar", "baz"},
+		},
+		{
+			input: Dialect(dialect.MySQL).
+				Select().
+				From(Table("users")).
+				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
+			wantQuery: "SELECT * FROM `users` WHERE `name` COLLATE utf8mb4_general_ci = ? OR `name` COLLATE utf8mb4_general_ci = ?",
 			wantArgs:  []interface{}{"bar", "baz"},
 		},
 		{
