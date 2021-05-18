@@ -363,6 +363,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "8ayac",
+      "name": "8ayac(Yoshinori Hayashi)",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29266382?v=4",
+      "profile": "https://about.8ay.ac/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
