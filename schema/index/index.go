@@ -4,12 +4,15 @@
 
 package index
 
+import "entgo.io/ent/schema"
+
 // A Descriptor for index configuration.
 type Descriptor struct {
-	Unique     bool     // unique index.
-	Edges      []string // edge columns.
-	Fields     []string // field columns.
-	StorageKey string   // custom index name.
+	Unique      bool                // unique index.
+	Edges       []string            // edge columns.
+	Fields      []string            // field columns.
+	StorageKey  string              // custom index name.
+	Annotations []schema.Annotation // index annotations.
 }
 
 // Builder for indexes on vertex columns and edges in the graph.
@@ -94,6 +97,23 @@ func (b *Builder) Unique() *Builder {
 // StorageKey sets the storage key of the index. In SQL dialects, it's the index name.
 func (b *Builder) StorageKey(key string) *Builder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// Annotations adds a list of annotations to the index object to be used by codegen extensions.
+//
+//	func (T) Indexes() []ent.Index {
+//
+//		// Partial index on name where the entity is not deleted.
+//		index.Field("name").
+//			Annotations(index.Annotation{
+//				WhereClause: "deleted_at is not null",
+//			})
+//
+//	}
+//
+func (b *Builder) Annotations(annotations ...schema.Annotation) *Builder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
