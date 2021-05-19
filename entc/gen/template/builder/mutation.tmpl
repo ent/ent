@@ -18,6 +18,7 @@ import (
 
 	{{- range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.Package }}"
+		{{- template "import/types" $n }}
 	{{- end }}
 
 	"entgo.io/ent"
