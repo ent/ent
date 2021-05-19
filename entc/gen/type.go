@@ -991,6 +991,15 @@ func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeI
 // IsEnum returns true if the field is an enum field.
 func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.TypeEnum }
 
+// IsNonStringEnum returns true if the field is an enum field w/ a non-string GoType.
+func (f Field) IsNonStringEnum() bool {
+	if f.Type != nil && f.Type.Type != field.TypeEnum {
+		return false
+	}
+
+	return f.HasGoType() && f.Type.RType.Kind != reflect.String
+}
+
 // IsEdgeField reports if the given field is an edge-field (i.e. a foreign-key)
 // that was referenced by one of the edges).
 func (f Field) IsEdgeField() bool { return f.fk != nil }

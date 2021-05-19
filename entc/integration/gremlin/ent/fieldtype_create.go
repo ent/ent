@@ -619,6 +619,20 @@ func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	return ftc
 }
 
+// SetColor sets the "color" field.
+func (ftc *FieldTypeCreate) SetColor(r role.Priority) *FieldTypeCreate {
+	ftc.mutation.SetColor(r)
+	return ftc
+}
+
+// SetNillableColor sets the "color" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableColor(r *role.Priority) *FieldTypeCreate {
+	if r != nil {
+		ftc.SetColor(*r)
+	}
+	return ftc
+}
+
 // SetUUID sets the "uuid" field.
 func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	ftc.mutation.SetUUID(u)
@@ -757,6 +771,10 @@ func (ftc *FieldTypeCreate) defaults() {
 		v := fieldtype.DefaultRole
 		ftc.mutation.SetRole(v)
 	}
+	if _, ok := ftc.mutation.Color(); !ok {
+		v := fieldtype.DefaultColor
+		ftc.mutation.SetColor(v)
+	}
 	if _, ok := ftc.mutation.Pair(); !ok {
 		v := fieldtype.DefaultPair()
 		ftc.mutation.SetPair(v)
@@ -822,6 +840,14 @@ func (ftc *FieldTypeCreate) check() error {
 	if v, ok := ftc.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if _, ok := ftc.mutation.Color(); !ok {
+		return &ValidationError{Name: "color", err: errors.New("ent: missing required field \"color\"")}
+	}
+	if v, ok := ftc.mutation.Color(); ok {
+		if err := fieldtype.ColorValidator(v); err != nil {
+			return &ValidationError{Name: "color", err: fmt.Errorf("ent: validator failed for field \"color\": %w", err)}
 		}
 	}
 	if _, ok := ftc.mutation.Pair(); !ok {
@@ -1003,6 +1029,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
+	}
+	if value, ok := ftc.mutation.Color(); ok {
+		v.Property(dsl.Single, fieldtype.FieldColor, value)
 	}
 	if value, ok := ftc.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)

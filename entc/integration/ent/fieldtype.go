@@ -126,6 +126,8 @@ type FieldType struct {
 	NullFloat *sql.NullFloat64 `json:"null_float,omitempty"`
 	// Role holds the value of the "role" field.
 	Role role.Role `json:"role,omitempty"`
+	// Color holds the value of the "color" field.
+	Color role.Priority `json:"color,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// NillableUUID holds the value of the "nillable_uuid" field.
@@ -158,6 +160,8 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = new([]byte)
+		case fieldtype.FieldColor:
+			values[i] = new(role.Priority)
 		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
 			values[i] = new(schema.Link)
 		case fieldtype.FieldMAC:
@@ -513,6 +517,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				ft.Role = role.Role(value.String)
 			}
+		case fieldtype.FieldColor:
+			if value, ok := values[i].(*role.Priority); !ok {
+				return fmt.Errorf("unexpected type %T for field color", values[i])
+			} else if value != nil {
+				ft.Color = *value
+			}
 		case fieldtype.FieldUUID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field uuid", values[i])
@@ -715,6 +725,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
+	builder.WriteString(", color=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Color))
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
 	if v := ft.NillableUUID; v != nil {

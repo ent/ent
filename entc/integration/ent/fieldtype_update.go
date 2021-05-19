@@ -1094,6 +1094,20 @@ func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
 	return ftu
 }
 
+// SetColor sets the "color" field.
+func (ftu *FieldTypeUpdate) SetColor(r role.Priority) *FieldTypeUpdate {
+	ftu.mutation.SetColor(r)
+	return ftu
+}
+
+// SetNillableColor sets the "color" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableColor(r *role.Priority) *FieldTypeUpdate {
+	if r != nil {
+		ftu.SetColor(*r)
+	}
+	return ftu
+}
+
 // SetUUID sets the "uuid" field.
 func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
 	ftu.mutation.SetUUID(u)
@@ -1276,6 +1290,11 @@ func (ftu *FieldTypeUpdate) check() error {
 	if v, ok := ftu.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Color(); ok {
+		if err := fieldtype.ColorValidator(v); err != nil {
+			return &ValidationError{Name: "color", err: fmt.Errorf("ent: validator failed for field \"color\": %w", err)}
 		}
 	}
 	return nil
@@ -2115,6 +2134,13 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: fieldtype.FieldRole,
+		})
+	}
+	if value, ok := ftu.mutation.Color(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldColor,
 		})
 	}
 	if value, ok := ftu.mutation.UUID(); ok {
@@ -3267,6 +3293,20 @@ func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOn
 	return ftuo
 }
 
+// SetColor sets the "color" field.
+func (ftuo *FieldTypeUpdateOne) SetColor(r role.Priority) *FieldTypeUpdateOne {
+	ftuo.mutation.SetColor(r)
+	return ftuo
+}
+
+// SetNillableColor sets the "color" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableColor(r *role.Priority) *FieldTypeUpdateOne {
+	if r != nil {
+		ftuo.SetColor(*r)
+	}
+	return ftuo
+}
+
 // SetUUID sets the "uuid" field.
 func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
 	ftuo.mutation.SetUUID(u)
@@ -3456,6 +3496,11 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 	if v, ok := ftuo.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Color(); ok {
+		if err := fieldtype.ColorValidator(v); err != nil {
+			return &ValidationError{Name: "color", err: fmt.Errorf("ent: validator failed for field \"color\": %w", err)}
 		}
 	}
 	return nil
@@ -4312,6 +4357,13 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: fieldtype.FieldRole,
+		})
+	}
+	if value, ok := ftuo.mutation.Color(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldColor,
 		})
 	}
 	if value, ok := ftuo.mutation.UUID(); ok {
