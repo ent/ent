@@ -1100,6 +1100,20 @@ func (ftu *FieldTypeUpdate) SetPriority(r role.Priority) *FieldTypeUpdate {
 	return ftu
 }
 
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePriority(r *role.Priority) *FieldTypeUpdate {
+	if r != nil {
+		ftu.SetPriority(*r)
+	}
+	return ftu
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (ftu *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
+	ftu.mutation.ClearPriority()
+	return ftu
+}
+
 // SetUUID sets the "uuid" field.
 func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
 	ftu.mutation.SetUUID(u)
@@ -2132,6 +2146,12 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Value:  value,
+			Column: fieldtype.FieldPriority,
+		})
+	}
+	if ftu.mutation.PriorityCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
 			Column: fieldtype.FieldPriority,
 		})
 	}
@@ -3291,6 +3311,20 @@ func (ftuo *FieldTypeUpdateOne) SetPriority(r role.Priority) *FieldTypeUpdateOne
 	return ftuo
 }
 
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePriority(r *role.Priority) *FieldTypeUpdateOne {
+	if r != nil {
+		ftuo.SetPriority(*r)
+	}
+	return ftuo
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (ftuo *FieldTypeUpdateOne) ClearPriority() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPriority()
+	return ftuo
+}
+
 // SetUUID sets the "uuid" field.
 func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
 	ftuo.mutation.SetUUID(u)
@@ -4347,6 +4381,12 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Value:  value,
+			Column: fieldtype.FieldPriority,
+		})
+	}
+	if ftuo.mutation.PriorityCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
 			Column: fieldtype.FieldPriority,
 		})
 	}

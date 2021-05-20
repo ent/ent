@@ -5078,6 +5078,20 @@ func PriorityNotIn(vs ...role.Priority) predicate.FieldType {
 	})
 }
 
+// PriorityIsNil applies the IsNil predicate on the "priority" field.
+func PriorityIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPriority)))
+	})
+}
+
+// PriorityNotNil applies the NotNil predicate on the "priority" field.
+func PriorityNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPriority)))
+	})
+}
+
 // UUIDEQ applies the EQ predicate on the "uuid" field.
 func UUIDEQ(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {

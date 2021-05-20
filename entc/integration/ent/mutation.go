@@ -4486,9 +4486,22 @@ func (m *FieldTypeMutation) OldPriority(ctx context.Context) (v role.Priority, e
 	return oldValue.Priority, nil
 }
 
+// ClearPriority clears the value of the "priority" field.
+func (m *FieldTypeMutation) ClearPriority() {
+	m.priority = nil
+	m.clearedFields[fieldtype.FieldPriority] = struct{}{}
+}
+
+// PriorityCleared returns if the "priority" field was cleared in this mutation.
+func (m *FieldTypeMutation) PriorityCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldPriority]
+	return ok
+}
+
 // ResetPriority resets all changes to the "priority" field.
 func (m *FieldTypeMutation) ResetPriority() {
 	m.priority = nil
+	delete(m.clearedFields, fieldtype.FieldPriority)
 }
 
 // SetUUID sets the "uuid" field.
@@ -6170,6 +6183,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldNullFloat) {
 		fields = append(fields, fieldtype.FieldNullFloat)
 	}
+	if m.FieldCleared(fieldtype.FieldPriority) {
+		fields = append(fields, fieldtype.FieldPriority)
+	}
 	if m.FieldCleared(fieldtype.FieldUUID) {
 		fields = append(fields, fieldtype.FieldUUID)
 	}
@@ -6324,6 +6340,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldNullFloat:
 		m.ClearNullFloat()
+		return nil
+	case fieldtype.FieldPriority:
+		m.ClearPriority()
 		return nil
 	case fieldtype.FieldUUID:
 		m.ClearUUID()

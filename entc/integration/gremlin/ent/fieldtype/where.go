@@ -4365,6 +4365,20 @@ func PriorityNotIn(vs ...role.Priority) predicate.FieldType {
 	})
 }
 
+// PriorityIsNil applies the IsNil predicate on the "priority" field.
+func PriorityIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldPriority)
+	})
+}
+
+// PriorityNotNil applies the NotNil predicate on the "priority" field.
+func PriorityNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldPriority)
+	})
+}
+
 // UUIDEQ applies the EQ predicate on the "uuid" field.
 func UUIDEQ(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
