@@ -6,7 +6,6 @@ package role
 
 import (
 	"database/sql/driver"
-	"errors"
 )
 
 type Role string
@@ -54,13 +53,15 @@ func (p Priority) Value() (driver.Value, error) {
 }
 
 func (p *Priority) Scan(val interface{}) error {
-	if val == nil {
-		return nil
-	}
+	var s string
 
-	var s, ok = val.(string)
-	if !ok {
-		return errors.New("val must be of type string")
+	switch v := val.(type) {
+	case nil:
+		return nil
+	case string:
+		s = v
+	case []uint8:
+		s = string(v)
 	}
 
 	switch s {
