@@ -54,6 +54,10 @@ func (p Priority) Value() (driver.Value, error) {
 }
 
 func (p *Priority) Scan(val interface{}) error {
+	if val == nil {
+		return nil
+	}
+
 	var s, ok = val.(string)
 	if !ok {
 		return errors.New("val must be of type string")
