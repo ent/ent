@@ -59,7 +59,8 @@ module.exports = {
         'generating-ent-schemas',
         'feature-flags',
         'translations',
-        'contributors'
+        'contributors',
+        'slack'
       ],
       collapsed: false,
     },
