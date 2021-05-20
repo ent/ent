@@ -43,7 +43,7 @@ module.exports={
         "pinned": true
       }
     ],
-    "slackChannel": "https://app.slack.com/client/T029RQSE6/C01FMSQDT53",
+    "slackChannel": "/docs/slack",
     "newsletter": "https://www.getrevue.co/profile/ent",
     "githubRepo": "https://github.com/ent/ent"
   },
@@ -107,7 +107,7 @@ module.exports={
         },
         {to: 'blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://app.slack.com/client/T029RQSE6/C01FMSQDT53',
+          href: '/docs/slack',
           position: 'right',
           className: 'header-slack-link',
           'aria-label': 'Slack channel',
@@ -161,7 +161,7 @@ module.exports={
           "title": "Community",
           "items": [
             {"label": "GitHub", "to": "https://github.com/ent/ent"},
-            {"label": "Slack", "to": "https://app.slack.com/client/T029RQSE6/C01FMSQDT53"},
+            {"label": "Slack", "to": "/docs/slack"},
             {"label": "Newsletter", "to": "https://www.getrevue.co/profile/ent"},
             {"label": "Discussions", "to": "https://github.com/ent/ent/discussions"},
             {
