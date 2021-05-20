@@ -213,7 +213,6 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			Default(string(role.Read)).
 			GoType(role.Role("role")),
 		field.Enum("priority").
-			// There is still an issue with Default (since it accepts string).
 			GoType(role.Priority(0)),
 		field.UUID("uuid", uuid.UUID{}).
 			Optional(),
