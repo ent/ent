@@ -70,6 +70,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetLinkOther(&schema.Link{URL: link}).
 		SetNullLink(&schema.Link{URL: link}).
 		SetRole(role.Admin).
+		SetPriority(role.High).
 		SetDuration(time.Hour).
 		SetPair(schema.Pair{K: []byte("K"), V: []byte("V")}).
 		SetNilPair(&schema.Pair{K: []byte("K"), V: []byte("V")}).
@@ -94,6 +95,8 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal("localhost", ft.NullLink.String())
 	require.Equal(net.IP("127.0.0.1").String(), ft.IP.String())
 	mac, err := net.ParseMAC("3b:b3:6b:3c:10:79")
+	require.Equal(role.Admin, ft.Role)
+	require.Equal(role.High, ft.Priority)
 	require.NoError(err)
 	dt, err := time.Parse(time.RFC3339, "1906-01-02T00:00:00+00:00")
 	require.NoError(err)
