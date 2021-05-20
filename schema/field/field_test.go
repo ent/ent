@@ -7,6 +7,7 @@ package field_test
 import (
 	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"net"
 	"net/http"
 	"net/url"
@@ -470,6 +471,45 @@ func (Role) Values() []string {
 	return []string{"admin", "owner"}
 }
 
+type RoleInt int32
+
+func (RoleInt) Values() []string {
+	return []string{"unknown", "admin", "owner"}
+}
+
+func (i RoleInt) String() string {
+	switch i {
+	case 1:
+		return "admin"
+	case 2:
+		return "owner"
+	default:
+		return "unknown"
+	}
+}
+
+func (i RoleInt) Value() (driver.Value, error) {
+	return i.String(), nil
+}
+
+func (i *RoleInt) Scan(val interface{}) error {
+	switch v := val.(type) {
+	case string:
+		switch v {
+		case "admin":
+			*i = 1
+		case "owner":
+			*i = 2
+		default:
+			*i = 0
+		}
+	default:
+		return errors.New("bad enum value")
+	}
+
+	return nil
+}
+
 func TestField_Enums(t *testing.T) {
 	fd := field.Enum("role").
 		Values(
@@ -505,6 +545,18 @@ func TestField_Enums(t *testing.T) {
 	assert.False(t, fd.Info.ValueScanner())
 	assert.Equal(t, "admin", fd.Enums[0].V)
 	assert.Equal(t, "owner", fd.Enums[1].V)
+	assert.False(t, fd.Info.Stringer())
+
+	fd = field.Enum("role").GoType(RoleInt(0)).Descriptor()
+	assert.Equal(t, "field_test.RoleInt", fd.Info.Ident)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "field_test.RoleInt", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+	assert.True(t, fd.Info.ValueScanner())
+	assert.Equal(t, "unknown", fd.Enums[0].V)
+	assert.Equal(t, "admin", fd.Enums[1].V)
+	assert.Equal(t, "owner", fd.Enums[2].V)
+	assert.True(t, fd.Info.Stringer())
 }
 
 func TestField_UUID(t *testing.T) {

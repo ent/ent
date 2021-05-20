@@ -619,6 +619,20 @@ func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	return ftc
 }
 
+// SetPriority sets the "priority" field.
+func (ftc *FieldTypeCreate) SetPriority(r role.Priority) *FieldTypeCreate {
+	ftc.mutation.SetPriority(r)
+	return ftc
+}
+
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillablePriority(r *role.Priority) *FieldTypeCreate {
+	if r != nil {
+		ftc.SetPriority(*r)
+	}
+	return ftc
+}
+
 // SetUUID sets the "uuid" field.
 func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	ftc.mutation.SetUUID(u)
@@ -824,6 +838,11 @@ func (ftc *FieldTypeCreate) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
+	if v, ok := ftc.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+		}
+	}
 	if _, ok := ftc.mutation.Pair(); !ok {
 		return &ValidationError{Name: "pair", err: errors.New("ent: missing required field \"pair\"")}
 	}
@@ -1003,6 +1022,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
+	}
+	if value, ok := ftc.mutation.Priority(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPriority, value)
 	}
 	if value, ok := ftc.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)

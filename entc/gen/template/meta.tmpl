@@ -130,7 +130,7 @@ const (
 	{{ $name := $f.Validator }}
 	// {{ $name }} is a validator for the "{{ $f.Name }}" field enum values. It is called by the builders before save.
 	func {{ $name }}({{ $receiver }} {{ $enum }}) error {
-		switch {{ $receiver }} {
+		switch {{ $receiver }}{{ if $f.Type.Stringer }}.String(){{ end }} {
 			case {{ range $i, $e := $f.Enums }}{{ if ne $i 0 }},{{ end }}{{ if $f.HasGoType }}"{{ $e.Value }}"{{ else }}{{ $e.Name }}{{ end }}{{ end }}:
 				return nil
 			default:

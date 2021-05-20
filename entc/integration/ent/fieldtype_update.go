@@ -1094,6 +1094,26 @@ func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
 	return ftu
 }
 
+// SetPriority sets the "priority" field.
+func (ftu *FieldTypeUpdate) SetPriority(r role.Priority) *FieldTypeUpdate {
+	ftu.mutation.SetPriority(r)
+	return ftu
+}
+
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePriority(r *role.Priority) *FieldTypeUpdate {
+	if r != nil {
+		ftu.SetPriority(*r)
+	}
+	return ftu
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (ftu *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
+	ftu.mutation.ClearPriority()
+	return ftu
+}
+
 // SetUUID sets the "uuid" field.
 func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
 	ftu.mutation.SetUUID(u)
@@ -1276,6 +1296,11 @@ func (ftu *FieldTypeUpdate) check() error {
 	if v, ok := ftu.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	return nil
@@ -2115,6 +2140,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: fieldtype.FieldRole,
+		})
+	}
+	if value, ok := ftu.mutation.Priority(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldPriority,
+		})
+	}
+	if ftu.mutation.PriorityCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: fieldtype.FieldPriority,
 		})
 	}
 	if value, ok := ftu.mutation.UUID(); ok {
@@ -3267,6 +3305,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOn
 	return ftuo
 }
 
+// SetPriority sets the "priority" field.
+func (ftuo *FieldTypeUpdateOne) SetPriority(r role.Priority) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPriority(r)
+	return ftuo
+}
+
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePriority(r *role.Priority) *FieldTypeUpdateOne {
+	if r != nil {
+		ftuo.SetPriority(*r)
+	}
+	return ftuo
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (ftuo *FieldTypeUpdateOne) ClearPriority() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPriority()
+	return ftuo
+}
+
 // SetUUID sets the "uuid" field.
 func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
 	ftuo.mutation.SetUUID(u)
@@ -3456,6 +3514,11 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 	if v, ok := ftuo.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	return nil
@@ -4312,6 +4375,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: fieldtype.FieldRole,
+		})
+	}
+	if value, ok := ftuo.mutation.Priority(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldPriority,
+		})
+	}
+	if ftuo.mutation.PriorityCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Column: fieldtype.FieldPriority,
 		})
 	}
 	if value, ok := ftuo.mutation.UUID(); ok {

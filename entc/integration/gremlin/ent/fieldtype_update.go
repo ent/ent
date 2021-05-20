@@ -1096,6 +1096,26 @@ func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
 	return ftu
 }
 
+// SetPriority sets the "priority" field.
+func (ftu *FieldTypeUpdate) SetPriority(r role.Priority) *FieldTypeUpdate {
+	ftu.mutation.SetPriority(r)
+	return ftu
+}
+
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePriority(r *role.Priority) *FieldTypeUpdate {
+	if r != nil {
+		ftu.SetPriority(*r)
+	}
+	return ftu
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (ftu *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
+	ftu.mutation.ClearPriority()
+	return ftu
+}
+
 // SetUUID sets the "uuid" field.
 func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
 	ftu.mutation.SetUUID(u)
@@ -1278,6 +1298,11 @@ func (ftu *FieldTypeUpdate) check() error {
 	if v, ok := ftu.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	return nil
@@ -1543,6 +1568,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
+	if value, ok := ftu.mutation.Priority(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPriority, value)
+	}
 	if value, ok := ftu.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
@@ -1693,6 +1721,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.NullFloatCleared() {
 		properties = append(properties, fieldtype.FieldNullFloat)
+	}
+	if ftu.mutation.PriorityCleared() {
+		properties = append(properties, fieldtype.FieldPriority)
 	}
 	if ftu.mutation.UUIDCleared() {
 		properties = append(properties, fieldtype.FieldUUID)
@@ -2780,6 +2811,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOn
 	return ftuo
 }
 
+// SetPriority sets the "priority" field.
+func (ftuo *FieldTypeUpdateOne) SetPriority(r role.Priority) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPriority(r)
+	return ftuo
+}
+
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePriority(r *role.Priority) *FieldTypeUpdateOne {
+	if r != nil {
+		ftuo.SetPriority(*r)
+	}
+	return ftuo
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (ftuo *FieldTypeUpdateOne) ClearPriority() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPriority()
+	return ftuo
+}
+
 // SetUUID sets the "uuid" field.
 func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
 	ftuo.mutation.SetUUID(u)
@@ -2969,6 +3020,11 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 	if v, ok := ftuo.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	return nil
@@ -3239,6 +3295,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
+	if value, ok := ftuo.mutation.Priority(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPriority, value)
+	}
 	if value, ok := ftuo.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
@@ -3389,6 +3448,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.NullFloatCleared() {
 		properties = append(properties, fieldtype.FieldNullFloat)
+	}
+	if ftuo.mutation.PriorityCleared() {
+		properties = append(properties, fieldtype.FieldPriority)
 	}
 	if ftuo.mutation.UUIDCleared() {
 		properties = append(properties, fieldtype.FieldUUID)

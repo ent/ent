@@ -618,6 +618,20 @@ func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
 	return ftc
 }
 
+// SetPriority sets the "priority" field.
+func (ftc *FieldTypeCreate) SetPriority(r role.Priority) *FieldTypeCreate {
+	ftc.mutation.SetPriority(r)
+	return ftc
+}
+
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillablePriority(r *role.Priority) *FieldTypeCreate {
+	if r != nil {
+		ftc.SetPriority(*r)
+	}
+	return ftc
+}
+
 // SetUUID sets the "uuid" field.
 func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	ftc.mutation.SetUUID(u)
@@ -821,6 +835,11 @@ func (ftc *FieldTypeCreate) check() error {
 	if v, ok := ftc.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftc.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	if _, ok := ftc.mutation.Pair(); !ok {
@@ -1258,6 +1277,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldRole,
 		})
 		_node.Role = value
+	}
+	if value, ok := ftc.mutation.Priority(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: fieldtype.FieldPriority,
+		})
+		_node.Priority = value
 	}
 	if value, ok := ftc.mutation.UUID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
