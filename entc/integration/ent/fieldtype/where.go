@@ -5030,22 +5030,22 @@ func RoleNotIn(vs ...role.Role) predicate.FieldType {
 	})
 }
 
-// ColorEQ applies the EQ predicate on the "color" field.
-func ColorEQ(v role.Priority) predicate.FieldType {
+// PriorityEQ applies the EQ predicate on the "priority" field.
+func PriorityEQ(v role.Priority) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldColor), v))
+		s.Where(sql.EQ(s.C(FieldPriority), v))
 	})
 }
 
-// ColorNEQ applies the NEQ predicate on the "color" field.
-func ColorNEQ(v role.Priority) predicate.FieldType {
+// PriorityNEQ applies the NEQ predicate on the "priority" field.
+func PriorityNEQ(v role.Priority) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldColor), v))
+		s.Where(sql.NEQ(s.C(FieldPriority), v))
 	})
 }
 
-// ColorIn applies the In predicate on the "color" field.
-func ColorIn(vs ...role.Priority) predicate.FieldType {
+// PriorityIn applies the In predicate on the "priority" field.
+func PriorityIn(vs ...role.Priority) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -5057,12 +5057,12 @@ func ColorIn(vs ...role.Priority) predicate.FieldType {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldColor), v...))
+		s.Where(sql.In(s.C(FieldPriority), v...))
 	})
 }
 
-// ColorNotIn applies the NotIn predicate on the "color" field.
-func ColorNotIn(vs ...role.Priority) predicate.FieldType {
+// PriorityNotIn applies the NotIn predicate on the "priority" field.
+func PriorityNotIn(vs ...role.Priority) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -5074,7 +5074,7 @@ func ColorNotIn(vs ...role.Priority) predicate.FieldType {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldColor), v...))
+		s.Where(sql.NotIn(s.C(FieldPriority), v...))
 	})
 }
 

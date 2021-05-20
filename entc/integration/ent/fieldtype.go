@@ -126,8 +126,8 @@ type FieldType struct {
 	NullFloat *sql.NullFloat64 `json:"null_float,omitempty"`
 	// Role holds the value of the "role" field.
 	Role role.Role `json:"role,omitempty"`
-	// Color holds the value of the "color" field.
-	Color role.Priority `json:"color,omitempty"`
+	// Priority holds the value of the "priority" field.
+	Priority role.Priority `json:"priority,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// NillableUUID holds the value of the "nillable_uuid" field.
@@ -160,7 +160,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = new([]byte)
-		case fieldtype.FieldColor:
+		case fieldtype.FieldPriority:
 			values[i] = new(role.Priority)
 		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
 			values[i] = new(schema.Link)
@@ -517,11 +517,11 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				ft.Role = role.Role(value.String)
 			}
-		case fieldtype.FieldColor:
+		case fieldtype.FieldPriority:
 			if value, ok := values[i].(*role.Priority); !ok {
-				return fmt.Errorf("unexpected type %T for field color", values[i])
+				return fmt.Errorf("unexpected type %T for field priority", values[i])
 			} else if value != nil {
-				ft.Color = *value
+				ft.Priority = *value
 			}
 		case fieldtype.FieldUUID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -725,8 +725,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
-	builder.WriteString(", color=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Color))
+	builder.WriteString(", priority=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Priority))
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
 	if v := ft.NillableUUID; v != nil {

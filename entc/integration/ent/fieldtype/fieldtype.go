@@ -121,8 +121,8 @@ const (
 	FieldNullFloat = "null_float"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
-	// FieldColor holds the string denoting the color field in the database.
-	FieldColor = "color"
+	// FieldPriority holds the string denoting the priority field in the database.
+	FieldPriority = "priority"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
 	// FieldNillableUUID holds the string denoting the nillable_uuid field in the database.
@@ -194,7 +194,7 @@ var Columns = []string{
 	FieldSchemaFloat32,
 	FieldNullFloat,
 	FieldRole,
-	FieldColor,
+	FieldPriority,
 	FieldUUID,
 	FieldNillableUUID,
 	FieldStrings,
@@ -285,15 +285,13 @@ func RoleValidator(r role.Role) error {
 	}
 }
 
-const DefaultColor role.Priority = "UNKNOWN"
-
-// ColorValidator is a validator for the "color" field enum values. It is called by the builders before save.
-func ColorValidator(c role.Priority) error {
-	switch c.String() {
+// PriorityValidator is a validator for the "priority" field enum values. It is called by the builders before save.
+func PriorityValidator(pr role.Priority) error {
+	switch pr.String() {
 	case "UNKNOWN", "LOW", "HIGH":
 		return nil
 	default:
-		return fmt.Errorf("fieldtype: invalid enum value for color field: %q", c)
+		return fmt.Errorf("fieldtype: invalid enum value for priority field: %q", pr)
 	}
 }
 

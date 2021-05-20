@@ -1094,17 +1094,9 @@ func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
 	return ftu
 }
 
-// SetColor sets the "color" field.
-func (ftu *FieldTypeUpdate) SetColor(r role.Priority) *FieldTypeUpdate {
-	ftu.mutation.SetColor(r)
-	return ftu
-}
-
-// SetNillableColor sets the "color" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableColor(r *role.Priority) *FieldTypeUpdate {
-	if r != nil {
-		ftu.SetColor(*r)
-	}
+// SetPriority sets the "priority" field.
+func (ftu *FieldTypeUpdate) SetPriority(r role.Priority) *FieldTypeUpdate {
+	ftu.mutation.SetPriority(r)
 	return ftu
 }
 
@@ -1292,9 +1284,9 @@ func (ftu *FieldTypeUpdate) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
-	if v, ok := ftu.mutation.Color(); ok {
-		if err := fieldtype.ColorValidator(v); err != nil {
-			return &ValidationError{Name: "color", err: fmt.Errorf("ent: validator failed for field \"color\": %w", err)}
+	if v, ok := ftu.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	return nil
@@ -2136,11 +2128,11 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldRole,
 		})
 	}
-	if value, ok := ftu.mutation.Color(); ok {
+	if value, ok := ftu.mutation.Priority(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Value:  value,
-			Column: fieldtype.FieldColor,
+			Column: fieldtype.FieldPriority,
 		})
 	}
 	if value, ok := ftu.mutation.UUID(); ok {
@@ -3293,17 +3285,9 @@ func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOn
 	return ftuo
 }
 
-// SetColor sets the "color" field.
-func (ftuo *FieldTypeUpdateOne) SetColor(r role.Priority) *FieldTypeUpdateOne {
-	ftuo.mutation.SetColor(r)
-	return ftuo
-}
-
-// SetNillableColor sets the "color" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableColor(r *role.Priority) *FieldTypeUpdateOne {
-	if r != nil {
-		ftuo.SetColor(*r)
-	}
+// SetPriority sets the "priority" field.
+func (ftuo *FieldTypeUpdateOne) SetPriority(r role.Priority) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPriority(r)
 	return ftuo
 }
 
@@ -3498,9 +3482,9 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
 		}
 	}
-	if v, ok := ftuo.mutation.Color(); ok {
-		if err := fieldtype.ColorValidator(v); err != nil {
-			return &ValidationError{Name: "color", err: fmt.Errorf("ent: validator failed for field \"color\": %w", err)}
+	if v, ok := ftuo.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	return nil
@@ -4359,11 +4343,11 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldRole,
 		})
 	}
-	if value, ok := ftuo.mutation.Color(); ok {
+	if value, ok := ftuo.mutation.Priority(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeEnum,
 			Value:  value,
-			Column: fieldtype.FieldColor,
+			Column: fieldtype.FieldPriority,
 		})
 	}
 	if value, ok := ftuo.mutation.UUID(); ok {

@@ -1378,7 +1378,7 @@ type FieldTypeMutation struct {
 	addschema_float32          *schema.Float32
 	null_float                 **sql.NullFloat64
 	role                       *role.Role
-	color                      *role.Priority
+	priority                   *role.Priority
 	uuid                       *uuid.UUID
 	nillable_uuid              *uuid.UUID
 	strings                    *[]string
@@ -4455,40 +4455,40 @@ func (m *FieldTypeMutation) ResetRole() {
 	m.role = nil
 }
 
-// SetColor sets the "color" field.
-func (m *FieldTypeMutation) SetColor(r role.Priority) {
-	m.color = &r
+// SetPriority sets the "priority" field.
+func (m *FieldTypeMutation) SetPriority(r role.Priority) {
+	m.priority = &r
 }
 
-// Color returns the value of the "color" field in the mutation.
-func (m *FieldTypeMutation) Color() (r role.Priority, exists bool) {
-	v := m.color
+// Priority returns the value of the "priority" field in the mutation.
+func (m *FieldTypeMutation) Priority() (r role.Priority, exists bool) {
+	v := m.priority
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldColor returns the old "color" field's value of the FieldType entity.
+// OldPriority returns the old "priority" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldColor(ctx context.Context) (v role.Priority, err error) {
+func (m *FieldTypeMutation) OldPriority(ctx context.Context) (v role.Priority, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldColor is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldPriority is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldColor requires an ID field in the mutation")
+		return v, fmt.Errorf("OldPriority requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldColor: %w", err)
+		return v, fmt.Errorf("querying old value for OldPriority: %w", err)
 	}
-	return oldValue.Color, nil
+	return oldValue.Priority, nil
 }
 
-// ResetColor resets all changes to the "color" field.
-func (m *FieldTypeMutation) ResetColor() {
-	m.color = nil
+// ResetPriority resets all changes to the "priority" field.
+func (m *FieldTypeMutation) ResetPriority() {
+	m.priority = nil
 }
 
 // SetUUID sets the "uuid" field.
@@ -4960,8 +4960,8 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.role != nil {
 		fields = append(fields, fieldtype.FieldRole)
 	}
-	if m.color != nil {
-		fields = append(fields, fieldtype.FieldColor)
+	if m.priority != nil {
+		fields = append(fields, fieldtype.FieldPriority)
 	}
 	if m.uuid != nil {
 		fields = append(fields, fieldtype.FieldUUID)
@@ -5092,8 +5092,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.NullFloat()
 	case fieldtype.FieldRole:
 		return m.Role()
-	case fieldtype.FieldColor:
-		return m.Color()
+	case fieldtype.FieldPriority:
+		return m.Priority()
 	case fieldtype.FieldUUID:
 		return m.UUID()
 	case fieldtype.FieldNillableUUID:
@@ -5217,8 +5217,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldNullFloat(ctx)
 	case fieldtype.FieldRole:
 		return m.OldRole(ctx)
-	case fieldtype.FieldColor:
-		return m.OldColor(ctx)
+	case fieldtype.FieldPriority:
+		return m.OldPriority(ctx)
 	case fieldtype.FieldUUID:
 		return m.OldUUID(ctx)
 	case fieldtype.FieldNillableUUID:
@@ -5592,12 +5592,12 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRole(v)
 		return nil
-	case fieldtype.FieldColor:
+	case fieldtype.FieldPriority:
 		v, ok := value.(role.Priority)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetColor(v)
+		m.SetPriority(v)
 		return nil
 	case fieldtype.FieldUUID:
 		v, ok := value.(uuid.UUID)
@@ -6495,8 +6495,8 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 	case fieldtype.FieldRole:
 		m.ResetRole()
 		return nil
-	case fieldtype.FieldColor:
-		m.ResetColor()
+	case fieldtype.FieldPriority:
+		m.ResetPriority()
 		return nil
 	case fieldtype.FieldUUID:
 		m.ResetUUID()
