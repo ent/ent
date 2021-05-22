@@ -27,13 +27,13 @@ go get entgo.io/ent/cmd/ent
 ## ドキュメントとサポート
 entを開発・使用するためのドキュメントは、こちら。: https://entgo.io
 
-議論やサポートについては、[Issueを立てる](https://github.com/facebook/ent/issues/new/choose)か、gophers Slackの[チャンネル](https://gophers.slack.com/archives/C01FMSQDT53)に参加してください。
+議論やサポートについては、[Issueを立てる](https://github.com/ent/ent/issues/new/choose)か、gophers Slackの[チャンネル](https://gophers.slack.com/archives/C01FMSQDT53)に参加してください。
 
 ## entコミュニティへの参加
 `ent`の構築は、コミュニティ全体の協力なしには実現できませんでした。 私たちは、この`ent`の貢献者をリストアップした[contributorsページ](doc/md/contributors.md)を管理しています。
 
 `ent`に貢献するときは、まず[CONTRIBUTING](CONTRIBUTING.md)を参照してください。
-もし、あなたの会社や製品で`ent`を利用している場合は、[ent usersページ](https://github.com/facebook/ent/wiki/ent-users)に追記する形で、そのことをぜひ教えて下さい。
+もし、あなたの会社や製品で`ent`を利用している場合は、[ent usersページ](https://github.com/ent/ent/wiki/ent-users)に追記する形で、そのことをぜひ教えて下さい。
 
 最新情報については、Twitter(<https://twitter.com/entgo_io>)をフォローしてください。
 
@@ -42,7 +42,7 @@ entを開発・使用するためのドキュメントは、こちら。: https:
 ## プロジェクトについて
 `ent`プロジェクトは、私たちが社内で使用しているエンティティフレームワークである`Ent`からインスピレーションを得ています。
 entは、[Facebook Connectivity][fbc]チームの[a8m](https://github.com/a8m)と[alexsn](https://github.com/alexsn)が開発・保守しています。
-本番環境では複数のチームやプロジェクトで使用されており、v1リリースまでのロードマップは[こちら](https://github.com/facebook/ent/issues/46)に記載されています。
+本番環境では複数のチームやプロジェクトで使用されており、v1リリースまでのロードマップは[こちら](https://github.com/ent/ent/issues/46)に記載されています。
 このプロジェクトの動機については[こちら](https://entgo.io/blog/2019/10/03/introducing-ent)をご覧ください。
 
 ## ライセンス
