@@ -24,6 +24,10 @@ SQLite supports all _"append-only"_ features mentioned in the [Migration](migrat
 However, dropping or modifying resources, like [drop-index](migrate.md#drop-resources) are not
 supported by default by SQLite, and will be added in the future using a [temporary table](https://www.sqlite.org/lang_altertable.html#otheralter).
 
+## Oracle
+Oracle supports use github.com/godror/godror driver,when using need to be modified ent->domain.go 
+file scanValues and assignValues method. switch case use switch strings.ToLower(columns[i]): case xxx.
+
 ## Gremlin
 
 Gremlin does not support migration nor indexes, and **<ins>it's considered experimental</ins>**.
