@@ -708,9 +708,9 @@ func (b *enumBuilder) Values(values ...string) *enumBuilder {
 //
 //	field.Enum("priority").
 //		NamedValues(
-//			"LOW", "low",
-//			"MID", "mid",
-//			"HIGH", "high",
+//			"Low", "LOW",
+//			"Mid", "MID",
+//			"High", "HIGH",
 //		)
 //
 func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
