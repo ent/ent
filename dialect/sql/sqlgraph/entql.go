@@ -273,7 +273,7 @@ func (e *state) evalEdge(name string, exprs ...entql.Expr) *sql.Predicate {
 func (e *state) field(f *entql.Field) string {
 	_, ok := e.context.Fields[f.Name]
 	expect(ok || e.context.ID.Column == f.Name, "field %q was not found for node %q", f.Name, e.context.Type)
-	return f.Name
+	return e.selector.C(f.Name)
 }
 
 func args(b *sql.Builder, v *entql.Value) {
