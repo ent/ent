@@ -2110,6 +2110,9 @@ func (s *Selector) Query() (string, []interface{}) {
 		})
 		b.WriteString(" AS ")
 		b.Ident(t.as)
+	case *WithBuilder:
+		t.SetDialect(s.dialect)
+		b.Ident(t.name)
 	}
 	for _, join := range s.joins {
 		b.WriteString(" " + join.kind + " ")
@@ -2124,6 +2127,9 @@ func (s *Selector) Query() (string, []interface{}) {
 			})
 			b.WriteString(" AS ")
 			b.Ident(view.as)
+		case *WithBuilder:
+			view.SetDialect(s.dialect)
+			b.Ident(view.name)
 		}
 		if join.on != nil {
 			b.WriteString(" ON ")
