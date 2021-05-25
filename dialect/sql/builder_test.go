@@ -978,7 +978,7 @@ func TestBuilder(t *testing.T) {
 					Where(Not(And(EQ("name", "foo"), EQ("age", "bar"))))
 				return Queries{With("users_view").As(s1), Select("name").From(Table("users_view"))}
 			}(),
-			wantQuery: "WITH users_view AS (SELECT * FROM `users` WHERE NOT (`name` = ? AND `age` = ?)) SELECT `name` FROM `users_view`",
+			wantQuery: "WITH `users_view` AS (SELECT * FROM `users` WHERE NOT (`name` = ? AND `age` = ?)) SELECT `name` FROM `users_view`",
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -989,7 +989,7 @@ func TestBuilder(t *testing.T) {
 					Where(Not(And(EQ("name", "foo"), EQ("age", "bar"))))
 				return Queries{d.With("users_view").As(s1), d.Select("name").From(Table("users_view"))}
 			}(),
-			wantQuery: `WITH users_view AS (SELECT * FROM "users" WHERE NOT ("name" = $1 AND "age" = $2)) SELECT "name" FROM "users_view"`,
+			wantQuery: `WITH "users_view" AS (SELECT * FROM "users" WHERE NOT ("name" = $1 AND "age" = $2)) SELECT "name" FROM "users_view"`,
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -1208,14 +1208,14 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input:     Queries{With("users_view").As(Select().From(Table("users"))), Select().From(Table("users_view"))},
-			wantQuery: "WITH users_view AS (SELECT * FROM `users`) SELECT * FROM `users_view`",
+			wantQuery: "WITH `users_view` AS (SELECT * FROM `users`) SELECT * FROM `users_view`",
 		},
 		{
 			input: func() Querier {
 				base := Select("*").From(Table("groups"))
 				return Queries{With("groups").As(base.Clone().Where(EQ("name", "bar"))), base.Select("age")}
 			}(),
-			wantQuery: "WITH groups AS (SELECT * FROM `groups` WHERE `name` = ?) SELECT `age` FROM `groups`",
+			wantQuery: "WITH `groups` AS (SELECT * FROM `groups` WHERE `name` = ?) SELECT `age` FROM `groups`",
 			wantArgs:  []interface{}{"bar"},
 		},
 		{
@@ -1514,6 +1514,64 @@ func TestSelector_OrderByExpr(t *testing.T) {
 		Query()
 	require.Equal(t, "SELECT * FROM `users` WHERE `age` > ? ORDER BY `name`, CASE WHEN id=? THEN id WHEN id=? THEN name END DESC", query)
 	require.Equal(t, []interface{}{28, 1, 2}, args)
+}
+
+func TestSelector_Union(t *testing.T) {
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Union(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		UnionAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" WHERE "is_active" = $2 AND "age" > $3 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $4 AND "age" < $5`, query)
+	require.Equal(t, []interface{}{true, true, 20, "true", 18}, args)
+
+	t1, t2, t3 := Table("files"), Table("files"), Table("path")
+	n := Queries{
+		WithRecursive("path", "id", "name", "parent_id").
+			As(Select(t1.Columns("id", "name", "parent_id")...).
+				From(t1).
+				Where(
+					And(
+						IsNull(t1.C("parent_id")),
+						EQ(t1.C("deleted"), false),
+					),
+				).
+				UnionAll(
+					Select(t2.Columns("id", "name", "parent_id")...).
+						From(t2).
+						Join(t3).
+						On(t2.C("parent_id"), t3.C("id")).
+						Where(
+							EQ(t2.C("deleted"), false),
+						),
+				),
+			),
+		Select(t3.Columns("id", "name", "parent_id")...).
+			From(t3),
+	}
+	query, args = n.Query()
+	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND `files`.`deleted` = ? UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE `files`.`deleted` = ?) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
+	require.Equal(t, []interface{}{false, false}, args)
 }
 
 func TestBuilderContext(t *testing.T) {
