@@ -1731,6 +1731,7 @@ type Selector struct {
 	offset   *int
 	distinct bool
 	union    []union
+	prefix   Queries
 }
 
 // WithContext sets the context into the *Selector.
@@ -1905,7 +1906,7 @@ func (s *Selector) join(kind string, t TableView) *Selector {
 	return s
 }
 
-// unionType describes a union type.
+// unionType describes an UNION type.
 type unionType string
 
 const (
@@ -1942,6 +1943,12 @@ func (s *Selector) UnionDistinct(t TableView) *Selector {
 		unionType: unionDistinct,
 		TableView: t,
 	})
+	return s
+}
+
+// Prefix prefixes the query with list of queries.
+func (s *Selector) Prefix(queries ...Querier) *Selector {
+	s.prefix = append(s.prefix, queries...)
 	return s
 }
 
@@ -2081,6 +2088,7 @@ func (s *Selector) Having(p *Predicate) *Selector {
 // Query returns query representation of a `SELECT` statement.
 func (s *Selector) Query() (string, []interface{}) {
 	b := s.Builder.clone()
+	s.joinPrefix(&b)
 	b.WriteString("SELECT ")
 	if s.distinct {
 		b.WriteString("DISTINCT ")
@@ -2151,6 +2159,13 @@ func (s *Selector) Query() (string, []interface{}) {
 	s.total = b.total
 	s.AddError(b.Err())
 	return b.String(), b.args
+}
+
+func (s *Selector) joinPrefix(b *Builder) {
+	if len(s.prefix) > 0 {
+		b.join(s.prefix, " ")
+		b.WriteByte(' ')
+	}
 }
 
 func (s *Selector) joinUnion(b *Builder) {
@@ -2232,6 +2247,13 @@ func (w *WithBuilder) Name() string { return w.name }
 func (w *WithBuilder) As(s *Selector) *WithBuilder {
 	w.s = s
 	return w
+}
+
+// C returns a formatted string for the WITH column.
+func (w *WithBuilder) C(column string) string {
+	b := &Builder{dialect: w.dialect}
+	b.Ident(w.name).WriteByte('.').Ident(column)
+	return b.String()
 }
 
 // Query returns query representation of a `WITH` clause.
