@@ -11,7 +11,6 @@ import (
 	"fmt"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/car"
@@ -275,15 +274,4 @@ func isSQLConstraintError(err error) (*ConstraintError, bool) {
 		return &ConstraintError{err.Error(), err}, true
 	}
 	return nil, false
-}
-
-// rollback calls tx.Rollback and wraps the given error with the rollback error if present.
-func rollback(tx dialect.Tx, err error) error {
-	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%w: %v", err, rerr)
-	}
-	if err, ok := isSQLConstraintError(err); ok {
-		return err
-	}
-	return err
 }
