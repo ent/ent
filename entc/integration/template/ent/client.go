@@ -43,6 +43,8 @@ func NewClient(opts ...Option) *Client {
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
+	// Example code
+	client.driver = ErrorInterceptor(client.driver, nil, nil)
 	return client
 }
 

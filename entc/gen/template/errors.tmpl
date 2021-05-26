@@ -1,0 +1,42 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{ define "errors" }}
+
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+// ErrorInterceptorDriver wraps errors
+type ErrorInterceptorDriver struct {
+	dialect.Driver                  // underlying driver.
+	queryError     func(context.Context, error) (error, bool) // wrap query errors
+	execError      func(context.Context, error) (error, bool) // wrap exec errors
+}
+
+// ErrorInterceptor export
+func ErrorInterceptor(d dialect.Driver, queryError, execError func(context.Context, error) (error, bool)) dialect.Driver {
+	if queryError == nil {
+		// default ignore error
+		queryError = func(ctx context.Context, err error) (error, bool) {
+			return err, false
+		}
+	}
+	if execError == nil {
+		execError = func(ctx context.Context, err error) (error, bool) {
+			// TODO: should not be here for gremlin
+			if cerr, ok := isSQLConstraintError(err); ok {
+				return cerr, true
+			}
+			return err, false
+		}
+	}
+	drv := &ErrorInterceptorDriver{Driver: d, queryError: queryError, execError: execError}
+	return drv
+}
+
+{{ end }}

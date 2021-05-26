@@ -99,6 +99,10 @@ var (
 			Format: "context.go",
 		},
 		{
+			Name:   "errors",
+			Format: "errors.go",
+		},
+		{
 			Name:   "tx",
 			Format: "tx.go",
 		},
