@@ -1312,6 +1312,36 @@ func (p *Predicate) NotIn(col string, args ...interface{}) *Predicate {
 	})
 }
 
+// Exists returns the `Exists` predicate.
+func Exists(query Querier) *Predicate {
+	return P().Exists(query)
+}
+
+// Exists appends the `EXISTS` predicate with the given query.
+func (p *Predicate) Exists(query Querier) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.WriteString("EXISTS ")
+		b.Nested(func(b *Builder) {
+			b.Join(query)
+		})
+	})
+}
+
+// NotExists returns the `NotExists` predicate.
+func NotExists(query Querier) *Predicate {
+	return P().NotExists(query)
+}
+
+// NotExists appends the `NOT EXISTS` predicate with the given query.
+func (p *Predicate) NotExists(query Querier) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.WriteString("NOT EXISTS ")
+		b.Nested(func(b *Builder) {
+			b.Join(query)
+		})
+	})
+}
+
 // Like returns the `LIKE` predicate.
 func Like(col, pattern string) *Predicate {
 	return P().Like(col, pattern)

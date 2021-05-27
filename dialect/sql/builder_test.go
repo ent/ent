@@ -514,6 +514,23 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"BAR", "BAZ"},
 		},
 		{
+			input: func() Querier {
+				t1, t2 := Table("users"), Table("pets")
+				return Dialect(dialect.Postgres).
+					Select().
+					From(t1).
+					Where(GT(t1.C("age"), 30)).
+					Where(
+						And(
+							Exists(Select().From(t2).Where(ColumnsEQ(t2.C("owner_id"), t1.C("id")))),
+							NotExists(Select().From(t2).Where(ColumnsEQ(t2.C("owner_id"), t1.C("id")))),
+						),
+					)
+			}(),
+			wantQuery: `SELECT * FROM "users" WHERE "users"."age" > $1 AND (EXISTS (SELECT * FROM "pets" WHERE "pets"."owner_id" = "users"."id") AND NOT EXISTS (SELECT * FROM "pets" WHERE "pets"."owner_id" = "users"."id"))`,
+			wantArgs:  []interface{}{30},
+		},
+		{
 			input: Update("users").
 				Set("name", "foo").
 				Set("age", 10).
