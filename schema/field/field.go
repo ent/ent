@@ -632,6 +632,13 @@ func (b *jsonBuilder) StorageKey(key string) *jsonBuilder {
 	return b
 }
 
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
+func (b *jsonBuilder) Nillable() *jsonBuilder {
+	b.desc.Nillable = true
+	return b
+}
+
 // Optional indicates that this field is optional on create.
 // Unlike edges, fields are required by default.
 func (b *jsonBuilder) Optional() *jsonBuilder {

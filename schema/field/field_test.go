@@ -439,8 +439,10 @@ func TestJSON(t *testing.T) {
 
 	fd = field.Strings("strings").
 		Optional().
+		Nillable().
 		Descriptor()
 	assert.True(t, fd.Optional)
+	assert.True(t, fd.Nillable)
 	assert.Empty(t, fd.Info.PkgPath)
 	assert.Equal(t, "strings", fd.Name)
 	assert.Equal(t, field.TypeJSON, fd.Info.Type)
