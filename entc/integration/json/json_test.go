@@ -193,9 +193,11 @@ func Dirs(t *testing.T, client *ent.Client) {
 
 func URL(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
+	usr := client.User.Create().SaveX(ctx)
+	require.Nil(t, usr.URL, "url field should be nil")
 	u, err := url.Parse("https://github.com/a8m")
 	require.NoError(t, err)
-	usr := client.User.Create().SetURL(u).SaveX(ctx)
+	usr = client.User.Create().SetURL(u).SaveX(ctx)
 	require.Equal(t, u, usr.URL)
 	require.Equal(t, u, client.User.GetX(ctx, usr.ID).URL)
 }
