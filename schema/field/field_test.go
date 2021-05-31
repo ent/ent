@@ -427,6 +427,18 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, field.TypeJSON, fd.Info.Type)
 	assert.Equal(t, "map[string]string", fd.Info.String())
 	assert.Equal(t, "comment", fd.Comment)
+	assert.True(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.RType.IsPtr())
+
+	type T struct{ S string }
+	fd = field.JSON("name", &T{}).
+		Descriptor()
+	assert.True(t, fd.Info.Nillable)
+	assert.Equal(t, "*field_test.T", fd.Info.Ident)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
+	assert.True(t, fd.Info.RType.IsPtr())
+	assert.Equal(t, "T", fd.Info.RType.Name)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.RType.PkgPath)
 
 	fd = field.JSON("dir", http.Dir("dir")).
 		Optional().
@@ -436,6 +448,7 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, "dir", fd.Name)
 	assert.Equal(t, "net/http", fd.Info.PkgPath)
 	assert.Equal(t, "http.Dir", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
 
 	fd = field.Strings("strings").
 		Optional().
