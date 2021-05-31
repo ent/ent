@@ -72,20 +72,21 @@ func Time(name string) *timeBuilder {
 //
 func JSON(name string, typ interface{}) *jsonBuilder {
 	t := reflect.TypeOf(typ)
-	info := &TypeInfo{
-		Type:    TypeJSON,
-		Ident:   t.String(),
-		PkgPath: t.PkgPath(),
-	}
+	b := &jsonBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{
+			Type:    TypeJSON,
+			Ident:   t.String(),
+			PkgPath: t.PkgPath(),
+		},
+	}}
+	b.desc.goType(typ, t)
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
-		info.Nillable = true
-		info.PkgPath = pkgPath(t)
+		b.desc.Info.Nillable = true
+		b.desc.Info.PkgPath = pkgPath(t)
 	}
-	return &jsonBuilder{&Descriptor{
-		Name: name,
-		Info: info,
-	}}
+	return b
 }
 
 // Strings returns a new JSON Field with type []string.
