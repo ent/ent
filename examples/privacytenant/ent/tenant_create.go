@@ -56,6 +56,7 @@ func (tc *TenantCreate) Save(ctx context.Context) (*Tenant, error) {
 			}
 			tc.mutation = mutation
 			node, err = tc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -161,6 +162,7 @@ func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

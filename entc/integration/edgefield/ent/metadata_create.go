@@ -91,6 +91,7 @@ func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 			}
 			mc.mutation = mutation
 			node, err = mc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -226,6 +227,7 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

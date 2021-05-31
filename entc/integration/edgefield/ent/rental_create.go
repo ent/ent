@@ -90,6 +90,7 @@ func (rc *RentalCreate) Save(ctx context.Context) (*Rental, error) {
 			}
 			rc.mutation = mutation
 			node, err = rc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -251,6 +252,7 @@ func (rcb *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

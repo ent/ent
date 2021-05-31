@@ -171,6 +171,7 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 			}
 			fc.mutation = mutation
 			node, err = fc.gremlinSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})

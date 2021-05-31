@@ -101,6 +101,7 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 			}
 			ftc.mutation = mutation
 			node, err = ftc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -265,6 +266,7 @@ func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

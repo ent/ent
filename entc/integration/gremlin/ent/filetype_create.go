@@ -103,6 +103,7 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 			}
 			ftc.mutation = mutation
 			node, err = ftc.gremlinSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})

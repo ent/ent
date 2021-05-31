@@ -152,6 +152,30 @@ func TestDeletion(t *testing.T) {
 	require.Zero(t, client.Card.Query().CountX(ctx))
 }
 
+func TestPostCreation(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	client.Card.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
+			id, exists := m.ID()
+			require.False(t, exists, "id should not exist pre mutation")
+			require.Zero(t, id)
+			value, err := next.Mutate(ctx, m)
+			if err != nil {
+				return nil, err
+			}
+			id, exists = m.ID()
+			require.True(t, exists, "id should exist post mutation")
+			require.NotZero(t, id)
+			require.True(t, id == value.(*ent.Card).ID)
+			return value, nil
+		})
+	}, ent.OpCreate))
+	client.Card.Create().SetNumber("12345").SetName("a8m").SaveX(ctx)
+	client.Card.CreateBulk(client.Card.Create().SetNumber("12345")).SaveX(ctx)
+}
+
 func TestOldValues(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))

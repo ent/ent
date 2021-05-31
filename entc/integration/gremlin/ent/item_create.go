@@ -50,6 +50,7 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 			}
 			ic.mutation = mutation
 			node, err = ic.gremlinSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})

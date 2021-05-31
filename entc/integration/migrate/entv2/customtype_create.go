@@ -63,6 +63,7 @@ func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 			}
 			ctc.mutation = mutation
 			node, err = ctc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -160,6 +161,7 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

@@ -91,6 +91,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 			}
 			gc.mutation = mutation
 			node, err = gc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -230,6 +231,7 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

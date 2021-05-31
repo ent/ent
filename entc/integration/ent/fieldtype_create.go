@@ -726,6 +726,7 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 			}
 			ftc.mutation = mutation
 			node, err = ftc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -1381,6 +1382,7 @@ func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error)
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

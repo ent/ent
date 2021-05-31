@@ -76,6 +76,7 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 			}
 			cc.mutation = mutation
 			node, err = cc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -195,6 +196,7 @@ func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

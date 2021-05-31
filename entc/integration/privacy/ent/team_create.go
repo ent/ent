@@ -88,6 +88,7 @@ func (tc *TeamCreate) Save(ctx context.Context) (*Team, error) {
 			}
 			tc.mutation = mutation
 			node, err = tc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -231,6 +232,7 @@ func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

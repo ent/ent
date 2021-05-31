@@ -134,6 +134,7 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 			}
 			pc.mutation = mutation
 			node, err = pc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -317,6 +318,7 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

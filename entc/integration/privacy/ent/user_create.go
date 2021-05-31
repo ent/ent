@@ -102,6 +102,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			}
 			uc.mutation = mutation
 			node, err = uc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -253,6 +254,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

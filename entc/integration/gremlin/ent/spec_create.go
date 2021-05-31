@@ -65,6 +65,7 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 			}
 			sc.mutation = mutation
 			node, err = sc.gremlinSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
