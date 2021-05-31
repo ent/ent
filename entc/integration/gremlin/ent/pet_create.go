@@ -120,6 +120,7 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 			}
 			pc.mutation = mutation
 			node, err = pc.gremlinSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})

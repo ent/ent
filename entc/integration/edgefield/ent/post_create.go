@@ -76,6 +76,7 @@ func (pc *PostCreate) Save(ctx context.Context) (*Post, error) {
 			}
 			pc.mutation = mutation
 			node, err = pc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -196,6 +197,7 @@ func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

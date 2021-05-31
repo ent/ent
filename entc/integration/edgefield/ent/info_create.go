@@ -83,6 +83,7 @@ func (ic *InfoCreate) Save(ctx context.Context) (*Info, error) {
 			}
 			ic.mutation = mutation
 			node, err = ic.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -209,6 +210,7 @@ func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

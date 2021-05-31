@@ -49,6 +49,7 @@ func (gc *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
 			}
 			gc.mutation = mutation
 			node, err = gc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -138,6 +139,7 @@ func (gcb *GoodsCreateBulk) Save(ctx context.Context) ([]*Goods, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

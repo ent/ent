@@ -139,8 +139,8 @@ func (m *BlobMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *BlobMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -584,8 +584,8 @@ func (m *CarMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CarMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1165,8 +1165,8 @@ func (m *DocMutation) SetID(id schema.DocID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *DocMutation) ID() (id schema.DocID, exists bool) {
 	if m.id == nil {
 		return
@@ -1628,8 +1628,8 @@ func (m *GroupMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *GroupMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1950,8 +1950,8 @@ func (m *MixinIDMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *MixinIDMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -2301,8 +2301,8 @@ func (m *NoteMutation) SetID(id schema.NoteID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *NoteMutation) ID() (id schema.NoteID, exists bool) {
 	if m.id == nil {
 		return
@@ -2771,8 +2771,8 @@ func (m *PetMutation) SetID(id string) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *PetMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -3295,8 +3295,8 @@ func (m *UserMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return

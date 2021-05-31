@@ -67,6 +67,7 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 			}
 			tc.mutation = mutation
 			node, err = tc.gremlinSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})

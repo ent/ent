@@ -65,6 +65,7 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 			}
 			sc.mutation = mutation
 			node, err = sc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -173,6 +174,7 @@ func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

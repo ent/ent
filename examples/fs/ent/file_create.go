@@ -105,6 +105,7 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 			}
 			fc.mutation = mutation
 			node, err = fc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -264,6 +265,7 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

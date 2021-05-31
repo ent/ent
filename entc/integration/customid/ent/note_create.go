@@ -113,6 +113,7 @@ func (nc *NoteCreate) Save(ctx context.Context) (*Note, error) {
 			}
 			nc.mutation = mutation
 			node, err = nc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -265,6 +266,7 @@ func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

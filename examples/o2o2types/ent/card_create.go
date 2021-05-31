@@ -75,6 +75,7 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 			}
 			cc.mutation = mutation
 			node, err = cc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -209,6 +210,7 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

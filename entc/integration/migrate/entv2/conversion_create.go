@@ -175,6 +175,7 @@ func (cc *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
 			}
 			cc.mutation = mutation
 			node, err = cc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -336,6 +337,7 @@ func (ccb *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

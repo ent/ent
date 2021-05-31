@@ -76,6 +76,7 @@ func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
 			}
 			sc.mutation = mutation
 			node, err = sc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -196,6 +197,7 @@ func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

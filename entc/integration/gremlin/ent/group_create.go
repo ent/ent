@@ -166,6 +166,7 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 			}
 			gc.mutation = mutation
 			node, err = gc.gremlinSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})

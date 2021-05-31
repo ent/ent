@@ -104,6 +104,7 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 			}
 			nc.mutation = mutation
 			node, err = nc.gremlinSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})

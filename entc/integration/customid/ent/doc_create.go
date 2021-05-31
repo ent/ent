@@ -113,6 +113,7 @@ func (dc *DocCreate) Save(ctx context.Context) (*Doc, error) {
 			}
 			dc.mutation = mutation
 			node, err = dc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -265,6 +266,7 @@ func (dcb *DocCreateBulk) Save(ctx context.Context) ([]*Doc, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err

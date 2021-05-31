@@ -98,6 +98,7 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 			}
 			bc.mutation = mutation
 			node, err = bc.sqlSave(ctx)
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
@@ -252,6 +253,7 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 						}
 					}
 				}
+				mutation.id = &nodes[i].ID
 				mutation.done = true
 				if err != nil {
 					return nil, err
