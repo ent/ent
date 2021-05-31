@@ -382,6 +382,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "Sacro",
+      "name": "Sacro",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2659869?v=4",
+      "profile": "https://github.com/Sacro",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
