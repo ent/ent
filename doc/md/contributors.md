@@ -61,6 +61,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://blog.scaleprocess.net"><img src="https://avatars.githubusercontent.com/u/862607?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Benjamin Bourgeais</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=sywesk" title="Code">💻</a></td>
     <td align="center"><a href="https://about.8ay.ac/"><img src="https://avatars.githubusercontent.com/u/29266382?v=4?s=100" width="100px;" alt=""/><br /><sub><b>8ayac(Yoshinori Hayashi)</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=8ayac" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/y-yagi"><img src="https://avatars.githubusercontent.com/u/987638?v=4?s=100" width="100px;" alt=""/><br /><sub><b>y-yagi</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=y-yagi" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/Sacro"><img src="https://avatars.githubusercontent.com/u/2659869?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ben Woodward</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=Sacro" title="Code">💻</a></td>
   </tr>
 </table>
 
