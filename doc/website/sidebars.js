@@ -60,6 +60,7 @@ module.exports = {
         'feature-flags',
         'translations',
         'contributors',
+        'writing-docs',
         'slack'
       ],
       collapsed: false,
