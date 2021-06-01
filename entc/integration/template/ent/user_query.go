@@ -33,10 +33,9 @@ type UserQuery struct {
 	// eager-loading edges.
 	withPets    *PetQuery
 	withFriends *UserQuery
-
 	// additional query fields.
-	extra string
-
+	extra     string
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -588,6 +587,9 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = uq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	for _, m := range uq.modifiers {
+		m(selector)
+	}
 	for _, p := range uq.predicates {
 		p(selector)
 	}
@@ -603,6 +605,11 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+func (uq *UserQuery) Modify(modifier func(s *sql.Selector)) *UserQuery {
+	uq.modifiers = append(uq.modifiers, modifier)
+	return uq
 }
 
 // UserGroupBy is the group-by builder for User entities.
