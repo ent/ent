@@ -474,10 +474,14 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 func (ftq *FileTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ftq.driver.Dialect())
 	t1 := builder.Table(filetype.Table)
-	selector := builder.Select(t1.Columns(filetype.Columns...)...).From(t1)
+	columns := ftq.fields
+	if len(columns) == 0 {
+		columns = filetype.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if ftq.sql != nil {
 		selector = ftq.sql
-		selector.Select(selector.Columns(filetype.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range ftq.predicates {
 		p(selector)
@@ -978,16 +982,10 @@ func (fts *FileTypeSelect) BoolX(ctx context.Context) bool {
 
 func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := fts.sqlQuery().Query()
+	query, args := fts.sql.Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (fts *FileTypeSelect) sqlQuery() sql.Querier {
-	selector := fts.sql
-	selector.Select(selector.Columns(fts.fields...)...)
-	return selector
 }

@@ -378,10 +378,14 @@ func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 func (iq *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(iq.driver.Dialect())
 	t1 := builder.Table(item.Table)
-	selector := builder.Select(t1.Columns(item.Columns...)...).From(t1)
+	columns := iq.fields
+	if len(columns) == 0 {
+		columns = item.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if iq.sql != nil {
 		selector = iq.sql
-		selector.Select(selector.Columns(item.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range iq.predicates {
 		p(selector)
@@ -882,16 +886,10 @@ func (is *ItemSelect) BoolX(ctx context.Context) bool {
 
 func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := is.sqlQuery().Query()
+	query, args := is.sql.Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (is *ItemSelect) sqlQuery() sql.Querier {
-	selector := is.sql
-	selector.Select(selector.Columns(is.fields...)...)
-	return selector
 }

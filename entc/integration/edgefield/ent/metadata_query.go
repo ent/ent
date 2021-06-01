@@ -470,10 +470,14 @@ func (mq *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
 func (mq *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(mq.driver.Dialect())
 	t1 := builder.Table(metadata.Table)
-	selector := builder.Select(t1.Columns(metadata.Columns...)...).From(t1)
+	columns := mq.fields
+	if len(columns) == 0 {
+		columns = metadata.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if mq.sql != nil {
 		selector = mq.sql
-		selector.Select(selector.Columns(metadata.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range mq.predicates {
 		p(selector)
@@ -974,16 +978,10 @@ func (ms *MetadataSelect) BoolX(ctx context.Context) bool {
 
 func (ms *MetadataSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ms.sqlQuery().Query()
+	query, args := ms.sql.Query()
 	if err := ms.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ms *MetadataSelect) sqlQuery() sql.Querier {
-	selector := ms.sql
-	selector.Select(selector.Columns(ms.fields...)...)
-	return selector
 }
