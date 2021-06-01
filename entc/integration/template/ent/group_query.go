@@ -28,10 +28,9 @@ type GroupQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Group
-
 	// additional query fields.
-	extra string
-
+	extra     string
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -415,6 +414,9 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = gq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	for _, m := range gq.modifiers {
+		m(selector)
+	}
 	for _, p := range gq.predicates {
 		p(selector)
 	}
@@ -430,6 +432,11 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+func (gq *GroupQuery) Modify(modifier func(s *sql.Selector)) *GroupQuery {
+	gq.modifiers = append(gq.modifiers, modifier)
+	return gq
 }
 
 // GroupGroupBy is the group-by builder for Group entities.

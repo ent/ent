@@ -32,10 +32,9 @@ type PetQuery struct {
 	// eager-loading edges.
 	withOwner *UserQuery
 	withFKs   bool
-
 	// additional query fields.
-	extra string
-
+	extra     string
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -494,6 +493,9 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = pq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	for _, m := range pq.modifiers {
+		m(selector)
+	}
 	for _, p := range pq.predicates {
 		p(selector)
 	}
@@ -509,6 +511,11 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+func (pq *PetQuery) Modify(modifier func(s *sql.Selector)) *PetQuery {
+	pq.modifiers = append(pq.modifiers, modifier)
+	return pq
 }
 
 // PetGroupBy is the group-by builder for Pet entities.
