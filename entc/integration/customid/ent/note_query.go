@@ -547,10 +547,14 @@ func (nq *NoteQuery) querySpec() *sqlgraph.QuerySpec {
 func (nq *NoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(nq.driver.Dialect())
 	t1 := builder.Table(note.Table)
-	selector := builder.Select(t1.Columns(note.Columns...)...).From(t1)
+	columns := nq.fields
+	if len(columns) == 0 {
+		columns = note.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if nq.sql != nil {
 		selector = nq.sql
-		selector.Select(selector.Columns(note.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range nq.predicates {
 		p(selector)
@@ -1051,16 +1055,10 @@ func (ns *NoteSelect) BoolX(ctx context.Context) bool {
 
 func (ns *NoteSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ns.sqlQuery().Query()
+	query, args := ns.sql.Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ns *NoteSelect) sqlQuery() sql.Querier {
-	selector := ns.sql
-	selector.Select(selector.Columns(ns.fields...)...)
-	return selector
 }

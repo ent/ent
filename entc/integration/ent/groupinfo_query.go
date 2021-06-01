@@ -474,10 +474,14 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(giq.driver.Dialect())
 	t1 := builder.Table(groupinfo.Table)
-	selector := builder.Select(t1.Columns(groupinfo.Columns...)...).From(t1)
+	columns := giq.fields
+	if len(columns) == 0 {
+		columns = groupinfo.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if giq.sql != nil {
 		selector = giq.sql
-		selector.Select(selector.Columns(groupinfo.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range giq.predicates {
 		p(selector)
@@ -978,16 +982,10 @@ func (gis *GroupInfoSelect) BoolX(ctx context.Context) bool {
 
 func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := gis.sqlQuery().Query()
+	query, args := gis.sql.Query()
 	if err := gis.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (gis *GroupInfoSelect) sqlQuery() sql.Querier {
-	selector := gis.sql
-	selector.Select(selector.Columns(gis.fields...)...)
-	return selector
 }

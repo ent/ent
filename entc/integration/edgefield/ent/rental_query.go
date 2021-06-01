@@ -533,10 +533,14 @@ func (rq *RentalQuery) querySpec() *sqlgraph.QuerySpec {
 func (rq *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rq.driver.Dialect())
 	t1 := builder.Table(rental.Table)
-	selector := builder.Select(t1.Columns(rental.Columns...)...).From(t1)
+	columns := rq.fields
+	if len(columns) == 0 {
+		columns = rental.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if rq.sql != nil {
 		selector = rq.sql
-		selector.Select(selector.Columns(rental.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range rq.predicates {
 		p(selector)
@@ -1037,16 +1041,10 @@ func (rs *RentalSelect) BoolX(ctx context.Context) bool {
 
 func (rs *RentalSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := rs.sqlQuery().Query()
+	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (rs *RentalSelect) sqlQuery() sql.Querier {
-	selector := rs.sql
-	selector.Select(selector.Columns(rs.fields...)...)
-	return selector
 }

@@ -1802,6 +1802,12 @@ func (s *Selector) Select(columns ...string) *Selector {
 	return s
 }
 
+// AppendSelect appends additional columns/expressions to the SELECT statement.
+func (s *Selector) AppendSelect(columns ...string) *Selector {
+	s.columns = append(s.columns, columns...)
+	return s
+}
+
 // SelectedColumns returns the selected columns of the Selector.
 func (s *Selector) SelectedColumns() []string {
 	return s.columns

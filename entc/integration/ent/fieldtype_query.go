@@ -407,10 +407,14 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 func (ftq *FieldTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ftq.driver.Dialect())
 	t1 := builder.Table(fieldtype.Table)
-	selector := builder.Select(t1.Columns(fieldtype.Columns...)...).From(t1)
+	columns := ftq.fields
+	if len(columns) == 0 {
+		columns = fieldtype.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if ftq.sql != nil {
 		selector = ftq.sql
-		selector.Select(selector.Columns(fieldtype.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range ftq.predicates {
 		p(selector)
@@ -911,16 +915,10 @@ func (fts *FieldTypeSelect) BoolX(ctx context.Context) bool {
 
 func (fts *FieldTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := fts.sqlQuery().Query()
+	query, args := fts.sql.Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (fts *FieldTypeSelect) sqlQuery() sql.Querier {
-	selector := fts.sql
-	selector.Select(selector.Columns(fts.fields...)...)
-	return selector
 }

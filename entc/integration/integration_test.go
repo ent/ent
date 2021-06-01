@@ -818,6 +818,29 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Equal(bar.ID, v3[1].ID)
 	require.Equal(bar.Name, v3[1].Name)
 	require.Equal(7.5, v3[1].Average)
+
+	var v4 []struct {
+		ID    int    `sql:"id"`
+		Name  string `sql:"name"`
+		Owner string `sql:"owner"`
+	}
+	client.Pet.Query().
+		Where(func(s *entsql.Selector) {
+			t := entsql.Table(user.Table).As(user.Table)
+			s.Join(t).On(s.C(pet.OwnerColumn), t.C(user.FieldID)) // owner_id = id for edge fields.
+			s.AppendSelect(entsql.As(t.C(user.FieldName), "owner"))
+		}).
+		Order(ent.Asc(pet.FieldID)).
+		Select(pet.FieldID, pet.FieldName).
+		ScanX(ctx, &v4)
+	require.Equal(v4[0].Name, "a")
+	require.Equal(v4[0].Owner, "foo")
+	require.Equal(v4[1].Name, "b")
+	require.Equal(v4[1].Owner, "foo")
+	require.Equal(v4[2].Name, "c")
+	require.Equal(v4[2].Owner, "bar")
+	require.Equal(v4[3].Name, "d")
+	require.Equal(v4[3].Owner, "bar")
 }
 
 func ClearFields(t *testing.T, client *ent.Client) {

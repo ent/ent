@@ -614,10 +614,14 @@ func (fq *FileQuery) querySpec() *sqlgraph.QuerySpec {
 func (fq *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(fq.driver.Dialect())
 	t1 := builder.Table(file.Table)
-	selector := builder.Select(t1.Columns(file.Columns...)...).From(t1)
+	columns := fq.fields
+	if len(columns) == 0 {
+		columns = file.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if fq.sql != nil {
 		selector = fq.sql
-		selector.Select(selector.Columns(file.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range fq.predicates {
 		p(selector)
@@ -1118,16 +1122,10 @@ func (fs *FileSelect) BoolX(ctx context.Context) bool {
 
 func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := fs.sqlQuery().Query()
+	query, args := fs.sql.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (fs *FileSelect) sqlQuery() sql.Querier {
-	selector := fs.sql
-	selector.Select(selector.Columns(fs.fields...)...)
-	return selector
 }
