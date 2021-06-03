@@ -439,8 +439,6 @@ func normalizePG(b *sql.Builder, arg interface{}, opts []Option) ([]Option, inte
 		base = append(base, Cast("float"))
 	case int8, int16, int32, int64, int, uint8, uint16, uint32, uint64:
 		base = append(base, Cast("int"))
-	default: // convert unknown types to text.
-		arg = marshal(arg)
 	}
 	return append(base, opts...), arg
 }
