@@ -63,6 +63,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/y-yagi"><img src="https://avatars.githubusercontent.com/u/987638?v=4?s=100" width="100px;" alt=""/><br /><sub><b>y-yagi</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=y-yagi" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/Sacro"><img src="https://avatars.githubusercontent.com/u/2659869?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ben Woodward</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=Sacro" title="Code">💻</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/wzyjerry"><img src="https://avatars.githubusercontent.com/u/11435169?v=4?s=100" width="100px;" alt=""/><br /><sub><b>WzyJerry</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=wzyjerry" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
