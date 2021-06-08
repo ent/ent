@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -24,6 +25,8 @@ func (User) Fields() []ent.Field {
 		field.Int32("age"),
 		field.String("name").
 			MaxLen(10),
+		field.Text("description").
+			Optional(),
 		field.String("nickname").
 			Unique(),
 		field.String("address").
@@ -58,6 +61,8 @@ func (User) Edges() []ent.Edge {
 
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("description").
+			Annotations(entsql.Prefix(50)),
 		index.Fields("name", "address").
 			Unique(),
 	}

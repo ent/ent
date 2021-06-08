@@ -80,10 +80,9 @@ var (
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
-		Name:        "groups",
-		Columns:     GroupsColumns,
-		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "groups",
+		Columns:    GroupsColumns,
+		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 	}
 	// MixinIdsColumns holds the columns for the "mixin_ids" table.
 	MixinIdsColumns = []*schema.Column{
@@ -93,10 +92,9 @@ var (
 	}
 	// MixinIdsTable holds the schema information for the "mixin_ids" table.
 	MixinIdsTable = &schema.Table{
-		Name:        "mixin_ids",
-		Columns:     MixinIdsColumns,
-		PrimaryKey:  []*schema.Column{MixinIdsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "mixin_ids",
+		Columns:    MixinIdsColumns,
+		PrimaryKey: []*schema.Column{MixinIdsColumns[0]},
 		Indexes: []*schema.Index{
 			{
 				Name:    "mixinid_id",

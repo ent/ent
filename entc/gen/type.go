@@ -152,6 +152,9 @@ type (
 		Unique bool
 		// Columns are the table columns.
 		Columns []string
+		// Annotations that were defined for the index in the schema.
+		// The mapping is from the Annotation.Name() to a JSON decoded object.
+		Annotations Annotations
 	}
 
 	// ForeignKey holds the information for foreign-key columns of types.
@@ -525,9 +528,18 @@ func (t Type) TagTypes() []string {
 // AddIndex adds a new index for the type.
 // It fails if the schema index is invalid.
 func (t *Type) AddIndex(idx *load.Index) error {
-	index := &Index{Name: idx.StorageKey, Unique: idx.Unique}
+	index := &Index{Name: idx.StorageKey, Unique: idx.Unique, Annotations: idx.Annotations}
 	if len(idx.Fields) == 0 && len(idx.Edges) == 0 {
 		return fmt.Errorf("missing fields or edges")
+	}
+	switch ant := entsqlIndexAnnotate(idx.Annotations); {
+	case ant == nil:
+	case len(ant.PrefixColumns) != 0 && ant.Prefix != 0:
+		return fmt.Errorf("index %q cannot contain both entsql.Prefix and entsql.PrefixColumn in annotation", index.Name)
+	case ant.Prefix != 0 && len(idx.Fields)+len(idx.Edges) != 1:
+		return fmt.Errorf("entsql.Prefix is used in a multicolumn index %q. Use entsql.PrefixColumn instead", index.Name)
+	case len(ant.PrefixColumns) > len(idx.Fields)+len(idx.Fields):
+		return fmt.Errorf("index %q has more entsql.PrefixColumn than column in its definitions", index.Name)
 	}
 	for _, name := range idx.Fields {
 		var f *Field
@@ -539,9 +551,6 @@ func (t *Type) AddIndex(idx *load.Index) error {
 			if !ok {
 				return fmt.Errorf("unknown index field %q", name)
 			}
-		}
-		if f.def.Size != nil && *f.def.Size > schema.DefaultStringLen {
-			return fmt.Errorf("field %q exceeds the index size limit (%d)", name, schema.DefaultStringLen)
 		}
 		index.Columns = append(index.Columns, f.StorageKey())
 	}
@@ -1625,6 +1634,18 @@ func builderField(name string) string {
 // entsqlAnnotate extracts the entsql annotation from a loaded annotation format.
 func entsqlAnnotate(annotation map[string]interface{}) *entsql.Annotation {
 	annotate := &entsql.Annotation{}
+	if annotation == nil || annotation[annotate.Name()] == nil {
+		return nil
+	}
+	if buf, err := json.Marshal(annotation[annotate.Name()]); err == nil {
+		_ = json.Unmarshal(buf, &annotate)
+	}
+	return annotate
+}
+
+// entsqlIndexAnnotate extracts the entsql annotation from a loaded annotation format.
+func entsqlIndexAnnotate(annotation map[string]interface{}) *entsql.IndexAnnotation {
+	annotate := &entsql.IndexAnnotation{}
 	if annotation == nil || annotation[annotate.Name()] == nil {
 		return nil
 	}

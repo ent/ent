@@ -23,6 +23,8 @@ type Media struct {
 	Source string `json:"source,omitempty"`
 	// SourceURI holds the value of the "source_uri" field.
 	SourceURI string `json:"source_uri,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -32,7 +34,7 @@ func (*Media) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case media.FieldID:
 			values[i] = new(sql.NullInt64)
-		case media.FieldSource, media.FieldSourceURI:
+		case media.FieldSource, media.FieldSourceURI, media.FieldText:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Media", columns[i])
@@ -67,6 +69,12 @@ func (m *Media) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				m.SourceURI = value.String
 			}
+		case media.FieldText:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field text", values[i])
+			} else if value.Valid {
+				m.Text = value.String
+			}
 		}
 	}
 	return nil
@@ -99,6 +107,8 @@ func (m *Media) String() string {
 	builder.WriteString(m.Source)
 	builder.WriteString(", source_uri=")
 	builder.WriteString(m.SourceURI)
+	builder.WriteString(", text=")
+	builder.WriteString(m.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

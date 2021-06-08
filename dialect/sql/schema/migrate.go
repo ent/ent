@@ -385,6 +385,13 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 		case idx1.Unique != idx2.Unique:
 			change.index.drop.append(idx2)
 			change.index.add.append(idx1)
+		default:
+			im, ok := m.sqlDialect.(interface{ indexModified(old, new *Index) bool })
+			// If the dialect supports comparing indexes.
+			if ok && im.indexModified(idx2, idx1) {
+				change.index.drop.append(idx2)
+				change.index.add.append(idx1)
+			}
 		}
 	}
 

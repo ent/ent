@@ -21,10 +21,9 @@ var (
 	}
 	// UsersTable holds the schema information for the "Users" table.
 	UsersTable = &schema.Table{
-		Name:        "Users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "Users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{

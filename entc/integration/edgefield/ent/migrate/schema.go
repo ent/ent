@@ -19,10 +19,9 @@ var (
 	}
 	// CarsTable holds the schema information for the "cars" table.
 	CarsTable = &schema.Table{
-		Name:        "cars",
-		Columns:     CarsColumns,
-		PrimaryKey:  []*schema.Column{CarsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "cars",
+		Columns:    CarsColumns,
+		PrimaryKey: []*schema.Column{CarsColumns[0]},
 	}
 	// CardsColumns holds the columns for the "cards" table.
 	CardsColumns = []*schema.Column{

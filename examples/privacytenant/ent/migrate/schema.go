@@ -39,10 +39,9 @@ var (
 	}
 	// TenantsTable holds the schema information for the "tenants" table.
 	TenantsTable = &schema.Table{
-		Name:        "tenants",
-		Columns:     TenantsColumns,
-		PrimaryKey:  []*schema.Column{TenantsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "tenants",
+		Columns:    TenantsColumns,
+		PrimaryKey: []*schema.Column{TenantsColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{

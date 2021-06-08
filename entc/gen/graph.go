@@ -507,6 +507,9 @@ func (g *Graph) Tables() (all []*schema.Table) {
 		table := tables[n.Table()]
 		for _, idx := range n.Indexes {
 			table.AddIndex(idx.Name, idx.Unique, idx.Columns)
+			// Set the entsql.IndexAnnotation from the schema if exists.
+			index, _ := table.Index(idx.Name)
+			index.Annotation = entsqlIndexAnnotate(idx.Annotations)
 		}
 	}
 	return

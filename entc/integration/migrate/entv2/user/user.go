@@ -24,6 +24,8 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
 	// FieldPhone holds the string denoting the phone field in the database.
@@ -81,6 +83,7 @@ var Columns = []string{
 	FieldMixedEnum,
 	FieldAge,
 	FieldName,
+	FieldDescription,
 	FieldNickname,
 	FieldPhone,
 	FieldBuffer,
