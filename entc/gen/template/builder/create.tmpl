@@ -58,7 +58,9 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 				return nil, err
 			}
 			{{ $mutation }} = mutation
-			node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx)
+			if node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx) ; err != nil {
+				return nil, err
+			}
 			mutation.{{ $.ID.BuilderField }} = &node.{{ $.ID.StructField }}
 			mutation.done = true
 			return node, err
