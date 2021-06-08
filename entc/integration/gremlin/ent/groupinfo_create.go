@@ -89,7 +89,9 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 				return nil, err
 			}
 			gic.mutation = mutation
-			node, err = gic.gremlinSave(ctx)
+			if node, err = gic.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err

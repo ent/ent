@@ -62,7 +62,9 @@ func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 				return nil, err
 			}
 			ctc.mutation = mutation
-			node, err = ctc.sqlSave(ctx)
+			if node, err = ctc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
@@ -161,11 +163,11 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 						}
 					}
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				id := specs[i].ID.Value.(int64)
 				nodes[i].ID = int(id)
 				return nodes[i], nil

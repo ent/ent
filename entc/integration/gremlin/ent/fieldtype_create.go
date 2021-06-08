@@ -726,7 +726,9 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 				return nil, err
 			}
 			ftc.mutation = mutation
-			node, err = ftc.gremlinSave(ctx)
+			if node, err = ftc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err

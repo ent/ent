@@ -119,7 +119,9 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 				return nil, err
 			}
 			pc.mutation = mutation
-			node, err = pc.gremlinSave(ctx)
+			if node, err = pc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err

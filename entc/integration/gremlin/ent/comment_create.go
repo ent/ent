@@ -78,7 +78,9 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 				return nil, err
 			}
 			cc.mutation = mutation
-			node, err = cc.gremlinSave(ctx)
+			if node, err = cc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
