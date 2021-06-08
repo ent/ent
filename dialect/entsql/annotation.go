@@ -158,3 +158,100 @@ const (
 	SetNull    ReferenceOption = "SET NULL"
 	SetDefault ReferenceOption = "SET DEFAULT"
 )
+
+// IndexAnnotation is a builtin schema annotation for attaching
+// SQL metadata to schema indexes for both codegen and runtime.
+type IndexAnnotation struct {
+	// Prefix defines a column prefix for a single string column index.
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("column").
+	//		Annotation(entsql.Prefix(100))
+	//
+	//	CREATE INDEX `table_column` ON `table`(`column`(100))
+	//
+	Prefix uint
+
+	// PrefixColumns defines column prefixes for a multi column index.
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("c1", "c2", "c3").
+	//		Annotation(
+	//			entsql.PrefixColumn("c1", 100),
+	//			entsql.PrefixColumn("c2", 200),
+	//		)
+	//
+	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1`(100), `c2`(200), `c3`)
+	//
+	PrefixColumns map[string]uint
+}
+
+// Prefix returns a new index annotation with a single string column index.
+// In MySQL, the following annotation maps to:
+//
+//	index.Fields("column").
+//		Annotation(entsql.Prefix(100))
+//
+//	CREATE INDEX `table_column` ON `table`(`column`(100))
+//
+func Prefix(prefix uint) *IndexAnnotation {
+	return &IndexAnnotation{
+		Prefix: prefix,
+	}
+}
+
+// PrefixColumns returns a new index annotation with column prefix for
+// multi-column indexes. In MySQL, the following annotation maps to:
+//
+//	index.Fields("c1", "c2", "c3").
+//		Annotation(
+//			entsql.PrefixColumn("c1", 100),
+//			entsql.PrefixColumn("c2", 200),
+//		)
+//
+//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1`(100), `c2`(200), `c3`)
+//
+func PrefixColumn(name string, prefix uint) *IndexAnnotation {
+	return &IndexAnnotation{
+		PrefixColumns: map[string]uint{
+			name: prefix,
+		},
+	}
+}
+
+// Name describes the annotation name.
+func (IndexAnnotation) Name() string {
+	return "EntSQLIndexes"
+}
+
+// Merge implements the schema.Merger interface.
+func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
+	var ant IndexAnnotation
+	switch other := other.(type) {
+	case IndexAnnotation:
+		ant = other
+	case *IndexAnnotation:
+		if other != nil {
+			ant = *other
+		}
+	default:
+		return a
+	}
+	if ant.Prefix != 0 {
+		a.Prefix = ant.Prefix
+	}
+	if ant.PrefixColumns != nil {
+		if a.PrefixColumns == nil {
+			a.PrefixColumns = make(map[string]uint)
+		}
+		for column, prefix := range ant.PrefixColumns {
+			a.PrefixColumns[column] = prefix
+		}
+	}
+	return a
+}
+
+var (
+	_ schema.Annotation = (*IndexAnnotation)(nil)
+	_ schema.Merger     = (*IndexAnnotation)(nil)
+)

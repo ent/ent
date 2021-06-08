@@ -49,6 +49,9 @@ func (User) Fields() []ent.Field {
 		field.Int("age"),
 		// extending name field to longtext.
 		field.Text("name"),
+		// extending the index prefix below (on MySQL).
+		field.Text("description").
+			Optional(),
 		// changing nickname from unique no non-unique.
 		field.String("nickname").
 			MaxLen(255),
@@ -113,6 +116,10 @@ func (User) Edges() []ent.Edge {
 
 func (User) Indexes() []ent.Index {
 	return []ent.Index{
+		// Extend the column prefix by drop and create
+		// this index on MySQL.
+		index.Fields("description").
+			Annotations(entsql.Prefix(100)),
 		// deleting old indexes (name, address),
 		// and defining a new one.
 		index.Fields("phone", "age").

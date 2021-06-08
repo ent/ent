@@ -19,10 +19,9 @@ var (
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
-		Name:        "groups",
-		Columns:     GroupsColumns,
-		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "groups",
+		Columns:    GroupsColumns,
+		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
@@ -52,10 +51,9 @@ var (
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
 	// UserFriendsColumns holds the columns for the "user_friends" table.
 	UserFriendsColumns = []*schema.Column{

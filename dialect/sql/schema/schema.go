@@ -112,6 +112,15 @@ func (t *Table) column(name string) (*Column, bool) {
 	return nil, false
 }
 
+// Index returns a table index by its exact name.
+func (t *Table) Index(name string) (*Index, bool) {
+	idx, ok := t.index(name)
+	if ok && idx.Name == name {
+		return idx, ok
+	}
+	return nil, false
+}
+
 // index returns a table index by its name.
 func (t *Table) index(name string) (*Index, bool) {
 	for _, idx := range t.Indexes {
@@ -407,12 +416,13 @@ func (r ReferenceOption) ConstName() string {
 
 // Index definition for table index.
 type Index struct {
-	Name     string    // index name.
-	Unique   bool      // uniqueness.
-	Columns  []*Column // actual table columns.
-	columns  []string  // columns loaded from query scan.
-	primary  bool      // primary key index.
-	realname string    // real name in the database (Postgres only).
+	Name       string                  // index name.
+	Unique     bool                    // uniqueness.
+	Columns    []*Column               // actual table columns.
+	Annotation *entsql.IndexAnnotation // index annotation.
+	columns    []string                // columns loaded from query scan.
+	primary    bool                    // primary key index.
+	realname   string                  // real name in the database (Postgres only).
 }
 
 // Builder returns the query builder for index creation. The DSL is identical in all dialects.

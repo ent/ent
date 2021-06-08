@@ -19,10 +19,9 @@ var (
 	}
 	// CitiesTable holds the schema information for the "cities" table.
 	CitiesTable = &schema.Table{
-		Name:        "cities",
-		Columns:     CitiesColumns,
-		PrimaryKey:  []*schema.Column{CitiesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "cities",
+		Columns:    CitiesColumns,
+		PrimaryKey: []*schema.Column{CitiesColumns[0]},
 	}
 	// StreetsColumns holds the columns for the "streets" table.
 	StreetsColumns = []*schema.Column{

@@ -70,6 +70,26 @@ func (mu *MediaUpdate) ClearSourceURI() *MediaUpdate {
 	return mu
 }
 
+// SetText sets the "text" field.
+func (mu *MediaUpdate) SetText(s string) *MediaUpdate {
+	mu.mutation.SetText(s)
+	return mu
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (mu *MediaUpdate) SetNillableText(s *string) *MediaUpdate {
+	if s != nil {
+		mu.SetText(*s)
+	}
+	return mu
+}
+
+// ClearText clears the value of the "text" field.
+func (mu *MediaUpdate) ClearText() *MediaUpdate {
+	mu.mutation.ClearText()
+	return mu
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (mu *MediaUpdate) Mutation() *MediaMutation {
 	return mu.mutation
@@ -170,6 +190,19 @@ func (mu *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: media.FieldSourceURI,
 		})
 	}
+	if value, ok := mu.mutation.Text(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: media.FieldText,
+		})
+	}
+	if mu.mutation.TextCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: media.FieldText,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{media.Label}
@@ -226,6 +259,26 @@ func (muo *MediaUpdateOne) SetNillableSourceURI(s *string) *MediaUpdateOne {
 // ClearSourceURI clears the value of the "source_uri" field.
 func (muo *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
 	muo.mutation.ClearSourceURI()
+	return muo
+}
+
+// SetText sets the "text" field.
+func (muo *MediaUpdateOne) SetText(s string) *MediaUpdateOne {
+	muo.mutation.SetText(s)
+	return muo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (muo *MediaUpdateOne) SetNillableText(s *string) *MediaUpdateOne {
+	if s != nil {
+		muo.SetText(*s)
+	}
+	return muo
+}
+
+// ClearText clears the value of the "text" field.
+func (muo *MediaUpdateOne) ClearText() *MediaUpdateOne {
+	muo.mutation.ClearText()
 	return muo
 }
 
@@ -351,6 +404,19 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: media.FieldSourceURI,
+		})
+	}
+	if value, ok := muo.mutation.Text(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: media.FieldText,
+		})
+	}
+	if muo.mutation.TextCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: media.FieldText,
 		})
 	}
 	_node = &Media{config: muo.config}

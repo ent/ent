@@ -63,10 +63,9 @@ var (
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{
-		Name:        "comments",
-		Columns:     CommentsColumns,
-		PrimaryKey:  []*schema.Column{CommentsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "comments",
+		Columns:    CommentsColumns,
+		PrimaryKey: []*schema.Column{CommentsColumns[0]},
 	}
 	// FieldTypesColumns holds the columns for the "field_types" table.
 	FieldTypesColumns = []*schema.Column{
@@ -219,10 +218,9 @@ var (
 	}
 	// FileTypesTable holds the schema information for the "file_types" table.
 	FileTypesTable = &schema.Table{
-		Name:        "file_types",
-		Columns:     FileTypesColumns,
-		PrimaryKey:  []*schema.Column{FileTypesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "file_types",
+		Columns:    FileTypesColumns,
+		PrimaryKey: []*schema.Column{FileTypesColumns[0]},
 	}
 	// GoodsColumns holds the columns for the "goods" table.
 	GoodsColumns = []*schema.Column{
@@ -230,10 +228,9 @@ var (
 	}
 	// GoodsTable holds the schema information for the "goods" table.
 	GoodsTable = &schema.Table{
-		Name:        "goods",
-		Columns:     GoodsColumns,
-		PrimaryKey:  []*schema.Column{GoodsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "goods",
+		Columns:    GoodsColumns,
+		PrimaryKey: []*schema.Column{GoodsColumns[0]},
 	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
@@ -267,10 +264,9 @@ var (
 	}
 	// GroupInfosTable holds the schema information for the "group_infos" table.
 	GroupInfosTable = &schema.Table{
-		Name:        "group_infos",
-		Columns:     GroupInfosColumns,
-		PrimaryKey:  []*schema.Column{GroupInfosColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "group_infos",
+		Columns:    GroupInfosColumns,
+		PrimaryKey: []*schema.Column{GroupInfosColumns[0]},
 	}
 	// ItemsColumns holds the columns for the "items" table.
 	ItemsColumns = []*schema.Column{
@@ -278,10 +274,9 @@ var (
 	}
 	// ItemsTable holds the schema information for the "items" table.
 	ItemsTable = &schema.Table{
-		Name:        "items",
-		Columns:     ItemsColumns,
-		PrimaryKey:  []*schema.Column{ItemsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "items",
+		Columns:    ItemsColumns,
+		PrimaryKey: []*schema.Column{ItemsColumns[0]},
 	}
 	// NodesColumns holds the columns for the "nodes" table.
 	NodesColumns = []*schema.Column{
@@ -345,10 +340,9 @@ var (
 	}
 	// SpecsTable holds the schema information for the "specs" table.
 	SpecsTable = &schema.Table{
-		Name:        "specs",
-		Columns:     SpecsColumns,
-		PrimaryKey:  []*schema.Column{SpecsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "specs",
+		Columns:    SpecsColumns,
+		PrimaryKey: []*schema.Column{SpecsColumns[0]},
 	}
 	// TasksColumns holds the columns for the "tasks" table.
 	TasksColumns = []*schema.Column{
@@ -357,10 +351,9 @@ var (
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{
-		Name:        "tasks",
-		Columns:     TasksColumns,
-		PrimaryKey:  []*schema.Column{TasksColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "tasks",
+		Columns:    TasksColumns,
+		PrimaryKey: []*schema.Column{TasksColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{

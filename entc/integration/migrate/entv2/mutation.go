@@ -1770,6 +1770,7 @@ type MediaMutation struct {
 	id            *int
 	source        *string
 	source_uri    *string
+	text          *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Media, error)
@@ -1953,6 +1954,55 @@ func (m *MediaMutation) ResetSourceURI() {
 	delete(m.clearedFields, media.FieldSourceURI)
 }
 
+// SetText sets the "text" field.
+func (m *MediaMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *MediaMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the Media entity.
+// If the Media object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MediaMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ClearText clears the value of the "text" field.
+func (m *MediaMutation) ClearText() {
+	m.text = nil
+	m.clearedFields[media.FieldText] = struct{}{}
+}
+
+// TextCleared returns if the "text" field was cleared in this mutation.
+func (m *MediaMutation) TextCleared() bool {
+	_, ok := m.clearedFields[media.FieldText]
+	return ok
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *MediaMutation) ResetText() {
+	m.text = nil
+	delete(m.clearedFields, media.FieldText)
+}
+
 // Op returns the operation name.
 func (m *MediaMutation) Op() Op {
 	return m.op
@@ -1967,12 +2017,15 @@ func (m *MediaMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MediaMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.source != nil {
 		fields = append(fields, media.FieldSource)
 	}
 	if m.source_uri != nil {
 		fields = append(fields, media.FieldSourceURI)
+	}
+	if m.text != nil {
+		fields = append(fields, media.FieldText)
 	}
 	return fields
 }
@@ -1986,6 +2039,8 @@ func (m *MediaMutation) Field(name string) (ent.Value, bool) {
 		return m.Source()
 	case media.FieldSourceURI:
 		return m.SourceURI()
+	case media.FieldText:
+		return m.Text()
 	}
 	return nil, false
 }
@@ -1999,6 +2054,8 @@ func (m *MediaMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldSource(ctx)
 	case media.FieldSourceURI:
 		return m.OldSourceURI(ctx)
+	case media.FieldText:
+		return m.OldText(ctx)
 	}
 	return nil, fmt.Errorf("unknown Media field %s", name)
 }
@@ -2021,6 +2078,13 @@ func (m *MediaMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSourceURI(v)
+		return nil
+	case media.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Media field %s", name)
@@ -2058,6 +2122,9 @@ func (m *MediaMutation) ClearedFields() []string {
 	if m.FieldCleared(media.FieldSourceURI) {
 		fields = append(fields, media.FieldSourceURI)
 	}
+	if m.FieldCleared(media.FieldText) {
+		fields = append(fields, media.FieldText)
+	}
 	return fields
 }
 
@@ -2078,6 +2145,9 @@ func (m *MediaMutation) ClearField(name string) error {
 	case media.FieldSourceURI:
 		m.ClearSourceURI()
 		return nil
+	case media.FieldText:
+		m.ClearText()
+		return nil
 	}
 	return fmt.Errorf("unknown Media nullable field %s", name)
 }
@@ -2091,6 +2161,9 @@ func (m *MediaMutation) ResetField(name string) error {
 		return nil
 	case media.FieldSourceURI:
 		m.ResetSourceURI()
+		return nil
+	case media.FieldText:
+		m.ResetText()
 		return nil
 	}
 	return fmt.Errorf("unknown Media field %s", name)
@@ -2449,6 +2522,7 @@ type UserMutation struct {
 	age            *int
 	addage         *int
 	name           *string
+	description    *string
 	nickname       *string
 	phone          *string
 	buffer         *[]byte
@@ -2720,6 +2794,55 @@ func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *UserMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *UserMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *UserMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[user.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *UserMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[user.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *UserMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, user.FieldDescription)
 }
 
 // SetNickname sets the "nickname" field.
@@ -3319,7 +3442,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 14)
+	fields := make([]string, 0, 15)
 	if m.mixed_string != nil {
 		fields = append(fields, user.FieldMixedString)
 	}
@@ -3331,6 +3454,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, user.FieldDescription)
 	}
 	if m.nickname != nil {
 		fields = append(fields, user.FieldNickname)
@@ -3378,6 +3504,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Age()
 	case user.FieldName:
 		return m.Name()
+	case user.FieldDescription:
+		return m.Description()
 	case user.FieldNickname:
 		return m.Nickname()
 	case user.FieldPhone:
@@ -3415,6 +3543,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldAge(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
+	case user.FieldDescription:
+		return m.OldDescription(ctx)
 	case user.FieldNickname:
 		return m.OldNickname(ctx)
 	case user.FieldPhone:
@@ -3471,6 +3601,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case user.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	case user.FieldNickname:
 		v, ok := value.(string)
@@ -3587,6 +3724,9 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(user.FieldDescription) {
+		fields = append(fields, user.FieldDescription)
+	}
 	if m.FieldCleared(user.FieldBuffer) {
 		fields = append(fields, user.FieldBuffer)
 	}
@@ -3619,6 +3759,9 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
+	case user.FieldDescription:
+		m.ClearDescription()
+		return nil
 	case user.FieldBuffer:
 		m.ClearBuffer()
 		return nil
@@ -3656,6 +3799,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldName:
 		m.ResetName()
+		return nil
+	case user.FieldDescription:
+		m.ResetDescription()
 		return nil
 	case user.FieldNickname:
 		m.ResetNickname()

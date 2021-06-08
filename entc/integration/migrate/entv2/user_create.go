@@ -66,6 +66,20 @@ func (uc *UserCreate) SetName(s string) *UserCreate {
 	return uc
 }
 
+// SetDescription sets the "description" field.
+func (uc *UserCreate) SetDescription(s string) *UserCreate {
+	uc.mutation.SetDescription(s)
+	return uc
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDescription(s *string) *UserCreate {
+	if s != nil {
+		uc.SetDescription(*s)
+	}
+	return uc
+}
+
 // SetNickname sets the "nickname" field.
 func (uc *UserCreate) SetNickname(s string) *UserCreate {
 	uc.mutation.SetNickname(s)
@@ -428,6 +442,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := uc.mutation.Description(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDescription,
+		})
+		_node.Description = value
 	}
 	if value, ok := uc.mutation.Nickname(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

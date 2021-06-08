@@ -80,6 +80,26 @@ func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	return uu
 }
 
+// SetDescription sets the "description" field.
+func (uu *UserUpdate) SetDescription(s string) *UserUpdate {
+	uu.mutation.SetDescription(s)
+	return uu
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDescription(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetDescription(*s)
+	}
+	return uu
+}
+
+// ClearDescription clears the value of the "description" field.
+func (uu *UserUpdate) ClearDescription() *UserUpdate {
+	uu.mutation.ClearDescription()
+	return uu
+}
+
 // SetNickname sets the "nickname" field.
 func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
 	uu.mutation.SetNickname(s)
@@ -469,6 +489,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldName,
 		})
 	}
+	if value, ok := uu.mutation.Description(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDescription,
+		})
+	}
+	if uu.mutation.DescriptionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldDescription,
+		})
+	}
 	if value, ok := uu.mutation.Nickname(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -781,6 +814,26 @@ func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
 // SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
+	return uuo
+}
+
+// SetDescription sets the "description" field.
+func (uuo *UserUpdateOne) SetDescription(s string) *UserUpdateOne {
+	uuo.mutation.SetDescription(s)
+	return uuo
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDescription(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetDescription(*s)
+	}
+	return uuo
+}
+
+// ClearDescription clears the value of the "description" field.
+func (uuo *UserUpdateOne) ClearDescription() *UserUpdateOne {
+	uuo.mutation.ClearDescription()
 	return uuo
 }
 
@@ -1195,6 +1248,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: user.FieldName,
+		})
+	}
+	if value, ok := uuo.mutation.Description(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDescription,
+		})
+	}
+	if uuo.mutation.DescriptionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldDescription,
 		})
 	}
 	if value, ok := uuo.mutation.Nickname(); ok {

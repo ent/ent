@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
 )
@@ -100,7 +101,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 	}
 	// Add and link indexes to table columns.
 	for _, idx := range indexes {
-		t.AddIndex(idx.Name, idx.Unique, idx.columns)
+		t.addIndex(idx)
 	}
 	if _, ok := d.mariadb(); ok {
 		if err := d.normalizeJSON(ctx, tx, t); err != nil {
@@ -113,7 +114,7 @@ func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, 
 // table loads the table indexes from the database.
 func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, name string) ([]*Index, error) {
 	rows := &sql.Rows{}
-	query, args := sql.Select("index_name", "column_name", "non_unique", "seq_in_index").
+	query, args := sql.Select("index_name", "column_name", "sub_part", "non_unique", "seq_in_index").
 		From(sql.Table("STATISTICS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			d.matchSchema(),
@@ -303,7 +304,20 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
 
 // addIndex returns the querying for adding an index to MySQL.
 func (d *MySQL) addIndex(i *Index, table string) *sql.IndexBuilder {
-	return i.Builder(table)
+	idx := sql.CreateIndex(i.Name).Table(table)
+	if i.Unique {
+		idx.Unique()
+	}
+	parts := indexParts(i)
+	for _, c := range i.Columns {
+		part, ok := parts[c.Name]
+		if !ok || part == 0 {
+			idx.Column(c.Name)
+		} else {
+			idx.Column(fmt.Sprintf("%s(%d)", idx.Builder.Quote(c.Name), part))
+		}
+	}
+	return idx
 }
 
 // dropIndex drops a MySQL index.
@@ -460,8 +474,8 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 }
 
 // scanIndexes scans sql.Rows into an Indexes list. The query for returning the rows,
-// should return the following 4 columns: INDEX_NAME, COLUMN_NAME, NON_UNIQUE, SEQ_IN_INDEX.
-// SEQ_IN_INDEX specifies the position of the column in the index columns.
+// should return the following 5 columns: INDEX_NAME, COLUMN_NAME, SUB_PART, NON_UNIQUE,
+// SEQ_IN_INDEX. SEQ_IN_INDEX specifies the position of the column in the index columns.
 func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 	var (
 		i     Indexes
@@ -473,8 +487,9 @@ func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 			column   string
 			nonuniq  bool
 			seqindex int
+			subpart  sql.NullInt64
 		)
-		if err := rows.Scan(&name, &column, &nonuniq, &seqindex); err != nil {
+		if err := rows.Scan(&name, &column, &subpart, &nonuniq, &seqindex); err != nil {
 			return nil, fmt.Errorf("scanning index description: %w", err)
 		}
 		// Ignore primary keys.
@@ -483,11 +498,17 @@ func (d *MySQL) scanIndexes(rows *sql.Rows) (Indexes, error) {
 		}
 		idx, ok := names[name]
 		if !ok {
-			idx = &Index{Name: name, Unique: !nonuniq}
+			idx = &Index{Name: name, Unique: !nonuniq, Annotation: &entsql.IndexAnnotation{}}
 			i = append(i, idx)
 			names[name] = idx
 		}
 		idx.columns = append(idx.columns, column)
+		if subpart.Int64 > 0 {
+			if idx.Annotation.PrefixColumns == nil {
+				idx.Annotation.PrefixColumns = make(map[string]uint)
+			}
+			idx.Annotation.PrefixColumns[column] = uint(subpart.Int64)
+		}
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -688,4 +709,36 @@ func (d *MySQL) defaultSize(c *Column) int64 {
 // (by table altering) to column "new".
 func (d *MySQL) needsConversion(old, new *Column) bool {
 	return d.cType(old) != d.cType(new)
+}
+
+// indexModified used by the migration differ to check if the index was modified.
+func (d *MySQL) indexModified(old, new *Index) bool {
+	oldParts, newParts := indexParts(old), indexParts(new)
+	if len(oldParts) != len(newParts) {
+		return true
+	}
+	for column, oldPart := range oldParts {
+		newPart, ok := newParts[column]
+		if !ok || oldPart != newPart {
+			return true
+		}
+	}
+	return false
+}
+
+// indexParts returns a map holding the sub_part mapping if exist.
+func indexParts(idx *Index) map[string]uint {
+	parts := make(map[string]uint)
+	if idx.Annotation == nil {
+		return parts
+	}
+	// If prefix (without a name) was defined on the
+	// annotation, map it to the single column index.
+	if idx.Annotation.Prefix > 0 && len(idx.Columns) == 1 {
+		parts[idx.Columns[0].Name] = idx.Annotation.Prefix
+	}
+	for column, part := range idx.Annotation.PrefixColumns {
+		parts[column] = part
+	}
+	return parts
 }

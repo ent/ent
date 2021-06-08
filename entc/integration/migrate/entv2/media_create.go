@@ -50,6 +50,20 @@ func (mc *MediaCreate) SetNillableSourceURI(s *string) *MediaCreate {
 	return mc
 }
 
+// SetText sets the "text" field.
+func (mc *MediaCreate) SetText(s string) *MediaCreate {
+	mc.mutation.SetText(s)
+	return mc
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (mc *MediaCreate) SetNillableText(s *string) *MediaCreate {
+	if s != nil {
+		mc.SetText(*s)
+	}
+	return mc
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (mc *MediaCreate) Mutation() *MediaMutation {
 	return mc.mutation
@@ -146,6 +160,14 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 			Column: media.FieldSourceURI,
 		})
 		_node.SourceURI = value
+	}
+	if value, ok := mc.mutation.Text(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: media.FieldText,
+		})
+		_node.Text = value
 	}
 	return _node, _spec
 }
