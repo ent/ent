@@ -89,7 +89,9 @@ func (rc *RentalCreate) Save(ctx context.Context) (*Rental, error) {
 				return nil, err
 			}
 			rc.mutation = mutation
-			node, err = rc.sqlSave(ctx)
+			if node, err = rc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
@@ -252,11 +254,11 @@ func (rcb *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 						}
 					}
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				id := specs[i].ID.Value.(int64)
 				nodes[i].ID = int(id)
 				return nodes[i], nil

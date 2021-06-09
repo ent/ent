@@ -109,7 +109,9 @@ func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 				return nil, err
 			}
 			cc.mutation = mutation
-			node, err = cc.sqlSave(ctx)
+			if node, err = cc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
@@ -268,11 +270,11 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 						}
 					}
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				if nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)

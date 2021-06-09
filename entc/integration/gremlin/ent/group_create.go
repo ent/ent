@@ -165,7 +165,9 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 				return nil, err
 			}
 			gc.mutation = mutation
-			node, err = gc.gremlinSave(ctx)
+			if node, err = gc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err

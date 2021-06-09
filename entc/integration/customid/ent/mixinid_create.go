@@ -69,7 +69,9 @@ func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 				return nil, err
 			}
 			mic.mutation = mutation
-			node, err = mic.sqlSave(ctx)
+			if node, err = mic.sqlSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
@@ -193,11 +195,11 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 						}
 					}
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

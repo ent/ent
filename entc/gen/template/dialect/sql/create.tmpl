@@ -120,11 +120,11 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 						}
 					}
 				}
-				mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
+				mutation.done = true
 				{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
 					{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
 				{{- else }}

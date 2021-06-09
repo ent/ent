@@ -65,7 +65,9 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 				return nil, err
 			}
 			tc.mutation = mutation
-			node, err = tc.sqlSave(ctx)
+			if node, err = tc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
@@ -181,11 +183,11 @@ func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 						}
 					}
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				id := specs[i].ID.Value.(int64)
 				nodes[i].ID = int(id)
 				return nodes[i], nil

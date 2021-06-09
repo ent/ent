@@ -48,7 +48,9 @@ func (gc *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
 				return nil, err
 			}
 			gc.mutation = mutation
-			node, err = gc.sqlSave(ctx)
+			if node, err = gc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
@@ -139,11 +141,11 @@ func (gcb *GoodsCreateBulk) Save(ctx context.Context) ([]*Goods, error) {
 						}
 					}
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				id := specs[i].ID.Value.(int64)
 				nodes[i].ID = int(id)
 				return nodes[i], nil

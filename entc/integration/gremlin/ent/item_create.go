@@ -49,7 +49,9 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 				return nil, err
 			}
 			ic.mutation = mutation
-			node, err = ic.gremlinSave(ctx)
+			if node, err = ic.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err

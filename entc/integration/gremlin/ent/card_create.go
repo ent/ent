@@ -152,7 +152,9 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 				return nil, err
 			}
 			cc.mutation = mutation
-			node, err = cc.gremlinSave(ctx)
+			if node, err = cc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
 			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
