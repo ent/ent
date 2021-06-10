@@ -186,5 +186,30 @@ func (Card) Indexes() []ent.Index {
 
 ## Dialect Support
 
-Indexes currently support only SQL dialects, and do not support Gremlin.
+Indexes currently support only SQL dialects, and do not support Gremlin. Dialect specific features are allowed using
+[annotations](schema-annotations.md). For example, in order to use [index prefixes](https://dev.mysql.com/doc/refman/8.0/en/column-indexes.html#column-indexes-prefix)
+in MySQL, use the following configuration:
+
+```go
+// Indexes of the User.
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("description").
+			Annotations(entsql.Prefix(128)),
+		index.Fields("c1", "c2", "c3").
+			Annotation(
+				entsql.PrefixColumn("c1", 100),
+				entsql.PrefixColumn("c2", 200),
+			)
+	}
+}
+```
+
+The code above generates the following SQL statements:
+
+```sql
+CREATE INDEX `users_description` ON `users`(`description`(128))
+
+CREATE INDEX `users_c1_c2_c3` ON `users`(`c1`(100), `c2`(200), `c3`)
+```
 
