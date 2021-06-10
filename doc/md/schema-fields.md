@@ -210,6 +210,7 @@ import (
     "entgo.io/ent"
     "entgo.io/ent/dialect"
     "entgo.io/ent/schema/field"
+    "github.com/shopspring/decimal"
 )
 
 // Amount is a custom Go type that's convertible to the basic float64 type.
@@ -232,6 +233,13 @@ func (Card) Fields() []ent.Field {
 		field.Enum("role").
 			// A convertible type to string.
 			GoType(role.Unknown),
+		field.Float("decimal").
+			// A ValueScanner type mixed with SchemaType.
+			GoType(decimal.Decimal{}).
+			SchemaType(map[string]string{
+			    dialect.MySQL:    "decimal(6,2)",
+			    dialect.Postgres: "numeric",
+			}),
 	}
 }
 ```
