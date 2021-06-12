@@ -1386,14 +1386,21 @@ func (p *Predicate) EqualFold(col, sub string) *Predicate {
 			// We assume the CHARACTER SET is configured to utf8mb4,
 			// because this how it is defined in dialect/sql/schema.
 			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci = ")
+			b.Arg(sub)
 		case dialect.Postgres:
 			b.Ident(col).WriteString(" ILIKE ")
-		default: // SQLite.
+			b.Arg(sub)
+		case dialect.SQLite:
+			b.Ident(col)
+			b.WriteOp(OpEQ)
+			b.Arg(sub)
+			b.WriteString(" COLLATE NOCASE ")
+		default:
 			f.Lower(col)
 			b.WriteString(f.String())
 			b.WriteOp(OpEQ)
+			b.Arg(strings.ToLower(sub))
 		}
-		b.Arg(strings.ToLower(sub))
 	})
 }
 

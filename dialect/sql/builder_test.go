@@ -949,6 +949,14 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"bar", "baz"},
 		},
 		{
+			input: Dialect(dialect.SQLite).
+				Select().
+				From(Table("users")).
+				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
+			wantQuery: "SELECT * FROM `users` WHERE `name` = ? COLLATE NOCASE OR `name` = ? COLLATE NOCASE",
+			wantArgs:  []interface{}{"bar", "baz"},
+		},
+		{
 			input: Dialect(dialect.Postgres).
 				Select().
 				From(Table("users")).
