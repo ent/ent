@@ -954,7 +954,7 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
 			wantQuery: "SELECT * FROM `users` WHERE `name` = ? COLLATE NOCASE OR `name` = ? COLLATE NOCASE",
-			wantArgs:  []interface{}{"bar", "baz"},
+			wantArgs:  []interface{}{"BAR", "BAZ"},
 		},
 		{
 			input: Dialect(dialect.Postgres).
@@ -962,7 +962,7 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
 			wantQuery: `SELECT * FROM "users" WHERE "name" ILIKE $1 OR "name" ILIKE $2`,
-			wantArgs:  []interface{}{"bar", "baz"},
+			wantArgs:  []interface{}{"BAR", "BAZ"},
 		},
 		{
 			input: Dialect(dialect.MySQL).
@@ -970,15 +970,22 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
 			wantQuery: "SELECT * FROM `users` WHERE `name` COLLATE utf8mb4_general_ci = ? OR `name` COLLATE utf8mb4_general_ci = ?",
-			wantArgs:  []interface{}{"bar", "baz"},
+			wantArgs:  []interface{}{"BAR", "BAZ"},
+		},
+		{
+			input: Select().
+				From(Table("users")).
+				Where(And(ContainsFold("name", "Ariel"), ContainsFold("nick", "Bar"))),
+			wantQuery: "SELECT * FROM `users` WHERE LOWER(`name`) LIKE ? AND LOWER(`nick`) LIKE ?",
+			wantArgs:  []interface{}{"%ariel%", "%bar%"},
 		},
 		{
 			input: Dialect(dialect.SQLite).
 				Select().
 				From(Table("users")).
 				Where(And(ContainsFold("name", "Ariel"), ContainsFold("nick", "Bar"))),
-			wantQuery: "SELECT * FROM `users` WHERE LOWER(`name`) LIKE ? AND LOWER(`nick`) LIKE ?",
-			wantArgs:  []interface{}{"%ariel%", "%bar%"},
+			wantQuery: "SELECT * FROM `users` WHERE `name` LIKE ? COLLATE NOCASE AND `nick` LIKE ? COLLATE NOCASE",
+			wantArgs:  []interface{}{"%Ariel%", "%Bar%"},
 		},
 		{
 			input: Dialect(dialect.Postgres).
@@ -986,7 +993,7 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				Where(And(ContainsFold("name", "Ariel"), ContainsFold("nick", "Bar"))),
 			wantQuery: `SELECT * FROM "users" WHERE "name" ILIKE $1 AND "nick" ILIKE $2`,
-			wantArgs:  []interface{}{"%ariel%", "%bar%"},
+			wantArgs:  []interface{}{"%Ariel%", "%Bar%"},
 		},
 		{
 			input: Dialect(dialect.MySQL).
@@ -994,7 +1001,7 @@ func TestBuilder(t *testing.T) {
 				From(Table("users")).
 				Where(And(ContainsFold("name", "Ariel"), ContainsFold("nick", "Bar"))),
 			wantQuery: "SELECT * FROM `users` WHERE `name` COLLATE utf8mb4_general_ci LIKE ? AND `nick` COLLATE utf8mb4_general_ci LIKE ?",
-			wantArgs:  []interface{}{"%ariel%", "%bar%"},
+			wantArgs:  []interface{}{"%Ariel%", "%Bar%"},
 		},
 		{
 			input: func() Querier {
