@@ -646,6 +646,9 @@ func (t *Type) setupFieldEdge(fk *ForeignKey, fkOwner *Edge, fkName string) erro
 	if tf.Optional != fkOwner.Optional {
 		return fmt.Errorf("mismatch optional/required config for edge %q and field %q", fkOwner.Name, fkName)
 	}
+	if tf.Immutable {
+		return fmt.Errorf("field edge %q cannot be immutable", fkName)
+	}
 	if t1, t2 := tf.Type.Type, fkOwner.Type.ID.Type.Type; t1 != t2 {
 		return fmt.Errorf("mismatch field type between edge field %q and id of type %q (%s != %s)", fkName, fkOwner.Type.Name, t1, t2)
 	}
