@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
 
@@ -65,12 +66,18 @@ func TestPostgres_Create(t *testing.T) {
 						{Name: "price", Type: field.TypeFloat64, SchemaType: map[string]string{dialect.Postgres: "numeric(5,2)"}},
 						{Name: "strings", Type: field.TypeOther, SchemaType: map[string]string{dialect.Postgres: "text[]"}, Nullable: true},
 					},
+					Annotation: &entsql.Annotation{
+						Check: "price > 0",
+						Checks: map[string]string{
+							"valid_name": "name <> ''",
+						},
+					},
 				},
 			},
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape(`CREATE TABLE IF NOT EXISTS "users"("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" varchar NULL COLLATE "he_IL", "age" bigint NOT NULL, "doc" jsonb NULL, "enums" varchar NOT NULL DEFAULT 'a', "price" numeric(5,2) NOT NULL, "strings" text[] NULL, PRIMARY KEY("id"))`)).
+				mock.ExpectExec(escape(`CREATE TABLE IF NOT EXISTS "users"("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" varchar NULL COLLATE "he_IL", "age" bigint NOT NULL, "doc" jsonb NULL, "enums" varchar NOT NULL DEFAULT 'a', "price" numeric(5,2) NOT NULL, "strings" text[] NULL, PRIMARY KEY("id"), CHECK (price > 0), CONSTRAINT "valid_name" CHECK (name <> ''))`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

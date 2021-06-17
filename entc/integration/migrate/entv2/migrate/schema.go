@@ -204,6 +204,12 @@ var (
 
 func init() {
 	CarsTable.ForeignKeys[0].RefTable = UsersTable
+	MediaTable.Annotation = &entsql.Annotation{
+		Check: "text <> 'boring'",
+	}
+	MediaTable.Annotation.Checks = map[string]string{
+		"boring_check": "source_uri <> 'entgo.io'",
+	}
 	PetsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendsTable.ForeignKeys[1].RefTable = UsersTable

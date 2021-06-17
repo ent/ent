@@ -87,13 +87,23 @@ type Annotation struct {
 	//
 	OnDelete ReferenceOption `json:"on_delete,omitempty"`
 
-	// Check allows injecting custom "DDL" for setting the "CHECK" clause in "CREATE TABLE".
+	// Check allows injecting custom "DDL" for setting an unnamed "CHECK" clause in "CREATE TABLE".
 	//
 	//	entsql.Annotation{
 	//		Check: "age < 10",
 	//	}
 	//
 	Check string `json:"check,omitempty"`
+
+	// Checks allows injecting custom "DDL" for setting named "CHECK" clauses in "CREATE TABLE".
+	//
+	//	entsql.Annotation{
+	//		Checks: map[string]string{
+	//			"valid_discount": "price > discount_price",
+	//		},
+	//	}
+	//
+	Checks map[string]string `json:"checks,omitempty"`
 }
 
 // Name describes the annotation name.
@@ -135,8 +145,16 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	if s := ant.OnDelete; s != "" {
 		a.OnDelete = s
 	}
-	if s := ant.Check; s != "" {
-		a.Check = s
+	if c := ant.Check; c != "" {
+		a.Check = c
+	}
+	if checks := ant.Checks; len(checks) > 0 {
+		if a.Checks == nil {
+			a.Checks = make(map[string]string)
+		}
+		for name, check := range checks {
+			a.Checks[name] = check
+		}
 	}
 	return a
 }

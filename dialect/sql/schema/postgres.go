@@ -304,6 +304,9 @@ func (d *Postgres) tBuilder(t *Table) *sql.TableBuilder {
 	for _, pk := range t.PrimaryKey {
 		b.PrimaryKey(pk.Name)
 	}
+	if t.Annotation != nil {
+		addChecks(b, t.Annotation)
+	}
 	return b
 }
 

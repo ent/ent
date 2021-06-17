@@ -192,6 +192,7 @@ func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder {
 		if opts := t.Annotation.Options; opts != "" {
 			b.Options(opts)
 		}
+		addChecks(b, t.Annotation)
 	}
 	return b
 }
