@@ -7,6 +7,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -37,5 +38,16 @@ func (Media) Indexes() []ent.Index {
 		// MySQL allow indexing text column prefix.
 		index.Fields("text").
 			Annotations(entsql.Prefix(100)),
+	}
+}
+
+func (Media) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		&entsql.Annotation{
+			Check: "text <> 'boring'",
+			Checks: map[string]string{
+				"boring_check": "source_uri <> 'entgo.io'",
+			},
+		},
 	}
 }

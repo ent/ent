@@ -151,10 +151,20 @@ func init() {
 				{{- with $ant.Options }}
 					Options: "{{ . }}",
 				{{- end }}
+				{{- with $ant.Check }}
+					Check: "{{ . }}",
+				{{- end }}
 			}
 			{{- with $ant.Incremental }}
 				{{ $table }}.Annotation.Incremental = new(bool)
 				*{{ $table }}.Annotation.Incremental = {{ with indirect . }}true{{ else }}false{{ end }}
+			{{- end }}
+			{{- with $keys := keys $ant.Checks }}
+				{{ $table }}.Annotation.Checks = map[string]string{
+					{{- range $k := $keys }}
+						"{{ $k }}": "{{ index $ant.Checks $k }}",
+					{{- end }}
+				}
 			{{- end }}
 		{{- end }}
 	{{- end }}

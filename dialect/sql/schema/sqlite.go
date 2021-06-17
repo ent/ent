@@ -72,6 +72,9 @@ func (d *SQLite) tBuilder(t *Table) *sql.TableBuilder {
 	for _, c := range t.Columns {
 		b.Column(d.addColumn(c))
 	}
+	if t.Annotation != nil {
+		addChecks(b, t.Annotation)
+	}
 	// Unlike in MySQL, we're not able to add foreign-key constraints to table
 	// after it was created, and adding them to the `CREATE TABLE` statement is
 	// not always valid (because circular foreign-keys situation is possible).

@@ -7,6 +7,7 @@ package schema
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -541,4 +542,34 @@ func compare(v1, v2 int) int {
 		return -1
 	}
 	return 1
+}
+
+// addChecks appends the CHECK clauses from the entsql.Annotation.
+func addChecks(t *sql.TableBuilder, ant *entsql.Annotation) {
+	if check := ant.Check; check != "" {
+		t.Checks(func(b *sql.Builder) {
+			b.WriteString("CHECK " + checkExpr(check))
+		})
+	}
+	if checks := ant.Checks; len(ant.Checks) > 0 {
+		names := make([]string, 0, len(checks))
+		for name := range checks {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		for _, name := range names {
+			t.Checks(func(b *sql.Builder) {
+				b.WriteString("CONSTRAINT ").Ident(name).WriteString(" CHECK " + checkExpr(checks[name]))
+			})
+		}
+	}
+}
+
+// checkExpr formats the CHECK expression.
+func checkExpr(expr string) string {
+	expr = strings.TrimSpace(expr)
+	if !strings.HasPrefix(expr, "(") && !strings.HasSuffix(expr, ")") {
+		expr = "(" + expr + ")"
+	}
+	return expr
 }
