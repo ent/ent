@@ -86,8 +86,11 @@ func TestBuilder(t *testing.T) {
 				).
 				PrimaryKey("id", "name").
 				ForeignKeys(ForeignKey().Columns("card_id").
-					Reference(Reference().Table("cards").Columns("id")).OnDelete("SET NULL")),
-			wantQuery: "CREATE TABLE IF NOT EXISTS `users`(`id` int auto_increment, `card_id` int, `doc` longtext CHECK (JSON_VALID(`doc`)), PRIMARY KEY(`id`, `name`), FOREIGN KEY(`card_id`) REFERENCES `cards`(`id`) ON DELETE SET NULL)",
+					Reference(Reference().Table("cards").Columns("id")).OnDelete("SET NULL")).
+				Checks(func(b *Builder) {
+					b.WriteString("CONSTRAINT ").Ident("valid_card").WriteString(" CHECK (").Ident("card_id").WriteString(" > 0)")
+				}),
+			wantQuery: "CREATE TABLE IF NOT EXISTS `users`(`id` int auto_increment, `card_id` int, `doc` longtext CHECK (JSON_VALID(`doc`)), PRIMARY KEY(`id`, `name`), FOREIGN KEY(`card_id`) REFERENCES `cards`(`id`) ON DELETE SET NULL, CONSTRAINT `valid_card` CHECK (`card_id` > 0))",
 		},
 		{
 			input: Dialect(dialect.Postgres).CreateTable("users").

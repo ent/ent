@@ -107,14 +107,15 @@ func (c *ColumnBuilder) Query() (string, []interface{}) {
 // TableBuilder is a query builder for `CREATE TABLE` statement.
 type TableBuilder struct {
 	Builder
-	name        string    // table name.
-	exists      bool      // check existence.
-	charset     string    // table charset.
-	collation   string    // table collation.
-	options     string    // table options.
-	columns     []Querier // table columns.
-	primary     []string  // primary key.
-	constraints []Querier // foreign keys and indices.
+	name        string           // table name.
+	exists      bool             // check existence.
+	charset     string           // table charset.
+	collation   string           // table collation.
+	options     string           // table options.
+	columns     []Querier        // table columns.
+	primary     []string         // primary key.
+	constraints []Querier        // foreign keys and indices.
+	checks      []func(*Builder) // check constraints.
 }
 
 // CreateTable returns a query builder for the `CREATE TABLE` statement.
@@ -177,6 +178,12 @@ func (t *TableBuilder) Constraints(fks ...*ForeignKeyBuilder) *TableBuilder {
 	return t
 }
 
+// Checks adds CHECK clauses to the CREATE TABLE statement.
+func (t *TableBuilder) Checks(checks ...func(*Builder)) *TableBuilder {
+	t.checks = append(t.checks, checks...)
+	return t
+}
+
 // Charset appends the `CHARACTER SET` clause to the statement. MySQL only.
 func (t *TableBuilder) Charset(s string) *TableBuilder {
 	t.charset = s
@@ -217,6 +224,9 @@ func (t *TableBuilder) Query() (string, []interface{}) {
 		}
 		if len(t.constraints) > 0 {
 			b.Comma().JoinComma(t.constraints...)
+		}
+		for _, check := range t.checks {
+			check(b.Comma())
 		}
 	})
 	if t.charset != "" {
