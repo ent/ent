@@ -18,7 +18,8 @@ sidebar_label: FAQ
 [How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)  
 [How to extend the generated models?](#how-to-extend-the-generated-models)  
 [How to extend the generated builders?](#how-to-extend-the-generated-builders)   
-[How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)
+[How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)  
+[How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)
 
 ## Answers
 
@@ -599,12 +600,6 @@ func main() {
 
 #### How to store Protobuf objects in a BLOB column?
 
-:::info
-This solution relies on a recent bugfix that is currently available on the `master` branch and
-will be released in `v.0.8.0`
-:::
-
-
 Assuming we have a Protobuf message defined:
 ```protobuf
 syntax = "proto3";
@@ -658,15 +653,16 @@ package main
 
 import (
 	"context"
+	"testing"
+
 	"project/ent/enttest"
 	"project/pb"
-	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
 
-func Test(t *testing.T) {
+func TestMain(t *testing.T) {
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 
@@ -679,5 +675,28 @@ func Test(t *testing.T) {
 	ret := client.Message.GetX(context.TODO(), msg.ID)
 	require.Equal(t, "hello", ret.Hi.Greeting)
 }
+```
 
+#### How to add `CHECK` constraints to table?
+
+The [`entsql.Annotation`](schema-annotations.md) option allows adding custom `CHECK` constraints to the `CREATE TABLE`
+statement. In order to add `CHECK` constraints to your schema, use the following example:
+
+```go
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		&entsql.Annotation{
+			// The `Check` option allows adding an
+			// unnamed CHECK constraint to table DDL.
+			Check: "website <> 'entgo.io'",
+
+			// The `Checks` option allows adding multiple CHECK constraints
+			// to table creation. The keys are used as the constraint names.
+			Checks: map[string]string{
+				"valid_nickname":  "nickname <> firstname",
+				"valid_firstname": "length(first_name) > 1",
+			},
+		},
+	}
+}
 ```
