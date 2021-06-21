@@ -400,6 +400,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "tarrencev",
+      "name": "Tarrence van As",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4740651?v=4",
+      "profile": "https://github.com/tarrencev",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
