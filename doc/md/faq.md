@@ -19,7 +19,8 @@ sidebar_label: FAQ
 [How to extend the generated models?](#how-to-extend-the-generated-models)  
 [How to extend the generated builders?](#how-to-extend-the-generated-builders)   
 [How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)  
-[How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)
+[How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)  
+[How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)
 
 ## Answers
 
@@ -698,5 +699,47 @@ func (User) Annotations() []schema.Annotation {
 			},
 		},
 	}
+}
+```
+
+#### How to define a custom precision numeric field?
+
+Using [GoType](schema-fields.md#go-type) and [SchemaType](schema-fields.md#database-type) it is possible to define custom precision numeric fields. For example, defining a field that uses [big.Int](https://golang.org/pkg/math/big/).
+
+```go
+func (T) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("precise").
+			GoType(new(BigInt)).
+			SchemaType(map[string]string{
+				dialect.SQLite:   "numeric(78, 0)",
+				dialect.Postgres: "numeric(78, 0)",
+			}),
+	}
+}
+
+type BigInt struct {
+	big.Int
+}
+
+func (b *BigInt) Scan(src interface{}) error {
+	var i sql.NullString
+	if err := i.Scan(src); err != nil {
+		return err
+	}
+
+	if !i.Valid {
+		return nil
+	}
+
+	if _, ok := b.Int.SetString(i.String, 10); ok {
+		return nil
+	}
+
+	return fmt.Errorf("could not scan type %T with value %v into BigInt", src, src)
+}
+
+func (b *BigInt) Value() (driver.Value, error) {
+	return b.String(), nil
 }
 ```
