@@ -6,6 +6,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 // Item holds the schema definition for the Item entity.
@@ -15,7 +16,10 @@ type Item struct {
 
 // Fields of the Item.
 func (Item) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.String("id").
+			MaxLen(64),
+	}
 }
 
 // Edges of the Item.

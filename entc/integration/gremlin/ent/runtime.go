@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	"entgo.io/ent/entc/integration/gremlin/ent/item"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
@@ -164,6 +165,12 @@ func init() {
 	groupinfoDescMaxUsers := groupinfoFields[1].Descriptor()
 	// groupinfo.DefaultMaxUsers holds the default value on creation for the max_users field.
 	groupinfo.DefaultMaxUsers = groupinfoDescMaxUsers.Default.(int)
+	itemFields := schema.Item{}.Fields()
+	_ = itemFields
+	// itemDescID is the schema descriptor for id field.
+	itemDescID := itemFields[0].Descriptor()
+	// item.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	item.IDValidator = itemDescID.Validators[0].(func(string) error)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescAge is the schema descriptor for age field.

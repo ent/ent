@@ -122,6 +122,17 @@ const (
 // Code implements the Node interface.
 func (c Cardinality) Code() (string, []interface{}) { return string(c), nil }
 
+// Keyword defines a Gremlin keyword.
+type Keyword string
+
+// Keyword options.
+const (
+	ID Keyword = "id"
+)
+
+// Code implements the Node interface.
+func (k Keyword) Code() (string, []interface{}) { return string(k), nil }
+
 // Order of vertex properties.
 type Order string
 

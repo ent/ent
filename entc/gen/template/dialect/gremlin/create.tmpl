@@ -36,6 +36,11 @@ func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 		constraints := make([]*constraint, 0, {{ . }})
 	{{- end }}
 	v := g.AddV({{ $.Package }}.Label)
+	{{- if $.ID.UserDefined }}
+		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
+			v.Property(dsl.ID, id)
+		}
+	{{- end }}
 	{{- range $f := $.MutationFields }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			{{- if $f.Unique }}
