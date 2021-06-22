@@ -9481,7 +9481,7 @@ type ItemMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *int
+	id            *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Item, error)
@@ -9508,7 +9508,7 @@ func newItemMutation(c config, op Op, opts ...itemOption) *ItemMutation {
 }
 
 // withItemID sets the ID field of the mutation.
-func withItemID(id int) itemOption {
+func withItemID(id string) itemOption {
 	return func(m *ItemMutation) {
 		var (
 			err   error
@@ -9558,9 +9558,15 @@ func (m ItemMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Item entities.
+func (m *ItemMutation) SetID(id string) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ItemMutation) ID() (id int, exists bool) {
+func (m *ItemMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
 	}

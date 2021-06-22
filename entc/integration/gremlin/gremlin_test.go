@@ -25,6 +25,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -139,6 +140,9 @@ func Sanity(t *testing.T, client *ent.Client) {
 	usr = client.User.UpdateOne(usr).SetName("baz").AddGroups(grp).SaveX(ctx)
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(usr.QueryGroups().AllX(ctx))
+	id := uuid.NewString()
+	it := client.Item.Create().SetID(id).SaveX(ctx)
+	require.Equal(id, it.ID)
 
 	// grouping.
 	var v []struct {

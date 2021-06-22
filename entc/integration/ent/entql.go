@@ -221,7 +221,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   item.Table,
 			Columns: item.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: item.FieldID,
 			},
 		},
@@ -1545,8 +1545,8 @@ func (f *ItemFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql int predicate on the id field.
-func (f *ItemFilter) WhereID(p entql.IntP) {
+// WhereID applies the entql string predicate on the id field.
+func (f *ItemFilter) WhereID(p entql.StringP) {
 	f.Where(p.Field(item.FieldID))
 }
 

@@ -1154,7 +1154,7 @@ func (c *ItemClient) UpdateOne(i *Item) *ItemUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ItemClient) UpdateOneID(id int) *ItemUpdateOne {
+func (c *ItemClient) UpdateOneID(id string) *ItemUpdateOne {
 	mutation := newItemMutation(c.config, OpUpdateOne, withItemID(id))
 	return &ItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1171,7 +1171,7 @@ func (c *ItemClient) DeleteOne(i *Item) *ItemDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *ItemClient) DeleteOneID(id int) *ItemDeleteOne {
+func (c *ItemClient) DeleteOneID(id string) *ItemDeleteOne {
 	builder := c.Delete().Where(item.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1186,12 +1186,12 @@ func (c *ItemClient) Query() *ItemQuery {
 }
 
 // Get returns a Item entity by its id.
-func (c *ItemClient) Get(ctx context.Context, id int) (*Item, error) {
+func (c *ItemClient) Get(ctx context.Context, id string) (*Item, error) {
 	return c.Query().Where(item.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ItemClient) GetX(ctx context.Context, id int) *Item {
+func (c *ItemClient) GetX(ctx context.Context, id string) *Item {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
