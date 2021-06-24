@@ -666,6 +666,7 @@ func (m *PostMutation) RemoveCommentIDs(ids ...int) {
 		m.removedcomments = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.comments, ids[i])
 		m.removedcomments[ids[i]] = struct{}{}
 	}
 }
@@ -1092,6 +1093,7 @@ func (m *UserMutation) RemovePostIDs(ids ...int) {
 		m.removedposts = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.posts, ids[i])
 		m.removedposts[ids[i]] = struct{}{}
 	}
 }

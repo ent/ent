@@ -215,6 +215,7 @@ func (m *CarMutation) RemoveRentalIDs(ids ...int) {
 		m.removedrentals = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.rentals, ids[i])
 		m.removedrentals[ids[i]] = struct{}{}
 	}
 }
@@ -3167,6 +3168,7 @@ func (m *UserMutation) RemovePetIDs(ids ...int) {
 		m.removedpets = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.pets, ids[i])
 		m.removedpets[ids[i]] = struct{}{}
 	}
 }
@@ -3246,6 +3248,7 @@ func (m *UserMutation) RemoveChildIDs(ids ...int) {
 		m.removedchildren = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -3403,6 +3406,7 @@ func (m *UserMutation) RemoveInfoIDs(ids ...int) {
 		m.removedinfo = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.info, ids[i])
 		m.removedinfo[ids[i]] = struct{}{}
 	}
 }
@@ -3456,6 +3460,7 @@ func (m *UserMutation) RemoveRentalIDs(ids ...int) {
 		m.removedrentals = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.rentals, ids[i])
 		m.removedrentals[ids[i]] = struct{}{}
 	}
 }

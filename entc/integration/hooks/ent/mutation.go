@@ -864,6 +864,7 @@ func (m *UserMutation) RemoveCardIDs(ids ...int) {
 		m.removedcards = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.cards, ids[i])
 		m.removedcards[ids[i]] = struct{}{}
 	}
 }
@@ -917,6 +918,7 @@ func (m *UserMutation) RemoveFriendIDs(ids ...int) {
 		m.removedfriends = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.friends, ids[i])
 		m.removedfriends[ids[i]] = struct{}{}
 	}
 }

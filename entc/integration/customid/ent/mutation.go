@@ -249,6 +249,7 @@ func (m *BlobMutation) RemoveLinkIDs(ids ...uuid.UUID) {
 		m.removedlinks = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.links, ids[i])
 		m.removedlinks[ids[i]] = struct{}{}
 	}
 }
@@ -1288,6 +1289,7 @@ func (m *DocMutation) RemoveChildIDs(ids ...schema.DocID) {
 		m.removedchildren = make(map[schema.DocID]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -1663,6 +1665,7 @@ func (m *GroupMutation) RemoveUserIDs(ids ...int) {
 		m.removedusers = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.users, ids[i])
 		m.removedusers[ids[i]] = struct{}{}
 	}
 }
@@ -2424,6 +2427,7 @@ func (m *NoteMutation) RemoveChildIDs(ids ...schema.NoteID) {
 		m.removedchildren = make(map[schema.NoteID]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -2845,6 +2849,7 @@ func (m *PetMutation) RemoveCarIDs(ids ...int) {
 		m.removedcars = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.cars, ids[i])
 		m.removedcars[ids[i]] = struct{}{}
 	}
 }
@@ -2898,6 +2903,7 @@ func (m *PetMutation) RemoveFriendIDs(ids ...string) {
 		m.removedfriends = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.friends, ids[i])
 		m.removedfriends[ids[i]] = struct{}{}
 	}
 }
@@ -3330,6 +3336,7 @@ func (m *UserMutation) RemoveGroupIDs(ids ...int) {
 		m.removedgroups = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.groups, ids[i])
 		m.removedgroups[ids[i]] = struct{}{}
 	}
 }
@@ -3422,6 +3429,7 @@ func (m *UserMutation) RemoveChildIDs(ids ...int) {
 		m.removedchildren = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -3475,6 +3483,7 @@ func (m *UserMutation) RemovePetIDs(ids ...string) {
 		m.removedpets = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.pets, ids[i])
 		m.removedpets[ids[i]] = struct{}{}
 	}
 }
