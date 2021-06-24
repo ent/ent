@@ -704,7 +704,8 @@ func (User) Annotations() []schema.Annotation {
 
 #### How to define a custom precision numeric field?
 
-Using [GoType](schema-fields.md#go-type) and [SchemaType](schema-fields.md#database-type) it is possible to define custom precision numeric fields. For example, defining a field that uses [big.Int](https://golang.org/pkg/math/big/).
+Using [GoType](schema-fields.md#go-type) and [SchemaType](schema-fields.md#database-type) it is possible to define
+custom precision numeric fields. For example, defining a field that uses [big.Int](https://golang.org/pkg/math/big/).
 
 ```go
 func (T) Fields() []ent.Field {
@@ -727,15 +728,12 @@ func (b *BigInt) Scan(src interface{}) error {
 	if err := i.Scan(src); err != nil {
 		return err
 	}
-
 	if !i.Valid {
 		return nil
 	}
-
 	if _, ok := b.Int.SetString(i.String, 10); ok {
 		return nil
 	}
-
 	return fmt.Errorf("could not scan type %T with value %v into BigInt", src, src)
 }
 
