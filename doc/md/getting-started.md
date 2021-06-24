@@ -185,7 +185,7 @@ import (
 func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
 		Query().
-		Where(user.NameEQ("a8m")).
+		Where(user.Name("a8m")).
 		// `Only` fails if no user found,
 		// or more than 1 user returned.
 		Only(ctx)
@@ -316,7 +316,7 @@ func QueryCars(ctx context.Context, a8m *ent.User) error {
 
 	// What about filtering specific cars.
 	ford, err := a8m.QueryCars().
-		Where(car.ModelEQ("Ford")).
+		Where(car.Model("Ford")).
 		Only(ctx)
 	if err != nil {
 		return fmt.Errorf("failed querying user cars: %w", err)
@@ -575,7 +575,7 @@ Now when we have a graph with data, we can run a few queries on it:
 				QueryCars().   					//
 				Where(         					//
 					car.Not( 					//	Get Neta and Ariel cars, but filter out
-						car.ModelEQ("Mazda"),	//	those who named "Mazda"
+						car.Model("Mazda"),		//	those who named "Mazda"
 					), 							//
 				). 								//
 				All(ctx)
