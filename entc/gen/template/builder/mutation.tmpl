@@ -26,11 +26,11 @@ import (
 
 const (
 	// Operation types.
-	OpCreate    = ent.OpCreate
-	OpDelete    = ent.OpDelete
-	OpDeleteOne = ent.OpDeleteOne
-	OpUpdate    = ent.OpUpdate
-	OpUpdateOne = ent.OpUpdateOne
+	OpCreate	= ent.OpCreate
+	OpDelete	= ent.OpDelete
+	OpDeleteOne	= ent.OpDeleteOne
+	OpUpdate	= ent.OpUpdate
+	OpUpdateOne	= ent.OpUpdateOne
 
 	// Node types.
 	{{- range $n := $.Nodes }}
@@ -77,9 +77,9 @@ type {{ $mutationOption }} func(*{{ $mutation }})
 // new{{ $mutation }} creates new mutation for the {{ $n.Name }} entity.
 func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mutation }} {
 	m := &{{ $mutation }}{
-		config:        c,
-		op:            op,
-		typ:           Type{{ $n.Name }},
+		config: c,
+		op: op,
+		typ: Type{{ $n.Name }},
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -290,15 +290,10 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 			if m.removed{{ $e.BuilderField }} == nil {
 				m.removed{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
 			}
-			{{- if $e.Unique }}
-				delete(m.{{ $e.BuilderField }}, id)
-				m.removed{{ $e.BuilderField }}[id] = struct{}{}
-			{{- else }}
-				for i := range ids {
-					delete(m.{{ $e.BuilderField }}, ids[i])
-					m.removed{{ $e.BuilderField }}[ids[i]] = struct{}{}
-				}
-			{{- end }}
+			for i := range ids {
+				delete(m.{{ $e.BuilderField }}, ids[i])
+				m.removed{{ $e.BuilderField }}[ids[i]] = struct{}{}
+			}
 		}
 
 		{{ $func := print "Removed" $e.StructField }}
@@ -320,12 +315,12 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 	{{ end }}
 
 	// {{ $e.StructField }}IDs returns the "{{ $e.Name }}" edge IDs in the mutation.
-  	{{- if $e.Unique }}
+	{{- if $e.Unique }}
 		// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 		// {{ $e.StructField }}ID instead. It exists only for internal usage by the builders.
 	{{- end }}
 	func (m *{{ $mutation }}) {{ $e.StructField }}IDs() (ids []{{ $e.Type.ID.Type }}) {
-    	{{- if $e.Unique }}
+		{{- if $e.Unique }}
 			if id := m.{{ $e.BuilderField }}; id != nil {
 				ids = append(ids, *id)
 			}
@@ -383,7 +378,7 @@ func (m *{{ $mutation }}) Field(name string) (ent.Value, bool) {
 		{{- range $f := $n.Fields }}
 			{{- $const := print $n.Package "." $f.Constant }}
 			case {{ $const }}:
-				return  m.{{ $f.MutationGet }}()
+				return m.{{ $f.MutationGet }}()
 		{{- end }}
 		}
 	{{- end }}
@@ -400,7 +395,7 @@ func (m *{{ $mutation }}) OldField(ctx context.Context, name string) (ent.Value,
 		{{- range $f := . }}
 			{{- $const := print $n.Package "." $f.Constant }}
 			case {{ $const }}:
-				return  m.{{ $f.MutationGetOld }}(ctx)
+				return m.{{ $f.MutationGetOld }}(ctx)
 		{{- end }}
 		}
 	{{- end }}
