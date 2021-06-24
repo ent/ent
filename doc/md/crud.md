@@ -169,7 +169,7 @@ n, err := client.User.			// UserClient.
 	Update().					// Pet update builder.
 	Where(						//
 		user.Or(				// (age >= 30 OR name = "bar") 
-			user.AgeEQ(30), 	//
+			user.AgeGT(30), 	//
 			user.Name("bar"),	// AND
 		),						//  
 		user.HasFollowers(),	// UserHasFollowers()  
