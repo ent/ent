@@ -330,6 +330,7 @@ func (m *TaskMutation) RemoveTeamIDs(ids ...int) {
 		m.removedteams = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.teams, ids[i])
 		m.removedteams[ids[i]] = struct{}{}
 	}
 }
@@ -835,6 +836,7 @@ func (m *TeamMutation) RemoveTaskIDs(ids ...int) {
 		m.removedtasks = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.tasks, ids[i])
 		m.removedtasks[ids[i]] = struct{}{}
 	}
 }
@@ -888,6 +890,7 @@ func (m *TeamMutation) RemoveUserIDs(ids ...int) {
 		m.removedusers = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.users, ids[i])
 		m.removedusers[ids[i]] = struct{}{}
 	}
 }
@@ -1368,6 +1371,7 @@ func (m *UserMutation) RemoveTeamIDs(ids ...int) {
 		m.removedteams = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.teams, ids[i])
 		m.removedteams[ids[i]] = struct{}{}
 	}
 }
@@ -1421,6 +1425,7 @@ func (m *UserMutation) RemoveTaskIDs(ids ...int) {
 		m.removedtasks = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.tasks, ids[i])
 		m.removedtasks[ids[i]] = struct{}{}
 	}
 }

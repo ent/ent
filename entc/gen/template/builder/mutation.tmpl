@@ -291,9 +291,11 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 				m.removed{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
 			}
 			{{- if $e.Unique }}
+				delete(m.{{ $e.BuilderField }}, id)
 				m.removed{{ $e.BuilderField }}[id] = struct{}{}
 			{{- else }}
 				for i := range ids {
+					delete(m.{{ $e.BuilderField }}, ids[i])
 					m.removed{{ $e.BuilderField }}[ids[i]] = struct{}{}
 				}
 			{{- end }}

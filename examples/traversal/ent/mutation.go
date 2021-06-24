@@ -192,6 +192,7 @@ func (m *GroupMutation) RemoveUserIDs(ids ...int) {
 		m.removedusers = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.users, ids[i])
 		m.removedusers[ids[i]] = struct{}{}
 	}
 }
@@ -630,6 +631,7 @@ func (m *PetMutation) RemoveFriendIDs(ids ...int) {
 		m.removedfriends = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.friends, ids[i])
 		m.removedfriends[ids[i]] = struct{}{}
 	}
 }
@@ -1133,6 +1135,7 @@ func (m *UserMutation) RemovePetIDs(ids ...int) {
 		m.removedpets = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.pets, ids[i])
 		m.removedpets[ids[i]] = struct{}{}
 	}
 }
@@ -1186,6 +1189,7 @@ func (m *UserMutation) RemoveFriendIDs(ids ...int) {
 		m.removedfriends = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.friends, ids[i])
 		m.removedfriends[ids[i]] = struct{}{}
 	}
 }
@@ -1239,6 +1243,7 @@ func (m *UserMutation) RemoveGroupIDs(ids ...int) {
 		m.removedgroups = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.groups, ids[i])
 		m.removedgroups[ids[i]] = struct{}{}
 	}
 }
@@ -1292,6 +1297,7 @@ func (m *UserMutation) RemoveManageIDs(ids ...int) {
 		m.removedmanage = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.manage, ids[i])
 		m.removedmanage[ids[i]] = struct{}{}
 	}
 }

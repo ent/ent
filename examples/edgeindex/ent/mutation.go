@@ -188,6 +188,7 @@ func (m *CityMutation) RemoveStreetIDs(ids ...int) {
 		m.removedstreets = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.streets, ids[i])
 		m.removedstreets[ids[i]] = struct{}{}
 	}
 }

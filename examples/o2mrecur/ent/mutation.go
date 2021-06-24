@@ -248,6 +248,7 @@ func (m *NodeMutation) RemoveChildIDs(ids ...int) {
 		m.removedchildren = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }

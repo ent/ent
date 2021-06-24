@@ -602,6 +602,7 @@ func (m *UserMutation) RemovePetIDs(ids ...int) {
 		m.removedpets = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.pets, ids[i])
 		m.removedpets[ids[i]] = struct{}{}
 	}
 }

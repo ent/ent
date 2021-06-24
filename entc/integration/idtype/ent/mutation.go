@@ -230,6 +230,7 @@ func (m *UserMutation) RemoveFollowerIDs(ids ...uint64) {
 		m.removedfollowers = make(map[uint64]struct{})
 	}
 	for i := range ids {
+		delete(m.followers, ids[i])
 		m.removedfollowers[ids[i]] = struct{}{}
 	}
 }
@@ -283,6 +284,7 @@ func (m *UserMutation) RemoveFollowingIDs(ids ...uint64) {
 		m.removedfollowing = make(map[uint64]struct{})
 	}
 	for i := range ids {
+		delete(m.following, ids[i])
 		m.removedfollowing[ids[i]] = struct{}{}
 	}
 }
