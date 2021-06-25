@@ -137,6 +137,8 @@ const (
 	FieldVstring = "vstring"
 	// FieldTriple holds the string denoting the triple field in the database.
 	FieldTriple = "triple"
+	// FieldBigInt holds the string denoting the big_int field in the database.
+	FieldBigInt = "big_int"
 )
 
 var (

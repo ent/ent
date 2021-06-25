@@ -31,6 +31,9 @@ func Types(t *testing.T, client *ent.Client) {
 	link, err := url.Parse("localhost")
 	require.NoError(err)
 
+	bigint := schema.NewBigInt(0)
+	require.NoError(bigint.Scan("1000"))
+
 	ft := client.FieldType.Create().
 		SetInt(1).
 		SetInt8(8).
@@ -75,6 +78,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetPair(schema.Pair{K: []byte("K"), V: []byte("V")}).
 		SetNilPair(&schema.Pair{K: []byte("K"), V: []byte("V")}).
 		SetStringArray([]string{"foo", "bar", "baz"}).
+		SetBigInt(bigint).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)
@@ -103,6 +107,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(schema.Pair{K: []byte("K"), V: []byte("V")}, ft.Pair)
 	require.Equal(&schema.Pair{K: []byte("K"), V: []byte("V")}, ft.NilPair)
 	require.EqualValues([]string{"foo", "bar", "baz"}, ft.StringArray)
+	require.Equal("1000", ft.BigInt.String())
 
 	ft = ft.Update().
 		SetInt(1).
@@ -134,6 +139,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetPair(schema.Pair{K: []byte("K1"), V: []byte("V1")}).
 		SetNilPair(&schema.Pair{K: []byte("K1"), V: []byte("V1")}).
 		SetStringArray([]string{"qux"}).
+		AddBigInt(bigint).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MaxInt8), ft.OptionalInt8)
@@ -163,6 +169,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.EqualValues([]string{"qux"}, ft.StringArray)
 	require.Nil(ft.NillableUUID)
 	require.Equal(uuid.UUID{}, ft.UUID)
+	require.Equal("2000", ft.BigInt.String())
 
 	exists, err := client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour * 2)).Exist(ctx)
 	require.NoError(err)

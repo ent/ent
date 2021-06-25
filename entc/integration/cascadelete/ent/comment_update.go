@@ -40,7 +40,6 @@ func (cu *CommentUpdate) SetText(s string) *CommentUpdate {
 
 // SetPostID sets the "post_id" field.
 func (cu *CommentUpdate) SetPostID(i int) *CommentUpdate {
-	cu.mutation.ResetPostID()
 	cu.mutation.SetPostID(i)
 	return cu
 }
@@ -213,7 +212,6 @@ func (cuo *CommentUpdateOne) SetText(s string) *CommentUpdateOne {
 
 // SetPostID sets the "post_id" field.
 func (cuo *CommentUpdateOne) SetPostID(i int) *CommentUpdateOne {
-	cuo.mutation.ResetPostID()
 	cuo.mutation.SetPostID(i)
 	return cuo
 }

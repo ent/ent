@@ -699,6 +699,20 @@ func (ftc *FieldTypeCreate) SetNillableTriple(s *schema.Triple) *FieldTypeCreate
 	return ftc
 }
 
+// SetBigInt sets the "big_int" field.
+func (ftc *FieldTypeCreate) SetBigInt(si schema.BigInt) *FieldTypeCreate {
+	ftc.mutation.SetBigInt(si)
+	return ftc
+}
+
+// SetNillableBigInt sets the "big_int" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableBigInt(si *schema.BigInt) *FieldTypeCreate {
+	if si != nil {
+		ftc.SetBigInt(*si)
+	}
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -1049,6 +1063,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.Triple(); ok {
 		v.Property(dsl.Single, fieldtype.FieldTriple, value)
+	}
+	if value, ok := ftc.mutation.BigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, value)
 	}
 	return v.ValueMap(true)
 }

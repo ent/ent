@@ -50,14 +50,12 @@ func (ru *RentalUpdate) SetNillableDate(t *time.Time) *RentalUpdate {
 
 // SetCarID sets the "car_id" field.
 func (ru *RentalUpdate) SetCarID(i int) *RentalUpdate {
-	ru.mutation.ResetCarID()
 	ru.mutation.SetCarID(i)
 	return ru
 }
 
 // SetUserID sets the "user_id" field.
 func (ru *RentalUpdate) SetUserID(i int) *RentalUpdate {
-	ru.mutation.ResetUserID()
 	ru.mutation.SetUserID(i)
 	return ru
 }
@@ -287,14 +285,12 @@ func (ruo *RentalUpdateOne) SetNillableDate(t *time.Time) *RentalUpdateOne {
 
 // SetCarID sets the "car_id" field.
 func (ruo *RentalUpdateOne) SetCarID(i int) *RentalUpdateOne {
-	ruo.mutation.ResetCarID()
 	ruo.mutation.SetCarID(i)
 	return ruo
 }
 
 // SetUserID sets the "user_id" field.
 func (ruo *RentalUpdateOne) SetUserID(i int) *RentalUpdateOne {
-	ruo.mutation.ResetUserID()
 	ruo.mutation.SetUserID(i)
 	return ruo
 }

@@ -78,7 +78,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 				{{- end }}
 				v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, value)
 			}
-			{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+			{{- if $f.SupportsMutationAdd }}
 				if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
 					{{- if $f.Unique }}
 						addValue := rv.Clone().Union(__.Values({{ $.Package }}.{{ $f.Constant }}), __.Constant(value)).Sum().Next()

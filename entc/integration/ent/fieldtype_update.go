@@ -921,7 +921,6 @@ func (ftu *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
 
 // SetNullInt64 sets the "null_int64" field.
 func (ftu *FieldTypeUpdate) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdate {
-	ftu.mutation.ResetNullInt64()
 	ftu.mutation.SetNullInt64(si)
 	return ftu
 }
@@ -1069,7 +1068,6 @@ func (ftu *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
 
 // SetNullFloat sets the "null_float" field.
 func (ftu *FieldTypeUpdate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdate {
-	ftu.mutation.ResetNullFloat()
 	ftu.mutation.SetNullFloat(sf)
 	return ftu
 }
@@ -1201,6 +1199,33 @@ func (ftu *FieldTypeUpdate) SetNillableTriple(s *schema.Triple) *FieldTypeUpdate
 	if s != nil {
 		ftu.SetTriple(*s)
 	}
+	return ftu
+}
+
+// SetBigInt sets the "big_int" field.
+func (ftu *FieldTypeUpdate) SetBigInt(si schema.BigInt) *FieldTypeUpdate {
+	ftu.mutation.ResetBigInt()
+	ftu.mutation.SetBigInt(si)
+	return ftu
+}
+
+// SetNillableBigInt sets the "big_int" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableBigInt(si *schema.BigInt) *FieldTypeUpdate {
+	if si != nil {
+		ftu.SetBigInt(*si)
+	}
+	return ftu
+}
+
+// AddBigInt adds si to the "big_int" field.
+func (ftu *FieldTypeUpdate) AddBigInt(si schema.BigInt) *FieldTypeUpdate {
+	ftu.mutation.AddBigInt(si)
+	return ftu
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (ftu *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate {
+	ftu.mutation.ClearBigInt()
 	return ftu
 }
 
@@ -2228,6 +2253,26 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldTriple,
 		})
 	}
+	if value, ok := ftu.mutation.BigInt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldBigInt,
+		})
+	}
+	if value, ok := ftu.mutation.AddedBigInt(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldBigInt,
+		})
+	}
+	if ftu.mutation.BigIntCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldBigInt,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{fieldtype.Label}
@@ -3132,7 +3177,6 @@ func (ftuo *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
 
 // SetNullInt64 sets the "null_int64" field.
 func (ftuo *FieldTypeUpdateOne) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdateOne {
-	ftuo.mutation.ResetNullInt64()
 	ftuo.mutation.SetNullInt64(si)
 	return ftuo
 }
@@ -3280,7 +3324,6 @@ func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
 
 // SetNullFloat sets the "null_float" field.
 func (ftuo *FieldTypeUpdateOne) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdateOne {
-	ftuo.mutation.ResetNullFloat()
 	ftuo.mutation.SetNullFloat(sf)
 	return ftuo
 }
@@ -3412,6 +3455,33 @@ func (ftuo *FieldTypeUpdateOne) SetNillableTriple(s *schema.Triple) *FieldTypeUp
 	if s != nil {
 		ftuo.SetTriple(*s)
 	}
+	return ftuo
+}
+
+// SetBigInt sets the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) SetBigInt(si schema.BigInt) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetBigInt()
+	ftuo.mutation.SetBigInt(si)
+	return ftuo
+}
+
+// SetNillableBigInt sets the "big_int" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableBigInt(si *schema.BigInt) *FieldTypeUpdateOne {
+	if si != nil {
+		ftuo.SetBigInt(*si)
+	}
+	return ftuo
+}
+
+// AddBigInt adds si to the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) AddBigInt(si schema.BigInt) *FieldTypeUpdateOne {
+	ftuo.mutation.AddBigInt(si)
+	return ftuo
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearBigInt()
 	return ftuo
 }
 
@@ -4461,6 +4531,26 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: fieldtype.FieldTriple,
+		})
+	}
+	if value, ok := ftuo.mutation.BigInt(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldBigInt,
+		})
+	}
+	if value, ok := ftuo.mutation.AddedBigInt(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldBigInt,
+		})
+	}
+	if ftuo.mutation.BigIntCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: fieldtype.FieldBigInt,
 		})
 	}
 	_node = &FieldType{config: ftuo.config}

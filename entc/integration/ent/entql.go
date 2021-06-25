@@ -135,6 +135,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldNilPair:               {Type: field.TypeBytes, Column: fieldtype.FieldNilPair},
 			fieldtype.FieldVstring:               {Type: field.TypeString, Column: fieldtype.FieldVstring},
 			fieldtype.FieldTriple:                {Type: field.TypeString, Column: fieldtype.FieldTriple},
+			fieldtype.FieldBigInt:                {Type: field.TypeInt, Column: fieldtype.FieldBigInt},
 		},
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
@@ -1113,6 +1114,11 @@ func (f *FieldTypeFilter) WhereVstring(p entql.StringP) {
 // WhereTriple applies the entql string predicate on the triple field.
 func (f *FieldTypeFilter) WhereTriple(p entql.StringP) {
 	f.Where(p.Field(fieldtype.FieldTriple))
+}
+
+// WhereBigInt applies the entql int predicate on the big_int field.
+func (f *FieldTypeFilter) WhereBigInt(p entql.IntP) {
+	f.Where(p.Field(fieldtype.FieldBigInt))
 }
 
 // addPredicate implements the predicateAdder interface.

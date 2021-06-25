@@ -61,7 +61,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						Column: {{ $.Package }}.{{ $f.Constant }},
 					})
 				}
-				{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+				{{- if $f.SupportsMutationAdd }}
 					if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
 						_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 							Type: field.{{ $f.Type.ConstName }},

@@ -24,7 +24,7 @@ in the LICENSE file in the root directory of this source tree.
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
-		{{- if and $f.Type.Numeric $updater }}
+		{{- if and $updater $f.SupportsMutationAdd }}
 			{{ $receiver }}.mutation.{{ print "Reset" $f.StructField }}()
 		{{- end }}
 		{{ $receiver }}.mutation.{{ $func }}({{ $p }})
@@ -43,7 +43,7 @@ in the LICENSE file in the root directory of this source tree.
 		}
 	{{ end }}
 
-	{{ if and $f.Type.Numeric $f.ConvertedToBasic $updater (not $f.IsEdgeField) }}
+	{{ if and $updater $f.SupportsMutationAdd }}
 		{{ $func := print "Add" $f.StructField }}
 		// {{ $func }} adds {{ $p }} to the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {

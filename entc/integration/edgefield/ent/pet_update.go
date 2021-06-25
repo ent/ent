@@ -33,7 +33,6 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 
 // SetOwnerID sets the "owner_id" field.
 func (pu *PetUpdate) SetOwnerID(i int) *PetUpdate {
-	pu.mutation.ResetOwnerID()
 	pu.mutation.SetOwnerID(i)
 	return pu
 }
@@ -193,7 +192,6 @@ type PetUpdateOne struct {
 
 // SetOwnerID sets the "owner_id" field.
 func (puo *PetUpdateOne) SetOwnerID(i int) *PetUpdateOne {
-	puo.mutation.ResetOwnerID()
 	puo.mutation.SetOwnerID(i)
 	return puo
 }

@@ -1247,6 +1247,46 @@ func (f Field) ConvertedToBasic() bool {
 	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
+// SupportsAdd reports if the field supports the mutation "Add(T) T" interface.
+func (f Field) SupportsMutationAdd() bool {
+	if !f.Type.Numeric() || f.IsEdgeField() {
+		return false
+	}
+	return f.ConvertedToBasic() || f.implementsAdder()
+}
+
+// MutationAddAssignExpr returns the expression for summing to identifiers and assigning to the mutation field.
+//
+//	MutationAddAssignExpr(a, b) => *m.a += b		// Basic Go type.
+//	MutationAddAssignExpr(a, b) => *m.a = m.Add(b)	// Custom Go types that implement the (Add(T) T) interface.
+//
+func (f Field) MutationAddAssignExpr(ident1, ident2 string) (string, error) {
+	if !f.SupportsMutationAdd() {
+		return "", fmt.Errorf("field %q does not support the add operation (a + b)", f.Name)
+	}
+	expr := "*%s += %s"
+	if f.implementsAdder() {
+		expr = "*%[1]s = %[1]s.Add(%[2]s)"
+	}
+	return fmt.Sprintf(expr, ident1, ident2), nil
+}
+
+func (f Field) implementsAdder() bool {
+	if !f.HasGoType() {
+		return false
+	}
+	// If the custom GoType supports the "Add(T) T" interface.
+	m, ok := f.Type.RType.Methods["Add"]
+	if !ok || len(m.In) != 1 && len(m.Out) != 1 {
+		return false
+	}
+	return rtypeEqual(f.Type.RType, m.In[0]) && rtypeEqual(f.Type.RType, m.Out[0])
+}
+
+func rtypeEqual(t1, t2 *field.RType) bool {
+	return t1.Kind == t2.Kind && t1.Ident == t2.Ident && t1.PkgPath == t2.PkgPath
+}
+
 var (
 	nullBoolType    = reflect.TypeOf(sql.NullBool{})
 	nullBoolPType   = reflect.TypeOf((*sql.NullBool)(nil))
