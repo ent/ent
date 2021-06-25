@@ -244,6 +244,14 @@ func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
 //	field.Int("int").
 //		GoType(pkg.Int(0))
 //
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
+//
 func (b *intBuilder) GoType(typ interface{}) *intBuilder {
 	b.desc.goType(typ, intType)
 	return b
@@ -394,6 +402,14 @@ func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
 //
 //	field.Uint("uint").
 //		GoType(pkg.Uint(0))
+//
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
 //
 func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
 	b.desc.goType(typ, uintType)
@@ -556,6 +572,14 @@ func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
 //	field.Int8("int8").
 //		GoType(pkg.Int8(0))
 //
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
+//
 func (b *int8Builder) GoType(typ interface{}) *int8Builder {
 	b.desc.goType(typ, int8Type)
 	return b
@@ -716,6 +740,14 @@ func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
 //
 //	field.Int16("int16").
 //		GoType(pkg.Int16(0))
+//
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
 //
 func (b *int16Builder) GoType(typ interface{}) *int16Builder {
 	b.desc.goType(typ, int16Type)
@@ -878,6 +910,14 @@ func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
 //	field.Int32("int32").
 //		GoType(pkg.Int32(0))
 //
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
+//
 func (b *int32Builder) GoType(typ interface{}) *int32Builder {
 	b.desc.goType(typ, int32Type)
 	return b
@@ -1039,6 +1079,14 @@ func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
 //	field.Int64("int64").
 //		GoType(pkg.Int64(0))
 //
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
+//
 func (b *int64Builder) GoType(typ interface{}) *int64Builder {
 	b.desc.goType(typ, int64Type)
 	return b
@@ -1189,6 +1237,14 @@ func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
 //
 //	field.Uint8("uint8").
 //		GoType(pkg.Uint8(0))
+//
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
 //
 func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
 	b.desc.goType(typ, uint8Type)
@@ -1341,6 +1397,14 @@ func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
 //	field.Uint16("uint16").
 //		GoType(pkg.Uint16(0))
 //
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
+//
 func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
 	b.desc.goType(typ, uint16Type)
 	return b
@@ -1492,6 +1556,14 @@ func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
 //	field.Uint32("uint32").
 //		GoType(pkg.Uint32(0))
 //
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
+//
 func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
 	b.desc.goType(typ, uint32Type)
 	return b
@@ -1642,6 +1714,14 @@ func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
 //
 //	field.Uint64("uint64").
 //		GoType(pkg.Uint64(0))
+//
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
 //
 func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
 	b.desc.goType(typ, uint64Type)
@@ -1806,6 +1886,14 @@ func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
 //	field.Float64("float64").
 //		GoType(pkg.Float64(0))
 //
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
+//
 func (b *float64Builder) GoType(typ interface{}) *float64Builder {
 	b.desc.goType(typ, float64Type)
 	return b
@@ -1952,6 +2040,14 @@ func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
 //
 //	field.Float32("float32").
 //		GoType(pkg.Float32(0))
+//
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
 //
 func (b *float32Builder) GoType(typ interface{}) *float32Builder {
 	b.desc.goType(typ, float32Type)

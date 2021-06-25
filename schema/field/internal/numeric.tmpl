@@ -179,6 +179,14 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 //	field.{{ $tt }}("{{ $t }}").
 //		GoType(pkg.{{ $tt }}(0))
 //
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
+//
 func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
 	b.desc.goType(typ, {{ $t }}Type)
 	return b
@@ -341,6 +349,14 @@ func (b *{{ $builder }}) SchemaType(types map[string]string) *{{ $builder }} {
 //
 //	field.{{ $tt }}("{{ $t }}").
 //		GoType(pkg.{{ $tt }}(0))
+//
+// Note that, the custom Go type `T` needs to implement the
+// `Add(T) T` method in order to support the `Add<F>` operation
+// in mutations. For example:
+//
+//	func(t1 T) Add(t1 T) T {
+//		return add(t1, t1)
+//	}
 //
 func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
 	b.desc.goType(typ, {{ $t }}Type)

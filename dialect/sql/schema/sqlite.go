@@ -122,6 +122,8 @@ func (*SQLite) cType(c *Column) (t string) {
 		t = "json"
 	case field.TypeUUID:
 		t = "uuid"
+	case field.TypeOther:
+		t = c.typ
 	default:
 		panic(fmt.Sprintf("unsupported type %q for column %q", c.Type, c.Name))
 	}
@@ -303,6 +305,8 @@ func (d *SQLite) scanColumn(c *Column, rows *sql.Rows) error {
 	case "varchar", "text":
 		c.Size = DefaultStringLen
 		c.Type = field.TypeString
+	case "decimal", "numeric":
+		c.Type = field.TypeOther
 	}
 	if defaults.Valid {
 		return c.ScanDefault(defaults.String)

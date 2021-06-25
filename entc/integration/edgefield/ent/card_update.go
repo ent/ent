@@ -53,7 +53,6 @@ func (cu *CardUpdate) ClearNumber() *CardUpdate {
 
 // SetOwnerID sets the "owner_id" field.
 func (cu *CardUpdate) SetOwnerID(i int) *CardUpdate {
-	cu.mutation.ResetOwnerID()
 	cu.mutation.SetOwnerID(i)
 	return cu
 }
@@ -246,7 +245,6 @@ func (cuo *CardUpdateOne) ClearNumber() *CardUpdateOne {
 
 // SetOwnerID sets the "owner_id" field.
 func (cuo *CardUpdateOne) SetOwnerID(i int) *CardUpdateOne {
-	cuo.mutation.ResetOwnerID()
 	cuo.mutation.SetOwnerID(i)
 	return cuo
 }

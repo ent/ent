@@ -141,7 +141,9 @@ type FieldType struct {
 	// Vstring holds the value of the "vstring" field.
 	Vstring schema.VString `json:"vstring,omitempty"`
 	// Triple holds the value of the "triple" field.
-	Triple     schema.Triple `json:"triple,omitempty"`
+	Triple schema.Triple `json:"triple,omitempty"`
+	// BigInt holds the value of the "big_int" field.
+	BigInt     schema.BigInt `json:"big_int,omitempty"`
 	file_field *int
 }
 
@@ -162,6 +164,8 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new([]byte)
 		case fieldtype.FieldPriority:
 			values[i] = new(role.Priority)
+		case fieldtype.FieldBigInt:
+			values[i] = new(schema.BigInt)
 		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
 			values[i] = new(schema.Link)
 		case fieldtype.FieldMAC:
@@ -568,6 +572,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value != nil {
 				ft.Triple = *value
 			}
+		case fieldtype.FieldBigInt:
+			if value, ok := values[i].(*schema.BigInt); !ok {
+				return fmt.Errorf("unexpected type %T for field big_int", values[i])
+			} else if value != nil {
+				ft.BigInt = *value
+			}
 		case fieldtype.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -745,6 +755,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Vstring))
 	builder.WriteString(", triple=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Triple))
+	builder.WriteString(", big_int=")
+	builder.WriteString(fmt.Sprintf("%v", ft.BigInt))
 	builder.WriteByte(')')
 	return builder.String()
 }

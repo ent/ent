@@ -52,7 +52,6 @@ func (fu *FileUpdate) SetNillableDeleted(b *bool) *FileUpdate {
 
 // SetParentID sets the "parent_id" field.
 func (fu *FileUpdate) SetParentID(i int) *FileUpdate {
-	fu.mutation.ResetParentID()
 	fu.mutation.SetParentID(i)
 	return fu
 }
@@ -336,7 +335,6 @@ func (fuo *FileUpdateOne) SetNillableDeleted(b *bool) *FileUpdateOne {
 
 // SetParentID sets the "parent_id" field.
 func (fuo *FileUpdateOne) SetParentID(i int) *FileUpdateOne {
-	fuo.mutation.ResetParentID()
 	fuo.mutation.SetParentID(i)
 	return fuo
 }

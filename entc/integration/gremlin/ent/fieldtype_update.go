@@ -923,7 +923,6 @@ func (ftu *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
 
 // SetNullInt64 sets the "null_int64" field.
 func (ftu *FieldTypeUpdate) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdate {
-	ftu.mutation.ResetNullInt64()
 	ftu.mutation.SetNullInt64(si)
 	return ftu
 }
@@ -1071,7 +1070,6 @@ func (ftu *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
 
 // SetNullFloat sets the "null_float" field.
 func (ftu *FieldTypeUpdate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdate {
-	ftu.mutation.ResetNullFloat()
 	ftu.mutation.SetNullFloat(sf)
 	return ftu
 }
@@ -1203,6 +1201,33 @@ func (ftu *FieldTypeUpdate) SetNillableTriple(s *schema.Triple) *FieldTypeUpdate
 	if s != nil {
 		ftu.SetTriple(*s)
 	}
+	return ftu
+}
+
+// SetBigInt sets the "big_int" field.
+func (ftu *FieldTypeUpdate) SetBigInt(si schema.BigInt) *FieldTypeUpdate {
+	ftu.mutation.ResetBigInt()
+	ftu.mutation.SetBigInt(si)
+	return ftu
+}
+
+// SetNillableBigInt sets the "big_int" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableBigInt(si *schema.BigInt) *FieldTypeUpdate {
+	if si != nil {
+		ftu.SetBigInt(*si)
+	}
+	return ftu
+}
+
+// AddBigInt adds si to the "big_int" field.
+func (ftu *FieldTypeUpdate) AddBigInt(si schema.BigInt) *FieldTypeUpdate {
+	ftu.mutation.AddBigInt(si)
+	return ftu
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (ftu *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate {
+	ftu.mutation.ClearBigInt()
 	return ftu
 }
 
@@ -1592,6 +1617,12 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.Triple(); ok {
 		v.Property(dsl.Single, fieldtype.FieldTriple, value)
 	}
+	if value, ok := ftu.mutation.BigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, value)
+	}
+	if value, ok := ftu.mutation.AddedBigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, __.Union(__.Values(fieldtype.FieldBigInt), __.Constant(value)).Sum())
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1736,6 +1767,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.NilPairCleared() {
 		properties = append(properties, fieldtype.FieldNilPair)
+	}
+	if ftu.mutation.BigIntCleared() {
+		properties = append(properties, fieldtype.FieldBigInt)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -2638,7 +2672,6 @@ func (ftuo *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
 
 // SetNullInt64 sets the "null_int64" field.
 func (ftuo *FieldTypeUpdateOne) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdateOne {
-	ftuo.mutation.ResetNullInt64()
 	ftuo.mutation.SetNullInt64(si)
 	return ftuo
 }
@@ -2786,7 +2819,6 @@ func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
 
 // SetNullFloat sets the "null_float" field.
 func (ftuo *FieldTypeUpdateOne) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdateOne {
-	ftuo.mutation.ResetNullFloat()
 	ftuo.mutation.SetNullFloat(sf)
 	return ftuo
 }
@@ -2918,6 +2950,33 @@ func (ftuo *FieldTypeUpdateOne) SetNillableTriple(s *schema.Triple) *FieldTypeUp
 	if s != nil {
 		ftuo.SetTriple(*s)
 	}
+	return ftuo
+}
+
+// SetBigInt sets the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) SetBigInt(si schema.BigInt) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetBigInt()
+	ftuo.mutation.SetBigInt(si)
+	return ftuo
+}
+
+// SetNillableBigInt sets the "big_int" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableBigInt(si *schema.BigInt) *FieldTypeUpdateOne {
+	if si != nil {
+		ftuo.SetBigInt(*si)
+	}
+	return ftuo
+}
+
+// AddBigInt adds si to the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) AddBigInt(si schema.BigInt) *FieldTypeUpdateOne {
+	ftuo.mutation.AddBigInt(si)
+	return ftuo
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearBigInt()
 	return ftuo
 }
 
@@ -3319,6 +3378,12 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.Triple(); ok {
 		v.Property(dsl.Single, fieldtype.FieldTriple, value)
 	}
+	if value, ok := ftuo.mutation.BigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, value)
+	}
+	if value, ok := ftuo.mutation.AddedBigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, __.Union(__.Values(fieldtype.FieldBigInt), __.Constant(value)).Sum())
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -3463,6 +3528,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.NilPairCleared() {
 		properties = append(properties, fieldtype.FieldNilPair)
+	}
+	if ftuo.mutation.BigIntCleared() {
+		properties = append(properties, fieldtype.FieldBigInt)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

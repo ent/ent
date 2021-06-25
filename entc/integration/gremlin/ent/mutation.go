@@ -1387,6 +1387,8 @@ type FieldTypeMutation struct {
 	nil_pair                   **schema.Pair
 	vstring                    *schema.VString
 	triple                     *schema.Triple
+	big_int                    *schema.BigInt
+	addbig_int                 *schema.BigInt
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -4809,6 +4811,76 @@ func (m *FieldTypeMutation) ResetTriple() {
 	m.triple = nil
 }
 
+// SetBigInt sets the "big_int" field.
+func (m *FieldTypeMutation) SetBigInt(si schema.BigInt) {
+	m.big_int = &si
+	m.addbig_int = nil
+}
+
+// BigInt returns the value of the "big_int" field in the mutation.
+func (m *FieldTypeMutation) BigInt() (r schema.BigInt, exists bool) {
+	v := m.big_int
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBigInt returns the old "big_int" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldBigInt(ctx context.Context) (v schema.BigInt, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldBigInt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldBigInt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBigInt: %w", err)
+	}
+	return oldValue.BigInt, nil
+}
+
+// AddBigInt adds si to the "big_int" field.
+func (m *FieldTypeMutation) AddBigInt(si schema.BigInt) {
+	if m.addbig_int != nil {
+		*m.addbig_int = m.addbig_int.Add(si)
+	} else {
+		m.addbig_int = &si
+	}
+}
+
+// AddedBigInt returns the value that was added to the "big_int" field in this mutation.
+func (m *FieldTypeMutation) AddedBigInt() (r schema.BigInt, exists bool) {
+	v := m.addbig_int
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (m *FieldTypeMutation) ClearBigInt() {
+	m.big_int = nil
+	m.addbig_int = nil
+	m.clearedFields[fieldtype.FieldBigInt] = struct{}{}
+}
+
+// BigIntCleared returns if the "big_int" field was cleared in this mutation.
+func (m *FieldTypeMutation) BigIntCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldBigInt]
+	return ok
+}
+
+// ResetBigInt resets all changes to the "big_int" field.
+func (m *FieldTypeMutation) ResetBigInt() {
+	m.big_int = nil
+	m.addbig_int = nil
+	delete(m.clearedFields, fieldtype.FieldBigInt)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -4823,7 +4895,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 58)
+	fields := make([]string, 0, 59)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4998,6 +5070,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.triple != nil {
 		fields = append(fields, fieldtype.FieldTriple)
 	}
+	if m.big_int != nil {
+		fields = append(fields, fieldtype.FieldBigInt)
+	}
 	return fields
 }
 
@@ -5122,6 +5197,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Vstring()
 	case fieldtype.FieldTriple:
 		return m.Triple()
+	case fieldtype.FieldBigInt:
+		return m.BigInt()
 	}
 	return nil, false
 }
@@ -5247,6 +5324,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldVstring(ctx)
 	case fieldtype.FieldTriple:
 		return m.OldTriple(ctx)
+	case fieldtype.FieldBigInt:
+		return m.OldBigInt(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -5662,6 +5741,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTriple(v)
 		return nil
+	case fieldtype.FieldBigInt:
+		v, ok := value.(schema.BigInt)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBigInt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -5760,6 +5846,9 @@ func (m *FieldTypeMutation) AddedFields() []string {
 	if m.addschema_float32 != nil {
 		fields = append(fields, fieldtype.FieldSchemaFloat32)
 	}
+	if m.addbig_int != nil {
+		fields = append(fields, fieldtype.FieldBigInt)
+	}
 	return fields
 }
 
@@ -5828,6 +5917,8 @@ func (m *FieldTypeMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedSchemaFloat()
 	case fieldtype.FieldSchemaFloat32:
 		return m.AddedSchemaFloat32()
+	case fieldtype.FieldBigInt:
+		return m.AddedBigInt()
 	}
 	return nil, false
 }
@@ -6047,6 +6138,13 @@ func (m *FieldTypeMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddSchemaFloat32(v)
 		return nil
+	case fieldtype.FieldBigInt:
+		v, ok := value.(schema.BigInt)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBigInt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown FieldType numeric field %s", name)
 }
@@ -6198,6 +6296,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(fieldtype.FieldNilPair) {
 		fields = append(fields, fieldtype.FieldNilPair)
+	}
+	if m.FieldCleared(fieldtype.FieldBigInt) {
+		fields = append(fields, fieldtype.FieldBigInt)
 	}
 	return fields
 }
@@ -6356,6 +6457,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldNilPair:
 		m.ClearNilPair()
+		return nil
+	case fieldtype.FieldBigInt:
+		m.ClearBigInt()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -6538,6 +6642,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldTriple:
 		m.ResetTriple()
+		return nil
+	case fieldtype.FieldBigInt:
+		m.ResetBigInt()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)

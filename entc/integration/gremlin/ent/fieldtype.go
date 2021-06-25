@@ -142,6 +142,8 @@ type FieldType struct {
 	Vstring schema.VString `json:"vstring,omitempty"`
 	// Triple holds the value of the "triple" field.
 	Triple schema.Triple `json:"triple,omitempty"`
+	// BigInt holds the value of the "big_int" field.
+	BigInt schema.BigInt `json:"big_int,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -210,6 +212,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		NilPair               *schema.Pair          `json:"nil_pair,omitempty"`
 		Vstring               schema.VString        `json:"vstring,omitempty"`
 		Triple                schema.Triple         `json:"triple,omitempty"`
+		BigInt                schema.BigInt         `json:"big_int,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -273,6 +276,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.NilPair = scanft.NilPair
 	ft.Vstring = scanft.Vstring
 	ft.Triple = scanft.Triple
+	ft.BigInt = scanft.BigInt
 	return nil
 }
 
@@ -441,6 +445,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Vstring))
 	builder.WriteString(", triple=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Triple))
+	builder.WriteString(", big_int=")
+	builder.WriteString(fmt.Sprintf("%v", ft.BigInt))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -514,6 +520,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		NilPair               *schema.Pair          `json:"nil_pair,omitempty"`
 		Vstring               schema.VString        `json:"vstring,omitempty"`
 		Triple                schema.Triple         `json:"triple,omitempty"`
+		BigInt                schema.BigInt         `json:"big_int,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -579,6 +586,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			NilPair:               v.NilPair,
 			Vstring:               v.Vstring,
 			Triple:                v.Triple,
+			BigInt:                v.BigInt,
 		})
 	}
 	return nil

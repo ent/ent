@@ -39,7 +39,6 @@ func (pu *PostUpdate) SetText(s string) *PostUpdate {
 
 // SetAuthorID sets the "author_id" field.
 func (pu *PostUpdate) SetAuthorID(i int) *PostUpdate {
-	pu.mutation.ResetAuthorID()
 	pu.mutation.SetAuthorID(i)
 	return pu
 }
@@ -212,7 +211,6 @@ func (puo *PostUpdateOne) SetText(s string) *PostUpdateOne {
 
 // SetAuthorID sets the "author_id" field.
 func (puo *PostUpdateOne) SetAuthorID(i int) *PostUpdateOne {
-	puo.mutation.ResetAuthorID()
 	puo.mutation.SetAuthorID(i)
 	return puo
 }

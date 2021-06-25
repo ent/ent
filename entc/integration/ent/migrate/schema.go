@@ -128,6 +128,7 @@ var (
 		{Name: "nil_pair", Type: field.TypeBytes, Nullable: true},
 		{Name: "vstring", Type: field.TypeString},
 		{Name: "triple", Type: field.TypeString},
+		{Name: "big_int", Type: field.TypeInt, Nullable: true},
 		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.
@@ -138,7 +139,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "field_types_files_field",
-				Columns:    []*schema.Column{FieldTypesColumns[59]},
+				Columns:    []*schema.Column{FieldTypesColumns[60]},
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -698,6 +698,20 @@ func (ftc *FieldTypeCreate) SetNillableTriple(s *schema.Triple) *FieldTypeCreate
 	return ftc
 }
 
+// SetBigInt sets the "big_int" field.
+func (ftc *FieldTypeCreate) SetBigInt(si schema.BigInt) *FieldTypeCreate {
+	ftc.mutation.SetBigInt(si)
+	return ftc
+}
+
+// SetNillableBigInt sets the "big_int" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableBigInt(si *schema.BigInt) *FieldTypeCreate {
+	if si != nil {
+		ftc.SetBigInt(*si)
+	}
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -1344,6 +1358,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldTriple,
 		})
 		_node.Triple = value
+	}
+	if value, ok := ftc.mutation.BigInt(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: fieldtype.FieldBigInt,
+		})
+		_node.BigInt = value
 	}
 	return _node, _spec
 }

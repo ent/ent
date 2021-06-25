@@ -37,7 +37,6 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 
 // SetParentID sets the "parent_id" field.
 func (uu *UserUpdate) SetParentID(i int) *UserUpdate {
-	uu.mutation.ResetParentID()
 	uu.mutation.SetParentID(i)
 	return uu
 }
@@ -58,7 +57,6 @@ func (uu *UserUpdate) ClearParentID() *UserUpdate {
 
 // SetSpouseID sets the "spouse_id" field.
 func (uu *UserUpdate) SetSpouseID(i int) *UserUpdate {
-	uu.mutation.ResetSpouseID()
 	uu.mutation.SetSpouseID(i)
 	return uu
 }
@@ -744,7 +742,6 @@ type UserUpdateOne struct {
 
 // SetParentID sets the "parent_id" field.
 func (uuo *UserUpdateOne) SetParentID(i int) *UserUpdateOne {
-	uuo.mutation.ResetParentID()
 	uuo.mutation.SetParentID(i)
 	return uuo
 }
@@ -765,7 +762,6 @@ func (uuo *UserUpdateOne) ClearParentID() *UserUpdateOne {
 
 // SetSpouseID sets the "spouse_id" field.
 func (uuo *UserUpdateOne) SetSpouseID(i int) *UserUpdateOne {
-	uuo.mutation.ResetSpouseID()
 	uuo.mutation.SetSpouseID(i)
 	return uuo
 }
