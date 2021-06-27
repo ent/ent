@@ -120,8 +120,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- end }}
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{ {{ $.Package }}.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return {{ $zero }}, err
 	}

@@ -8,11 +8,4 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* custom errors and errors handlers for sql dialects */}}
 {{ define "dialect/sql/errors" }}
-func isSQLConstraintError(err error) (*ConstraintError, bool) {
-	if sqlgraph.IsConstraintError(err) {
-		return &ConstraintError{err.Error(), err}, true
-	}
-	return nil, false
-}
-
 {{ end }}

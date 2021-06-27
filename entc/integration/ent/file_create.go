@@ -221,8 +221,8 @@ func (fc *FileCreate) check() error {
 func (fc *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 	_node, _spec := fc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -375,8 +375,8 @@ func (fcb *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, fcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}

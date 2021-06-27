@@ -165,8 +165,8 @@ func (ftc *FileTypeCreate) check() error {
 func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 	_node, _spec := ftc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -263,8 +263,8 @@ func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
