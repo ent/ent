@@ -13,7 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 import (
-	{{ range $_, $n := $.Nodes }}
+	{{ range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
 
@@ -23,10 +23,10 @@ import (
 )
 
 var (
-	{{- range $_, $t := $.Tables }}
+	{{- range $t := $.Tables }}
 		{{- /* find type node in the graph of this table, if exists */}}
 		{{- $node := index $.Nodes 0 }}
-		{{- range $_, $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
+		{{- range $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
 		{{- $columns := pascal $t.Name | printf "%sColumns" }}
 		// {{ $columns }} holds the columns for the "{{ $t.Name }}" table.
 		{{ $columns }} = []*schema.Column{
@@ -125,7 +125,7 @@ var (
 	{{- end }}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		{{- range $_, $t := $.Tables }}
+		{{- range $t := $.Tables }}
 			{{ pascal $t.Name | printf "%sTable" }},
 		{{- end }}
 	}

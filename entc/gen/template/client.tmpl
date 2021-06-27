@@ -15,12 +15,12 @@ import (
 	"log"
 
 	"{{ $.Config.Package }}/migrate"
-	{{ range $_, $n := $.Nodes }}
+	{{ range $n := $.Nodes }}
 		"{{ $n.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
 
 	"entgo.io/ent/dialect"
-	{{ range $_, $import := $.Storage.Imports -}}
+	{{ range $import := $.Storage.Imports -}}
 		"{{ $import }}"
 	{{ end -}}
 )
@@ -90,9 +90,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx: ctx,
 		config: cfg,
-		{{ range $_, $n := $.Nodes -}}
+		{{- range $n := $.Nodes }}
 			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
-		{{ end -}}
+		{{- end }}
 	}, nil
 }
 
