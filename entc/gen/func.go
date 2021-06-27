@@ -26,7 +26,7 @@ var (
 	// Funcs are the predefined template
 	// functions used by the codegen.
 	Funcs = template.FuncMap{
-		"ops":           ops,
+		"ops":           fieldOps,
 		"add":           add,
 		"append":        reflect.Append,
 		"appends":       reflect.AppendSlice,
@@ -73,27 +73,27 @@ var (
 	acronyms = make(map[string]struct{})
 )
 
-// ops returns all operations for given field.
-func ops(f *Field) (op []Op) {
+// fieldOps returns all predicate operations for a given field.
+func fieldOps(f *Field) (ops []Op) {
 	switch t := f.Type.Type; {
 	case f.HasGoType() && !f.ConvertedToBasic() && !f.Type.Valuer():
 	case t == field.TypeJSON:
 	case t == field.TypeBool:
-		op = boolOps
+		ops = boolOps
 	case t == field.TypeString && strings.ToLower(f.Name) != "id":
-		op = stringOps
+		ops = stringOps
 		if f.HasGoType() && !f.ConvertedToBasic() && f.Type.Valuer() {
-			op = numericOps
+			ops = numericOps
 		}
 	case t == field.TypeEnum || f.IsEdgeField():
-		op = enumOps
+		ops = enumOps
 	default:
-		op = numericOps
+		ops = numericOps
 	}
 	if f.Optional {
-		op = append(op, nillableOps...)
+		ops = append(ops, nillableOps...)
 	}
-	return op
+	return ops
 }
 
 // xrange generates a slice of len n.

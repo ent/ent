@@ -54,6 +54,7 @@ type (
 
 	// Field holds the information of a type field used for the templates.
 	Field struct {
+		cfg *Config
 		def *load.Field
 		// Name is the name of this field in the database schema.
 		Name string
@@ -195,6 +196,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	typ := &Type{
 		Config: c,
 		ID: &Field{
+			cfg:  c,
 			Name: "id",
 			def: &load.Field{
 				Name: "id",
@@ -214,6 +216,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	}
 	for _, f := range schema.Fields {
 		tf := &Field{
+			cfg:           c,
 			def:           f,
 			Name:          f.Name,
 			Type:          f.Info,
@@ -1386,6 +1389,15 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 		}
 	}
 	return enums, nil
+}
+
+// Ops returns all predicate operations of the field.
+func (f *Field) Ops() []Op {
+	ops := fieldOps(f)
+	if f.Name != "id" && f.cfg != nil && f.cfg.Storage.Ops != nil {
+		ops = append(ops, f.cfg.Storage.Ops(f)...)
+	}
+	return ops
 }
 
 // Label returns the Gremlin label name of the edge.

@@ -22,7 +22,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	)
 }
 
-{{ range $op := ops $.ID }}
+{{ range $op := $.ID.Ops }}
 	{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
 	{{ $func := printf "ID%s" $op.Name }}
 	// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
@@ -61,11 +61,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 {{ end }}
 
 {{ range $f := $.Fields }}
-	{{ $ops := ops $f }}
-	{{ with $.Storage.Ops }}
-		{{ $ops = appends $ops (call $.Storage.Ops $f) }}
-	{{ end }}
-	{{ range $op := $ops }}
+	{{ range $op := $f.Ops }}
 		{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
 		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}
 		{{ $func := print $f.StructField $op.Name }}

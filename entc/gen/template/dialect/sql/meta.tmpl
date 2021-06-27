@@ -54,7 +54,7 @@ in the LICENSE file in the root directory of this source tree.
 
 	{{ with $.NumM2M }}
 		var (
-			{{- range $_, $e := $.Edges }}
+			{{- range $e := $.Edges }}
 				{{- if $e.M2M }}
 					// {{ $e.PKConstant }} and {{ $e.ColumnConstant }}2 are the table columns denoting the
 					// primary key for the {{ $e.Name }} relation (M2M).
