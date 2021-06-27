@@ -159,8 +159,8 @@ func (nc *NoteCreate) check() error {
 func (nc *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
 	_node, _spec := nc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -263,8 +263,8 @@ func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ncb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}

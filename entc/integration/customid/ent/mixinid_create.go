@@ -117,8 +117,8 @@ func (mic *MixinIDCreate) check() error {
 func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 	_node, _spec := mic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mic.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -190,8 +190,8 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, micb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}

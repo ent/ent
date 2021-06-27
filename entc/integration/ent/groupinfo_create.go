@@ -134,8 +134,8 @@ func (gic *GroupInfoCreate) check() error {
 func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	_node, _spec := gic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -224,8 +224,8 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, gicb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}

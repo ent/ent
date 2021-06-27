@@ -96,8 +96,8 @@ func (ctc *CustomTypeCreate) check() error {
 func (ctc *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
 	_node, _spec := ctc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ctc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -158,8 +158,8 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 				} else {
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ctcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
