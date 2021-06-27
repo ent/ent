@@ -3,7 +3,7 @@ id: grpc-optional-fields
 title: Optional Fields
 sidebar_label: Optional Fields
 ---
-A common issue with Protobuf's is that the way that nil values are represented: a zero-valued primitive field isn't
+A common issue with Protobufs is that the way that nil values are represented: a zero-valued primitive field isn't
 encoded into the binary representation, this means that applications cannot distinguish between zero and not-set for
 primitive fields. 
 
