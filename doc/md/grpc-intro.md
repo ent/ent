@@ -10,7 +10,7 @@ language-neutral, platform-neutral extensible mechanism for serializing structur
 Ent supports the automatic generation of gRPC services from schemas using a plugin available in [ent/contrib](https://github.com/ent/contrib).
 
 On a high-level, the integration between Ent and gRPC works like this:
-* A command-line (or code-gen hook) named `entproto` is used to generated protocol buffer definitions and gRPC service
+* A command-line (or code-gen hook) named `entproto` is used to generate protocol buffer definitions and gRPC service
   definitions from an ent schema. (The schema is annotated using `entproto` annotations to assist the mapping between
   the domains).
 * A protoc (protobuf compiler) plugin, `protoc-gen-entgrpc`, is used to generate an implementation of the gRPC service
