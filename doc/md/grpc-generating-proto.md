@@ -3,7 +3,7 @@ id: grpc-generating-proto
 title: Generating Protobufs with entproto
 sidebar_label: Generating Protobufs
 ---
-As ent and Protobuf schemas are not identical, we must supply some annotations on our schema to help `entproto` figure out exactly how to generate Protobuf definitions (called "Messages" in protobuf lingo).
+As Ent and Protobuf schemas are not identical, we must supply some annotations on our schema to help `entproto` figure out exactly how to generate Protobuf definitions (called "Messages" in protobuf terminology).
 
 The first thing we need to do is to add an `entproto.Message()` annotation. This is our opt-in to Protobuf schema generation, we don't necessarily want to generate proto messages or gRPC service definitions from *all* of our schema entities, and this annotation gives us that control. To add it, append to `ent/schema/user.go`:
 
@@ -89,7 +89,11 @@ A new `generate.go` file was created with an invocation to `protoc`, the protobu
 
 - [protoc installation](https://grpc.io/docs/protoc-installation/)
 - [protoc-gen-go + protoc-gen-go-grpc installation](https://grpc.io/docs/languages/go/quickstart/)
-- Run `go get -u entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc` to install `protoc-gen-entgrpc`
+- To install `protoc-gen-entgrpc`, run:
+  
+  ```
+  go get -u entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc
+  ```
 
 After installing these dependencies, we can re-run code-generation:
 

@@ -122,16 +122,16 @@ func TestServiceWithEdges(t *testing.T) {
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 
-	// next, initialize the UserService. Notice we won't be opening an actual port and creating a gRPC server
-	// and instead we are just calling the library code directly. 
+	// next, initialize the UserService. Notice we won't be opening an actual port and
+	// creating a gRPC server and instead we are just calling the library code directly. 
 	svc := entpb.NewUserService(client)
 
-	// next, we create a category directly using the ent client. notice we are initializing it with no relation
-	// to a User.
+	// next, we create a category directly using the ent client.
+	// Notice we are initializing it with no relation to a User.
 	cat := client.Category.Create().SetName("cat_1").SaveX(ctx)
 
-	// next, we invoke the User service's `Create` method. Notice we are passing a list of entpb.Category 
-	// instances with only the ID set. 
+	// next, we invoke the User service's `Create` method. Notice we are
+	// passing a list of entpb.Category instances with only the ID set. 
 	create, err := svc.Create(ctx, &entpb.CreateUserRequest{
 		User: &entpb.User{
 			Name:         "user",
@@ -145,8 +145,8 @@ func TestServiceWithEdges(t *testing.T) {
 		t.Fatal("failed creating user using UserService", err)
 	}
 
-	// to verify everything worked correctly, we query the category table to check we have exactly
-	// one category which is administered by the created user.
+	// to verify everything worked correctly, we query the category table to check
+	// we have exactly one category which is administered by the created user.
 	count, err := client.Category.
 		Query().
 		Where(
@@ -195,8 +195,8 @@ func TestGet(t *testing.T) {
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 
-	// next, initialize the UserService. Notice we won't be opening an actual port and creating a gRPC server
-	// and instead we are just calling the library code directly.
+	// next, initialize the UserService. Notice we won't be opening an actual port and
+	// creating a gRPC server and instead we are just calling the library code directly.
 	svc := entpb.NewUserService(client)
 
 	// next, create a user, a category and set that user to be the admin of the category

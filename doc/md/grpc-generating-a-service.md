@@ -5,11 +5,11 @@ sidebar_label: Generating a Service
 ---
 Generating Protobuf structs generated from our `ent.Schema` can be useful, but what we're really interested in is getting an actual server that can create, read, update, and delete entities from an actual database. To do that, we need to update just one line of code! When we annotate a schema with `entproto.Service`, we tell the `entproto` code-gen that we are interested in generating a gRPC service definition, from the `protoc-gen-entgrpc` will read our definition and generate a service implementation. Edit `ent/schema/user.go` and modify the schema's `Annotations`:
 
-```diff
+```go {4}
 func (User) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entproto.Message(),
-+		entproto.Service(), // <-- add this
+		entproto.Service(), // <-- add this
 	}
 }
 ```
@@ -50,7 +50,8 @@ In addition, two new files were created. The first, `ent_grpc.pb.go`, contains t
 ```go
 // UserServiceClient is the client API for UserService service.
 //
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+// For semantics around ctx use and closing/ending streaming RPCs, please
+// refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	Create(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
 	Get(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*User, error)

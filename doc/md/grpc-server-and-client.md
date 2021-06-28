@@ -5,7 +5,7 @@ sidebar_label: Server and Client
 ---
 
 Getting an automatically generated gRPC service definition is super cool, but we still need to register it to a
-concrete gRPC server, that will listen on some TCP port for traffic and be able to respond to RPC calls. 
+concrete gRPC server, that listens on some TCP port for traffic and is able to respond to RPC calls. 
 
 We decided not to generate this part automatically because it typically involves some team/org specific
 behavior such as wiring in different middlewares. This may change in the future. In the meantime, this section
@@ -78,7 +78,7 @@ go run -mod=mod ./cmd/server
 
 ### Creating the Client
 
-Let's create a simple client that will make some calls to our server. Create a new file named `cmd/client/main.go` and write:
+Let's create a simple client that makes some calls to our server. Create a new file named `cmd/client/main.go` and write:
 
 ```go
 package main

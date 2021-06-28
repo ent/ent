@@ -22,7 +22,7 @@ When `entproto` generates a Protobuf message definition, it uses these wrapper t
 
 Let's see this in action, modifying our ent schema to include an optional field:
 
-```diff
+```go {14-16}
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
@@ -36,9 +36,9 @@ func (User) Fields() []ent.Field {
 			Annotations(
 				entproto.Field(3),
 			),
-+		field.String("alias").
-+			Optional().
-+			Annotations(entproto.Field(4)),
+		field.String("alias").
+			Optional().
+			Annotations(entproto.Field(4)),
 	}
 }
 ```
@@ -59,8 +59,7 @@ message User {
 
 The generated service implementation also utilize this field. Observe in `entpb_user_service.go`:
 
-```go {6-8}
-
+```go {5-7}
 // Create implements UserServiceServer.Create
 func (svc *UserService) Create(ctx context.Context, req *CreateUserRequest) (*User, error) {
 	user := req.GetUser()
@@ -92,7 +91,7 @@ func randomUser() *entpb.User {
 	return &entpb.User{
 		Name:         fmt.Sprintf("user_%d", rand.Int()),
 		EmailAddress: fmt.Sprintf("user_%d@example.com", rand.Int()),
-		Alias:        wrapperspb.String(fmt.Sprintf("John Doe")),
+		Alias:        wrapperspb.String("John Doe"),
 	}
 }
 ```
