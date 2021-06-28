@@ -89,5 +89,19 @@ module.exports = {
       ],
       collapsed: false,
     },
+    {
+      type: 'category',
+      collapsed: false,
+      label: 'gRPC',
+      items: [
+          'grpc-intro',
+          'grpc-setting-up',
+          'grpc-generating-proto',
+          'grpc-generating-a-service',
+          'grpc-server-and-client',
+          'grpc-edges',
+          'grpc-optional-fields',
+      ]
+    }
   ]
 }
