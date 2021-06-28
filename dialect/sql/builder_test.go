@@ -1313,6 +1313,14 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE INDEX "name_index" ON "users"("name")`,
 		},
 		{
+			input: Dialect(dialect.Postgres).
+				CreateIndex("name_index").
+				IfNotExists().
+				Table("users").
+				Column("name"),
+			wantQuery: `CREATE INDEX IF NOT EXISTS "name_index" ON "users"("name")`,
+		},
+		{
 			input:     CreateIndex("unique_name").Unique().Table("users").Columns("first", "last"),
 			wantQuery: "CREATE UNIQUE INDEX `unique_name` ON `users`(`first`, `last`)",
 		},

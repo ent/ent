@@ -397,7 +397,7 @@ func hasUniqueName(i *Index) bool {
 	return name != suffix
 }
 
-// addIndex returns the querying for adding an index to PostgreSQL.
+// addIndex returns the query for adding an index to PostgreSQL.
 func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
 	name := i.Name
 	if !hasUniqueName(i) {
@@ -406,7 +406,7 @@ func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
 		name = fmt.Sprintf("%s_%s", table, i.Name)
 	}
 	idx := sql.Dialect(dialect.Postgres).
-		CreateIndex(name).Table(table)
+		CreateIndex(name).IfNotExists().Table(table)
 	if i.Unique {
 		idx.Unique()
 	}
