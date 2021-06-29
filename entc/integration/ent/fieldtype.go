@@ -84,6 +84,8 @@ type FieldType struct {
 	MAC schema.MAC `json:"mac,omitempty"`
 	// StringArray holds the value of the "string_array" field.
 	StringArray schema.Strings `json:"string_array,omitempty"`
+	// Password holds the value of the "password" field.
+	Password string `json:"-"`
 	// StringScanner holds the value of the "string_scanner" field.
 	StringScanner *schema.StringScanner `json:"string_scanner,omitempty"`
 	// Duration holds the value of the "duration" field.
@@ -143,8 +145,10 @@ type FieldType struct {
 	// Triple holds the value of the "triple" field.
 	Triple schema.Triple `json:"triple,omitempty"`
 	// BigInt holds the value of the "big_int" field.
-	BigInt     schema.BigInt `json:"big_int,omitempty"`
-	file_field *int
+	BigInt schema.BigInt `json:"big_int,omitempty"`
+	// PasswordOther holds the value of the "password_other" field.
+	PasswordOther schema.Password `json:"-"`
+	file_field    *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -172,6 +176,8 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(schema.MAC)
 		case fieldtype.FieldPair:
 			values[i] = new(schema.Pair)
+		case fieldtype.FieldPasswordOther:
+			values[i] = new(schema.Password)
 		case fieldtype.FieldStringArray:
 			values[i] = new(schema.Strings)
 		case fieldtype.FieldTriple:
@@ -184,7 +190,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullFloat64)
 		case fieldtype.FieldID, fieldtype.FieldInt, fieldtype.FieldInt8, fieldtype.FieldInt16, fieldtype.FieldInt32, fieldtype.FieldInt64, fieldtype.FieldOptionalInt, fieldtype.FieldOptionalInt8, fieldtype.FieldOptionalInt16, fieldtype.FieldOptionalInt32, fieldtype.FieldOptionalInt64, fieldtype.FieldNillableInt, fieldtype.FieldNillableInt8, fieldtype.FieldNillableInt16, fieldtype.FieldNillableInt32, fieldtype.FieldNillableInt64, fieldtype.FieldValidateOptionalInt32, fieldtype.FieldOptionalUint, fieldtype.FieldOptionalUint8, fieldtype.FieldOptionalUint16, fieldtype.FieldOptionalUint32, fieldtype.FieldOptionalUint64, fieldtype.FieldDuration, fieldtype.FieldNullInt64, fieldtype.FieldSchemaInt, fieldtype.FieldSchemaInt8, fieldtype.FieldSchemaInt64:
 			values[i] = new(sql.NullInt64)
-		case fieldtype.FieldState, fieldtype.FieldDir, fieldtype.FieldNdir, fieldtype.FieldStr, fieldtype.FieldNullStr, fieldtype.FieldRole:
+		case fieldtype.FieldState, fieldtype.FieldPassword, fieldtype.FieldDir, fieldtype.FieldNdir, fieldtype.FieldStr, fieldtype.FieldNullStr, fieldtype.FieldRole:
 			values[i] = new(sql.NullString)
 		case fieldtype.FieldDatetime, fieldtype.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -392,6 +398,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value != nil {
 				ft.StringArray = *value
 			}
+		case fieldtype.FieldPassword:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field password", values[i])
+			} else if value.Valid {
+				ft.Password = value.String
+			}
 		case fieldtype.FieldStringScanner:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field string_scanner", values[i])
@@ -578,6 +590,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value != nil {
 				ft.BigInt = *value
 			}
+		case fieldtype.FieldPasswordOther:
+			if value, ok := values[i].(*schema.Password); !ok {
+				return fmt.Errorf("unexpected type %T for field password_other", values[i])
+			} else if value != nil {
+				ft.PasswordOther = *value
+			}
 		case fieldtype.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field file_field", value)
@@ -681,6 +699,7 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", string_array=")
 	builder.WriteString(fmt.Sprintf("%v", ft.StringArray))
+	builder.WriteString(", password=<sensitive>")
 	if v := ft.StringScanner; v != nil {
 		builder.WriteString(", string_scanner=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
@@ -757,6 +776,7 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Triple))
 	builder.WriteString(", big_int=")
 	builder.WriteString(fmt.Sprintf("%v", ft.BigInt))
+	builder.WriteString(", password_other=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

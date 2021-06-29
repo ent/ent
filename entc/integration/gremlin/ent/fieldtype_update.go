@@ -700,6 +700,26 @@ func (ftu *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetPassword sets the "password" field.
+func (ftu *FieldTypeUpdate) SetPassword(s string) *FieldTypeUpdate {
+	ftu.mutation.SetPassword(s)
+	return ftu
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePassword(s *string) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetPassword(*s)
+	}
+	return ftu
+}
+
+// ClearPassword clears the value of the "password" field.
+func (ftu *FieldTypeUpdate) ClearPassword() *FieldTypeUpdate {
+	ftu.mutation.ClearPassword()
+	return ftu
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (ftu *FieldTypeUpdate) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdate {
 	ftu.mutation.SetStringScanner(ss)
@@ -1231,6 +1251,26 @@ func (ftu *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetPasswordOther sets the "password_other" field.
+func (ftu *FieldTypeUpdate) SetPasswordOther(s schema.Password) *FieldTypeUpdate {
+	ftu.mutation.SetPasswordOther(s)
+	return ftu
+}
+
+// SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePasswordOther(s *schema.Password) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetPasswordOther(*s)
+	}
+	return ftu
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (ftu *FieldTypeUpdate) ClearPasswordOther() *FieldTypeUpdate {
+	ftu.mutation.ClearPasswordOther()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1512,6 +1552,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
+	if value, ok := ftu.mutation.Password(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPassword, value)
+	}
 	if value, ok := ftu.mutation.StringScanner(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
 	}
@@ -1623,6 +1666,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.AddedBigInt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldBigInt, __.Union(__.Values(fieldtype.FieldBigInt), __.Constant(value)).Sum())
 	}
+	if value, ok := ftu.mutation.PasswordOther(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPasswordOther, value)
+	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -1695,6 +1741,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.StringArrayCleared() {
 		properties = append(properties, fieldtype.FieldStringArray)
+	}
+	if ftu.mutation.PasswordCleared() {
+		properties = append(properties, fieldtype.FieldPassword)
 	}
 	if ftu.mutation.StringScannerCleared() {
 		properties = append(properties, fieldtype.FieldStringScanner)
@@ -1770,6 +1819,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.BigIntCleared() {
 		properties = append(properties, fieldtype.FieldBigInt)
+	}
+	if ftu.mutation.PasswordOtherCleared() {
+		properties = append(properties, fieldtype.FieldPasswordOther)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -2449,6 +2501,26 @@ func (ftuo *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetPassword sets the "password" field.
+func (ftuo *FieldTypeUpdateOne) SetPassword(s string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPassword(s)
+	return ftuo
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePassword(s *string) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetPassword(*s)
+	}
+	return ftuo
+}
+
+// ClearPassword clears the value of the "password" field.
+func (ftuo *FieldTypeUpdateOne) ClearPassword() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPassword()
+	return ftuo
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (ftuo *FieldTypeUpdateOne) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStringScanner(ss)
@@ -2980,6 +3052,26 @@ func (ftuo *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetPasswordOther sets the "password_other" field.
+func (ftuo *FieldTypeUpdateOne) SetPasswordOther(s schema.Password) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPasswordOther(s)
+	return ftuo
+}
+
+// SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePasswordOther(s *schema.Password) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetPasswordOther(*s)
+	}
+	return ftuo
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (ftuo *FieldTypeUpdateOne) ClearPasswordOther() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPasswordOther()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -3273,6 +3365,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
+	if value, ok := ftuo.mutation.Password(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPassword, value)
+	}
 	if value, ok := ftuo.mutation.StringScanner(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
 	}
@@ -3384,6 +3479,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.AddedBigInt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldBigInt, __.Union(__.Values(fieldtype.FieldBigInt), __.Constant(value)).Sum())
 	}
+	if value, ok := ftuo.mutation.PasswordOther(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPasswordOther, value)
+	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
 		properties = append(properties, fieldtype.FieldOptionalInt)
@@ -3456,6 +3554,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.StringArrayCleared() {
 		properties = append(properties, fieldtype.FieldStringArray)
+	}
+	if ftuo.mutation.PasswordCleared() {
+		properties = append(properties, fieldtype.FieldPassword)
 	}
 	if ftuo.mutation.StringScannerCleared() {
 		properties = append(properties, fieldtype.FieldStringScanner)
@@ -3531,6 +3632,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.BigIntCleared() {
 		properties = append(properties, fieldtype.FieldBigInt)
+	}
+	if ftuo.mutation.PasswordOtherCleared() {
+		properties = append(properties, fieldtype.FieldPasswordOther)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

@@ -698,6 +698,26 @@ func (ftu *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetPassword sets the "password" field.
+func (ftu *FieldTypeUpdate) SetPassword(s string) *FieldTypeUpdate {
+	ftu.mutation.SetPassword(s)
+	return ftu
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePassword(s *string) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetPassword(*s)
+	}
+	return ftu
+}
+
+// ClearPassword clears the value of the "password" field.
+func (ftu *FieldTypeUpdate) ClearPassword() *FieldTypeUpdate {
+	ftu.mutation.ClearPassword()
+	return ftu
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (ftu *FieldTypeUpdate) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdate {
 	ftu.mutation.SetStringScanner(ss)
@@ -1226,6 +1246,26 @@ func (ftu *FieldTypeUpdate) AddBigInt(si schema.BigInt) *FieldTypeUpdate {
 // ClearBigInt clears the value of the "big_int" field.
 func (ftu *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate {
 	ftu.mutation.ClearBigInt()
+	return ftu
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (ftu *FieldTypeUpdate) SetPasswordOther(s schema.Password) *FieldTypeUpdate {
+	ftu.mutation.SetPasswordOther(s)
+	return ftu
+}
+
+// SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePasswordOther(s *schema.Password) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetPasswordOther(*s)
+	}
+	return ftu
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (ftu *FieldTypeUpdate) ClearPasswordOther() *FieldTypeUpdate {
+	ftu.mutation.ClearPasswordOther()
 	return ftu
 }
 
@@ -1864,6 +1904,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldStringArray,
 		})
 	}
+	if value, ok := ftu.mutation.Password(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldPassword,
+		})
+	}
+	if ftu.mutation.PasswordCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldPassword,
+		})
+	}
 	if value, ok := ftu.mutation.StringScanner(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -2271,6 +2324,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: fieldtype.FieldBigInt,
+		})
+	}
+	if value, ok := ftu.mutation.PasswordOther(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldPasswordOther,
+		})
+	}
+	if ftu.mutation.PasswordOtherCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: fieldtype.FieldPasswordOther,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
@@ -2954,6 +3020,26 @@ func (ftuo *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetPassword sets the "password" field.
+func (ftuo *FieldTypeUpdateOne) SetPassword(s string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPassword(s)
+	return ftuo
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePassword(s *string) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetPassword(*s)
+	}
+	return ftuo
+}
+
+// ClearPassword clears the value of the "password" field.
+func (ftuo *FieldTypeUpdateOne) ClearPassword() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPassword()
+	return ftuo
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (ftuo *FieldTypeUpdateOne) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStringScanner(ss)
@@ -3482,6 +3568,26 @@ func (ftuo *FieldTypeUpdateOne) AddBigInt(si schema.BigInt) *FieldTypeUpdateOne 
 // ClearBigInt clears the value of the "big_int" field.
 func (ftuo *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearBigInt()
+	return ftuo
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (ftuo *FieldTypeUpdateOne) SetPasswordOther(s schema.Password) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPasswordOther(s)
+	return ftuo
+}
+
+// SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePasswordOther(s *schema.Password) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetPasswordOther(*s)
+	}
+	return ftuo
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (ftuo *FieldTypeUpdateOne) ClearPasswordOther() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPasswordOther()
 	return ftuo
 }
 
@@ -4144,6 +4250,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldStringArray,
 		})
 	}
+	if value, ok := ftuo.mutation.Password(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldPassword,
+		})
+	}
+	if ftuo.mutation.PasswordCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldPassword,
+		})
+	}
 	if value, ok := ftuo.mutation.StringScanner(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -4551,6 +4670,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: fieldtype.FieldBigInt,
+		})
+	}
+	if value, ok := ftuo.mutation.PasswordOther(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldPasswordOther,
+		})
+	}
+	if ftuo.mutation.PasswordOtherCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: fieldtype.FieldPasswordOther,
 		})
 	}
 	_node = &FieldType{config: ftuo.config}
