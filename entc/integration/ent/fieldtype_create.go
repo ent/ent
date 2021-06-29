@@ -380,6 +380,20 @@ func (ftc *FieldTypeCreate) SetStringArray(s schema.Strings) *FieldTypeCreate {
 	return ftc
 }
 
+// SetPassword sets the "password" field.
+func (ftc *FieldTypeCreate) SetPassword(s string) *FieldTypeCreate {
+	ftc.mutation.SetPassword(s)
+	return ftc
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillablePassword(s *string) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetPassword(*s)
+	}
+	return ftc
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (ftc *FieldTypeCreate) SetStringScanner(ss schema.StringScanner) *FieldTypeCreate {
 	ftc.mutation.SetStringScanner(ss)
@@ -708,6 +722,20 @@ func (ftc *FieldTypeCreate) SetBigInt(si schema.BigInt) *FieldTypeCreate {
 func (ftc *FieldTypeCreate) SetNillableBigInt(si *schema.BigInt) *FieldTypeCreate {
 	if si != nil {
 		ftc.SetBigInt(*si)
+	}
+	return ftc
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (ftc *FieldTypeCreate) SetPasswordOther(s schema.Password) *FieldTypeCreate {
+	ftc.mutation.SetPasswordOther(s)
+	return ftc
+}
+
+// SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillablePasswordOther(s *schema.Password) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetPasswordOther(*s)
 	}
 	return ftc
 }
@@ -1127,6 +1155,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		})
 		_node.StringArray = value
 	}
+	if value, ok := ftc.mutation.Password(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldPassword,
+		})
+		_node.Password = value
+	}
 	if value, ok := ftc.mutation.StringScanner(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -1366,6 +1402,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldBigInt,
 		})
 		_node.BigInt = value
+	}
+	if value, ok := ftc.mutation.PasswordOther(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldPasswordOther,
+		})
+		_node.PasswordOther = value
 	}
 	return _node, _spec
 }

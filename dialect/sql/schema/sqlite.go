@@ -282,7 +282,10 @@ func (d *SQLite) scanColumn(c *Column, rows *sql.Rows) error {
 	if pk.Int64 > 0 {
 		c.Key = PrimaryKey
 	}
-	parts, _, _, err := parseColumn(c.typ)
+	if c.typ == "" {
+		return fmt.Errorf("missing type information for column %q", c.Name)
+	}
+	parts, size, _, err := parseColumn(c.typ)
 	if err != nil {
 		return err
 	}
@@ -302,8 +305,8 @@ func (d *SQLite) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeJSON
 	case "uuid":
 		c.Type = field.TypeUUID
-	case "varchar", "text":
-		c.Size = DefaultStringLen
+	case "varchar", "char", "text":
+		c.Size = size
 		c.Type = field.TypeString
 	case "decimal", "numeric":
 		c.Type = field.TypeOther
@@ -339,5 +342,6 @@ func (d *SQLite) tables() sql.Querier {
 // needsConversion reports if column "old" needs to be converted
 // (by table altering) to column "new".
 func (d *SQLite) needsConversion(old, new *Column) bool {
-	return d.cType(old) != d.cType(new)
+	c1, c2 := d.cType(old), d.cType(new)
+	return c1 != c2 && old.typ != c2
 }

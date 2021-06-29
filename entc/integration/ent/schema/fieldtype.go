@@ -127,6 +127,12 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 				dialect.SQLite:   "json",
 				dialect.MySQL:    "blob",
 			}),
+		field.String("password").
+			Optional().
+			Sensitive().
+			SchemaType(map[string]string{
+				dialect.MySQL: "char(32)",
+			}),
 
 		// ----------------------------------------------------------------------------
 		// Custom Go types
@@ -245,6 +251,35 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		field.Int("big_int").
 			Optional().
 			GoType(BigInt{}),
+		field.Other("password_other", Password("")).
+			Optional().
+			Sensitive().
+			SchemaType(map[string]string{
+				dialect.MySQL:    "char(32)",
+				dialect.SQLite:   "char(32)",
+				dialect.Postgres: "varchar",
+			}),
+	}
+}
+
+type Password string
+
+func (p Password) Value() (driver.Value, error) {
+	return string(p), nil
+}
+
+func (p *Password) Scan(src interface{}) error {
+	switch src := src.(type) {
+	case nil:
+		return nil
+	case string:
+		*p = Password(src)
+		return nil
+	case []byte:
+		*p = Password(src)
+		return nil
+	default:
+		return fmt.Errorf("scan: unable to scan type %T into string", src)
 	}
 }
 

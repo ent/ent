@@ -106,6 +106,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldLinkOther:             {Type: field.TypeOther, Column: fieldtype.FieldLinkOther},
 			fieldtype.FieldMAC:                   {Type: field.TypeString, Column: fieldtype.FieldMAC},
 			fieldtype.FieldStringArray:           {Type: field.TypeOther, Column: fieldtype.FieldStringArray},
+			fieldtype.FieldPassword:              {Type: field.TypeString, Column: fieldtype.FieldPassword},
 			fieldtype.FieldStringScanner:         {Type: field.TypeString, Column: fieldtype.FieldStringScanner},
 			fieldtype.FieldDuration:              {Type: field.TypeInt64, Column: fieldtype.FieldDuration},
 			fieldtype.FieldDir:                   {Type: field.TypeString, Column: fieldtype.FieldDir},
@@ -136,6 +137,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldVstring:               {Type: field.TypeString, Column: fieldtype.FieldVstring},
 			fieldtype.FieldTriple:                {Type: field.TypeString, Column: fieldtype.FieldTriple},
 			fieldtype.FieldBigInt:                {Type: field.TypeInt, Column: fieldtype.FieldBigInt},
+			fieldtype.FieldPasswordOther:         {Type: field.TypeOther, Column: fieldtype.FieldPasswordOther},
 		},
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
@@ -971,6 +973,11 @@ func (f *FieldTypeFilter) WhereStringArray(p entql.OtherP) {
 	f.Where(p.Field(fieldtype.FieldStringArray))
 }
 
+// WherePassword applies the entql string predicate on the password field.
+func (f *FieldTypeFilter) WherePassword(p entql.StringP) {
+	f.Where(p.Field(fieldtype.FieldPassword))
+}
+
 // WhereStringScanner applies the entql string predicate on the string_scanner field.
 func (f *FieldTypeFilter) WhereStringScanner(p entql.StringP) {
 	f.Where(p.Field(fieldtype.FieldStringScanner))
@@ -1119,6 +1126,11 @@ func (f *FieldTypeFilter) WhereTriple(p entql.StringP) {
 // WhereBigInt applies the entql int predicate on the big_int field.
 func (f *FieldTypeFilter) WhereBigInt(p entql.IntP) {
 	f.Where(p.Field(fieldtype.FieldBigInt))
+}
+
+// WherePasswordOther applies the entql other predicate on the password_other field.
+func (f *FieldTypeFilter) WherePasswordOther(p entql.OtherP) {
+	f.Where(p.Field(fieldtype.FieldPasswordOther))
 }
 
 // addPredicate implements the predicateAdder interface.

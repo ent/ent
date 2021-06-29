@@ -84,6 +84,8 @@ type FieldType struct {
 	MAC schema.MAC `json:"mac,omitempty"`
 	// StringArray holds the value of the "string_array" field.
 	StringArray schema.Strings `json:"string_array,omitempty"`
+	// Password holds the value of the "password" field.
+	Password string `json:"-"`
 	// StringScanner holds the value of the "string_scanner" field.
 	StringScanner *schema.StringScanner `json:"string_scanner,omitempty"`
 	// Duration holds the value of the "duration" field.
@@ -144,6 +146,8 @@ type FieldType struct {
 	Triple schema.Triple `json:"triple,omitempty"`
 	// BigInt holds the value of the "big_int" field.
 	BigInt schema.BigInt `json:"big_int,omitempty"`
+	// PasswordOther holds the value of the "password_other" field.
+	PasswordOther schema.Password `json:"-"`
 }
 
 // FromResponse scans the gremlin response data into FieldType.
@@ -183,6 +187,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		LinkOther             *schema.Link          `json:"link_other,omitempty"`
 		MAC                   schema.MAC            `json:"mac,omitempty"`
 		StringArray           schema.Strings        `json:"string_array,omitempty"`
+		Password              string                `json:"password,omitempty"`
 		StringScanner         *schema.StringScanner `json:"string_scanner,omitempty"`
 		Duration              time.Duration         `json:"duration,omitempty"`
 		Dir                   http.Dir              `json:"dir,omitempty"`
@@ -213,6 +218,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Vstring               schema.VString        `json:"vstring,omitempty"`
 		Triple                schema.Triple         `json:"triple,omitempty"`
 		BigInt                schema.BigInt         `json:"big_int,omitempty"`
+		PasswordOther         schema.Password       `json:"password_other,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -247,6 +253,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.LinkOther = scanft.LinkOther
 	ft.MAC = scanft.MAC
 	ft.StringArray = scanft.StringArray
+	ft.Password = scanft.Password
 	ft.StringScanner = scanft.StringScanner
 	ft.Duration = scanft.Duration
 	ft.Dir = scanft.Dir
@@ -277,6 +284,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Vstring = scanft.Vstring
 	ft.Triple = scanft.Triple
 	ft.BigInt = scanft.BigInt
+	ft.PasswordOther = scanft.PasswordOther
 	return nil
 }
 
@@ -371,6 +379,7 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", string_array=")
 	builder.WriteString(fmt.Sprintf("%v", ft.StringArray))
+	builder.WriteString(", password=<sensitive>")
 	if v := ft.StringScanner; v != nil {
 		builder.WriteString(", string_scanner=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
@@ -447,6 +456,7 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Triple))
 	builder.WriteString(", big_int=")
 	builder.WriteString(fmt.Sprintf("%v", ft.BigInt))
+	builder.WriteString(", password_other=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -491,6 +501,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		LinkOther             *schema.Link          `json:"link_other,omitempty"`
 		MAC                   schema.MAC            `json:"mac,omitempty"`
 		StringArray           schema.Strings        `json:"string_array,omitempty"`
+		Password              string                `json:"password,omitempty"`
 		StringScanner         *schema.StringScanner `json:"string_scanner,omitempty"`
 		Duration              time.Duration         `json:"duration,omitempty"`
 		Dir                   http.Dir              `json:"dir,omitempty"`
@@ -521,6 +532,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Vstring               schema.VString        `json:"vstring,omitempty"`
 		Triple                schema.Triple         `json:"triple,omitempty"`
 		BigInt                schema.BigInt         `json:"big_int,omitempty"`
+		PasswordOther         schema.Password       `json:"password_other,omitempty"`
 	}
 	if err := vmap.Decode(&scanft); err != nil {
 		return err
@@ -557,6 +569,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			LinkOther:             v.LinkOther,
 			MAC:                   v.MAC,
 			StringArray:           v.StringArray,
+			Password:              v.Password,
 			StringScanner:         v.StringScanner,
 			Duration:              v.Duration,
 			Dir:                   v.Dir,
@@ -587,6 +600,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Vstring:               v.Vstring,
 			Triple:                v.Triple,
 			BigInt:                v.BigInt,
+			PasswordOther:         v.PasswordOther,
 		})
 	}
 	return nil

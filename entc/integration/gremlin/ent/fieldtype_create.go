@@ -381,6 +381,20 @@ func (ftc *FieldTypeCreate) SetStringArray(s schema.Strings) *FieldTypeCreate {
 	return ftc
 }
 
+// SetPassword sets the "password" field.
+func (ftc *FieldTypeCreate) SetPassword(s string) *FieldTypeCreate {
+	ftc.mutation.SetPassword(s)
+	return ftc
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillablePassword(s *string) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetPassword(*s)
+	}
+	return ftc
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (ftc *FieldTypeCreate) SetStringScanner(ss schema.StringScanner) *FieldTypeCreate {
 	ftc.mutation.SetStringScanner(ss)
@@ -713,6 +727,20 @@ func (ftc *FieldTypeCreate) SetNillableBigInt(si *schema.BigInt) *FieldTypeCreat
 	return ftc
 }
 
+// SetPasswordOther sets the "password_other" field.
+func (ftc *FieldTypeCreate) SetPasswordOther(s schema.Password) *FieldTypeCreate {
+	ftc.mutation.SetPasswordOther(s)
+	return ftc
+}
+
+// SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillablePasswordOther(s *schema.Password) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetPasswordOther(*s)
+	}
+	return ftc
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
 	return ftc.mutation
@@ -977,6 +1005,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	if value, ok := ftc.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
+	if value, ok := ftc.mutation.Password(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPassword, value)
+	}
 	if value, ok := ftc.mutation.StringScanner(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
 	}
@@ -1066,6 +1097,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.BigInt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldBigInt, value)
+	}
+	if value, ok := ftc.mutation.PasswordOther(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPasswordOther, value)
 	}
 	return v.ValueMap(true)
 }

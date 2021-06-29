@@ -389,6 +389,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	if nullable.Valid {
 		c.Nullable = nullable.String == "YES"
 	}
+	if c.typ == "" {
+		return fmt.Errorf("missing type information for column %q", c.Name)
+	}
 	parts, size, unsigned, err := parseColumn(c.typ)
 	if err != nil {
 		return err
@@ -458,11 +461,11 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 			c.Enums[i] = strings.Trim(e, "'")
 		}
 	case "char":
+		c.Type = field.TypeOther
 		// UUID field has length of 36 characters (32 alphanumeric characters and 4 hyphens).
-		if size != 36 {
-			return fmt.Errorf("unknown char(%d) type (not a uuid)", size)
+		if size == 36 {
+			c.Type = field.TypeUUID
 		}
-		c.Type = field.TypeUUID
 	case "point", "geometry", "linestring", "polygon":
 		c.Type = field.TypeOther
 	default:
@@ -652,7 +655,9 @@ func parseColumn(typ string) (parts []string, size int64, unsigned bool, err err
 			size, err = strconv.ParseInt(parts[1], 10, 0)
 		}
 	case "varbinary", "varchar", "char", "binary":
-		size, err = strconv.ParseInt(parts[1], 10, 64)
+		if len(parts) > 1 {
+			size, err = strconv.ParseInt(parts[1], 10, 64)
+		}
 	}
 	if err != nil {
 		return parts, size, unsigned, fmt.Errorf("converting %s size to int: %w", parts[0], err)
