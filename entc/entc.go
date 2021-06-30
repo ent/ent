@@ -253,13 +253,15 @@ type DefaultExtension struct{}
 func (DefaultExtension) Hooks() []gen.Hook { return nil }
 
 // Annotations of the extensions.
-func (DefaultExtension) Annotations() gen.Annotations { return nil }
+func (DefaultExtension) Annotations() []Annotation { return nil }
 
 // Templates of the extensions.
 func (DefaultExtension) Templates() []*gen.Template { return nil }
 
 // Options of the extensions.
 func (DefaultExtension) Options() []Option { return nil }
+
+var _ Extension = (*DefaultExtension)(nil)
 
 // templateOption ensures the template instantiate
 // once for config and execute the given Option.
