@@ -142,9 +142,9 @@ func (d *SQLite) addColumn(c *Column) *sql.ColumnBuilder {
 	return b
 }
 
-// addIndex returns the querying for adding an index to SQLite.
+// addIndex returns the query for adding an index to SQLite.
 func (d *SQLite) addIndex(i *Index, table string) *sql.IndexBuilder {
-	return i.Builder(table)
+	return i.Builder(table).IfNotExists()
 }
 
 // dropIndex drops a SQLite index.

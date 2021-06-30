@@ -524,6 +524,7 @@ type IndexBuilder struct {
 	Builder
 	name    string
 	unique  bool
+	exists  bool
 	table   string
 	columns []string
 }
@@ -544,6 +545,12 @@ type IndexBuilder struct {
 //
 func CreateIndex(name string) *IndexBuilder {
 	return &IndexBuilder{name: name}
+}
+
+// IfNotExists appends the `IF NOT EXISTS` clause to the `CREATE INDEX` statement.
+func (i *IndexBuilder) IfNotExists() *IndexBuilder {
+	i.exists = true
+	return i
 }
 
 // Unique sets the index to be a unique index.
@@ -577,6 +584,9 @@ func (i *IndexBuilder) Query() (string, []interface{}) {
 		i.WriteString("UNIQUE ")
 	}
 	i.WriteString("INDEX ")
+	if i.exists {
+		i.WriteString("IF NOT EXISTS ")
+	}
 	i.Ident(i.name)
 	i.WriteString(" ON ")
 	i.Ident(i.table).Nested(func(b *Builder) {

@@ -533,7 +533,7 @@ func TestPostgres_Create(t *testing.T) {
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0))
-				mock.ExpectExec(escape(`CREATE UNIQUE INDEX "users_age" ON "users"("age")`)).
+				mock.ExpectExec(escape(`CREATE UNIQUE INDEX IF NOT EXISTS "users_age" ON "users"("age")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -655,9 +655,9 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow(0))
 				mock.ExpectExec(escape(`DROP INDEX "user_score"`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectExec(escape(`CREATE UNIQUE INDEX "users_age" ON "users"("age")`)).
+				mock.ExpectExec(escape(`CREATE UNIQUE INDEX IF NOT EXISTS "users_age" ON "users"("age")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectExec(escape(`CREATE UNIQUE INDEX "user_score" ON "users"("score")`)).
+				mock.ExpectExec(escape(`CREATE UNIQUE INDEX IF NOT EXISTS "user_score" ON "users"("score")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.tableExists("equipment", true)
 				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
