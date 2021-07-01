@@ -60,7 +60,7 @@ query FilterTodos {
 ```
 
 ### Background
-Many libraries that deal with data in Go choose the path of passing around empty interace instances
+Many libraries that deal with data in Go choose the path of passing around empty interface instances
 (`interface{}`) and use reflection at runtime to figure out how to map data to struct fields. Aside from the
 performance penalty of using reflection everywhere, the big negative impact on teams is the
 loss of type-safety. 
