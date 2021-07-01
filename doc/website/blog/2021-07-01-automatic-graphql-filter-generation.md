@@ -1,5 +1,5 @@
 ---
-title: Automatic GraphQL Filters Generation
+title: Automatic GraphQL Filter Generation
 author: Ariel Mashraki
 authorURL: "https://github.com/a8m"
 authorImageURL: "https://avatars0.githubusercontent.com/u/7413593"
@@ -8,10 +8,10 @@ authorTwitter: arielmashraki
 
 #### TL;DR
 
-We added a new integration to the Ent GraphQL extension, that generates type-safe GraphQL filters (i.e. `Where` predicates)
+We added a new integration to the Ent GraphQL extension that generates type-safe GraphQL filters (i.e. `Where` predicates)
 from an `ent/schema`, and allows users to seamlessly map GraphQL queries to Ent queries.
 
-For example, in order to get all `COMPLETED` todo items, we execute the following:
+For example, to get all `COMPLETED` todo items, we can execute the following:
 
 ````graphql
 query QueryAllCompletedTodos {
@@ -128,7 +128,7 @@ can now add to their GraphQL schema a complete set of "Filter Input Types" that 
 GraphQL queries. In addition, the implementation provides runtime code that parses these predicates and maps them into
 Ent queries. Let's see this in action:
 
-### Generate Filter Input Types
+### Generating Filter Input Types
 
 In order to generate input filters (e.g. `TodoWhereInput`) for each type in your `ent/schema` package,
 edit the `ent/entc.go` configuration file as follows:
@@ -163,8 +163,8 @@ func main() {
 
 If you're new to Ent and GraphQL, please follow the [Getting Started Tutorial](https://entgo.io/docs/tutorial-todo-gql).
 
-Then, after running `go generate ./ent/...`, Ent will generate `<T>WhereInput` for each type in your schema, and
-update the GraphQL schema as well, so you won't need to `autobind` them to `gqlgen` manually. For example:
+Next, run `go generate ./ent/...`. Observe that Ent has generated `<T>WhereInput` for each type in your schema. Ent
+will update the GraphQL schema as well, so you don't need to `autobind` them to `gqlgen` manually. For example:
 
 ```go
 // TodoWhereInput represents a where input for filtering Todo queries.
@@ -223,7 +223,7 @@ input TodoWhereInput {
 }
 ```
 
-Next, to complete the integration we need to change 2 more lines:
+Next, to complete the integration we need to make two more changes:
 
 1\. Edit the GraphQL schema to accept the new filter types:
 ```graphql {8}
@@ -252,7 +252,8 @@ func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int
 
 ### Filter Specification
 
-As mentioned above, with the new GraphQL filter types, you can express the same Ent filters you use in Go.
+As mentioned above, with the new GraphQL filter types, you can express the same Ent filters you use in your 
+Go code.
 
 #### Conjunction, disjunction and negation
 
@@ -274,7 +275,7 @@ The `Not`, `And` and `Or` operators can be added using the `not`, `and` and `or`
 }
 ```
 
-When multiple filter fields are provided, the `And` operator is added as conjunction implicitly.
+When multiple filter fields are provided, Ent implicitly adds the `And` operator.
 
 ```graphql
 {
@@ -282,7 +283,7 @@ When multiple filter fields are provided, the `And` operator is added as conjunc
   text_has_prefix: "GraphQL",
 }
 ```
-The above code will produce the following Ent query:
+The above query will produce the following Ent query:
 
 ```go
 client.Todo.
@@ -309,7 +310,7 @@ client.Todo.
 }
 ```
 
-The above code will produce the following Ent query:
+The above query will produce the following Ent query:
 
 ```go
 client.Todo.
@@ -326,3 +327,20 @@ client.Todo.
 ### Implementation Example
 
 A working example exists in [github.com/a8m/ent-graphql-example](https://github.com/a8m/ent-graphql-example). 
+
+### Wrapping Up
+
+As we've discussed earlier, Ent has set creating a "statically typed and explicit API using code generation"
+as a core design principle. With automatic GraphQL filter generation, we are doubling down on this
+idea to provide developers with the same explicit, type-safe development experience on the RPC layer as well. 
+
+Have questions? Need help with getting started? Feel free to join our [Slack channel](https://entgo.io/docs/slack).
+
+:::note For more Ent news and updates:
+
+- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Follow us on [Twitter](https://twitter.com/entgo_io)
+- Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+
+:::
+
