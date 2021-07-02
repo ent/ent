@@ -303,7 +303,7 @@ client.Todo.
 
 ```graphql
 {
-  has_parent: false,
+  has_parent: true,
   has_children_with: {
     status: IN_PROGRESS,
   }
