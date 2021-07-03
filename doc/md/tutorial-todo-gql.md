@@ -15,8 +15,8 @@ server, you can clone the repository and checkout `v0.1.0` as follows:
 
 ```console
 git clone git@github.com:a8m/ent-graphql-example.git
+cd ent-graphql-example
 git checkout v0.1.0
-cd ent-graphql-example 
 go run ./cmd/todo/
 ```
 

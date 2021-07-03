@@ -59,7 +59,7 @@ After running codegen, the following add-ons will be added to your project.
 
 ## Node API
 
-A new file named `ent/node.go` was created that implements the [Relay Node interface](https://relay.dev/docs/en/graphql-server-specification.html#object-identification).
+A new file named `ent/node.go` was created that implements the [Relay Node interface](https://relay.dev/graphql/objectidentification.htm).
 
 In order to use the new generated `ent.Noder` interface in the [GraphQL resolver](https://gqlgen.com/reference/resolvers/),
 add the `Node` method to the query resolver, and look at the [configuration](#gql-configuration) section to understand
