@@ -66,6 +66,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/wzyjerry"><img src="https://avatars.githubusercontent.com/u/11435169?v=4?s=100" width="100px;" alt=""/><br /><sub><b>WzyJerry</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=wzyjerry" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/tarrencev"><img src="https://avatars.githubusercontent.com/u/4740651?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Tarrence van As</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=tarrencev" title="Documentation">📖</a> <a href="https://github.com/ent/ent/commits?author=tarrencev" title="Code">💻</a></td>
+    <td align="center"><a href="https://mo7ka.com"><img src="https://avatars.githubusercontent.com/u/32859963?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yuya Sumie</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=MONAKA0721" title="Documentation">📖</a></td>
   </tr>
 </table>
 

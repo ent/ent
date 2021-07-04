@@ -410,6 +410,15 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "MONAKA0721",
+      "name": "Yuya Sumie",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32859963?v=4",
+      "profile": "https://mo7ka.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
