@@ -42,6 +42,7 @@ The `generate` command generates the following assets for the schemas:
 - Entity object (Go struct) for each of the schema types.
 - Package containing constants and predicates used for interacting with the builders.
 - A `migrate` package for SQL dialects. See [Migration](migrate.md) for more info.
+- A `hook` package for adding mutation middlewares. See [Hooks](hooks.md) for more info.
 
 ## Version Compatibility Between `entc` And `ent`
 
