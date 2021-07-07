@@ -37,14 +37,14 @@ query FilterTodos {
     where: {
       or: [
         {
-          has_parent: false,
+          hasParent: false,
           status: COMPLETED,
         },
         {
           status: IN_PROGRESS,
-          has_parent_with: {
-            priority_lt: 1,
-            status_neq: COMPLETED,
+          hasParentWith: {
+            priorityLT: 1,
+            statusNEQ: COMPLETED,
           },
         }
       ]
@@ -174,20 +174,20 @@ type TodoWhereInput struct {
 	And []*TodoWhereInput `json:"and,omitempty"`
 
 	// "created_at" field predicates.
-	CreatedAt      *time.Time  `json:"created_at,omitempty"`
-	CreatedAtNEQ   *time.Time  `json:"created_at_neq,omitempty"`
-	CreatedAtIn    []time.Time `json:"created_at_in,omitempty"`
-	CreatedAtNotIn []time.Time `json:"created_at_not_in,omitempty"`
-	CreatedAtGT    *time.Time  `json:"created_at_gt,omitempty"`
-	CreatedAtGTE   *time.Time  `json:"created_at_gte,omitempty"`
-	CreatedAtLT    *time.Time  `json:"created_at_lt,omitempty"`
-	CreatedAtLTE   *time.Time  `json:"created_at_lte,omitempty"`
+	CreatedAt      *time.Time  `json:"createdAt,omitempty"`
+	CreatedAtNEQ   *time.Time  `json:"createdAtNEQ,omitempty"`
+	CreatedAtIn    []time.Time `json:"createdAtIn,omitempty"`
+	CreatedAtNotIn []time.Time `json:"createdAtNotIn,omitempty"`
+	CreatedAtGT    *time.Time  `json:"createdAtGT,omitempty"`
+	CreatedAtGTE   *time.Time  `json:"createdAtGTE,omitempty"`
+	CreatedAtLT    *time.Time  `json:"createdAtLT,omitempty"`
+	CreatedAtLTE   *time.Time  `json:"createdAtLTE,omitempty"`
 
 	// "status" field predicates.
 	Status      *todo.Status  `json:"status,omitempty"`
-	StatusNEQ   *todo.Status  `json:"status_neq,omitempty"`
-	StatusIn    []todo.Status `json:"status_in,omitempty"`
-	StatusNotIn []todo.Status `json:"status_not_in,omitempty"`
+	StatusNEQ   *todo.Status  `json:"statusNEQ,omitempty"`
+	StatusIn    []todo.Status `json:"statusIn,omitempty"`
+	StatusNotIn []todo.Status `json:"statusNotIn,omitempty"`
 
     // .. truncated ..
 }
@@ -204,20 +204,20 @@ input TodoWhereInput {
   or: [TodoWhereInput!]
   
   """created_at field predicates"""
-  created_at: Time
-  created_at_neq: Time
-  created_at_in: [Time!]
-  created_at_not_in: [Time!]
-  created_at_gt: Time
-  created_at_gte: Time
-  created_at_lt: Time
-  created_at_lte: Time
+  createdAt: Time
+  createdAtNEQ: Time
+  createdAtIn: [Time!]
+  createdAtNotIn: [Time!]
+  createdAtGT: Time
+  createdAtGTE: Time
+  createdAtLT: Time
+  createdAtLTE: Time
   
   """status field predicates"""
   status: Status
-  status_neq: Status
-  status_in: [Status!]
-  status_not_in: [Status!]
+  statusNEQ: Status
+  statusIn: [Status!]
+  statusNotIn: [Status!]
     
   # .. truncated ..
 }
@@ -267,7 +267,7 @@ The `Not`, `And` and `Or` operators can be added using the `not`, `and` and `or`
     },
     {
       not: {
-        has_parent: true,
+        hasParent: true,
         status: IN_PROGRESS,
       }
     }
@@ -280,7 +280,7 @@ When multiple filter fields are provided, Ent implicitly adds the `And` operator
 ```graphql
 {
   status: COMPLETED,
-  text_has_prefix: "GraphQL",
+  textHasPrefix: "GraphQL",
 }
 ```
 The above query will produce the following Ent query:
@@ -303,8 +303,8 @@ client.Todo.
 
 ```graphql
 {
-  has_parent: true,
-  has_children_with: {
+  hasParent: true,
+  hasChildrenWith: {
     status: IN_PROGRESS,
   }
 }
