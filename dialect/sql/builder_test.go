@@ -1641,3 +1641,47 @@ func TestParamFormatter(t *testing.T) {
 	require.Equal(t, "SELECT * FROM `users` WHERE `point` = ST_GeomFromWKB(?)", query)
 	require.Equal(t, p, args[0])
 }
+
+func TestSelectWithLock(t *testing.T) {
+	query, args := Dialect(dialect.MySQL).
+		Select().
+		From(Table("users")).
+		Where(EQ("id", 1)).
+		ForUpdate().
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `id` = ? FOR UPDATE", query)
+	require.Equal(t, 1, args[0])
+
+	query, args = Dialect(dialect.Postgres).
+		Select().
+		From(Table("users")).
+		Where(EQ("id", 1)).
+		ForUpdate(WithLockAction(NoWait)).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "id" = $1 FOR UPDATE NOWAIT`, query)
+	require.Equal(t, 1, args[0])
+
+	users, pets := Table("users"), Table("pets")
+	query, args = Dialect(dialect.Postgres).
+		Select().
+		From(pets).
+		Join(users).
+		On(pets.C("owner_id"), users.C("id")).
+		Where(EQ("id", 20)).
+		ForUpdate(
+			WithLockAction(SkipLocked),
+			WithLockTables(pets),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "pets" JOIN "users" AS "t1" ON "pets"."owner_id" = "t1"."id" WHERE "id" = $1 FOR UPDATE OF "pets" SKIP LOCKED`, query)
+	require.Equal(t, 20, args[0])
+
+	query, args = Dialect(dialect.MySQL).
+		Select().
+		From(Table("users")).
+		Where(EQ("id", 20)).
+		ForShare(WithLockClause("LOCK IN SHARE MODE")).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `id` = ? LOCK IN SHARE MODE", query)
+	require.Equal(t, 20, args[0])
+}
