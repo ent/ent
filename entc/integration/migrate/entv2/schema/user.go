@@ -120,7 +120,7 @@ func (User) Indexes() []ent.Index {
 		// this index on MySQL.
 		index.Fields("description").
 			Annotations(entsql.Prefix(100)),
-		// deleting old indexes (name, address),
+		// Deleting old indexes (name, address),
 		// and defining a new one.
 		index.Fields("phone", "age").
 			Unique(),
@@ -135,7 +135,10 @@ func (Car) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
 			Ref("car").
-			Unique(),
+			Unique().
+			// Make a M20 edge from nullable to required.
+			// Requires column and foreign-key migration.
+			Required(),
 	}
 }
 

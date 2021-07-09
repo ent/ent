@@ -16,7 +16,7 @@ var (
 	CommentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "text", Type: field.TypeString},
-		{Name: "post_id", Type: field.TypeInt, Nullable: true},
+		{Name: "post_id", Type: field.TypeInt},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{

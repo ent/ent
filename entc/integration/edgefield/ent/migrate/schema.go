@@ -165,8 +165,8 @@ var (
 	RentalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "date", Type: field.TypeTime},
-		{Name: "car_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "user_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
+		{Name: "car_id", Type: field.TypeUUID},
+		{Name: "user_id", Type: field.TypeInt, SchemaType: map[string]string{"sqlite3": "integer"}},
 	}
 	// RentalsTable holds the schema information for the "rentals" table.
 	RentalsTable = &schema.Table{
@@ -178,13 +178,13 @@ var (
 				Symbol:     "rentals_cars_rentals",
 				Columns:    []*schema.Column{RentalsColumns[2]},
 				RefColumns: []*schema.Column{CarsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "rentals_users_rentals",
 				Columns:    []*schema.Column{RentalsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
