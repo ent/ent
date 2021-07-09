@@ -127,7 +127,8 @@ func (Group) Fields() []ent.Field {
 func (Blob) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New),
+			Default(uuid.New).
+			StorageKey("oid"),
 	}
 }
 
