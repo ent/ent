@@ -50,10 +50,10 @@ The following types are currently supported by the framework:
 - `bool`
 - `string`
 - `time.Time`
+- `UUID`
 - `[]byte` (SQL only).
 - `JSON` (SQL only).
 - `Enum` (SQL only).
-- `UUID` (SQL only).
 - `Other` (SQL only).
 
 ```go
