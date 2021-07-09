@@ -418,7 +418,7 @@ func resolve(t *Type) error {
 }
 
 // Tables returns the schema definitions of SQL tables for the graph.
-func (g *Graph) Tables() (all []*schema.Table) {
+func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
 		table := schema.NewTable(n.Table()).
@@ -444,7 +444,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				// and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, Nullable: true}
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
 				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
@@ -456,7 +456,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Nullable: true}
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
 				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
