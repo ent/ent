@@ -419,6 +419,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "akfaew",
+      "name": "Michal Mazurek",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7853732?v=4",
+      "profile": "http://jasminek.net",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
