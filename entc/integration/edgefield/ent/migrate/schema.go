@@ -27,7 +27,7 @@ var (
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "number", Type: field.TypeString, Nullable: true},
-		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
 	}
 	// CardsTable holds the schema information for the "cards" table.
 	CardsTable = &schema.Table{
@@ -91,7 +91,7 @@ var (
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "owner_id", Type: field.TypeInt, Nullable: true},
+		{Name: "owner_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
 	}
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
@@ -111,7 +111,7 @@ var (
 	PostsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "text", Type: field.TypeString},
-		{Name: "author_id", Type: field.TypeInt, Nullable: true},
+		{Name: "author_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
 	}
 	// PostsTable holds the schema information for the "posts" table.
 	PostsTable = &schema.Table{
@@ -139,7 +139,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "date", Type: field.TypeTime},
 		{Name: "car_id", Type: field.TypeInt, Nullable: true},
-		{Name: "user_id", Type: field.TypeInt, Nullable: true},
+		{Name: "user_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
 	}
 	// RentalsTable holds the schema information for the "rentals" table.
 	RentalsTable = &schema.Table{
@@ -170,9 +170,9 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
-		{Name: "spouse_id", Type: field.TypeInt, Unique: true, Nullable: true},
+		{Name: "id", Type: field.TypeInt, Increment: true, SchemaType: map[string]string{"sqlite3": "integer"}},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
+		{Name: "spouse_id", Type: field.TypeInt, Unique: true, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
