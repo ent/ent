@@ -60,7 +60,9 @@ module.exports={
           sidebarPath: require.resolve('./sidebars.js'),
         },
         "blog": {
-          "path": "blog"
+          "path": "blog",
+          "blogSidebarCount": 'ALL',
+          "blogSidebarTitle": 'All our posts',
         },
         "theme": {
           "customCss": ["../src/css/custom.css"],
