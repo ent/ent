@@ -4,7 +4,7 @@ title: Filter Inputs
 sidebar_label: Filter Inputs
 ---
 
-In this section, we continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to generates
+In this section, we continue the [GraphQL example](tutorial-todo-gql.md) by explaining how to generate
 type-safe GraphQL filters (i.e. `Where` predicates) from our `ent/schema`, and allow users to seamlessly
 map GraphQL queries to Ent queries. For example, the following GraphQL query, maps to the Ent query below:
 
@@ -70,8 +70,8 @@ func main() {
 ```
 
 The `WithWhereFilters` option enables the filter generation, the `WithConfigPath` configures the path to the `gqlgen`
-config file, resulting a better and more correct GraphQL code generation. The last option `WithSchemaPath`, configures
-a path to a new, or an existing GraphQL schema to write the generated filters to.
+config file, which allows the extension to more accurately map GraphQL to Ent types. The last option `WithSchemaPath`,
+configures a path to a new, or an existing GraphQL schema to write the generated filters to.
 
 After changing the `entc.go` configuration, we're ready to execute the code generation as follows:
 
