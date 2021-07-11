@@ -86,6 +86,7 @@ module.exports = {
         'tutorial-todo-gql-field-collection',
         'tutorial-todo-gql-tx-mutation',
         'tutorial-todo-gql-mutation-input',
+        'tutorial-todo-gql-filter-input',
       ],
       collapsed: false,
     },
