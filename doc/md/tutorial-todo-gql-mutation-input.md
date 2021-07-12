@@ -81,7 +81,7 @@ The full documentation for the template API (Go types and functions) is availabl
 
 Now, we tell the Ent code generator to execute this template by passing it as an argument in the `ent/entc.go` file:
 
-```go {8}
+```go {8} title="ent/entc.go"
 func main() {
 	ex, err := entgql.NewExtension()
 	if err != nil {
