@@ -305,8 +305,8 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CarQuery) Select(fields ...string) *CarSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CarSelect{CarQuery: cq}
 }
 

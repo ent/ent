@@ -75,8 +75,20 @@ func TestCustomTemplate(t *testing.T) {
 			s.Join(t).On(s.C(pet.OwnerColumn), t.C(user.FieldID))
 			s.Select(s.C(pet.FieldID), sql.As(t.C(user.FieldID), "owner"))
 		}).
-		Select(pet.FieldID).
+		Select().
 		ScanX(ctx, &v)
 	require.Equal(t, p.ID, v[0].ID)
 	require.Equal(t, u.ID, v[0].Owner)
+
+	var sum int
+	for _, age := range client.Pet.Query().Select(pet.FieldAge).IntsX(ctx) {
+		sum += age
+	}
+	got := client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.Select(sql.Sum(pet.FieldAge))
+		}).
+		Select().
+		IntX(ctx)
+	require.Equal(t, sum, got)
 }

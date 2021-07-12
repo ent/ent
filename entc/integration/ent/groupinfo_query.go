@@ -329,8 +329,8 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //		Select(groupinfo.FieldDesc).
 //		Scan(ctx, &v)
 //
-func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSelect {
-	giq.fields = append([]string{field}, fields...)
+func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
+	giq.fields = append(giq.fields, fields...)
 	return &GroupInfoSelect{GroupInfoQuery: giq}
 }
 

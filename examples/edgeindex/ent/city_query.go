@@ -329,8 +329,8 @@ func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 //		Select(city.FieldName).
 //		Scan(ctx, &v)
 //
-func (cq *CityQuery) Select(field string, fields ...string) *CitySelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CityQuery) Select(fields ...string) *CitySelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CitySelect{CityQuery: cq}
 }
 

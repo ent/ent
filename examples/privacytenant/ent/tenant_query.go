@@ -291,8 +291,8 @@ func (tq *TenantQuery) GroupBy(field string, fields ...string) *TenantGroupBy {
 //		Select(tenant.FieldName).
 //		Scan(ctx, &v)
 //
-func (tq *TenantQuery) Select(field string, fields ...string) *TenantSelect {
-	tq.fields = append([]string{field}, fields...)
+func (tq *TenantQuery) Select(fields ...string) *TenantSelect {
+	tq.fields = append(tq.fields, fields...)
 	return &TenantSelect{TenantQuery: tq}
 }
 

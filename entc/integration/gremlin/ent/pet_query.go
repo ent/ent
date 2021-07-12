@@ -348,8 +348,8 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Select(pet.FieldAge).
 //		Scan(ctx, &v)
 //
-func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
-	pq.fields = append([]string{field}, fields...)
+func (pq *PetQuery) Select(fields ...string) *PetSelect {
+	pq.fields = append(pq.fields, fields...)
 	return &PetSelect{PetQuery: pq}
 }
 
