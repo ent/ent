@@ -328,8 +328,8 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //		Select(comment.FieldText).
 //		Scan(ctx, &v)
 //
-func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CommentSelect{CommentQuery: cq}
 }
 

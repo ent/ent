@@ -328,8 +328,8 @@ func (iq *InfoQuery) GroupBy(field string, fields ...string) *InfoGroupBy {
 //		Select(info.FieldContent).
 //		Scan(ctx, &v)
 //
-func (iq *InfoQuery) Select(field string, fields ...string) *InfoSelect {
-	iq.fields = append([]string{field}, fields...)
+func (iq *InfoQuery) Select(fields ...string) *InfoSelect {
+	iq.fields = append(iq.fields, fields...)
 	return &InfoSelect{InfoQuery: iq}
 }
 

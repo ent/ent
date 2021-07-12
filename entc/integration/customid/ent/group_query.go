@@ -305,8 +305,8 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
-	gq.fields = append([]string{field}, fields...)
+func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
+	gq.fields = append(gq.fields, fields...)
 	return &GroupSelect{GroupQuery: gq}
 }
 

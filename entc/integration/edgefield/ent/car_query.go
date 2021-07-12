@@ -329,8 +329,8 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 //		Select(car.FieldNumber).
 //		Scan(ctx, &v)
 //
-func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CarQuery) Select(fields ...string) *CarSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CarSelect{CarQuery: cq}
 }
 

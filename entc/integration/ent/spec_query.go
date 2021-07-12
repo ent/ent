@@ -305,8 +305,8 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
-	sq.fields = append([]string{field}, fields...)
+func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
+	sq.fields = append(sq.fields, fields...)
 	return &SpecSelect{SpecQuery: sq}
 }
 

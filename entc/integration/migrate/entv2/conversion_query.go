@@ -291,8 +291,8 @@ func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGr
 //		Select(conversion.FieldName).
 //		Scan(ctx, &v)
 //
-func (cq *ConversionQuery) Select(field string, fields ...string) *ConversionSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *ConversionQuery) Select(fields ...string) *ConversionSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &ConversionSelect{ConversionQuery: cq}
 }
 

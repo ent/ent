@@ -364,8 +364,8 @@ func (rq *RentalQuery) GroupBy(field string, fields ...string) *RentalGroupBy {
 //		Select(rental.FieldDate).
 //		Scan(ctx, &v)
 //
-func (rq *RentalQuery) Select(field string, fields ...string) *RentalSelect {
-	rq.fields = append([]string{field}, fields...)
+func (rq *RentalQuery) Select(fields ...string) *RentalSelect {
+	rq.fields = append(rq.fields, fields...)
 	return &RentalSelect{RentalQuery: rq}
 }
 

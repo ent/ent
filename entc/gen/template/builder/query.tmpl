@@ -352,8 +352,8 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 //		Scan(ctx, &v)
 //
 {{- end }}
-func ({{ $receiver }} *{{ $builder }}) Select(field string, fields ...string) *{{ $selectBuilder }} {
-	{{ $receiver }}.fields = append([]string{field}, fields...)
+func ({{ $receiver }} *{{ $builder }}) Select(fields ...string) *{{ $selectBuilder }} {
+	{{ $receiver }}.fields = append({{ $receiver }}.fields, fields...)
 	return &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
 }
 

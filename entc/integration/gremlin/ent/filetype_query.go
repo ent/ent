@@ -320,8 +320,8 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 //		Select(filetype.FieldName).
 //		Scan(ctx, &v)
 //
-func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect {
-	ftq.fields = append([]string{field}, fields...)
+func (ftq *FileTypeQuery) Select(fields ...string) *FileTypeSelect {
+	ftq.fields = append(ftq.fields, fields...)
 	return &FileTypeSelect{FileTypeQuery: ftq}
 }
 

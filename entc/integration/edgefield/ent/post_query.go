@@ -328,8 +328,8 @@ func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 //		Select(post.FieldText).
 //		Scan(ctx, &v)
 //
-func (pq *PostQuery) Select(field string, fields ...string) *PostSelect {
-	pq.fields = append([]string{field}, fields...)
+func (pq *PostQuery) Select(fields ...string) *PostSelect {
+	pq.fields = append(pq.fields, fields...)
 	return &PostSelect{PostQuery: pq}
 }
 

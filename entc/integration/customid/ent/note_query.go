@@ -365,8 +365,8 @@ func (nq *NoteQuery) GroupBy(field string, fields ...string) *NoteGroupBy {
 //		Select(note.FieldText).
 //		Scan(ctx, &v)
 //
-func (nq *NoteQuery) Select(field string, fields ...string) *NoteSelect {
-	nq.fields = append([]string{field}, fields...)
+func (nq *NoteQuery) Select(fields ...string) *NoteSelect {
+	nq.fields = append(nq.fields, fields...)
 	return &NoteSelect{NoteQuery: nq}
 }
 

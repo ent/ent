@@ -329,8 +329,8 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 //		Select(street.FieldName).
 //		Scan(ctx, &v)
 //
-func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
-	sq.fields = append([]string{field}, fields...)
+func (sq *StreetQuery) Select(fields ...string) *StreetSelect {
+	sq.fields = append(sq.fields, fields...)
 	return &StreetSelect{StreetQuery: sq}
 }
 

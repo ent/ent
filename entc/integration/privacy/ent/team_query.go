@@ -365,8 +365,8 @@ func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
 //		Select(team.FieldName).
 //		Scan(ctx, &v)
 //
-func (tq *TeamQuery) Select(field string, fields ...string) *TeamSelect {
-	tq.fields = append([]string{field}, fields...)
+func (tq *TeamQuery) Select(fields ...string) *TeamSelect {
+	tq.fields = append(tq.fields, fields...)
 	return &TeamSelect{TeamQuery: tq}
 }
 

@@ -329,8 +329,8 @@ func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
 //		Select(group.FieldName).
 //		Scan(ctx, &v)
 //
-func (gq *GroupQuery) Select(field string, fields ...string) *GroupSelect {
-	gq.fields = append([]string{field}, fields...)
+func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
+	gq.fields = append(gq.fields, fields...)
 	return &GroupSelect{GroupQuery: gq}
 }
 
