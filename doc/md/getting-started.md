@@ -108,20 +108,11 @@ ent
 ├── config.go
 ├── context.go
 ├── ent.go
-├── enttest
-│   └── enttest.go
 ├── generate.go
-├── hook
-│   └── hook.go
-├── migrate
-│   ├── migrate.go
-│   └── schema.go
 ├── mutation.go
-├── predicate
-│   └── predicate.go
-├── runtime
-│   └── runtime.go
-├── runtime.go
+... truncated
+├── schema
+│   └── user.go
 ├── schema
 │   └── user.go
 ├── tx.go
