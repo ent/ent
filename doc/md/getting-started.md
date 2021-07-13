@@ -49,8 +49,6 @@ The command above will generate the schema for `User` under `<project>/ent/schem
 
 package schema
 
-import "entgo.io/ent"
-
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
@@ -74,12 +72,6 @@ Add 2 fields to the `User` schema:
 
 package schema
 
-import (
-	"entgo.io/ent"
-	"entgo.io/ent/schema/field"
-)
-
-
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
@@ -98,7 +90,7 @@ go generate ./ent
 ```
 
 This produces the following files:
-```
+```console {12-20}
 ent
 ├── client.go
 ├── config.go
@@ -152,6 +144,7 @@ func main() {
 ```
 
 Now, we're ready to create our user. Let's call this function `CreateUser` for the sake of example:
+
 ```go title="<project>/start/start.go"
 
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
@@ -215,11 +208,6 @@ And then we add the rest of the fields manually:
 
 ```go title="<project>/ent/schema/car.go"
 
-import (
-	"entgo.io/ent"
-	"entgo.io/ent/schema/field"
-)
-
 // Fields of the Car.
 func (Car) Fields() []ent.Field {
 	return []ent.Field{
@@ -230,14 +218,6 @@ func (Car) Fields() []ent.Field {
 ```
 
 ```go title="<project>/ent/schema/group.go"
-
-import (
-	"regexp"
-	
-	"entgo.io/ent"
-	"entgo.io/ent/schema/field"
-)
-
 
 // Fields of the Group.
 func (Group) Fields() []ent.Field {
@@ -258,12 +238,7 @@ Let's add the `"cars"` edge to the `User` schema, and run `go generate ./ent`:
 
 ```go title="<project>/ent/schema/user.go"
 
-import (
-	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
-)
-
- // Edges of the User.
+// Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("cars", Car.Type),
@@ -364,13 +339,6 @@ in the `User` schema, and run `go generate ./ent`.
 
 ```go title="<project>/ent/schema/car.go"
 
-import (
-	"log"
-
-	"entgo.io/ent"
-	"entgo.io/ent/schema/edge"
-)
-
 // Edges of the Car.
 func (Car) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -427,13 +395,6 @@ relationship named `groups`. Let's define this relationship in our schemas:
 
 ```go title="<project>/ent/schema/group.go"
 
-import (
-   "log"
-
-   "entgo.io/ent"
-   "entgo.io/ent/schema/edge"
-)
-
 // Edges of the Group.
 func (Group) Edges() []ent.Edge {
    return []ent.Edge{
@@ -443,12 +404,6 @@ func (Group) Edges() []ent.Edge {
 ```
 
 ```go title="<project>/ent/schema/user.go"
-
-import (
-   "log"
-   "entgo.io/ent"
-   "entgo.io/ent/schema/edge"
-)
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
