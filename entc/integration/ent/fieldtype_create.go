@@ -874,6 +874,11 @@ func (ftc *FieldTypeCreate) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
 		}
 	}
+	if v, ok := ftc.mutation.IP(); ok {
+		if err := fieldtype.IPValidator([]byte(v)); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf("ent: validator failed for field \"ip\": %w", err)}
+		}
+	}
 	if _, ok := ftc.mutation.Role(); !ok {
 		return &ValidationError{Name: "role", err: errors.New("ent: missing required field \"role\"")}
 	}

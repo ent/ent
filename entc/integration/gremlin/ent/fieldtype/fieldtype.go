@@ -162,6 +162,8 @@ var (
 	LinkValidator func(string) error
 	// DefaultIP holds the default value on creation for the "ip" field.
 	DefaultIP func() net.IP
+	// IPValidator is a validator for the "ip" field. It is called by the builders before save.
+	IPValidator func([]byte) error
 	// DefaultPair holds the default value on creation for the "pair" field.
 	DefaultPair func() schema.Pair
 	// DefaultVstring holds the default value on creation for the "vstring" field.

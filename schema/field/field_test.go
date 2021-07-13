@@ -187,12 +187,19 @@ func (*Pair) Scan(interface{}) error      { return nil }
 func (Pair) Value() (driver.Value, error) { return nil, nil }
 
 func TestBytes(t *testing.T) {
-	fd := field.Bytes("active").Default([]byte("{}")).Comment("comment").Descriptor()
+	fd := field.Bytes("active").
+		Default([]byte("{}")).
+		Comment("comment").
+		Validate(func(bytes []byte) error {
+			return nil
+		}).
+		Descriptor()
 	assert.Equal(t, "active", fd.Name)
 	assert.Equal(t, field.TypeBytes, fd.Info.Type)
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, []byte("{}"), fd.Default)
 	assert.Equal(t, "comment", fd.Comment)
+	assert.Len(t, fd.Validators, 1)
 
 	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).Descriptor()
 	assert.NoError(t, fd.Err)
