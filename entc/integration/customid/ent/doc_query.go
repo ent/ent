@@ -365,8 +365,8 @@ func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 //		Select(doc.FieldText).
 //		Scan(ctx, &v)
 //
-func (dq *DocQuery) Select(field string, fields ...string) *DocSelect {
-	dq.fields = append([]string{field}, fields...)
+func (dq *DocQuery) Select(fields ...string) *DocSelect {
+	dq.fields = append(dq.fields, fields...)
 	return &DocSelect{DocQuery: dq}
 }
 

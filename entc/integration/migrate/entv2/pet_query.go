@@ -305,8 +305,8 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
-	pq.fields = append([]string{field}, fields...)
+func (pq *PetQuery) Select(fields ...string) *PetSelect {
+	pq.fields = append(pq.fields, fields...)
 	return &PetSelect{PetQuery: pq}
 }
 

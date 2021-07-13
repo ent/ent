@@ -267,8 +267,8 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
-	iq.fields = append([]string{field}, fields...)
+func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
+	iq.fields = append(iq.fields, fields...)
 	return &ItemSelect{ItemQuery: iq}
 }
 

@@ -291,8 +291,8 @@ func (mq *MediaQuery) GroupBy(field string, fields ...string) *MediaGroupBy {
 //		Select(media.FieldSource).
 //		Scan(ctx, &v)
 //
-func (mq *MediaQuery) Select(field string, fields ...string) *MediaSelect {
-	mq.fields = append([]string{field}, fields...)
+func (mq *MediaQuery) Select(fields ...string) *MediaSelect {
+	mq.fields = append(mq.fields, fields...)
 	return &MediaSelect{MediaQuery: mq}
 }
 

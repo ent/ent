@@ -347,8 +347,8 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Select(node.FieldValue).
 //		Scan(ctx, &v)
 //
-func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
-	nq.fields = append([]string{field}, fields...)
+func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
+	nq.fields = append(nq.fields, fields...)
 	return &NodeSelect{NodeQuery: nq}
 }
 

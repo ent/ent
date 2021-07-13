@@ -328,8 +328,8 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //		Select(card.FieldNumber).
 //		Scan(ctx, &v)
 //
-func (cq *CardQuery) Select(field string, fields ...string) *CardSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CardQuery) Select(fields ...string) *CardSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CardSelect{CardQuery: cq}
 }
 

@@ -291,8 +291,8 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 //		Select(customtype.FieldCustom).
 //		Scan(ctx, &v)
 //
-func (ctq *CustomTypeQuery) Select(field string, fields ...string) *CustomTypeSelect {
-	ctq.fields = append([]string{field}, fields...)
+func (ctq *CustomTypeQuery) Select(fields ...string) *CustomTypeSelect {
+	ctq.fields = append(ctq.fields, fields...)
 	return &CustomTypeSelect{CustomTypeQuery: ctq}
 }
 

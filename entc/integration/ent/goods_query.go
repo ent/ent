@@ -267,8 +267,8 @@ func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (gq *GoodsQuery) Select(field string, fields ...string) *GoodsSelect {
-	gq.fields = append([]string{field}, fields...)
+func (gq *GoodsQuery) Select(fields ...string) *GoodsSelect {
+	gq.fields = append(gq.fields, fields...)
 	return &GoodsSelect{GoodsQuery: gq}
 }
 

@@ -292,8 +292,8 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 //		Select(fieldtype.FieldInt).
 //		Scan(ctx, &v)
 //
-func (ftq *FieldTypeQuery) Select(field string, fields ...string) *FieldTypeSelect {
-	ftq.fields = append([]string{field}, fields...)
+func (ftq *FieldTypeQuery) Select(fields ...string) *FieldTypeSelect {
+	ftq.fields = append(ftq.fields, fields...)
 	return &FieldTypeSelect{FieldTypeQuery: ftq}
 }
 

@@ -389,6 +389,10 @@ func Select(t *testing.T, client *ent.Client) {
 		Select(pet.FieldName).
 		StringsX(ctx)
 	require.Equal([]string{"b", "c", "a", "b"}, names)
+
+	var ps []*ent.Pet
+	client.Pet.Query().Select().ScanX(ctx, &ps)
+	require.Len(ps, 4, "support scanning nodes manually")
 }
 
 func Predicate(t *testing.T, client *ent.Client) {

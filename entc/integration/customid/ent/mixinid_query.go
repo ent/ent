@@ -292,8 +292,8 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 //		Select(mixinid.FieldSomeField).
 //		Scan(ctx, &v)
 //
-func (miq *MixinIDQuery) Select(field string, fields ...string) *MixinIDSelect {
-	miq.fields = append([]string{field}, fields...)
+func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
+	miq.fields = append(miq.fields, fields...)
 	return &MixinIDSelect{MixinIDQuery: miq}
 }
 

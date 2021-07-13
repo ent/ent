@@ -365,8 +365,8 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 //		Select(blob.FieldUUID).
 //		Scan(ctx, &v)
 //
-func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
-	bq.fields = append([]string{field}, fields...)
+func (bq *BlobQuery) Select(fields ...string) *BlobSelect {
+	bq.fields = append(bq.fields, fields...)
 	return &BlobSelect{BlobQuery: bq}
 }
 

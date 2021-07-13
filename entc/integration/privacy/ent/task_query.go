@@ -366,8 +366,8 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 //		Select(task.FieldTitle).
 //		Scan(ctx, &v)
 //
-func (tq *TaskQuery) Select(field string, fields ...string) *TaskSelect {
-	tq.fields = append([]string{field}, fields...)
+func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
+	tq.fields = append(tq.fields, fields...)
 	return &TaskSelect{TaskQuery: tq}
 }
 

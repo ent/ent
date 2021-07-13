@@ -328,8 +328,8 @@ func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupB
 //		Select(metadata.FieldAge).
 //		Scan(ctx, &v)
 //
-func (mq *MetadataQuery) Select(field string, fields ...string) *MetadataSelect {
-	mq.fields = append([]string{field}, fields...)
+func (mq *MetadataQuery) Select(fields ...string) *MetadataSelect {
+	mq.fields = append(mq.fields, fields...)
 	return &MetadataSelect{MetadataQuery: mq}
 }
 
