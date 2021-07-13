@@ -47,8 +47,7 @@ go run entgo.io/ent/cmd/ent init User
 
 The command above will generate the schema for `User` under `<project>/ent/schema/` directory:
 
-```go
-// <project>/ent/schema/user.go
+```go title="<project>/ent/schema/user.go"
 
 package schema
 
@@ -73,8 +72,7 @@ func (User) Edges() []ent.Edge {
 
 Add 2 fields to the `User` schema:
 
-```go
-// <project>/ent/schema/user.go
+```go title="<project>/ent/schema/user.go"
 
 package schema
 
@@ -194,6 +192,7 @@ and additional information about storage elements (column names, primary keys, e
 
 ```go
 // <project>/start/start.go
+package main
 
 import (
 	"log"
