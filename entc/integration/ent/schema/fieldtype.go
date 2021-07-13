@@ -194,6 +194,12 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			GoType(net.IP("127.0.0.1")).
 			DefaultFunc(func() net.IP {
 				return net.IP("127.0.0.1")
+			}).
+			Validate(func(i []byte) error {
+				if net.ParseIP(string(i)) == nil {
+					return fmt.Errorf("ent/schema: invalid ip %q", string(i))
+				}
+				return nil
 			}),
 		field.Int("null_int64").
 			Optional().

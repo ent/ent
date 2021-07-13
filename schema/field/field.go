@@ -575,6 +575,21 @@ func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
 	return b
 }
 
+// Validate adds a validator for this field. Operation fails if the validation fails.
+//
+//	field.Bytes("blob").
+//		Validate(func(b []byte) error {
+//			if len(b) % 2 == 0 {
+//				return fmt.Errorf("ent/schema: blob length is even: %d", len(b))
+//			}
+//			return nil
+//		})
+//
+func (b *bytesBuilder) Validate(fn func([]byte) error) *bytesBuilder {
+	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *bytesBuilder) StorageKey(key string) *bytesBuilder {

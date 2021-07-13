@@ -89,6 +89,8 @@ func init() {
 	fieldtypeDescIP := fieldtypeFields[42].Descriptor()
 	// fieldtype.DefaultIP holds the default value on creation for the ip field.
 	fieldtype.DefaultIP = fieldtypeDescIP.Default.(func() net.IP)
+	// fieldtype.IPValidator is a validator for the "ip" field. It is called by the builders before save.
+	fieldtype.IPValidator = fieldtypeDescIP.Validators[0].(func([]byte) error)
 	// fieldtypeDescPair is the schema descriptor for pair field.
 	fieldtypeDescPair := fieldtypeFields[55].Descriptor()
 	// fieldtype.DefaultPair holds the default value on creation for the pair field.
