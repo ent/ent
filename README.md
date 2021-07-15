@@ -55,3 +55,4 @@ ent is licensed under Apache 2.0 as found in the [LICENSE file](LICENSE).
 [entgo instal]: https://entgo.io/docs/code-gen/#version-compatibility-between-entc-and-ent
 [Go modules]: https://github.com/golang/go/wiki/Modules#quick-start
 [fbc]: https://connectivity.fb.com
+Thu 15 Jul 15:02:26 CEST 2021
