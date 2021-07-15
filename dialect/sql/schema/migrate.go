@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -190,7 +189,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 			}
 			change, err := m.changeSet(curr, t)
 			if err != nil {
-				return errors.Wrapf(err, "creating changeset for %s", t.Name)
+				return fmt.Errorf("creating changeset for %q: %w", t.Name, err)
 			}
 			if err := m.apply(ctx, tx, t.Name, change); err != nil {
 				return err

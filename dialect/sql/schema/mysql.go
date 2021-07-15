@@ -67,7 +67,10 @@ func (d *MySQL) fkExist(ctx context.Context, tx dialect.Tx, name string) (bool, 
 // table loads the current table description from the database.
 func (d *MySQL) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
 	rows := &sql.Rows{}
-	query, args := sql.Select("column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name").
+	query, args := sql.Select(
+		"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name",
+		"numeric_precision", "numeric_scale",
+	).
 		From(sql.Table("COLUMNS").Schema("INFORMATION_SCHEMA")).
 		Where(sql.And(
 			d.matchSchema(),
@@ -377,12 +380,15 @@ func (d *MySQL) prepare(ctx context.Context, tx dialect.Tx, change *changes, tab
 }
 
 // scanColumn scans the column information from MySQL column description.
+// nolint:funlen
 func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
-		nullable sql.NullString
-		defaults sql.NullString
+		nullable         sql.NullString
+		defaults         sql.NullString
+		numericPrecision sql.NullInt64
+		numericScale     sql.NullInt64
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr, &sql.NullString{}, &sql.NullString{}); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &c.Key, &defaults, &c.Attr, &sql.NullString{}, &sql.NullString{}, &numericPrecision, &numericScale); err != nil {
 		return fmt.Errorf("scanning column description: %w", err)
 	}
 	c.Unique = c.UniqueKey()
@@ -421,8 +427,15 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		default:
 			c.Type = field.TypeInt8
 		}
-	case "numeric", "decimal", "double":
+	case "double":
 		c.Type = field.TypeFloat64
+	case "numeric", "decimal":
+		c.Type = field.TypeFloat64
+		// If precision is specified then we should take that into account.
+		if numericPrecision.Valid {
+			schemaType := fmt.Sprintf("%s(%d,%d)", parts[0], numericPrecision.Int64, numericScale.Int64)
+			c.SchemaType = map[string]string{dialect.MySQL: schemaType}
+		}
 	case "time", "timestamp", "date", "datetime":
 		c.Type = field.TypeTime
 		// The mapping from schema defaults to database
