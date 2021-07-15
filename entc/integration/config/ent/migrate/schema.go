@@ -38,4 +38,6 @@ func init() {
 	}
 	UsersTable.Annotation.Incremental = new(bool)
 	*UsersTable.Annotation.Incremental = false
+	UsersTable.Annotation.Unique = new(bool)
+	*UsersTable.Annotation.Unique = false
 }

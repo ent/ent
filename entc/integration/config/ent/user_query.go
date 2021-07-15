@@ -371,7 +371,7 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 			},
 		},
 		From:   uq.sql,
-		Unique: true,
+		Unique: false,
 	}
 	if unique := uq.unique; unique != nil {
 		_spec.Unique = *unique
