@@ -39,9 +39,11 @@ func AllowIfAdmin() privacy.QueryMutationRule {
 	})
 }
 
-// FilterTenantRule is a query rule that filters out entities that are not in the tenant.
+// FilterTenantRule is a query/mutation rule that filters out entities that are not in the tenant.
 func FilterTenantRule() privacy.QueryMutationRule {
-	type TeamsFilter interface {
+	// TenantsFilter is an interface to wrap WhereHasTenantWith() predicate that's
+	// used by both `Group` and `User` schemas.
+	type TenantsFilter interface {
 		WhereHasTenantWith(...predicate.Tenant)
 	}
 	return privacy.FilterFunc(func(ctx context.Context, f privacy.Filter) error {
@@ -49,22 +51,21 @@ func FilterTenantRule() privacy.QueryMutationRule {
 		if view.Tenant() == "" {
 			return privacy.Denyf("missing tenant information in viewer")
 		}
-		tf, ok := f.(TeamsFilter)
+		tf, ok := f.(TenantsFilter)
 		if !ok {
 			return privacy.Denyf("unexpected filter type %T", f)
 		}
-		// Make sure that a tenant is able to read only entities that
-		// has an edge to it.
+		// Make sure that a tenant reads only entities that has an edge to it.
 		tf.WhereHasTenantWith(tenant.Name(view.Tenant()))
 		// Skip to the next privacy rule (equivalent to return nil).
 		return privacy.Skip
 	})
 }
 
-// DenyMismatchedTenants is a rule that returns a deny decision if the operations
-// tries to add users to groups that are not in the same tenant.
+// DenyMismatchedTenants is a rule that returns a deny decision if the operation
+// involves users that don't belong to the same tenant as the group or users are from more than one tenant.
 func DenyMismatchedTenants() privacy.MutationRule {
-	rule := privacy.GroupMutationRuleFunc(func(ctx context.Context, m *ent.GroupMutation) error {
+	return privacy.GroupMutationRuleFunc(func(ctx context.Context, m *ent.GroupMutation) error {
 		tid, exists := m.TenantID()
 		if !exists {
 			return privacy.Denyf("missing tenant information in mutation")
@@ -76,16 +77,14 @@ func DenyMismatchedTenants() privacy.MutationRule {
 		}
 		// Query the tenant-id of all users. Expect to have exact 1 result,
 		// and it matches the tenant-id of the group above.
-		uid, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
+		userTid, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
 		if err != nil {
 			return privacy.Denyf("querying the tenant-id %v", err)
 		}
-		if uid != tid {
-			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, uid)
+		if userTid != tid {
+			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, userTid)
 		}
 		// Skip to the next privacy rule (equivalent to return nil).
 		return privacy.Skip
 	})
-	// Evaluate the mutation rule only on group creation.
-	return privacy.OnMutationOperation(rule, ent.OpCreate)
 }

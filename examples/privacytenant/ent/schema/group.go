@@ -45,7 +45,11 @@ func (Group) Edges() []ent.Edge {
 func (Group) Policy() ent.Policy {
 	return privacy.Policy{
 		Mutation: privacy.MutationPolicy{
-			rule.DenyMismatchedTenants(),
+			privacy.OnMutationOperation(
+				rule.DenyMismatchedTenants(),
+				ent.OpCreate),
+			// Limit the FilterTenantRule only for
+			// UpdateOne and DeleteOne operations.
 			privacy.OnMutationOperation(
 				rule.FilterTenantRule(),
 				ent.OpUpdateOne|ent.OpDeleteOne,
