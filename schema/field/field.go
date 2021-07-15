@@ -549,6 +549,13 @@ func (b *bytesBuilder) Optional() *bytesBuilder {
 	return b
 }
 
+// Unique makes the field unique within all vertices of this type.
+// Only supported in PostgresSQL.
+func (b *bytesBuilder) Unique() *bytesBuilder {
+	b.desc.Unique = true
+	return b
+}
+
 // Immutable indicates that this field cannot be updated.
 func (b *bytesBuilder) Immutable() *bytesBuilder {
 	b.desc.Immutable = true
