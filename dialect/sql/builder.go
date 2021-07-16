@@ -526,6 +526,7 @@ type IndexBuilder struct {
 	unique  bool
 	exists  bool
 	table   string
+	method  string
 	columns []string
 }
 
@@ -565,6 +566,12 @@ func (i *IndexBuilder) Table(table string) *IndexBuilder {
 	return i
 }
 
+// Using sets the method to create the index with.
+func (i *IndexBuilder) Using(method string) *IndexBuilder {
+	i.method = method
+	return i
+}
+
 // Column appends a column to the column list for the index.
 func (i *IndexBuilder) Column(column string) *IndexBuilder {
 	i.columns = append(i.columns, column)
@@ -589,7 +596,11 @@ func (i *IndexBuilder) Query() (string, []interface{}) {
 	}
 	i.Ident(i.name)
 	i.WriteString(" ON ")
-	i.Ident(i.table).Nested(func(b *Builder) {
+	i.Ident(i.table)
+	if i.method != "" {
+		i.WriteString(fmt.Sprintf(" USING %v", i.Quote(i.method)))
+	}
+	i.Nested(func(b *Builder) {
 		b.IdentComma(i.columns...)
 	})
 	return i.String(), nil
