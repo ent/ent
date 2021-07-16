@@ -1044,7 +1044,7 @@ func (f Field) ScanType() string {
 		if f.Nillable && !f.standardNullType() {
 			return "sql.NullScanner"
 		}
-		return f.Type.RType.String()
+		return f.Type.RTypeString()
 	}
 	switch f.Type.Type {
 	case field.TypeJSON, field.TypeBytes:
@@ -1069,7 +1069,7 @@ func (f Field) ScanType() string {
 // nillable-type supported by the SQL driver (e.g. []byte).
 func (f Field) NewScanType() string {
 	if f.Type.ValueScanner() {
-		expr := fmt.Sprintf("new(%s)", f.Type.RType.String())
+		expr := fmt.Sprintf("new(%s)", f.Type.RTypeString())
 		if f.Nillable && !f.standardNullType() {
 			expr = fmt.Sprintf("&sql.NullScanner{S: %s}", expr)
 		}
@@ -1103,7 +1103,7 @@ func (f Field) ScanTypeField(rec string) string {
 			expr = "*" + expr
 		}
 		if f.Nillable && !f.standardNullType() {
-			return fmt.Sprintf("%s.S.(*%s)", expr, f.Type.RType.String())
+			return fmt.Sprintf("%s.S.(*%s)", expr, f.Type.RTypeString())
 		}
 		return expr
 	}

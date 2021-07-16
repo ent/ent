@@ -102,6 +102,15 @@ func (t TypeInfo) String() string {
 	}
 }
 
+// String returns the string representation of a type.
+func (t TypeInfo) RTypeString() string {
+	if t.RType != nil && t.RType.String() != "" {
+		return t.RType.String()
+	}
+
+	return t.String()
+}
+
 // Valid reports if the given type if known type.
 func (t TypeInfo) Valid() bool {
 	return t.Type.Valid()
