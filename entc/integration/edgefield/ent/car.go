@@ -12,13 +12,14 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
+	"github.com/google/uuid"
 )
 
 // Car is the model entity for the Car schema.
 type Car struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Number holds the value of the "number" field.
 	Number string `json:"number,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -49,10 +50,10 @@ func (*Car) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case car.FieldID:
-			values[i] = new(sql.NullInt64)
 		case car.FieldNumber:
 			values[i] = new(sql.NullString)
+		case car.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Car", columns[i])
 		}
@@ -69,11 +70,11 @@ func (c *Car) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case car.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				c.ID = *value
 			}
-			c.ID = int(value.Int64)
 		case car.FieldNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field number", values[i])

@@ -17,10 +17,10 @@ const (
 	FieldID = "id"
 	// FieldDate holds the string denoting the date field in the database.
 	FieldDate = "date"
-	// FieldCarID holds the string denoting the car_id field in the database.
-	FieldCarID = "car_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldCarID holds the string denoting the car_id field in the database.
+	FieldCarID = "car_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeCar holds the string denoting the car edge name in mutations.
@@ -47,8 +47,8 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDate,
-	FieldCarID,
 	FieldUserID,
+	FieldCarID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

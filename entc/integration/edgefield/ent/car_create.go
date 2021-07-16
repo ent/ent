@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // CarCreate is the builder for creating a Car entity.
@@ -34,6 +35,12 @@ func (cc *CarCreate) SetNillableNumber(s *string) *CarCreate {
 	if s != nil {
 		cc.SetNumber(*s)
 	}
+	return cc
+}
+
+// SetID sets the "id" field.
+func (cc *CarCreate) SetID(u uuid.UUID) *CarCreate {
+	cc.mutation.SetID(u)
 	return cc
 }
 
@@ -63,6 +70,7 @@ func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 		err  error
 		node *Car
 	)
+	cc.defaults()
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
 			return nil, err
@@ -104,6 +112,14 @@ func (cc *CarCreate) SaveX(ctx context.Context) *Car {
 	return v
 }
 
+// defaults sets the default values of the builder before save.
+func (cc *CarCreate) defaults() {
+	if _, ok := cc.mutation.ID(); !ok {
+		v := car.DefaultID()
+		cc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (cc *CarCreate) check() error {
 	return nil
@@ -117,8 +133,6 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
 	return _node, nil
 }
 
@@ -128,11 +142,15 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: car.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: car.FieldID,
 			},
 		}
 	)
+	if id, ok := cc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := cc.mutation.Number(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -177,6 +195,7 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CarMutation)
 				if !ok {
@@ -203,8 +222,6 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

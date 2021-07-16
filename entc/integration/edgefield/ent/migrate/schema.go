@@ -14,7 +14,7 @@ import (
 var (
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID},
 		{Name: "number", Type: field.TypeString, Nullable: true},
 	}
 	// CarsTable holds the schema information for the "cars" table.
@@ -73,6 +73,7 @@ var (
 	MetadataColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeInt, Default: 0},
+		{Name: "parent_id", Type: field.TypeInt, Nullable: true},
 	}
 	// MetadataTable holds the schema information for the "metadata" table.
 	MetadataTable = &schema.Table{
@@ -80,6 +81,12 @@ var (
 		Columns:    MetadataColumns,
 		PrimaryKey: []*schema.Column{MetadataColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "metadata_metadata_parent",
+				Columns:    []*schema.Column{MetadataColumns[2]},
+				RefColumns: []*schema.Column{MetadataColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
 			{
 				Symbol:     "metadata_users_metadata",
 				Columns:    []*schema.Column{MetadataColumns[0]},
@@ -138,7 +145,7 @@ var (
 	RentalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "date", Type: field.TypeTime},
-		{Name: "car_id", Type: field.TypeInt, Nullable: true},
+		{Name: "car_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt, Nullable: true, SchemaType: map[string]string{"sqlite3": "integer"}},
 	}
 	// RentalsTable holds the schema information for the "rentals" table.
@@ -210,7 +217,8 @@ var (
 func init() {
 	CardsTable.ForeignKeys[0].RefTable = UsersTable
 	InfosTable.ForeignKeys[0].RefTable = UsersTable
-	MetadataTable.ForeignKeys[0].RefTable = UsersTable
+	MetadataTable.ForeignKeys[0].RefTable = MetadataTable
+	MetadataTable.ForeignKeys[1].RefTable = UsersTable
 	PetsTable.ForeignKeys[0].RefTable = UsersTable
 	PostsTable.ForeignKeys[0].RefTable = UsersTable
 	RentalsTable.ForeignKeys[0].RefTable = CarsTable

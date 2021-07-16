@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // RentalCreate is the builder for creating a Rental entity.
@@ -40,15 +41,15 @@ func (rc *RentalCreate) SetNillableDate(t *time.Time) *RentalCreate {
 	return rc
 }
 
-// SetCarID sets the "car_id" field.
-func (rc *RentalCreate) SetCarID(i int) *RentalCreate {
-	rc.mutation.SetCarID(i)
-	return rc
-}
-
 // SetUserID sets the "user_id" field.
 func (rc *RentalCreate) SetUserID(i int) *RentalCreate {
 	rc.mutation.SetUserID(i)
+	return rc
+}
+
+// SetCarID sets the "car_id" field.
+func (rc *RentalCreate) SetCarID(u uuid.UUID) *RentalCreate {
+	rc.mutation.SetCarID(u)
 	return rc
 }
 
@@ -128,11 +129,11 @@ func (rc *RentalCreate) check() error {
 	if _, ok := rc.mutation.Date(); !ok {
 		return &ValidationError{Name: "date", err: errors.New("ent: missing required field \"date\"")}
 	}
-	if _, ok := rc.mutation.CarID(); !ok {
-		return &ValidationError{Name: "car_id", err: errors.New("ent: missing required field \"car_id\"")}
-	}
 	if _, ok := rc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New("ent: missing required field \"user_id\"")}
+	}
+	if _, ok := rc.mutation.CarID(); !ok {
+		return &ValidationError{Name: "car_id", err: errors.New("ent: missing required field \"car_id\"")}
 	}
 	if _, ok := rc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
@@ -204,7 +205,7 @@ func (rc *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: car.FieldID,
 				},
 			},

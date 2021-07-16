@@ -149,7 +149,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   car.Table,
 			Columns: car.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: car.FieldID,
 			},
 		},
@@ -372,7 +372,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			Table:   car.Table,
 			Columns: car.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: car.FieldID,
 			},
 		},

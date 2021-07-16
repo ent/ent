@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
@@ -104,17 +105,17 @@ func Date(v time.Time) predicate.Rental {
 	})
 }
 
-// CarID applies equality check predicate on the "car_id" field. It's identical to CarIDEQ.
-func CarID(v int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCarID), v))
-	})
-}
-
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldUserID), v))
+	})
+}
+
+// CarID applies equality check predicate on the "car_id" field. It's identical to CarIDEQ.
+func CarID(v uuid.UUID) predicate.Rental {
+	return predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCarID), v))
 	})
 }
 
@@ -194,54 +195,6 @@ func DateLTE(v time.Time) predicate.Rental {
 	})
 }
 
-// CarIDEQ applies the EQ predicate on the "car_id" field.
-func CarIDEQ(v int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCarID), v))
-	})
-}
-
-// CarIDNEQ applies the NEQ predicate on the "car_id" field.
-func CarIDNEQ(v int) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCarID), v))
-	})
-}
-
-// CarIDIn applies the In predicate on the "car_id" field.
-func CarIDIn(vs ...int) predicate.Rental {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Rental(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldCarID), v...))
-	})
-}
-
-// CarIDNotIn applies the NotIn predicate on the "car_id" field.
-func CarIDNotIn(vs ...int) predicate.Rental {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Rental(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldCarID), v...))
-	})
-}
-
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.Rental {
 	return predicate.Rental(func(s *sql.Selector) {
@@ -287,6 +240,54 @@ func UserIDNotIn(vs ...int) predicate.Rental {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldUserID), v...))
+	})
+}
+
+// CarIDEQ applies the EQ predicate on the "car_id" field.
+func CarIDEQ(v uuid.UUID) predicate.Rental {
+	return predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCarID), v))
+	})
+}
+
+// CarIDNEQ applies the NEQ predicate on the "car_id" field.
+func CarIDNEQ(v uuid.UUID) predicate.Rental {
+	return predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCarID), v))
+	})
+}
+
+// CarIDIn applies the In predicate on the "car_id" field.
+func CarIDIn(vs ...uuid.UUID) predicate.Rental {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Rental(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCarID), v...))
+	})
+}
+
+// CarIDNotIn applies the NotIn predicate on the "car_id" field.
+func CarIDNotIn(vs ...uuid.UUID) predicate.Rental {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Rental(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCarID), v...))
 	})
 }
 
