@@ -547,6 +547,18 @@ func (b *int8Builder) Validate(fn func(int8) error) *int8Builder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int8("int8").
+//		Default(0).
+//		UpdateDefault(0),
+//
+func (b *int8Builder) UpdateDefault(f func() interface{}) *int8Builder {
+	b.desc.UpdateDefault = f
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *int8Builder) StorageKey(key string) *int8Builder {
@@ -713,6 +725,18 @@ func (b *int16Builder) StructTag(s string) *int16Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *int16Builder) Validate(fn func(int16) error) *int16Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int64("int16").
+//		Default(0).
+//		UpdateDefault(0),
+//
+func (b *int16Builder) UpdateDefault(f func() interface{}) *int16Builder {
+	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -885,6 +909,18 @@ func (b *int32Builder) Validate(fn func(int32) error) *int32Builder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int32("int32").
+//		Default(0).
+//		UpdateDefault(0),
+//
+func (b *int32Builder) UpdateDefault(f func() interface{}) *int32Builder {
+	b.desc.UpdateDefault = f
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *int32Builder) StorageKey(key string) *int32Builder {
@@ -1054,6 +1090,18 @@ func (b *int64Builder) Validate(fn func(int64) error) *int64Builder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int64("int64").
+//		Default(0).
+//		UpdateDefault(0),
+//
+func (b *int64Builder) UpdateDefault(f func() interface{}) *int64Builder {
+	b.desc.UpdateDefault = f
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *int64Builder) StorageKey(key string) *int64Builder {
@@ -1210,6 +1258,18 @@ func (b *uint8Builder) StructTag(s string) *uint8Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uint8Builder) Validate(fn func(uint8) error) *uint8Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint8("uint8").
+//		Default(0).
+//		UpdateDefault(0),
+//
+func (b *uint8Builder) UpdateDefault(f func() interface{}) *uint8Builder {
+	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -1372,6 +1432,18 @@ func (b *uint16Builder) Validate(fn func(uint16) error) *uint16Builder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint16("uint16").
+//		Default(0).
+//		UpdateDefault(0),
+//
+func (b *uint16Builder) UpdateDefault(f func() interface{}) *uint16Builder {
+	b.desc.UpdateDefault = f
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uint16Builder) StorageKey(key string) *uint16Builder {
@@ -1531,6 +1603,18 @@ func (b *uint32Builder) Validate(fn func(uint32) error) *uint32Builder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint32("uint32").
+//		Default(0).
+//		UpdateDefault(0),
+//
+func (b *uint32Builder) UpdateDefault(f func() interface{}) *uint32Builder {
+	b.desc.UpdateDefault = f
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uint32Builder) StorageKey(key string) *uint32Builder {
@@ -1687,6 +1771,18 @@ func (b *uint64Builder) StructTag(s string) *uint64Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uint64Builder) Validate(fn func(uint64) error) *uint64Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint64("uint64").
+//		Default(0).
+//		UpdateDefault(0),
+//
+func (b *uint64Builder) UpdateDefault(f func() interface{}) *uint64Builder {
+	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -1860,6 +1956,18 @@ func (b *float64Builder) Validate(fn func(float64) error) *float64Builder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Float64("float64").
+//		Default(0.0).
+//		UpdateDefault(0.0),
+//
+func (b *float64Builder) UpdateDefault(f func() interface{}) *float64Builder {
+	b.desc.UpdateDefault = f
+	return b
+}
+
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *float64Builder) StorageKey(key string) *float64Builder {
@@ -2012,6 +2120,18 @@ func (b *float32Builder) StructTag(s string) *float32Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *float32Builder) Validate(fn func(float32) error) *float32Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Float32("float32").
+//		Default(0.0).
+//		UpdateDefault(0.0),
+//
+func (b *float32Builder) UpdateDefault(f func() interface{}) *float32Builder {
+	b.desc.UpdateDefault = f
 	return b
 }
 
