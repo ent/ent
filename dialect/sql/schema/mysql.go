@@ -380,7 +380,6 @@ func (d *MySQL) prepare(ctx context.Context, tx dialect.Tx, change *changes, tab
 }
 
 // scanColumn scans the column information from MySQL column description.
-// nolint:funlen
 func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
 		nullable         sql.NullString
