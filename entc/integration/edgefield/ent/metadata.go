@@ -22,6 +22,8 @@ type Metadata struct {
 	ID int `json:"id,omitempty"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
+	// ParentID holds the value of the "parent_id" field.
+	ParentID int `json:"parent_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MetadataQuery when eager-loading is set.
 	Edges MetadataEdges `json:"edges"`
@@ -31,9 +33,13 @@ type Metadata struct {
 type MetadataEdges struct {
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// Children holds the value of the children edge.
+	Children []*Metadata `json:"children,omitempty"`
+	// Parent holds the value of the parent edge.
+	Parent *Metadata `json:"parent,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -50,12 +56,35 @@ func (e MetadataEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// ChildrenOrErr returns the Children value or an error if the edge
+// was not loaded in eager-loading.
+func (e MetadataEdges) ChildrenOrErr() ([]*Metadata, error) {
+	if e.loadedTypes[1] {
+		return e.Children, nil
+	}
+	return nil, &NotLoadedError{edge: "children"}
+}
+
+// ParentOrErr returns the Parent value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MetadataEdges) ParentOrErr() (*Metadata, error) {
+	if e.loadedTypes[2] {
+		if e.Parent == nil {
+			// The edge parent was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: metadata.Label}
+		}
+		return e.Parent, nil
+	}
+	return nil, &NotLoadedError{edge: "parent"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Metadata) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case metadata.FieldID, metadata.FieldAge:
+		case metadata.FieldID, metadata.FieldAge, metadata.FieldParentID:
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Metadata", columns[i])
@@ -84,6 +113,12 @@ func (m *Metadata) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				m.Age = int(value.Int64)
 			}
+		case metadata.FieldParentID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
+			} else if value.Valid {
+				m.ParentID = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -92,6 +127,16 @@ func (m *Metadata) assignValues(columns []string, values []interface{}) error {
 // QueryUser queries the "user" edge of the Metadata entity.
 func (m *Metadata) QueryUser() *UserQuery {
 	return (&MetadataClient{config: m.config}).QueryUser(m)
+}
+
+// QueryChildren queries the "children" edge of the Metadata entity.
+func (m *Metadata) QueryChildren() *MetadataQuery {
+	return (&MetadataClient{config: m.config}).QueryChildren(m)
+}
+
+// QueryParent queries the "parent" edge of the Metadata entity.
+func (m *Metadata) QueryParent() *MetadataQuery {
+	return (&MetadataClient{config: m.config}).QueryParent(m)
 }
 
 // Update returns a builder for updating this Metadata.
@@ -119,6 +164,8 @@ func (m *Metadata) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteString(", age=")
 	builder.WriteString(fmt.Sprintf("%v", m.Age))
+	builder.WriteString(", parent_id=")
+	builder.WriteString(fmt.Sprintf("%v", m.ParentID))
 	builder.WriteByte(')')
 	return builder.String()
 }

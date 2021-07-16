@@ -1516,6 +1516,9 @@ func (e Edge) Field() *Field {
 // HasFieldSetter reports if this edge already has a field-edge setters for its mutation API.
 // It's used by the codegen templates to avoid generating duplicate setters for id APIs (e.g. SetOwnerID).
 func (e Edge) HasFieldSetter() bool {
+	if !e.OwnFK() {
+		return false
+	}
 	fk, err := e.ForeignKey()
 	if err != nil {
 		return false

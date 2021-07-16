@@ -9,15 +9,23 @@ package ent
 import (
 	"time"
 
+	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/schema"
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	carFields := schema.Car{}.Fields()
+	_ = carFields
+	// carDescID is the schema descriptor for id field.
+	carDescID := carFields[0].Descriptor()
+	// car.DefaultID holds the default value on creation for the id field.
+	car.DefaultID = carDescID.Default.(func() uuid.UUID)
 	metadataFields := schema.Metadata{}.Fields()
 	_ = metadataFields
 	// metadataDescAge is the schema descriptor for age field.

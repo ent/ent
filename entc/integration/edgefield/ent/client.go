@@ -12,6 +12,7 @@ import (
 	"log"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/migrate"
+	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/card"
@@ -215,7 +216,7 @@ func (c *CarClient) UpdateOne(ca *Car) *CarUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CarClient) UpdateOneID(id int) *CarUpdateOne {
+func (c *CarClient) UpdateOneID(id uuid.UUID) *CarUpdateOne {
 	mutation := newCarMutation(c.config, OpUpdateOne, withCarID(id))
 	return &CarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -232,7 +233,7 @@ func (c *CarClient) DeleteOne(ca *Car) *CarDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
+func (c *CarClient) DeleteOneID(id uuid.UUID) *CarDeleteOne {
 	builder := c.Delete().Where(car.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -247,12 +248,12 @@ func (c *CarClient) Query() *CarQuery {
 }
 
 // Get returns a Car entity by its id.
-func (c *CarClient) Get(ctx context.Context, id int) (*Car, error) {
+func (c *CarClient) Get(ctx context.Context, id uuid.UUID) (*Car, error) {
 	return c.Query().Where(car.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CarClient) GetX(ctx context.Context, id int) *Car {
+func (c *CarClient) GetX(ctx context.Context, id uuid.UUID) *Car {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -587,6 +588,38 @@ func (c *MetadataClient) QueryUser(m *Metadata) *UserQuery {
 			sqlgraph.From(metadata.Table, metadata.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, metadata.UserTable, metadata.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Metadata.
+func (c *MetadataClient) QueryChildren(m *Metadata) *MetadataQuery {
+	query := &MetadataQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(metadata.Table, metadata.FieldID, id),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, metadata.ChildrenTable, metadata.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParent queries the parent edge of a Metadata.
+func (c *MetadataClient) QueryParent(m *Metadata) *MetadataQuery {
+	query := &MetadataQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(metadata.Table, metadata.FieldID, id),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, metadata.ParentTable, metadata.ParentColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil

@@ -13,8 +13,14 @@ const (
 	FieldID = "id"
 	// FieldAge holds the string denoting the age field in the database.
 	FieldAge = "age"
+	// FieldParentID holds the string denoting the parent_id field in the database.
+	FieldParentID = "parent_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
 	// Table holds the table name of the metadata in the database.
 	Table = "metadata"
 	// UserTable is the table the holds the user relation/edge.
@@ -24,12 +30,21 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "id"
+	// ChildrenTable is the table the holds the children relation/edge.
+	ChildrenTable = "metadata"
+	// ChildrenColumn is the table column denoting the children relation/edge.
+	ChildrenColumn = "parent_id"
+	// ParentTable is the table the holds the parent relation/edge.
+	ParentTable = "metadata"
+	// ParentColumn is the table column denoting the parent relation/edge.
+	ParentColumn = "parent_id"
 )
 
 // Columns holds all SQL columns for metadata fields.
 var Columns = []string{
 	FieldID,
 	FieldAge,
+	FieldParentID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
