@@ -189,7 +189,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 			}
 			change, err := m.changeSet(curr, t)
 			if err != nil {
-				return err
+				return fmt.Errorf("creating changeset for %q: %w", t.Name, err)
 			}
 			if err := m.apply(ctx, tx, t.Name, change); err != nil {
 				return err
