@@ -731,7 +731,7 @@ func (b *int16Builder) Validate(fn func(int16) error) *int16Builder {
 // UpdateDefault sets the function that is applied to set default value
 // of the field on update. For example:
 //
-//	field.Int64("int16").
+//	field.Int16("int16").
 //		Default(0).
 //		UpdateDefault(0),
 //
