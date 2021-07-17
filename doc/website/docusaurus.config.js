@@ -218,8 +218,8 @@ module.exports={
       "trackingID": "UA-189726777-1"
     },
     announcementBar: {
-      id: 'user-survey', // Identify this message.
-      content: 'Help us improve by taking <a href="https://forms.gle/vLUXn2ETDD2q457X9">our user survey.</a>',
+      id: 'star-repo', // Identify this message.
+      content: '⭐️ If you like Ent, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/ent/ent">GitHub</a>! ⭐',
       backgroundColor: '#fafbfc',
       textColor: '#091E42',
       isCloseable: true,
