@@ -474,7 +474,7 @@ func DenyMismatchedTenants() privacy.MutationRule {
 		// and it matches the tenant-id of the group above.
 		userTid, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
 		if err != nil {
-			return privacy.Denyf("querying the tenant-id %w", err)
+			return privacy.Denyf("querying the tenant-id %v", err)
 		}
 		if userTid != tid {
 			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, userTid)
