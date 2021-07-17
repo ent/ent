@@ -1330,6 +1330,15 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE INDEX IF NOT EXISTS "name_index" ON "users" USING "gin"("name")`,
 		},
 		{
+			input: Dialect(dialect.MySQL).
+				CreateIndex("name_index").
+				IfNotExists().
+				Table("users").
+				Using("HASH").
+				Column("name"),
+			wantQuery: "CREATE INDEX IF NOT EXISTS `name_index` ON `users`(`name`) USING `HASH`",
+		},
+		{
 			input:     CreateIndex("unique_name").Unique().Table("users").Columns("first", "last"),
 			wantQuery: "CREATE UNIQUE INDEX `unique_name` ON `users`(`first`, `last`)",
 		},
