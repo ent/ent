@@ -176,7 +176,19 @@ func (b *intBuilder) Default(i int) *intBuilder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *intBuilder) DefaultFunc(fn interface{}) *intBuilder {
+func (b *intBuilder) DefaultFunc(fn func() int) *intBuilder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int("int").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *intBuilder) UpdateDefault(fn func() int) *intBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -335,7 +347,19 @@ func (b *uintBuilder) Default(i uint) *uintBuilder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uintBuilder) DefaultFunc(fn interface{}) *uintBuilder {
+func (b *uintBuilder) DefaultFunc(fn func() uint) *uintBuilder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint("uint").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *uintBuilder) UpdateDefault(fn func() uint) *uintBuilder {
 	b.desc.Default = fn
 	return b
 }
@@ -504,7 +528,19 @@ func (b *int8Builder) Default(i int8) *int8Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *int8Builder) DefaultFunc(fn interface{}) *int8Builder {
+func (b *int8Builder) DefaultFunc(fn func() int8) *int8Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int8("int8").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *int8Builder) UpdateDefault(fn func() int8) *int8Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -544,18 +580,6 @@ func (b *int8Builder) StructTag(s string) *int8Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *int8Builder) Validate(fn func(int8) error) *int8Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Int8("int8").
-//		Default(0).
-//		UpdateDefault(0),
-//
-func (b *int8Builder) UpdateDefault(f func() interface{}) *int8Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -685,7 +709,19 @@ func (b *int16Builder) Default(i int16) *int16Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *int16Builder) DefaultFunc(fn interface{}) *int16Builder {
+func (b *int16Builder) DefaultFunc(fn func() int16) *int16Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int16("int16").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *int16Builder) UpdateDefault(fn func() int16) *int16Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -725,18 +761,6 @@ func (b *int16Builder) StructTag(s string) *int16Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *int16Builder) Validate(fn func(int16) error) *int16Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Int16("int16").
-//		Default(0).
-//		UpdateDefault(0),
-//
-func (b *int16Builder) UpdateDefault(f func() interface{}) *int16Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -866,7 +890,19 @@ func (b *int32Builder) Default(i int32) *int32Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *int32Builder) DefaultFunc(fn interface{}) *int32Builder {
+func (b *int32Builder) DefaultFunc(fn func() int32) *int32Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int32("int32").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *int32Builder) UpdateDefault(fn func() int32) *int32Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -906,18 +942,6 @@ func (b *int32Builder) StructTag(s string) *int32Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *int32Builder) Validate(fn func(int32) error) *int32Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Int32("int32").
-//		Default(0).
-//		UpdateDefault(0),
-//
-func (b *int32Builder) UpdateDefault(f func() interface{}) *int32Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -1047,7 +1071,19 @@ func (b *int64Builder) Default(i int64) *int64Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *int64Builder) DefaultFunc(fn interface{}) *int64Builder {
+func (b *int64Builder) DefaultFunc(fn func() int64) *int64Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int64("int64").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *int64Builder) UpdateDefault(fn func() int64) *int64Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1087,18 +1123,6 @@ func (b *int64Builder) StructTag(s string) *int64Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *int64Builder) Validate(fn func(int64) error) *int64Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Int64("int64").
-//		Default(0).
-//		UpdateDefault(0),
-//
-func (b *int64Builder) UpdateDefault(f func() interface{}) *int64Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -1218,7 +1242,19 @@ func (b *uint8Builder) Default(i uint8) *uint8Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uint8Builder) DefaultFunc(fn interface{}) *uint8Builder {
+func (b *uint8Builder) DefaultFunc(fn func() uint8) *uint8Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint8("uint8").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *uint8Builder) UpdateDefault(fn func() uint8) *uint8Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1258,18 +1294,6 @@ func (b *uint8Builder) StructTag(s string) *uint8Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uint8Builder) Validate(fn func(uint8) error) *uint8Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Uint8("uint8").
-//		Default(0).
-//		UpdateDefault(0),
-//
-func (b *uint8Builder) UpdateDefault(f func() interface{}) *uint8Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -1389,7 +1413,19 @@ func (b *uint16Builder) Default(i uint16) *uint16Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uint16Builder) DefaultFunc(fn interface{}) *uint16Builder {
+func (b *uint16Builder) DefaultFunc(fn func() uint16) *uint16Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint16("uint16").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *uint16Builder) UpdateDefault(fn func() uint16) *uint16Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1429,18 +1465,6 @@ func (b *uint16Builder) StructTag(s string) *uint16Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uint16Builder) Validate(fn func(uint16) error) *uint16Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Uint16("uint16").
-//		Default(0).
-//		UpdateDefault(0),
-//
-func (b *uint16Builder) UpdateDefault(f func() interface{}) *uint16Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -1560,7 +1584,19 @@ func (b *uint32Builder) Default(i uint32) *uint32Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uint32Builder) DefaultFunc(fn interface{}) *uint32Builder {
+func (b *uint32Builder) DefaultFunc(fn func() uint32) *uint32Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint32("uint32").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *uint32Builder) UpdateDefault(fn func() uint32) *uint32Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1600,18 +1636,6 @@ func (b *uint32Builder) StructTag(s string) *uint32Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uint32Builder) Validate(fn func(uint32) error) *uint32Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Uint32("uint32").
-//		Default(0).
-//		UpdateDefault(0),
-//
-func (b *uint32Builder) UpdateDefault(f func() interface{}) *uint32Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -1731,7 +1755,19 @@ func (b *uint64Builder) Default(i uint64) *uint64Builder {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *uint64Builder) DefaultFunc(fn interface{}) *uint64Builder {
+func (b *uint64Builder) DefaultFunc(fn func() uint64) *uint64Builder {
+	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint64("uint64").
+//		Default(0).
+//		UpdateDefault(GenNumber()),
+//
+func (b *uint64Builder) UpdateDefault(fn func() uint64) *uint64Builder {
 	b.desc.Default = fn
 	return b
 }
@@ -1771,18 +1807,6 @@ func (b *uint64Builder) StructTag(s string) *uint64Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *uint64Builder) Validate(fn func(uint64) error) *uint64Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Uint64("uint64").
-//		Default(0).
-//		UpdateDefault(0),
-//
-func (b *uint64Builder) UpdateDefault(f func() interface{}) *uint64Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
@@ -1956,18 +1980,6 @@ func (b *float64Builder) Validate(fn func(float64) error) *float64Builder {
 	return b
 }
 
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Float64("float64").
-//		Default(0.0).
-//		UpdateDefault(0.0),
-//
-func (b *float64Builder) UpdateDefault(f func() interface{}) *float64Builder {
-	b.desc.UpdateDefault = f
-	return b
-}
-
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *float64Builder) StorageKey(key string) *float64Builder {
@@ -2120,18 +2132,6 @@ func (b *float32Builder) StructTag(s string) *float32Builder {
 // Validate adds a validator for this field. Operation fails if the validation fails.
 func (b *float32Builder) Validate(fn func(float32) error) *float32Builder {
 	b.desc.Validators = append(b.desc.Validators, fn)
-	return b
-}
-
-// UpdateDefault sets the function that is applied to set default value
-// of the field on update. For example:
-//
-//	field.Float32("float32").
-//		Default(0.0).
-//		UpdateDefault(0.0),
-//
-func (b *float32Builder) UpdateDefault(f func() interface{}) *float32Builder {
-	b.desc.UpdateDefault = f
 	return b
 }
 
