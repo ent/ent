@@ -51,7 +51,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 	for {{ $idx }} := range columns {
 		switch columns[{{ $idx }}] {
 		case {{ $.Package }}.{{ $.ID.Constant }}:
-			{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+			{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes) }}
 				{{- with extend $ "Idx" $idx "Field" $.ID "Rec" $receiver }}
 					{{ template "dialect/sql/decode/field" . }}
 				{{- end }}
@@ -71,7 +71,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 		{{- range $i, $fk := $.UnexportedForeignKeys }}
 			{{- $f := $fk.Field }}
 			case {{ if $fk.UserDefined }}{{ $.Package }}.{{ $.ID.Constant }}{{ else }}{{ $.Package }}.ForeignKeys[{{ $i }}]{{ end }}:
-				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsUUID)) }}
+				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsUUID $.ID.IsBytes)) }}
 					{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}

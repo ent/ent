@@ -188,6 +188,7 @@ func (Pair) Value() (driver.Value, error) { return nil, nil }
 
 func TestBytes(t *testing.T) {
 	fd := field.Bytes("active").
+		Unique().
 		Default([]byte("{}")).
 		Comment("comment").
 		Validate(func(bytes []byte) error {
@@ -195,6 +196,7 @@ func TestBytes(t *testing.T) {
 		}).
 		Descriptor()
 	assert.Equal(t, "active", fd.Name)
+	assert.True(t, fd.Unique)
 	assert.Equal(t, field.TypeBytes, fd.Info.Type)
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, []byte("{}"), fd.Default)

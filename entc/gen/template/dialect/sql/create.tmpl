@@ -19,8 +19,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		}
 		return nil, err
 	}
-	{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
-		{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
+	{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes) }}
+		{{- /* Do nothing, because these 3 types must be supplied by the user. */ -}}
 	{{- else }}
 		{{- if $.ID.UserDefined }}
 			if _node.ID == 0 {
@@ -125,7 +125,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 				}
 				mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
 				mutation.done = true
-				{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+				{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes) }}
 					{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
 				{{- else }}
 					{{- if $.ID.UserDefined }}
