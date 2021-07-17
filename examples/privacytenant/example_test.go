@@ -87,12 +87,10 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Expect operation to fail, because the DenyMismatchedTenants rule makes sure
 	// the group and the users are connected to the same tenant.
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab).Save(adminCtx)
-	if !errors.Is(err, privacy.Deny) {
+	if _, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab).Save(adminCtx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since user (natiLab) is not connected to the same tenant")
 	}
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab, a8mHub).Save(adminCtx)
-	if !errors.Is(err, privacy.Deny) {
+	if _, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab, a8mHub).Save(adminCtx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since some users (natiLab) are not connected to the same tenant")
 	}
 	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(a8mHub).Save(adminCtx)
@@ -103,8 +101,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Expect operation to fail, because the FilterTenantRule rule makes sure
 	// that tenants can update and delete only their groups.
-	err = entgo.Update().SetName("fail.go").Exec(labView)
-	if !ent.IsNotFound(err) {
+	if err = entgo.Update().SetName("fail.go").Exec(labView); !ent.IsNotFound(err) {
 		return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub), but got %w", err)
 	}
 	entgo, err = entgo.Update().SetName("entgo").Save(hubView)

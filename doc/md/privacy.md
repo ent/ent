@@ -377,9 +377,9 @@ func (TenantMixin) Edges() []ent.Edge {
 
 Now, we want to enforce that viewers can see only groups and users that are connected to the tenant they belong to.
 In this case, we create another type of privacy rule named `FilterTenantRule`.  
-This rule can help us to filters out entities that are not connected to the same tenant.
+This rule can help us filter out entities that are not connected to the same tenant.
 
-> Note, the filtering option for privacy needs to be enabled using the [`entql`](https://entgo.io/docs/feature-flags/#entql-filtering) feature-flag (see instructions [above](#configuration)).
+> Note, the privacy filtering option needs to be enabled using the [`entql`](https://entgo.io/docs/feature-flags/#entql-filtering) feature-flag (see instructions [above](#configuration)).
 
 ```go title="examples/privacytenant/rule/rule.go"
 // FilterTenantRule is a query/mutation rule that filters out entities that are not in the tenant.
@@ -458,7 +458,7 @@ the same tenant as the group.
 
 ```go title="examples/privacytenant/rule/rule.go"
 // DenyMismatchedTenants is a rule that returns a deny decision if the operation
-// involves users that don't belong to the same tenant as the group or users are from more than one tenant.
+// involves users that don't belong to the same tenant as the group or users from more than one tenant.
 func DenyMismatchedTenants() privacy.MutationRule {
 	return privacy.GroupMutationRuleFunc(func(ctx context.Context, m *ent.GroupMutation) error {
 		tid, exists := m.TenantID()
@@ -474,7 +474,7 @@ func DenyMismatchedTenants() privacy.MutationRule {
 		// and it matches the tenant-id of the group above.
 		userTid, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
 		if err != nil {
-			return privacy.Denyf("querying the tenant-id %v", err)
+			return privacy.Denyf("querying the tenant-id %w", err)
 		}
 		if userTid != tid {
 			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, userTid)
@@ -508,12 +508,10 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Expect operation to fail, because the DenyMismatchedTenants rule makes sure
 	// the group and the users are connected to the same tenant.
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab).Save(adminCtx)
-	if !errors.Is(err, privacy.Deny) {
+	if _, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab).Save(adminCtx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since user (natiLab) is not connected to the same tenant")
 	}
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab, a8mHub).Save(adminCtx)
-	if !errors.Is(err, privacy.Deny) {
+	if _, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab, a8mHub).Save(adminCtx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since some users (natiLab) are not connected to the same tenant")
 	}
 	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(a8mHub).Save(adminCtx)
@@ -556,8 +554,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Expect operation to fail, because the FilterTenantRule rule makes sure
 	// that tenants can update and delete only their groups.
-	err = entgo.Update().SetName("fail.go").Exec(labView)
-	if !ent.IsNotFound(err) {
+	if err = entgo.Update().SetName("fail.go").Exec(labView); !ent.IsNotFound(err) {
 		return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub), but got %w", err)
 	}
 	entgo, err = entgo.Update().SetName("entgo").Save(hubView)
