@@ -1909,3 +1909,219 @@ func (c *UserClient) QueryParent(u *User) *UserQuery {
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
 }
+
+// ReadonlyClient is the client that holds all readonly ent builders.
+type ReadonlyClient struct {
+	client *Client
+	config
+	// Card is the client for interacting with the Card builders.
+	Card ReadonlyCardClient
+	// Comment is the client for interacting with the Comment builders.
+	Comment ReadonlyCommentClient
+	// FieldType is the client for interacting with the FieldType builders.
+	FieldType ReadonlyFieldTypeClient
+	// File is the client for interacting with the File builders.
+	File ReadonlyFileClient
+	// FileType is the client for interacting with the FileType builders.
+	FileType ReadonlyFileTypeClient
+	// Goods is the client for interacting with the Goods builders.
+	Goods ReadonlyGoodsClient
+	// Group is the client for interacting with the Group builders.
+	Group ReadonlyGroupClient
+	// GroupInfo is the client for interacting with the GroupInfo builders.
+	GroupInfo ReadonlyGroupInfoClient
+	// Item is the client for interacting with the Item builders.
+	Item ReadonlyItemClient
+	// Node is the client for interacting with the Node builders.
+	Node ReadonlyNodeClient
+	// Pet is the client for interacting with the Pet builders.
+	Pet ReadonlyPetClient
+	// Spec is the client for interacting with the Spec builders.
+	Spec ReadonlySpecClient
+	// Task is the client for interacting with the Task builders.
+	Task ReadonlyTaskClient
+	// User is the client for interacting with the User builders.
+	User ReadonlyUserClient
+}
+
+// NewReadonlyClient returns a read only client
+func NewReadonlyClient(opts ...Option) *ReadonlyClient {
+	client := NewClient(opts...)
+	return &ReadonlyClient{
+		client:    client,
+		config:    client.config,
+		Card:      client.Card,
+		Comment:   client.Comment,
+		FieldType: client.FieldType,
+		File:      client.File,
+		FileType:  client.FileType,
+		Goods:     client.Goods,
+		Group:     client.Group,
+		GroupInfo: client.GroupInfo,
+		Item:      client.Item,
+		Node:      client.Node,
+		Pet:       client.Pet,
+		Spec:      client.Spec,
+		Task:      client.Task,
+		User:      client.User,
+	}
+}
+
+func (c *ReadonlyClient) Use(hooks ...Hook) {
+	c.client.Use(hooks...)
+}
+
+// CardClient is a client for the Card schema.
+type ReadonlyCardClient interface {
+	Query() *CardQuery
+	Get(ctx context.Context, id int) (*Card, error)
+	GetX(ctx context.Context, id int) *Card
+	QueryOwner(ca *Card) *UserQuery
+	QuerySpec(ca *Card) *SpecQuery
+}
+
+// CommentClient is a client for the Comment schema.
+type ReadonlyCommentClient interface {
+	Query() *CommentQuery
+	Get(ctx context.Context, id int) (*Comment, error)
+	GetX(ctx context.Context, id int) *Comment
+}
+
+// FieldTypeClient is a client for the FieldType schema.
+type ReadonlyFieldTypeClient interface {
+	Query() *FieldTypeQuery
+	Get(ctx context.Context, id int) (*FieldType, error)
+	GetX(ctx context.Context, id int) *FieldType
+}
+
+// FileClient is a client for the File schema.
+type ReadonlyFileClient interface {
+	Query() *FileQuery
+	Get(ctx context.Context, id int) (*File, error)
+	GetX(ctx context.Context, id int) *File
+	QueryOwner(f *File) *UserQuery
+	QueryType(f *File) *FileTypeQuery
+	QueryField(f *File) *FieldTypeQuery
+}
+
+// FileTypeClient is a client for the FileType schema.
+type ReadonlyFileTypeClient interface {
+	Query() *FileTypeQuery
+	Get(ctx context.Context, id int) (*FileType, error)
+	GetX(ctx context.Context, id int) *FileType
+	QueryFiles(ft *FileType) *FileQuery
+}
+
+// GoodsClient is a client for the Goods schema.
+type ReadonlyGoodsClient interface {
+	Query() *GoodsQuery
+	Get(ctx context.Context, id int) (*Goods, error)
+	GetX(ctx context.Context, id int) *Goods
+}
+
+// GroupClient is a client for the Group schema.
+type ReadonlyGroupClient interface {
+	Query() *GroupQuery
+	Get(ctx context.Context, id int) (*Group, error)
+	GetX(ctx context.Context, id int) *Group
+	QueryFiles(gr *Group) *FileQuery
+	QueryBlocked(gr *Group) *UserQuery
+	QueryUsers(gr *Group) *UserQuery
+	QueryInfo(gr *Group) *GroupInfoQuery
+}
+
+// GroupInfoClient is a client for the GroupInfo schema.
+type ReadonlyGroupInfoClient interface {
+	Query() *GroupInfoQuery
+	Get(ctx context.Context, id int) (*GroupInfo, error)
+	GetX(ctx context.Context, id int) *GroupInfo
+	QueryGroups(gi *GroupInfo) *GroupQuery
+}
+
+// ItemClient is a client for the Item schema.
+type ReadonlyItemClient interface {
+	Query() *ItemQuery
+	Get(ctx context.Context, id string) (*Item, error)
+	GetX(ctx context.Context, id string) *Item
+}
+
+// NodeClient is a client for the Node schema.
+type ReadonlyNodeClient interface {
+	Query() *NodeQuery
+	Get(ctx context.Context, id int) (*Node, error)
+	GetX(ctx context.Context, id int) *Node
+	QueryPrev(n *Node) *NodeQuery
+	QueryNext(n *Node) *NodeQuery
+}
+
+// PetClient is a client for the Pet schema.
+type ReadonlyPetClient interface {
+	Query() *PetQuery
+	Get(ctx context.Context, id int) (*Pet, error)
+	GetX(ctx context.Context, id int) *Pet
+	QueryTeam(pe *Pet) *UserQuery
+	QueryOwner(pe *Pet) *UserQuery
+}
+
+// SpecClient is a client for the Spec schema.
+type ReadonlySpecClient interface {
+	Query() *SpecQuery
+	Get(ctx context.Context, id int) (*Spec, error)
+	GetX(ctx context.Context, id int) *Spec
+	QueryCard(s *Spec) *CardQuery
+}
+
+// TaskClient is a client for the Task schema.
+type ReadonlyTaskClient interface {
+	Query() *TaskQuery
+	Get(ctx context.Context, id int) (*Task, error)
+	GetX(ctx context.Context, id int) *Task
+}
+
+// UserClient is a client for the User schema.
+type ReadonlyUserClient interface {
+	Query() *UserQuery
+	Get(ctx context.Context, id int) (*User, error)
+	GetX(ctx context.Context, id int) *User
+	QueryCard(u *User) *CardQuery
+	QueryPets(u *User) *PetQuery
+	QueryFiles(u *User) *FileQuery
+	QueryGroups(u *User) *GroupQuery
+	QueryFriends(u *User) *UserQuery
+	QueryFollowers(u *User) *UserQuery
+	QueryFollowing(u *User) *UserQuery
+	QueryTeam(u *User) *PetQuery
+	QuerySpouse(u *User) *UserQuery
+	QueryChildren(u *User) *UserQuery
+	QueryParent(u *User) *UserQuery
+}
+
+func (c *ReadonlyClient) BeginTx(ctx context.Context, opts *sql.TxOptions) (*ReadonlyTx, error) {
+	if opts == nil {
+		opts = &sql.TxOptions{}
+	}
+	tx, err := c.client.BeginTx(ctx, &sql.TxOptions{
+		Isolation: opts.Isolation,
+		ReadOnly:  true,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ReadonlyTx{
+		tx:        tx,
+		Card:      tx.Card,
+		Comment:   tx.Comment,
+		FieldType: tx.FieldType,
+		File:      tx.File,
+		FileType:  tx.FileType,
+		Goods:     tx.Goods,
+		Group:     tx.Group,
+		GroupInfo: tx.GroupInfo,
+		Item:      tx.Item,
+		Node:      tx.Node,
+		Pet:       tx.Pet,
+		Spec:      tx.Spec,
+		Task:      tx.Task,
+		User:      tx.User,
+	}, nil
+}

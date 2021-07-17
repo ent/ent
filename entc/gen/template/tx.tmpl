@@ -15,6 +15,9 @@ import (
 	"sync"
 
 	"entgo.io/ent/dialect"
+	{{- if $.FeatureEnabled "readonly/client" }}
+	"entgo.io/ent/dialect/sql"
+	{{- end }}
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -174,4 +177,24 @@ func (tx *txDriver) Query(ctx context.Context, query string, args, v interface{}
 
 var _ dialect.Driver = (*txDriver)(nil)
 
+{{- if $.FeatureEnabled "readonly/client" }}
+// TODO: only  for sql
+type ReadonlyTx struct {
+    tx *Tx
+    {{- range $n := $.Nodes }}
+        // {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
+        {{ $n.Name }} Readonly{{ $n.Name }}Client
+    {{- end }}
+}
+
+// Commit commits the transaction.
+func (tx *ReadonlyTx) Commit() error {
+	return tx.tx.Commit()
+}
+
+// OnCommit adds a hook to call on commit.
+func (tx *ReadonlyTx) OnCommit(f CommitHook) {
+	tx.tx.OnCommit(f)
+}
+{{- end }}
 {{ end }}

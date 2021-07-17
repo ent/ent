@@ -251,3 +251,46 @@ func (tx *txDriver) Query(ctx context.Context, query string, args, v interface{}
 }
 
 var _ dialect.Driver = (*txDriver)(nil)
+
+// TODO: only  for sql
+type ReadonlyTx struct {
+	tx *Tx
+	// Card is the client for interacting with the Card builders.
+	Card ReadonlyCardClient
+	// Comment is the client for interacting with the Comment builders.
+	Comment ReadonlyCommentClient
+	// FieldType is the client for interacting with the FieldType builders.
+	FieldType ReadonlyFieldTypeClient
+	// File is the client for interacting with the File builders.
+	File ReadonlyFileClient
+	// FileType is the client for interacting with the FileType builders.
+	FileType ReadonlyFileTypeClient
+	// Goods is the client for interacting with the Goods builders.
+	Goods ReadonlyGoodsClient
+	// Group is the client for interacting with the Group builders.
+	Group ReadonlyGroupClient
+	// GroupInfo is the client for interacting with the GroupInfo builders.
+	GroupInfo ReadonlyGroupInfoClient
+	// Item is the client for interacting with the Item builders.
+	Item ReadonlyItemClient
+	// Node is the client for interacting with the Node builders.
+	Node ReadonlyNodeClient
+	// Pet is the client for interacting with the Pet builders.
+	Pet ReadonlyPetClient
+	// Spec is the client for interacting with the Spec builders.
+	Spec ReadonlySpecClient
+	// Task is the client for interacting with the Task builders.
+	Task ReadonlyTaskClient
+	// User is the client for interacting with the User builders.
+	User ReadonlyUserClient
+}
+
+// Commit commits the transaction.
+func (tx *ReadonlyTx) Commit() error {
+	return tx.tx.Commit()
+}
+
+// OnCommit adds a hook to call on commit.
+func (tx *ReadonlyTx) OnCommit(f CommitHook) {
+	tx.tx.OnCommit(f)
+}

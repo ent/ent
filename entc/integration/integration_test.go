@@ -142,6 +142,7 @@ var (
 		Mutation,
 		CreateBulk,
 		ConstraintChecks,
+		Readonly,
 	}
 )
 
@@ -1479,6 +1480,34 @@ func ConstraintChecks(t *testing.T, client *ent.Client) {
 	require.True(t, errors.As(err, &cerr))
 	require.False(t, sqlgraph.IsForeignKeyConstraintError(err))
 	require.True(t, sqlgraph.IsUniqueConstraintError(err))
+}
+
+var ErrReadOnly = errors.New("readonly only driver")
+
+type readonlyDriver struct{ dialect.Driver }
+
+func (r *readonlyDriver) Exec(context.Context, string, interface{}, interface{}) error {
+	return ErrReadOnly
+}
+
+func ReadOnly(drv dialect.Driver) dialect.Driver {
+	return &readonlyDriver{drv}
+}
+
+// Circular import
+// client.Use(hook.Reject(ent.OpCreate | ent.OpUpdate | ent.OpUpdateOne | ent.OpDelete | ent.OpDeleteOne))
+
+func Readonly(t *testing.T, c *ent.Client) {
+	client := ent.NewReadonlyClient(ent.Driver(ReadOnly(nil)))
+	client.Use(hook.Reject(ent.OpCreate | ent.OpUpdate | ent.OpUpdateOne | ent.OpDelete | ent.OpDeleteOne))
+
+	//var client = c.Readonly()
+	//client.User.Query().AllX(context.Background())
+	//tx, err := client.BeginTx(context.Background(), nil)
+	//require.NoError(t, err)
+	//tx.User.Query().AllX(context.Background())
+	//err = tx.Commit()
+	//require.NoError(t, err)
 }
 
 func drop(t *testing.T, client *ent.Client) {

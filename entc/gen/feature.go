@@ -17,9 +17,6 @@ var (
 		Stage:       Alpha,
 		Default:     false,
 		Description: "Privacy provides a privacy layer for ent through the schema configuration",
-		cleanup: func(c *Config) error {
-			return os.RemoveAll(filepath.Join(c.Target, "privacy"))
-		},
 	}
 
 	// FeatureEntQL provides a feature-flag for the entql extension for ent.
@@ -69,12 +66,24 @@ var (
 		},
 	}
 
+	// FeatureReadonlyClient provides a feature-flag for the readonly client extension for ent.
+	FeatureReadonlyClient = Feature{
+		Name:        "readonly/client",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allow creating Readonly ent clients",
+		cleanup: func(c *Config) error {
+			return os.RemoveAll(filepath.Join(c.Target, "client_readonly.go"))
+		},
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
 		FeatureEntQL,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
+		FeatureReadonlyClient,
 	}
 )
 
