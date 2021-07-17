@@ -12,6 +12,8 @@ in the LICENSE file in the root directory of this source tree.
 {{ template "header" $ }}
 
 import (
+    "context"
+    "fmt"
 	"log"
 
 	"{{ $.Config.Package }}/migrate"
@@ -255,6 +257,43 @@ func (c *{{ $client }}) Hooks() []Hook {
 	{{- end }}
 }
 
+{{ end }}
+{{- if $.FeatureEnabled "readonly/client" }}
+// ReadonlyClient is the client that holds all readonly ent builders.
+type ReadonlyClient struct {
+	config
+	{{- range $n := $.Nodes }}
+		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
+		{{ $n.Name }} Readonly{{ $n.Name }}Client
+	{{- end }}
+}
+
+// Readonly returns a read only client
+func (c *Client) Readonly() *ReadonlyClient {
+	client := &ReadonlyClient{
+	    config: c.config,
+        {{- range $n := $.Nodes }}
+            {{ $n.Name }}: c.{{ $n.Name }},
+        {{- end }}
+	}
+	return client
+}
+
+{{ range $n := $.Nodes }}
+{{ $client := print $n.Name "Client" }}
+// {{ $client }} is a client for the {{ $n.Name }} schema.
+type Readonly{{ $client }} interface {
+    Query() *{{ $n.Name }}Query
+    Get(ctx context.Context, id {{ $n.ID.Type }}) (*{{ $n.Name }}, error)
+    GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Name }}
+    {{- $rec := $n.Receiver }}{{ if eq $rec "c" }}{{ $rec = printf "%.2s" $n.Name | lower }}{{ end -}}
+    {{- range $e := $n.Edges }}
+    {{- $builder := $e.Type.QueryName -}}
+    {{- $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
+    Query{{ pascal $e.Name }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }}
+    {{- end -}}
+}
+{{- end }}
 {{ end }}
 {{ end }}
 

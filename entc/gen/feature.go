@@ -69,12 +69,24 @@ var (
 		},
 	}
 
+	// FeatureReadonlyClient provides a feature-flag for the readonly client extension for ent.
+	FeatureReadonlyClient = Feature{
+		Name:        "readonly/client",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allow creating Readonly ent clients",
+		cleanup: func(c *Config) error {
+			return os.RemoveAll(filepath.Join(c.Target, "client_readonly.go"))
+		},
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
 		FeatureEntQL,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
+		FeatureReadonlyClient,
 	}
 )
 

@@ -142,6 +142,7 @@ var (
 		Mutation,
 		CreateBulk,
 		ConstraintChecks,
+		Readonly,
 	}
 )
 
@@ -1479,6 +1480,11 @@ func ConstraintChecks(t *testing.T, client *ent.Client) {
 	require.True(t, errors.As(err, &cerr))
 	require.False(t, sqlgraph.IsForeignKeyConstraintError(err))
 	require.True(t, sqlgraph.IsUniqueConstraintError(err))
+}
+
+func Readonly(t *testing.T, c *ent.Client) {
+	var client = c.Readonly()
+	client.User.Query().AllX(context.Background())
 }
 
 func drop(t *testing.T, client *ent.Client) {
