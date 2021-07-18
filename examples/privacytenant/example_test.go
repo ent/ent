@@ -18,7 +18,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func Example_privacyTenant() {
+//goland:noinspection GoTestName
+func Example_PrivacyTenant() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
@@ -35,8 +36,8 @@ func Example_privacyTenant() {
 	// Output:
 	// Tenant(id=1, name=GitHub)
 	// Tenant(id=2, name=GitLab)
-	// User(id=1, name=a8mHub, foods=[])
-	// User(id=2, name=natiLab, foods=[Sushi Burritos])
+	// User(id=1, name=a8m, foods=[])
+	// User(id=2, name=nati, foods=[])
 	// Group(id=1, name=entgo.io)
 	// Group(id=1, name=entgo)
 }
@@ -48,8 +49,8 @@ func Do(ctx context.Context, client *ent.Client) error {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Deny tenant creation if the viewer is not admin.
-	viewOnly := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
-	if _, err := client.Tenant.Create().Save(viewOnly); !errors.Is(err, privacy.Deny) {
+	viewCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
+	if _, err := client.Tenant.Create().Save(viewCtx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Apply the same operation with "Admin" role, expect it to pass.
@@ -66,34 +67,36 @@ func Do(ctx context.Context, client *ent.Client) error {
 	fmt.Println(lab)
 
 	// Create 2 users connected to the 2 tenants we created above
-	a8mHub := client.User.Create().SetName("a8mHub").SetTenant(hub).SaveX(adminCtx)
-	natiLab := client.User.Create().SetName("natiLab").SetTenant(lab).SetFoods([]string{"Sushi", "Burritos"}).SaveX(adminCtx)
+	hubUser := client.User.Create().SetName("a8m").SetTenant(hub).SaveX(adminCtx)
+	labUser := client.User.Create().SetName("nati").SetTenant(lab).SaveX(adminCtx)
 
 	hubView := viewer.NewContext(ctx, viewer.UserViewer{T: hub})
 	out := client.User.Query().OnlyX(hubView)
-	// Expect that "GitHub" tenant to read only its users (i.e. a8mHub).
-	if out.ID != a8mHub.ID {
+	// Expect that "GitHub" tenant to read only its users (i.e. a8m).
+	if out.ID != hubUser.ID {
 		return fmt.Errorf("expect result for user query, got %v", out)
 	}
 	fmt.Println(out)
 
 	labView := viewer.NewContext(ctx, viewer.UserViewer{T: lab})
 	out = client.User.Query().OnlyX(labView)
-	// Expect that "GitLab" tenant to read only its users (i.e. natiLab).
-	if out.ID != natiLab.ID {
+	// Expect that "GitLab" tenant to read only its users (i.e. nati).
+	if out.ID != labUser.ID {
 		return fmt.Errorf("expect result for user query, got %v", out)
 	}
 	fmt.Println(out)
 
 	// Expect operation to fail, because the DenyMismatchedTenants rule makes sure
 	// the group and the users are connected to the same tenant.
-	if _, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab).Save(adminCtx); !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operation to fail, since user (natiLab) is not connected to the same tenant")
+	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser).Save(adminCtx)
+	if !errors.Is(err, privacy.Deny) {
+		return fmt.Errorf("expect operation to fail, since user (nati) is not connected to the same tenant")
 	}
-	if _, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(natiLab, a8mHub).Save(adminCtx); !errors.Is(err, privacy.Deny) {
-		return fmt.Errorf("expect operation to fail, since some users (natiLab) are not connected to the same tenant")
+	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser, hubUser).Save(adminCtx)
+	if !errors.Is(err, privacy.Deny) {
+		return fmt.Errorf("expect operation to fail, since some users (nati) are not connected to the same tenant")
 	}
-	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(a8mHub).Save(adminCtx)
+	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(hubUser).Save(adminCtx)
 	if err != nil {
 		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
@@ -101,7 +104,8 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Expect operation to fail, because the FilterTenantRule rule makes sure
 	// that tenants can update and delete only their groups.
-	if err = entgo.Update().SetName("fail.go").Exec(labView); !ent.IsNotFound(err) {
+	err = entgo.Update().SetName("fail.go").Exec(labView)
+	if !ent.IsNotFound(err) {
 		return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub), but got %w", err)
 	}
 	entgo, err = entgo.Update().SetName("entgo").Save(hubView)

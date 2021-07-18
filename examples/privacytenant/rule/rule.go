@@ -41,8 +41,8 @@ func AllowIfAdmin() privacy.QueryMutationRule {
 
 // FilterTenantRule is a query/mutation rule that filters out entities that are not in the tenant.
 func FilterTenantRule() privacy.QueryMutationRule {
-	// TenantsFilter is an interface to wrap WhereHasTenantWith() predicate that's
-	// used by both `Group` and `User` schemas.
+	// TenantsFilter is an interface to wrap WhereHasTenantWith()
+	// predicate that is used by both `Group` and `User` schemas.
 	type TenantsFilter interface {
 		WhereHasTenantWith(...predicate.Tenant)
 	}
@@ -63,7 +63,7 @@ func FilterTenantRule() privacy.QueryMutationRule {
 }
 
 // DenyMismatchedTenants is a rule that returns a deny decision if the operation
-// involves users that don't belong to the same tenant as the group or users from more than one tenant.
+// involves users that don't belong to the same tenant as the group or users that are from more than one tenant.
 func DenyMismatchedTenants() privacy.MutationRule {
 	return privacy.GroupMutationRuleFunc(func(ctx context.Context, m *ent.GroupMutation) error {
 		tid, exists := m.TenantID()
@@ -77,12 +77,12 @@ func DenyMismatchedTenants() privacy.MutationRule {
 		}
 		// Query the tenant-id of all users. Expect to have exact 1 result,
 		// and it matches the tenant-id of the group above.
-		userTid, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
+		id, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
 		if err != nil {
 			return privacy.Denyf("querying the tenant-id %v", err)
 		}
-		if userTid != tid {
-			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, userTid)
+		if id != tid {
+			return privacy.Denyf("mismatch tenant-ids for group/users %d != %d", tid, id)
 		}
 		// Skip to the next privacy rule (equivalent to return nil).
 		return privacy.Skip
