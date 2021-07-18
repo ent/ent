@@ -379,13 +379,13 @@ Now, we want to enforce that viewers can see only groups and users that are conn
 In this case, we create another type of privacy rule named `FilterTenantRule`.  
 This rule can help us filter out entities that are not connected to the same tenant.
 
-> Note, the privacy filtering option needs to be enabled using the [`entql`](https://entgo.io/docs/feature-flags/#entql-filtering) feature-flag (see instructions [above](#configuration)).
+> Note, the privacy filtering option needs to be enabled using the [`entql`](features.md#entql-filtering) feature-flag (see instructions [above](#configuration)).
 
 ```go title="examples/privacytenant/rule/rule.go"
 // FilterTenantRule is a query/mutation rule that filters out entities that are not in the tenant.
 func FilterTenantRule() privacy.QueryMutationRule {
-	// TenantsFilter is an interface to wrap WhereHasTenantWith() predicate that's
-	// used by both `Group` and `User` schemas.
+	// TenantsFilter is an interface to wrap WhereHasTenantWith()
+	// predicate that's used by both `Group` and `User` schemas.
 	type TenantsFilter interface {
 		WhereHasTenantWith(...predicate.Tenant)
 	}
@@ -472,7 +472,7 @@ func DenyMismatchedTenants() privacy.MutationRule {
 		}
 		// Query the tenant-id of all users. Expect to have exact 1 result,
 		// and it matches the tenant-id of the group above.
-		userTid, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
+		id, err := m.Client().User.Query().Where(user.IDIn(users...)).QueryTenant().OnlyID(ctx)
 		if err != nil {
 			return privacy.Denyf("querying the tenant-id %v", err)
 		}
@@ -524,7 +524,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 ```
 
 In some cases, we want to reject user operations on entities that don't belong to their tenant **without loading
-these entities from the database** (unlike the `DenyMismatchedTenants` example above).  
+these entities from the database** (unlike the `DenyMismatchedTenants` example above). 
 To achieve this, we can use the `FilterTenantRule` rule for mutations as well, but limit it to specific operations as follows:
 
 ```go title="examples/privacytenant/ent/schema/group.go"
