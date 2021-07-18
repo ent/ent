@@ -28,7 +28,7 @@ func Example_RecursiveTraversal() {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
-	// Add multiple files in the following ree structure:
+	// Add multiple files in the following tree structure:
 	//
 	//	a/
 	//	├─ b/
@@ -62,6 +62,8 @@ func Example_RecursiveTraversal() {
 			t1, t2 := sql.Table(file.Table), sql.Table(file.Table)
 			with := sql.WithRecursive("undeleted", file.FieldID, file.FieldParentID)
 			with.As(
+				// The initial `SELECT` statement executed once at the start,
+				// and produces the initial row or rows for the recursion.
 				sql.Select(t1.Columns(file.FieldID, file.FieldParentID)...).
 					From(t1).
 					Where(
@@ -70,7 +72,10 @@ func Example_RecursiveTraversal() {
 							sql.EQ(t1.C(file.FieldDeleted), false),
 						),
 					).
+					// Merge the `SELECT` statement above with the following:
 					UnionAll(
+						// A `SELECT` statement that produces additional rows and recurses by referring
+						// to the CTE name (e.g. "undeleted"), and ends when there are no more new rows.
 						sql.Select(t2.Columns(file.FieldID, file.FieldParentID)...).
 							From(t2).
 							Join(with).
@@ -80,6 +85,7 @@ func Example_RecursiveTraversal() {
 							),
 					),
 			)
+			// Join the root `SELECT` query with the CTE result (`WITH` clause).
 			s.Prefix(with).Join(with).On(s.C(file.FieldID), with.C(file.FieldID))
 		}).
 		Select(file.FieldName).
