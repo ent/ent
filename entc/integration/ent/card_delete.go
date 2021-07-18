@@ -24,9 +24,9 @@ type CardDelete struct {
 	mutation *CardMutation
 }
 
-// Where adds a new predicate to the CardDelete builder.
+// Where appends a list predicates to the CardDelete builder.
 func (cd *CardDelete) Where(ps ...predicate.Card) *CardDelete {
-	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
+	cd.mutation.Where(ps...)
 	return cd
 }
 

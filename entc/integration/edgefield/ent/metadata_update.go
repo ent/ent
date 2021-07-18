@@ -25,9 +25,9 @@ type MetadataUpdate struct {
 	mutation *MetadataMutation
 }
 
-// Where adds a new predicate for the MetadataUpdate builder.
+// Where appends a list predicates to the MetadataUpdate builder.
 func (mu *MetadataUpdate) Where(ps ...predicate.Metadata) *MetadataUpdate {
-	mu.mutation.predicates = append(mu.mutation.predicates, ps...)
+	mu.mutation.Where(ps...)
 	return mu
 }
 

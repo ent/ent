@@ -24,9 +24,9 @@ type ConversionDelete struct {
 	mutation *ConversionMutation
 }
 
-// Where adds a new predicate to the ConversionDelete builder.
+// Where appends a list predicates to the ConversionDelete builder.
 func (cd *ConversionDelete) Where(ps ...predicate.Conversion) *ConversionDelete {
-	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
+	cd.mutation.Where(ps...)
 	return cd
 }
 

@@ -24,9 +24,9 @@ type PostDelete struct {
 	mutation *PostMutation
 }
 
-// Where adds a new predicate to the PostDelete builder.
+// Where appends a list predicates to the PostDelete builder.
 func (pd *PostDelete) Where(ps ...predicate.Post) *PostDelete {
-	pd.mutation.predicates = append(pd.mutation.predicates, ps...)
+	pd.mutation.Where(ps...)
 	return pd
 }
 

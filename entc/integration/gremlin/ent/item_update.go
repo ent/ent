@@ -24,9 +24,9 @@ type ItemUpdate struct {
 	mutation *ItemMutation
 }
 
-// Where adds a new predicate for the ItemUpdate builder.
+// Where appends a list predicates to the ItemUpdate builder.
 func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	iu.mutation.predicates = append(iu.mutation.predicates, ps...)
+	iu.mutation.Where(ps...)
 	return iu
 }
 

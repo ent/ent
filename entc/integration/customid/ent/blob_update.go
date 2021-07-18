@@ -25,9 +25,9 @@ type BlobUpdate struct {
 	mutation *BlobMutation
 }
 
-// Where adds a new predicate for the BlobUpdate builder.
+// Where appends a list predicates to the BlobUpdate builder.
 func (bu *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
-	bu.mutation.predicates = append(bu.mutation.predicates, ps...)
+	bu.mutation.Where(ps...)
 	return bu
 }
 

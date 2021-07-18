@@ -24,9 +24,9 @@ type NoteDelete struct {
 	mutation *NoteMutation
 }
 
-// Where adds a new predicate to the NoteDelete builder.
+// Where appends a list predicates to the NoteDelete builder.
 func (nd *NoteDelete) Where(ps ...predicate.Note) *NoteDelete {
-	nd.mutation.predicates = append(nd.mutation.predicates, ps...)
+	nd.mutation.Where(ps...)
 	return nd
 }
 

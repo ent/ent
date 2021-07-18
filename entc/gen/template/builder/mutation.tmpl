@@ -346,6 +346,11 @@ func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
 {{ end }}
 
 
+// Where appends a list predicates to the {{ $mutation }} builder.
+func (m *{{ $mutation }}) Where(ps ...predicate.{{ $n.Name }}) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *{{ $mutation }}) Op() Op {
 	return m.op

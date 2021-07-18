@@ -27,9 +27,9 @@ type TaskUpdate struct {
 	mutation *TaskMutation
 }
 
-// Where adds a new predicate for the TaskUpdate builder.
+// Where appends a list predicates to the TaskUpdate builder.
 func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	tu.mutation.predicates = append(tu.mutation.predicates, ps...)
+	tu.mutation.Where(ps...)
 	return tu
 }
 

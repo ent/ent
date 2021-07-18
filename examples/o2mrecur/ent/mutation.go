@@ -276,6 +276,11 @@ func (m *NodeMutation) ResetChildren() {
 	m.removedchildren = nil
 }
 
+// Where appends a list predicates to the NodeMutation builder.
+func (m *NodeMutation) Where(ps ...predicate.Node) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *NodeMutation) Op() Op {
 	return m.op

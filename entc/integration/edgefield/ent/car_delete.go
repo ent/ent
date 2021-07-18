@@ -24,9 +24,9 @@ type CarDelete struct {
 	mutation *CarMutation
 }
 
-// Where adds a new predicate to the CarDelete builder.
+// Where appends a list predicates to the CarDelete builder.
 func (cd *CarDelete) Where(ps ...predicate.Car) *CarDelete {
-	cd.mutation.predicates = append(cd.mutation.predicates, ps...)
+	cd.mutation.Where(ps...)
 	return cd
 }
 

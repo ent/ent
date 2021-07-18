@@ -216,6 +216,11 @@ func (m *CityMutation) ResetStreets() {
 	m.removedstreets = nil
 }
 
+// Where appends a list predicates to the CityMutation builder.
+func (m *CityMutation) Where(ps ...predicate.City) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CityMutation) Op() Op {
 	return m.op
@@ -578,6 +583,11 @@ func (m *StreetMutation) CityIDs() (ids []int) {
 func (m *StreetMutation) ResetCity() {
 	m.city = nil
 	m.clearedcity = false
+}
+
+// Where appends a list predicates to the StreetMutation builder.
+func (m *StreetMutation) Where(ps ...predicate.Street) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

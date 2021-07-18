@@ -25,9 +25,9 @@ type PostUpdate struct {
 	mutation *PostMutation
 }
 
-// Where adds a new predicate for the PostUpdate builder.
+// Where appends a list predicates to the PostUpdate builder.
 func (pu *PostUpdate) Where(ps ...predicate.Post) *PostUpdate {
-	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
+	pu.mutation.Where(ps...)
 	return pu
 }
 

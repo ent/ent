@@ -25,9 +25,9 @@ type StreetUpdate struct {
 	mutation *StreetMutation
 }
 
-// Where adds a new predicate for the StreetUpdate builder.
+// Where appends a list predicates to the StreetUpdate builder.
 func (su *StreetUpdate) Where(ps ...predicate.Street) *StreetUpdate {
-	su.mutation.predicates = append(su.mutation.predicates, ps...)
+	su.mutation.Where(ps...)
 	return su
 }
 

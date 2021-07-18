@@ -24,9 +24,9 @@ type MediaDelete struct {
 	mutation *MediaMutation
 }
 
-// Where adds a new predicate to the MediaDelete builder.
+// Where appends a list predicates to the MediaDelete builder.
 func (md *MediaDelete) Where(ps ...predicate.Media) *MediaDelete {
-	md.mutation.predicates = append(md.mutation.predicates, ps...)
+	md.mutation.Where(ps...)
 	return md
 }
 

@@ -24,9 +24,9 @@ type GoodsDelete struct {
 	mutation *GoodsMutation
 }
 
-// Where adds a new predicate to the GoodsDelete builder.
+// Where appends a list predicates to the GoodsDelete builder.
 func (gd *GoodsDelete) Where(ps ...predicate.Goods) *GoodsDelete {
-	gd.mutation.predicates = append(gd.mutation.predicates, ps...)
+	gd.mutation.Where(ps...)
 	return gd
 }
 

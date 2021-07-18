@@ -29,9 +29,9 @@ type {{ $builder }} struct {
 	{{- template "update/fields" $ -}}
 }
 
-// Where adds a new predicate for the {{ $builder }} builder.
+// Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $mutation }}.predicates = append({{ $mutation }}.predicates, ps...)
+	{{ $mutation }}.Where(ps...)
 	return {{ $receiver }}
 }
 

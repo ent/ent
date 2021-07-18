@@ -25,9 +25,9 @@ type CarUpdate struct {
 	mutation *CarMutation
 }
 
-// Where adds a new predicate for the CarUpdate builder.
+// Where appends a list predicates to the CarUpdate builder.
 func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 

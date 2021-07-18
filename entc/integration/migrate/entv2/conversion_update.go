@@ -24,9 +24,9 @@ type ConversionUpdate struct {
 	mutation *ConversionMutation
 }
 
-// Where adds a new predicate for the ConversionUpdate builder.
+// Where appends a list predicates to the ConversionUpdate builder.
 func (cu *ConversionUpdate) Where(ps ...predicate.Conversion) *ConversionUpdate {
-	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 

@@ -225,6 +225,11 @@ func (m *CommentMutation) ResetPost() {
 	m.clearedpost = false
 }
 
+// Where appends a list predicates to the CommentMutation builder.
+func (m *CommentMutation) Where(ps ...predicate.Comment) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CommentMutation) Op() Op {
 	return m.op
@@ -694,6 +699,11 @@ func (m *PostMutation) ResetComments() {
 	m.removedcomments = nil
 }
 
+// Where appends a list predicates to the PostMutation builder.
+func (m *PostMutation) Where(ps ...predicate.Post) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *PostMutation) Op() Op {
 	return m.op
@@ -1119,6 +1129,11 @@ func (m *UserMutation) ResetPosts() {
 	m.posts = nil
 	m.clearedposts = false
 	m.removedposts = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

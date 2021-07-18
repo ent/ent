@@ -328,6 +328,11 @@ func (m *FileMutation) ResetChildren() {
 	m.removedchildren = nil
 }
 
+// Where appends a list predicates to the FileMutation builder.
+func (m *FileMutation) Where(ps ...predicate.File) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *FileMutation) Op() Op {
 	return m.op

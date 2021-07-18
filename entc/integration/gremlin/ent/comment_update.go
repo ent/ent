@@ -26,9 +26,9 @@ type CommentUpdate struct {
 	mutation *CommentMutation
 }
 
-// Where adds a new predicate for the CommentUpdate builder.
+// Where appends a list predicates to the CommentUpdate builder.
 func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
-	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 

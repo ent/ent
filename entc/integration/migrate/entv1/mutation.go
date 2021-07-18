@@ -167,6 +167,11 @@ func (m *CarMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
+// Where appends a list predicates to the CarMutation builder.
+func (m *CarMutation) Where(ps ...predicate.Car) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CarMutation) Op() Op {
 	return m.op
@@ -1046,6 +1051,11 @@ func (m *ConversionMutation) ResetUint64ToString() {
 	delete(m.clearedFields, conversion.FieldUint64ToString)
 }
 
+// Where appends a list predicates to the ConversionMutation builder.
+func (m *ConversionMutation) Where(ps ...predicate.Conversion) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *ConversionMutation) Op() Op {
 	return m.op
@@ -1636,6 +1646,11 @@ func (m *CustomTypeMutation) CustomCleared() bool {
 func (m *CustomTypeMutation) ResetCustom() {
 	m.custom = nil
 	delete(m.clearedFields, customtype.FieldCustom)
+}
+
+// Where appends a list predicates to the CustomTypeMutation builder.
+func (m *CustomTypeMutation) Where(ps ...predicate.CustomType) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2563,6 +2578,11 @@ func (m *UserMutation) CarIDs() (ids []int) {
 func (m *UserMutation) ResetCar() {
 	m.car = nil
 	m.clearedcar = false
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

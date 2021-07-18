@@ -24,9 +24,9 @@ type GoodsUpdate struct {
 	mutation *GoodsMutation
 }
 
-// Where adds a new predicate for the GoodsUpdate builder.
+// Where appends a list predicates to the GoodsUpdate builder.
 func (gu *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
+	gu.mutation.Where(ps...)
 	return gu
 }
 

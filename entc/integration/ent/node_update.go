@@ -24,9 +24,9 @@ type NodeUpdate struct {
 	mutation *NodeMutation
 }
 
-// Where adds a new predicate for the NodeUpdate builder.
+// Where appends a list predicates to the NodeUpdate builder.
 func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
-	nu.mutation.predicates = append(nu.mutation.predicates, ps...)
+	nu.mutation.Where(ps...)
 	return nu
 }
 

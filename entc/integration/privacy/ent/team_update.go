@@ -26,9 +26,9 @@ type TeamUpdate struct {
 	mutation *TeamMutation
 }
 
-// Where adds a new predicate for the TeamUpdate builder.
+// Where appends a list predicates to the TeamUpdate builder.
 func (tu *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
-	tu.mutation.predicates = append(tu.mutation.predicates, ps...)
+	tu.mutation.Where(ps...)
 	return tu
 }
 

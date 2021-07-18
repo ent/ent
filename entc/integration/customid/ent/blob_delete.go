@@ -24,9 +24,9 @@ type BlobDelete struct {
 	mutation *BlobMutation
 }
 
-// Where adds a new predicate to the BlobDelete builder.
+// Where appends a list predicates to the BlobDelete builder.
 func (bd *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
-	bd.mutation.predicates = append(bd.mutation.predicates, ps...)
+	bd.mutation.Where(ps...)
 	return bd
 }
 

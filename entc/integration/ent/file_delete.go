@@ -24,9 +24,9 @@ type FileDelete struct {
 	mutation *FileMutation
 }
 
-// Where adds a new predicate to the FileDelete builder.
+// Where appends a list predicates to the FileDelete builder.
 func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
-	fd.mutation.predicates = append(fd.mutation.predicates, ps...)
+	fd.mutation.Where(ps...)
 	return fd
 }
 

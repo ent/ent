@@ -24,9 +24,9 @@ type MixinIDUpdate struct {
 	mutation *MixinIDMutation
 }
 
-// Where adds a new predicate for the MixinIDUpdate builder.
+// Where appends a list predicates to the MixinIDUpdate builder.
 func (miu *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
-	miu.mutation.predicates = append(miu.mutation.predicates, ps...)
+	miu.mutation.Where(ps...)
 	return miu
 }
 

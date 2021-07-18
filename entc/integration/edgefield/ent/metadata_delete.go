@@ -24,9 +24,9 @@ type MetadataDelete struct {
 	mutation *MetadataMutation
 }
 
-// Where adds a new predicate to the MetadataDelete builder.
+// Where appends a list predicates to the MetadataDelete builder.
 func (md *MetadataDelete) Where(ps ...predicate.Metadata) *MetadataDelete {
-	md.mutation.predicates = append(md.mutation.predicates, ps...)
+	md.mutation.Where(ps...)
 	return md
 }
 
