@@ -26,9 +26,9 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the UserUpdate builder.
+// Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
+	uu.mutation.Where(ps...)
 	return uu
 }
 

@@ -25,9 +25,9 @@ type UserDelete struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate to the UserDelete builder.
+// Where appends a list predicates to the UserDelete builder.
 func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
-	ud.mutation.predicates = append(ud.mutation.predicates, ps...)
+	ud.mutation.Where(ps...)
 	return ud
 }
 

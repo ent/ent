@@ -24,9 +24,9 @@ type MediaUpdate struct {
 	mutation *MediaMutation
 }
 
-// Where adds a new predicate for the MediaUpdate builder.
+// Where appends a list predicates to the MediaUpdate builder.
 func (mu *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
-	mu.mutation.predicates = append(mu.mutation.predicates, ps...)
+	mu.mutation.Where(ps...)
 	return mu
 }
 

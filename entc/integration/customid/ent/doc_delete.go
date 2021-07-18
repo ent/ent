@@ -24,9 +24,9 @@ type DocDelete struct {
 	mutation *DocMutation
 }
 
-// Where adds a new predicate to the DocDelete builder.
+// Where appends a list predicates to the DocDelete builder.
 func (dd *DocDelete) Where(ps ...predicate.Doc) *DocDelete {
-	dd.mutation.predicates = append(dd.mutation.predicates, ps...)
+	dd.mutation.Where(ps...)
 	return dd
 }
 

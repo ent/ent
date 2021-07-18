@@ -25,9 +25,9 @@ type DocUpdate struct {
 	mutation *DocMutation
 }
 
-// Where adds a new predicate for the DocUpdate builder.
+// Where appends a list predicates to the DocUpdate builder.
 func (du *DocUpdate) Where(ps ...predicate.Doc) *DocUpdate {
-	du.mutation.predicates = append(du.mutation.predicates, ps...)
+	du.mutation.Where(ps...)
 	return du
 }
 

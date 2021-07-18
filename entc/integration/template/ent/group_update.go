@@ -24,9 +24,9 @@ type GroupUpdate struct {
 	mutation *GroupMutation
 }
 
-// Where adds a new predicate for the GroupUpdate builder.
+// Where appends a list predicates to the GroupUpdate builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
+	gu.mutation.Where(ps...)
 	return gu
 }
 

@@ -24,9 +24,9 @@ type CustomTypeUpdate struct {
 	mutation *CustomTypeMutation
 }
 
-// Where adds a new predicate for the CustomTypeUpdate builder.
+// Where appends a list predicates to the CustomTypeUpdate builder.
 func (ctu *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate {
-	ctu.mutation.predicates = append(ctu.mutation.predicates, ps...)
+	ctu.mutation.Where(ps...)
 	return ctu
 }
 

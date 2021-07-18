@@ -26,9 +26,9 @@ type CardUpdate struct {
 	mutation *CardMutation
 }
 
-// Where adds a new predicate for the CardUpdate builder.
+// Where appends a list predicates to the CardUpdate builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 

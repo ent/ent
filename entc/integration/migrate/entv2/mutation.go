@@ -173,6 +173,11 @@ func (m *CarMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
+// Where appends a list predicates to the CarMutation builder.
+func (m *CarMutation) Where(ps ...predicate.Car) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CarMutation) Op() Op {
 	return m.op
@@ -876,6 +881,11 @@ func (m *ConversionMutation) ResetUint64ToString() {
 	delete(m.clearedFields, conversion.FieldUint64ToString)
 }
 
+// Where appends a list predicates to the ConversionMutation builder.
+func (m *ConversionMutation) Where(ps ...predicate.Conversion) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *ConversionMutation) Op() Op {
 	return m.op
@@ -1369,6 +1379,11 @@ func (m *CustomTypeMutation) ResetCustom() {
 	delete(m.clearedFields, customtype.FieldCustom)
 }
 
+// Where appends a list predicates to the CustomTypeMutation builder.
+func (m *CustomTypeMutation) Where(ps ...predicate.CustomType) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CustomTypeMutation) Op() Op {
 	return m.op
@@ -1626,6 +1641,11 @@ func (m *GroupMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// Where appends a list predicates to the GroupMutation builder.
+func (m *GroupMutation) Where(ps ...predicate.Group) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2003,6 +2023,11 @@ func (m *MediaMutation) ResetText() {
 	delete(m.clearedFields, media.FieldText)
 }
 
+// Where appends a list predicates to the MediaMutation builder.
+func (m *MediaMutation) Where(ps ...predicate.Media) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *MediaMutation) Op() Op {
 	return m.op
@@ -2347,6 +2372,11 @@ func (m *PetMutation) OwnerIDs() (ids []int) {
 func (m *PetMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
+}
+
+// Where appends a list predicates to the PetMutation builder.
+func (m *PetMutation) Where(ps ...predicate.Pet) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -3428,6 +3458,11 @@ func (m *UserMutation) ResetFriends() {
 	m.friends = nil
 	m.clearedfriends = false
 	m.removedfriends = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

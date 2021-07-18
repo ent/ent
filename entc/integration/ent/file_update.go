@@ -27,9 +27,9 @@ type FileUpdate struct {
 	mutation *FileMutation
 }
 
-// Where adds a new predicate for the FileUpdate builder.
+// Where appends a list predicates to the FileUpdate builder.
 func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
-	fu.mutation.predicates = append(fu.mutation.predicates, ps...)
+	fu.mutation.Where(ps...)
 	return fu
 }
 

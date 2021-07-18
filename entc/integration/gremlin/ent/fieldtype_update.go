@@ -32,9 +32,9 @@ type FieldTypeUpdate struct {
 	mutation *FieldTypeMutation
 }
 
-// Where adds a new predicate for the FieldTypeUpdate builder.
+// Where appends a list predicates to the FieldTypeUpdate builder.
 func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
-	ftu.mutation.predicates = append(ftu.mutation.predicates, ps...)
+	ftu.mutation.Where(ps...)
 	return ftu
 }
 

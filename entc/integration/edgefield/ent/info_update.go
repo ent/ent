@@ -26,9 +26,9 @@ type InfoUpdate struct {
 	mutation *InfoMutation
 }
 
-// Where adds a new predicate for the InfoUpdate builder.
+// Where appends a list predicates to the InfoUpdate builder.
 func (iu *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate {
-	iu.mutation.predicates = append(iu.mutation.predicates, ps...)
+	iu.mutation.Where(ps...)
 	return iu
 }
 

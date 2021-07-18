@@ -28,9 +28,9 @@ type PetUpdate struct {
 	mutation *PetMutation
 }
 
-// Where adds a new predicate for the PetUpdate builder.
+// Where appends a list predicates to the PetUpdate builder.
 func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	pu.mutation.predicates = append(pu.mutation.predicates, ps...)
+	pu.mutation.Where(ps...)
 	return pu
 }
 

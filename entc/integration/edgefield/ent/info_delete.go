@@ -24,9 +24,9 @@ type InfoDelete struct {
 	mutation *InfoMutation
 }
 
-// Where adds a new predicate to the InfoDelete builder.
+// Where appends a list predicates to the InfoDelete builder.
 func (id *InfoDelete) Where(ps ...predicate.Info) *InfoDelete {
-	id.mutation.predicates = append(id.mutation.predicates, ps...)
+	id.mutation.Where(ps...)
 	return id
 }
 

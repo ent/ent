@@ -250,6 +250,11 @@ func (m *CarMutation) ResetRentals() {
 	m.removedrentals = nil
 }
 
+// Where appends a list predicates to the CarMutation builder.
+func (m *CarMutation) Where(ps ...predicate.Car) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CarMutation) Op() Op {
 	return m.op
@@ -672,6 +677,11 @@ func (m *CardMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
+// Where appends a list predicates to the CardMutation builder.
+func (m *CardMutation) Where(ps ...predicate.Card) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CardMutation) Op() Op {
 	return m.op
@@ -1067,6 +1077,11 @@ func (m *InfoMutation) UserIDs() (ids []int) {
 func (m *InfoMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
+}
+
+// Where appends a list predicates to the InfoMutation builder.
+func (m *InfoMutation) Where(ps ...predicate.Info) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1586,6 +1601,11 @@ func (m *MetadataMutation) ResetParent() {
 	m.clearedparent = false
 }
 
+// Where appends a list predicates to the MetadataMutation builder.
+func (m *MetadataMutation) Where(ps ...predicate.Metadata) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *MetadataMutation) Op() Op {
 	return m.op
@@ -2026,6 +2046,11 @@ func (m *PetMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
+// Where appends a list predicates to the PetMutation builder.
+func (m *PetMutation) Where(ps ...predicate.Pet) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *PetMutation) Op() Op {
 	return m.op
@@ -2428,6 +2453,11 @@ func (m *PostMutation) AuthorIDs() (ids []int) {
 func (m *PostMutation) ResetAuthor() {
 	m.author = nil
 	m.clearedauthor = false
+}
+
+// Where appends a list predicates to the PostMutation builder.
+func (m *PostMutation) Where(ps ...predicate.Post) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2900,6 +2930,11 @@ func (m *RentalMutation) CarIDs() (ids []uuid.UUID) {
 func (m *RentalMutation) ResetCar() {
 	m.car = nil
 	m.clearedcar = false
+}
+
+// Where appends a list predicates to the RentalMutation builder.
+func (m *RentalMutation) Where(ps ...predicate.Rental) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -3703,6 +3738,11 @@ func (m *UserMutation) ResetRentals() {
 	m.rentals = nil
 	m.clearedrentals = false
 	m.removedrentals = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

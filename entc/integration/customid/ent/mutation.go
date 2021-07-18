@@ -277,6 +277,11 @@ func (m *BlobMutation) ResetLinks() {
 	m.removedlinks = nil
 }
 
+// Where appends a list predicates to the BlobMutation builder.
+func (m *BlobMutation) Where(ps ...predicate.Blob) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *BlobMutation) Op() Op {
 	return m.op
@@ -809,6 +814,11 @@ func (m *CarMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
+// Where appends a list predicates to the CarMutation builder.
+func (m *CarMutation) Where(ps ...predicate.Car) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CarMutation) Op() Op {
 	return m.op
@@ -1317,6 +1327,11 @@ func (m *DocMutation) ResetChildren() {
 	m.removedchildren = nil
 }
 
+// Where appends a list predicates to the DocMutation builder.
+func (m *DocMutation) Where(ps ...predicate.Doc) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *DocMutation) Op() Op {
 	return m.op
@@ -1693,6 +1708,11 @@ func (m *GroupMutation) ResetUsers() {
 	m.removedusers = nil
 }
 
+// Where appends a list predicates to the GroupMutation builder.
+func (m *GroupMutation) Where(ps ...predicate.Group) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *GroupMutation) Op() Op {
 	return m.op
@@ -2032,6 +2052,11 @@ func (m *MixinIDMutation) OldMixinField(ctx context.Context) (v string, err erro
 // ResetMixinField resets all changes to the "mixin_field" field.
 func (m *MixinIDMutation) ResetMixinField() {
 	m.mixin_field = nil
+}
+
+// Where appends a list predicates to the MixinIDMutation builder.
+func (m *MixinIDMutation) Where(ps ...predicate.MixinID) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2453,6 +2478,11 @@ func (m *NoteMutation) ResetChildren() {
 	m.children = nil
 	m.clearedchildren = false
 	m.removedchildren = nil
+}
+
+// Where appends a list predicates to the NoteMutation builder.
+func (m *NoteMutation) Where(ps ...predicate.Note) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2968,6 +2998,11 @@ func (m *PetMutation) BestFriendIDs() (ids []string) {
 func (m *PetMutation) ResetBestFriend() {
 	m.best_friend = nil
 	m.clearedbest_friend = false
+}
+
+// Where appends a list predicates to the PetMutation builder.
+func (m *PetMutation) Where(ps ...predicate.Pet) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -3509,6 +3544,11 @@ func (m *UserMutation) ResetPets() {
 	m.pets = nil
 	m.clearedpets = false
 	m.removedpets = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

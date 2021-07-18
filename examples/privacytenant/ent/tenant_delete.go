@@ -24,9 +24,9 @@ type TenantDelete struct {
 	mutation *TenantMutation
 }
 
-// Where adds a new predicate to the TenantDelete builder.
+// Where appends a list predicates to the TenantDelete builder.
 func (td *TenantDelete) Where(ps ...predicate.Tenant) *TenantDelete {
-	td.mutation.predicates = append(td.mutation.predicates, ps...)
+	td.mutation.Where(ps...)
 	return td
 }
 

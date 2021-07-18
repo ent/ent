@@ -25,9 +25,9 @@ type NoteUpdate struct {
 	mutation *NoteMutation
 }
 
-// Where adds a new predicate for the NoteUpdate builder.
+// Where appends a list predicates to the NoteUpdate builder.
 func (nu *NoteUpdate) Where(ps ...predicate.Note) *NoteUpdate {
-	nu.mutation.predicates = append(nu.mutation.predicates, ps...)
+	nu.mutation.Where(ps...)
 	return nu
 }
 

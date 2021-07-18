@@ -25,9 +25,9 @@ type GroupInfoUpdate struct {
 	mutation *GroupInfoMutation
 }
 
-// Where adds a new predicate for the GroupInfoUpdate builder.
+// Where appends a list predicates to the GroupInfoUpdate builder.
 func (giu *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
-	giu.mutation.predicates = append(giu.mutation.predicates, ps...)
+	giu.mutation.Where(ps...)
 	return giu
 }
 

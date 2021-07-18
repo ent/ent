@@ -468,6 +468,11 @@ func (m *CardMutation) ResetSpec() {
 	m.removedspec = nil
 }
 
+// Where appends a list predicates to the CardMutation builder.
+func (m *CardMutation) Where(ps ...predicate.Card) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CardMutation) Op() Op {
 	return m.op
@@ -1050,6 +1055,11 @@ func (m *CommentMutation) ResetNillableInt() {
 	m.nillable_int = nil
 	m.addnillable_int = nil
 	delete(m.clearedFields, comment.FieldNillableInt)
+}
+
+// Where appends a list predicates to the CommentMutation builder.
+func (m *CommentMutation) Where(ps ...predicate.Comment) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -4981,6 +4991,11 @@ func (m *FieldTypeMutation) ResetPasswordOther() {
 	delete(m.clearedFields, fieldtype.FieldPasswordOther)
 }
 
+// Where appends a list predicates to the FieldTypeMutation builder.
+func (m *FieldTypeMutation) Where(ps ...predicate.FieldType) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -7319,6 +7334,11 @@ func (m *FileMutation) ResetFieldEdge() {
 	m.removedfield = nil
 }
 
+// Where appends a list predicates to the FileMutation builder.
+func (m *FileMutation) Where(ps ...predicate.File) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *FileMutation) Op() Op {
 	return m.op
@@ -7913,6 +7933,11 @@ func (m *FileTypeMutation) ResetFiles() {
 	m.removedfiles = nil
 }
 
+// Where appends a list predicates to the FileTypeMutation builder.
+func (m *FileTypeMutation) Where(ps ...predicate.FileType) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *FileTypeMutation) Op() Op {
 	return m.op
@@ -8231,6 +8256,11 @@ func (m *GoodsMutation) ID() (id string, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// Where appends a list predicates to the GoodsMutation builder.
+func (m *GoodsMutation) Where(ps ...predicate.Goods) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -8903,6 +8933,11 @@ func (m *GroupMutation) ResetInfo() {
 	m.clearedinfo = false
 }
 
+// Where appends a list predicates to the GroupMutation builder.
+func (m *GroupMutation) Where(ps ...predicate.Group) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *GroupMutation) Op() Op {
 	return m.op
@@ -9509,6 +9544,11 @@ func (m *GroupInfoMutation) ResetGroups() {
 	m.removedgroups = nil
 }
 
+// Where appends a list predicates to the GroupInfoMutation builder.
+func (m *GroupInfoMutation) Where(ps ...predicate.GroupInfo) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *GroupInfoMutation) Op() Op {
 	return m.op
@@ -9831,6 +9871,11 @@ func (m *ItemMutation) ID() (id string, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// Where appends a list predicates to the ItemMutation builder.
+func (m *ItemMutation) Where(ps ...predicate.Item) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -10210,6 +10255,11 @@ func (m *NodeMutation) NextIDs() (ids []string) {
 func (m *NodeMutation) ResetNext() {
 	m.next = nil
 	m.clearednext = false
+}
+
+// Where appends a list predicates to the NodeMutation builder.
+func (m *NodeMutation) Where(ps ...predicate.Node) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -10759,6 +10809,11 @@ func (m *PetMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
+// Where appends a list predicates to the PetMutation builder.
+func (m *PetMutation) Where(ps ...predicate.Pet) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *PetMutation) Op() Op {
 	return m.op
@@ -11170,6 +11225,11 @@ func (m *SpecMutation) ResetCard() {
 	m.removedcard = nil
 }
 
+// Where appends a list predicates to the SpecMutation builder.
+func (m *SpecMutation) Where(ps ...predicate.Spec) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *SpecMutation) Op() Op {
 	return m.op
@@ -11487,6 +11547,11 @@ func (m *TaskMutation) AddedPriority() (r schema.Priority, exists bool) {
 func (m *TaskMutation) ResetPriority() {
 	m.priority = nil
 	m.addpriority = nil
+}
+
+// Where appends a list predicates to the TaskMutation builder.
+func (m *TaskMutation) Where(ps ...predicate.Task) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -12806,6 +12871,11 @@ func (m *UserMutation) ParentIDs() (ids []string) {
 func (m *UserMutation) ResetParent() {
 	m.parent = nil
 	m.clearedparent = false
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

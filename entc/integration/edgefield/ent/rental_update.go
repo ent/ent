@@ -29,9 +29,9 @@ type RentalUpdate struct {
 	mutation *RentalMutation
 }
 
-// Where adds a new predicate for the RentalUpdate builder.
+// Where appends a list predicates to the RentalUpdate builder.
 func (ru *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
-	ru.mutation.predicates = append(ru.mutation.predicates, ps...)
+	ru.mutation.Where(ps...)
 	return ru
 }
 

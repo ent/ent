@@ -25,9 +25,9 @@ type CityUpdate struct {
 	mutation *CityMutation
 }
 
-// Where adds a new predicate for the CityUpdate builder.
+// Where appends a list predicates to the CityUpdate builder.
 func (cu *CityUpdate) Where(ps ...predicate.City) *CityUpdate {
-	cu.mutation.predicates = append(cu.mutation.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 

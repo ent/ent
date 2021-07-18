@@ -25,9 +25,9 @@ type SpecUpdate struct {
 	mutation *SpecMutation
 }
 
-// Where adds a new predicate for the SpecUpdate builder.
+// Where appends a list predicates to the SpecUpdate builder.
 func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	su.mutation.predicates = append(su.mutation.predicates, ps...)
+	su.mutation.Where(ps...)
 	return su
 }
 

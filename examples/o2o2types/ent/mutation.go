@@ -238,6 +238,11 @@ func (m *CardMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
+// Where appends a list predicates to the CardMutation builder.
+func (m *CardMutation) Where(ps ...predicate.Card) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *CardMutation) Op() Op {
 	return m.op
@@ -667,6 +672,11 @@ func (m *UserMutation) CardIDs() (ids []int) {
 func (m *UserMutation) ResetCard() {
 	m.card = nil
 	m.clearedcard = false
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

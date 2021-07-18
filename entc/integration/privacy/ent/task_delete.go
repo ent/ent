@@ -24,9 +24,9 @@ type TaskDelete struct {
 	mutation *TaskMutation
 }
 
-// Where adds a new predicate to the TaskDelete builder.
+// Where appends a list predicates to the TaskDelete builder.
 func (td *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
-	td.mutation.predicates = append(td.mutation.predicates, ps...)
+	td.mutation.Where(ps...)
 	return td
 }
 

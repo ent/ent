@@ -24,9 +24,9 @@ type GroupDelete struct {
 	mutation *GroupMutation
 }
 
-// Where adds a new predicate to the GroupDelete builder.
+// Where appends a list predicates to the GroupDelete builder.
 func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.mutation.predicates = append(gd.mutation.predicates, ps...)
+	gd.mutation.Where(ps...)
 	return gd
 }
 
