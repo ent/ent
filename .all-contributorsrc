@@ -428,6 +428,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "nmemoto",
+      "name": "Takafumi Umemoto",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1522332?v=4",
+      "profile": "https://github.com/nmemoto",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
