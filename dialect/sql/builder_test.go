@@ -1336,7 +1336,7 @@ func TestBuilder(t *testing.T) {
 				Table("users").
 				Using("HASH").
 				Column("name"),
-			wantQuery: "CREATE INDEX IF NOT EXISTS `name_index` ON `users`(`name`) USING `HASH`",
+			wantQuery: "CREATE INDEX IF NOT EXISTS `name_index` ON `users`(`name`) USING HASH",
 		},
 		{
 			input:     CreateIndex("unique_name").Unique().Table("users").Columns("first", "last"),

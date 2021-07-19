@@ -597,14 +597,25 @@ func (i *IndexBuilder) Query() (string, []interface{}) {
 	i.Ident(i.name)
 	i.WriteString(" ON ")
 	i.Ident(i.table)
-	if i.method != "" && i.dialect == dialect.Postgres {
-		i.WriteString(fmt.Sprintf(" USING %v", i.Quote(i.method)))
-	}
-	i.Nested(func(b *Builder) {
-		b.IdentComma(i.columns...)
-	})
-	if i.method != "" && i.dialect == dialect.MySQL {
-		i.WriteString(fmt.Sprintf(" USING %v", i.Quote(i.method)))
+	switch i.dialect {
+	case dialect.Postgres:
+		if i.method != "" {
+			i.WriteString(" USING ").Ident(i.method)
+		}
+		i.Nested(func(b *Builder) {
+			b.IdentComma(i.columns...)
+		})
+	case dialect.MySQL:
+		i.Nested(func(b *Builder) {
+			b.IdentComma(i.columns...)
+		})
+		if i.method != "" {
+			i.WriteString(" USING " + i.method)
+		}
+	default:
+		i.Nested(func(b *Builder) {
+			b.IdentComma(i.columns...)
+		})
 	}
 	return i.String(), nil
 }
