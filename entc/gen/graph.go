@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 	"text/template/parse"
 
 	"entgo.io/ent/dialect/sql/schema"
@@ -598,11 +599,15 @@ func (g *Graph) typ(name string) (*Type, bool) {
 	return nil, false
 }
 
-// templates returns the template.Template for the code and external templates
-// to execute on the Graph object if provided.
+// templates returns the Template to execute on the Graph,
+// and a list of optional external templates if provided.
 func (g *Graph) templates() (*Template, []GraphTemplate) {
 	initTemplates()
-	external := make([]GraphTemplate, 0, len(g.Templates))
+	var (
+		roots    = make(map[string]struct{})
+		helpers  = make(map[string]struct{})
+		external = make([]GraphTemplate, 0, len(g.Templates))
+	)
 	for _, rootT := range g.Templates {
 		templates.Funcs(rootT.FuncMap)
 		for _, tmpl := range rootT.Templates() {
@@ -610,16 +615,35 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 				continue
 			}
 			name := tmpl.Name()
-			// If the template does not override or extend one of
-			// the builtin templates, generate it in a new file.
-			if templates.Lookup(name) == nil && !extendExisting(name) {
+			switch {
+			// Helper templates can be either global (prefixed with "helper/"),
+			// or local, where their names follow the format: <root-tmpl>/helper/.+).
+			case strings.HasPrefix(name, "helper/"):
+			case strings.Contains(name, "/helper/"):
+				helpers[name] = struct{}{}
+			case templates.Lookup(name) == nil && !extendExisting(name):
+				// If the template does not override or extend one of
+				// the builtin templates, generate it in a new file.
 				external = append(external, GraphTemplate{
 					Name:   name,
 					Format: snake(name) + ".go",
 				})
+				roots[name] = struct{}{}
 			}
 			templates = MustParse(templates.AddParseTree(name, tmpl.Tree))
 		}
+	}
+	for name := range helpers {
+		root := name[:strings.Index(name, "/helper/")]
+		// If the name is prefixed with a name of a root
+		// template, we treat it as a local helper template.
+		if _, ok := roots[root]; ok {
+			continue
+		}
+		external = append(external, GraphTemplate{
+			Name:   name,
+			Format: snake(name) + ".go",
+		})
 	}
 	for _, f := range g.Features {
 		external = append(external, f.GraphTemplates...)
