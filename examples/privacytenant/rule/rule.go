@@ -62,8 +62,8 @@ func FilterTenantRule() privacy.QueryMutationRule {
 	})
 }
 
-// DenyMismatchedTenants is a rule that returns a deny decision if the operation
-// involves users that don't belong to the same tenant as the group or users that are from more than one tenant.
+// DenyMismatchedTenants is a rule that runs only on create operations and returns a deny
+// decision if the operation tries to add users to groups that are not in the same tenant.
 func DenyMismatchedTenants() privacy.MutationRule {
 	return privacy.GroupMutationRuleFunc(func(ctx context.Context, m *ent.GroupMutation) error {
 		tid, exists := m.TenantID()
