@@ -164,6 +164,17 @@ func (t *tables) Load(ctx context.Context, querier querier) ([]string, error) {
 	return tables, err
 }
 
+{{ template "node/helper/loadtable" $ }}
+
+{{ end }}
+
+{{ define "client/fields/additional" }}
+	// additional fields for node api
+	tables tables
+{{ end }}
+
+{{/* An example of a local helper template. */}}
+{{ define "node/helper/loadtable" }}
 func (tables) load(ctx context.Context, querier querier) ([]string, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("type").
@@ -177,9 +188,4 @@ func (tables) load(ctx context.Context, querier querier) ([]string, error) {
 	var tables []string
 	return tables, sql.ScanSlice(rows, &tables)
 }
-{{ end }}
-
-{{ define "client/fields/additional" }}
-	// additional fields for node api
-	tables tables
 {{ end }}
