@@ -94,6 +94,9 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 			return node, err
 		})
 		for i := len(gic.hooks) - 1; i >= 0; i-- {
+			if gic.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gic.mutation); err != nil {
@@ -123,10 +126,10 @@ func (gic *GroupInfoCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gic *GroupInfoCreate) check() error {
 	if _, ok := gic.mutation.Desc(); !ok {
-		return &ValidationError{Name: "desc", err: errors.New("ent: missing required field \"desc\"")}
+		return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "desc"`)}
 	}
 	if _, ok := gic.mutation.MaxUsers(); !ok {
-		return &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
+		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "max_users"`)}
 	}
 	return nil
 }

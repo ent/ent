@@ -77,6 +77,9 @@ func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 			return node, err
 		})
 		for i := len(mic.hooks) - 1; i >= 0; i-- {
+			if mic.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = mic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mic.mutation); err != nil {
@@ -106,10 +109,10 @@ func (mic *MixinIDCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (mic *MixinIDCreate) check() error {
 	if _, ok := mic.mutation.SomeField(); !ok {
-		return &ValidationError{Name: "some_field", err: errors.New("ent: missing required field \"some_field\"")}
+		return &ValidationError{Name: "some_field", err: errors.New(`ent: missing required field "some_field"`)}
 	}
 	if _, ok := mic.mutation.MixinField(); !ok {
-		return &ValidationError{Name: "mixin_field", err: errors.New("ent: missing required field \"mixin_field\"")}
+		return &ValidationError{Name: "mixin_field", err: errors.New(`ent: missing required field "mixin_field"`)}
 	}
 	return nil
 }

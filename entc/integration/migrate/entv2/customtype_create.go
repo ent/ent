@@ -70,6 +70,9 @@ func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 			return node, err
 		})
 		for i := len(ctc.hooks) - 1; i >= 0; i-- {
+			if ctc.hooks[i] == nil {
+				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = ctc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ctc.mutation); err != nil {

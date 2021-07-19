@@ -82,6 +82,9 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			if cc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
@@ -103,10 +106,10 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
 	if _, ok := cc.mutation.Expired(); !ok {
-		return &ValidationError{Name: "expired", err: errors.New("ent: missing required field \"expired\"")}
+		return &ValidationError{Name: "expired", err: errors.New(`ent: missing required field "expired"`)}
 	}
 	if _, ok := cc.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
+		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "number"`)}
 	}
 	if _, ok := cc.mutation.OwnerID(); !ok {
 		return &ValidationError{Name: "owner", err: errors.New("ent: missing required edge \"owner\"")}

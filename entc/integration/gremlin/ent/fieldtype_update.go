@@ -1302,6 +1302,9 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ftu.hooks) - 1; i >= 0; i-- {
+			if ftu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ftu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftu.mutation); err != nil {
@@ -3115,6 +3118,9 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 			return node, err
 		})
 		for i := len(ftuo.hooks) - 1; i >= 0; i-- {
+			if ftuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ftuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftuo.mutation); err != nil {

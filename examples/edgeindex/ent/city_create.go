@@ -79,6 +79,9 @@ func (cc *CityCreate) Save(ctx context.Context) (*City, error) {
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			if cc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
@@ -100,7 +103,7 @@ func (cc *CityCreate) SaveX(ctx context.Context) *City {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CityCreate) check() error {
 	if _, ok := cc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
 	return nil
 }

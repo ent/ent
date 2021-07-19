@@ -137,6 +137,9 @@ func (nu *NoteUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(nu.hooks) - 1; i >= 0; i-- {
+			if nu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nu.mutation); err != nil {
@@ -420,6 +423,9 @@ func (nuo *NoteUpdateOne) Save(ctx context.Context) (*Note, error) {
 			return node, err
 		})
 		for i := len(nuo.hooks) - 1; i >= 0; i-- {
+			if nuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nuo.mutation); err != nil {

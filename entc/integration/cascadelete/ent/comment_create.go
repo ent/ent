@@ -75,6 +75,9 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			if cc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
@@ -96,10 +99,10 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.Text(); !ok {
-		return &ValidationError{Name: "text", err: errors.New("ent: missing required field \"text\"")}
+		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "text"`)}
 	}
 	if _, ok := cc.mutation.PostID(); !ok {
-		return &ValidationError{Name: "post_id", err: errors.New("ent: missing required field \"post_id\"")}
+		return &ValidationError{Name: "post_id", err: errors.New(`ent: missing required field "post_id"`)}
 	}
 	if _, ok := cc.mutation.PostID(); !ok {
 		return &ValidationError{Name: "post", err: errors.New("ent: missing required edge \"post\"")}

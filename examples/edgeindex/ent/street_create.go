@@ -83,6 +83,9 @@ func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
 			return node, err
 		})
 		for i := len(sc.hooks) - 1; i >= 0; i-- {
+			if sc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = sc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
@@ -104,7 +107,7 @@ func (sc *StreetCreate) SaveX(ctx context.Context) *Street {
 // check runs all checks and user-defined validators on the builder.
 func (sc *StreetCreate) check() error {
 	if _, ok := sc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
 	return nil
 }

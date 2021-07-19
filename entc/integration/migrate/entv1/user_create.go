@@ -244,6 +244,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			if uc.hooks[i] == nil {
+				return nil, fmt.Errorf("entv1: uninitialized hook (forgotten import entv1/runtime?)")
+			}
 			mut = uc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
@@ -265,27 +268,27 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New("entv1: missing required field \"age\"")}
+		return &ValidationError{Name: "age", err: errors.New(`entv1: missing required field "age"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("entv1: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`entv1: missing required field "name"`)}
 	}
 	if v, ok := uc.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("entv1: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`entv1: validator failed for field "name": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.Nickname(); !ok {
-		return &ValidationError{Name: "nickname", err: errors.New("entv1: missing required field \"nickname\"")}
+		return &ValidationError{Name: "nickname", err: errors.New(`entv1: missing required field "nickname"`)}
 	}
 	if v, ok := uc.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("entv1: validator failed for field \"state\": %w", err)}
+			return &ValidationError{Name: "state", err: fmt.Errorf(`entv1: validator failed for field "state": %w`, err)}
 		}
 	}
 	if v, ok := uc.mutation.Workplace(); ok {
 		if err := user.WorkplaceValidator(v); err != nil {
-			return &ValidationError{Name: "workplace", err: fmt.Errorf("entv1: validator failed for field \"workplace\": %w", err)}
+			return &ValidationError{Name: "workplace", err: fmt.Errorf(`entv1: validator failed for field "workplace": %w`, err)}
 		}
 	}
 	return nil

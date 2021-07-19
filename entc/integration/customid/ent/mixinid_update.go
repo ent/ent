@@ -67,6 +67,9 @@ func (miu *MixinIDUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(miu.hooks) - 1; i >= 0; i-- {
+			if miu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = miu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, miu.mutation); err != nil {
@@ -193,6 +196,9 @@ func (miuo *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
 			return node, err
 		})
 		for i := len(miuo.hooks) - 1; i >= 0; i-- {
+			if miuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = miuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, miuo.mutation); err != nil {

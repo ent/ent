@@ -73,6 +73,9 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 			return node, err
 		})
 		for i := len(tc.hooks) - 1; i >= 0; i-- {
+			if tc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
@@ -102,11 +105,11 @@ func (tc *TaskCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (tc *TaskCreate) check() error {
 	if _, ok := tc.mutation.Priority(); !ok {
-		return &ValidationError{Name: "priority", err: errors.New("ent: missing required field \"priority\"")}
+		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "priority"`)}
 	}
 	if v, ok := tc.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "priority": %w`, err)}
 		}
 	}
 	return nil

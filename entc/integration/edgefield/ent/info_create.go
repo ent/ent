@@ -90,6 +90,9 @@ func (ic *InfoCreate) Save(ctx context.Context) (*Info, error) {
 			return node, err
 		})
 		for i := len(ic.hooks) - 1; i >= 0; i-- {
+			if ic.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
@@ -111,7 +114,7 @@ func (ic *InfoCreate) SaveX(ctx context.Context) *Info {
 // check runs all checks and user-defined validators on the builder.
 func (ic *InfoCreate) check() error {
 	if _, ok := ic.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New("ent: missing required field \"content\"")}
+		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "content"`)}
 	}
 	return nil
 }

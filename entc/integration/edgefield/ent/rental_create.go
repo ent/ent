@@ -98,6 +98,9 @@ func (rc *RentalCreate) Save(ctx context.Context) (*Rental, error) {
 			return node, err
 		})
 		for i := len(rc.hooks) - 1; i >= 0; i-- {
+			if rc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = rc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, rc.mutation); err != nil {
@@ -127,13 +130,13 @@ func (rc *RentalCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (rc *RentalCreate) check() error {
 	if _, ok := rc.mutation.Date(); !ok {
-		return &ValidationError{Name: "date", err: errors.New("ent: missing required field \"date\"")}
+		return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "date"`)}
 	}
 	if _, ok := rc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New("ent: missing required field \"user_id\"")}
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "user_id"`)}
 	}
 	if _, ok := rc.mutation.CarID(); !ok {
-		return &ValidationError{Name: "car_id", err: errors.New("ent: missing required field \"car_id\"")}
+		return &ValidationError{Name: "car_id", err: errors.New(`ent: missing required field "car_id"`)}
 	}
 	if _, ok := rc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}

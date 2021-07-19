@@ -132,6 +132,9 @@ func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 			return node, err
 		})
 		for i := len(mc.hooks) - 1; i >= 0; i-- {
+			if mc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = mc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mc.mutation); err != nil {
@@ -161,7 +164,7 @@ func (mc *MetadataCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (mc *MetadataCreate) check() error {
 	if _, ok := mc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "age"`)}
 	}
 	return nil
 }

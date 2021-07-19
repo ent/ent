@@ -50,6 +50,9 @@ func (td *TeamDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(td.hooks) - 1; i >= 0; i-- {
+			if td.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = td.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, td.mutation); err != nil {

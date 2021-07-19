@@ -78,6 +78,9 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 			return node, err
 		})
 		for i := len(gc.hooks) - 1; i >= 0; i-- {
+			if gc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {

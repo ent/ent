@@ -137,6 +137,9 @@ func (du *DocUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(du.hooks) - 1; i >= 0; i-- {
+			if du.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = du.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, du.mutation); err != nil {
@@ -420,6 +423,9 @@ func (duo *DocUpdateOne) Save(ctx context.Context) (*Doc, error) {
 			return node, err
 		})
 		for i := len(duo.hooks) - 1; i >= 0; i-- {
+			if duo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = duo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, duo.mutation); err != nil {

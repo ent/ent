@@ -108,6 +108,9 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 			return node, err
 		})
 		for i := len(nc.hooks) - 1; i >= 0; i-- {
+			if nc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {

@@ -182,6 +182,9 @@ func (cc *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			if cc.hooks[i] == nil {
+				return nil, fmt.Errorf("entv1: uninitialized hook (forgotten import entv1/runtime?)")
+			}
 			mut = cc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
