@@ -617,7 +617,7 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 			name := tmpl.Name()
 			switch {
 			// Helper templates can be either global (prefixed with "helper/"),
-			// or local, where their names follow the format: <root-tmpl>/helper/.+).
+			// or local, where their names follow the format: "<root-tmpl>/helper/.+").
 			case strings.HasPrefix(name, "helper/"):
 			case strings.Contains(name, "/helper/"):
 				helpers[name] = struct{}{}

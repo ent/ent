@@ -71,6 +71,52 @@ In order to override an existing template, use its name. For example:
 {{ end }}
 ```
 
+## Helper Templates
+
+As mentioned above, `ent` writes each template's execution output to a file named the same as the template.
+For example, the output from a template defined as `{{ define "stringer" }}` will be written to a file named
+`ent/stringer.go`.
+
+By default, `ent` writes each template declared with `{{ define "<name>" }}` to a file. However, it is sometimes
+desirable to define helper templates - templates that will not be invoked directly but rather be executed by other
+templates. To facilitate this use case, `ent` supports two naming formats that designate a template as a helper.
+The formats are:
+
+1\. `{{ define "helper/.+" }}` for global helper templates. For example:
+
+```gotemplate
+{{ define "helper/foo" }}
+    {{/* Logic goes here. */}}
+{{ end }}
+
+{{ define "helper/bar/baz" }}
+    {{/* Logic goes here. */}}
+{{ end }}
+```
+
+2\. `{{ define "<root-template>/helper/.+" }}` for local helper templates. A template is considered as "root" if
+its execution output is written to a file. For example:
+
+```gotemplate
+{{/* A root template that is executed on the `gen.Graph` and will be written to a file named: `ent/http.go`.*/}}
+{{ define "http" }}
+    {{ range $n := $.Nodes }}
+        {{ template "http/helper/get" $n }}
+        {{ template "http/helper/post" $n }}
+    {{ end }}
+{{ end }}
+
+{{/* A helper template that is executed on `gen.Type` */}}
+{{ define "http/helper/get" }}
+    {{/* Logic goes here. */}}
+{{ end }}
+
+{{/* A helper template that is executed on `gen.Type` */}}
+{{ define "http/helper/post" }}
+    {{/* Logic goes here. */}}
+{{ end }}
+```
+
 ## Annotations
 Schema annotations allow attaching metadata to fields and edges and inject them to external templates.  
 An annotation must be a Go type that is serializable to JSON raw value (e.g. struct, map or slice)
