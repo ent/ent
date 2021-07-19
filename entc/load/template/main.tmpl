@@ -17,7 +17,7 @@ import (
 )
 
 var schemas = []ent.Interface{
-	{{- range $_, $name := .Names }}
+	{{- range $name := .Names }}
 		entschema.{{- printf "%s{}" $name }},
 	{{- end }}
 }
