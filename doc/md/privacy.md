@@ -57,7 +57,7 @@ There are three types of decision that can help you control the privacy rules ev
 
 ![privacy-allow](https://entgo.io/images/assets/permission_3.png)
 
-Now, that we’ve covered the basic terms, let’s start writing some code.
+Now that we’ve covered the basic terms, let’s start writing some code.
 
 ## Configuration
 
@@ -375,10 +375,10 @@ func (TenantMixin) Edges() []ent.Edge {
 }
 ```
 
-Now, we want to enforce that viewers can see only groups and users that are connected to the tenant they belong to.
-In this case, there's another type of privacy rule named `Filter`.
-We use it to filter out entities that are not connected to the same tenant.
-Unlike previous rules, we only use it for filtering, not for privacy decision-making. 
+Next, we may want to enforce a rule that will limit viewers to only query groups and users that are connected to the tenant they belong to.
+For use cases like this, Ent has an additional type of privacy rule named `Filter`.
+We can use `Filter` rules to filter out entities based on the identity of the viewer.
+Unlike the rules we previously discussed, `Filter` rules can limit the scope of the queries a viewer can make, in addition to returning privacy decisions. 
 
 > Note, the privacy filtering option needs to be enabled using the [`entql`](features.md#entql-filtering) feature-flag (see instructions [above](#configuration)).
 
