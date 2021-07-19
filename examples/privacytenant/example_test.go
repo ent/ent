@@ -36,7 +36,7 @@ func Example_PrivacyTenant() {
 	// Tenant(id=1, name=GitHub)
 	// Tenant(id=2, name=GitLab)
 	// User(id=1, name=a8m, foods=[])
-	// User(id=2, name=nati, foods=[Sushi Burritos])
+	// User(id=2, name=nati, foods=[])
 	// Group(id=1, name=entgo.io)
 	// Group(id=1, name=entgo)
 }
@@ -48,31 +48,31 @@ func Do(ctx context.Context, client *ent.Client) error {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Deny tenant creation if the viewer is not admin.
-	viewOnly := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
-	if _, err := client.Tenant.Create().Save(viewOnly); !errors.Is(err, privacy.Deny) {
+	viewCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
+	if _, err := client.Tenant.Create().Save(viewCtx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
-	// Apply the same operation with "Admin" role.
-	admin := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
-	hub, err := client.Tenant.Create().SetName("GitHub").Save(admin)
+	// Apply the same operation with "Admin" role, expect it to pass.
+	adminCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
+	hub, err := client.Tenant.Create().SetName("GitHub").Save(adminCtx)
 	if err != nil {
 		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
 	fmt.Println(hub)
-	lab, err := client.Tenant.Create().SetName("GitLab").Save(admin)
+	lab, err := client.Tenant.Create().SetName("GitLab").Save(adminCtx)
 	if err != nil {
 		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
 	fmt.Println(lab)
 
-	// Create 2 users connected to the 2 tenants we created above (a8m->GitHub, nati->GitLab).
-	a8m := client.User.Create().SetName("a8m").SetTenant(hub).SaveX(admin)
-	nati := client.User.Create().SetName("nati").SetTenant(lab).SetFoods([]string{"Sushi", "Burritos"}).SaveX(admin)
+	// Create 2 users connected to the 2 tenants we created above
+	hubUser := client.User.Create().SetName("a8m").SetTenant(hub).SaveX(adminCtx)
+	labUser := client.User.Create().SetName("nati").SetTenant(lab).SaveX(adminCtx)
 
 	hubView := viewer.NewContext(ctx, viewer.UserViewer{T: hub})
 	out := client.User.Query().OnlyX(hubView)
 	// Expect that "GitHub" tenant to read only its users (i.e. a8m).
-	if out.ID != a8m.ID {
+	if out.ID != hubUser.ID {
 		return fmt.Errorf("expect result for user query, got %v", out)
 	}
 	fmt.Println(out)
@@ -80,22 +80,22 @@ func Do(ctx context.Context, client *ent.Client) error {
 	labView := viewer.NewContext(ctx, viewer.UserViewer{T: lab})
 	out = client.User.Query().OnlyX(labView)
 	// Expect that "GitLab" tenant to read only its users (i.e. nati).
-	if out.ID != nati.ID {
+	if out.ID != labUser.ID {
 		return fmt.Errorf("expect result for user query, got %v", out)
 	}
 	fmt.Println(out)
 
 	// Expect operation to fail, because the DenyMismatchedTenants rule makes sure
 	// the group and the users are connected to the same tenant.
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(nati).Save(admin)
+	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser).Save(adminCtx)
 	if !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since user (nati) is not connected to the same tenant")
 	}
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(nati, a8m).Save(admin)
+	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser, hubUser).Save(adminCtx)
 	if !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since some users (nati) are not connected to the same tenant")
 	}
-	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(a8m).Save(admin)
+	entgo, err := client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(hubUser).Save(adminCtx)
 	if err != nil {
 		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
@@ -105,7 +105,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	// that tenants can update and delete only their groups.
 	err = entgo.Update().SetName("fail.go").Exec(labView)
 	if !ent.IsNotFound(err) {
-		return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub)")
+		return fmt.Errorf("expect operation to fail, since the group (entgo) is managed by a different tenant (hub), but got %w", err)
 	}
 	entgo, err = entgo.Update().SetName("entgo").Save(hubView)
 	if err != nil {
