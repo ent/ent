@@ -63,6 +63,9 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 			return node, err
 		})
 		for i := len(gc.hooks) - 1; i >= 0; i-- {
+			if gc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
@@ -84,7 +87,7 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.MaxUsers(); !ok {
-		return &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
+		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "max_users"`)}
 	}
 	return nil
 }

@@ -366,6 +366,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			if uc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
@@ -404,24 +407,24 @@ func (uc *UserCreate) defaults() {
 func (uc *UserCreate) check() error {
 	if v, ok := uc.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
-			return &ValidationError{Name: "optional_int", err: fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)}
+			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "optional_int": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "age"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
 	if _, ok := uc.mutation.Last(); !ok {
-		return &ValidationError{Name: "last", err: errors.New("ent: missing required field \"last\"")}
+		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "last"`)}
 	}
 	if _, ok := uc.mutation.Role(); !ok {
-		return &ValidationError{Name: "role", err: errors.New("ent: missing required field \"role\"")}
+		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "role"`)}
 	}
 	if v, ok := uc.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "role": %w`, err)}
 		}
 	}
 	return nil

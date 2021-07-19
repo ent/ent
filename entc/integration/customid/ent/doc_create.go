@@ -120,6 +120,9 @@ func (dc *DocCreate) Save(ctx context.Context) (*Doc, error) {
 			return node, err
 		})
 		for i := len(dc.hooks) - 1; i >= 0; i-- {
+			if dc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = dc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, dc.mutation); err != nil {
@@ -150,7 +153,7 @@ func (dc *DocCreate) defaults() {
 func (dc *DocCreate) check() error {
 	if v, ok := dc.mutation.ID(); ok {
 		if err := doc.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
 		}
 	}
 	return nil

@@ -63,6 +63,9 @@ func (tc *TenantCreate) Save(ctx context.Context) (*Tenant, error) {
 			return node, err
 		})
 		for i := len(tc.hooks) - 1; i >= 0; i-- {
+			if tc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
@@ -84,11 +87,11 @@ func (tc *TenantCreate) SaveX(ctx context.Context) *Tenant {
 // check runs all checks and user-defined validators on the builder.
 func (tc *TenantCreate) check() error {
 	if _, ok := tc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
 	if v, ok := tc.mutation.Name(); ok {
 		if err := tenant.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
 		}
 	}
 	return nil

@@ -88,6 +88,9 @@ func (iu *InfoUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(iu.hooks) - 1; i >= 0; i-- {
+			if iu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = iu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, iu.mutation); err != nil {
@@ -261,6 +264,9 @@ func (iuo *InfoUpdateOne) Save(ctx context.Context) (*Info, error) {
 			return node, err
 		})
 		for i := len(iuo.hooks) - 1; i >= 0; i-- {
+			if iuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = iuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, iuo.mutation); err != nil {

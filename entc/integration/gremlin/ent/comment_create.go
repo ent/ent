@@ -86,6 +86,9 @@ func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			if cc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
@@ -107,10 +110,10 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.UniqueInt(); !ok {
-		return &ValidationError{Name: "unique_int", err: errors.New("ent: missing required field \"unique_int\"")}
+		return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "unique_int"`)}
 	}
 	if _, ok := cc.mutation.UniqueFloat(); !ok {
-		return &ValidationError{Name: "unique_float", err: errors.New("ent: missing required field \"unique_float\"")}
+		return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "unique_float"`)}
 	}
 	return nil
 }

@@ -120,6 +120,9 @@ func (nc *NoteCreate) Save(ctx context.Context) (*Note, error) {
 			return node, err
 		})
 		for i := len(nc.hooks) - 1; i >= 0; i-- {
+			if nc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
@@ -150,7 +153,7 @@ func (nc *NoteCreate) defaults() {
 func (nc *NoteCreate) check() error {
 	if v, ok := nc.mutation.ID(); ok {
 		if err := note.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
 		}
 	}
 	return nil

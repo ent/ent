@@ -111,7 +111,9 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 		err  error
 		node *Task
 	)
-	tc.defaults()
+	if err := tc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(tc.hooks) == 0 {
 		if err = tc.check(); err != nil {
 			return nil, err
@@ -135,6 +137,9 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 			return node, err
 		})
 		for i := len(tc.hooks) - 1; i >= 0; i-- {
+			if tc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
@@ -154,29 +159,30 @@ func (tc *TaskCreate) SaveX(ctx context.Context) *Task {
 }
 
 // defaults sets the default values of the builder before save.
-func (tc *TaskCreate) defaults() {
+func (tc *TaskCreate) defaults() error {
 	if _, ok := tc.mutation.Status(); !ok {
 		v := task.DefaultStatus
 		tc.mutation.SetStatus(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TaskCreate) check() error {
 	if _, ok := tc.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New("ent: missing required field \"title\"")}
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "title"`)}
 	}
 	if v, ok := tc.mutation.Title(); ok {
 		if err := task.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "title": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New("ent: missing required field \"status\"")}
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "status"`)}
 	}
 	if v, ok := tc.mutation.Status(); ok {
 		if err := task.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "status": %w`, err)}
 		}
 	}
 	return nil

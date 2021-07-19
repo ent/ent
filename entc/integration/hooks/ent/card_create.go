@@ -103,7 +103,9 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 		err  error
 		node *Card
 	)
-	cc.defaults()
+	if err := cc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(cc.hooks) == 0 {
 		if err = cc.check(); err != nil {
 			return nil, err
@@ -127,6 +129,9 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			if cc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
@@ -146,32 +151,36 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 }
 
 // defaults sets the default values of the builder before save.
-func (cc *CardCreate) defaults() {
+func (cc *CardCreate) defaults() error {
 	if _, ok := cc.mutation.Number(); !ok {
 		v := card.DefaultNumber
 		cc.mutation.SetNumber(v)
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
+		if card.DefaultCreatedAt == nil {
+			return fmt.Errorf("ent: uninitialized card.DefaultCreatedAt (forgotten import ent/runtime?)")
+		}
 		v := card.DefaultCreatedAt()
 		cc.mutation.SetCreatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
 	if _, ok := cc.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
+		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "number"`)}
 	}
 	if v, ok := cc.mutation.Number(); ok {
 		if err := card.NumberValidator(v); err != nil {
-			return &ValidationError{Name: "number", err: fmt.Errorf("ent: validator failed for field \"number\": %w", err)}
+			return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "number": %w`, err)}
 		}
 	}
 	if _, ok := cc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("ent: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "created_at"`)}
 	}
 	if _, ok := cc.mutation.InHook(); !ok {
-		return &ValidationError{Name: "in_hook", err: errors.New("ent: missing required field \"in_hook\"")}
+		return &ValidationError{Name: "in_hook", err: errors.New(`ent: missing required field "in_hook"`)}
 	}
 	return nil
 }

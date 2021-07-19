@@ -62,6 +62,9 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 			return node, err
 		})
 		for i := len(ic.hooks) - 1; i >= 0; i-- {
+			if ic.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
@@ -84,7 +87,7 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 func (ic *ItemCreate) check() error {
 	if v, ok := ic.mutation.ID(); ok {
 		if err := item.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
 		}
 	}
 	return nil

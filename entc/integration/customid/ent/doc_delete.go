@@ -50,6 +50,9 @@ func (dd *DocDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(dd.hooks) - 1; i >= 0; i-- {
+			if dd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = dd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, dd.mutation); err != nil {

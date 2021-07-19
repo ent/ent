@@ -105,6 +105,9 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 			return node, err
 		})
 		for i := len(bc.hooks) - 1; i >= 0; i-- {
+			if bc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = bc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, bc.mutation); err != nil {
@@ -138,7 +141,7 @@ func (bc *BlobCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (bc *BlobCreate) check() error {
 	if _, ok := bc.mutation.UUID(); !ok {
-		return &ValidationError{Name: "uuid", err: errors.New("ent: missing required field \"uuid\"")}
+		return &ValidationError{Name: "uuid", err: errors.New(`ent: missing required field "uuid"`)}
 	}
 	return nil
 }

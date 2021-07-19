@@ -22,6 +22,7 @@ import (
 {{ $builder := $.UpdateName }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
+{{ $runtimeRequired := or $.NumHooks $.NumPolicy }}
 
 // {{ $builder }} is the builder for updating {{ $.Name }} entities.
 type {{ $builder }} struct {
@@ -50,7 +51,13 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	{{- if $.HasUpdateDefault }}
-		{{ $receiver }}.defaults()
+		{{- if $runtimeRequired }}
+			if err := {{ $receiver }}.defaults(); err != nil {
+				return 0, err
+			}
+		{{- else }}
+			{{ $receiver }}.defaults()
+		{{- end }}
 	{{- end }}
 	if len({{ $receiver }}.hooks) == 0 {
 		{{- if $.HasUpdateCheckers }}
@@ -76,6 +83,9 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
+			if {{ $receiver }}.hooks[i] == nil {
+				return 0, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
@@ -150,7 +160,13 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 		node *{{ $.Name }}
 	)
 	{{- if $.HasUpdateDefault }}
-		{{ $receiver }}.defaults()
+		{{- if $runtimeRequired }}
+			if err := {{ $receiver }}.defaults(); err != nil {
+				return nil, err
+			}
+		{{- else }}
+			{{ $receiver }}.defaults()
+		{{- end }}
 	{{- end }}
 	if len({{ $receiver }}.hooks) == 0 {
 		{{- if $.HasUpdateCheckers }}
@@ -176,6 +192,9 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			return node, err
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
+			if {{ $receiver }}.hooks[i] == nil {
+				return nil, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
@@ -274,17 +293,26 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ $receiver := .Scope.Receiver }}
 {{ $builder := pascal .Scope.Builder }}
 {{ $mutation := print $receiver ".mutation" }}
+{{ $runtimeRequired := or $.NumHooks $.NumPolicy }}
 
 {{ if $.HasUpdateDefault }}
 	// defaults sets the default values of the builder before save.
-	func ({{ $receiver }} *{{ $builder }}) defaults() {
+	func ({{ $receiver }} *{{ $builder }}) defaults() {{ if $runtimeRequired }}error{{ end }}{
 		{{- range $f := $.Fields }}
 			{{- if $f.UpdateDefault }}
 				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {{ if $f.Optional }} && !{{ $mutation }}.{{ $f.StructField }}Cleared() {{ end }} {
+					{{- if and $runtimeRequired $f.IsTime }}
+						if {{ $.Package }}.{{ $f.UpdateDefaultName }} == nil {
+							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
+						}
+					{{- end }}
 					v := {{ $.Package }}.{{ $f.UpdateDefaultName }}{{ if $f.IsTime }}(){{ end }}
 					{{ $mutation }}.Set{{ $f.StructField }}(v)
 				}
 			{{- end }}
+		{{- end }}
+		{{- if $runtimeRequired }}
+			return nil
 		{{- end }}
 	}
 {{ end }}

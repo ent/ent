@@ -97,6 +97,9 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 			return node, err
 		})
 		for i := len(nc.hooks) - 1; i >= 0; i-- {
+			if nc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
@@ -118,7 +121,7 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 // check runs all checks and user-defined validators on the builder.
 func (nc *NodeCreate) check() error {
 	if _, ok := nc.mutation.Value(); !ok {
-		return &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
+		return &ValidationError{Name: "value", err: errors.New(`ent: missing required field "value"`)}
 	}
 	return nil
 }

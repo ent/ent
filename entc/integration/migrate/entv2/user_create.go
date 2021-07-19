@@ -286,6 +286,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			if uc.hooks[i] == nil {
+				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = uc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
@@ -335,48 +338,48 @@ func (uc *UserCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.MixedString(); !ok {
-		return &ValidationError{Name: "mixed_string", err: errors.New("entv2: missing required field \"mixed_string\"")}
+		return &ValidationError{Name: "mixed_string", err: errors.New(`entv2: missing required field "mixed_string"`)}
 	}
 	if _, ok := uc.mutation.MixedEnum(); !ok {
-		return &ValidationError{Name: "mixed_enum", err: errors.New("entv2: missing required field \"mixed_enum\"")}
+		return &ValidationError{Name: "mixed_enum", err: errors.New(`entv2: missing required field "mixed_enum"`)}
 	}
 	if v, ok := uc.mutation.MixedEnum(); ok {
 		if err := user.MixedEnumValidator(v); err != nil {
-			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf("entv2: validator failed for field \"mixed_enum\": %w", err)}
+			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf(`entv2: validator failed for field "mixed_enum": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New("entv2: missing required field \"age\"")}
+		return &ValidationError{Name: "age", err: errors.New(`entv2: missing required field "age"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("entv2: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`entv2: missing required field "name"`)}
 	}
 	if _, ok := uc.mutation.Nickname(); !ok {
-		return &ValidationError{Name: "nickname", err: errors.New("entv2: missing required field \"nickname\"")}
+		return &ValidationError{Name: "nickname", err: errors.New(`entv2: missing required field "nickname"`)}
 	}
 	if v, ok := uc.mutation.Nickname(); ok {
 		if err := user.NicknameValidator(v); err != nil {
-			return &ValidationError{Name: "nickname", err: fmt.Errorf("entv2: validator failed for field \"nickname\": %w", err)}
+			return &ValidationError{Name: "nickname", err: fmt.Errorf(`entv2: validator failed for field "nickname": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.Phone(); !ok {
-		return &ValidationError{Name: "phone", err: errors.New("entv2: missing required field \"phone\"")}
+		return &ValidationError{Name: "phone", err: errors.New(`entv2: missing required field "phone"`)}
 	}
 	if _, ok := uc.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New("entv2: missing required field \"title\"")}
+		return &ValidationError{Name: "title", err: errors.New(`entv2: missing required field "title"`)}
 	}
 	if v, ok := uc.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
+			return &ValidationError{Name: "state", err: fmt.Errorf(`entv2: validator failed for field "state": %w`, err)}
 		}
 	}
 	if v, ok := uc.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("entv2: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entv2: validator failed for field "status": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New("entv2: missing required field \"created_at\"")}
+		return &ValidationError{Name: "created_at", err: errors.New(`entv2: missing required field "created_at"`)}
 	}
 	return nil
 }

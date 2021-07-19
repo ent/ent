@@ -54,7 +54,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
-	uc.defaults()
+	if err := uc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
 			return nil, err
@@ -78,6 +80,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			if uc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
@@ -97,24 +102,28 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 // defaults sets the default values of the builder before save.
-func (uc *UserCreate) defaults() {
+func (uc *UserCreate) defaults() error {
 	if _, ok := uc.mutation.Version(); !ok {
+		if user.DefaultVersion == nil {
+			return fmt.Errorf("ent: uninitialized user.DefaultVersion (forgotten import ent/runtime?)")
+		}
 		v := user.DefaultVersion()
 		uc.mutation.SetVersion(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Version(); !ok {
-		return &ValidationError{Name: "version", err: errors.New("ent: missing required field \"version\"")}
+		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "version"`)}
 	}
 	if _, ok := uc.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New("ent: missing required field \"status\"")}
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "status"`)}
 	}
 	if v, ok := uc.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "status": %w`, err)}
 		}
 	}
 	return nil

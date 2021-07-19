@@ -98,6 +98,9 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 			return node, err
 		})
 		for i := len(pc.hooks) - 1; i >= 0; i-- {
+			if pc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
@@ -119,7 +122,7 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 // check runs all checks and user-defined validators on the builder.
 func (pc *PetCreate) check() error {
 	if _, ok := pc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "age"`)}
 	}
 	return nil
 }

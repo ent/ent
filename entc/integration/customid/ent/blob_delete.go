@@ -50,6 +50,9 @@ func (bd *BlobDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(bd.hooks) - 1; i >= 0; i-- {
+			if bd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = bd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, bd.mutation); err != nil {

@@ -169,6 +169,9 @@ func (mu *MetadataUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(mu.hooks) - 1; i >= 0; i-- {
+			if mu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = mu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mu.mutation); err != nil {
@@ -520,6 +523,9 @@ func (muo *MetadataUpdateOne) Save(ctx context.Context) (*Metadata, error) {
 			return node, err
 		})
 		for i := len(muo.hooks) - 1; i >= 0; i-- {
+			if muo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = muo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, muo.mutation); err != nil {

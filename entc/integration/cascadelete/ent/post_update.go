@@ -138,6 +138,9 @@ func (pu *PostUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(pu.hooks) - 1; i >= 0; i-- {
+			if pu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
@@ -415,6 +418,9 @@ func (puo *PostUpdateOne) Save(ctx context.Context) (*Post, error) {
 			return node, err
 		})
 		for i := len(puo.hooks) - 1; i >= 0; i-- {
+			if puo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = puo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
