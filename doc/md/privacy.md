@@ -510,8 +510,8 @@ Again, we expect the privacy-rules to take effect on the client operations.
 func Do(ctx context.Context, client *ent.Client) error {
     // A continuation of the code-block above.
 
-	// Expect operation to fail, because the DenyMismatchedTenants rule makes sure
-	// the group and the users are connected to the same tenant.
+	// Expect operation to fail because the DenyMismatchedTenants rule
+	// makes sure the group and the users are connected to the same tenant.
 	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser).Save(adminCtx)
 	if !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since user (nati) is not connected to the same tenant")
