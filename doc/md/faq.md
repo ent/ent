@@ -363,7 +363,7 @@ func (BaseMixin) Hooks() []ent.Hook {
 }
 
 func IDHook() ent.Hook {
-    sf := sonyflake.NewSonyflake(sonyflage.Settings{})
+    sf := sonyflake.NewSonyflake(sonyflake.Settings{})
 	type IDSetter interface {
 		SetID(uint64)
 	}
