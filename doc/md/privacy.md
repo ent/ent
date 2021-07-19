@@ -572,7 +572,6 @@ func Do(ctx context.Context, client *ent.Client) error {
 		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
 	fmt.Println(entgo)
-
 	return nil
 }
 ```
