@@ -186,7 +186,7 @@ func (b *intBuilder) DefaultFunc(fn func() int) *intBuilder {
 //
 //	field.Int("int").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *intBuilder) UpdateDefault(fn func() int) *intBuilder {
 	b.desc.Default = fn
@@ -357,7 +357,7 @@ func (b *uintBuilder) DefaultFunc(fn func() uint) *uintBuilder {
 //
 //	field.Uint("uint").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *uintBuilder) UpdateDefault(fn func() uint) *uintBuilder {
 	b.desc.Default = fn
@@ -538,7 +538,7 @@ func (b *int8Builder) DefaultFunc(fn func() int8) *int8Builder {
 //
 //	field.Int8("int8").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *int8Builder) UpdateDefault(fn func() int8) *int8Builder {
 	b.desc.Default = fn
@@ -719,7 +719,7 @@ func (b *int16Builder) DefaultFunc(fn func() int16) *int16Builder {
 //
 //	field.Int16("int16").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *int16Builder) UpdateDefault(fn func() int16) *int16Builder {
 	b.desc.Default = fn
@@ -900,7 +900,7 @@ func (b *int32Builder) DefaultFunc(fn func() int32) *int32Builder {
 //
 //	field.Int32("int32").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *int32Builder) UpdateDefault(fn func() int32) *int32Builder {
 	b.desc.Default = fn
@@ -1081,7 +1081,7 @@ func (b *int64Builder) DefaultFunc(fn func() int64) *int64Builder {
 //
 //	field.Int64("int64").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *int64Builder) UpdateDefault(fn func() int64) *int64Builder {
 	b.desc.Default = fn
@@ -1252,7 +1252,7 @@ func (b *uint8Builder) DefaultFunc(fn func() uint8) *uint8Builder {
 //
 //	field.Uint8("uint8").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *uint8Builder) UpdateDefault(fn func() uint8) *uint8Builder {
 	b.desc.Default = fn
@@ -1423,7 +1423,7 @@ func (b *uint16Builder) DefaultFunc(fn func() uint16) *uint16Builder {
 //
 //	field.Uint16("uint16").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *uint16Builder) UpdateDefault(fn func() uint16) *uint16Builder {
 	b.desc.Default = fn
@@ -1594,7 +1594,7 @@ func (b *uint32Builder) DefaultFunc(fn func() uint32) *uint32Builder {
 //
 //	field.Uint32("uint32").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *uint32Builder) UpdateDefault(fn func() uint32) *uint32Builder {
 	b.desc.Default = fn
@@ -1765,7 +1765,7 @@ func (b *uint64Builder) DefaultFunc(fn func() uint64) *uint64Builder {
 //
 //	field.Uint64("uint64").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *uint64Builder) UpdateDefault(fn func() uint64) *uint64Builder {
 	b.desc.Default = fn

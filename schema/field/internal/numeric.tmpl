@@ -120,7 +120,7 @@ func (b *{{ $builder }}) DefaultFunc(fn func(){{ $t }}) *{{ $builder }} {
 //
 //	field.{{ title $t.String }}("{{$t.String}}").
 //		Default(0).
-//		UpdateDefault(GenNumber()),
+//		UpdateDefault(GenNumber),
 //
 func (b *{{ $builder }}) UpdateDefault(fn func(){{ $t }}) *{{ $builder }} {
     b.desc.Default = fn
