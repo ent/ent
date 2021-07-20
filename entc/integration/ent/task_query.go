@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
@@ -28,6 +29,7 @@ type TaskQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Task
+	modifiers  []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -329,6 +331,9 @@ func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 		node := nodes[len(nodes)-1]
 		return node.assignValues(columns, values)
 	}
+	if len(tq.modifiers) > 0 {
+		_spec.Modifiers = tq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -340,6 +345,9 @@ func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
 
 func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tq.querySpec()
+	if len(tq.modifiers) > 0 {
+		_spec.Modifiers = tq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
 }
 
@@ -411,6 +419,9 @@ func (tq *TaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = tq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	for _, m := range tq.modifiers {
+		m(selector)
+	}
 	for _, p := range tq.predicates {
 		p(selector)
 	}
@@ -426,6 +437,38 @@ func (tq *TaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (tq *TaskQuery) ForUpdate(opts ...sql.LockOption) *TaskQuery {
+	if tq.driver.Dialect() == dialect.Postgres {
+		tq.Unique(false)
+	}
+	tq.modifiers = append(tq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return tq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (tq *TaskQuery) ForShare(opts ...sql.LockOption) *TaskQuery {
+	if tq.driver.Dialect() == dialect.Postgres {
+		tq.Unique(false)
+	}
+	tq.modifiers = append(tq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return tq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (tq *TaskQuery) Modify(modifiers ...func(s *sql.Selector)) *TaskSelect {
+	tq.modifiers = append(tq.modifiers, modifiers...)
+	return tq.Select()
 }
 
 // TaskGroupBy is the group-by builder for Task entities.
@@ -916,4 +959,10 @@ func (ts *TaskSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ts *TaskSelect) Modify(modifiers ...func(s *sql.Selector)) *TaskSelect {
+	ts.modifiers = append(ts.modifiers, modifiers...)
+	return ts
 }

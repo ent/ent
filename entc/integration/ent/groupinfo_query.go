@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/group"
@@ -32,6 +33,7 @@ type GroupInfoQuery struct {
 	predicates []predicate.GroupInfo
 	// eager-loading edges.
 	withGroups *GroupQuery
+	modifiers  []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -371,6 +373,9 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(giq.modifiers) > 0 {
+		_spec.Modifiers = giq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, giq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -412,6 +417,9 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := giq.querySpec()
+	if len(giq.modifiers) > 0 {
+		_spec.Modifiers = giq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, giq.driver, _spec)
 }
 
@@ -483,6 +491,9 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = giq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	for _, m := range giq.modifiers {
+		m(selector)
+	}
 	for _, p := range giq.predicates {
 		p(selector)
 	}
@@ -498,6 +509,38 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (giq *GroupInfoQuery) ForUpdate(opts ...sql.LockOption) *GroupInfoQuery {
+	if giq.driver.Dialect() == dialect.Postgres {
+		giq.Unique(false)
+	}
+	giq.modifiers = append(giq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return giq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (giq *GroupInfoQuery) ForShare(opts ...sql.LockOption) *GroupInfoQuery {
+	if giq.driver.Dialect() == dialect.Postgres {
+		giq.Unique(false)
+	}
+	giq.modifiers = append(giq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return giq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (giq *GroupInfoQuery) Modify(modifiers ...func(s *sql.Selector)) *GroupInfoSelect {
+	giq.modifiers = append(giq.modifiers, modifiers...)
+	return giq.Select()
 }
 
 // GroupInfoGroupBy is the group-by builder for GroupInfo entities.
@@ -988,4 +1031,10 @@ func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (gis *GroupInfoSelect) Modify(modifiers ...func(s *sql.Selector)) *GroupInfoSelect {
+	gis.modifiers = append(gis.modifiers, modifiers...)
+	return gis
 }

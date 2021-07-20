@@ -6,7 +6,6 @@ package integration
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,7 +20,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/enttest"
@@ -35,11 +34,11 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/user"
-	"github.com/stretchr/testify/mock"
 
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
+	"github.com/go-sql-driver/mysql"
+	"github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -113,6 +112,7 @@ var (
 	tests = [...]func(*testing.T, *ent.Client){
 		NoSchemaChanges,
 		Tx,
+		Lock,
 		Indexes,
 		Types,
 		Clone,
@@ -379,10 +379,10 @@ func Select(t *testing.T, client *ent.Client) {
 	names = client.Pet.Query().Order(ent.Asc(pet.FieldName)).Select(pet.FieldName).StringsX(ctx)
 	require.Equal([]string{"a", "b", "b", "c"}, names)
 	names = client.Pet.Query().
-		Order(func(s *entsql.Selector) {
+		Order(func(s *sql.Selector) {
 			// Join with user table for ordering by owner-name
 			// and pet-name (edge + field ordering).
-			t := entsql.Table(user.Table)
+			t := sql.Table(user.Table)
 			s.Join(t).On(s.C(pet.OwnerColumn), t.C(user.FieldID))
 			s.OrderBy(t.C(user.FieldName), s.C(pet.FieldName))
 		}).
@@ -393,6 +393,22 @@ func Select(t *testing.T, client *ent.Client) {
 	var ps []*ent.Pet
 	client.Pet.Query().Select().ScanX(ctx, &ps)
 	require.Len(ps, 4, "support scanning nodes manually")
+
+	lens := client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.Select("LENGTH(name)")
+		}).
+		IntsX(ctx)
+	require.Equal([]int{1, 1, 1, 1}, lens)
+	for i := range pets {
+		pets[i].Update().SetName(pets[i].Name + pets[i].Name).ExecX(ctx)
+	}
+	n := client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.Select("SUM(LENGTH(name))")
+		}).
+		IntX(ctx)
+	require.Equal(8, n)
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
@@ -807,12 +823,12 @@ func Relation(t *testing.T, client *ent.Client) {
 	client.User.Query().
 		Where(user.IDIn(foo.ID, bar.ID)).
 		GroupBy(user.FieldID, user.FieldName).
-		Aggregate(func(s *entsql.Selector) string {
+		Aggregate(func(s *sql.Selector) string {
 			// Join with pet table and calculate the
 			// average age of the pets of each user.
-			t := entsql.Table(pet.Table)
+			t := sql.Table(pet.Table)
 			s.Join(t).On(s.C(user.FieldID), t.C(pet.OwnerColumn))
-			return entsql.As(entsql.Avg(t.C(pet.FieldAge)), "average")
+			return sql.As(sql.Avg(t.C(pet.FieldAge)), "average")
 		}).
 		ScanX(ctx, &v3)
 	require.Len(v3, 2)
@@ -829,10 +845,10 @@ func Relation(t *testing.T, client *ent.Client) {
 		Owner string `sql:"owner"`
 	}
 	client.Pet.Query().
-		Where(func(s *entsql.Selector) {
-			t := entsql.Table(user.Table).As(user.Table)
+		Where(func(s *sql.Selector) {
+			t := sql.Table(user.Table).As(user.Table)
 			s.Join(t).On(s.C(pet.OwnerColumn), t.C(user.FieldID)) // owner_id = id for edge fields.
-			s.AppendSelect(entsql.As(t.C(user.FieldName), "owner"))
+			s.AppendSelect(sql.As(t.C(user.FieldName), "owner"))
 		}).
 		Order(ent.Asc(pet.FieldID)).
 		Select(pet.FieldID, pet.FieldName).
@@ -1113,8 +1129,8 @@ func Tx(t *testing.T, client *ent.Client) {
 		require.NoError(t, tx.Rollback())
 	})
 	t.Run("TxOptions", func(t *testing.T) {
-		if strings.Contains(t.Name(), "SQLite") {
-			t.Skip("SQLite does not support TxOptions.ReadOnly")
+		if client.Dialect() == dialect.SQLite {
+			t.Skip("Skipping SQLite")
 		}
 		tx, err := client.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
 		require.NoError(t, err)
@@ -1479,6 +1495,71 @@ func ConstraintChecks(t *testing.T, client *ent.Client) {
 	require.True(t, errors.As(err, &cerr))
 	require.False(t, sqlgraph.IsForeignKeyConstraintError(err))
 	require.True(t, sqlgraph.IsUniqueConstraintError(err))
+}
+
+func Lock(t *testing.T, client *ent.Client) {
+	for _, d := range []string{"SQLite", "MySQL/5", "Maria/10.2"} {
+		if strings.Contains(t.Name(), d) {
+			t.Skip("unsupported version")
+		}
+	}
+	ctx := context.Background()
+	xabi := client.Pet.Create().SetName("Xabi").SaveX(ctx)
+
+	t.Run("ForUpdate", func(t *testing.T) {
+		tx1, err := client.Tx(ctx)
+		require.NoError(t, err)
+		tx2, err := client.Tx(ctx)
+		require.NoError(t, err)
+		tx3, err := client.Tx(ctx)
+		require.NoError(t, err)
+		p1 := tx1.Pet.Query().Where(pet.ID(xabi.ID)).ForUpdate().OnlyX(ctx)
+		_, err = tx2.Pet.Query().Where(pet.ID(xabi.ID)).ForUpdate(sql.WithLockAction(sql.NoWait)).Only(ctx)
+		switch name := t.Name(); {
+		case strings.Contains(name, "Postgres"):
+			err := err.(*pq.Error)
+			require.EqualValues(t, "55P03", err.Code)
+			require.EqualValues(t, `could not obtain lock on row in relation "pet"`, err.Message)
+		case strings.Contains(name, "MySQL"):
+			err := err.(*mysql.MySQLError)
+			require.EqualValues(t, 3572, err.Number)
+			require.EqualValues(t, "Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.", err.Message)
+		case strings.Contains(name, "Maria"):
+			err := err.(*mysql.MySQLError)
+			require.EqualValues(t, 1205, err.Number)
+			require.EqualValues(t, "Lock wait timeout exceeded; try restarting transaction", err.Message)
+		}
+		require.NoError(t, tx2.Rollback())
+		p1.Update().SetName("updated").SaveX(ctx)
+		require.NoError(t, tx1.Commit())
+		tx3.Pet.Query().Where(pet.ID(xabi.ID)).ForUpdate().OnlyX(ctx)
+		require.NoError(t, tx3.Rollback())
+	})
+
+	t.Run("ForShare", func(t *testing.T) {
+		if strings.Contains(t.Name(), "Maria") {
+			t.Skip("unsupported version")
+		}
+		tx1, err := client.Tx(ctx)
+		require.NoError(t, err)
+		tx2, err := client.Tx(ctx)
+		require.NoError(t, err)
+		tx3, err := client.Tx(ctx)
+		require.NoError(t, err)
+		tx1.Pet.Query().Where(pet.ID(xabi.ID)).ForShare().OnlyX(ctx)
+		tx2.Pet.Query().Where(pet.ID(xabi.ID)).ForShare().OnlyX(ctx)
+		_, err = tx3.Pet.Query().
+			Where(pet.ID(xabi.ID)).
+			ForUpdate(
+				sql.WithLockTables(pet.Table),
+				sql.WithLockAction(sql.NoWait),
+			).
+			Only(ctx)
+		require.Error(t, err)
+		require.NoError(t, tx1.Rollback())
+		require.NoError(t, tx2.Rollback())
+		require.NoError(t, tx3.Rollback())
+	})
 }
 
 func drop(t *testing.T, client *ent.Client) {

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/card"
@@ -35,6 +36,7 @@ type CardQuery struct {
 	withOwner *UserQuery
 	withSpec  *SpecQuery
 	withFKs   bool
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -416,6 +418,9 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(cq.modifiers) > 0 {
+		_spec.Modifiers = cq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -522,6 +527,9 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 
 func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	if len(cq.modifiers) > 0 {
+		_spec.Modifiers = cq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 
@@ -593,6 +601,9 @@ func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = cq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	for _, m := range cq.modifiers {
+		m(selector)
+	}
 	for _, p := range cq.predicates {
 		p(selector)
 	}
@@ -608,6 +619,38 @@ func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (cq *CardQuery) ForUpdate(opts ...sql.LockOption) *CardQuery {
+	if cq.driver.Dialect() == dialect.Postgres {
+		cq.Unique(false)
+	}
+	cq.modifiers = append(cq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return cq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (cq *CardQuery) ForShare(opts ...sql.LockOption) *CardQuery {
+	if cq.driver.Dialect() == dialect.Postgres {
+		cq.Unique(false)
+	}
+	cq.modifiers = append(cq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return cq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cq *CardQuery) Modify(modifiers ...func(s *sql.Selector)) *CardSelect {
+	cq.modifiers = append(cq.modifiers, modifiers...)
+	return cq.Select()
 }
 
 // CardGroupBy is the group-by builder for Card entities.
@@ -1098,4 +1141,10 @@ func (cs *CardSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cs *CardSelect) Modify(modifiers ...func(s *sql.Selector)) *CardSelect {
+	cs.modifiers = append(cs.modifiers, modifiers...)
+	return cs
 }

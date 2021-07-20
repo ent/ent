@@ -11,9 +11,9 @@
     }
 {{ end }}
 
-{{ define "dialect/sql/query/fields/additional/modify" -}}
+{{- define "dialect/sql/query/fields/additional/modify" }}
     modifiers []func(s *sql.Selector)
-{{- end -}}
+{{- end }}
 
 {{ define "dialect/sql/query/selector/modify" }}
     {{- $receiver := pascal $.Scope.Builder | receiver }}

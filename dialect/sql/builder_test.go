@@ -1688,7 +1688,7 @@ func TestSelectWithLock(t *testing.T) {
 		Where(EQ("id", 20)).
 		ForUpdate(
 			WithLockAction(SkipLocked),
-			WithLockTables(pets),
+			WithLockTables("pets"),
 		).
 		Query()
 	require.Equal(t, `SELECT * FROM "pets" JOIN "users" AS "t1" ON "pets"."owner_id" = "t1"."id" WHERE "id" = $1 FOR UPDATE OF "pets" SKIP LOCKED`, query)

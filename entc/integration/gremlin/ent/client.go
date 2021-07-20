@@ -192,6 +192,11 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+// Dialect returns the driver dialect.
+func (c *Client) Dialect() string {
+	return c.driver.Dialect()
+}
+
 // CardClient is a client for the Card schema.
 type CardClient struct {
 	config

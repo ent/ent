@@ -69,12 +69,30 @@ var (
 		},
 	}
 
+	// FeatureLock provides a feature-flag for sql locking extension for ent.
+	FeatureLock = Feature{
+		Name:        "sql/lock",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to use row-level locking in SQL using the 'FOR {UPDATE|SHARE}' clauses",
+	}
+
+	// FeatureModifier provides a feature-flag for adding query modifiers.
+	FeatureModifier = Feature{
+		Name:        "sql/modifier",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to attach custom modifiers to queries",
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
 		FeatureEntQL,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
+		FeatureLock,
+		FeatureModifier,
 	}
 )
 
