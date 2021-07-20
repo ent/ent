@@ -61,27 +61,6 @@ func TestRuntimeHooks(t *testing.T) {
 	require.Equal(t, 4, calls, "debug client should keep thr same hooks")
 }
 
-func TestReject(t *testing.T) {
-	ctx := context.Background()
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithOptions(ent.Log(t.Log)), enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
-	c := client.Card.Create().SetNumber("1234").SaveX(ctx)
-	op := ent.OpCreate | ent.OpUpdate | ent.OpUpdateOne | ent.OpDelete | ent.OpDeleteOne
-	client.Use(hook.Reject(op))
-
-	_, err := client.Card.Create().SetName("1234").Save(ctx)
-	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpCreate, Op: op})
-	_, err = client.Card.Update().SetName("1234").Save(ctx)
-	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpUpdate, Op: op})
-	_, err = client.Card.UpdateOne(c).SetName("1234").Save(ctx)
-	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpUpdateOne, Op: op})
-	_, err = client.Card.Delete().Exec(ctx)
-	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpDelete, Op: op})
-	err = client.Card.DeleteOne(c).Exec(ctx)
-	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpDeleteOne, Op: op})
-	_, err = client.Card.Query().All(ctx)
-	require.NoError(t, err)
-}
-
 func TestRuntimeChain(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
@@ -319,4 +298,25 @@ func TestConditions(t *testing.T) {
 	alexsn := client.User.Create().SetName("alexsn").SaveX(ctx)
 	client.User.Update().Where(user.ID(alexsn.ID)).AddWorth(100).SaveX(ctx)
 	client.User.DeleteOne(alexsn).ExecX(ctx)
+}
+
+func TestReject(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithOptions(ent.Log(t.Log)), enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
+	c := client.Card.Create().SetNumber("1234").SaveX(ctx)
+	op := ent.OpCreate | ent.OpUpdate | ent.OpUpdateOne | ent.OpDelete | ent.OpDeleteOne
+	client.Use(hook.Reject(op))
+
+	_, err := client.Card.Create().SetName("1234").Save(ctx)
+	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpCreate, Op: op})
+	_, err = client.Card.Update().SetName("1234").Save(ctx)
+	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpUpdate, Op: op})
+	_, err = client.Card.UpdateOne(c).SetName("1234").Save(ctx)
+	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpUpdateOne, Op: op})
+	_, err = client.Card.Delete().Exec(ctx)
+	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpDelete, Op: op})
+	err = client.Card.DeleteOne(c).Exec(ctx)
+	require.Equal(t, err, &hook.RejectError{Rejected: ent.OpDeleteOne, Op: op})
+	_, err = client.Card.Query().All(ctx)
+	require.NoError(t, err)
 }
