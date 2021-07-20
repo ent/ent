@@ -381,6 +381,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(pq.modifiers) > 0 {
+		_spec.Modifiers = pq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -422,6 +425,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
+	if len(pq.modifiers) > 0 {
+		_spec.Modifiers = pq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
 }
 

@@ -332,6 +332,9 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 		node := nodes[len(nodes)-1]
 		return node.assignValues(columns, values)
 	}
+	if len(gq.modifiers) > 0 {
+		_spec.Modifiers = gq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -343,6 +346,9 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 
 func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gq.querySpec()
+	if len(gq.modifiers) > 0 {
+		_spec.Modifiers = gq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
 
