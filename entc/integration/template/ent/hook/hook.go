@@ -184,6 +184,19 @@ func FixedError(err error) ent.Hook {
 	}
 }
 
+// RejectError returns when an operation is rejected
+type RejectError struct {
+	// Op are the operations that will be rejected
+	Op ent.Op
+	// Rejected operation
+	Rejected ent.Op
+}
+
+func (r RejectError) Error() string {
+	// TODO: string name
+	return fmt.Sprintf("%s operation is not allowed", r.Rejected)
+}
+
 // Reject returns a hook that rejects all operations that match op.
 //
 //	func (T) Hooks() []ent.Hook {
@@ -193,8 +206,11 @@ func FixedError(err error) ent.Hook {
 //	}
 //
 func Reject(op ent.Op) ent.Hook {
-	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
-	return On(hk, op)
+	return On(func(ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			return nil, &RejectError{Op: op, Rejected: m.Op()}
+		})
+	}, op)
 }
 
 // Chain acts as a list of hooks and is effectively immutable.
