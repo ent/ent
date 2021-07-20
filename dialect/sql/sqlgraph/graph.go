@@ -492,6 +492,7 @@ type QuerySpec struct {
 	Unique    bool
 	Order     func(*sql.Selector)
 	Predicate func(*sql.Selector)
+	Modifiers []func(*sql.Selector)
 
 	ScanValues func(columns []string) ([]interface{}, error)
 	Assign     func(columns []string, values []interface{}) error
@@ -632,6 +633,9 @@ func (q *query) selector(ctx context.Context) (*sql.Selector, error) {
 	}
 	if q.Unique {
 		selector.Distinct()
+	}
+	for _, m := range q.Modifiers {
+		m(selector)
 	}
 	if err := selector.Err(); err != nil {
 		return nil, err
