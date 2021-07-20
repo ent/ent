@@ -351,12 +351,22 @@ func hasTemplate(name string) bool {
 	return false
 }
 
-// matchTemplate returns all template names that match the given pattern.
-func matchTemplate(pattern string) []string {
-	var names []string
-	for _, t := range templates.Templates() {
-		if match, _ := filepath.Match(pattern, t.Name()); match {
-			names = append(names, t.Name())
+// matchTemplate returns all template names that match the given patterns.
+func matchTemplate(patterns ...string) []string {
+	var (
+		names  []string
+		exists = make(map[string]struct{})
+	)
+	for _, pattern := range patterns {
+		for _, t := range templates.Templates() {
+			name := t.Name()
+			if _, ok := exists[name]; ok {
+				continue
+			}
+			if match, _ := filepath.Match(pattern, name); match {
+				names = append(names, name)
+				exists[name] = struct{}{}
+			}
 		}
 	}
 	sort.Strings(names)

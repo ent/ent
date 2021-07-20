@@ -2142,13 +2142,9 @@ func WithLockAction(action LockAction) LockOption {
 }
 
 // WithLockTables sets the Tables of the lock.
-func WithLockTables(tables ...*SelectTable) LockOption {
+func WithLockTables(tables ...string) LockOption {
 	return func(c *LockConfig) {
-		names := make([]string, len(tables))
-		for i := range tables {
-			names[i] = tables[i].name
-		}
-		c.Tables = names
+		c.Tables = tables
 	}
 }
 

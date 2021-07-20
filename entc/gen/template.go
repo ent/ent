@@ -160,6 +160,8 @@ var (
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
+		"client/additional/*",
+		"client/additional/*/*",
 		"config/*/*",
 		"create/additional/*",
 		"delete/additional/*",
@@ -170,6 +172,7 @@ var (
 		"dialect/*/query/selector/*",
 		"dialect/sql/model/additional/*",
 		"dialect/sql/model/fields/*",
+		"dialect/sql/select/additional/*",
 		"dialect/sql/predicate/edge/*/*",
 		"dialect/sql/query/additional/*",
 		"dialect/sql/query/from/*",

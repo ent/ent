@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/item"
@@ -28,6 +29,7 @@ type ItemQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Item
+	modifiers  []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -305,6 +307,9 @@ func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
 		node := nodes[len(nodes)-1]
 		return node.assignValues(columns, values)
 	}
+	if len(iq.modifiers) > 0 {
+		_spec.Modifiers = iq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, iq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -316,6 +321,9 @@ func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
 
 func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := iq.querySpec()
+	if len(iq.modifiers) > 0 {
+		_spec.Modifiers = iq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, iq.driver, _spec)
 }
 
@@ -387,6 +395,9 @@ func (iq *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = iq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	for _, m := range iq.modifiers {
+		m(selector)
+	}
 	for _, p := range iq.predicates {
 		p(selector)
 	}
@@ -402,6 +413,38 @@ func (iq *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (iq *ItemQuery) ForUpdate(opts ...sql.LockOption) *ItemQuery {
+	if iq.driver.Dialect() == dialect.Postgres {
+		iq.Unique(false)
+	}
+	iq.modifiers = append(iq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return iq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (iq *ItemQuery) ForShare(opts ...sql.LockOption) *ItemQuery {
+	if iq.driver.Dialect() == dialect.Postgres {
+		iq.Unique(false)
+	}
+	iq.modifiers = append(iq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return iq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (iq *ItemQuery) Modify(modifiers ...func(s *sql.Selector)) *ItemSelect {
+	iq.modifiers = append(iq.modifiers, modifiers...)
+	return iq.Select()
 }
 
 // ItemGroupBy is the group-by builder for Item entities.
@@ -892,4 +935,10 @@ func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (is *ItemSelect) Modify(modifiers ...func(s *sql.Selector)) *ItemSelect {
+	is.modifiers = append(is.modifiers, modifiers...)
+	return is
 }

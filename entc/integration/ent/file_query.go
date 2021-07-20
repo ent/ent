@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
@@ -37,6 +38,7 @@ type FileQuery struct {
 	withType  *FileTypeQuery
 	withField *FieldTypeQuery
 	withFKs   bool
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -453,6 +455,9 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(fq.modifiers) > 0 {
+		_spec.Modifiers = fq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, fq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -552,6 +557,9 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 
 func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := fq.querySpec()
+	if len(fq.modifiers) > 0 {
+		_spec.Modifiers = fq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, fq.driver, _spec)
 }
 
@@ -623,6 +631,9 @@ func (fq *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = fq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	for _, m := range fq.modifiers {
+		m(selector)
+	}
 	for _, p := range fq.predicates {
 		p(selector)
 	}
@@ -638,6 +649,38 @@ func (fq *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (fq *FileQuery) ForUpdate(opts ...sql.LockOption) *FileQuery {
+	if fq.driver.Dialect() == dialect.Postgres {
+		fq.Unique(false)
+	}
+	fq.modifiers = append(fq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return fq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (fq *FileQuery) ForShare(opts ...sql.LockOption) *FileQuery {
+	if fq.driver.Dialect() == dialect.Postgres {
+		fq.Unique(false)
+	}
+	fq.modifiers = append(fq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return fq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (fq *FileQuery) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
+	fq.modifiers = append(fq.modifiers, modifiers...)
+	return fq.Select()
 }
 
 // FileGroupBy is the group-by builder for File entities.
@@ -1128,4 +1171,10 @@ func (fs *FileSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (fs *FileSelect) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
+	fs.modifiers = append(fs.modifiers, modifiers...)
+	return fs
 }

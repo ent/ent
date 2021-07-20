@@ -133,6 +133,11 @@ func (c *Client) Use(hooks ...Hook) {
 	{{- end }}
 }
 
+{{- with $tmpls := matchTemplate "client/additional/*" "client/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 {{ range $n := $.Nodes }}
 {{ $client := print $n.Name "Client" }}

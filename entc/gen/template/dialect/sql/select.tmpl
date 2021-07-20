@@ -19,4 +19,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v interface{
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
+
+{{/* Allow adding methods to the select-builder by ent extensions or user templates.*/}}
+{{ with $tmpls := matchTemplate "dialect/sql/select/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{ end }}
+
 {{ end }}
