@@ -77,6 +77,19 @@ func (gc *GoodsCreate) SaveX(ctx context.Context) *Goods {
 	return v
 }
 
+// Exec executes the query.
+func (gc *GoodsCreate) Exec(ctx context.Context) error {
+	_, err := gc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gc *GoodsCreate) ExecX(ctx context.Context) {
+	if err := gc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (gc *GoodsCreate) check() error {
 	return nil

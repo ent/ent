@@ -141,6 +141,19 @@ func (dc *DocCreate) SaveX(ctx context.Context) *Doc {
 	return v
 }
 
+// Exec executes the query.
+func (dc *DocCreate) Exec(ctx context.Context) error {
+	_, err := dc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (dc *DocCreate) ExecX(ctx context.Context) {
+	if err := dc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (dc *DocCreate) defaults() {
 	if _, ok := dc.mutation.ID(); !ok {

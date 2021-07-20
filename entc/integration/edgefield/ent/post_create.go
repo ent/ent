@@ -104,6 +104,19 @@ func (pc *PostCreate) SaveX(ctx context.Context) *Post {
 	return v
 }
 
+// Exec executes the query.
+func (pc *PostCreate) Exec(ctx context.Context) error {
+	_, err := pc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (pc *PostCreate) ExecX(ctx context.Context) {
+	if err := pc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pc *PostCreate) check() error {
 	if _, ok := pc.mutation.Text(); !ok {

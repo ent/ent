@@ -150,6 +150,19 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 	return v
 }
 
+// Exec executes the query.
+func (cc *CardCreate) Exec(ctx context.Context) error {
+	_, err := cc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (cc *CardCreate) ExecX(ctx context.Context) {
+	if err := cc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (cc *CardCreate) defaults() error {
 	if _, ok := cc.mutation.Number(); !ok {

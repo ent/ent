@@ -119,6 +119,19 @@ func (rc *RentalCreate) SaveX(ctx context.Context) *Rental {
 	return v
 }
 
+// Exec executes the query.
+func (rc *RentalCreate) Exec(ctx context.Context) error {
+	_, err := rc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (rc *RentalCreate) ExecX(ctx context.Context) {
+	if err := rc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (rc *RentalCreate) defaults() {
 	if _, ok := rc.mutation.Date(); !ok {

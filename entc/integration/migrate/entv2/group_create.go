@@ -77,6 +77,19 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 	return v
 }
 
+// Exec executes the query.
+func (gc *GroupCreate) Exec(ctx context.Context) error {
+	_, err := gc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gc *GroupCreate) ExecX(ctx context.Context) {
+	if err := gc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	return nil

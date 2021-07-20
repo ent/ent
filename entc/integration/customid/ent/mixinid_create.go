@@ -98,6 +98,19 @@ func (mic *MixinIDCreate) SaveX(ctx context.Context) *MixinID {
 	return v
 }
 
+// Exec executes the query.
+func (mic *MixinIDCreate) Exec(ctx context.Context) error {
+	_, err := mic.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mic *MixinIDCreate) ExecX(ctx context.Context) {
+	if err := mic.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (mic *MixinIDCreate) defaults() {
 	if _, ok := mic.mutation.ID(); !ok {

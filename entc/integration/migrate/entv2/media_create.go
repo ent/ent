@@ -119,6 +119,19 @@ func (mc *MediaCreate) SaveX(ctx context.Context) *Media {
 	return v
 }
 
+// Exec executes the query.
+func (mc *MediaCreate) Exec(ctx context.Context) error {
+	_, err := mc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mc *MediaCreate) ExecX(ctx context.Context) {
+	if err := mc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (mc *MediaCreate) check() error {
 	return nil

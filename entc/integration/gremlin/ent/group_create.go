@@ -194,6 +194,19 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 	return v
 }
 
+// Exec executes the query.
+func (gc *GroupCreate) Exec(ctx context.Context) error {
+	_, err := gc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gc *GroupCreate) ExecX(ctx context.Context) {
+	if err := gc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (gc *GroupCreate) defaults() {
 	if _, ok := gc.mutation.Active(); !ok {

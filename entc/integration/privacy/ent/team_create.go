@@ -116,6 +116,19 @@ func (tc *TeamCreate) SaveX(ctx context.Context) *Team {
 	return v
 }
 
+// Exec executes the query.
+func (tc *TeamCreate) Exec(ctx context.Context) error {
+	_, err := tc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tc *TeamCreate) ExecX(ctx context.Context) {
+	if err := tc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tc *TeamCreate) check() error {
 	if _, ok := tc.mutation.Name(); !ok {

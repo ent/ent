@@ -203,6 +203,19 @@ func (cc *ConversionCreate) SaveX(ctx context.Context) *Conversion {
 	return v
 }
 
+// Exec executes the query.
+func (cc *ConversionCreate) Exec(ctx context.Context) error {
+	_, err := cc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (cc *ConversionCreate) ExecX(ctx context.Context) {
+	if err := cc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (cc *ConversionCreate) check() error {
 	return nil

@@ -91,6 +91,19 @@ func (ctc *CustomTypeCreate) SaveX(ctx context.Context) *CustomType {
 	return v
 }
 
+// Exec executes the query.
+func (ctc *CustomTypeCreate) Exec(ctx context.Context) error {
+	_, err := ctc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ctc *CustomTypeCreate) ExecX(ctx context.Context) {
+	if err := ctc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ctc *CustomTypeCreate) check() error {
 	return nil
