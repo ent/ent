@@ -55,14 +55,14 @@ func main() {
 
 The privacy layer allows configuring privacy policy for queries and mutations of entities in the database.
 
-This option can be added to projects using the `--feature privacy` flag, and its full documentation exists
+This option can added to a project using the `--feature privacy` flag, and its full documentation exists
 in the [privacy page](privacy.md).
 
 #### EntQL Filtering
 
 The `entql` option provides a generic and dynamic filtering capability at runtime for the different query builders.
 
-This option can be added to projects using the `--feature entql` flag, and more information about it exists
+This option can be added to a project using the `--feature entql` flag, and more information about it exists
 in the [privacy page](privacy.md#multi-tenancy).
 
 #### Auto-Solve Merge Conflicts
@@ -70,14 +70,14 @@ in the [privacy page](privacy.md#multi-tenancy).
 The `schema/snapshot` option tells `entc` (ent codegen) to store a snapshot of the latest schema in an internal package,
 and use it to automatically solve merge conflicts when user's schema can't be built.
 
-This option can be added to projects using the `--feature schema/snapshot` flag, but please see
+This option can be added to a project using the `--feature schema/snapshot` flag, but please see
 [ent/ent/issues/852](https://github.com/ent/ent/issues/852) to get more context about it.
 
 #### Schema Config
 
 The `sql/schemaconfig` option lets you pass alternate SQL database names to models. This is useful when your models don't all live under one database and are spread out across different schemas.
 
-This option can be added to projects using the `--feature sql/schemaconfig` flag. Once you generate the code, you can now use a new option as such: 
+This option can be added to a project using the `--feature sql/schemaconfig` flag. Once you generate the code, you can now use a new option as such: 
 
 ```go
 c, err := ent.Open(dialect, conn, ent.AlternateSchema(ent.SchemaConfig{
@@ -86,4 +86,30 @@ c, err := ent.Open(dialect, conn, ent.AlternateSchema(ent.SchemaConfig{
 }))
 c.User.Query().All(ctx) // SELECT * FROM `usersdb`.`users`
 c.Car.Query().All(ctx) 	// SELECT * FROM `carsdb`.`cars`
+```
+
+#### Row-level Locks
+
+The `sql/lock` option lets configure row-level locking using the SQL `SELECT ... FOR {UPDATE | SHARE}` syntax.
+
+This option can be added to a project using the `--feature sql/lock` flag.
+
+```go
+tx, err := client.Tx(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+tx.Pet.Query().
+	Where(pet.Name(name)).
+	ForUpdate().
+	Only(ctx)
+
+tx.Pet.Query().
+	Where(pet.ID(id)).
+	ForShare(
+		sql.WithLockTables(pet.Table),
+		sql.WithLockAction(sql.NoWait),
+	).
+	Only(ctx)
 ```
