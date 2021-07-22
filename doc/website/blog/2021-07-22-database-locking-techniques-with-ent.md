@@ -121,8 +121,8 @@ func optimisticUpdate(tx *ent.Tx, prev *ent.User, online bool) error {
 		SaveX(context.Background())
 
 	// SaveX returns the number of affected records. If this value is 
-  // different from 1 the record must have been changed by another
-  // process.
+	// different from 1 the record must have been changed by another
+	// process.
 	if n != 1 {
 		return fmt.Errorf("update failed: user id=%d updated by another process", prev.ID)
 	}
