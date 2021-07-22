@@ -1715,4 +1715,3 @@ func TestSelector_UnionOrderBy(t *testing.T) {
 		Query()
 	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
 }
-
