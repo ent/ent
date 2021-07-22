@@ -61,7 +61,7 @@ On a high-level, this is how optimistic locking works:
       will increase the current value by 1, and some will set it
       to the current timestamp.
 - The database returns the amount of rows modified by
-  the UPDATE statement. If the number is 0, this means someone
+  the `UPDATE` statement. If the number is 0, this means someone
   else has modified the record between the time we read it, and 
   the time we wanted to update it. The transaction is considered 
   failed, rolled back and can be retried.
