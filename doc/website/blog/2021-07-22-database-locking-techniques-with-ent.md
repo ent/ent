@@ -104,10 +104,10 @@ Next, let's implement a simple optimistically locked update to our
 ```go
 func optimisticUpdate(tx *ent.Tx, prev *ent.User, online bool) error {
 	// The next version number for the record must monotonically increase
-  // using the current timestamp is a common technique to achieve this. 
+	// using the current timestamp is a common technique to achieve this. 
 	nextVer := time.Now().UnixNano()
 
-  // We begin the update operation:
+	// We begin the update operation:
 	n := tx.User.Update().
 
 		// We limit our update to only work on the correct record and version:
