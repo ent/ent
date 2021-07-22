@@ -1703,3 +1703,15 @@ func TestSelectWithLock(t *testing.T) {
 	require.Equal(t, "SELECT * FROM `users` WHERE `id` = ? LOCK IN SHARE MODE", query)
 	require.Equal(t, 20, args[0])
 }
+
+func TestSelector_UnionOrderBy(t *testing.T) {
+	table := Table("users")
+	query, _ := Dialect(dialect.Postgres).
+		Select("*").
+		From(table).
+		Where(EQ("active", true)).
+		Union(Select("*").From(Table("old_users1"))).
+		OrderBy(table.C("whatever")).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
+}
