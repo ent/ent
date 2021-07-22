@@ -150,7 +150,7 @@ func TestOCC(t *testing.T) {
 		log.Fatalf("failed creating transaction: %v", err)
 	}
 
-  // Try to update the record once. This should succeed.
+	// Try to update the record once. This should succeed.
 	if err := optimisticUpdate(tx, userCopy, false); err != nil {
 		tx.Rollback()
 		log.Fatal("unexpected failure:", err)
