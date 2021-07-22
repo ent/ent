@@ -31,26 +31,26 @@ const (
 	EdgeInfo = "info"
 	// Table holds the table name of the group in the database.
 	Table = "groups"
-	// FilesTable is the table the holds the files relation/edge.
+	// FilesTable is the table that holds the files relation/edge.
 	FilesTable = "files"
 	// FilesInverseTable is the table name for the File entity.
 	// It exists in this package in order to avoid circular dependency with the "file" package.
 	FilesInverseTable = "files"
 	// FilesColumn is the table column denoting the files relation/edge.
 	FilesColumn = "group_files"
-	// BlockedTable is the table the holds the blocked relation/edge.
+	// BlockedTable is the table that holds the blocked relation/edge.
 	BlockedTable = "users"
 	// BlockedInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	BlockedInverseTable = "users"
 	// BlockedColumn is the table column denoting the blocked relation/edge.
 	BlockedColumn = "group_blocked"
-	// UsersTable is the table the holds the users relation/edge. The primary key declared below.
+	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
 	UsersTable = "user_groups"
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UsersInverseTable = "users"
-	// InfoTable is the table the holds the info relation/edge.
+	// InfoTable is the table that holds the info relation/edge.
 	InfoTable = "groups"
 	// InfoInverseTable is the table name for the GroupInfo entity.
 	// It exists in this package in order to avoid circular dependency with the "groupinfo" package.

@@ -17,7 +17,7 @@ in the LICENSE file in the root directory of this source tree.
 	// Table holds the table name of the {{ lower $.Name }} in the database.
 	Table = "{{ $.Table }}"
 	{{- range $e := $.Edges }}
-		// {{ $e.TableConstant }} is the table the holds the {{ $e.Name }} relation/edge.
+		// {{ $e.TableConstant }} is the table that holds the {{ $e.Name }} relation/edge.
 		{{- if $e.M2M }} The primary key declared below.{{ end }}
 		{{ $e.TableConstant }} = "{{ $e.Rel.Table }}"
 		{{- if ne $.Table $e.Type.Table }}

@@ -23,12 +23,12 @@ const (
 	EdgeUsers = "users"
 	// Table holds the table name of the team in the database.
 	Table = "teams"
-	// TasksTable is the table the holds the tasks relation/edge. The primary key declared below.
+	// TasksTable is the table that holds the tasks relation/edge. The primary key declared below.
 	TasksTable = "task_teams"
 	// TasksInverseTable is the table name for the Task entity.
 	// It exists in this package in order to avoid circular dependency with the "task" package.
 	TasksInverseTable = "tasks"
-	// UsersTable is the table the holds the users relation/edge. The primary key declared below.
+	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
 	UsersTable = "user_teams"
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.

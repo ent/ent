@@ -31,12 +31,12 @@ const (
 	EdgeOwner = "owner"
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
-	// TeamsTable is the table the holds the teams relation/edge. The primary key declared below.
+	// TeamsTable is the table that holds the teams relation/edge. The primary key declared below.
 	TeamsTable = "task_teams"
 	// TeamsInverseTable is the table name for the Team entity.
 	// It exists in this package in order to avoid circular dependency with the "team" package.
 	TeamsInverseTable = "teams"
-	// OwnerTable is the table the holds the owner relation/edge.
+	// OwnerTable is the table that holds the owner relation/edge.
 	OwnerTable = "tasks"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.

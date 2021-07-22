@@ -19,11 +19,11 @@ const (
 	EdgeNext = "next"
 	// Table holds the table name of the node in the database.
 	Table = "nodes"
-	// PrevTable is the table the holds the prev relation/edge.
+	// PrevTable is the table that holds the prev relation/edge.
 	PrevTable = "nodes"
 	// PrevColumn is the table column denoting the prev relation/edge.
 	PrevColumn = "node_next"
-	// NextTable is the table the holds the next relation/edge.
+	// NextTable is the table that holds the next relation/edge.
 	NextTable = "nodes"
 	// NextColumn is the table column denoting the next relation/edge.
 	NextColumn = "node_next"

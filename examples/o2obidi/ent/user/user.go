@@ -19,7 +19,7 @@ const (
 	EdgeSpouse = "spouse"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// SpouseTable is the table the holds the spouse relation/edge.
+	// SpouseTable is the table that holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
 	SpouseColumn = "user_spouse"

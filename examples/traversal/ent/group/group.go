@@ -19,12 +19,12 @@ const (
 	EdgeAdmin = "admin"
 	// Table holds the table name of the group in the database.
 	Table = "groups"
-	// UsersTable is the table the holds the users relation/edge. The primary key declared below.
+	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
 	UsersTable = "group_users"
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UsersInverseTable = "users"
-	// AdminTable is the table the holds the admin relation/edge.
+	// AdminTable is the table that holds the admin relation/edge.
 	AdminTable = "groups"
 	// AdminInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.

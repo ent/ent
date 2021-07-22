@@ -27,14 +27,14 @@ const (
 	EdgeCar = "car"
 	// Table holds the table name of the rental in the database.
 	Table = "rentals"
-	// UserTable is the table the holds the user relation/edge.
+	// UserTable is the table that holds the user relation/edge.
 	UserTable = "rentals"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
-	// CarTable is the table the holds the car relation/edge.
+	// CarTable is the table that holds the car relation/edge.
 	CarTable = "rentals"
 	// CarInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.

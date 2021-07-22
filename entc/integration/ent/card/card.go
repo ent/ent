@@ -31,14 +31,14 @@ const (
 	EdgeSpec = "spec"
 	// Table holds the table name of the card in the database.
 	Table = "cards"
-	// OwnerTable is the table the holds the owner relation/edge.
+	// OwnerTable is the table that holds the owner relation/edge.
 	OwnerTable = "cards"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "user_card"
-	// SpecTable is the table the holds the spec relation/edge. The primary key declared below.
+	// SpecTable is the table that holds the spec relation/edge. The primary key declared below.
 	SpecTable = "spec_card"
 	// SpecInverseTable is the table name for the Spec entity.
 	// It exists in this package in order to avoid circular dependency with the "spec" package.

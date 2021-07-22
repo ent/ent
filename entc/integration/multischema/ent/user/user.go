@@ -19,14 +19,14 @@ const (
 	EdgeGroups = "groups"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// PetsTable is the table the holds the pets relation/edge.
+	// PetsTable is the table that holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "user_pets"
-	// GroupsTable is the table the holds the groups relation/edge. The primary key declared below.
+	// GroupsTable is the table that holds the groups relation/edge. The primary key declared below.
 	GroupsTable = "group_users"
 	// GroupsInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.

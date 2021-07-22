@@ -19,11 +19,11 @@ const (
 	EdgeChildren = "children"
 	// Table holds the table name of the node in the database.
 	Table = "nodes"
-	// ParentTable is the table the holds the parent relation/edge.
+	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "nodes"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "node_children"
-	// ChildrenTable is the table the holds the children relation/edge.
+	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "nodes"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "node_children"

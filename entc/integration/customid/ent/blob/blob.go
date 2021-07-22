@@ -23,11 +23,11 @@ const (
 	EdgeLinks = "links"
 	// Table holds the table name of the blob in the database.
 	Table = "blobs"
-	// ParentTable is the table the holds the parent relation/edge.
+	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "blobs"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "blob_parent"
-	// LinksTable is the table the holds the links relation/edge. The primary key declared below.
+	// LinksTable is the table that holds the links relation/edge. The primary key declared below.
 	LinksTable = "blob_links"
 )
 
