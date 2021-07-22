@@ -29,21 +29,21 @@ const (
 	EdgeField = "field"
 	// Table holds the table name of the file in the database.
 	Table = "files"
-	// OwnerTable is the table the holds the owner relation/edge.
+	// OwnerTable is the table that holds the owner relation/edge.
 	OwnerTable = "files"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "user_files"
-	// TypeTable is the table the holds the type relation/edge.
+	// TypeTable is the table that holds the type relation/edge.
 	TypeTable = "files"
 	// TypeInverseTable is the table name for the FileType entity.
 	// It exists in this package in order to avoid circular dependency with the "filetype" package.
 	TypeInverseTable = "file_types"
 	// TypeColumn is the table column denoting the type relation/edge.
 	TypeColumn = "file_type_files"
-	// FieldTable is the table the holds the field relation/edge.
+	// FieldTable is the table that holds the field relation/edge.
 	FieldTable = "field_types"
 	// FieldInverseTable is the table name for the FieldType entity.
 	// It exists in this package in order to avoid circular dependency with the "fieldtype" package.

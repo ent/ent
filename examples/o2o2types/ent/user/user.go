@@ -19,7 +19,7 @@ const (
 	EdgeCard = "card"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// CardTable is the table the holds the card relation/edge.
+	// CardTable is the table that holds the card relation/edge.
 	CardTable = "cards"
 	// CardInverseTable is the table name for the Card entity.
 	// It exists in this package in order to avoid circular dependency with the "card" package.

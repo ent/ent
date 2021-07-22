@@ -17,7 +17,7 @@ const (
 	EdgeStreets = "streets"
 	// Table holds the table name of the city in the database.
 	Table = "cities"
-	// StreetsTable is the table the holds the streets relation/edge.
+	// StreetsTable is the table that holds the streets relation/edge.
 	StreetsTable = "streets"
 	// StreetsInverseTable is the table name for the Street entity.
 	// It exists in this package in order to avoid circular dependency with the "street" package.

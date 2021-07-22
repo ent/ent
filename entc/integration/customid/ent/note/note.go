@@ -23,11 +23,11 @@ const (
 	EdgeChildren = "children"
 	// Table holds the table name of the note in the database.
 	Table = "notes"
-	// ParentTable is the table the holds the parent relation/edge.
+	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "notes"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "note_children"
-	// ChildrenTable is the table the holds the children relation/edge.
+	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "notes"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "note_children"

@@ -21,7 +21,7 @@ const (
 	EdgeRentals = "rentals"
 	// Table holds the table name of the car in the database.
 	Table = "cars"
-	// RentalsTable is the table the holds the rentals relation/edge.
+	// RentalsTable is the table that holds the rentals relation/edge.
 	RentalsTable = "rentals"
 	// RentalsInverseTable is the table name for the Rental entity.
 	// It exists in this package in order to avoid circular dependency with the "rental" package.

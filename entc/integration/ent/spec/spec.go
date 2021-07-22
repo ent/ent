@@ -15,7 +15,7 @@ const (
 	EdgeCard = "card"
 	// Table holds the table name of the spec in the database.
 	Table = "specs"
-	// CardTable is the table the holds the card relation/edge. The primary key declared below.
+	// CardTable is the table that holds the card relation/edge. The primary key declared below.
 	CardTable = "spec_card"
 	// CardInverseTable is the table name for the Card entity.
 	// It exists in this package in order to avoid circular dependency with the "card" package.

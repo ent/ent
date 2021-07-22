@@ -21,14 +21,14 @@ const (
 	EdgeComments = "comments"
 	// Table holds the table name of the post in the database.
 	Table = "posts"
-	// AuthorTable is the table the holds the author relation/edge.
+	// AuthorTable is the table that holds the author relation/edge.
 	AuthorTable = "posts"
 	// AuthorInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	AuthorInverseTable = "users"
 	// AuthorColumn is the table column denoting the author relation/edge.
 	AuthorColumn = "author_id"
-	// CommentsTable is the table the holds the comments relation/edge.
+	// CommentsTable is the table that holds the comments relation/edge.
 	CommentsTable = "comments"
 	// CommentsInverseTable is the table name for the Comment entity.
 	// It exists in this package in order to avoid circular dependency with the "comment" package.
