@@ -70,6 +70,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://jasminek.net"><img src="https://avatars.githubusercontent.com/u/7853732?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Michal Mazurek</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=akfaew" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/nmemoto"><img src="https://avatars.githubusercontent.com/u/1522332?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Takafumi Umemoto</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=nmemoto" title="Documentation">📖</a></td>
     <td align="center"><a href="http://www.linkedin.com/in/khadija-sidhpuri-87709316a"><img src="https://avatars.githubusercontent.com/u/59063821?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Khadija Sidhpuri</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=squarebat" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/neel229"><img src="https://avatars.githubusercontent.com/u/53475167?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Neel Modi</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=neel229" title="Code">💻</a></td>
   </tr>
 </table>
 
