@@ -157,7 +157,7 @@ func TestOCC(t *testing.T) {
 	}
 
 	// Try to update the record a second time. This should fail.
-  err = optimisticUpdate(tx, orig, false)
+	err = optimisticUpdate(tx, orig, false)
 	if err == nil {
 		log.Fatal("expected second update to fail")
 	}
