@@ -141,7 +141,7 @@ func TestOCC(t *testing.T) {
 	// Create the user for the first time.
 	orig := client.User.Create().SetOnline(true).SaveX(ctx)
 
-  // Read another copy of the same user.
+	// Read another copy of the same user.
 	userCopy := client.User.GetX(ctx, orig.ID)
 
 	// Open a new transaction:
