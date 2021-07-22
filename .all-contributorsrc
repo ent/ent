@@ -437,6 +437,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "squarebat",
+      "name": "Khadija Sidhpuri",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59063821?v=4",
+      "profile": "http://www.linkedin.com/in/khadija-sidhpuri-87709316a",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
