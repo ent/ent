@@ -51,7 +51,7 @@ behavior without explicitly acquiring a lock on any record.
 On a high-level, this is how optimistic locking works:
 
 - Each record is assigned a numeric version number. This value 
-  must be monotonically increasing. Often unix timestamps of the latest row update are used.
+  must be monotonically increasing. Often Unix timestamps of the latest row update are used.
 - A transaction reads a record, noting its version number from the 
   database.
 - An `UPDATE` statement is issued to modify the record:
@@ -320,4 +320,3 @@ our [Slack channel](https://entgo.io/docs/slack).
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
 
 :::
-
