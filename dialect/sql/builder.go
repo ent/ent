@@ -2320,6 +2320,9 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString(" HAVING ")
 		b.Join(s.having)
 	}
+	if len(s.union) > 0 {
+		s.joinUnion(&b)
+	}
 	if len(s.order) > 0 {
 		s.joinOrder(&b)
 	}
@@ -2330,9 +2333,6 @@ func (s *Selector) Query() (string, []interface{}) {
 	if s.offset != nil {
 		b.WriteString(" OFFSET ")
 		b.WriteString(strconv.Itoa(*s.offset))
-	}
-	if len(s.union) > 0 {
-		s.joinUnion(&b)
 	}
 	s.joinLock(&b)
 	s.total = b.total
