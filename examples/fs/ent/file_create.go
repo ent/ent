@@ -133,6 +133,19 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 	return v
 }
 
+// Exec executes the query.
+func (fc *FileCreate) Exec(ctx context.Context) error {
+	_, err := fc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (fc *FileCreate) ExecX(ctx context.Context) {
+	if err := fc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (fc *FileCreate) defaults() {
 	if _, ok := fc.mutation.Deleted(); !ok {

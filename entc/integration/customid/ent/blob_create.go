@@ -126,6 +126,19 @@ func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
 	return v
 }
 
+// Exec executes the query.
+func (bc *BlobCreate) Exec(ctx context.Context) error {
+	_, err := bc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (bc *BlobCreate) ExecX(ctx context.Context) {
+	if err := bc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (bc *BlobCreate) defaults() {
 	if _, ok := bc.mutation.UUID(); !ok {

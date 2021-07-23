@@ -141,6 +141,19 @@ func (nc *NoteCreate) SaveX(ctx context.Context) *Note {
 	return v
 }
 
+// Exec executes the query.
+func (nc *NoteCreate) Exec(ctx context.Context) error {
+	_, err := nc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (nc *NoteCreate) ExecX(ctx context.Context) {
+	if err := nc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (nc *NoteCreate) defaults() {
 	if _, ok := nc.mutation.ID(); !ok {

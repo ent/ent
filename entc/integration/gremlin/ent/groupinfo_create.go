@@ -118,6 +118,19 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 	return v
 }
 
+// Exec executes the query.
+func (gic *GroupInfoCreate) Exec(ctx context.Context) error {
+	_, err := gic.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gic *GroupInfoCreate) ExecX(ctx context.Context) {
+	if err := gic.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (gic *GroupInfoCreate) defaults() {
 	if _, ok := gic.mutation.MaxUsers(); !ok {

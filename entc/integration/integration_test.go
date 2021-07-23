@@ -249,6 +249,8 @@ func Sanity(t *testing.T, client *ent.Client) {
 	fi, ok = reflect.TypeOf(ent.Card{}).FieldByName("Number")
 	require.True(ok)
 	require.Equal("-", fi.Tag.Get("json"))
+
+	client.User.Create().SetName("tarrence").SetAge(30).ExecX(ctx)
 }
 
 func Clone(t *testing.T, client *ent.Client) {

@@ -138,6 +138,19 @@ func (cc *CarCreate) SaveX(ctx context.Context) *Car {
 	return v
 }
 
+// Exec executes the query.
+func (cc *CarCreate) Exec(ctx context.Context) error {
+	_, err := cc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (cc *CarCreate) ExecX(ctx context.Context) {
+	if err := cc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (cc *CarCreate) check() error {
 	if v, ok := cc.mutation.BeforeID(); ok {

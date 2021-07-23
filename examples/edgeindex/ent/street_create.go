@@ -104,6 +104,19 @@ func (sc *StreetCreate) SaveX(ctx context.Context) *Street {
 	return v
 }
 
+// Exec executes the query.
+func (sc *StreetCreate) Exec(ctx context.Context) error {
+	_, err := sc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (sc *StreetCreate) ExecX(ctx context.Context) {
+	if err := sc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (sc *StreetCreate) check() error {
 	if _, ok := sc.mutation.Name(); !ok {

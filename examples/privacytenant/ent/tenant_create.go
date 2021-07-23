@@ -84,6 +84,19 @@ func (tc *TenantCreate) SaveX(ctx context.Context) *Tenant {
 	return v
 }
 
+// Exec executes the query.
+func (tc *TenantCreate) Exec(ctx context.Context) error {
+	_, err := tc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tc *TenantCreate) ExecX(ctx context.Context) {
+	if err := tc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tc *TenantCreate) check() error {
 	if _, ok := tc.mutation.Name(); !ok {

@@ -118,6 +118,19 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 	return v
 }
 
+// Exec executes the query.
+func (nc *NodeCreate) Exec(ctx context.Context) error {
+	_, err := nc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (nc *NodeCreate) ExecX(ctx context.Context) {
+	if err := nc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (nc *NodeCreate) check() error {
 	if _, ok := nc.mutation.Value(); !ok {

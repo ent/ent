@@ -129,6 +129,19 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 	return v
 }
 
+// Exec executes the query.
+func (ftc *FileTypeCreate) Exec(ctx context.Context) error {
+	_, err := ftc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ftc *FileTypeCreate) ExecX(ctx context.Context) {
+	if err := ftc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (ftc *FileTypeCreate) defaults() {
 	if _, ok := ftc.mutation.GetType(); !ok {

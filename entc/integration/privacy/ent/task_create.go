@@ -158,6 +158,19 @@ func (tc *TaskCreate) SaveX(ctx context.Context) *Task {
 	return v
 }
 
+// Exec executes the query.
+func (tc *TaskCreate) Exec(ctx context.Context) error {
+	_, err := tc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tc *TaskCreate) ExecX(ctx context.Context) {
+	if err := tc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (tc *TaskCreate) defaults() error {
 	if _, ok := tc.mutation.Status(); !ok {

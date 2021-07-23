@@ -111,6 +111,19 @@ func (ic *InfoCreate) SaveX(ctx context.Context) *Info {
 	return v
 }
 
+// Exec executes the query.
+func (ic *InfoCreate) Exec(ctx context.Context) error {
+	_, err := ic.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ic *InfoCreate) ExecX(ctx context.Context) {
+	if err := ic.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ic *InfoCreate) check() error {
 	if _, ok := ic.mutation.Content(); !ok {

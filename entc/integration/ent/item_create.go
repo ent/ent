@@ -83,6 +83,19 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 	return v
 }
 
+// Exec executes the query.
+func (ic *ItemCreate) Exec(ctx context.Context) error {
+	_, err := ic.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ic *ItemCreate) ExecX(ctx context.Context) {
+	if err := ic.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ic *ItemCreate) check() error {
 	if v, ok := ic.mutation.ID(); ok {

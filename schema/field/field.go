@@ -550,7 +550,7 @@ func (b *bytesBuilder) Optional() *bytesBuilder {
 }
 
 // Unique makes the field unique within all vertices of this type.
-// Only supported in PostgresSQL.
+// Only supported in PostgreSQL.
 func (b *bytesBuilder) Unique() *bytesBuilder {
 	b.desc.Unique = true
 	return b

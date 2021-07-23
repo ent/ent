@@ -153,6 +153,19 @@ func (mc *MetadataCreate) SaveX(ctx context.Context) *Metadata {
 	return v
 }
 
+// Exec executes the query.
+func (mc *MetadataCreate) Exec(ctx context.Context) error {
+	_, err := mc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mc *MetadataCreate) ExecX(ctx context.Context) {
+	if err := mc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (mc *MetadataCreate) defaults() {
 	if _, ok := mc.mutation.Age(); !ok {
