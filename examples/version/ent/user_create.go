@@ -54,9 +54,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
-	if err := uc.defaults(); err != nil {
-		return nil, err
-	}
+	uc.defaults()
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
 			return nil, err
@@ -115,15 +113,11 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (uc *UserCreate) defaults() error {
+func (uc *UserCreate) defaults() {
 	if _, ok := uc.mutation.Version(); !ok {
-		if user.DefaultVersion == nil {
-			return fmt.Errorf("ent: uninitialized user.DefaultVersion (forgotten import ent/runtime?)")
-		}
 		v := user.DefaultVersion()
 		uc.mutation.SetVersion(v)
 	}
-	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.

@@ -6,4 +6,22 @@
 
 package ent
 
-// The schema-stitching logic is generated in entgo.io/ent/examples/version/ent/runtime/runtime.go
+import (
+	"entgo.io/ent/examples/version/ent/schema"
+	"entgo.io/ent/examples/version/ent/user"
+)
+
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
+// to their package variables.
+func init() {
+	userMixin := schema.User{}.Mixin()
+	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescVersion is the schema descriptor for version field.
+	userDescVersion := userMixinFields0[0].Descriptor()
+	// user.DefaultVersion holds the default value on creation for the version field.
+	user.DefaultVersion = userDescVersion.Default.(func() int64)
+}
