@@ -52,9 +52,11 @@ import (
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{- with $tmpls := matchTemplate (printf "dialect/%s/import/additional/*" $.Storage) }}
-		{{- range $tmpl := $tmpls }}
-			{{- xtemplate $tmpl $ }}
+	{{- if $.Storage }}
+		{{- with $tmpls := matchTemplate (printf "dialect/%s/import/additional/*" $.Storage) }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $ }}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 {{ end }}
