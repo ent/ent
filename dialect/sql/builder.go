@@ -1946,9 +1946,16 @@ func (s *Selector) Table() *SelectTable {
 	return s.from.(*SelectTable)
 }
 
-// TableName returns the name of the selected table.
+// TableName returns the name of the selected table or alias of selector.
 func (s *Selector) TableName() string {
-	return s.Table().name
+	switch view := s.from.(type) {
+	case *SelectTable:
+		return view.name
+	case *Selector:
+		return view.as
+	default:
+		panic(fmt.Sprintf("unhandled TableView type %T", s.from))
+	}
 }
 
 // Join appends a `JOIN` clause to the statement.
