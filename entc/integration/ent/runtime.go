@@ -57,6 +57,10 @@ func init() {
 	card.NameValidator = cardDescName.Validators[0].(func(string) error)
 	fieldtypeFields := schema.FieldType{}.Fields()
 	_ = fieldtypeFields
+	// fieldtypeDescInt64 is the schema descriptor for int64 field.
+	fieldtypeDescInt64 := fieldtypeFields[4].Descriptor()
+	// fieldtype.UpdateDefaultInt64 holds the default value on update for the int64 field.
+	fieldtype.UpdateDefaultInt64 = fieldtypeDescInt64.UpdateDefault.(func() int64)
 	// fieldtypeDescValidateOptionalInt32 is the schema descriptor for validate_optional_int32 field.
 	fieldtypeDescValidateOptionalInt32 := fieldtypeFields[15].Descriptor()
 	// fieldtype.ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
@@ -65,6 +69,10 @@ func init() {
 	fieldtypeDescMAC := fieldtypeFields[27].Descriptor()
 	// fieldtype.MACValidator is a validator for the "mac" field. It is called by the builders before save.
 	fieldtype.MACValidator = fieldtypeDescMAC.Validators[0].(func(string) error)
+	// fieldtypeDescDuration is the schema descriptor for duration field.
+	fieldtypeDescDuration := fieldtypeFields[31].Descriptor()
+	// fieldtype.UpdateDefaultDuration holds the default value on update for the duration field.
+	fieldtype.UpdateDefaultDuration = fieldtypeDescDuration.UpdateDefault.(func() time.Duration)
 	// fieldtypeDescDir is the schema descriptor for dir field.
 	fieldtypeDescDir := fieldtypeFields[32].Descriptor()
 	// fieldtype.DefaultDir holds the default value on creation for the dir field.

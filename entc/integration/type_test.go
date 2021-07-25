@@ -108,13 +108,18 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(&schema.Pair{K: []byte("K"), V: []byte("V")}, ft.NilPair)
 	require.EqualValues([]string{"foo", "bar", "baz"}, ft.StringArray)
 	require.Equal("1000", ft.BigInt.String())
+	exists, err := client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour * 2)).Exist(ctx)
+	require.NoError(err)
+	require.True(exists)
+	exists, err = client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour)).Exist(ctx)
+	require.NoError(err)
+	require.False(exists)
 
 	ft = ft.Update().
 		SetInt(1).
 		SetInt8(math.MaxInt8).
 		SetInt16(math.MaxInt16).
 		SetInt32(math.MaxInt16).
-		SetInt64(math.MaxInt16).
 		SetOptionalInt8(math.MaxInt8).
 		SetOptionalInt16(math.MaxInt16).
 		SetOptionalInt32(math.MaxInt32).
@@ -170,13 +175,8 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Nil(ft.NillableUUID)
 	require.Equal(uuid.UUID{}, ft.UUID)
 	require.Equal("2000", ft.BigInt.String())
-
-	exists, err := client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour * 2)).Exist(ctx)
-	require.NoError(err)
-	require.True(exists)
-	exists, err = client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour)).Exist(ctx)
-	require.NoError(err)
-	require.False(exists)
+	require.EqualValues(100, ft.Int64, "UpdateDefault sets the value to 100")
+	require.EqualValues(100, ft.Duration, "UpdateDefault sets the value to 100ns")
 
 	_, err = client.Task.CreateBulk(
 		client.Task.Create().SetPriority(schema.PriorityLow),

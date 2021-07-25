@@ -1137,20 +1137,21 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 }
 
 func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {
-	typ := reflect.TypeOf(d.Default)
-	if typ.Kind() != reflect.Func || d.Err != nil {
-		return
-	}
-	err := fmt.Errorf("expect type (func() %s) for default value", d.Info)
-	if typ.NumIn() != 0 || typ.NumOut() != 1 {
-		d.Err = err
-	}
-	rtype := expectType
-	if d.Info.RType != nil {
-		rtype = d.Info.RType.rtype
-	}
-	if !typ.Out(0).AssignableTo(rtype) {
-		d.Err = err
+	for _, typ := range []reflect.Type{reflect.TypeOf(d.Default), reflect.TypeOf(d.UpdateDefault)} {
+		if typ == nil || typ.Kind() != reflect.Func || d.Err != nil {
+			continue
+		}
+		err := fmt.Errorf("expect type (func() %s) for default value", d.Info)
+		if typ.NumIn() != 0 || typ.NumOut() != 1 {
+			d.Err = err
+		}
+		rtype := expectType
+		if d.Info.RType != nil {
+			rtype = d.Info.RType.rtype
+		}
+		if !typ.Out(0).AssignableTo(rtype) {
+			d.Err = err
+		}
 	}
 }
 

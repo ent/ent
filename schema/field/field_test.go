@@ -95,15 +95,21 @@ func TestInt(t *testing.T) {
 func TestInt_DefaultFunc(t *testing.T) {
 	type CustomInt int
 
-	f1 := func() int { return 1000 }
+	f1 := func() CustomInt { return 1000 }
 	fd := field.Int("id").DefaultFunc(f1).GoType(CustomInt(0)).Descriptor()
-	assert.Error(t, fd.Err, "expect type (func() field_test.CustomInt) for default value")
-
-	fd = field.Int("dir").GoType(CustomInt(0)).DefaultFunc(f1).Descriptor()
-	assert.Error(t, fd.Err, "`var _ CustomInt = f2()` should fail")
+	assert.NoError(t, fd.Err)
 
 	fd = field.Int("id").DefaultFunc(f1).Descriptor()
+	assert.Error(t, fd.Err, "`var _ int = f1()` should fail")
+
+	f2 := func() int { return 1000 }
+	fd = field.Int("dir").GoType(CustomInt(0)).DefaultFunc(f2).Descriptor()
+	assert.Error(t, fd.Err, "`var _ CustomInt = f2()` should fail")
+
+	fd = field.Int("id").DefaultFunc(f2).UpdateDefault(f2).Descriptor()
 	assert.NoError(t, fd.Err)
+	assert.NotNil(t, fd.Default)
+	assert.NotNil(t, fd.UpdateDefault)
 }
 
 func TestFloat(t *testing.T) {

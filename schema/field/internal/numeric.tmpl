@@ -110,7 +110,7 @@ func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *{{ $builder }}) DefaultFunc(fn func(){{ $t }}) *{{ $builder }} {
+func (b *{{ $builder }}) DefaultFunc(fn interface{}) *{{ $builder }} {
 	b.desc.Default = fn
 	return b
 }
@@ -122,8 +122,8 @@ func (b *{{ $builder }}) DefaultFunc(fn func(){{ $t }}) *{{ $builder }} {
 //		Default(0).
 //		UpdateDefault(GenNumber),
 //
-func (b *{{ $builder }}) UpdateDefault(fn func(){{ $t }}) *{{ $builder }} {
-    b.desc.Default = fn
+func (b *{{ $builder }}) UpdateDefault(fn interface{}) *{{ $builder }} {
+    b.desc.UpdateDefault = fn
     return b
 }
 
@@ -219,7 +219,7 @@ func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $buil
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *{{ $builder }}) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc({{ $t }}Type)
 	}
 	return b.desc
