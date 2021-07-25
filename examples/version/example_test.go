@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"entgo.io/ent/examples/version/ent"
 	_ "entgo.io/ent/examples/version/ent/runtime"
@@ -32,15 +33,23 @@ func Example_OptimisticLock() {
 	fmt.Println(usr.ID, usr.Status)
 
 	usrCopy := client.User.Query().OnlyX(ctx)
-	usrCopy = usrCopy.Update().SetStatus(user.StatusOffline).SaveX(ctx)
-	fmt.Println(usrCopy.ID, usrCopy.Status)
+	affected := client.User.Update().
+		Where(user.ID(usrCopy.ID), user.Version(usrCopy.Version)).
+		SetStatus(user.StatusOffline).
+		SetVersion(time.Now().UnixNano()).
+		SaveX(ctx)
+	fmt.Println(affected)
 
-	// The operation fails because the user was updated by another process (usrCopy).
-	_, err = usr.Update().SetStatus(user.StatusOffline).Save(ctx)
-	fmt.Println(err)
+	// The operation won't updated the database because the user was updated by another process (usrCopy).
+	affected = client.User.Update().
+		Where(user.ID(usr.ID), user.Version(usr.Version)).
+		SetStatus(user.StatusOffline).
+		SetVersion(time.Now().UnixNano()).
+		SaveX(ctx)
+	fmt.Println(affected)
 
 	// Output:
 	// 1 online
-	// 1 offline
-	// user 1 was changed by another process
+	// 1
+	// 0
 }

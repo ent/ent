@@ -6,28 +6,7 @@
 
 package runtime
 
-import (
-	"entgo.io/ent/examples/version/ent/schema"
-	"entgo.io/ent/examples/version/ent/user"
-)
-
-// The init function reads all schema descriptors with runtime code
-// (default values, validators, hooks and policies) and stitches it
-// to their package variables.
-func init() {
-	userMixin := schema.User{}.Mixin()
-	userMixinHooks0 := userMixin[0].Hooks()
-	user.Hooks[0] = userMixinHooks0[0]
-	user.Hooks[1] = userMixinHooks0[1]
-	userMixinFields0 := userMixin[0].Fields()
-	_ = userMixinFields0
-	userFields := schema.User{}.Fields()
-	_ = userFields
-	// userDescVersion is the schema descriptor for version field.
-	userDescVersion := userMixinFields0[0].Descriptor()
-	// user.DefaultVersion holds the default value on creation for the version field.
-	user.DefaultVersion = userDescVersion.Default.(func() int64)
-}
+// The schema-stitching logic is generated in entgo.io/ent/examples/version/ent/runtime.go
 
 const (
 	Version = "(devel)" // Version of ent codegen.
