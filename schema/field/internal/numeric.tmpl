@@ -110,9 +110,21 @@ func (b *{{ $builder }}) Default(i {{ $t }}) *{{ $builder }} {
 
 // DefaultFunc sets the function that is applied to set the default value
 // of the field on creation.
-func (b *{{ $builder }}) DefaultFunc(fn interface{}) *{{ $builder }} {
+func (b *{{ $builder }}) DefaultFunc(fn func(){{ $t }}) *{{ $builder }} {
 	b.desc.Default = fn
 	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.{{ title $t.String }}("{{$t.String}}").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *{{ $builder }}) UpdateDefault(fn func(){{ $t }}) *{{ $builder }} {
+    b.desc.Default = fn
+    return b
 }
 
 // Nillable indicates that this field is a nillable.
