@@ -1492,41 +1492,6 @@ WHERE (((("users"."id1" = "users"."id2" AND "users"."id1" <> "users"."id2")
 AND "users"."id1" > "users"."id2") AND "users"."id1" >= "users"."id2") 
 AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""),
 		},
-		{
-			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").ConflictColumns("id").UpdateSet("email", "user-1@example.com"),
-			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "excluded"."id", "email" = "excluded"."email"`,
-			wantArgs:  []interface{}{"1", "user@example.com"},
-		},
-		{
-			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("id"),
-			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "id", "email" = "email"`,
-			wantArgs:  []interface{}{"1", "user@example.com"},
-		},
-		{
-			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithAlternateValues).UpdateSet("email", "user-1@example.com").ConflictColumns("email"),
-			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = ?",
-			wantArgs:  []interface{}{"user@example.com", "user-1@example.com"},
-		},
-		{
-			input:     Dialect(dialect.Postgres).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithAlternateValues).UpdateSet("email", "user-1@example.com").ConflictColumns("email"),
-			wantQuery: `INSERT INTO "users" ("email") VALUES ($1) ON CONFLICT ("email") DO UPDATE SET "email" = $2`,
-			wantArgs:  []interface{}{"user@example.com", "user-1@example.com"},
-		},
-		{
-			input:     Dialect(dialect.Postgres).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("email"),
-			wantQuery: `INSERT INTO "users" ("email") VALUES ($1) ON CONFLICT ("email") DO UPDATE SET "email" = "email"`,
-			wantArgs:  []interface{}{"user@example.com"},
-		},
-		{
-			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("email"),
-			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = `email`",
-			wantArgs:  []interface{}{"user@example.com"},
-		},
-		{
-			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithNewValues).ConflictColumns("email"),
-			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = VALUES(`email`)",
-			wantArgs:  []interface{}{"user@example.com"},
-		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -1732,4 +1697,110 @@ func TestUpdateBuilder_SetExpr(t *testing.T) {
 		Query()
 	require.Equal(t, `UPDATE "users" SET "name" = $1, "active" = NOT(active), "age" = "excluded"."age", "x" = "excluded"."x" || ' (formerly ' || "x" || ')', "y" = $2 + "excluded"."y" + $3`, query)
 	require.Equal(t, []interface{}{"Ariel", "~", "~"}, args)
+}
+
+func TestInsert_OnConflict(t *testing.T) {
+	t.Run("Postgres", func(t *testing.T) { // And SQLite.
+		query, args := Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id", "email").
+			Values("1", "user@example.com").
+			OnConflict(
+				ConflictColumns("email"),
+				ConflictWhere(EQ("name", "Ariel")),
+				ResolveWithNewValues(),
+				UpdateWhere(NEQ("updated_at", 0)),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "excluded"."id", "email" = "excluded"."email" WHERE "updated_at" <> $4`, query)
+		require.Equal(t, []interface{}{"1", "user@example.com", "Ariel", 0}, args)
+
+		query, args = Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id", "name").
+			Values("1", "Mashraki").
+			OnConflict(
+				ConflictConstraint("users_pkey"),
+				DoNothing(),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id", "name") VALUES ($1, $2) ON CONFLICT ON CONSTRAINT "users_pkey" DO NOTHING`, query)
+		require.Equal(t, []interface{}{"1", "Mashraki"}, args)
+
+		query, args = Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id").
+			Values(1).
+			OnConflict(
+				DoNothing(),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id") VALUES ($1) ON CONFLICT DO NOTHING`, query)
+		require.Equal(t, []interface{}{1}, args)
+
+		query, args = Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id").
+			Values(1).
+			OnConflict(
+				ConflictColumns("id"),
+				ResolveWithIgnore(),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id") VALUES ($1) ON CONFLICT ("id") DO UPDATE SET "id" = "users"."id"`, query)
+		require.Equal(t, []interface{}{1}, args)
+
+		query, args = Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id", "name").
+			Values(1, "Mashraki").
+			OnConflict(
+				ConflictColumns("name"),
+				ResolveWith(func(s *UpdateSet) {
+					s.SetExcluded("name")
+					s.SetNull("created_at")
+				}),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id", "name") VALUES ($1, $2) ON CONFLICT ("name") DO UPDATE SET "created_at" = NULL, "name" = "excluded"."name"`, query)
+		require.Equal(t, []interface{}{1, "Mashraki"}, args)
+	})
+
+	t.Run("MySQL", func(t *testing.T) {
+		query, args := Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("id", "email").
+			Values("1", "user@example.com").
+			OnConflict(
+				ResolveWithNewValues(),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`id`, `email`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `email` = VALUES(`email`)", query)
+		require.Equal(t, []interface{}{"1", "user@example.com"}, args)
+
+		query, args = Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("id", "email").
+			Values("1", "user@example.com").
+			OnConflict(
+				ResolveWithIgnore(),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`id`, `email`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `id` = `users`.`id`, `email` = `users`.`email`", query)
+		require.Equal(t, []interface{}{"1", "user@example.com"}, args)
+
+		query, args = Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("id", "name").
+			Values("1", "Mashraki").
+			OnConflict(
+				ResolveWith(func(s *UpdateSet) {
+					s.SetExcluded("name")
+					s.SetNull("created_at")
+				}),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `created_at` = NULL, `name` = VALUES(`name`)", query)
+		require.Equal(t, []interface{}{"1", "Mashraki"}, args)
+	})
 }
