@@ -78,7 +78,7 @@ const (
 			{{- if $f.UpdateDefault }}
 				{{- $default := $f.UpdateDefaultName }}
 				// {{ $default }} holds the default value on update for the "{{ $f.Name }}" field.
-				{{ $default }} {{ if $f.IsTime }}func() {{ end }}{{ $f.Type }}
+				{{ $default }} func() {{ $f.Type }}
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := $f.Validator }}

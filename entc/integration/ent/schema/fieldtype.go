@@ -41,7 +41,10 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		field.Int8("int8"),
 		field.Int16("int16"),
 		field.Int32("int32"),
-		field.Int64("int64"),
+		field.Int64("int64").
+			UpdateDefault(func() int64 {
+				return 100
+			}),
 		field.Int("optional_int").
 			Optional(),
 		field.Int8("optional_int8").
@@ -143,6 +146,9 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			Optional(),
 		field.Int64("duration").
 			GoType(time.Duration(0)).
+			UpdateDefault(func() time.Duration {
+				return time.Duration(100)
+			}).
 			Optional(),
 		field.String("dir").
 			GoType(http.Dir("dir")).

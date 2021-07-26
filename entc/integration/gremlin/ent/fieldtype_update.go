@@ -747,14 +747,6 @@ func (ftu *FieldTypeUpdate) SetDuration(t time.Duration) *FieldTypeUpdate {
 	return ftu
 }
 
-// SetNillableDuration sets the "duration" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableDuration(t *time.Duration) *FieldTypeUpdate {
-	if t != nil {
-		ftu.SetDuration(*t)
-	}
-	return ftu
-}
-
 // AddDuration adds t to the "duration" field.
 func (ftu *FieldTypeUpdate) AddDuration(t time.Duration) *FieldTypeUpdate {
 	ftu.mutation.AddDuration(t)
@@ -1282,6 +1274,7 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	ftu.defaults()
 	if len(ftu.hooks) == 0 {
 		if err = ftu.check(); err != nil {
 			return 0, err
@@ -1333,6 +1326,18 @@ func (ftu *FieldTypeUpdate) Exec(ctx context.Context) error {
 func (ftu *FieldTypeUpdate) ExecX(ctx context.Context) {
 	if err := ftu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ftu *FieldTypeUpdate) defaults() {
+	if _, ok := ftu.mutation.Int64(); !ok {
+		v := fieldtype.UpdateDefaultInt64()
+		ftu.mutation.SetInt64(v)
+	}
+	if _, ok := ftu.mutation.Duration(); !ok && !ftu.mutation.DurationCleared() {
+		v := fieldtype.UpdateDefaultDuration()
+		ftu.mutation.SetDuration(v)
 	}
 }
 
@@ -2556,14 +2561,6 @@ func (ftuo *FieldTypeUpdateOne) SetDuration(t time.Duration) *FieldTypeUpdateOne
 	return ftuo
 }
 
-// SetNillableDuration sets the "duration" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableDuration(t *time.Duration) *FieldTypeUpdateOne {
-	if t != nil {
-		ftuo.SetDuration(*t)
-	}
-	return ftuo
-}
-
 // AddDuration adds t to the "duration" field.
 func (ftuo *FieldTypeUpdateOne) AddDuration(t time.Duration) *FieldTypeUpdateOne {
 	ftuo.mutation.AddDuration(t)
@@ -3098,6 +3095,7 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 		err  error
 		node *FieldType
 	)
+	ftuo.defaults()
 	if len(ftuo.hooks) == 0 {
 		if err = ftuo.check(); err != nil {
 			return nil, err
@@ -3149,6 +3147,18 @@ func (ftuo *FieldTypeUpdateOne) Exec(ctx context.Context) error {
 func (ftuo *FieldTypeUpdateOne) ExecX(ctx context.Context) {
 	if err := ftuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ftuo *FieldTypeUpdateOne) defaults() {
+	if _, ok := ftuo.mutation.Int64(); !ok {
+		v := fieldtype.UpdateDefaultInt64()
+		ftuo.mutation.SetInt64(v)
+	}
+	if _, ok := ftuo.mutation.Duration(); !ok && !ftuo.mutation.DurationCleared() {
+		v := fieldtype.UpdateDefaultDuration()
+		ftuo.mutation.SetDuration(v)
 	}
 }
 

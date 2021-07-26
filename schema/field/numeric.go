@@ -181,6 +181,18 @@ func (b *intBuilder) DefaultFunc(fn interface{}) *intBuilder {
 	return b
 }
 
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int("int").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *intBuilder) UpdateDefault(fn interface{}) *intBuilder {
+	b.desc.UpdateDefault = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *intBuilder) Nillable() *intBuilder {
@@ -272,7 +284,7 @@ func (b *intBuilder) Annotations(annotations ...schema.Annotation) *intBuilder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *intBuilder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(intType)
 	}
 	return b.desc
@@ -337,6 +349,18 @@ func (b *uintBuilder) Default(i uint) *uintBuilder {
 // of the field on creation.
 func (b *uintBuilder) DefaultFunc(fn interface{}) *uintBuilder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint("uint").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *uintBuilder) UpdateDefault(fn interface{}) *uintBuilder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -431,7 +455,7 @@ func (b *uintBuilder) Annotations(annotations ...schema.Annotation) *uintBuilder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uintBuilder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(uintType)
 	}
 	return b.desc
@@ -506,6 +530,18 @@ func (b *int8Builder) Default(i int8) *int8Builder {
 // of the field on creation.
 func (b *int8Builder) DefaultFunc(fn interface{}) *int8Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int8("int8").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *int8Builder) UpdateDefault(fn interface{}) *int8Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -600,7 +636,7 @@ func (b *int8Builder) Annotations(annotations ...schema.Annotation) *int8Builder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int8Builder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(int8Type)
 	}
 	return b.desc
@@ -675,6 +711,18 @@ func (b *int16Builder) Default(i int16) *int16Builder {
 // of the field on creation.
 func (b *int16Builder) DefaultFunc(fn interface{}) *int16Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int16("int16").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *int16Builder) UpdateDefault(fn interface{}) *int16Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -769,7 +817,7 @@ func (b *int16Builder) Annotations(annotations ...schema.Annotation) *int16Build
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int16Builder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(int16Type)
 	}
 	return b.desc
@@ -844,6 +892,18 @@ func (b *int32Builder) Default(i int32) *int32Builder {
 // of the field on creation.
 func (b *int32Builder) DefaultFunc(fn interface{}) *int32Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int32("int32").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *int32Builder) UpdateDefault(fn interface{}) *int32Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -938,7 +998,7 @@ func (b *int32Builder) Annotations(annotations ...schema.Annotation) *int32Build
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int32Builder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(int32Type)
 	}
 	return b.desc
@@ -1013,6 +1073,18 @@ func (b *int64Builder) Default(i int64) *int64Builder {
 // of the field on creation.
 func (b *int64Builder) DefaultFunc(fn interface{}) *int64Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Int64("int64").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *int64Builder) UpdateDefault(fn interface{}) *int64Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -1107,7 +1179,7 @@ func (b *int64Builder) Annotations(annotations ...schema.Annotation) *int64Build
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *int64Builder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(int64Type)
 	}
 	return b.desc
@@ -1172,6 +1244,18 @@ func (b *uint8Builder) Default(i uint8) *uint8Builder {
 // of the field on creation.
 func (b *uint8Builder) DefaultFunc(fn interface{}) *uint8Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint8("uint8").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *uint8Builder) UpdateDefault(fn interface{}) *uint8Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -1266,7 +1350,7 @@ func (b *uint8Builder) Annotations(annotations ...schema.Annotation) *uint8Build
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint8Builder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(uint8Type)
 	}
 	return b.desc
@@ -1331,6 +1415,18 @@ func (b *uint16Builder) Default(i uint16) *uint16Builder {
 // of the field on creation.
 func (b *uint16Builder) DefaultFunc(fn interface{}) *uint16Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint16("uint16").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *uint16Builder) UpdateDefault(fn interface{}) *uint16Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -1425,7 +1521,7 @@ func (b *uint16Builder) Annotations(annotations ...schema.Annotation) *uint16Bui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint16Builder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(uint16Type)
 	}
 	return b.desc
@@ -1490,6 +1586,18 @@ func (b *uint32Builder) Default(i uint32) *uint32Builder {
 // of the field on creation.
 func (b *uint32Builder) DefaultFunc(fn interface{}) *uint32Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint32("uint32").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *uint32Builder) UpdateDefault(fn interface{}) *uint32Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -1584,7 +1692,7 @@ func (b *uint32Builder) Annotations(annotations ...schema.Annotation) *uint32Bui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint32Builder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(uint32Type)
 	}
 	return b.desc
@@ -1649,6 +1757,18 @@ func (b *uint64Builder) Default(i uint64) *uint64Builder {
 // of the field on creation.
 func (b *uint64Builder) DefaultFunc(fn interface{}) *uint64Builder {
 	b.desc.Default = fn
+	return b
+}
+
+// UpdateDefault sets the function that is applied to set default value
+// of the field on update. For example:
+//
+//	field.Uint64("uint64").
+//		Default(0).
+//		UpdateDefault(GenNumber),
+//
+func (b *uint64Builder) UpdateDefault(fn interface{}) *uint64Builder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -1743,7 +1863,7 @@ func (b *uint64Builder) Annotations(annotations ...schema.Annotation) *uint64Bui
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *uint64Builder) Descriptor() *Descriptor {
-	if b.desc.Default != nil {
+	if b.desc.Default != nil || b.desc.UpdateDefault != nil {
 		b.desc.checkDefaultFunc(uint64Type)
 	}
 	return b.desc

@@ -301,12 +301,12 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{- range $f := $.Fields }}
 			{{- if $f.UpdateDefault }}
 				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {{ if $f.Optional }} && !{{ $mutation }}.{{ $f.StructField }}Cleared() {{ end }} {
-					{{- if and $runtimeRequired $f.IsTime }}
+					{{- if $runtimeRequired }}
 						if {{ $.Package }}.{{ $f.UpdateDefaultName }} == nil {
 							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
-					v := {{ $.Package }}.{{ $f.UpdateDefaultName }}{{ if $f.IsTime }}(){{ end }}
+					v := {{ $.Package }}.{{ $f.UpdateDefaultName }}()
 					{{ $mutation }}.Set{{ $f.StructField }}(v)
 				}
 			{{- end }}

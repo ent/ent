@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
@@ -146,10 +147,14 @@ const (
 )
 
 var (
+	// UpdateDefaultInt64 holds the default value on update for the "int64" field.
+	UpdateDefaultInt64 func() int64
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	ValidateOptionalInt32Validator func(int32) error
 	// MACValidator is a validator for the "mac" field. It is called by the builders before save.
 	MACValidator func(string) error
+	// UpdateDefaultDuration holds the default value on update for the "duration" field.
+	UpdateDefaultDuration func() time.Duration
 	// DefaultDir holds the default value on creation for the "dir" field.
 	DefaultDir func() http.Dir
 	// NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
