@@ -2543,6 +2543,29 @@ type expr struct {
 
 func (e *expr) Query() (string, []interface{}) { return e.s, e.args }
 
+// ExprFunc returns an expression function that implements the Querier interface.
+//
+//	Update("users").
+//		Set("x", ExprFunc(func(b *Builder) {
+//			// The sql.Builder config (argc and dialect)
+//			// was set before the function was executed.
+//			b.Ident("x").WriteOp(OpAdd).Arg(1)
+//		}))
+//
+func ExprFunc(fn func(*Builder)) Querier {
+	return &exprFunc{fn: fn}
+}
+
+type exprFunc struct {
+	Builder
+	fn func(*Builder)
+}
+
+func (e *exprFunc) Query() (string, []interface{}) {
+	e.fn(&e.Builder)
+	return e.Builder.Query()
+}
+
 // Queries are list of queries join with space between them.
 type Queries []Querier
 
@@ -2688,12 +2711,12 @@ func (b *Builder) Err() error {
 	return fmt.Errorf(br.String())
 }
 
-// An Op represents a predicate operator.
+// An Op represents an operator.
 type Op int
 
-// Predicate operators
 const (
-	OpEQ      Op = iota // logical and.
+	// Predicate operators.
+	OpEQ      Op = iota // =
 	OpNEQ               // <>
 	OpGT                // >
 	OpGTE               // >=
@@ -2704,6 +2727,13 @@ const (
 	OpLike              // LIKE
 	OpIsNull            // IS NULL
 	OpNotNull           // IS NOT NULL
+
+	// Arithmetic operators.
+	OpAdd // +
+	OpSub // -
+	OpMul // *
+	OpDiv // / (Quotient)
+	OpMod // % (Reminder)
 )
 
 var ops = [...]string{
@@ -2718,12 +2748,17 @@ var ops = [...]string{
 	OpLike:    "LIKE",
 	OpIsNull:  "IS NULL",
 	OpNotNull: "IS NOT NULL",
+	OpAdd:     "+",
+	OpSub:     "-",
+	OpMul:     "*",
+	OpDiv:     "/",
+	OpMod:     "%",
 }
 
 // WriteOp writes an operator to the builder.
 func (b *Builder) WriteOp(op Op) *Builder {
 	switch {
-	case op >= OpEQ && op <= OpLike:
+	case op >= OpEQ && op <= OpLike || op >= OpAdd && op <= OpMod:
 		b.Pad().WriteString(ops[op]).Pad()
 	case op == OpIsNull || op == OpNotNull:
 		b.Pad().WriteString(ops[op])

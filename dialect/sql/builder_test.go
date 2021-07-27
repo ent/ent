@@ -1715,3 +1715,21 @@ func TestSelector_UnionOrderBy(t *testing.T) {
 		Query()
 	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
 }
+
+func TestUpdateBuilder_SetExpr(t *testing.T) {
+	d := Dialect(dialect.Postgres)
+	excluded := d.Table("excluded")
+	query, args := d.Update("users").
+		Set("name", "Ariel").
+		Set("active", Expr("NOT(active)")).
+		Set("age", Expr(excluded.C("age"))).
+		Set("x", ExprFunc(func(b *Builder) {
+			b.WriteString(excluded.C("x")).WriteString(" || ' (formerly ' || ").Ident("x").WriteString(" || ')'")
+		})).
+		Set("y", ExprFunc(func(b *Builder) {
+			b.Arg("~").WriteOp(OpAdd).WriteString(excluded.C("y")).WriteOp(OpAdd).Arg("~")
+		})).
+		Query()
+	require.Equal(t, `UPDATE "users" SET "name" = $1, "active" = NOT(active), "age" = "excluded"."age", "x" = "excluded"."x" || ' (formerly ' || "x" || ')', "y" = $2 + "excluded"."y" + $3`, query)
+	require.Equal(t, []interface{}{"Ariel", "~", "~"}, args)
+}
