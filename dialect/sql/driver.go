@@ -160,5 +160,8 @@ type NullScanner struct {
 // Scan implements the Scanner interface.
 func (n *NullScanner) Scan(value interface{}) error {
 	n.Valid = value != nil
-	return n.S.Scan(value)
+	if n.Valid {
+		return n.S.Scan(value)
+	}
+	return nil
 }
