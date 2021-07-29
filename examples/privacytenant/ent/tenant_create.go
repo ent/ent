@@ -211,3 +211,16 @@ func (tcb *TenantCreateBulk) SaveX(ctx context.Context) []*Tenant {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (tcb *TenantCreateBulk) Exec(ctx context.Context) error {
+	_, err := tcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tcb *TenantCreateBulk) ExecX(ctx context.Context) {
+	if err := tcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

@@ -223,3 +223,16 @@ func (scb *SpecCreateBulk) SaveX(ctx context.Context) []*Spec {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (scb *SpecCreateBulk) Exec(ctx context.Context) error {
+	_, err := scb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (scb *SpecCreateBulk) ExecX(ctx context.Context) {
+	if err := scb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

@@ -244,3 +244,16 @@ func (ccb *CommentCreateBulk) SaveX(ctx context.Context) []*Comment {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (ccb *CommentCreateBulk) Exec(ctx context.Context) error {
+	_, err := ccb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ccb *CommentCreateBulk) ExecX(ctx context.Context) {
+	if err := ccb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

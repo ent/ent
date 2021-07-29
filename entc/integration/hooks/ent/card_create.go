@@ -344,3 +344,16 @@ func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (ccb *CardCreateBulk) Exec(ctx context.Context) error {
+	_, err := ccb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ccb *CardCreateBulk) ExecX(ctx context.Context) {
+	if err := ccb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

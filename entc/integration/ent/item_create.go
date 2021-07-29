@@ -199,3 +199,16 @@ func (icb *ItemCreateBulk) SaveX(ctx context.Context) []*Item {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (icb *ItemCreateBulk) Exec(ctx context.Context) error {
+	_, err := icb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (icb *ItemCreateBulk) ExecX(ctx context.Context) {
+	if err := icb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

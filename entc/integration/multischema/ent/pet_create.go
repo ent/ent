@@ -266,3 +266,16 @@ func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (pcb *PetCreateBulk) Exec(ctx context.Context) error {
+	_, err := pcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (pcb *PetCreateBulk) ExecX(ctx context.Context) {
+	if err := pcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

@@ -315,3 +315,16 @@ func (ftcb *FileTypeCreateBulk) SaveX(ctx context.Context) []*FileType {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (ftcb *FileTypeCreateBulk) Exec(ctx context.Context) error {
+	_, err := ftcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ftcb *FileTypeCreateBulk) ExecX(ctx context.Context) {
+	if err := ftcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

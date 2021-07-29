@@ -276,3 +276,16 @@ func (gicb *GroupInfoCreateBulk) SaveX(ctx context.Context) []*GroupInfo {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (gicb *GroupInfoCreateBulk) Exec(ctx context.Context) error {
+	_, err := gicb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gicb *GroupInfoCreateBulk) ExecX(ctx context.Context) {
+	if err := gicb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

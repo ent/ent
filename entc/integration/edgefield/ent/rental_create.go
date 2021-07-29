@@ -302,3 +302,16 @@ func (rcb *RentalCreateBulk) SaveX(ctx context.Context) []*Rental {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (rcb *RentalCreateBulk) Exec(ctx context.Context) error {
+	_, err := rcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (rcb *RentalCreateBulk) ExecX(ctx context.Context) {
+	if err := rcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

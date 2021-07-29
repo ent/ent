@@ -427,3 +427,16 @@ func (fcb *FileCreateBulk) SaveX(ctx context.Context) []*File {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (fcb *FileCreateBulk) Exec(ctx context.Context) error {
+	_, err := fcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (fcb *FileCreateBulk) ExecX(ctx context.Context) {
+	if err := fcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

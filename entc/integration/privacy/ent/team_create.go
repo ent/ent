@@ -281,3 +281,16 @@ func (tcb *TeamCreateBulk) SaveX(ctx context.Context) []*Team {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (tcb *TeamCreateBulk) Exec(ctx context.Context) error {
+	_, err := tcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tcb *TeamCreateBulk) ExecX(ctx context.Context) {
+	if err := tcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

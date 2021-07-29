@@ -313,3 +313,16 @@ func (ncb *NoteCreateBulk) SaveX(ctx context.Context) []*Note {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (ncb *NoteCreateBulk) Exec(ctx context.Context) error {
+	_, err := ncb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ncb *NoteCreateBulk) ExecX(ctx context.Context) {
+	if err := ncb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

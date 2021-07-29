@@ -351,3 +351,16 @@ func (mcb *MetadataCreateBulk) SaveX(ctx context.Context) []*Metadata {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (mcb *MetadataCreateBulk) Exec(ctx context.Context) error {
+	_, err := mcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mcb *MetadataCreateBulk) ExecX(ctx context.Context) {
+	if err := mcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
