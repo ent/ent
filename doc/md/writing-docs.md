@@ -48,6 +48,7 @@ title: Writing Docs
 ```
 Where `id` should be a unique identifier for the document, should be the same as the filename without the `.md` suffix,
 and `title` is the title of the document as it will appear in the page itself and any navigation element on the site.
+
 3.If you want the page to appear in the documentation website's sidebar, add its `id` to `website/sidebars.js`, for example:
 ```diff
 {
