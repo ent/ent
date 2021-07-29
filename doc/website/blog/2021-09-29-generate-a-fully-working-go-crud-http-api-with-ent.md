@@ -28,7 +28,7 @@ Let’s get started!
 
 ### Getting Started
 
-The final version of the code below can be found on GitHub.
+The final version of the code below can be found on [GitHub](https://github.com/masseelch/elk-example).
 
 Start by creating a new Go project:
 
