@@ -344,7 +344,20 @@ type (
 		ID     *FieldSpec
 		Fields []*FieldSpec
 		Edges  []*EdgeSpec
+
+		// The Modifiers option allows providing custom functions to
+		// modify the INSERT statement of the node before it is executed.
+		//
+		//	sqlgraph.CreateSpec{
+		//		Modifiers: []func(*sql.InsertBuilder) {
+		//			OnConflictOptions(...),
+		//			ReturningOptions(...),
+		//		},
+		//	}
+		//
+		Modifiers []func(*sql.InsertBuilder)
 	}
+
 	// BatchCreateSpec holds the information for creating
 	// multiple nodes in the graph.
 	BatchCreateSpec struct {
@@ -957,6 +970,9 @@ func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sq
 		insert.Set(c.ID.Column, c.ID.Value)
 		query, args := insert.Query()
 		return tx.Exec(ctx, query, args, &res)
+	}
+	for _, m := range c.CreateSpec.Modifiers {
+		m(insert)
 	}
 	id, err := insertLastID(ctx, tx, insert.Returning(c.ID.Column))
 	if err != nil {
