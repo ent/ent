@@ -72,6 +72,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="http://www.linkedin.com/in/khadija-sidhpuri-87709316a"><img src="https://avatars.githubusercontent.com/u/59063821?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Khadija Sidhpuri</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=squarebat" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/neel229"><img src="https://avatars.githubusercontent.com/u/53475167?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Neel Modi</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=neel229" title="Code">💻</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://ie.linkedin.com/in/boris-shomodjvarac-51970879"><img src="https://avatars.githubusercontent.com/u/304768?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Boris Shomodjvarac</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=shomodj" title="Documentation">📖</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
