@@ -1180,48 +1180,88 @@ func TestCreateNode(t *testing.T) {
 func TestBatchCreate(t *testing.T) {
 	tests := []struct {
 		name    string
-		nodes   []*CreateSpec
+		spec    *BatchCreateSpec
 		expect  func(sqlmock.Sqlmock)
 		wantErr bool
 	}{
 		{
 			name: "empty",
+			spec: &BatchCreateSpec{},
 			expect: func(m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 				m.ExpectCommit()
 			},
 		},
 		{
-			name: "multiple",
-			nodes: []*CreateSpec{
-				{
-					Table: "users",
-					ID:    &FieldSpec{Column: "id"},
-					Fields: []*FieldSpec{
-						{Column: "age", Type: field.TypeInt, Value: 32},
-						{Column: "name", Type: field.TypeString, Value: "a8m"},
-						{Column: "active", Type: field.TypeBool, Value: false},
+			name: "fields with modifiers",
+			spec: &BatchCreateSpec{
+				Nodes: []*CreateSpec{
+					{
+						Table: "users",
+						ID:    &FieldSpec{Column: "id"},
+						Fields: []*FieldSpec{
+							{Column: "age", Type: field.TypeInt, Value: 32},
+							{Column: "name", Type: field.TypeString, Value: "a8m"},
+							{Column: "active", Type: field.TypeBool, Value: false},
+						},
 					},
-					Edges: []*EdgeSpec{
-						{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
-						{Rel: M2M, Table: "user_products", Columns: []string{"user_id", "product_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
-						{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{2}}},
-						{Rel: M2O, Table: "company", Columns: []string{"workplace_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
-						{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+					{
+						Table: "users",
+						ID:    &FieldSpec{Column: "id"},
+						Fields: []*FieldSpec{
+							{Column: "age", Type: field.TypeInt, Value: 30},
+							{Column: "name", Type: field.TypeString, Value: "nati"},
+							{Column: "active", Type: field.TypeBool, Value: true},
+						},
 					},
 				},
-				{
-					Table: "users",
-					ID:    &FieldSpec{Column: "id"},
-					Fields: []*FieldSpec{
-						{Column: "age", Type: field.TypeInt, Value: 30},
-						{Column: "name", Type: field.TypeString, Value: "nati"},
+				Modifiers: []func(*sql.InsertBuilder){
+					func(i *sql.InsertBuilder) {
+						i.OnConflict(sql.ResolveWithIgnore())
 					},
-					Edges: []*EdgeSpec{
-						{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
-						{Rel: M2M, Table: "user_products", Columns: []string{"user_id", "product_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
-						{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{2}}},
-						{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{3}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`) VALUES (?, ?, ?), (?, ?, ?) ON DUPLICATE KEY UPDATE `active` = `users`.`active`, `age` = `users`.`age`, `name` = `users`.`name`")).
+					WithArgs(false, 32, "a8m", true, 30, "nati").
+					WillReturnResult(sqlmock.NewResult(10, 2))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "multiple",
+			spec: &BatchCreateSpec{
+				Nodes: []*CreateSpec{
+					{
+						Table: "users",
+						ID:    &FieldSpec{Column: "id"},
+						Fields: []*FieldSpec{
+							{Column: "age", Type: field.TypeInt, Value: 32},
+							{Column: "name", Type: field.TypeString, Value: "a8m"},
+							{Column: "active", Type: field.TypeBool, Value: false},
+						},
+						Edges: []*EdgeSpec{
+							{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+							{Rel: M2M, Table: "user_products", Columns: []string{"user_id", "product_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+							{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{2}}},
+							{Rel: M2O, Table: "company", Columns: []string{"workplace_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+							{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+						},
+					},
+					{
+						Table: "users",
+						ID:    &FieldSpec{Column: "id"},
+						Fields: []*FieldSpec{
+							{Column: "age", Type: field.TypeInt, Value: 30},
+							{Column: "name", Type: field.TypeString, Value: "nati"},
+						},
+						Edges: []*EdgeSpec{
+							{Rel: M2M, Inverse: true, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+							{Rel: M2M, Table: "user_products", Columns: []string{"user_id", "product_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+							{Rel: M2M, Table: "user_friends", Bidi: true, Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{IDSpec: &FieldSpec{Column: "id"}, Nodes: []driver.Value{2}}},
+							{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{3}, IDSpec: &FieldSpec{Column: "id"}}},
+						},
 					},
 				},
 			},
@@ -1259,7 +1299,7 @@ func TestBatchCreate(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
 			tt.expect(mock)
-			err = BatchCreate(context.Background(), sql.OpenDB("mysql", db), &BatchCreateSpec{Nodes: tt.nodes})
+			err = BatchCreate(context.Background(), sql.OpenDB("mysql", db), tt.spec)
 			require.Equal(t, tt.wantErr, err != nil, err)
 		})
 	}

@@ -362,6 +362,18 @@ type (
 	// multiple nodes in the graph.
 	BatchCreateSpec struct {
 		Nodes []*CreateSpec
+
+		// The Modifiers option allows providing custom functions to
+		// modify the INSERT statement of the node before it is executed.
+		//
+		//	sqlgraph.BatchCreateSpec{
+		//		Modifiers: []func(*sql.InsertBuilder) {
+		//			OnConflictOptions(...),
+		//			ReturningOptions(...),
+		//		},
+		//	}
+		//
+		Modifiers []func(*sql.InsertBuilder)
 	}
 )
 
@@ -982,8 +994,11 @@ func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sq
 	return nil
 }
 
-// batchInsert inserts a batch of nodes to their table and sets their ID if it wasn't provided by the user.
+// batchInsert inserts a batch of nodes to their table and sets their ID if it was not provided by the user.
 func (c *creator) batchInsert(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
+	for _, m := range c.BatchCreateSpec.Modifiers {
+		m(insert)
+	}
 	ids, err := insertLastIDs(ctx, tx, insert.Returning(c.Nodes[0].ID.Column))
 	if err != nil {
 		return err
