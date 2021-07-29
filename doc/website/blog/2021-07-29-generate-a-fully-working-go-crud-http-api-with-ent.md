@@ -69,7 +69,7 @@ integrate with Ent’s code-generation. This requires that we use the `entc` (en
 described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). Follow the next three steps to enable it and to
 configure Ent to work with the `elk` extension:
 
-1. Create a new Go file named `ent/entc.go` and paste the following content:
+1\. Create a new Go file named `ent/entc.go` and paste the following content:
 
 ```go
 // +build ignore
@@ -97,7 +97,7 @@ func main() {
 
 ```
 
-2. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
+2\. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
 
 ```go
 package ent
@@ -106,7 +106,7 @@ package ent
 
 ```
 
-3. `elk` uses a not yet released version of Ent. To have the dependencies up to date run the following:
+3\. `elk` uses a not yet released version of Ent. To have the dependencies up to date run the following:
 
 ```shell
 go mod tidy
@@ -234,11 +234,12 @@ package main
 
 import (
 	"context"
-	"elk-example/ent"
-	elk "elk-example/ent/http"
 	"fmt"
 	"log"
 	"net/http"
+
+	"elk-example/ent"
+	elk "elk-example/ent/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
@@ -314,9 +315,7 @@ If you head over to the terminal where the server is running you can also see `e
 
 To illustrate more of `elk`s features, let’s extend our graph. Edit `ent/schema/user.go` and `ent/schema/pet.go`:
 
-`ent/schema/pet.go`:
-
-```go
+```go title="ent/schema/pet.go"
 // Edges of the Pet.
 func (Pet) Edges() []ent.Edge {
     return []ent.Edge{
@@ -328,9 +327,7 @@ func (Pet) Edges() []ent.Edge {
 
 ```
 
-`ent/schema/user.go`:
-
-```go
+```go title="ent/schema/user.go"
 package schema
 
 import (
