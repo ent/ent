@@ -455,6 +455,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "shomodj",
+      "name": "Boris Shomodjvarac",
+      "avatar_url": "https://avatars.githubusercontent.com/u/304768?v=4",
+      "profile": "https://ie.linkedin.com/in/boris-shomodjvarac-51970879",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
