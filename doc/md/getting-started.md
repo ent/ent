@@ -251,9 +251,9 @@ We continue our example by creating 2 cars and adding them to a user.
 ```go title="<project>/start/start.go"
 
 import (
-	"<porject>/ent"
-	"<porject>/ent/car"
-	"<porject>/ent/user"
+	"<project>/ent"
+	"<project>/ent/car"
+	"<project>/ent/user"
 )
 
 func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
