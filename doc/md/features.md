@@ -113,3 +113,47 @@ tx.Pet.Query().
 	).
 	Only(ctx)
 ```
+
+#### Custom SQL Modifiers
+
+The `sql/modifier` option lets add custom SQL modifiers to the builders and mutate the statements before they are executed.
+
+This option can be added to a project using the `--feature sql/modifier` flag.
+
+```go
+client.Pet.
+	Query().
+	Modify(func(s *sql.Selector) {
+		s.Select("SUM(LENGTH(name))")
+	}).
+	IntX(ctx)
+
+// SELECT SUM(LENGTH(name)) FROM `pet`
+
+var v []struct {
+	Count     int       `json:"count"`
+	Price     int       `json:"price"`
+	CreatedAt time.Time `json:"created_at"`
+}
+client.User.
+	Query().
+	Where(
+        user.CreatedAtGT(x),
+        user.CreatedAtLT(y),
+	).
+	Modify(func(s *sql.Selector) {
+		s.Select(
+			sql.As(sql.Count("*"), "count"),
+			sql.As(sql.Sum("price"), "price"),
+			sql.As("DATE(created_at)", "created_at"),
+		).
+		GroupBy("DATE(created_at)").
+		OrderBy(sql.Desc("DATE(created_at)"))
+	}).
+	ScanX(ctx, &v)
+
+// SELECT COUNT(*) AS `count`, SUM(`price`) AS `price`, DATE(created_at) AS `created_at`
+// FROM `users` WHERE created_at > x AND created_at < y
+// GROUP BY DATE(created_at)
+// ORDER BY DATE(created_at) DESC
+```
