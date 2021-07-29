@@ -1502,3 +1502,16 @@ func (ftcb *FieldTypeCreateBulk) SaveX(ctx context.Context) []*FieldType {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (ftcb *FieldTypeCreateBulk) Exec(ctx context.Context) error {
+	_, err := ftcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ftcb *FieldTypeCreateBulk) ExecX(ctx context.Context) {
+	if err := ftcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

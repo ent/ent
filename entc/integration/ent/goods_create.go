@@ -188,3 +188,16 @@ func (gcb *GoodsCreateBulk) SaveX(ctx context.Context) []*Goods {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (gcb *GoodsCreateBulk) Exec(ctx context.Context) error {
+	_, err := gcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gcb *GoodsCreateBulk) ExecX(ctx context.Context) {
+	if err := gcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

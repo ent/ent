@@ -230,3 +230,16 @@ func (tcb *TaskCreateBulk) SaveX(ctx context.Context) []*Task {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (tcb *TaskCreateBulk) Exec(ctx context.Context) error {
+	_, err := tcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tcb *TaskCreateBulk) ExecX(ctx context.Context) {
+	if err := tcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

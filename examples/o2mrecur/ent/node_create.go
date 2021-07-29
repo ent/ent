@@ -279,3 +279,16 @@ func (ncb *NodeCreateBulk) SaveX(ctx context.Context) []*Node {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (ncb *NodeCreateBulk) Exec(ctx context.Context) error {
+	_, err := ncb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ncb *NodeCreateBulk) ExecX(ctx context.Context) {
+	if err := ncb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

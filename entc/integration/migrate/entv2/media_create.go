@@ -254,3 +254,16 @@ func (mcb *MediaCreateBulk) SaveX(ctx context.Context) []*Media {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (mcb *MediaCreateBulk) Exec(ctx context.Context) error {
+	_, err := mcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mcb *MediaCreateBulk) ExecX(ctx context.Context) {
+	if err := mcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

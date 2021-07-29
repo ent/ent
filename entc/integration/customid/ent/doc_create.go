@@ -313,3 +313,16 @@ func (dcb *DocCreateBulk) SaveX(ctx context.Context) []*Doc {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (dcb *DocCreateBulk) Exec(ctx context.Context) error {
+	_, err := dcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (dcb *DocCreateBulk) ExecX(ctx context.Context) {
+	if err := dcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

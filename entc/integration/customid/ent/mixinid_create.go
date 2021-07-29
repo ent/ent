@@ -240,3 +240,16 @@ func (micb *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (micb *MixinIDCreateBulk) Exec(ctx context.Context) error {
+	_, err := micb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (micb *MixinIDCreateBulk) ExecX(ctx context.Context) {
+	if err := micb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

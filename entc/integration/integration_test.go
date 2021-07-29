@@ -896,7 +896,7 @@ func ClearEdges(t *testing.T, client *ent.Client) {
 	client.File.CreateBulk(
 		client.File.Create().SetName("A").SetSize(10).SetType(ft),
 		client.File.Create().SetName("B").SetSize(20).SetType(ft),
-	).SaveX(ctx)
+	).ExecX(ctx)
 	require.NotZero(t, ft.QueryFiles().CountX(ctx))
 	ft = ft.Update().ClearFiles().SaveX(ctx)
 	require.Zero(t, ft.QueryFiles().CountX(ctx))

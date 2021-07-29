@@ -237,3 +237,16 @@ func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (gcb *GroupCreateBulk) Exec(ctx context.Context) error {
+	_, err := gcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gcb *GroupCreateBulk) ExecX(ctx context.Context) {
+	if err := gcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

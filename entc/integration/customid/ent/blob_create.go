@@ -300,3 +300,16 @@ func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (bcb *BlobCreateBulk) Exec(ctx context.Context) error {
+	_, err := bcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (bcb *BlobCreateBulk) ExecX(ctx context.Context) {
+	if err := bcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}

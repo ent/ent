@@ -210,3 +210,16 @@ func (ctcb *CustomTypeCreateBulk) SaveX(ctx context.Context) []*CustomType {
 	}
 	return v
 }
+
+// Exec executes the query.
+func (ctcb *CustomTypeCreateBulk) Exec(ctx context.Context) error {
+	_, err := ctcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ctcb *CustomTypeCreateBulk) ExecX(ctx context.Context) {
+	if err := ctcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
