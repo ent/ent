@@ -859,6 +859,29 @@ func TestCreateNode(t *testing.T) {
 			},
 		},
 		{
+			name: "modifiers",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id"},
+				Fields: []*FieldSpec{
+					{Column: "age", Type: field.TypeInt, Value: 30},
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Modifiers: []func(i *sql.InsertBuilder){
+					func(i *sql.InsertBuilder) {
+						i.OnConflict(sql.ResolveWithNewValues())
+					},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`age`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `age` = VALUES(`age`), `name` = VALUES(`name`)")).
+					WithArgs(30, "a8m").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
 			name: "fields/user-defined-id",
 			spec: &CreateSpec{
 				Table: "users",
@@ -1148,7 +1171,7 @@ func TestCreateNode(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
 			tt.expect(mock)
-			err = CreateNode(context.Background(), sql.OpenDB("", db), tt.spec)
+			err = CreateNode(context.Background(), sql.OpenDB(dialect.MySQL, db), tt.spec)
 			require.Equal(t, tt.wantErr, err != nil, err)
 		})
 	}
