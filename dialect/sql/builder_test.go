@@ -1802,5 +1802,19 @@ func TestInsert_OnConflict(t *testing.T) {
 			Query()
 		require.Equal(t, "INSERT INTO `users` (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `created_at` = NULL, `name` = VALUES(`name`)", query)
 		require.Equal(t, []interface{}{"1", "Mashraki"}, args)
+
+		query, args = Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("name").
+			Values("Mashraki").
+			OnConflict(
+				ResolveWithNewValues(),
+				ResolveWith(func(s *UpdateSet) {
+					s.Set("id", Expr("LAST_INSERT_ID(`id`)"))
+				}),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`name`) VALUES (?) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `id` = LAST_INSERT_ID(`id`)", query)
+		require.Equal(t, []interface{}{"Mashraki"}, args)
 	})
 }
