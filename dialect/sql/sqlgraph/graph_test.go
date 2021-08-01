@@ -867,10 +867,8 @@ func TestCreateNode(t *testing.T) {
 					{Column: "age", Type: field.TypeInt, Value: 30},
 					{Column: "name", Type: field.TypeString, Value: "a8m"},
 				},
-				Modifiers: []func(i *sql.InsertBuilder){
-					func(i *sql.InsertBuilder) {
-						i.OnConflict(sql.ResolveWithNewValues())
-					},
+				OnConflict: []sql.ConflictOption{
+					sql.ResolveWithNewValues(),
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
@@ -1215,10 +1213,8 @@ func TestBatchCreate(t *testing.T) {
 						},
 					},
 				},
-				Modifiers: []func(*sql.InsertBuilder){
-					func(i *sql.InsertBuilder) {
-						i.OnConflict(sql.ResolveWithIgnore())
-					},
+				OnConflict: []sql.ConflictOption{
+					sql.ResolveWithIgnore(),
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {

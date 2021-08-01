@@ -345,17 +345,16 @@ type (
 		Fields []*FieldSpec
 		Edges  []*EdgeSpec
 
-		// The Modifiers option allows providing custom functions to
-		// modify the INSERT statement of the node before it is executed.
+		// The OnConflict option allows providing on-conflict
+		// options to the INSERT statement.
 		//
 		//	sqlgraph.CreateSpec{
-		//		Modifiers: []func(*sql.InsertBuilder) {
-		//			OnConflictOptions(...),
-		//			ReturningOptions(...),
+		//		OnConflict: []sql.ConflictOption{
+		//			sql.ResolveWithNewValues(),
 		//		},
 		//	}
 		//
-		Modifiers []func(*sql.InsertBuilder)
+		OnConflict []sql.ConflictOption
 	}
 
 	// BatchCreateSpec holds the information for creating
@@ -363,17 +362,16 @@ type (
 	BatchCreateSpec struct {
 		Nodes []*CreateSpec
 
-		// The Modifiers option allows providing custom functions to
-		// modify the INSERT statement of the node before it is executed.
+		// The OnConflict option allows providing on-conflict
+		// options to the INSERT statement.
 		//
-		//	sqlgraph.BatchCreateSpec{
-		//		Modifiers: []func(*sql.InsertBuilder) {
-		//			OnConflictOptions(...),
-		//			ReturningOptions(...),
+		//	sqlgraph.CreateSpec{
+		//		OnConflict: []sql.ConflictOption{
+		//			sql.ResolveWithNewValues(),
 		//		},
 		//	}
 		//
-		Modifiers []func(*sql.InsertBuilder)
+		OnConflict []sql.ConflictOption
 	}
 )
 
@@ -983,8 +981,8 @@ func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sq
 		query, args := insert.Query()
 		return tx.Exec(ctx, query, args, &res)
 	}
-	for _, m := range c.CreateSpec.Modifiers {
-		m(insert)
+	if opts := c.CreateSpec.OnConflict; len(opts) > 0 {
+		insert.OnConflict(opts...)
 	}
 	id, err := insertLastID(ctx, tx, insert.Returning(c.ID.Column))
 	if err != nil {
@@ -996,8 +994,8 @@ func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sq
 
 // batchInsert inserts a batch of nodes to their table and sets their ID if it was not provided by the user.
 func (c *creator) batchInsert(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
-	for _, m := range c.BatchCreateSpec.Modifiers {
-		m(insert)
+	if opts := c.BatchCreateSpec.OnConflict; len(opts) > 0 {
+		insert.OnConflict(opts...)
 	}
 	ids, err := insertLastIDs(ctx, tx, insert.Returning(c.Nodes[0].ID.Column))
 	if err != nil {
