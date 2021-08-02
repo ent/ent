@@ -99,6 +99,8 @@ func Sanity(t *testing.T, client *ent.Client) {
 	usr.QuerySpouse().OnlyX(ctx)
 	require.Equal(usr.Name, usr.QueryPets().QueryOwner().OnlyX(ctx).Name)
 	require.Equal(pt.Name, usr.QueryPets().QueryOwner().QueryPets().OnlyX(ctx).Name)
+	require.Equal(pt.Name, client.User.QueryPets(usr).OnlyX(ctx).Name)
+	require.Equal(pt.Name, client.User.QueryPetsId(usr.ID).OnlyX(ctx).Name)
 	require.Empty(usr.QuerySpouse().QueryPets().AllX(ctx))
 	require.Equal(pt.Name, usr2.QuerySpouse().QueryPets().OnlyX(ctx).Name)
 	require.Len(usr.QueryGroups().QueryUsers().AllX(ctx), 2)

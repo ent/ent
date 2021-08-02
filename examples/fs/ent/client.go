@@ -213,15 +213,19 @@ func (c *FileClient) GetX(ctx context.Context, id int) *File {
 
 // QueryParent queries the parent edge of a File.
 func (c *FileClient) QueryParent(f *File) *FileQuery {
+	return c.QueryParentId(f.ID)
+}
+
+// QueryParentId queries the parent edge of a File by its id.
+func (c *FileClient) QueryParentId(id int) *FileQuery {
 	query := &FileQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, file.ParentTable, file.ParentColumn),
 		)
-		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -229,15 +233,19 @@ func (c *FileClient) QueryParent(f *File) *FileQuery {
 
 // QueryChildren queries the children edge of a File.
 func (c *FileClient) QueryChildren(f *File) *FileQuery {
+	return c.QueryChildrenId(f.ID)
+}
+
+// QueryChildrenId queries the children edge of a File by its id.
+func (c *FileClient) QueryChildrenId(id int) *FileQuery {
 	query := &FileQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, file.ChildrenTable, file.ChildrenColumn),
 		)
-		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query

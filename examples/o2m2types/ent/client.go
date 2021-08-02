@@ -220,15 +220,19 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
+	return c.QueryOwnerId(pe.ID)
+}
+
+// QueryOwnerId queries the owner edge of a Pet by its id.
+func (c *PetClient) QueryOwnerId(id int) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pe.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
 		)
-		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -326,15 +330,19 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(u *User) *PetQuery {
+	return c.QueryPetsId(u.ID)
+}
+
+// QueryPetsId queries the pets edge of a User by its id.
+func (c *UserClient) QueryPetsId(id int) *PetQuery {
 	query := &PetQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(pet.Table, pet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query

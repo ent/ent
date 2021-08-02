@@ -3,7 +3,7 @@
 # in the LICENSE file in the root directory of this source tree.
 
 # Fetch base gremlin server image
-FROM tinkerpop/gremlin-server
+FROM tinkerpop/gremlin-server:3.4.10
 
 # Copy overriden server configuration.
 COPY gremlin-server.yaml tinkergraph-empty.properties /opt/gremlin-server/conf/

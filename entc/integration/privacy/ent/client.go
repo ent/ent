@@ -227,15 +227,19 @@ func (c *TaskClient) GetX(ctx context.Context, id int) *Task {
 
 // QueryTeams queries the teams edge of a Task.
 func (c *TaskClient) QueryTeams(t *Task) *TeamQuery {
+	return c.QueryTeamsId(t.ID)
+}
+
+// QueryTeamsId queries the teams edge of a Task by its id.
+func (c *TaskClient) QueryTeamsId(id int) *TeamQuery {
 	query := &TeamQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(task.Table, task.FieldID, id),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, task.TeamsTable, task.TeamsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -243,15 +247,19 @@ func (c *TaskClient) QueryTeams(t *Task) *TeamQuery {
 
 // QueryOwner queries the owner edge of a Task.
 func (c *TaskClient) QueryOwner(t *Task) *UserQuery {
+	return c.QueryOwnerId(t.ID)
+}
+
+// QueryOwnerId queries the owner edge of a Task by its id.
+func (c *TaskClient) QueryOwnerId(id int) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(task.Table, task.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, task.OwnerTable, task.OwnerColumn),
 		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -350,15 +358,19 @@ func (c *TeamClient) GetX(ctx context.Context, id int) *Team {
 
 // QueryTasks queries the tasks edge of a Team.
 func (c *TeamClient) QueryTasks(t *Team) *TaskQuery {
+	return c.QueryTasksId(t.ID)
+}
+
+// QueryTasksId queries the tasks edge of a Team by its id.
+func (c *TeamClient) QueryTasksId(id int) *TaskQuery {
 	query := &TaskQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(team.Table, team.FieldID, id),
 			sqlgraph.To(task.Table, task.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, team.TasksTable, team.TasksPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -366,15 +378,19 @@ func (c *TeamClient) QueryTasks(t *Team) *TaskQuery {
 
 // QueryUsers queries the users edge of a Team.
 func (c *TeamClient) QueryUsers(t *Team) *UserQuery {
+	return c.QueryUsersId(t.ID)
+}
+
+// QueryUsersId queries the users edge of a Team by its id.
+func (c *TeamClient) QueryUsersId(id int) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(team.Table, team.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, team.UsersTable, team.UsersPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -473,15 +489,19 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryTeams queries the teams edge of a User.
 func (c *UserClient) QueryTeams(u *User) *TeamQuery {
+	return c.QueryTeamsId(u.ID)
+}
+
+// QueryTeamsId queries the teams edge of a User by its id.
+func (c *UserClient) QueryTeamsId(id int) *TeamQuery {
 	query := &TeamQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.TeamsTable, user.TeamsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -489,15 +509,19 @@ func (c *UserClient) QueryTeams(u *User) *TeamQuery {
 
 // QueryTasks queries the tasks edge of a User.
 func (c *UserClient) QueryTasks(u *User) *TaskQuery {
+	return c.QueryTasksId(u.ID)
+}
+
+// QueryTasksId queries the tasks edge of a User by its id.
+func (c *UserClient) QueryTasksId(id int) *TaskQuery {
 	query := &TaskQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(task.Table, task.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.TasksTable, user.TasksColumn),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
