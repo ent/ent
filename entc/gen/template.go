@@ -45,6 +45,10 @@ var (
 		{
 			Name:   "create",
 			Format: pkgf("%s_create.go"),
+			ExtendPatterns: []string{
+				"dialect/*/create/fields/additional/*",
+				"dialect/*/create_bulk/fields/additional/*",
+			},
 		},
 		{
 			Name:   "update",
@@ -55,9 +59,11 @@ var (
 			Format: pkgf("%s_delete.go"),
 		},
 		{
-			Name:           "query",
-			Format:         pkgf("%s_query.go"),
-			ExtendPatterns: []string{"dialect/*/query/fields/additional/*"},
+			Name:   "query",
+			Format: pkgf("%s_query.go"),
+			ExtendPatterns: []string{
+				"dialect/*/query/fields/additional/*",
+			},
 		},
 		{
 			Name:   "model",
@@ -170,6 +176,8 @@ var (
 		"dialect/*/config/*/*",
 		"dialect/*/import/additional/*",
 		"dialect/*/query/selector/*",
+		"dialect/sql/create/additional/*",
+		"dialect/sql/create_bulk/additional/*",
 		"dialect/sql/model/additional/*",
 		"dialect/sql/model/fields/*",
 		"dialect/sql/select/additional/*",

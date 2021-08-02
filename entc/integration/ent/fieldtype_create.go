@@ -28,6 +28,7 @@ type FieldTypeCreate struct {
 	config
 	mutation *FieldTypeMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetInt sets the "int" field.
@@ -944,6 +945,7 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	_spec.OnConflict = ftc.conflict
 	if value, ok := ftc.mutation.Int(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -1435,10 +1437,2384 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.FieldType.Create().
+//		SetInt(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FieldTypeUpsert) {
+//			SetInt(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (ftc *FieldTypeCreate) OnConflict(opts ...sql.ConflictOption) *FieldTypeUpsertOne {
+	ftc.conflict = opts
+	return &FieldTypeUpsertOne{
+		create: ftc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//  client.FieldType.Create().
+//      OnConflict(sql.ConflictColumns(columns...)).
+//      Exec(ctx)
+//
+func (ftc *FieldTypeCreate) OnConflictColumns(columns ...string) *FieldTypeUpsertOne {
+	ftc.conflict = append(ftc.conflict, sql.ConflictColumns(columns...))
+	return &FieldTypeUpsertOne{
+		create: ftc,
+	}
+}
+
+type (
+	// FieldTypeUpsertOne is the builder for "upsert"-ing
+	//  one FieldType node.
+	FieldTypeUpsertOne struct {
+		create *FieldTypeCreate
+	}
+
+	// FieldTypeUpsert is the "OnConflict" setter.
+	FieldTypeUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetInt sets the "int" field.
+func (u *FieldTypeUpsert) SetInt(v int) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldInt, v)
+	return u
+}
+
+// UpdateInt sets the "int" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateInt() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldInt)
+	return u
+}
+
+// SetInt8 sets the "int8" field.
+func (u *FieldTypeUpsert) SetInt8(v int8) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldInt8, v)
+	return u
+}
+
+// UpdateInt8 sets the "int8" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateInt8() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldInt8)
+	return u
+}
+
+// SetInt16 sets the "int16" field.
+func (u *FieldTypeUpsert) SetInt16(v int16) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldInt16, v)
+	return u
+}
+
+// UpdateInt16 sets the "int16" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateInt16() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldInt16)
+	return u
+}
+
+// SetInt32 sets the "int32" field.
+func (u *FieldTypeUpsert) SetInt32(v int32) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldInt32, v)
+	return u
+}
+
+// UpdateInt32 sets the "int32" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateInt32() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldInt32)
+	return u
+}
+
+// SetInt64 sets the "int64" field.
+func (u *FieldTypeUpsert) SetInt64(v int64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldInt64, v)
+	return u
+}
+
+// UpdateInt64 sets the "int64" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateInt64() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldInt64)
+	return u
+}
+
+// SetOptionalInt sets the "optional_int" field.
+func (u *FieldTypeUpsert) SetOptionalInt(v int) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalInt, v)
+	return u
+}
+
+// UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalInt() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalInt)
+	return u
+}
+
+// ClearOptionalInt clears the value of the "optional_int" field.
+func (u *FieldTypeUpsert) ClearOptionalInt() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalInt)
+	return u
+}
+
+// SetOptionalInt8 sets the "optional_int8" field.
+func (u *FieldTypeUpsert) SetOptionalInt8(v int8) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalInt8, v)
+	return u
+}
+
+// UpdateOptionalInt8 sets the "optional_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalInt8() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalInt8)
+	return u
+}
+
+// ClearOptionalInt8 clears the value of the "optional_int8" field.
+func (u *FieldTypeUpsert) ClearOptionalInt8() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalInt8)
+	return u
+}
+
+// SetOptionalInt16 sets the "optional_int16" field.
+func (u *FieldTypeUpsert) SetOptionalInt16(v int16) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalInt16, v)
+	return u
+}
+
+// UpdateOptionalInt16 sets the "optional_int16" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalInt16() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalInt16)
+	return u
+}
+
+// ClearOptionalInt16 clears the value of the "optional_int16" field.
+func (u *FieldTypeUpsert) ClearOptionalInt16() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalInt16)
+	return u
+}
+
+// SetOptionalInt32 sets the "optional_int32" field.
+func (u *FieldTypeUpsert) SetOptionalInt32(v int32) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalInt32, v)
+	return u
+}
+
+// UpdateOptionalInt32 sets the "optional_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalInt32() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalInt32)
+	return u
+}
+
+// ClearOptionalInt32 clears the value of the "optional_int32" field.
+func (u *FieldTypeUpsert) ClearOptionalInt32() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalInt32)
+	return u
+}
+
+// SetOptionalInt64 sets the "optional_int64" field.
+func (u *FieldTypeUpsert) SetOptionalInt64(v int64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalInt64, v)
+	return u
+}
+
+// UpdateOptionalInt64 sets the "optional_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalInt64() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalInt64)
+	return u
+}
+
+// ClearOptionalInt64 clears the value of the "optional_int64" field.
+func (u *FieldTypeUpsert) ClearOptionalInt64() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalInt64)
+	return u
+}
+
+// SetNillableInt sets the "nillable_int" field.
+func (u *FieldTypeUpsert) SetNillableInt(v int) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNillableInt, v)
+	return u
+}
+
+// UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNillableInt() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNillableInt)
+	return u
+}
+
+// ClearNillableInt clears the value of the "nillable_int" field.
+func (u *FieldTypeUpsert) ClearNillableInt() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNillableInt)
+	return u
+}
+
+// SetNillableInt8 sets the "nillable_int8" field.
+func (u *FieldTypeUpsert) SetNillableInt8(v int8) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNillableInt8, v)
+	return u
+}
+
+// UpdateNillableInt8 sets the "nillable_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNillableInt8() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNillableInt8)
+	return u
+}
+
+// ClearNillableInt8 clears the value of the "nillable_int8" field.
+func (u *FieldTypeUpsert) ClearNillableInt8() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNillableInt8)
+	return u
+}
+
+// SetNillableInt16 sets the "nillable_int16" field.
+func (u *FieldTypeUpsert) SetNillableInt16(v int16) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNillableInt16, v)
+	return u
+}
+
+// UpdateNillableInt16 sets the "nillable_int16" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNillableInt16() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNillableInt16)
+	return u
+}
+
+// ClearNillableInt16 clears the value of the "nillable_int16" field.
+func (u *FieldTypeUpsert) ClearNillableInt16() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNillableInt16)
+	return u
+}
+
+// SetNillableInt32 sets the "nillable_int32" field.
+func (u *FieldTypeUpsert) SetNillableInt32(v int32) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNillableInt32, v)
+	return u
+}
+
+// UpdateNillableInt32 sets the "nillable_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNillableInt32() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNillableInt32)
+	return u
+}
+
+// ClearNillableInt32 clears the value of the "nillable_int32" field.
+func (u *FieldTypeUpsert) ClearNillableInt32() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNillableInt32)
+	return u
+}
+
+// SetNillableInt64 sets the "nillable_int64" field.
+func (u *FieldTypeUpsert) SetNillableInt64(v int64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNillableInt64, v)
+	return u
+}
+
+// UpdateNillableInt64 sets the "nillable_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNillableInt64() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNillableInt64)
+	return u
+}
+
+// ClearNillableInt64 clears the value of the "nillable_int64" field.
+func (u *FieldTypeUpsert) ClearNillableInt64() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNillableInt64)
+	return u
+}
+
+// SetValidateOptionalInt32 sets the "validate_optional_int32" field.
+func (u *FieldTypeUpsert) SetValidateOptionalInt32(v int32) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldValidateOptionalInt32, v)
+	return u
+}
+
+// UpdateValidateOptionalInt32 sets the "validate_optional_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateValidateOptionalInt32() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldValidateOptionalInt32)
+	return u
+}
+
+// ClearValidateOptionalInt32 clears the value of the "validate_optional_int32" field.
+func (u *FieldTypeUpsert) ClearValidateOptionalInt32() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldValidateOptionalInt32)
+	return u
+}
+
+// SetOptionalUint sets the "optional_uint" field.
+func (u *FieldTypeUpsert) SetOptionalUint(v uint) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalUint, v)
+	return u
+}
+
+// UpdateOptionalUint sets the "optional_uint" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalUint() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalUint)
+	return u
+}
+
+// ClearOptionalUint clears the value of the "optional_uint" field.
+func (u *FieldTypeUpsert) ClearOptionalUint() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalUint)
+	return u
+}
+
+// SetOptionalUint8 sets the "optional_uint8" field.
+func (u *FieldTypeUpsert) SetOptionalUint8(v uint8) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalUint8, v)
+	return u
+}
+
+// UpdateOptionalUint8 sets the "optional_uint8" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalUint8() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalUint8)
+	return u
+}
+
+// ClearOptionalUint8 clears the value of the "optional_uint8" field.
+func (u *FieldTypeUpsert) ClearOptionalUint8() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalUint8)
+	return u
+}
+
+// SetOptionalUint16 sets the "optional_uint16" field.
+func (u *FieldTypeUpsert) SetOptionalUint16(v uint16) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalUint16, v)
+	return u
+}
+
+// UpdateOptionalUint16 sets the "optional_uint16" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalUint16() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalUint16)
+	return u
+}
+
+// ClearOptionalUint16 clears the value of the "optional_uint16" field.
+func (u *FieldTypeUpsert) ClearOptionalUint16() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalUint16)
+	return u
+}
+
+// SetOptionalUint32 sets the "optional_uint32" field.
+func (u *FieldTypeUpsert) SetOptionalUint32(v uint32) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalUint32, v)
+	return u
+}
+
+// UpdateOptionalUint32 sets the "optional_uint32" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalUint32() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalUint32)
+	return u
+}
+
+// ClearOptionalUint32 clears the value of the "optional_uint32" field.
+func (u *FieldTypeUpsert) ClearOptionalUint32() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalUint32)
+	return u
+}
+
+// SetOptionalUint64 sets the "optional_uint64" field.
+func (u *FieldTypeUpsert) SetOptionalUint64(v uint64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalUint64, v)
+	return u
+}
+
+// UpdateOptionalUint64 sets the "optional_uint64" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalUint64() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalUint64)
+	return u
+}
+
+// ClearOptionalUint64 clears the value of the "optional_uint64" field.
+func (u *FieldTypeUpsert) ClearOptionalUint64() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalUint64)
+	return u
+}
+
+// SetState sets the "state" field.
+func (u *FieldTypeUpsert) SetState(v fieldtype.State) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldState, v)
+	return u
+}
+
+// UpdateState sets the "state" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateState() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldState)
+	return u
+}
+
+// ClearState clears the value of the "state" field.
+func (u *FieldTypeUpsert) ClearState() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldState)
+	return u
+}
+
+// SetOptionalFloat sets the "optional_float" field.
+func (u *FieldTypeUpsert) SetOptionalFloat(v float64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalFloat, v)
+	return u
+}
+
+// UpdateOptionalFloat sets the "optional_float" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalFloat() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalFloat)
+	return u
+}
+
+// ClearOptionalFloat clears the value of the "optional_float" field.
+func (u *FieldTypeUpsert) ClearOptionalFloat() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalFloat)
+	return u
+}
+
+// SetOptionalFloat32 sets the "optional_float32" field.
+func (u *FieldTypeUpsert) SetOptionalFloat32(v float32) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalFloat32, v)
+	return u
+}
+
+// UpdateOptionalFloat32 sets the "optional_float32" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalFloat32() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalFloat32)
+	return u
+}
+
+// ClearOptionalFloat32 clears the value of the "optional_float32" field.
+func (u *FieldTypeUpsert) ClearOptionalFloat32() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalFloat32)
+	return u
+}
+
+// SetDatetime sets the "datetime" field.
+func (u *FieldTypeUpsert) SetDatetime(v time.Time) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldDatetime, v)
+	return u
+}
+
+// UpdateDatetime sets the "datetime" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateDatetime() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldDatetime)
+	return u
+}
+
+// ClearDatetime clears the value of the "datetime" field.
+func (u *FieldTypeUpsert) ClearDatetime() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldDatetime)
+	return u
+}
+
+// SetDecimal sets the "decimal" field.
+func (u *FieldTypeUpsert) SetDecimal(v float64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldDecimal, v)
+	return u
+}
+
+// UpdateDecimal sets the "decimal" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateDecimal() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldDecimal)
+	return u
+}
+
+// ClearDecimal clears the value of the "decimal" field.
+func (u *FieldTypeUpsert) ClearDecimal() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldDecimal)
+	return u
+}
+
+// SetLinkOther sets the "link_other" field.
+func (u *FieldTypeUpsert) SetLinkOther(v *schema.Link) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldLinkOther, v)
+	return u
+}
+
+// UpdateLinkOther sets the "link_other" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateLinkOther() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldLinkOther)
+	return u
+}
+
+// ClearLinkOther clears the value of the "link_other" field.
+func (u *FieldTypeUpsert) ClearLinkOther() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldLinkOther)
+	return u
+}
+
+// SetMAC sets the "mac" field.
+func (u *FieldTypeUpsert) SetMAC(v schema.MAC) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldMAC, v)
+	return u
+}
+
+// UpdateMAC sets the "mac" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateMAC() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldMAC)
+	return u
+}
+
+// ClearMAC clears the value of the "mac" field.
+func (u *FieldTypeUpsert) ClearMAC() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldMAC)
+	return u
+}
+
+// SetStringArray sets the "string_array" field.
+func (u *FieldTypeUpsert) SetStringArray(v schema.Strings) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldStringArray, v)
+	return u
+}
+
+// UpdateStringArray sets the "string_array" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateStringArray() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldStringArray)
+	return u
+}
+
+// ClearStringArray clears the value of the "string_array" field.
+func (u *FieldTypeUpsert) ClearStringArray() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldStringArray)
+	return u
+}
+
+// SetPassword sets the "password" field.
+func (u *FieldTypeUpsert) SetPassword(v string) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldPassword, v)
+	return u
+}
+
+// UpdatePassword sets the "password" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdatePassword() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldPassword)
+	return u
+}
+
+// ClearPassword clears the value of the "password" field.
+func (u *FieldTypeUpsert) ClearPassword() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldPassword)
+	return u
+}
+
+// SetStringScanner sets the "string_scanner" field.
+func (u *FieldTypeUpsert) SetStringScanner(v schema.StringScanner) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldStringScanner, v)
+	return u
+}
+
+// UpdateStringScanner sets the "string_scanner" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateStringScanner() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldStringScanner)
+	return u
+}
+
+// ClearStringScanner clears the value of the "string_scanner" field.
+func (u *FieldTypeUpsert) ClearStringScanner() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldStringScanner)
+	return u
+}
+
+// SetDuration sets the "duration" field.
+func (u *FieldTypeUpsert) SetDuration(v time.Duration) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldDuration, v)
+	return u
+}
+
+// UpdateDuration sets the "duration" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateDuration() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldDuration)
+	return u
+}
+
+// ClearDuration clears the value of the "duration" field.
+func (u *FieldTypeUpsert) ClearDuration() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldDuration)
+	return u
+}
+
+// SetDir sets the "dir" field.
+func (u *FieldTypeUpsert) SetDir(v http.Dir) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldDir, v)
+	return u
+}
+
+// UpdateDir sets the "dir" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateDir() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldDir)
+	return u
+}
+
+// SetNdir sets the "ndir" field.
+func (u *FieldTypeUpsert) SetNdir(v http.Dir) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNdir, v)
+	return u
+}
+
+// UpdateNdir sets the "ndir" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNdir() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNdir)
+	return u
+}
+
+// ClearNdir clears the value of the "ndir" field.
+func (u *FieldTypeUpsert) ClearNdir() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNdir)
+	return u
+}
+
+// SetStr sets the "str" field.
+func (u *FieldTypeUpsert) SetStr(v sql.NullString) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldStr, v)
+	return u
+}
+
+// UpdateStr sets the "str" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateStr() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldStr)
+	return u
+}
+
+// ClearStr clears the value of the "str" field.
+func (u *FieldTypeUpsert) ClearStr() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldStr)
+	return u
+}
+
+// SetNullStr sets the "null_str" field.
+func (u *FieldTypeUpsert) SetNullStr(v *sql.NullString) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNullStr, v)
+	return u
+}
+
+// UpdateNullStr sets the "null_str" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNullStr() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNullStr)
+	return u
+}
+
+// ClearNullStr clears the value of the "null_str" field.
+func (u *FieldTypeUpsert) ClearNullStr() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNullStr)
+	return u
+}
+
+// SetLink sets the "link" field.
+func (u *FieldTypeUpsert) SetLink(v schema.Link) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldLink, v)
+	return u
+}
+
+// UpdateLink sets the "link" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateLink() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldLink)
+	return u
+}
+
+// ClearLink clears the value of the "link" field.
+func (u *FieldTypeUpsert) ClearLink() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldLink)
+	return u
+}
+
+// SetNullLink sets the "null_link" field.
+func (u *FieldTypeUpsert) SetNullLink(v *schema.Link) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNullLink, v)
+	return u
+}
+
+// UpdateNullLink sets the "null_link" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNullLink() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNullLink)
+	return u
+}
+
+// ClearNullLink clears the value of the "null_link" field.
+func (u *FieldTypeUpsert) ClearNullLink() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNullLink)
+	return u
+}
+
+// SetActive sets the "active" field.
+func (u *FieldTypeUpsert) SetActive(v schema.Status) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldActive, v)
+	return u
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateActive() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldActive)
+	return u
+}
+
+// ClearActive clears the value of the "active" field.
+func (u *FieldTypeUpsert) ClearActive() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldActive)
+	return u
+}
+
+// SetNullActive sets the "null_active" field.
+func (u *FieldTypeUpsert) SetNullActive(v schema.Status) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNullActive, v)
+	return u
+}
+
+// UpdateNullActive sets the "null_active" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNullActive() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNullActive)
+	return u
+}
+
+// ClearNullActive clears the value of the "null_active" field.
+func (u *FieldTypeUpsert) ClearNullActive() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNullActive)
+	return u
+}
+
+// SetDeleted sets the "deleted" field.
+func (u *FieldTypeUpsert) SetDeleted(v *sql.NullBool) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldDeleted, v)
+	return u
+}
+
+// UpdateDeleted sets the "deleted" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateDeleted() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldDeleted)
+	return u
+}
+
+// ClearDeleted clears the value of the "deleted" field.
+func (u *FieldTypeUpsert) ClearDeleted() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldDeleted)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *FieldTypeUpsert) SetDeletedAt(v *sql.NullTime) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateDeletedAt() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *FieldTypeUpsert) ClearDeletedAt() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldDeletedAt)
+	return u
+}
+
+// SetIP sets the "ip" field.
+func (u *FieldTypeUpsert) SetIP(v net.IP) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldIP, v)
+	return u
+}
+
+// UpdateIP sets the "ip" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateIP() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldIP)
+	return u
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *FieldTypeUpsert) ClearIP() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldIP)
+	return u
+}
+
+// SetNullInt64 sets the "null_int64" field.
+func (u *FieldTypeUpsert) SetNullInt64(v *sql.NullInt64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNullInt64, v)
+	return u
+}
+
+// UpdateNullInt64 sets the "null_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNullInt64() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNullInt64)
+	return u
+}
+
+// ClearNullInt64 clears the value of the "null_int64" field.
+func (u *FieldTypeUpsert) ClearNullInt64() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNullInt64)
+	return u
+}
+
+// SetSchemaInt sets the "schema_int" field.
+func (u *FieldTypeUpsert) SetSchemaInt(v schema.Int) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldSchemaInt, v)
+	return u
+}
+
+// UpdateSchemaInt sets the "schema_int" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateSchemaInt() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldSchemaInt)
+	return u
+}
+
+// ClearSchemaInt clears the value of the "schema_int" field.
+func (u *FieldTypeUpsert) ClearSchemaInt() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldSchemaInt)
+	return u
+}
+
+// SetSchemaInt8 sets the "schema_int8" field.
+func (u *FieldTypeUpsert) SetSchemaInt8(v schema.Int8) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldSchemaInt8, v)
+	return u
+}
+
+// UpdateSchemaInt8 sets the "schema_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateSchemaInt8() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldSchemaInt8)
+	return u
+}
+
+// ClearSchemaInt8 clears the value of the "schema_int8" field.
+func (u *FieldTypeUpsert) ClearSchemaInt8() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldSchemaInt8)
+	return u
+}
+
+// SetSchemaInt64 sets the "schema_int64" field.
+func (u *FieldTypeUpsert) SetSchemaInt64(v schema.Int64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldSchemaInt64, v)
+	return u
+}
+
+// UpdateSchemaInt64 sets the "schema_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateSchemaInt64() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldSchemaInt64)
+	return u
+}
+
+// ClearSchemaInt64 clears the value of the "schema_int64" field.
+func (u *FieldTypeUpsert) ClearSchemaInt64() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldSchemaInt64)
+	return u
+}
+
+// SetSchemaFloat sets the "schema_float" field.
+func (u *FieldTypeUpsert) SetSchemaFloat(v schema.Float64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldSchemaFloat, v)
+	return u
+}
+
+// UpdateSchemaFloat sets the "schema_float" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateSchemaFloat() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldSchemaFloat)
+	return u
+}
+
+// ClearSchemaFloat clears the value of the "schema_float" field.
+func (u *FieldTypeUpsert) ClearSchemaFloat() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldSchemaFloat)
+	return u
+}
+
+// SetSchemaFloat32 sets the "schema_float32" field.
+func (u *FieldTypeUpsert) SetSchemaFloat32(v schema.Float32) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldSchemaFloat32, v)
+	return u
+}
+
+// UpdateSchemaFloat32 sets the "schema_float32" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateSchemaFloat32() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldSchemaFloat32)
+	return u
+}
+
+// ClearSchemaFloat32 clears the value of the "schema_float32" field.
+func (u *FieldTypeUpsert) ClearSchemaFloat32() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldSchemaFloat32)
+	return u
+}
+
+// SetNullFloat sets the "null_float" field.
+func (u *FieldTypeUpsert) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNullFloat, v)
+	return u
+}
+
+// UpdateNullFloat sets the "null_float" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNullFloat() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNullFloat)
+	return u
+}
+
+// ClearNullFloat clears the value of the "null_float" field.
+func (u *FieldTypeUpsert) ClearNullFloat() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNullFloat)
+	return u
+}
+
+// SetRole sets the "role" field.
+func (u *FieldTypeUpsert) SetRole(v role.Role) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldRole, v)
+	return u
+}
+
+// UpdateRole sets the "role" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateRole() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldRole)
+	return u
+}
+
+// SetPriority sets the "priority" field.
+func (u *FieldTypeUpsert) SetPriority(v role.Priority) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldPriority, v)
+	return u
+}
+
+// UpdatePriority sets the "priority" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdatePriority() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldPriority)
+	return u
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (u *FieldTypeUpsert) ClearPriority() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldPriority)
+	return u
+}
+
+// SetUUID sets the "uuid" field.
+func (u *FieldTypeUpsert) SetUUID(v uuid.UUID) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldUUID, v)
+	return u
+}
+
+// UpdateUUID sets the "uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateUUID() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldUUID)
+	return u
+}
+
+// ClearUUID clears the value of the "uuid" field.
+func (u *FieldTypeUpsert) ClearUUID() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldUUID)
+	return u
+}
+
+// SetNillableUUID sets the "nillable_uuid" field.
+func (u *FieldTypeUpsert) SetNillableUUID(v uuid.UUID) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNillableUUID, v)
+	return u
+}
+
+// UpdateNillableUUID sets the "nillable_uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNillableUUID() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNillableUUID)
+	return u
+}
+
+// ClearNillableUUID clears the value of the "nillable_uuid" field.
+func (u *FieldTypeUpsert) ClearNillableUUID() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNillableUUID)
+	return u
+}
+
+// SetStrings sets the "strings" field.
+func (u *FieldTypeUpsert) SetStrings(v []string) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldStrings, v)
+	return u
+}
+
+// UpdateStrings sets the "strings" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateStrings() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldStrings)
+	return u
+}
+
+// ClearStrings clears the value of the "strings" field.
+func (u *FieldTypeUpsert) ClearStrings() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldStrings)
+	return u
+}
+
+// SetPair sets the "pair" field.
+func (u *FieldTypeUpsert) SetPair(v schema.Pair) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldPair, v)
+	return u
+}
+
+// UpdatePair sets the "pair" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdatePair() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldPair)
+	return u
+}
+
+// SetNilPair sets the "nil_pair" field.
+func (u *FieldTypeUpsert) SetNilPair(v *schema.Pair) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldNilPair, v)
+	return u
+}
+
+// UpdateNilPair sets the "nil_pair" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateNilPair() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldNilPair)
+	return u
+}
+
+// ClearNilPair clears the value of the "nil_pair" field.
+func (u *FieldTypeUpsert) ClearNilPair() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldNilPair)
+	return u
+}
+
+// SetVstring sets the "vstring" field.
+func (u *FieldTypeUpsert) SetVstring(v schema.VString) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldVstring, v)
+	return u
+}
+
+// UpdateVstring sets the "vstring" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateVstring() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldVstring)
+	return u
+}
+
+// SetTriple sets the "triple" field.
+func (u *FieldTypeUpsert) SetTriple(v schema.Triple) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldTriple, v)
+	return u
+}
+
+// UpdateTriple sets the "triple" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateTriple() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldTriple)
+	return u
+}
+
+// SetBigInt sets the "big_int" field.
+func (u *FieldTypeUpsert) SetBigInt(v schema.BigInt) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldBigInt, v)
+	return u
+}
+
+// UpdateBigInt sets the "big_int" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateBigInt() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldBigInt)
+	return u
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (u *FieldTypeUpsert) ClearBigInt() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldBigInt)
+	return u
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (u *FieldTypeUpsert) SetPasswordOther(v schema.Password) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldPasswordOther, v)
+	return u
+}
+
+// UpdatePasswordOther sets the "password_other" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdatePasswordOther() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldPasswordOther)
+	return u
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (u *FieldTypeUpsert) ClearPasswordOther() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldPasswordOther)
+	return u
+}
+
+// UpdateNewValues updates the fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//  client.FieldType.Create().
+//      OnConflict(sql.ResolveWithNewValues()).
+//      Exec(ctx)
+//
+func (u *FieldTypeUpsertOne) UpdateNewValues() *FieldTypeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.FieldType.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *FieldTypeUpsertOne) Ignore() *FieldTypeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FieldTypeUpsertOne) DoNothing() *FieldTypeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FieldTypeCreate.OnConflict
+// documentation for more info.
+func (u *FieldTypeUpsertOne) Update(set func(*FieldTypeUpsert)) *FieldTypeUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FieldTypeUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetInt sets the "int" field.
+func (u *FieldTypeUpsertOne) SetInt(v int) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt(v)
+	})
+}
+
+// UpdateInt sets the "int" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt()
+	})
+}
+
+// SetInt8 sets the "int8" field.
+func (u *FieldTypeUpsertOne) SetInt8(v int8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt8(v)
+	})
+}
+
+// UpdateInt8 sets the "int8" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateInt8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt8()
+	})
+}
+
+// SetInt16 sets the "int16" field.
+func (u *FieldTypeUpsertOne) SetInt16(v int16) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt16(v)
+	})
+}
+
+// UpdateInt16 sets the "int16" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateInt16() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt16()
+	})
+}
+
+// SetInt32 sets the "int32" field.
+func (u *FieldTypeUpsertOne) SetInt32(v int32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt32(v)
+	})
+}
+
+// UpdateInt32 sets the "int32" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateInt32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt32()
+	})
+}
+
+// SetInt64 sets the "int64" field.
+func (u *FieldTypeUpsertOne) SetInt64(v int64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt64(v)
+	})
+}
+
+// UpdateInt64 sets the "int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt64()
+	})
+}
+
+// SetOptionalInt sets the "optional_int" field.
+func (u *FieldTypeUpsertOne) SetOptionalInt(v int) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt(v)
+	})
+}
+
+// UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt()
+	})
+}
+
+// ClearOptionalInt clears the value of the "optional_int" field.
+func (u *FieldTypeUpsertOne) ClearOptionalInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt()
+	})
+}
+
+// SetOptionalInt8 sets the "optional_int8" field.
+func (u *FieldTypeUpsertOne) SetOptionalInt8(v int8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt8(v)
+	})
+}
+
+// UpdateOptionalInt8 sets the "optional_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalInt8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt8()
+	})
+}
+
+// ClearOptionalInt8 clears the value of the "optional_int8" field.
+func (u *FieldTypeUpsertOne) ClearOptionalInt8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt8()
+	})
+}
+
+// SetOptionalInt16 sets the "optional_int16" field.
+func (u *FieldTypeUpsertOne) SetOptionalInt16(v int16) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt16(v)
+	})
+}
+
+// UpdateOptionalInt16 sets the "optional_int16" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalInt16() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt16()
+	})
+}
+
+// ClearOptionalInt16 clears the value of the "optional_int16" field.
+func (u *FieldTypeUpsertOne) ClearOptionalInt16() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt16()
+	})
+}
+
+// SetOptionalInt32 sets the "optional_int32" field.
+func (u *FieldTypeUpsertOne) SetOptionalInt32(v int32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt32(v)
+	})
+}
+
+// UpdateOptionalInt32 sets the "optional_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalInt32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt32()
+	})
+}
+
+// ClearOptionalInt32 clears the value of the "optional_int32" field.
+func (u *FieldTypeUpsertOne) ClearOptionalInt32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt32()
+	})
+}
+
+// SetOptionalInt64 sets the "optional_int64" field.
+func (u *FieldTypeUpsertOne) SetOptionalInt64(v int64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt64(v)
+	})
+}
+
+// UpdateOptionalInt64 sets the "optional_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt64()
+	})
+}
+
+// ClearOptionalInt64 clears the value of the "optional_int64" field.
+func (u *FieldTypeUpsertOne) ClearOptionalInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt64()
+	})
+}
+
+// SetNillableInt sets the "nillable_int" field.
+func (u *FieldTypeUpsertOne) SetNillableInt(v int) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt(v)
+	})
+}
+
+// UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNillableInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt()
+	})
+}
+
+// ClearNillableInt clears the value of the "nillable_int" field.
+func (u *FieldTypeUpsertOne) ClearNillableInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt()
+	})
+}
+
+// SetNillableInt8 sets the "nillable_int8" field.
+func (u *FieldTypeUpsertOne) SetNillableInt8(v int8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt8(v)
+	})
+}
+
+// UpdateNillableInt8 sets the "nillable_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNillableInt8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt8()
+	})
+}
+
+// ClearNillableInt8 clears the value of the "nillable_int8" field.
+func (u *FieldTypeUpsertOne) ClearNillableInt8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt8()
+	})
+}
+
+// SetNillableInt16 sets the "nillable_int16" field.
+func (u *FieldTypeUpsertOne) SetNillableInt16(v int16) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt16(v)
+	})
+}
+
+// UpdateNillableInt16 sets the "nillable_int16" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNillableInt16() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt16()
+	})
+}
+
+// ClearNillableInt16 clears the value of the "nillable_int16" field.
+func (u *FieldTypeUpsertOne) ClearNillableInt16() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt16()
+	})
+}
+
+// SetNillableInt32 sets the "nillable_int32" field.
+func (u *FieldTypeUpsertOne) SetNillableInt32(v int32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt32(v)
+	})
+}
+
+// UpdateNillableInt32 sets the "nillable_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNillableInt32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt32()
+	})
+}
+
+// ClearNillableInt32 clears the value of the "nillable_int32" field.
+func (u *FieldTypeUpsertOne) ClearNillableInt32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt32()
+	})
+}
+
+// SetNillableInt64 sets the "nillable_int64" field.
+func (u *FieldTypeUpsertOne) SetNillableInt64(v int64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt64(v)
+	})
+}
+
+// UpdateNillableInt64 sets the "nillable_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNillableInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt64()
+	})
+}
+
+// ClearNillableInt64 clears the value of the "nillable_int64" field.
+func (u *FieldTypeUpsertOne) ClearNillableInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt64()
+	})
+}
+
+// SetValidateOptionalInt32 sets the "validate_optional_int32" field.
+func (u *FieldTypeUpsertOne) SetValidateOptionalInt32(v int32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetValidateOptionalInt32(v)
+	})
+}
+
+// UpdateValidateOptionalInt32 sets the "validate_optional_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateValidateOptionalInt32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateValidateOptionalInt32()
+	})
+}
+
+// ClearValidateOptionalInt32 clears the value of the "validate_optional_int32" field.
+func (u *FieldTypeUpsertOne) ClearValidateOptionalInt32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearValidateOptionalInt32()
+	})
+}
+
+// SetOptionalUint sets the "optional_uint" field.
+func (u *FieldTypeUpsertOne) SetOptionalUint(v uint) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint(v)
+	})
+}
+
+// UpdateOptionalUint sets the "optional_uint" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalUint() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint()
+	})
+}
+
+// ClearOptionalUint clears the value of the "optional_uint" field.
+func (u *FieldTypeUpsertOne) ClearOptionalUint() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint()
+	})
+}
+
+// SetOptionalUint8 sets the "optional_uint8" field.
+func (u *FieldTypeUpsertOne) SetOptionalUint8(v uint8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint8(v)
+	})
+}
+
+// UpdateOptionalUint8 sets the "optional_uint8" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalUint8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint8()
+	})
+}
+
+// ClearOptionalUint8 clears the value of the "optional_uint8" field.
+func (u *FieldTypeUpsertOne) ClearOptionalUint8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint8()
+	})
+}
+
+// SetOptionalUint16 sets the "optional_uint16" field.
+func (u *FieldTypeUpsertOne) SetOptionalUint16(v uint16) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint16(v)
+	})
+}
+
+// UpdateOptionalUint16 sets the "optional_uint16" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalUint16() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint16()
+	})
+}
+
+// ClearOptionalUint16 clears the value of the "optional_uint16" field.
+func (u *FieldTypeUpsertOne) ClearOptionalUint16() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint16()
+	})
+}
+
+// SetOptionalUint32 sets the "optional_uint32" field.
+func (u *FieldTypeUpsertOne) SetOptionalUint32(v uint32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint32(v)
+	})
+}
+
+// UpdateOptionalUint32 sets the "optional_uint32" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalUint32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint32()
+	})
+}
+
+// ClearOptionalUint32 clears the value of the "optional_uint32" field.
+func (u *FieldTypeUpsertOne) ClearOptionalUint32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint32()
+	})
+}
+
+// SetOptionalUint64 sets the "optional_uint64" field.
+func (u *FieldTypeUpsertOne) SetOptionalUint64(v uint64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint64(v)
+	})
+}
+
+// UpdateOptionalUint64 sets the "optional_uint64" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalUint64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint64()
+	})
+}
+
+// ClearOptionalUint64 clears the value of the "optional_uint64" field.
+func (u *FieldTypeUpsertOne) ClearOptionalUint64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint64()
+	})
+}
+
+// SetState sets the "state" field.
+func (u *FieldTypeUpsertOne) SetState(v fieldtype.State) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetState(v)
+	})
+}
+
+// UpdateState sets the "state" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateState() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateState()
+	})
+}
+
+// ClearState clears the value of the "state" field.
+func (u *FieldTypeUpsertOne) ClearState() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearState()
+	})
+}
+
+// SetOptionalFloat sets the "optional_float" field.
+func (u *FieldTypeUpsertOne) SetOptionalFloat(v float64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalFloat(v)
+	})
+}
+
+// UpdateOptionalFloat sets the "optional_float" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalFloat() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalFloat()
+	})
+}
+
+// ClearOptionalFloat clears the value of the "optional_float" field.
+func (u *FieldTypeUpsertOne) ClearOptionalFloat() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalFloat()
+	})
+}
+
+// SetOptionalFloat32 sets the "optional_float32" field.
+func (u *FieldTypeUpsertOne) SetOptionalFloat32(v float32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalFloat32(v)
+	})
+}
+
+// UpdateOptionalFloat32 sets the "optional_float32" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalFloat32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalFloat32()
+	})
+}
+
+// ClearOptionalFloat32 clears the value of the "optional_float32" field.
+func (u *FieldTypeUpsertOne) ClearOptionalFloat32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalFloat32()
+	})
+}
+
+// SetDatetime sets the "datetime" field.
+func (u *FieldTypeUpsertOne) SetDatetime(v time.Time) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDatetime(v)
+	})
+}
+
+// UpdateDatetime sets the "datetime" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateDatetime() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDatetime()
+	})
+}
+
+// ClearDatetime clears the value of the "datetime" field.
+func (u *FieldTypeUpsertOne) ClearDatetime() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDatetime()
+	})
+}
+
+// SetDecimal sets the "decimal" field.
+func (u *FieldTypeUpsertOne) SetDecimal(v float64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDecimal(v)
+	})
+}
+
+// UpdateDecimal sets the "decimal" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateDecimal() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDecimal()
+	})
+}
+
+// ClearDecimal clears the value of the "decimal" field.
+func (u *FieldTypeUpsertOne) ClearDecimal() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDecimal()
+	})
+}
+
+// SetLinkOther sets the "link_other" field.
+func (u *FieldTypeUpsertOne) SetLinkOther(v *schema.Link) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetLinkOther(v)
+	})
+}
+
+// UpdateLinkOther sets the "link_other" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateLinkOther() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateLinkOther()
+	})
+}
+
+// ClearLinkOther clears the value of the "link_other" field.
+func (u *FieldTypeUpsertOne) ClearLinkOther() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearLinkOther()
+	})
+}
+
+// SetMAC sets the "mac" field.
+func (u *FieldTypeUpsertOne) SetMAC(v schema.MAC) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetMAC(v)
+	})
+}
+
+// UpdateMAC sets the "mac" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateMAC() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateMAC()
+	})
+}
+
+// ClearMAC clears the value of the "mac" field.
+func (u *FieldTypeUpsertOne) ClearMAC() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearMAC()
+	})
+}
+
+// SetStringArray sets the "string_array" field.
+func (u *FieldTypeUpsertOne) SetStringArray(v schema.Strings) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetStringArray(v)
+	})
+}
+
+// UpdateStringArray sets the "string_array" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateStringArray() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateStringArray()
+	})
+}
+
+// ClearStringArray clears the value of the "string_array" field.
+func (u *FieldTypeUpsertOne) ClearStringArray() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearStringArray()
+	})
+}
+
+// SetPassword sets the "password" field.
+func (u *FieldTypeUpsertOne) SetPassword(v string) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetPassword(v)
+	})
+}
+
+// UpdatePassword sets the "password" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdatePassword() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdatePassword()
+	})
+}
+
+// ClearPassword clears the value of the "password" field.
+func (u *FieldTypeUpsertOne) ClearPassword() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearPassword()
+	})
+}
+
+// SetStringScanner sets the "string_scanner" field.
+func (u *FieldTypeUpsertOne) SetStringScanner(v schema.StringScanner) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetStringScanner(v)
+	})
+}
+
+// UpdateStringScanner sets the "string_scanner" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateStringScanner() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateStringScanner()
+	})
+}
+
+// ClearStringScanner clears the value of the "string_scanner" field.
+func (u *FieldTypeUpsertOne) ClearStringScanner() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearStringScanner()
+	})
+}
+
+// SetDuration sets the "duration" field.
+func (u *FieldTypeUpsertOne) SetDuration(v time.Duration) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDuration(v)
+	})
+}
+
+// UpdateDuration sets the "duration" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateDuration() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDuration()
+	})
+}
+
+// ClearDuration clears the value of the "duration" field.
+func (u *FieldTypeUpsertOne) ClearDuration() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDuration()
+	})
+}
+
+// SetDir sets the "dir" field.
+func (u *FieldTypeUpsertOne) SetDir(v http.Dir) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDir(v)
+	})
+}
+
+// UpdateDir sets the "dir" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateDir() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDir()
+	})
+}
+
+// SetNdir sets the "ndir" field.
+func (u *FieldTypeUpsertOne) SetNdir(v http.Dir) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNdir(v)
+	})
+}
+
+// UpdateNdir sets the "ndir" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNdir() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNdir()
+	})
+}
+
+// ClearNdir clears the value of the "ndir" field.
+func (u *FieldTypeUpsertOne) ClearNdir() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNdir()
+	})
+}
+
+// SetStr sets the "str" field.
+func (u *FieldTypeUpsertOne) SetStr(v sql.NullString) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetStr(v)
+	})
+}
+
+// UpdateStr sets the "str" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateStr() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateStr()
+	})
+}
+
+// ClearStr clears the value of the "str" field.
+func (u *FieldTypeUpsertOne) ClearStr() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearStr()
+	})
+}
+
+// SetNullStr sets the "null_str" field.
+func (u *FieldTypeUpsertOne) SetNullStr(v *sql.NullString) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullStr(v)
+	})
+}
+
+// UpdateNullStr sets the "null_str" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNullStr() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullStr()
+	})
+}
+
+// ClearNullStr clears the value of the "null_str" field.
+func (u *FieldTypeUpsertOne) ClearNullStr() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullStr()
+	})
+}
+
+// SetLink sets the "link" field.
+func (u *FieldTypeUpsertOne) SetLink(v schema.Link) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetLink(v)
+	})
+}
+
+// UpdateLink sets the "link" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateLink() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateLink()
+	})
+}
+
+// ClearLink clears the value of the "link" field.
+func (u *FieldTypeUpsertOne) ClearLink() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearLink()
+	})
+}
+
+// SetNullLink sets the "null_link" field.
+func (u *FieldTypeUpsertOne) SetNullLink(v *schema.Link) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullLink(v)
+	})
+}
+
+// UpdateNullLink sets the "null_link" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNullLink() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullLink()
+	})
+}
+
+// ClearNullLink clears the value of the "null_link" field.
+func (u *FieldTypeUpsertOne) ClearNullLink() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullLink()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *FieldTypeUpsertOne) SetActive(v schema.Status) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateActive() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateActive()
+	})
+}
+
+// ClearActive clears the value of the "active" field.
+func (u *FieldTypeUpsertOne) ClearActive() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearActive()
+	})
+}
+
+// SetNullActive sets the "null_active" field.
+func (u *FieldTypeUpsertOne) SetNullActive(v schema.Status) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullActive(v)
+	})
+}
+
+// UpdateNullActive sets the "null_active" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNullActive() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullActive()
+	})
+}
+
+// ClearNullActive clears the value of the "null_active" field.
+func (u *FieldTypeUpsertOne) ClearNullActive() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullActive()
+	})
+}
+
+// SetDeleted sets the "deleted" field.
+func (u *FieldTypeUpsertOne) SetDeleted(v *sql.NullBool) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDeleted(v)
+	})
+}
+
+// UpdateDeleted sets the "deleted" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateDeleted() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDeleted()
+	})
+}
+
+// ClearDeleted clears the value of the "deleted" field.
+func (u *FieldTypeUpsertOne) ClearDeleted() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDeleted()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *FieldTypeUpsertOne) SetDeletedAt(v *sql.NullTime) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateDeletedAt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *FieldTypeUpsertOne) ClearDeletedAt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetIP sets the "ip" field.
+func (u *FieldTypeUpsertOne) SetIP(v net.IP) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetIP(v)
+	})
+}
+
+// UpdateIP sets the "ip" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateIP() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateIP()
+	})
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *FieldTypeUpsertOne) ClearIP() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearIP()
+	})
+}
+
+// SetNullInt64 sets the "null_int64" field.
+func (u *FieldTypeUpsertOne) SetNullInt64(v *sql.NullInt64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullInt64(v)
+	})
+}
+
+// UpdateNullInt64 sets the "null_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNullInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullInt64()
+	})
+}
+
+// ClearNullInt64 clears the value of the "null_int64" field.
+func (u *FieldTypeUpsertOne) ClearNullInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullInt64()
+	})
+}
+
+// SetSchemaInt sets the "schema_int" field.
+func (u *FieldTypeUpsertOne) SetSchemaInt(v schema.Int) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaInt(v)
+	})
+}
+
+// UpdateSchemaInt sets the "schema_int" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateSchemaInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaInt()
+	})
+}
+
+// ClearSchemaInt clears the value of the "schema_int" field.
+func (u *FieldTypeUpsertOne) ClearSchemaInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaInt()
+	})
+}
+
+// SetSchemaInt8 sets the "schema_int8" field.
+func (u *FieldTypeUpsertOne) SetSchemaInt8(v schema.Int8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaInt8(v)
+	})
+}
+
+// UpdateSchemaInt8 sets the "schema_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateSchemaInt8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaInt8()
+	})
+}
+
+// ClearSchemaInt8 clears the value of the "schema_int8" field.
+func (u *FieldTypeUpsertOne) ClearSchemaInt8() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaInt8()
+	})
+}
+
+// SetSchemaInt64 sets the "schema_int64" field.
+func (u *FieldTypeUpsertOne) SetSchemaInt64(v schema.Int64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaInt64(v)
+	})
+}
+
+// UpdateSchemaInt64 sets the "schema_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateSchemaInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaInt64()
+	})
+}
+
+// ClearSchemaInt64 clears the value of the "schema_int64" field.
+func (u *FieldTypeUpsertOne) ClearSchemaInt64() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaInt64()
+	})
+}
+
+// SetSchemaFloat sets the "schema_float" field.
+func (u *FieldTypeUpsertOne) SetSchemaFloat(v schema.Float64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaFloat(v)
+	})
+}
+
+// UpdateSchemaFloat sets the "schema_float" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateSchemaFloat() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaFloat()
+	})
+}
+
+// ClearSchemaFloat clears the value of the "schema_float" field.
+func (u *FieldTypeUpsertOne) ClearSchemaFloat() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaFloat()
+	})
+}
+
+// SetSchemaFloat32 sets the "schema_float32" field.
+func (u *FieldTypeUpsertOne) SetSchemaFloat32(v schema.Float32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaFloat32(v)
+	})
+}
+
+// UpdateSchemaFloat32 sets the "schema_float32" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateSchemaFloat32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaFloat32()
+	})
+}
+
+// ClearSchemaFloat32 clears the value of the "schema_float32" field.
+func (u *FieldTypeUpsertOne) ClearSchemaFloat32() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaFloat32()
+	})
+}
+
+// SetNullFloat sets the "null_float" field.
+func (u *FieldTypeUpsertOne) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullFloat(v)
+	})
+}
+
+// UpdateNullFloat sets the "null_float" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNullFloat() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullFloat()
+	})
+}
+
+// ClearNullFloat clears the value of the "null_float" field.
+func (u *FieldTypeUpsertOne) ClearNullFloat() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullFloat()
+	})
+}
+
+// SetRole sets the "role" field.
+func (u *FieldTypeUpsertOne) SetRole(v role.Role) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetRole(v)
+	})
+}
+
+// UpdateRole sets the "role" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateRole() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateRole()
+	})
+}
+
+// SetPriority sets the "priority" field.
+func (u *FieldTypeUpsertOne) SetPriority(v role.Priority) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetPriority(v)
+	})
+}
+
+// UpdatePriority sets the "priority" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdatePriority() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdatePriority()
+	})
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (u *FieldTypeUpsertOne) ClearPriority() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearPriority()
+	})
+}
+
+// SetUUID sets the "uuid" field.
+func (u *FieldTypeUpsertOne) SetUUID(v uuid.UUID) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetUUID(v)
+	})
+}
+
+// UpdateUUID sets the "uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateUUID() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateUUID()
+	})
+}
+
+// ClearUUID clears the value of the "uuid" field.
+func (u *FieldTypeUpsertOne) ClearUUID() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearUUID()
+	})
+}
+
+// SetNillableUUID sets the "nillable_uuid" field.
+func (u *FieldTypeUpsertOne) SetNillableUUID(v uuid.UUID) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableUUID(v)
+	})
+}
+
+// UpdateNillableUUID sets the "nillable_uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNillableUUID() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableUUID()
+	})
+}
+
+// ClearNillableUUID clears the value of the "nillable_uuid" field.
+func (u *FieldTypeUpsertOne) ClearNillableUUID() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableUUID()
+	})
+}
+
+// SetStrings sets the "strings" field.
+func (u *FieldTypeUpsertOne) SetStrings(v []string) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetStrings(v)
+	})
+}
+
+// UpdateStrings sets the "strings" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateStrings() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateStrings()
+	})
+}
+
+// ClearStrings clears the value of the "strings" field.
+func (u *FieldTypeUpsertOne) ClearStrings() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearStrings()
+	})
+}
+
+// SetPair sets the "pair" field.
+func (u *FieldTypeUpsertOne) SetPair(v schema.Pair) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetPair(v)
+	})
+}
+
+// UpdatePair sets the "pair" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdatePair() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdatePair()
+	})
+}
+
+// SetNilPair sets the "nil_pair" field.
+func (u *FieldTypeUpsertOne) SetNilPair(v *schema.Pair) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNilPair(v)
+	})
+}
+
+// UpdateNilPair sets the "nil_pair" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateNilPair() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNilPair()
+	})
+}
+
+// ClearNilPair clears the value of the "nil_pair" field.
+func (u *FieldTypeUpsertOne) ClearNilPair() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNilPair()
+	})
+}
+
+// SetVstring sets the "vstring" field.
+func (u *FieldTypeUpsertOne) SetVstring(v schema.VString) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetVstring(v)
+	})
+}
+
+// UpdateVstring sets the "vstring" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateVstring() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateVstring()
+	})
+}
+
+// SetTriple sets the "triple" field.
+func (u *FieldTypeUpsertOne) SetTriple(v schema.Triple) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetTriple(v)
+	})
+}
+
+// UpdateTriple sets the "triple" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateTriple() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateTriple()
+	})
+}
+
+// SetBigInt sets the "big_int" field.
+func (u *FieldTypeUpsertOne) SetBigInt(v schema.BigInt) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetBigInt(v)
+	})
+}
+
+// UpdateBigInt sets the "big_int" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateBigInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateBigInt()
+	})
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (u *FieldTypeUpsertOne) ClearBigInt() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearBigInt()
+	})
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (u *FieldTypeUpsertOne) SetPasswordOther(v schema.Password) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetPasswordOther(v)
+	})
+}
+
+// UpdatePasswordOther sets the "password_other" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdatePasswordOther() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdatePasswordOther()
+	})
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (u *FieldTypeUpsertOne) ClearPasswordOther() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearPasswordOther()
+	})
+}
+
+// Exec executes the query.
+func (u *FieldTypeUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FieldTypeCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FieldTypeUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *FieldTypeUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *FieldTypeUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // FieldTypeCreateBulk is the builder for creating many FieldType entities in bulk.
 type FieldTypeCreateBulk struct {
 	config
 	builders []*FieldTypeCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the FieldType entities in the database.
@@ -1464,8 +3840,10 @@ func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error)
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ftcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = ftcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{err.Error(), err}
 						}
@@ -1476,8 +3854,10 @@ func (ftcb *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error)
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -1512,6 +3892,1320 @@ func (ftcb *FieldTypeCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (ftcb *FieldTypeCreateBulk) ExecX(ctx context.Context) {
 	if err := ftcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.FieldType.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.FieldTypeUpsert) {
+//			SetInt(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (ftcb *FieldTypeCreateBulk) OnConflict(opts ...sql.ConflictOption) *FieldTypeUpsertBulk {
+	ftcb.conflict = opts
+	return &FieldTypeUpsertBulk{
+		create: ftcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//  client.FieldType.Create().
+//      OnConflict(sql.ConflictColumns(columns...)).
+//      Exec(ctx)
+//
+func (ftcb *FieldTypeCreateBulk) OnConflictColumns(columns ...string) *FieldTypeUpsertBulk {
+	ftcb.conflict = append(ftcb.conflict, sql.ConflictColumns(columns...))
+	return &FieldTypeUpsertBulk{
+		create: ftcb,
+	}
+}
+
+// FieldTypeUpsertBulk is the builder for "upsert"-ing
+// a bulk of FieldType nodes.
+type FieldTypeUpsertBulk struct {
+	create *FieldTypeCreateBulk
+}
+
+// UpdateNewValues updates the fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//  client.FieldType.Create().
+//      OnConflict(sql.ResolveWithNewValues()).
+//      Exec(ctx)
+//
+func (u *FieldTypeUpsertBulk) UpdateNewValues() *FieldTypeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.FieldType.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *FieldTypeUpsertBulk) Ignore() *FieldTypeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *FieldTypeUpsertBulk) DoNothing() *FieldTypeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the FieldTypeCreateBulk.OnConflict
+// documentation for more info.
+func (u *FieldTypeUpsertBulk) Update(set func(*FieldTypeUpsert)) *FieldTypeUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&FieldTypeUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetInt sets the "int" field.
+func (u *FieldTypeUpsertBulk) SetInt(v int) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt(v)
+	})
+}
+
+// UpdateInt sets the "int" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt()
+	})
+}
+
+// SetInt8 sets the "int8" field.
+func (u *FieldTypeUpsertBulk) SetInt8(v int8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt8(v)
+	})
+}
+
+// UpdateInt8 sets the "int8" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateInt8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt8()
+	})
+}
+
+// SetInt16 sets the "int16" field.
+func (u *FieldTypeUpsertBulk) SetInt16(v int16) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt16(v)
+	})
+}
+
+// UpdateInt16 sets the "int16" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateInt16() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt16()
+	})
+}
+
+// SetInt32 sets the "int32" field.
+func (u *FieldTypeUpsertBulk) SetInt32(v int32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt32(v)
+	})
+}
+
+// UpdateInt32 sets the "int32" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateInt32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt32()
+	})
+}
+
+// SetInt64 sets the "int64" field.
+func (u *FieldTypeUpsertBulk) SetInt64(v int64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetInt64(v)
+	})
+}
+
+// UpdateInt64 sets the "int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateInt64()
+	})
+}
+
+// SetOptionalInt sets the "optional_int" field.
+func (u *FieldTypeUpsertBulk) SetOptionalInt(v int) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt(v)
+	})
+}
+
+// UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt()
+	})
+}
+
+// ClearOptionalInt clears the value of the "optional_int" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt()
+	})
+}
+
+// SetOptionalInt8 sets the "optional_int8" field.
+func (u *FieldTypeUpsertBulk) SetOptionalInt8(v int8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt8(v)
+	})
+}
+
+// UpdateOptionalInt8 sets the "optional_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalInt8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt8()
+	})
+}
+
+// ClearOptionalInt8 clears the value of the "optional_int8" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalInt8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt8()
+	})
+}
+
+// SetOptionalInt16 sets the "optional_int16" field.
+func (u *FieldTypeUpsertBulk) SetOptionalInt16(v int16) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt16(v)
+	})
+}
+
+// UpdateOptionalInt16 sets the "optional_int16" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalInt16() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt16()
+	})
+}
+
+// ClearOptionalInt16 clears the value of the "optional_int16" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalInt16() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt16()
+	})
+}
+
+// SetOptionalInt32 sets the "optional_int32" field.
+func (u *FieldTypeUpsertBulk) SetOptionalInt32(v int32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt32(v)
+	})
+}
+
+// UpdateOptionalInt32 sets the "optional_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalInt32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt32()
+	})
+}
+
+// ClearOptionalInt32 clears the value of the "optional_int32" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalInt32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt32()
+	})
+}
+
+// SetOptionalInt64 sets the "optional_int64" field.
+func (u *FieldTypeUpsertBulk) SetOptionalInt64(v int64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalInt64(v)
+	})
+}
+
+// UpdateOptionalInt64 sets the "optional_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalInt64()
+	})
+}
+
+// ClearOptionalInt64 clears the value of the "optional_int64" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalInt64()
+	})
+}
+
+// SetNillableInt sets the "nillable_int" field.
+func (u *FieldTypeUpsertBulk) SetNillableInt(v int) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt(v)
+	})
+}
+
+// UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNillableInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt()
+	})
+}
+
+// ClearNillableInt clears the value of the "nillable_int" field.
+func (u *FieldTypeUpsertBulk) ClearNillableInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt()
+	})
+}
+
+// SetNillableInt8 sets the "nillable_int8" field.
+func (u *FieldTypeUpsertBulk) SetNillableInt8(v int8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt8(v)
+	})
+}
+
+// UpdateNillableInt8 sets the "nillable_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNillableInt8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt8()
+	})
+}
+
+// ClearNillableInt8 clears the value of the "nillable_int8" field.
+func (u *FieldTypeUpsertBulk) ClearNillableInt8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt8()
+	})
+}
+
+// SetNillableInt16 sets the "nillable_int16" field.
+func (u *FieldTypeUpsertBulk) SetNillableInt16(v int16) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt16(v)
+	})
+}
+
+// UpdateNillableInt16 sets the "nillable_int16" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNillableInt16() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt16()
+	})
+}
+
+// ClearNillableInt16 clears the value of the "nillable_int16" field.
+func (u *FieldTypeUpsertBulk) ClearNillableInt16() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt16()
+	})
+}
+
+// SetNillableInt32 sets the "nillable_int32" field.
+func (u *FieldTypeUpsertBulk) SetNillableInt32(v int32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt32(v)
+	})
+}
+
+// UpdateNillableInt32 sets the "nillable_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNillableInt32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt32()
+	})
+}
+
+// ClearNillableInt32 clears the value of the "nillable_int32" field.
+func (u *FieldTypeUpsertBulk) ClearNillableInt32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt32()
+	})
+}
+
+// SetNillableInt64 sets the "nillable_int64" field.
+func (u *FieldTypeUpsertBulk) SetNillableInt64(v int64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableInt64(v)
+	})
+}
+
+// UpdateNillableInt64 sets the "nillable_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNillableInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableInt64()
+	})
+}
+
+// ClearNillableInt64 clears the value of the "nillable_int64" field.
+func (u *FieldTypeUpsertBulk) ClearNillableInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableInt64()
+	})
+}
+
+// SetValidateOptionalInt32 sets the "validate_optional_int32" field.
+func (u *FieldTypeUpsertBulk) SetValidateOptionalInt32(v int32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetValidateOptionalInt32(v)
+	})
+}
+
+// UpdateValidateOptionalInt32 sets the "validate_optional_int32" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateValidateOptionalInt32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateValidateOptionalInt32()
+	})
+}
+
+// ClearValidateOptionalInt32 clears the value of the "validate_optional_int32" field.
+func (u *FieldTypeUpsertBulk) ClearValidateOptionalInt32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearValidateOptionalInt32()
+	})
+}
+
+// SetOptionalUint sets the "optional_uint" field.
+func (u *FieldTypeUpsertBulk) SetOptionalUint(v uint) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint(v)
+	})
+}
+
+// UpdateOptionalUint sets the "optional_uint" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalUint() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint()
+	})
+}
+
+// ClearOptionalUint clears the value of the "optional_uint" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalUint() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint()
+	})
+}
+
+// SetOptionalUint8 sets the "optional_uint8" field.
+func (u *FieldTypeUpsertBulk) SetOptionalUint8(v uint8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint8(v)
+	})
+}
+
+// UpdateOptionalUint8 sets the "optional_uint8" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalUint8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint8()
+	})
+}
+
+// ClearOptionalUint8 clears the value of the "optional_uint8" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalUint8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint8()
+	})
+}
+
+// SetOptionalUint16 sets the "optional_uint16" field.
+func (u *FieldTypeUpsertBulk) SetOptionalUint16(v uint16) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint16(v)
+	})
+}
+
+// UpdateOptionalUint16 sets the "optional_uint16" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalUint16() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint16()
+	})
+}
+
+// ClearOptionalUint16 clears the value of the "optional_uint16" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalUint16() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint16()
+	})
+}
+
+// SetOptionalUint32 sets the "optional_uint32" field.
+func (u *FieldTypeUpsertBulk) SetOptionalUint32(v uint32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint32(v)
+	})
+}
+
+// UpdateOptionalUint32 sets the "optional_uint32" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalUint32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint32()
+	})
+}
+
+// ClearOptionalUint32 clears the value of the "optional_uint32" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalUint32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint32()
+	})
+}
+
+// SetOptionalUint64 sets the "optional_uint64" field.
+func (u *FieldTypeUpsertBulk) SetOptionalUint64(v uint64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalUint64(v)
+	})
+}
+
+// UpdateOptionalUint64 sets the "optional_uint64" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalUint64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalUint64()
+	})
+}
+
+// ClearOptionalUint64 clears the value of the "optional_uint64" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalUint64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalUint64()
+	})
+}
+
+// SetState sets the "state" field.
+func (u *FieldTypeUpsertBulk) SetState(v fieldtype.State) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetState(v)
+	})
+}
+
+// UpdateState sets the "state" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateState() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateState()
+	})
+}
+
+// ClearState clears the value of the "state" field.
+func (u *FieldTypeUpsertBulk) ClearState() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearState()
+	})
+}
+
+// SetOptionalFloat sets the "optional_float" field.
+func (u *FieldTypeUpsertBulk) SetOptionalFloat(v float64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalFloat(v)
+	})
+}
+
+// UpdateOptionalFloat sets the "optional_float" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalFloat() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalFloat()
+	})
+}
+
+// ClearOptionalFloat clears the value of the "optional_float" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalFloat() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalFloat()
+	})
+}
+
+// SetOptionalFloat32 sets the "optional_float32" field.
+func (u *FieldTypeUpsertBulk) SetOptionalFloat32(v float32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetOptionalFloat32(v)
+	})
+}
+
+// UpdateOptionalFloat32 sets the "optional_float32" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalFloat32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateOptionalFloat32()
+	})
+}
+
+// ClearOptionalFloat32 clears the value of the "optional_float32" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalFloat32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearOptionalFloat32()
+	})
+}
+
+// SetDatetime sets the "datetime" field.
+func (u *FieldTypeUpsertBulk) SetDatetime(v time.Time) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDatetime(v)
+	})
+}
+
+// UpdateDatetime sets the "datetime" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateDatetime() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDatetime()
+	})
+}
+
+// ClearDatetime clears the value of the "datetime" field.
+func (u *FieldTypeUpsertBulk) ClearDatetime() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDatetime()
+	})
+}
+
+// SetDecimal sets the "decimal" field.
+func (u *FieldTypeUpsertBulk) SetDecimal(v float64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDecimal(v)
+	})
+}
+
+// UpdateDecimal sets the "decimal" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateDecimal() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDecimal()
+	})
+}
+
+// ClearDecimal clears the value of the "decimal" field.
+func (u *FieldTypeUpsertBulk) ClearDecimal() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDecimal()
+	})
+}
+
+// SetLinkOther sets the "link_other" field.
+func (u *FieldTypeUpsertBulk) SetLinkOther(v *schema.Link) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetLinkOther(v)
+	})
+}
+
+// UpdateLinkOther sets the "link_other" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateLinkOther() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateLinkOther()
+	})
+}
+
+// ClearLinkOther clears the value of the "link_other" field.
+func (u *FieldTypeUpsertBulk) ClearLinkOther() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearLinkOther()
+	})
+}
+
+// SetMAC sets the "mac" field.
+func (u *FieldTypeUpsertBulk) SetMAC(v schema.MAC) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetMAC(v)
+	})
+}
+
+// UpdateMAC sets the "mac" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateMAC() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateMAC()
+	})
+}
+
+// ClearMAC clears the value of the "mac" field.
+func (u *FieldTypeUpsertBulk) ClearMAC() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearMAC()
+	})
+}
+
+// SetStringArray sets the "string_array" field.
+func (u *FieldTypeUpsertBulk) SetStringArray(v schema.Strings) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetStringArray(v)
+	})
+}
+
+// UpdateStringArray sets the "string_array" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateStringArray() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateStringArray()
+	})
+}
+
+// ClearStringArray clears the value of the "string_array" field.
+func (u *FieldTypeUpsertBulk) ClearStringArray() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearStringArray()
+	})
+}
+
+// SetPassword sets the "password" field.
+func (u *FieldTypeUpsertBulk) SetPassword(v string) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetPassword(v)
+	})
+}
+
+// UpdatePassword sets the "password" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdatePassword() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdatePassword()
+	})
+}
+
+// ClearPassword clears the value of the "password" field.
+func (u *FieldTypeUpsertBulk) ClearPassword() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearPassword()
+	})
+}
+
+// SetStringScanner sets the "string_scanner" field.
+func (u *FieldTypeUpsertBulk) SetStringScanner(v schema.StringScanner) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetStringScanner(v)
+	})
+}
+
+// UpdateStringScanner sets the "string_scanner" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateStringScanner() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateStringScanner()
+	})
+}
+
+// ClearStringScanner clears the value of the "string_scanner" field.
+func (u *FieldTypeUpsertBulk) ClearStringScanner() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearStringScanner()
+	})
+}
+
+// SetDuration sets the "duration" field.
+func (u *FieldTypeUpsertBulk) SetDuration(v time.Duration) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDuration(v)
+	})
+}
+
+// UpdateDuration sets the "duration" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateDuration() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDuration()
+	})
+}
+
+// ClearDuration clears the value of the "duration" field.
+func (u *FieldTypeUpsertBulk) ClearDuration() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDuration()
+	})
+}
+
+// SetDir sets the "dir" field.
+func (u *FieldTypeUpsertBulk) SetDir(v http.Dir) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDir(v)
+	})
+}
+
+// UpdateDir sets the "dir" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateDir() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDir()
+	})
+}
+
+// SetNdir sets the "ndir" field.
+func (u *FieldTypeUpsertBulk) SetNdir(v http.Dir) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNdir(v)
+	})
+}
+
+// UpdateNdir sets the "ndir" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNdir() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNdir()
+	})
+}
+
+// ClearNdir clears the value of the "ndir" field.
+func (u *FieldTypeUpsertBulk) ClearNdir() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNdir()
+	})
+}
+
+// SetStr sets the "str" field.
+func (u *FieldTypeUpsertBulk) SetStr(v sql.NullString) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetStr(v)
+	})
+}
+
+// UpdateStr sets the "str" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateStr() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateStr()
+	})
+}
+
+// ClearStr clears the value of the "str" field.
+func (u *FieldTypeUpsertBulk) ClearStr() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearStr()
+	})
+}
+
+// SetNullStr sets the "null_str" field.
+func (u *FieldTypeUpsertBulk) SetNullStr(v *sql.NullString) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullStr(v)
+	})
+}
+
+// UpdateNullStr sets the "null_str" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNullStr() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullStr()
+	})
+}
+
+// ClearNullStr clears the value of the "null_str" field.
+func (u *FieldTypeUpsertBulk) ClearNullStr() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullStr()
+	})
+}
+
+// SetLink sets the "link" field.
+func (u *FieldTypeUpsertBulk) SetLink(v schema.Link) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetLink(v)
+	})
+}
+
+// UpdateLink sets the "link" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateLink() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateLink()
+	})
+}
+
+// ClearLink clears the value of the "link" field.
+func (u *FieldTypeUpsertBulk) ClearLink() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearLink()
+	})
+}
+
+// SetNullLink sets the "null_link" field.
+func (u *FieldTypeUpsertBulk) SetNullLink(v *schema.Link) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullLink(v)
+	})
+}
+
+// UpdateNullLink sets the "null_link" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNullLink() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullLink()
+	})
+}
+
+// ClearNullLink clears the value of the "null_link" field.
+func (u *FieldTypeUpsertBulk) ClearNullLink() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullLink()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *FieldTypeUpsertBulk) SetActive(v schema.Status) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateActive() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateActive()
+	})
+}
+
+// ClearActive clears the value of the "active" field.
+func (u *FieldTypeUpsertBulk) ClearActive() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearActive()
+	})
+}
+
+// SetNullActive sets the "null_active" field.
+func (u *FieldTypeUpsertBulk) SetNullActive(v schema.Status) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullActive(v)
+	})
+}
+
+// UpdateNullActive sets the "null_active" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNullActive() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullActive()
+	})
+}
+
+// ClearNullActive clears the value of the "null_active" field.
+func (u *FieldTypeUpsertBulk) ClearNullActive() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullActive()
+	})
+}
+
+// SetDeleted sets the "deleted" field.
+func (u *FieldTypeUpsertBulk) SetDeleted(v *sql.NullBool) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDeleted(v)
+	})
+}
+
+// UpdateDeleted sets the "deleted" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateDeleted() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDeleted()
+	})
+}
+
+// ClearDeleted clears the value of the "deleted" field.
+func (u *FieldTypeUpsertBulk) ClearDeleted() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDeleted()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *FieldTypeUpsertBulk) SetDeletedAt(v *sql.NullTime) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateDeletedAt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *FieldTypeUpsertBulk) ClearDeletedAt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetIP sets the "ip" field.
+func (u *FieldTypeUpsertBulk) SetIP(v net.IP) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetIP(v)
+	})
+}
+
+// UpdateIP sets the "ip" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateIP() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateIP()
+	})
+}
+
+// ClearIP clears the value of the "ip" field.
+func (u *FieldTypeUpsertBulk) ClearIP() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearIP()
+	})
+}
+
+// SetNullInt64 sets the "null_int64" field.
+func (u *FieldTypeUpsertBulk) SetNullInt64(v *sql.NullInt64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullInt64(v)
+	})
+}
+
+// UpdateNullInt64 sets the "null_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNullInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullInt64()
+	})
+}
+
+// ClearNullInt64 clears the value of the "null_int64" field.
+func (u *FieldTypeUpsertBulk) ClearNullInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullInt64()
+	})
+}
+
+// SetSchemaInt sets the "schema_int" field.
+func (u *FieldTypeUpsertBulk) SetSchemaInt(v schema.Int) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaInt(v)
+	})
+}
+
+// UpdateSchemaInt sets the "schema_int" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateSchemaInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaInt()
+	})
+}
+
+// ClearSchemaInt clears the value of the "schema_int" field.
+func (u *FieldTypeUpsertBulk) ClearSchemaInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaInt()
+	})
+}
+
+// SetSchemaInt8 sets the "schema_int8" field.
+func (u *FieldTypeUpsertBulk) SetSchemaInt8(v schema.Int8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaInt8(v)
+	})
+}
+
+// UpdateSchemaInt8 sets the "schema_int8" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateSchemaInt8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaInt8()
+	})
+}
+
+// ClearSchemaInt8 clears the value of the "schema_int8" field.
+func (u *FieldTypeUpsertBulk) ClearSchemaInt8() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaInt8()
+	})
+}
+
+// SetSchemaInt64 sets the "schema_int64" field.
+func (u *FieldTypeUpsertBulk) SetSchemaInt64(v schema.Int64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaInt64(v)
+	})
+}
+
+// UpdateSchemaInt64 sets the "schema_int64" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateSchemaInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaInt64()
+	})
+}
+
+// ClearSchemaInt64 clears the value of the "schema_int64" field.
+func (u *FieldTypeUpsertBulk) ClearSchemaInt64() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaInt64()
+	})
+}
+
+// SetSchemaFloat sets the "schema_float" field.
+func (u *FieldTypeUpsertBulk) SetSchemaFloat(v schema.Float64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaFloat(v)
+	})
+}
+
+// UpdateSchemaFloat sets the "schema_float" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateSchemaFloat() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaFloat()
+	})
+}
+
+// ClearSchemaFloat clears the value of the "schema_float" field.
+func (u *FieldTypeUpsertBulk) ClearSchemaFloat() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaFloat()
+	})
+}
+
+// SetSchemaFloat32 sets the "schema_float32" field.
+func (u *FieldTypeUpsertBulk) SetSchemaFloat32(v schema.Float32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSchemaFloat32(v)
+	})
+}
+
+// UpdateSchemaFloat32 sets the "schema_float32" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateSchemaFloat32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSchemaFloat32()
+	})
+}
+
+// ClearSchemaFloat32 clears the value of the "schema_float32" field.
+func (u *FieldTypeUpsertBulk) ClearSchemaFloat32() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSchemaFloat32()
+	})
+}
+
+// SetNullFloat sets the "null_float" field.
+func (u *FieldTypeUpsertBulk) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNullFloat(v)
+	})
+}
+
+// UpdateNullFloat sets the "null_float" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNullFloat() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNullFloat()
+	})
+}
+
+// ClearNullFloat clears the value of the "null_float" field.
+func (u *FieldTypeUpsertBulk) ClearNullFloat() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNullFloat()
+	})
+}
+
+// SetRole sets the "role" field.
+func (u *FieldTypeUpsertBulk) SetRole(v role.Role) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetRole(v)
+	})
+}
+
+// UpdateRole sets the "role" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateRole() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateRole()
+	})
+}
+
+// SetPriority sets the "priority" field.
+func (u *FieldTypeUpsertBulk) SetPriority(v role.Priority) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetPriority(v)
+	})
+}
+
+// UpdatePriority sets the "priority" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdatePriority() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdatePriority()
+	})
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (u *FieldTypeUpsertBulk) ClearPriority() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearPriority()
+	})
+}
+
+// SetUUID sets the "uuid" field.
+func (u *FieldTypeUpsertBulk) SetUUID(v uuid.UUID) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetUUID(v)
+	})
+}
+
+// UpdateUUID sets the "uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateUUID() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateUUID()
+	})
+}
+
+// ClearUUID clears the value of the "uuid" field.
+func (u *FieldTypeUpsertBulk) ClearUUID() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearUUID()
+	})
+}
+
+// SetNillableUUID sets the "nillable_uuid" field.
+func (u *FieldTypeUpsertBulk) SetNillableUUID(v uuid.UUID) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNillableUUID(v)
+	})
+}
+
+// UpdateNillableUUID sets the "nillable_uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNillableUUID() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNillableUUID()
+	})
+}
+
+// ClearNillableUUID clears the value of the "nillable_uuid" field.
+func (u *FieldTypeUpsertBulk) ClearNillableUUID() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNillableUUID()
+	})
+}
+
+// SetStrings sets the "strings" field.
+func (u *FieldTypeUpsertBulk) SetStrings(v []string) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetStrings(v)
+	})
+}
+
+// UpdateStrings sets the "strings" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateStrings() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateStrings()
+	})
+}
+
+// ClearStrings clears the value of the "strings" field.
+func (u *FieldTypeUpsertBulk) ClearStrings() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearStrings()
+	})
+}
+
+// SetPair sets the "pair" field.
+func (u *FieldTypeUpsertBulk) SetPair(v schema.Pair) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetPair(v)
+	})
+}
+
+// UpdatePair sets the "pair" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdatePair() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdatePair()
+	})
+}
+
+// SetNilPair sets the "nil_pair" field.
+func (u *FieldTypeUpsertBulk) SetNilPair(v *schema.Pair) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetNilPair(v)
+	})
+}
+
+// UpdateNilPair sets the "nil_pair" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateNilPair() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateNilPair()
+	})
+}
+
+// ClearNilPair clears the value of the "nil_pair" field.
+func (u *FieldTypeUpsertBulk) ClearNilPair() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearNilPair()
+	})
+}
+
+// SetVstring sets the "vstring" field.
+func (u *FieldTypeUpsertBulk) SetVstring(v schema.VString) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetVstring(v)
+	})
+}
+
+// UpdateVstring sets the "vstring" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateVstring() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateVstring()
+	})
+}
+
+// SetTriple sets the "triple" field.
+func (u *FieldTypeUpsertBulk) SetTriple(v schema.Triple) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetTriple(v)
+	})
+}
+
+// UpdateTriple sets the "triple" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateTriple() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateTriple()
+	})
+}
+
+// SetBigInt sets the "big_int" field.
+func (u *FieldTypeUpsertBulk) SetBigInt(v schema.BigInt) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetBigInt(v)
+	})
+}
+
+// UpdateBigInt sets the "big_int" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateBigInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateBigInt()
+	})
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (u *FieldTypeUpsertBulk) ClearBigInt() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearBigInt()
+	})
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (u *FieldTypeUpsertBulk) SetPasswordOther(v schema.Password) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetPasswordOther(v)
+	})
+}
+
+// UpdatePasswordOther sets the "password_other" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdatePasswordOther() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdatePasswordOther()
+	})
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (u *FieldTypeUpsertBulk) ClearPasswordOther() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearPasswordOther()
+	})
+}
+
+// Exec executes the query.
+func (u *FieldTypeUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the FieldTypeCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for FieldTypeCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *FieldTypeUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
