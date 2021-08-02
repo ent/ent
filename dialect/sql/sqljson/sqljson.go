@@ -142,6 +142,39 @@ func ValueContains(column string, arg interface{}, opts ...Option) *sql.Predicat
 	})
 }
 
+// StrValueContains return a predicate for checking that a JSON string value
+// (returned by the path) contains the given substring
+func StrValueContains(column string, arg string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append(opts, Unquote(true))
+		ValuePath(b, column, opts...)
+		argWithWildCard := "%" + arg + "%"
+		b.WriteOp(sql.OpLike).Arg(argWithWildCard)
+	})
+}
+
+// StrValueHasPrefix return a predicate for checking that a JSON string value
+// (returned by the path) has the given substring as prefix
+func StrValueHasPrefix(column string, arg string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append(opts, Unquote(true))
+		ValuePath(b, column, opts...)
+		argWithWildCard := arg + "%"
+		b.WriteOp(sql.OpLike).Arg(argWithWildCard)
+	})
+}
+
+// StrValueHasSuffix return a predicate for checking that a JSON string value
+// (returned by the path) has the given substring as suffix
+func StrValueHasSuffix(column string, arg string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append(opts, Unquote(true))
+		ValuePath(b, column, opts...)
+		argWithWildCard := "%" + arg
+		b.WriteOp(sql.OpLike).Arg(argWithWildCard)
+	})
+}
+
 // LenEQ return a predicate for checking that an array length
 // of a JSON (returned by the path) is equal to the given argument.
 //

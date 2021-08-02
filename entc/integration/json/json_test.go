@@ -291,6 +291,7 @@ func Predicates(t *testing.T, client *ent.Client) {
 		s.Where(sqljson.ValueContains(user.FieldInts, 3))
 	}).OnlyX(ctx)
 	require.Contains(t, r.Ints, 3)
+
 	r = client.User.Query().Where(func(s *sql.Selector) {
 		s.Where(sqljson.ValueContains(user.FieldT, 3, sqljson.Path("li")))
 	}).OnlyX(ctx)
@@ -300,4 +301,35 @@ func Predicates(t *testing.T, client *ent.Client) {
 		s.Where(sqljson.ValueContains(user.FieldT, "a", sqljson.Path("ls")))
 	}).OnlyX(ctx)
 	require.Contains(t, r.T.Ls, "a")
+
+	client.User.Delete().ExecX(ctx)
+	u, err := url.Parse("https://github.com/a8m")
+	require.NoError(t, err)
+	dirs := []http.Dir{"/dev/null"}
+	_, err = client.User.CreateBulk(
+		client.User.Create().SetURL(u),
+		client.User.Create().SetDirs(dirs),
+		client.User.Create().SetT(&schema.T{S: "foobar", Ls: []string{"foo", "bar"}}),
+	).Save(ctx)
+	require.NoError(t, err)
+
+	r = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.StrValueContains(user.FieldDirs, "dev", sqljson.Path("[0]")))
+	}).OnlyX(ctx)
+	require.Equal(t, r.Dirs, dirs)
+
+	r = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.StrValueContains(user.FieldURL, "github", sqljson.Path("Host")))
+	}).OnlyX(ctx)
+	require.Equal(t, r.URL, u)
+
+	r = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.StrValueHasPrefix(user.FieldT, "foo", sqljson.Path("s")))
+	}).OnlyX(ctx)
+	require.Equal(t, r.T.S, "foobar")
+
+	r = client.User.Query().Where(func(s *sql.Selector) {
+		s.Where(sqljson.StrValueHasSuffix(user.FieldT, "bar", sqljson.Path("s")))
+	}).OnlyX(ctx)
+	require.Equal(t, r.T.S, "foobar")
 }
