@@ -25,7 +25,7 @@ in the LICENSE file in the root directory of this source tree.
     {{- end }}
 {{- end -}}
 
-{{/* Template for adding the passing the modifiers to the sqlgraph.QuerySpec. */}}
+{{/* Template for passing the modifiers to the sqlgraph.QuerySpec. */}}
 {{ define "dialect/sql/query/spec/modify" }}
     {{- if or ($.FeatureEnabled "sql/lock") ($.FeatureEnabled "sql/modifier") }}
         {{- $receiver := pascal $.Scope.Builder | receiver }}

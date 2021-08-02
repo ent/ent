@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
@@ -22,6 +23,7 @@ type GroupInfoCreate struct {
 	config
 	mutation *GroupInfoMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetDesc sets the "desc" field.
@@ -171,6 +173,7 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	_spec.OnConflict = gic.conflict
 	if value, ok := gic.mutation.Desc(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -209,10 +212,187 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.GroupInfo.Create().
+//		SetDesc(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.GroupInfoUpsert) {
+//			SetDesc(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (gic *GroupInfoCreate) OnConflict(opts ...sql.ConflictOption) *GroupInfoUpsertOne {
+	gic.conflict = opts
+	return &GroupInfoUpsertOne{
+		create: gic,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//  client.GroupInfo.Create().
+//      OnConflict(sql.ConflictColumns(columns...)).
+//      Exec(ctx)
+//
+func (gic *GroupInfoCreate) OnConflictColumns(columns ...string) *GroupInfoUpsertOne {
+	gic.conflict = append(gic.conflict, sql.ConflictColumns(columns...))
+	return &GroupInfoUpsertOne{
+		create: gic,
+	}
+}
+
+type (
+	// GroupInfoUpsertOne is the builder for "upsert"-ing
+	//  one GroupInfo node.
+	GroupInfoUpsertOne struct {
+		create *GroupInfoCreate
+	}
+
+	// GroupInfoUpsert is the "OnConflict" setter.
+	GroupInfoUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetDesc sets the "desc" field.
+func (u *GroupInfoUpsert) SetDesc(v string) *GroupInfoUpsert {
+	u.Set(groupinfo.FieldDesc, v)
+	return u
+}
+
+// UpdateDesc sets the "desc" field to the value that was provided on create.
+func (u *GroupInfoUpsert) UpdateDesc() *GroupInfoUpsert {
+	u.SetExcluded(groupinfo.FieldDesc)
+	return u
+}
+
+// SetMaxUsers sets the "max_users" field.
+func (u *GroupInfoUpsert) SetMaxUsers(v int) *GroupInfoUpsert {
+	u.Set(groupinfo.FieldMaxUsers, v)
+	return u
+}
+
+// UpdateMaxUsers sets the "max_users" field to the value that was provided on create.
+func (u *GroupInfoUpsert) UpdateMaxUsers() *GroupInfoUpsert {
+	u.SetExcluded(groupinfo.FieldMaxUsers)
+	return u
+}
+
+// UpdateNewValues updates the fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//  client.GroupInfo.Create().
+//      OnConflict(sql.ResolveWithNewValues()).
+//      Exec(ctx)
+//
+func (u *GroupInfoUpsertOne) UpdateNewValues() *GroupInfoUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.GroupInfo.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *GroupInfoUpsertOne) Ignore() *GroupInfoUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *GroupInfoUpsertOne) DoNothing() *GroupInfoUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the GroupInfoCreate.OnConflict
+// documentation for more info.
+func (u *GroupInfoUpsertOne) Update(set func(*GroupInfoUpsert)) *GroupInfoUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&GroupInfoUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetDesc sets the "desc" field.
+func (u *GroupInfoUpsertOne) SetDesc(v string) *GroupInfoUpsertOne {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.SetDesc(v)
+	})
+}
+
+// UpdateDesc sets the "desc" field to the value that was provided on create.
+func (u *GroupInfoUpsertOne) UpdateDesc() *GroupInfoUpsertOne {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.UpdateDesc()
+	})
+}
+
+// SetMaxUsers sets the "max_users" field.
+func (u *GroupInfoUpsertOne) SetMaxUsers(v int) *GroupInfoUpsertOne {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.SetMaxUsers(v)
+	})
+}
+
+// UpdateMaxUsers sets the "max_users" field to the value that was provided on create.
+func (u *GroupInfoUpsertOne) UpdateMaxUsers() *GroupInfoUpsertOne {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.UpdateMaxUsers()
+	})
+}
+
+// Exec executes the query.
+func (u *GroupInfoUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for GroupInfoCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *GroupInfoUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *GroupInfoUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *GroupInfoUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // GroupInfoCreateBulk is the builder for creating many GroupInfo entities in bulk.
 type GroupInfoCreateBulk struct {
 	config
 	builders []*GroupInfoCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the GroupInfo entities in the database.
@@ -238,8 +418,10 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, gicb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = gicb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gicb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, gicb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{err.Error(), err}
 						}
@@ -250,8 +432,10 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -286,6 +470,137 @@ func (gicb *GroupInfoCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (gicb *GroupInfoCreateBulk) ExecX(ctx context.Context) {
 	if err := gicb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.GroupInfo.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.GroupInfoUpsert) {
+//			SetDesc(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (gicb *GroupInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupInfoUpsertBulk {
+	gicb.conflict = opts
+	return &GroupInfoUpsertBulk{
+		create: gicb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//  client.GroupInfo.Create().
+//      OnConflict(sql.ConflictColumns(columns...)).
+//      Exec(ctx)
+//
+func (gicb *GroupInfoCreateBulk) OnConflictColumns(columns ...string) *GroupInfoUpsertBulk {
+	gicb.conflict = append(gicb.conflict, sql.ConflictColumns(columns...))
+	return &GroupInfoUpsertBulk{
+		create: gicb,
+	}
+}
+
+// GroupInfoUpsertBulk is the builder for "upsert"-ing
+// a bulk of GroupInfo nodes.
+type GroupInfoUpsertBulk struct {
+	create *GroupInfoCreateBulk
+}
+
+// UpdateNewValues updates the fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//  client.GroupInfo.Create().
+//      OnConflict(sql.ResolveWithNewValues()).
+//      Exec(ctx)
+//
+func (u *GroupInfoUpsertBulk) UpdateNewValues() *GroupInfoUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.GroupInfo.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *GroupInfoUpsertBulk) Ignore() *GroupInfoUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *GroupInfoUpsertBulk) DoNothing() *GroupInfoUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the GroupInfoCreateBulk.OnConflict
+// documentation for more info.
+func (u *GroupInfoUpsertBulk) Update(set func(*GroupInfoUpsert)) *GroupInfoUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&GroupInfoUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetDesc sets the "desc" field.
+func (u *GroupInfoUpsertBulk) SetDesc(v string) *GroupInfoUpsertBulk {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.SetDesc(v)
+	})
+}
+
+// UpdateDesc sets the "desc" field to the value that was provided on create.
+func (u *GroupInfoUpsertBulk) UpdateDesc() *GroupInfoUpsertBulk {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.UpdateDesc()
+	})
+}
+
+// SetMaxUsers sets the "max_users" field.
+func (u *GroupInfoUpsertBulk) SetMaxUsers(v int) *GroupInfoUpsertBulk {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.SetMaxUsers(v)
+	})
+}
+
+// UpdateMaxUsers sets the "max_users" field to the value that was provided on create.
+func (u *GroupInfoUpsertBulk) UpdateMaxUsers() *GroupInfoUpsertBulk {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.UpdateMaxUsers()
+	})
+}
+
+// Exec executes the query.
+func (u *GroupInfoUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the GroupInfoCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for GroupInfoCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *GroupInfoUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

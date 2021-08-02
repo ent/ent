@@ -85,6 +85,14 @@ var (
 		Description: "Allows users to attach custom modifiers to queries",
 	}
 
+	// FeatureUpsert provides a feature-flag for adding upsert (ON CONFLICT) capabilities to create builders.
+	FeatureUpsert = Feature{
+		Name:        "sql/upsert",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to configure the `ON CONFLICT`/`ON DUPLICATE KEY` clause for `INSERT` statements",
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
@@ -93,6 +101,7 @@ var (
 		FeatureSchemaConfig,
 		FeatureLock,
 		FeatureModifier,
+		FeatureUpsert,
 	}
 )
 

@@ -311,8 +311,9 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{err.Error(), err}
 						}
@@ -323,7 +324,7 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 				}
 				mutation.id = &nodes[i].ID
 				mutation.done = true
-				if nodes[i].ID == 0 {
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}

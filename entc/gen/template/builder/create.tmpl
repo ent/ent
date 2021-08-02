@@ -29,6 +29,11 @@ type {{ $builder }} struct {
 	config
 	mutation *{{  $.MutationName }}
 	hooks []Hook
+	{{- /* Additional fields to add to the builder. */}}
+	{{- $tmpl := printf "dialect/%s/create/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
 }
 
 {{ with extend $ "Builder" $builder }}
@@ -180,10 +185,15 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 type {{ $bulk }} struct {
 	config
 	builders []*{{  $builder }}
+	{{- /* Additional fields to add to the builder. */}}
+	{{- $tmpl = printf "dialect/%s/create_bulk/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
 }
 
 {{/* If the storage driver supports bulk creation */}}
-{{ $tmpl := printf "dialect/%s/create_bulk" $.Storage }}
+{{ $tmpl = printf "dialect/%s/create_bulk" $.Storage }}
 {{ if hasTemplate $tmpl }}
 	{{ with extend $ "Builder" $bulk "Receiver" $receiver }}
 		{{ xtemplate $tmpl . }}

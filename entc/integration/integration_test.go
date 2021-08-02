@@ -29,6 +29,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/hook"
+	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/migrate"
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
@@ -121,6 +122,7 @@ var (
 		Paging,
 		Select,
 		Delete,
+		Upsert,
 		Relation,
 		Predicate,
 		AddValues,
@@ -249,8 +251,65 @@ func Sanity(t *testing.T, client *ent.Client) {
 	fi, ok = reflect.TypeOf(ent.Card{}).FieldByName("Number")
 	require.True(ok)
 	require.Equal("-", fi.Tag.Get("json"))
-
 	client.User.Create().SetName("tarrence").SetAge(30).ExecX(ctx)
+}
+
+func Upsert(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	u := client.User.Create().SetName("Ariel").SetAge(30).SetPhone("0000").SaveX(ctx)
+	require.Equal(t, "static", u.Address, "address was set by default func")
+	err := client.User.Create().SetName("Mashraki").SetAge(30).SetPhone("0000").Exec(ctx)
+	require.True(t, ent.IsConstraintError(err), "phone field is unique")
+	err = client.User.Create().SetName("Mashraki").SetAge(30).SetPhone("0000").OnConflict().Exec(ctx)
+	require.EqualError(t, err, "ent: missing options for UserCreate.OnConflict")
+
+	client.User.Create().
+		SetName("Mashraki").
+		SetAge(30).
+		SetPhone("0000").
+		OnConflict(sql.ConflictColumns(user.FieldPhone)).
+		// Update "name" to the value that was set on create ("Mashraki").
+		UpdateName().
+		ExecX(ctx)
+	u = client.User.GetX(ctx, u.ID)
+	require.Equal(t, "Mashraki", u.Name, "name was changed by the UPDATE clause")
+
+	id := client.User.Create().
+		SetName("Boring").
+		SetAge(33).
+		SetPhone("0000").
+		OnConflictColumns(user.FieldPhone).
+		// Override some of the fields with custom update.
+		Update(func(u *ent.UserUpsert) {
+			// Age was set to the new value (33).
+			u.UpdateAge()
+			// Update an additional field that was defined in `VALUES`.
+			u.SetAddress("localhost")
+		}).
+		IDX(ctx)
+	require.Equal(t, u.ID, id)
+	u = client.User.GetX(ctx, u.ID)
+	require.Equal(t, "Mashraki", u.Name)
+	require.Equal(t, 33, u.Age, "address was modified by the UPDATE clause")
+	require.Equal(t, "localhost", u.Address, "address was modified by the UPDATE clause")
+
+	builders := []*ent.UserCreate{
+		client.User.Create().SetName("A").SetAge(1).SetPhone("0000"), // Duplicate
+		client.User.Create().SetName("B").SetAge(1).SetPhone("1111"), // New row.
+	}
+	client.User.CreateBulk(builders...).
+		OnConflictColumns(user.FieldPhone).
+		UpdateNewValues().
+		ExecX(ctx)
+	users := client.User.Query().Order(ent.Asc(user.FieldPhone)).AllX(ctx)
+	require.Equal(t, "0000", users[0].Phone)
+	require.Equal(t, "A", users[0].Name)
+	require.Equal(t, "1111", users[1].Phone)
+	require.Equal(t, "B", users[1].Name)
+
+	// Setting primary key.
+	client.Item.Create().SetID("A").SaveX(ctx)
+	client.Item.Create().SetID("A").OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().ExecX(ctx)
 }
 
 func Clone(t *testing.T, client *ent.Client) {
