@@ -38,7 +38,7 @@ cd elk-example
 go mod init elk-example
 ```
 
-Invoke the ent code generator and create three schemas: User, Pet, Group:
+Invoke the ent code generator and create two schemas: User, Pet:
 
 ```shell
 go run -mod=mod entgo.io/ent/cmd/ent init Pet User
