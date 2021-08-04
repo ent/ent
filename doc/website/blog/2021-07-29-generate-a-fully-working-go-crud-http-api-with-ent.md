@@ -106,7 +106,7 @@ package ent
 
 ```
 
-3\. `elk` uses a not yet released version of Ent and some other thid party packages. To have the dependencies up to date run the following:
+3\. `elk` uses a not yet released version of Ent and some other third-party packages. To have the dependencies up to date run the following:
 
 ```shell
 go get -u github.com/masseelch/render 
