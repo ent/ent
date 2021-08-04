@@ -157,3 +157,42 @@ client.User.
 // GROUP BY DATE(created_at)
 // ORDER BY DATE(created_at) DESC
 ```
+
+#### Upsert
+
+The `sql/upsert` option lets configure upsert and bulk-upsert logic using the SQL `ON CONFLICT` / `ON DUPLICATE KEY`
+syntax. For full documentation, go to the [Upsert API](crud.md#upsert-one).
+
+This option can be added to a project using the `--feature sql/upsert` flag.
+
+```go
+// Use the new values that were set on create.
+id, err := client.User.
+	Create().
+	SetAge(30).
+	SetName("Ariel").
+	OnConflict().
+	UpadteNewValues().
+	ID(ctx)
+
+// In PostgreSQL, the conflict target is required.
+err := client.User.
+	Create().
+	SetAge(30).
+	SetName("Ariel").
+	OnConflictColumns(user.FieldName).
+	UpadteNewValues().
+	Exec(ctx)
+
+// Bulk upsert is also supported.
+client.User.
+	CreateBulk(builders...).
+	OnConflict(
+		sql.ConflictWhere(...),
+		sql.UpdateWhere(...),
+	).
+	UpadteNewValues().
+	Exec(ctx)
+
+// INSERT INTO "users" (...) VALUES ... ON CONFLICT WHERE ... DO UPDATE SET ... WHERE ...
+```
