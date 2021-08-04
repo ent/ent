@@ -222,7 +222,7 @@ func EnsureStructTag(name string) gen.Hook {
 				for _, field := range node.Fields {
 					tag := reflect.StructTag(field.StructTag)
 					if _, ok := tag.Lookup(name); !ok {
-						return fmt.Errorf("struct tag %q is missing for field %s.%s", name, node.Name, f.Name)
+						return fmt.Errorf("struct tag %q is missing for field %s.%s", name, node.Name, field.Name)
 					}
 				}
 			}
