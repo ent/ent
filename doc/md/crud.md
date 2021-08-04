@@ -207,7 +207,7 @@ err := client.User.
 	SetName("Ariel").
 	OnConflict().
 	// Use the new values that were set on create.
-	UpadteNewValues().
+	UpdateNewValues().
 	Exec(ctx)
 
 id, err := client.User.
