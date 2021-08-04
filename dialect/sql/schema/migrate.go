@@ -143,6 +143,9 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 // Note that SQLite dialect does not support (this moment) the "append-only" mode describe above,
 // since it's used only for testing.
 func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
+	for _, t := range tables {
+		m.setupTable(t)
+	}
 	var creator Creator = CreateFunc(m.create)
 	for i := len(m.hooks) - 1; i >= 0; i-- {
 		creator = m.hooks[i](creator)
@@ -172,7 +175,6 @@ func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
 
 func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
 	for _, t := range tables {
-		m.setupTable(t)
 		switch exist, err := m.tableExist(ctx, tx, t.Name); {
 		case err != nil:
 			return err
