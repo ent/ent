@@ -74,6 +74,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://ie.linkedin.com/in/boris-shomodjvarac-51970879"><img src="https://avatars.githubusercontent.com/u/304768?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Boris Shomodjvarac</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=shomodj" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/sadmansakib"><img src="https://avatars.githubusercontent.com/u/17023844?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sadman Sakib</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=sadmansakib" title="Documentation">📖</a></td>
   </tr>
 </table>
 
