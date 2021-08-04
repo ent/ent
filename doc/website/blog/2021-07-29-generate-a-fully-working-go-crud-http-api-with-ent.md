@@ -106,10 +106,12 @@ package ent
 
 ```
 
-3\. `elk` uses a not yet released version of Ent. To have the dependencies up to date run the following:
+3\. `elk` uses a not yet released version of Ent and some other thid party packages. To have the dependencies up to date run the following:
 
 ```shell
-go mod tidy
+go get -u github.com/masseelch/render 
+go get -u github.com/liip/sheriff
+go get -u entgo.io/ent@master
 ```
 
 With these steps complete, all is set up for using our `elk`-powered ent! To learn more about Ent, how to connect to
