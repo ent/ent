@@ -5,10 +5,10 @@
 package graphson
 
 import (
+	"fmt"
 	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 // EncoderOfError returns a value encoder which always fails to encode.
@@ -22,7 +22,7 @@ func (decodeExtension) DecoderOfError(format string, args ...interface{}) jsonit
 }
 
 func decoratorOfError(format string, args ...interface{}) errorCodec {
-	err := errors.Errorf(format, args...)
+	err := fmt.Errorf(format, args...)
 	return errorCodec{err}
 }
 

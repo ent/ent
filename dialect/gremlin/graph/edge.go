@@ -8,8 +8,6 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin/encoding/graphson"
-
-	"github.com/pkg/errors"
 )
 
 type (
@@ -58,7 +56,7 @@ func (e Edge) MarshalGraphson() ([]byte, error) {
 func (e *Edge) UnmarshalGraphson(data []byte) error {
 	var edge edge
 	if err := graphson.Unmarshal(data, &edge); err != nil {
-		return errors.Wrap(err, "unmarshaling edge")
+		return fmt.Errorf("unmarshaling edge: %w", err)
 	}
 
 	*e = NewEdge(

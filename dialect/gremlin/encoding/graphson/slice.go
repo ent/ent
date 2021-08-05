@@ -5,13 +5,13 @@
 package graphson
 
 import (
+	"fmt"
 	"io"
 	"reflect"
 	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/modern-go/reflect2"
-	"github.com/pkg/errors"
 )
 
 // DecoratorOfSlice decorates a value encoder of a slice type.
@@ -87,7 +87,7 @@ type sliceDecoder struct {
 func (dec sliceDecoder) Decode(ptr unsafe.Pointer, iter *jsoniter.Iterator) {
 	dec.decode(ptr, iter)
 	if iter.Error != nil && iter.Error != io.EOF {
-		iter.Error = errors.Wrapf(iter.Error, "decoding slice %s", dec.sliceType)
+		iter.Error = fmt.Errorf("decoding slice %s: %w", dec.sliceType, iter.Error)
 	}
 }
 
@@ -119,7 +119,7 @@ type arrayDecoder struct {
 func (dec arrayDecoder) Decode(ptr unsafe.Pointer, iter *jsoniter.Iterator) {
 	dec.decode(ptr, iter)
 	if iter.Error != nil && iter.Error != io.EOF {
-		iter.Error = errors.Wrapf(iter.Error, "decoding array %s", dec.arrayType)
+		iter.Error = fmt.Errorf("decoding array %s: %w", dec.arrayType, iter.Error)
 	}
 }
 

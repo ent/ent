@@ -5,10 +5,11 @@
 package gremlin
 
 import (
+	"errors"
+	"fmt"
+
 	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 	"entgo.io/ent/dialect/gremlin/graph"
-
-	"github.com/pkg/errors"
 )
 
 // A Response models a response message received from the server.
@@ -38,7 +39,7 @@ func (rsp *Response) IsErr() bool {
 // Err returns an error representing response status.
 func (rsp *Response) Err() error {
 	if rsp.IsErr() {
-		return errors.Errorf("gremlin: code=%d, message=%q", rsp.Status.Code, rsp.Status.Message)
+		return fmt.Errorf("gremlin: code=%d, message=%q", rsp.Status.Code, rsp.Status.Message)
 	}
 	return nil
 }
@@ -49,7 +50,7 @@ func (rsp *Response) ReadVal(v interface{}) error {
 		return err
 	}
 	if err := graphson.Unmarshal(rsp.Result.Data, v); err != nil {
-		return errors.Wrapf(err, "gremlin: unmarshal response data: type=%T", v)
+		return fmt.Errorf("gremlin: unmarshal response data: type=%T: %w", v, err)
 	}
 	return nil
 }
