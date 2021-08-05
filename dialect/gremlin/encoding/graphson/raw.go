@@ -5,7 +5,7 @@
 package graphson
 
 import (
-	"github.com/pkg/errors"
+	"errors"
 )
 
 // RawMessage is a raw encoded graphson value.

@@ -5,11 +5,11 @@
 package graphson
 
 import (
+	"errors"
 	"io"
 	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 // graphson encoding type / value keys

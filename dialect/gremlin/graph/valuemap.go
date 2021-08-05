@@ -5,10 +5,11 @@
 package graph
 
 import (
+	"errors"
+	"fmt"
 	"reflect"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 )
 
 // ValueMap models a .valueMap() gremlin response.
@@ -47,10 +48,10 @@ func (m ValueMap) decode(v interface{}) error {
 
 	dec, err := mapstructure.NewDecoder(&cfg)
 	if err != nil {
-		return errors.Wrap(err, "creating structure decoder")
+		return fmt.Errorf("creating structure decoder: %w", err)
 	}
 	if err := dec.Decode(m); err != nil {
-		return errors.Wrap(err, "decoding value map")
+		return fmt.Errorf("decoding value map: %w", err)
 	}
 	return nil
 }
