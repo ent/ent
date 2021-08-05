@@ -3,7 +3,7 @@ title: Database Locking Techniques with Ent
 author: Rotem Tamir
 authorURL: "https://github.com/rotemtam"
 authorImageURL: "https://s.gravatar.com/avatar/36b3739951a27d2e37251867b7d44b1a?s=80"
-authorTwitter: rtam
+authorTwitter: _rtam
 ---
 
 Locks are one of the fundamental building blocks of any concurrent 
