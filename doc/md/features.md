@@ -172,7 +172,7 @@ id, err := client.User.
 	SetAge(30).
 	SetName("Ariel").
 	OnConflict().
-	UpadteNewValues().
+	UpdateNewValues().
 	ID(ctx)
 
 // In PostgreSQL, the conflict target is required.
@@ -181,7 +181,7 @@ err := client.User.
 	SetAge(30).
 	SetName("Ariel").
 	OnConflictColumns(user.FieldName).
-	UpadteNewValues().
+	UpdateNewValues().
 	Exec(ctx)
 
 // Bulk upsert is also supported.
@@ -191,7 +191,7 @@ client.User.
 		sql.ConflictWhere(...),
 		sql.UpdateWhere(...),
 	).
-	UpadteNewValues().
+	UpdateNewValues().
 	Exec(ctx)
 
 // INSERT INTO "users" (...) VALUES ... ON CONFLICT WHERE ... DO UPDATE SET ... WHERE ...
