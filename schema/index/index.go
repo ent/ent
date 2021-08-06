@@ -31,7 +31,7 @@ type Builder struct {
 //
 //		// Unique index of field under specific edge.
 //		index.Fields("name").
-//			FromEdges("parent").
+//			Edges("parent").
 //			Unique(),
 //
 //	}
@@ -46,7 +46,7 @@ func Fields(fields ...string) *Builder {
 //	func (T) Indexes() []ent.Index {
 //
 //		// Unique index of field under 2 edges.
-//		index.Field("name").
+//		index.Fields("name").
 //			Edges("parent", "type").
 //			Unique(),
 //
@@ -105,7 +105,7 @@ func (b *Builder) StorageKey(key string) *Builder {
 //	func (T) Indexes() []ent.Index {
 //
 //		// Partial index on name where the entity is not deleted.
-//		index.Field("name").
+//		index.Fields("name").
 //			Annotations(index.Annotation{
 //				WhereClause: "deleted_at is not null",
 //			})
