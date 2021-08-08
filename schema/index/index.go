@@ -106,9 +106,7 @@ func (b *Builder) StorageKey(key string) *Builder {
 //
 //		// Partial index on name where the entity is not deleted.
 //		index.Fields("name").
-//			Annotations(index.Annotation{
-//				WhereClause: "deleted_at is not null",
-//			})
+//			Annotations(entsql.Prefix(100))
 //
 //	}
 //
