@@ -17,15 +17,6 @@ and maintain applications with large data-models and sticks with the following p
 
 ![gopher-schema-as-code](https://entgo.io/images/assets/gopher-schema-as-code.png)
 
-## Installation
-
-```console
-go get entgo.io/ent/cmd/ent
-```
-
-After installing `ent` codegen tool, you should have it in your `PATH`.
-If you don't find it your path, you can also run: `go run entgo.io/ent/cmd/ent <command>`
-
 ## Setup A Go Environment
 
 If your project directory is outside [GOPATH](https://github.com/golang/go/wiki/GOPATH) or you are not familiar with
@@ -34,6 +25,15 @@ GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-star
 ```console
 go mod init <project>
 ```
+
+## Installation
+
+```console
+go get entgo.io/ent/cmd/ent
+```
+
+After installing `ent` codegen tool, you should have it in your `PATH`.
+If you don't find it your path, you can also run: `go run entgo.io/ent/cmd/ent <command>`
 
 ## Create Your First Schema
 
