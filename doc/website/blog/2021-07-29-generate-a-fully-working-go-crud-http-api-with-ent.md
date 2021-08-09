@@ -66,7 +66,7 @@ go get -u github.com/masseelch/elk
 `elk` uses the
 Ent [extension API](https://github.com/ent/ent/blob/a19a89a141cf1a5e1b38c93d7898f218a1f86c94/entc/entc.go#L197) to
 integrate with Ent’s code-generation. This requires that we use the `entc` (ent codegen) package as
-described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). Follow the next three steps to enable it and to
+described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). Follow the next two steps to enable it and to
 configure Ent to work with the `elk` extension:
 
 1\. Create a new Go file named `ent/entc.go` and paste the following content:
@@ -106,14 +106,6 @@ package ent
 
 ```
 
-3\. `elk` uses a not yet released version of Ent and some other third-party packages. To have the dependencies up to date run the following:
-
-```shell
-go get -u github.com/masseelch/render 
-go get -u github.com/liip/sheriff
-go get -u entgo.io/ent@master
-```
-
 With these steps complete, all is set up for using our `elk`-powered ent! To learn more about Ent, how to connect to
 different types of databases, run migrations or work with entities head over to
 the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/).
@@ -147,7 +139,7 @@ func (Pet) Fields() []ent.Field {
 ```
 
 We added two fields to our `Pet` entity: `name` and `age`. The `ent.Schema` just defines the fields of our entity. To
-generate runnable code from our schema, run:
+generate runnable code from our schema, run (and ignore the dependency issues for now):
 
 ```shell
 go generate ./...
@@ -159,73 +151,63 @@ is some of the generated code for a read-operation on the Pet entity:
 
 ```go
 const (
-    PetCreate Routes = 1 << iota
-    PetRead
-    PetUpdate
-    PetDelete
-    PetList
-    PetRoutes = 1<<iota - 1
+	PetCreate Routes = 1 << iota
+	PetRead
+	PetUpdate
+	PetDelete
+	PetList
+	PetRoutes = 1<<iota - 1
 )
 
 // PetHandler handles http crud operations on ent.Pet.
 type PetHandler struct {
-    handler
+	handler
 
-    client    *ent.Client
-    log       *zap.Logger
-    validator *validator.Validate
+	client *ent.Client
+	log    *zap.Logger
 }
 
-func NewPetHandler(c *ent.Client, l *zap.Logger, v *validator.Validate) *PetHandler {
-    return &PetHandler{
-        client:    c,
-        log:       l.With(zap.String("handler", "PetHandler")),
-        validator: v,
-    }
+func NewPetHandler(c *ent.Client, l *zap.Logger) *PetHandler {
+	return &PetHandler{
+		client: c,
+		log:    l.With(zap.String("handler", "PetHandler")),
+	}
 }
 
 // Read fetches the ent.Pet identified by a given url-parameter from the
 // database and renders it to the client.
 func (h *PetHandler) Read(w http.ResponseWriter, r *http.Request) {
-    l := h.log.With(zap.String("method", "Read"))
-    // ID is URL parameter.
-    id, err := strconv.Atoi(chi.URLParam(r, "id"))
-    if err != nil {
-        l.Error("error getting id from url parameter", zap.String("id", chi.URLParam(r, "id")), zap.Error(err))
-        render.BadRequest(w, r, "id must be an integer greater zero")
-        return
-    }
-    // Create the query to fetch the Pet
-    q := h.client.Pet.Query().Where(pet.ID(id))
-    e, err := q.Only(r.Context())
-    if err != nil {
-        switch err.(type) {
-        case ent.IdNotFound(err):
-            msg := h.stripEntError(err)
-            l.Info(msg, zap.Int("id", id), zap.Error(err))
-            render.NotFound(w, r, msg)
-        case ent.IsNotSingular(err):
-            msg := h.stripEntError(err)
-            l.Error(msg, zap.Int("id", id), zap.Error(err))
-            render.BadRequest(w, r, msg)
-        default:
-            l.Error("error fetching pet from db", zap.Int("id", id), zap.Error(err))
-            render.InternalServerError(w, r, nil)
-        }
-        return
-    }
-    d, err := sheriff.Marshal(&sheriff.Options{
-        IncludeEmptyTag: true,
-        Groups:          []string{"pet"},
-    }, e)
-    if err != nil {
-        l.Error("serialization error", zap.Int("id", id), zap.Error(err))
-        render.InternalServerError(w, r, nil)
-        return
-    }
-    l.Info("pet rendered", zap.Int("id", id))
-    render.OK(w, r, d)
+	l := h.log.With(zap.String("method", "Read"))
+	// ID is URL parameter.
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		l.Error("error getting id from url parameter", zap.String("id", chi.URLParam(r, "id")), zap.Error(err))
+		render.BadRequest(w, r, "id must be an integer greater zero")
+		return
+	}
+	// Create the query to fetch the Pet
+	q := h.client.Pet.Query().Where(pet.ID(id))
+	e, err := q.Only(r.Context())
+	if err != nil {
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			render.NotFound(w, r, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			render.BadRequest(w, r, msg)
+		default:
+			l.Error("could not read pet", zap.Error(err), zap.Int("id", id))
+			render.InternalServerError(w, r, nil)
+		}
+		return
+	}
+	l.Info("pet rendered", zap.Int("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewPet2657988899View(e), w)
 }
+
 ```
 
 Next, let’s see how to create an actual RESTful HTTP server that can manage your Pet entities. Create a file
@@ -244,7 +226,6 @@ import (
 	elk "elk-example/ent/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/validator/v10"
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 )
@@ -260,11 +241,11 @@ func main() {
 	if err := c.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
-	// Router, Logger and Validator.
-	r, l, v := chi.NewRouter(), zap.NewExample(), validator.New()
+	// Router and Logger.
+	r, l := chi.NewRouter(), zap.NewExample()
 	// Create the pet handler.
 	r.Route("/pets", func(r chi.Router) {
-		elk.NewPetHandler(c, l, v).Mount(r, elk.PetRoutes)
+		elk.NewPetHandler(c, l).Mount(r, elk.PetRoutes)
 	})
 	// Start listen to incoming requests.
 	fmt.Println("Server running")
@@ -276,7 +257,7 @@ func main() {
 
 ```
 
-Next, start the server:
+Next, start the server (and resolve the dependency issues the `go generate` command might have reported):
 
 ```shell
 go run -mod=mod main.go
