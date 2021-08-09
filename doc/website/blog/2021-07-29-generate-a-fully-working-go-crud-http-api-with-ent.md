@@ -66,7 +66,7 @@ go get -u github.com/masseelch/elk
 `elk` uses the
 Ent [extension API](https://github.com/ent/ent/blob/a19a89a141cf1a5e1b38c93d7898f218a1f86c94/entc/entc.go#L197) to
 integrate with Ent’s code-generation. This requires that we use the `entc` (ent codegen) package as
-described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). Follow the next two steps to enable it and to
+described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). Follow the next three steps to enable it and to
 configure Ent to work with the `elk` extension:
 
 1\. Create a new Go file named `ent/entc.go` and paste the following content:
@@ -106,6 +106,13 @@ package ent
 
 ```
 
+3/. `elk` uses some external packages in its generated code. Currently, you have to get those packages manually once
+when setting up `elk`:
+
+```shell
+go get github.com/mailru/easyjson github.com/masseelch/render github.com/go-chi/chi/v5 go.uber.org/zap
+```
+
 With these steps complete, all is set up for using our `elk`-powered ent! To learn more about Ent, how to connect to
 different types of databases, run migrations or work with entities head over to
 the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/).
@@ -139,7 +146,7 @@ func (Pet) Fields() []ent.Field {
 ```
 
 We added two fields to our `Pet` entity: `name` and `age`. The `ent.Schema` just defines the fields of our entity. To
-generate runnable code from our schema, run (and ignore the dependency issues for now):
+generate runnable code from our schema, run:
 
 ```shell
 go generate ./...
@@ -257,7 +264,7 @@ func main() {
 
 ```
 
-Next, start the server (and resolve the dependency issues the `go generate` command might have reported):
+Next, start the server:
 
 ```shell
 go run -mod=mod main.go
