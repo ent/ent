@@ -25,13 +25,13 @@ possible.
   In order to test your documentation changes, run `npm start` from the `doc/website` directory, and open [localhost:3000](http://localhost:3000/).
 
 # Run integration tests
-If you touch any file in `entc`, run the following command in `entc/integration`:
+If you touch any file in `entc`, run the following command in `entc`:
 
 ```
 go generate ./...
 ```
 
-Then, run `docker-compose` in order to spin-up all database containers:
+Then, in `entc/inegration` run `docker-compose` in order to spin-up all database containers:
 
 ```
 docker-compose -f compose/docker-compose.yaml up -d --scale test=0
