@@ -160,6 +160,10 @@ func (u *{{ $upsertOne }}) Ignore() *{{ $upsertOne }} {
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
+//
+// In PostgreSQL, this behavior prevents returning data from the same
+// query. Using DoNothing with ID will therefore result in an
+// immediate error. For a similar alternative, see Ignore.
 func (u *{{ $upsertOne }}) DoNothing() *{{ $upsertOne }} {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
@@ -218,6 +222,9 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
+//
+// In PostgreSQL, this method is incompatible with DoNothing, and
+// combining the two will result in an error.
 func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
@@ -228,6 +235,9 @@ func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err erro
 
 
 // IDX is like ID, but panics if an error occurs.
+//
+// In PostgreSQL, this method is incompatible with DoNothing, and
+// combining the two will result in an error.
 func (u *{{ $upsertOne }}) IDX(ctx context.Context) {{ $.ID.Type }} {
 	id, err := u.ID(ctx)
 	if err != nil {
@@ -326,6 +336,10 @@ func (u *{{ $upsertBulk }}) Ignore() *{{ $upsertBulk }} {
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
+//
+// In PostgreSQL, this behavior prevents returning data from the same
+// query. Using DoNothing with ID will therefore result in an
+// immediate error. For a similar alternative, see Ignore.
 func (u *{{ $upsertBulk }}) DoNothing() *{{ $upsertBulk }} {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
