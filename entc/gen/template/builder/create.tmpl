@@ -139,16 +139,27 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 func ({{ $receiver }} *{{ $builder }}) check() error {
 	var errs ValidationErrors
 	{{- range $f := $fields }}
-		{{- if and (not $f.Optional) (ne $f.Name $.ID.Name) }}
+		{{- $req := and (not $f.Optional) (ne $f.Name $.ID.Name) }}
+		{{- $val := or $f.Validators $f.IsEnum }}
+		{{- $rErr := print "errs = append(errs, &ValidationError{Name: \"" $f.Name "\", err: errors.New(`" $pkg ": missing required field \"" $f.Name "\"`)})" }}
+		{{- $vErr := print "errs = append(errs, &ValidationError{Name: \"" $f.Name "\", err: fmt.Errorf(`" $pkg ": validator failed for field \"" $f.Name "\": %w`, err)})" }}
+		{{- if and $req (not $val) }}
 			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-				errs = append(errs, &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $f.Name }}"`)})
+				{{ $rErr }}
 			}
-		{{- end }}
-		{{- with or $f.Validators $f.IsEnum }}
+		{{- else if and $req $val }}
+			{{- $basic := $f.BasicType $f.Name }}
+			{{ $f.Name }}, ok := {{ $mutation }}.{{ $f.MutationGet }}()
+			if !ok {
+				{{ $rErr }}
+			} else if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
+				{{ $vErr }}
+			}
+		{{- else if and (not $req) $val }}
+			{{- $basic := $f.BasicType "v" }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-				{{- $basic := $f.BasicType "v" }}
 				if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
-					errs = append(errs, &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $f.Name }}": %w`, err)})
+					{{ $vErr }}
 				}
 			}
 		{{- end }}
