@@ -1275,7 +1275,13 @@ func (p *Predicate) Not() *Predicate {
 	})
 }
 
-func (p *Predicate) columnsOp(col1, col2 string, op Op) *Predicate {
+// ColumnsOp returns a new predicate between 2 columns.
+func ColumnsOp(col1, col2 string, op Op) *Predicate {
+	return P().ColumnsOp(col1, col2, op)
+}
+
+// ColumnsOp appends the given predicate between 2 columns.
+func (p *Predicate) ColumnsOp(col1, col2 string, op Op) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col1)
 		b.WriteOp(op)
@@ -1306,13 +1312,13 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsEQ appends a "=" predicate between 2 columns.
-func ColumnsEQ(col1 string, col2 string) *Predicate {
+func ColumnsEQ(col1, col2 string) *Predicate {
 	return P().ColumnsEQ(col1, col2)
 }
 
 // ColumnsEQ appends a "=" predicate between 2 columns.
-func (p *Predicate) ColumnsEQ(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpEQ)
+func (p *Predicate) ColumnsEQ(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpEQ)
 }
 
 // NEQ returns a "<>" predicate.
@@ -1330,13 +1336,13 @@ func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsNEQ appends a "<>" predicate between 2 columns.
-func ColumnsNEQ(col1 string, col2 string) *Predicate {
+func ColumnsNEQ(col1, col2 string) *Predicate {
 	return P().ColumnsNEQ(col1, col2)
 }
 
 // ColumnsNEQ appends a "<>" predicate between 2 columns.
-func (p *Predicate) ColumnsNEQ(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpNEQ)
+func (p *Predicate) ColumnsNEQ(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpNEQ)
 }
 
 // LT returns a "<" predicate.
@@ -1354,13 +1360,13 @@ func (p *Predicate) LT(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsLT appends a "<" predicate between 2 columns.
-func ColumnsLT(col1 string, col2 string) *Predicate {
+func ColumnsLT(col1, col2 string) *Predicate {
 	return P().ColumnsLT(col1, col2)
 }
 
 // ColumnsLT appends a "<" predicate between 2 columns.
-func (p *Predicate) ColumnsLT(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpLT)
+func (p *Predicate) ColumnsLT(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpLT)
 }
 
 // LTE returns a "<=" predicate.
@@ -1378,13 +1384,13 @@ func (p *Predicate) LTE(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsLTE appends a "<=" predicate between 2 columns.
-func ColumnsLTE(col1 string, col2 string) *Predicate {
+func ColumnsLTE(col1, col2 string) *Predicate {
 	return P().ColumnsLTE(col1, col2)
 }
 
 // ColumnsLTE appends a "<=" predicate between 2 columns.
-func (p *Predicate) ColumnsLTE(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpLTE)
+func (p *Predicate) ColumnsLTE(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpLTE)
 }
 
 // GT returns a ">" predicate.
@@ -1402,13 +1408,13 @@ func (p *Predicate) GT(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsGT appends a ">" predicate between 2 columns.
-func ColumnsGT(col1 string, col2 string) *Predicate {
+func ColumnsGT(col1, col2 string) *Predicate {
 	return P().ColumnsGT(col1, col2)
 }
 
 // ColumnsGT appends a ">" predicate between 2 columns.
-func (p *Predicate) ColumnsGT(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpGT)
+func (p *Predicate) ColumnsGT(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpGT)
 }
 
 // GTE returns a ">=" predicate.
@@ -1426,13 +1432,13 @@ func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsGTE appends a ">=" predicate between 2 columns.
-func ColumnsGTE(col1 string, col2 string) *Predicate {
+func ColumnsGTE(col1, col2 string) *Predicate {
 	return P().ColumnsGTE(col1, col2)
 }
 
 // ColumnsGTE appends a ">=" predicate between 2 columns.
-func (p *Predicate) ColumnsGTE(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpGTE)
+func (p *Predicate) ColumnsGTE(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpGTE)
 }
 
 // NotNull returns the `IS NOT NULL` predicate.
