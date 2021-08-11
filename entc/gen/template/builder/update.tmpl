@@ -320,12 +320,13 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ if $.HasUpdateCheckers }}
 	// check runs all checks and user-defined validators on the builder.
 	func ({{ $receiver }} *{{ $builder }}) check() error {
+		var errs ValidationErrors
 		{{- range $f := $.Fields }}
 			{{- with and (or $f.Validators $f.IsEnum) (not $f.Immutable) }}
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- $basic := $f.BasicType "v" }}
 					if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
-						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %w", err)}
+						errs = append(errs, &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %w", err)})
 					}
 				}
 			{{- end }}
@@ -337,7 +338,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 				}
 			{{- end }}
 		{{- end }}
-		return nil
+		return errs
 	}
 {{ end }}
 

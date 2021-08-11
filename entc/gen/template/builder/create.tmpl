@@ -137,17 +137,18 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func ({{ $receiver }} *{{ $builder }}) check() error {
+	var errs ValidationErrors
 	{{- range $f := $fields }}
 		{{- if and (not $f.Optional) (ne $f.Name $.ID.Name) }}
 			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-				return &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $f.Name }}"`)}
+				errs = append(errs, &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $f.Name }}"`)})
 			}
 		{{- end }}
 		{{- with or $f.Validators $f.IsEnum }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				{{- $basic := $f.BasicType "v" }}
 				if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
-					return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $f.Name }}": %w`, err)}
+					errs = append(errs, &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $f.Name }}": %w`, err)})
 				}
 			}
 		{{- end }}
@@ -159,11 +160,11 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 			{{- else }}
 				if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
 			{{- end }}
-				return &ValidationError{Name: "{{ $e.Name }}", err: errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")}
+			errs = append(errs, &ValidationError{Name: "{{ $e.Name }}", err: errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")})
 			}
 		{{- end }}
 	{{- end }}
-	return nil
+	return errs
 }
 
 {{ with extend $ "Builder" $builder }}

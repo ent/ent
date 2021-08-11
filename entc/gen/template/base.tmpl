@@ -98,6 +98,28 @@ func IsValidationError(err error) bool {
 	return errors.As(err, &e)
 }
 
+// ValidationErrors collects multiple ValidationError.
+type ValidationErrors []*ValidationError
+
+// Error implements the error interface.
+func (e ValidationErrors) Error() string {
+	s := make([]string, len(e))
+	for i, e := range e {
+		s[i] = e.Error()
+	}
+	return strings.Join(s, ", ")
+}
+
+// Unwrap implements the errors.Wrapper interface. This is a collection of errors, therefore a "correct" implementation
+// of errors.Wrapper is not possible. To stay deterministic we return the very first error in the list. Users are
+// recommended to use Is/As to get the correct error type out.
+func (e ValidationErrors) Unwrap() error {
+	if len(e) == 0 {
+		return nil
+	}
+	return e[0]
+}
+
 // NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
 type NotFoundError struct {
 	label string
