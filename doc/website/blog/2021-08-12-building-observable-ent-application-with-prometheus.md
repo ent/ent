@@ -237,7 +237,7 @@ func Hook() ent.Hook {
 ### Connecting the Prometheus Collector to our Service
 
 After defining our hook, let’s see next how to connect it to our application and how to use Prometheus to serve
-an endpoint that exposes the metrics in our collectors.
+an endpoint that exposes the metrics in our collectors:
 
 ```go
 package main
