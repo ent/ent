@@ -78,6 +78,43 @@ func incrementError() {
 
 ### Ent Hooks
 
+[Hooks](https://entgo.io/docs/hooks) are a feature of Ent that allows adding custom logic before and after operations that change the data entities.
+
+A mutation is an operation that changes something in the database.
+There are 5 types of mutations:
+1. Create.
+2. UpdateOne.
+3. Update.
+4. DeleteOne.
+5. Delete.
+
+Hooks are functions that get an [ent.Mutator](https://pkg.go.dev/entgo.io/ent#Mutator) and return a mutator back.
+They function similar to the popular [HTTP middleware pattern](https://dzone.com/articles/understanding-middleware-pattern-in-expressjs).
+
+```go
+package example
+
+import (
+	"context"
+
+	"entgo.io/ent"
+)
+
+func exampleHook() ent.Hook {
+	//use this to init your hook
+	return func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			// Do something before mutation
+			v, err := next.Mutate(ctx, m)
+			if err != nil {
+				// Do something if error after mutation
+			}
+			// Do something always after mutation
+			return v, err
+		})
+	}
+}
+```
 
 ### Wrapping Up
 
