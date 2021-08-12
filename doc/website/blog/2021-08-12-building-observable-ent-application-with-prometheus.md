@@ -36,7 +36,7 @@ To expose an application’s metrics using Prometheus, we need to create a
 prometheus [Collector](https://prometheus.io/docs/introduction/glossary/#collector), a collector collects
 a set of metrics from your server.
 
-In our example, we will be using [two types of metrics](https://prometheus.io/docs/concepts/metric_types/#histogram)
+In our example, we will be using [two types of metrics](https://prometheus.io/docs/concepts/metric_types/)
 that can be stored in a collector: Counters and Histograms. Counters are monotonically increasing cumulative metrics
 that represent how many times something has happened, commonly used to count the number of requests a server has
 processed or errors that have occurred. Histograms sample observations into buckets of configurable sizes and are
@@ -89,7 +89,7 @@ There are 5 types of mutations:
 5. Delete.
 
 Hooks are functions that get an [ent.Mutator](https://pkg.go.dev/entgo.io/ent#Mutator) and return a mutator back.
-They function similar to the popular [HTTP middleware pattern](https://dzone.com/articles/understanding-middleware-pattern-in-expressjs).
+They function similar to the popular [HTTP middleware pattern](https://github.com/go-chi/chi#middleware-handlers).
 
 ```go
 package example
