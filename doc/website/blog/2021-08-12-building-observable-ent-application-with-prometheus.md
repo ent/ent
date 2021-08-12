@@ -294,7 +294,7 @@ func main() {
 }
 ```
 
-The output on /metrics:
+After a few times of accessing `/` on our server (using `curl` or a browser), go to `/metrics`. There you will see the output from the Prometheus client:
 
 ```shell
 # HELP ent_operation_duration_seconds Time in seconds per operation
