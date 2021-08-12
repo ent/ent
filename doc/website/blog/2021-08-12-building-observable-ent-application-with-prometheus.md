@@ -32,7 +32,7 @@ a unified, standards-based integration with any such backend.
 
 ### Working with Prometheus
 
-To expose an application’s metrics using Prometheus, we need to create a
+To expose an application's metrics using Prometheus, we need to create a
 prometheus [Collector](https://prometheus.io/docs/introduction/glossary/#collector), a collector collects
 a set of metrics from your server.
 
