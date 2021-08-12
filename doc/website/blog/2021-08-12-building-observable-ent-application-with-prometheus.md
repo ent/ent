@@ -160,6 +160,166 @@ Each of these metrics will be broken down by labels into two dimensions:
 
 Let’s start by defining our collectors:
 
+```go
+//Ent dynamic dimensions
+const (
+	mutationType = "mutation_type"
+	mutationOp   = "mutation_op"
+)
+
+var entLabels = []string{mutationType, mutationOp}
+
+// Create a collector for total operations counter
+func initOpsProcessedTotal() *prometheus.CounterVec {
+	return promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ent_operation_total",
+			Help: "Number of ent mutation operations",
+		},
+		entLabels,
+	)
+}
+
+// Create a collector for error counter
+func initOpsProcessedError() *prometheus.CounterVec {
+	return promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "ent_operation_error",
+			Help: "Number of failed ent mutation operations",
+		},
+		entLabels,
+	)
+}
+
+// Create a collector for duration histogram collector
+func initOpsDuration() *prometheus.HistogramVec {
+	return promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name: "ent_operation_duration_seconds",
+			Help: "Time in seconds per operation",
+		},
+		entLabels,
+	)
+}
+```
+Next, let’s define our new hook:
+
+```go
+// Hook init collectors, count total at beginning error on mutation error and duration also after.
+func Hook() ent.Hook {
+	opsProcessedTotal := initOpsProcessedTotal()
+	opsProcessedError := initOpsProcessedError()
+	opsDuration := initOpsDuration()
+	return func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			// Before mutation, start measuring time.
+			start := time.Now()
+			// Extract dynamic labels from mutation.
+			labels := prometheus.Labels{mutationType: m.Type(), mutationOp: m.Op().String()}
+			// Increment total ops counter.
+			opsProcessedTotal.With(labels).Inc()
+			// Execute mutation.
+			v, err := next.Mutate(ctx, m)
+			if err != nil {
+				// In case of error increment error counter.
+				opsProcessedError.With(labels).Inc()
+			}
+			// Stop time measure.
+			duration := time.Since(start)
+			// Record duration in seconds.
+			opsDuration.With(labels).Observe(duration.Seconds())
+			return v, err
+		})
+	}
+}
+```
+
+### Connecting the Prometheus collector to our service
+
+After defining our hook, let’s see next how to connect it to our application and how to use Prometheus to serve
+an endpoint that exposes the metrics in our collectors.
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+
+	"entprom"
+	"entprom/ent"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+)
+
+func createClient() *ent.Client {
+	c, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	ctx := context.Background()
+	// Run the auto migration tool.
+	if err := c.Schema.Create(ctx); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+	return c
+}
+
+func handler(client *ent.Client) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.Background()
+		// Run operations.
+		_, err := client.User.Create().SetName("a8m").Save(ctx)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
+}
+
+func main() {
+	// Create Ent client and migrate
+	client := createClient()
+	// Use the hook
+	client.Use(entprom.Hook())
+	// Simple handler to run actions on our DB.
+	http.HandleFunc("/", handler(client))
+	// This endpoint sends metrics to the prometheus to collect
+	http.Handle("/metrics", promhttp.Handler())
+	log.Println("server starting on port 8080")
+	// Run the server
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+```
+
+The output on /metrics:
+
+```shell
+# HELP ent_operation_duration_seconds Time in seconds per operation
+# TYPE ent_operation_duration_seconds histogram
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="0.005"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="0.01"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="0.025"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="0.05"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="0.1"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="0.25"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="0.5"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="1"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="2.5"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="5"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="10"} 2
+ent_operation_duration_seconds_bucket{mutation_op="OpCreate",mutation_type="User",le="+Inf"} 2
+ent_operation_duration_seconds_sum{mutation_op="OpCreate",mutation_type="User"} 0.000265669
+ent_operation_duration_seconds_count{mutation_op="OpCreate",mutation_type="User"} 2
+# HELP ent_operation_error Number of failed ent mutation operations
+# TYPE ent_operation_error counter
+ent_operation_error{mutation_op="OpCreate",mutation_type="User"} 1
+# HELP ent_operation_total Number of ent mutation operations
+# TYPE ent_operation_total counter
+ent_operation_total{mutation_op="OpCreate",mutation_type="User"} 2
+```
 
 ### Wrapping Up
 
