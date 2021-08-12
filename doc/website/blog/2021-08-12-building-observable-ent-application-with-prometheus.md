@@ -354,7 +354,7 @@ We invite everyone to [join the discussion](https://github.com/ent/ent/discussio
 ### Wrap-Up
 
 We started this post by presenting Prometheus, a popular open-source monitoring solution. Next, we reviewed “Hooks”, a feature
-of Ent that allows adding custom logic before and after operations that change the data entities. Next, we showed how
+of Ent that allows adding custom logic before and after operations that change the data entities. We then showed how
 to integrate the two to create observable applications using Ent.  Finally, we discussed the future of observability in Ent
 and invited everyone to join the discussion [to shape it](https://github.com/ent/ent/discussions/1819).
 
