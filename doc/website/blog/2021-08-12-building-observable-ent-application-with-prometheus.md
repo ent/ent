@@ -9,7 +9,7 @@ authorTwitter: yonidavidson
 Observability is a quality of a system that refers to how well its internal state can be measured externally.
 As a computer program evolves into a full-blown production system this quality becomes increasingly important.
 One of the ways to make a software system more observable is to export metrics, that is, to report in some externally 
-visible way a quantitative description of the running system’s state. For instance, to expose an HTTP endpoint where we 
+visible way a quantitative description of the running system's state. For instance, to expose an HTTP endpoint where we 
 can see how many errors occurred since the process has started. In this post, we will explore how to build more
 observable Ent applications using Prometheus.
 
