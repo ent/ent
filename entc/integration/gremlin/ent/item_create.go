@@ -29,6 +29,14 @@ func (ic *ItemCreate) SetID(s string) *ItemCreate {
 	return ic
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ic *ItemCreate) SetNillableID(s *string) *ItemCreate {
+	if s != nil {
+		ic.SetID(*s)
+	}
+	return ic
+}
+
 // Mutation returns the ItemMutation object of the builder.
 func (ic *ItemCreate) Mutation() *ItemMutation {
 	return ic.mutation
@@ -40,6 +48,7 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 		err  error
 		node *Item
 	)
+	ic.defaults()
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err
@@ -94,6 +103,14 @@ func (ic *ItemCreate) Exec(ctx context.Context) error {
 func (ic *ItemCreate) ExecX(ctx context.Context) {
 	if err := ic.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ic *ItemCreate) defaults() {
+	if _, ok := ic.mutation.ID(); !ok {
+		v := item.DefaultID()
+		ic.mutation.SetID(v)
 	}
 }
 

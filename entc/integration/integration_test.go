@@ -308,8 +308,16 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, "B", users[1].Name)
 
 	// Setting primary key.
-	client.Item.Create().SetID("A").SaveX(ctx)
-	client.Item.Create().SetID("A").OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().ExecX(ctx)
+	a := client.Item.Create().SetID("A").SaveX(ctx)
+	require.Equal(t, "A", a.ID)
+	aid := client.Item.Create().SetID("A").OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().IDX(ctx)
+	require.Equal(t, a.ID, aid)
+
+	// Primary key is generated.
+	b := client.Item.Create().SaveX(ctx)
+	require.NotZero(t, b.ID)
+	bid := client.Item.Create().SetID(b.ID).OnConflictColumns(item.FieldID).Ignore().IDX(ctx)
+	require.Equal(t, b.ID, bid)
 }
 
 func Clone(t *testing.T, client *ent.Client) {
