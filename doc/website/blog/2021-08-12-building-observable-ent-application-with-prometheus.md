@@ -1,6 +1,6 @@
 ---
 title: Building Observable Ent Applications with Prometheus
-author: Yni Davidson
+author: Yoni Davidson
 authorURL: "https://github.com/yonidavidson"
 authorImageURL: "https://avatars0.githubusercontent.com/u/5472778"
 authorTwitter: yonidavidson
@@ -20,7 +20,7 @@ to build and maintain applications with large data models.
 
 ### What is Prometheus?
 
-Prometheus is an open source monitoring system developed by engineering at SoundCloud in 2012.
+[Prometheus](https://prometheus.io/) is an open source monitoring system developed by engineering at SoundCloud in 2012.
 It includes an embedded time series database and many integrations to third-party systems.
 The Prometheus client exposes the process's metrics via an HTTP endpoint (usually /metrics), this endpoint is
 discovered by the Prometheus scraper which polls the endpoint every interval (typically 30s) and writes it
@@ -44,7 +44,39 @@ commonly used to represent latency distributions (i.e how many requests returned
 In addition, Prometheus allows metrics to be broken down into labels.  This is useful for example for counting requests
 but breaking down the counter by endpoint name.
 
+Let’s see how to create such a collector using the [official Go client](https://github.com/prometheus/client_golang).
+To do so, we will use a package in the client called [promauto](https://pkg.go.dev/github.com/prometheus/client_golang@v1.11.0/prometheus/promauto) that simplifies the processes of creating collectors.
+A simple example of a collector that counts (for example, total request or number or request error):
 
+```go
+package example
+
+import (
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+var (
+	// List of dynamic labels
+	labelNames = []string{"endpoint", "error_code"}
+
+	// Create a counter collector
+	exampleCollector = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "endpoint_errors",
+			Help: "Number of errors in endpoints",
+		},
+		labelNames,
+	)
+)
+
+// When using you set the values of the dynamic labels and then increment the counter
+func incrementError() {
+	exampleCollector.WithLabelValues("/create-user", "400").Inc()
+}
+```
+
+### Ent Hooks
 
 
 ### Wrapping Up
