@@ -116,8 +116,8 @@ func exampleHook() ent.Hook {
 }
 ```
 
-In Ent, there are 2 types of mutation hooks - schema hooks and runtime hooks. Schema hooks are mainly used for defining
-custom mutation logic in the schema for example, syncing entity creation to another system and runtime hooks are used
+In Ent, there are two types of mutation hooks - schema hooks and runtime hooks. Schema hooks are mainly used for defining
+custom mutation logic on a specific entity type, for example, syncing entity creation to another system. Runtime hooks, on the other hand, are used
 to define more global logic for adding things like logging, metrics, tracing, etc.
 
 For our use case, we should definitely use runtime hooks, because to be valuable we want to export metrics on all
