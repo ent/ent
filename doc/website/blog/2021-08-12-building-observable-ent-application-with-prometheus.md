@@ -22,7 +22,7 @@ to build and maintain applications with large data models.
 
 [Prometheus](https://prometheus.io/) is an open source monitoring system developed by engineering at SoundCloud in 2012.
 It includes an embedded time series database and many integrations to third-party systems.
-The Prometheus client exposes the process's metrics via an HTTP endpoint (usually /metrics), this endpoint is
+The Prometheus client exposes the process's metrics via an HTTP endpoint (usually `/metrics`), this endpoint is
 discovered by the Prometheus scraper which polls the endpoint every interval (typically 30s) and writes it
 into a time-series database.
 
