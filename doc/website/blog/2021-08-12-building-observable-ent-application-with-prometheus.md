@@ -116,6 +116,51 @@ func exampleHook() ent.Hook {
 }
 ```
 
+In Ent, there are 2 types of mutation hooks - schema hooks and runtime hooks. Schema hooks are mainly used for defining
+custom mutation logic in the schema for example, syncing entity creation to another system and runtime hooks are used
+to define more global logic for adding things like logging, metrics, tracing, etc.
+
+For our use case, we should definitely use runtime hooks, because to be valuable we want to export metrics on all
+operations on all entity types:
+
+```go
+package example
+
+import (
+	"entprom/ent"
+	"entprom/ent/hook"
+)
+
+func main() {
+	client, _ := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+
+	// Add a hook only on user mutations.
+	client.User.Use(exampleHook())
+
+	// Add a hook only on update operations.
+	client.Use(hook.On(exampleHook(), ent.OpUpdate|ent.OpUpdateOne))
+}
+```
+
+### Exporting Prometheus Metrics for an Ent Application
+
+With all of the introductions complete, let’s cut to the chase and show how to use Prometheus and Ent hooks together to
+create an observable application. Our goal with this example is to export these metrics using a hook:
+
+| Metric Name                    | Description                              |
+|--------------------------------|------------------------------------------|
+| ent_operation_total            | Number of ent mutation operations        |
+| ent_operation_error            | Number of failed ent mutation operations |
+| ent_operation_duration_seconds | Time in seconds per operation            |
+
+
+Each of these metrics will be broken down by labels into two dimensions:
+* Mutation_type: Entity type that is being mutated (User, BlogPost, Account etc.).
+* Mutation_op: The operation that is being performed (Create, Delete etc.).
+
+Let’s start by defining our collectors:
+
+
 ### Wrapping Up
 
 In this post, we presented the Upsert API, a long-anticipated capability, that is available by feature-flag in Ent v0.9.0.
