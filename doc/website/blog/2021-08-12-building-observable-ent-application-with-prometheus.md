@@ -155,8 +155,8 @@ create an observable application. Our goal with this example is to export these 
 
 
 Each of these metrics will be broken down by labels into two dimensions:
-* Mutation_type: Entity type that is being mutated (User, BlogPost, Account etc.).
-* Mutation_op: The operation that is being performed (Create, Delete etc.).
+* `mutation_type`: Entity type that is being mutated (User, BlogPost, Account etc.).
+* `mutation_op`: The operation that is being performed (Create, Delete etc.).
 
 Let’s start by defining our collectors:
 
