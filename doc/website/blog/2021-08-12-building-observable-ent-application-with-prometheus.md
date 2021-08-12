@@ -321,11 +321,43 @@ ent_operation_error{mutation_op="OpCreate",mutation_type="User"} 1
 ent_operation_total{mutation_op="OpCreate",mutation_type="User"} 2
 ```
 
-### Wrapping Up
+In the top part, we can see the histogram calculated, it calculates the number of operations in each “bucket”.
+After that, we can see the number of total operations and the number of errors.
+Each metric is followed by its description that can be seen when querying with Prometheus dashboard.
 
-In this post, we presented the Upsert API, a long-anticipated capability, that is available by feature-flag in Ent v0.9.0.
-We discussed where upserts are commonly used in applications and the way they are implemented using common relational databases.
-Finally, we showed a simple example of how to get started with the Upsert API using Ent.
+The Prometheus client is only one component of the Prometheus architecture.
+To run a complete system including a scraper that will poll your endpoint, a Prometheus that will store your
+metrics and can answer queries, and a simple UI to interact with it, I recommend reading the official
+documentation or use the docker-compose.yaml in this example repo [repo](https://github.com/yonidavidson/ent-prometheus-example).
+
+### Future Work on Observability in Ent
+
+As we’ve mentioned above, there is an abundance of metric collections backends available today,
+Prometheus being just one of many successful projects. While these solutions differ in many dimensions
+(self-hosted vs SaaS, different storage engines with different query languages, and more) - from the metric
+reporting client perspective, they are virtually identical.
+
+In cases like these, good software engineering principles suggest that the concrete backend should be abstracted away
+from the client using an interface. This interface can then be implemented by backends so client applications can easily
+switch between the different implementations. Such changes are happening in recent years in our industry. Consider,
+for example, the [Open Container Initiative](https://opencontainers.org/) or the
+[Service Mesh Interface](https://smi-spec.io/): both are initiatives that strive to define a standard interface
+for a problem space. This interface is supposed to create an ecosystem of implementations of
+the standard.  In the observability space, the exact same convergence is occurring with [OpenCensus](https://opencensus.io/) and 
+[OpenTracing](https://opentracing.io/) currently merging into [OpenTelemetry](https://opentelemetry.io/).
+
+As nice as it would be to publish an Ent + Prometheus extension similar to the one presented in this post, we are firm
+believers that observability should be solved with a standards-based approach.
+We invite everyone to [join the discussion](https://github.com/ent/ent/discussions/1819) on what is the right way to do this for Ent.
+
+
+### Wrap-Up
+
+We started this post by presenting Prometheus, a popular open-source monitoring solution. Next, we reviewed “Hooks”, a feature
+of Ent that allows adding custom logic before and after operations that change the data entities. Next, we showed how
+to integrate the two to create observable applications using Ent.  Finally, we discussed the future of observability in Ent
+and invited everyone to join the discussion [to shape it](https://github.com/ent/ent/discussions/1819).
+
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
