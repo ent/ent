@@ -328,7 +328,7 @@ Each metric is followed by its description that can be seen when querying with P
 The Prometheus client is only one component of the Prometheus architecture.
 To run a complete system including a scraper that will poll your endpoint, a Prometheus that will store your
 metrics and can answer queries, and a simple UI to interact with it, I recommend reading the official
-documentation or use the docker-compose.yaml in this example repo [repo](https://github.com/yonidavidson/ent-prometheus-example).
+documentation or use the docker-compose.yaml in this example [repo](https://github.com/yonidavidson/ent-prometheus-example).
 
 ### Future Work on Observability in Ent
 
