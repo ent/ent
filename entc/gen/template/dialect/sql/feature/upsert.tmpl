@@ -13,6 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/create/fields/additional/upsert" -}}
 	{{- if $.FeatureEnabled "sql/upsert" }}
 		conflict []sql.ConflictOption
+		donothing bool
 	{{- end }}
 {{- end -}}
 
@@ -160,8 +161,13 @@ func (u *{{ $upsertOne }}) Ignore() *{{ $upsertOne }} {
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
+//
+// In PostgreSQL, this behavior prevents returning data from the same
+// query. Using DoNothing with ID will therefore result in an
+// immediate error. For a similar alternative, see Ignore.
 func (u *{{ $upsertOne }}) DoNothing() *{{ $upsertOne }} {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	u.create.donothing = true
 	return u
 }
 
@@ -218,7 +224,16 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
+//
+// In PostgreSQL, this method is incompatible with DoNothing, and
+// combining the two will result in an error.
 func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+	switch u.create.config.driver.Dialect() {
+	case dialect.Postgres:
+	if u.create.donothing {
+		return id, /* TODO: Return an error. */
+	}
+
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -228,7 +243,16 @@ func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err erro
 
 
 // IDX is like ID, but panics if an error occurs.
+//
+// In PostgreSQL, this method is incompatible with DoNothing, and
+// combining the two will result in an error.
 func (u *{{ $upsertOne }}) IDX(ctx context.Context) {{ $.ID.Type }} {
+	switch u.create.config.driver.Dialect() {
+	case dialect.Postgres:
+	if u.create.donothing {
+		panic(/* TODO: Return an error. */)
+	}
+
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -326,8 +350,13 @@ func (u *{{ $upsertBulk }}) Ignore() *{{ $upsertBulk }} {
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
+//
+// In PostgreSQL, this behavior prevents returning data from the same
+// query. Using DoNothing with ID will therefore result in an
+// immediate error. For a similar alternative, see Ignore.
 func (u *{{ $upsertBulk }}) DoNothing() *{{ $upsertBulk }} {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	u.create.donothing = true
 	return u
 }
 
