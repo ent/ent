@@ -385,6 +385,20 @@ func (d *Postgres) addColumn(c *Column) *sql.ColumnBuilder {
 func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 	b := sql.Dialect(dialect.Postgres)
 	ops = append(ops, b.Column(c.Name).Type(d.cType(c)))
+	if c.Default != nil {
+		attrDefault := fmt.Sprint(c.Default)
+		switch v := c.Default.(type) {
+		case bool:
+			attrDefault = strconv.FormatBool(v)
+		case string:
+			if t := c.Type; t != field.TypeUUID && t != field.TypeTime {
+				// Escape single quote by replacing each with 2.
+				attrDefault = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
+			}
+		}
+
+		ops = append(ops, b.Column(c.Name).Attr("SET DEFAULT "+attrDefault))
+	}
 	if c.Nullable {
 		ops = append(ops, b.Column(c.Name).Attr("DROP NOT NULL"))
 	} else {
@@ -548,7 +562,7 @@ func arrayType(t string) bool {
 
 // foreignKeys populates the tables foreign keys using the information_schema tables
 func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Table) error {
-	var tableLookup = make(map[string]*Table)
+	tableLookup := make(map[string]*Table)
 	for _, t := range tables {
 		tableLookup[t.Name] = t
 	}
@@ -559,7 +573,7 @@ func (d *Postgres) foreignKeys(ctx context.Context, tx dialect.Tx, tables []*Tab
 			return fmt.Errorf("querying foreign keys for table %s: %w", t.Name, err)
 		}
 		defer rows.Close()
-		var tableFksLookup = make(map[string]*ForeignKey)
+		tableFksLookup := make(map[string]*ForeignKey)
 		for rows.Next() {
 			var tableSchema, constraintName, tableName, columnName, refTableSchema, refTableName, refColumnName string
 			if err := rows.Scan(&tableSchema, &constraintName, &tableName, &columnName, &refTableSchema, &refTableName, &refColumnName); err != nil {
