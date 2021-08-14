@@ -307,17 +307,48 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, "1111", users[1].Phone)
 	require.Equal(t, "B", users[1].Name)
 
-	// Setting primary key.
+	// Setting primary key manually.
 	a := client.Item.Create().SetID("A").SaveX(ctx)
 	require.Equal(t, "A", a.ID)
-	aid := client.Item.Create().SetID("A").OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().IDX(ctx)
-	require.Equal(t, a.ID, aid)
+	if strings.Contains(t.Name(), "MySQL") || strings.Contains(t.Name(), "Maria") {
+		// MySQL is skipped since it does not support the RETURNING clause. Maria is skipped
+		// as well, because there's no way to distinguish between MySQL and Maria at runtime.
+		client.Item.Create().SetID("A").OnConflict().Ignore().ExecX(ctx)
+		require.Equal(t, 1, client.Item.Query().CountX(ctx))
+		client.Item.Delete().ExecX(ctx)
 
-	// Primary key is generated.
-	b := client.Item.Create().SaveX(ctx)
-	require.NotZero(t, b.ID)
-	bid := client.Item.Create().SetID(b.ID).OnConflictColumns(item.FieldID).Ignore().IDX(ctx)
-	require.Equal(t, b.ID, bid)
+		// Primary key is set by a default function.
+		b := client.Item.Create().SetText("hello").SaveX(ctx)
+		require.NotZero(t, b.ID)
+		client.Item.Create().SetID(b.ID).SetText("world").OnConflict().UpdateNewValues().ExecX(ctx)
+		cb := client.Item.Query().OnlyX(ctx)
+		require.Equal(t, cb.ID, b.ID)
+		require.Equal(t, "world", cb.Text)
+	} else {
+		aid := client.Item.Create().SetID("A").OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().IDX(ctx)
+		require.Equal(t, a.ID, aid)
+		client.Item.Delete().ExecX(ctx)
+
+		// Primary key is set by a default function.
+		b := client.Item.Create().SetText("hello").SaveX(ctx)
+		require.NotZero(t, b.ID)
+		bid := client.Item.Create().SetID(b.ID).SetText("hello").OnConflictColumns(item.FieldText).Ignore().IDX(ctx)
+		require.Equal(t, b.ID, bid)
+		bid = client.Item.Create().SetText("hello").OnConflictColumns(item.FieldText).UpdateNewValues().IDX(ctx)
+		require.Equal(t, bid, b.ID)
+		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
+		bid = client.Item.Create().SetID(bid).SetText("world").OnConflictColumns(item.FieldID).UpdateNewValues().IDX(ctx)
+		require.Equal(t, bid, b.ID)
+		b = client.Item.Query().OnlyX(ctx)
+		require.Equal(t, bid, b.ID)
+		require.Equal(t, "world", b.Text)
+
+		client.Item.CreateBulk(client.Item.Create().SetID(bid).SetText("hello")).
+			OnConflictColumns(item.FieldID).
+			Ignore().
+			ExecX(ctx)
+		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
+	}
 }
 
 func Clone(t *testing.T, client *ent.Client) {

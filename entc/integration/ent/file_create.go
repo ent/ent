@@ -390,9 +390,9 @@ func (fc *FileCreate) OnConflict(opts ...sql.ConflictOption) *FileUpsertOne {
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.File.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.File.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (fc *FileCreate) OnConflictColumns(columns ...string) *FileUpsertOne {
 	fc.conflict = append(fc.conflict, sql.ConflictColumns(columns...))
@@ -492,12 +492,14 @@ func (u *FileUpsert) ClearOp() *FileUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
 //
-//  client.File.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.File.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *FileUpsertOne) UpdateNewValues() *FileUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -768,9 +770,9 @@ func (fcb *FileCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileUpsertBul
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.File.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.File.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (fcb *FileCreateBulk) OnConflictColumns(columns ...string) *FileUpsertBulk {
 	fcb.conflict = append(fcb.conflict, sql.ConflictColumns(columns...))
@@ -788,9 +790,11 @@ type FileUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.File.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.File.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *FileUpsertBulk) UpdateNewValues() *FileUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -800,9 +804,9 @@ func (u *FileUpsertBulk) UpdateNewValues() *FileUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.File.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.File.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *FileUpsertBulk) Ignore() *FileUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())

@@ -22,10 +22,9 @@ func (Item) Fields() []ent.Field {
 		field.String("id").
 			DefaultFunc(uuid.NewString).
 			MaxLen(64),
+		field.String("text").
+			MaxLen(128).
+			Unique().
+			Optional(),
 	}
-}
-
-// Edges of the Item.
-func (Item) Edges() []ent.Edge {
-	return nil
 }

@@ -252,9 +252,9 @@ func (nc *NodeCreate) OnConflict(opts ...sql.ConflictOption) *NodeUpsertOne {
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Node.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Node.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (nc *NodeCreate) OnConflictColumns(columns ...string) *NodeUpsertOne {
 	nc.conflict = append(nc.conflict, sql.ConflictColumns(columns...))
@@ -294,12 +294,14 @@ func (u *NodeUpsert) ClearValue() *NodeUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
 //
-//  client.Node.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Node.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *NodeUpsertOne) UpdateNewValues() *NodeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -499,9 +501,9 @@ func (ncb *NodeCreateBulk) OnConflict(opts ...sql.ConflictOption) *NodeUpsertBul
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Node.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Node.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (ncb *NodeCreateBulk) OnConflictColumns(columns ...string) *NodeUpsertBulk {
 	ncb.conflict = append(ncb.conflict, sql.ConflictColumns(columns...))
@@ -519,9 +521,11 @@ type NodeUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.Node.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Node.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *NodeUpsertBulk) UpdateNewValues() *NodeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -531,9 +535,9 @@ func (u *NodeUpsertBulk) UpdateNewValues() *NodeUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Node.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.Node.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *NodeUpsertBulk) Ignore() *NodeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())

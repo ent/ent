@@ -14,6 +14,7 @@ package sql
 import (
 	"context"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -833,7 +834,7 @@ func ResolveWithIgnore() ConflictOption {
 	return func(c *conflict) {
 		c.action.update = append(c.action.update, func(u *UpdateSet) {
 			for _, c := range u.columns {
-				u.Set(c, Expr(u.Table().C(c)))
+				u.SetIgnore(c)
 			}
 		})
 	}
@@ -871,9 +872,10 @@ func ResolveWithNewValues() ConflictOption {
 //		Values(1, "Mashraki").
 //		OnConflict(
 //			ConflictColumns("name"),
-//			ResolveWith(func(s *UpdateSet) {
-//				s.SetNull("created_at")
-//				s.Set("name", Expr(s.Excluded().C("name")))
+//			ResolveWith(func(u *UpdateSet) {
+//				u.SetIgnore("id")
+//				u.SetNull("created_at")
+//				u.Set("name", Expr(u.Excluded().C("name")))
 //			}),
 //		)
 //
@@ -938,6 +940,11 @@ func (u *UpdateSet) SetNull(column string) *UpdateSet {
 	return u
 }
 
+// SetIgnore sets the column to itself. For example, "id" = "users"."id".
+func (u *UpdateSet) SetIgnore(name string) *UpdateSet {
+	return u.Set(name, Expr(u.Table().C(name)))
+}
+
 // SetExcluded sets the column name to its EXCLUDED/VALUES value.
 // For example, "c" = "excluded"."c", or `c` = VALUES(`c`).
 func (u *UpdateSet) SetExcluded(name string) *UpdateSet {
@@ -973,7 +980,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 	if i.conflict != nil {
 		i.writeConflict()
 	}
-	if len(i.returning) > 0 && i.postgres() {
+	if len(i.returning) > 0 && !i.mysql() {
 		i.WriteString(" RETURNING ")
 		i.IdentComma(i.returning...)
 	}
@@ -1014,6 +1021,9 @@ func (i *InsertBuilder) writeConflict() {
 			return
 		}
 		i.WriteString(" DO UPDATE SET ")
+	}
+	if len(i.conflict.action.update) == 0 {
+		i.AddError(errors.New("missing action for 'DO UPDATE SET' clause"))
 	}
 	u := &UpdateSet{table: i.table, columns: i.columns, update: &UpdateBuilder{}}
 	u.update.Builder = i.Builder
@@ -3101,6 +3111,11 @@ func (b Builder) clone() Builder {
 // postgres reports if the builder dialect is PostgreSQL.
 func (b Builder) postgres() bool {
 	return b.Dialect() == dialect.Postgres
+}
+
+// mysql reports if the builder dialect is MySQL.
+func (b Builder) mysql() bool {
+	return b.Dialect() == dialect.MySQL
 }
 
 // fromIdent sets the builder dialect from the identifier format.

@@ -11,9 +11,13 @@ const (
 	Label = "item"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldText holds the string denoting the text field in the database.
+	FieldText = "text"
 )
 
 var (
+	// TextValidator is a validator for the "text" field. It is called by the builders before save.
+	TextValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
