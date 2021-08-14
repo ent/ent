@@ -58,7 +58,7 @@ admins, err := client.User.
 	// Populate the first 5 `groups` that associated with the `admins`.
 	WithGroups(func(q *ent.GroupQuery) {
 		q.Limit(5) 				// Limit to 5.
-		q.WithUsers().Limit(5)	// Populate the `users` of each `groups`. 
+		q.WithUsers()           // Populate the `users` of each `groups`.
 	}).
 	All(ctx)
 if err != nil {
