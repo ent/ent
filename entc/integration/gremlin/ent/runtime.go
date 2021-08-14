@@ -177,6 +177,10 @@ func init() {
 	groupinfo.DefaultMaxUsers = groupinfoDescMaxUsers.Default.(int)
 	itemFields := schema.Item{}.Fields()
 	_ = itemFields
+	// itemDescText is the schema descriptor for text field.
+	itemDescText := itemFields[1].Descriptor()
+	// item.TextValidator is a validator for the "text" field. It is called by the builders before save.
+	item.TextValidator = itemDescText.Validators[0].(func(string) error)
 	// itemDescID is the schema descriptor for id field.
 	itemDescID := itemFields[0].Descriptor()
 	// item.DefaultID holds the default value on creation for the id field.

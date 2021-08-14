@@ -19,14 +19,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		}
 		return nil, err
 	}
-	{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes) }}
-		{{- /* Do nothing, because these 3 types must be supplied by the user. */ -}}
+	{{- if and $.ID.UserDefined (not $.ID.Type.Numeric) }}
+		if _spec.ID.Value != nil {
+			_node.ID = _spec.ID.Value.({{ $.ID.Type }})
+		}
 	{{- else }}
 		{{- if $.ID.UserDefined }}
-			if _node.ID == 0 {
+			if _spec.ID.Value != _node.ID {
 		{{- end }}
-			id := _spec.ID.Value.(int64)
-			_node.ID = {{ $.ID.Type }}(id)
+				id := _spec.ID.Value.(int64)
+				_node.ID = {{ $.ID.Type }}(id)
 		{{- if $.ID.UserDefined }}
 			}
 		{{- end }}

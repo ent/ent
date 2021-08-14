@@ -239,9 +239,9 @@ func (gic *GroupInfoCreate) OnConflict(opts ...sql.ConflictOption) *GroupInfoUps
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.GroupInfo.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.GroupInfo.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (gic *GroupInfoCreate) OnConflictColumns(columns ...string) *GroupInfoUpsertOne {
 	gic.conflict = append(gic.conflict, sql.ConflictColumns(columns...))
@@ -287,12 +287,14 @@ func (u *GroupInfoUpsert) UpdateMaxUsers() *GroupInfoUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
 //
-//  client.GroupInfo.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.GroupInfo.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *GroupInfoUpsertOne) UpdateNewValues() *GroupInfoUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -500,9 +502,9 @@ func (gicb *GroupInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupIn
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.GroupInfo.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.GroupInfo.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (gicb *GroupInfoCreateBulk) OnConflictColumns(columns ...string) *GroupInfoUpsertBulk {
 	gicb.conflict = append(gicb.conflict, sql.ConflictColumns(columns...))
@@ -520,9 +522,11 @@ type GroupInfoUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.GroupInfo.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.GroupInfo.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *GroupInfoUpsertBulk) UpdateNewValues() *GroupInfoUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -532,9 +536,9 @@ func (u *GroupInfoUpsertBulk) UpdateNewValues() *GroupInfoUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.GroupInfo.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.GroupInfo.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *GroupInfoUpsertBulk) Ignore() *GroupInfoUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())

@@ -424,9 +424,9 @@ func (gc *GroupCreate) OnConflict(opts ...sql.ConflictOption) *GroupUpsertOne {
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Group.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Group.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (gc *GroupCreate) OnConflictColumns(columns ...string) *GroupUpsertOne {
 	gc.conflict = append(gc.conflict, sql.ConflictColumns(columns...))
@@ -520,12 +520,14 @@ func (u *GroupUpsert) UpdateName() *GroupUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
 //
-//  client.Group.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Group.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *GroupUpsertOne) UpdateNewValues() *GroupUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -789,9 +791,9 @@ func (gcb *GroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupUpsertB
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Group.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Group.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (gcb *GroupCreateBulk) OnConflictColumns(columns ...string) *GroupUpsertBulk {
 	gcb.conflict = append(gcb.conflict, sql.ConflictColumns(columns...))
@@ -809,9 +811,11 @@ type GroupUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.Group.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Group.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *GroupUpsertBulk) UpdateNewValues() *GroupUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -821,9 +825,9 @@ func (u *GroupUpsertBulk) UpdateNewValues() *GroupUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Group.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.Group.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *GroupUpsertBulk) Ignore() *GroupUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())

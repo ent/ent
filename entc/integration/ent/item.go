@@ -16,9 +16,11 @@ import (
 
 // Item is the model entity for the Item schema.
 type Item struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -26,7 +28,7 @@ func (*Item) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case item.FieldID:
+		case item.FieldID, item.FieldText:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Item", columns[i])
@@ -48,6 +50,12 @@ func (i *Item) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", values[j])
 			} else if value.Valid {
 				i.ID = value.String
+			}
+		case item.FieldText:
+			if value, ok := values[j].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field text", values[j])
+			} else if value.Valid {
+				i.Text = value.String
 			}
 		}
 	}
@@ -77,6 +85,8 @@ func (i *Item) String() string {
 	var builder strings.Builder
 	builder.WriteString("Item(")
 	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
+	builder.WriteString(", text=")
+	builder.WriteString(i.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

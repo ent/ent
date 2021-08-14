@@ -254,6 +254,19 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Text string `json:"text,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Item.Query().
+//		GroupBy(item.FieldText).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+//
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	group := &ItemGroupBy{config: iq.config}
 	group.fields = append([]string{field}, fields...)
@@ -268,6 +281,17 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Text string `json:"text,omitempty"`
+//	}
+//
+//	client.Item.Query().
+//		Select(item.FieldText).
+//		Scan(ctx, &v)
+//
 func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
 	iq.fields = append(iq.fields, fields...)
 	return &ItemSelect{ItemQuery: iq}

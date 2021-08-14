@@ -1709,10 +1709,14 @@ func TestInsert_OnConflict(t *testing.T) {
 				ConflictColumns("email"),
 				ConflictWhere(EQ("name", "Ariel")),
 				ResolveWithNewValues(),
+				// Update all new values excepts id field.
+				ResolveWith(func(u *UpdateSet) {
+					u.SetIgnore("id")
+				}),
 				UpdateWhere(NEQ("updated_at", 0)),
 			).
 			Query()
-		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "excluded"."id", "email" = "excluded"."email" WHERE "updated_at" <> $4`, query)
+		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email" WHERE "updated_at" <> $4`, query)
 		require.Equal(t, []interface{}{"1", "user@example.com", "Ariel", 0}, args)
 
 		query, args = Dialect(dialect.Postgres).

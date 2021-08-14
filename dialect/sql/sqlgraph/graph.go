@@ -982,15 +982,14 @@ func (c *creator) insert(ctx context.Context, tx dialect.ExecQuerier, insert *sq
 	// If the id field was provided by the user.
 	if c.ID.Value != nil {
 		insert.Set(c.ID.Column, c.ID.Value)
-		query, args := insert.Query()
-		return tx.Exec(ctx, query, args, &res)
+		// In case of "ON CONFLICT", the record may exists in the
+		// database, and we need to get back the database id field.
+		if len(c.CreateSpec.OnConflict) == 0 {
+			query, args := insert.Query()
+			return tx.Exec(ctx, query, args, &res)
+		}
 	}
-	id, err := insertLastID(ctx, tx, insert.Returning(c.ID.Column))
-	if err != nil {
-		return err
-	}
-	c.ID.Value = id
-	return nil
+	return c.insertLastID(ctx, tx, insert.Returning(c.ID.Column))
 }
 
 // ensureLastInsertID ensures the LAST_INSERT_ID was added to the
@@ -1014,18 +1013,7 @@ func (c *creator) batchInsert(ctx context.Context, tx dialect.ExecQuerier, inser
 	if opts := c.BatchCreateSpec.OnConflict; len(opts) > 0 {
 		insert.OnConflict(opts...)
 	}
-	ids, err := insertLastIDs(ctx, tx, insert.Returning(c.Nodes[0].ID.Column))
-	if err != nil {
-		return err
-	}
-	for i, node := range c.Nodes {
-		// If the ID field was not provided by the user,
-		// but was returned by the `RETURNING` clause.
-		if node.ID.Value == nil && i < len(ids) {
-			node.ID.Value = ids[i]
-		}
-	}
-	return nil
+	return c.insertLastIDs(ctx, tx, insert.Returning(c.Nodes[0].ID.Column))
 }
 
 // GroupRel groups edges by their relation type.
@@ -1280,63 +1268,99 @@ func setTableColumns(fields []*FieldSpec, edges map[Rel][]*EdgeSpec, set func(st
 }
 
 // insertLastID invokes the insert query on the transaction and returns the LastInsertID.
-func insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) (driver.Value, error) {
+func (c *creator) insertLastID(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
 	query, args := insert.Query()
-	// PostgreSQL does not support the LastInsertId() method of sql.Result
-	// on Exec, and should be extracted manually using the `RETURNING` clause.
-	if insert.Dialect() == dialect.Postgres {
+	if err := insert.Err(); err != nil {
+		return err
+	}
+	// MySQL does not support the "RETURNING" clause.
+	if insert.Dialect() != dialect.MySQL {
 		rows := &sql.Rows{}
 		if err := tx.Query(ctx, query, args, rows); err != nil {
-			return 0, err
+			return err
 		}
 		defer rows.Close()
-		return sql.ScanValue(rows)
+		if !c.ID.Type.Numeric() {
+			return sql.ScanOne(rows, &c.ID.Value)
+		}
+		// Normalize the type to int64 to make it looks
+		// like LastInsertId.
+		id, err := sql.ScanInt64(rows)
+		if err != nil {
+			return err
+		}
+		c.ID.Value = id
+		return nil
 	}
-	// MySQL, SQLite, etc.
+	// MySQL.
 	var res sql.Result
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return 0, err
+		return err
 	}
-	return res.LastInsertId()
+	// If the ID field is not numeric (e.g. string),
+	// there is no way to scan the LAST_INSERT_ID.
+	if c.ID.Type.Numeric() {
+		id, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+		c.ID.Value = id
+	}
+	return nil
 }
 
 // insertLastIDs invokes the batch insert query on the transaction and returns the LastInsertID of all entities.
-func insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) (ids []driver.Value, err error) {
+func (c *creator) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
 	query, args := insert.Query()
-	// PostgreSQL does not support the LastInsertId() method of sql.Result
-	// on Exec, and should be extracted manually using the `RETURNING` clause.
-	if insert.Dialect() == dialect.Postgres {
+	if err := insert.Err(); err != nil {
+		return err
+	}
+	// MySQL does not support the "RETURNING" clause.
+	if insert.Dialect() != dialect.MySQL {
 		rows := &sql.Rows{}
 		if err := tx.Query(ctx, query, args, rows); err != nil {
-			return nil, err
+			return err
 		}
 		defer rows.Close()
-		return ids, sql.ScanSlice(rows, &ids)
+		for i := 0; rows.Next(); i++ {
+			node := c.Nodes[i]
+			if node.ID.Type.Numeric() {
+				// Normalize the type to int64 to make it looks
+				// like LastInsertId.
+				var id int64
+				if err := rows.Scan(&id); err != nil {
+					return err
+				}
+				node.ID.Value = id
+			} else if err := rows.Scan(&node.ID.Value); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
-	// MySQL, SQLite, etc.
+	// MySQL.
 	var res sql.Result
 	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return nil, err
+		return err
 	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		return nil, err
-	}
-	affected, err := res.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	ids = make([]driver.Value, 0, affected)
-	switch insert.Dialect() {
-	case dialect.SQLite:
-		id -= affected - 1
-		fallthrough
-	case dialect.MySQL:
-		for i := int64(0); i < affected; i++ {
-			ids = append(ids, id+i)
+	// If the ID field is not numeric (e.g. string),
+	// there is no way to scan the LAST_INSERT_ID.
+	if len(c.Nodes) > 0 && c.Nodes[0].ID.Type.Numeric() {
+		id, err := res.LastInsertId()
+		if err != nil {
+			return err
+		}
+		affected, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		// Assume the ID field is AUTO_INCREMENT
+		// if its type is numeric.
+		for i := 0; int64(i) < affected && i < len(c.Nodes); i++ {
+			c.Nodes[i].ID.Value = id + int64(i)
 		}
 	}
-	return ids, nil
+	return nil
 }
 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.

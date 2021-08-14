@@ -147,9 +147,9 @@ func (gc *GoodsCreate) OnConflict(opts ...sql.ConflictOption) *GoodsUpsertOne {
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Goods.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Goods.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (gc *GoodsCreate) OnConflictColumns(columns ...string) *GoodsUpsertOne {
 	gc.conflict = append(gc.conflict, sql.ConflictColumns(columns...))
@@ -171,12 +171,14 @@ type (
 	}
 )
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
 //
-//  client.Goods.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Goods.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *GoodsUpsertOne) UpdateNewValues() *GoodsUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -350,9 +352,9 @@ func (gcb *GoodsCreateBulk) OnConflict(opts ...sql.ConflictOption) *GoodsUpsertB
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Goods.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Goods.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (gcb *GoodsCreateBulk) OnConflictColumns(columns ...string) *GoodsUpsertBulk {
 	gcb.conflict = append(gcb.conflict, sql.ConflictColumns(columns...))
@@ -370,9 +372,11 @@ type GoodsUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.Goods.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Goods.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *GoodsUpsertBulk) UpdateNewValues() *GoodsUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -382,9 +386,9 @@ func (u *GoodsUpsertBulk) UpdateNewValues() *GoodsUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Goods.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.Goods.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *GoodsUpsertBulk) Ignore() *GoodsUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())

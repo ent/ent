@@ -1464,9 +1464,9 @@ func (ftc *FieldTypeCreate) OnConflict(opts ...sql.ConflictOption) *FieldTypeUps
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (ftc *FieldTypeCreate) OnConflictColumns(columns ...string) *FieldTypeUpsertOne {
 	ftc.conflict = append(ftc.conflict, sql.ConflictColumns(columns...))
@@ -2526,12 +2526,14 @@ func (u *FieldTypeUpsert) ClearPasswordOther() *FieldTypeUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *FieldTypeUpsertOne) UpdateNewValues() *FieldTypeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -3922,9 +3924,9 @@ func (ftcb *FieldTypeCreateBulk) OnConflict(opts ...sql.ConflictOption) *FieldTy
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (ftcb *FieldTypeCreateBulk) OnConflictColumns(columns ...string) *FieldTypeUpsertBulk {
 	ftcb.conflict = append(ftcb.conflict, sql.ConflictColumns(columns...))
@@ -3942,9 +3944,11 @@ type FieldTypeUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *FieldTypeUpsertBulk) UpdateNewValues() *FieldTypeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -3954,9 +3958,9 @@ func (u *FieldTypeUpsertBulk) UpdateNewValues() *FieldTypeUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *FieldTypeUpsertBulk) Ignore() *FieldTypeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())

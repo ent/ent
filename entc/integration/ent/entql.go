@@ -228,8 +228,10 @@ var schemaGraph = func() *sqlgraph.Schema {
 				Column: item.FieldID,
 			},
 		},
-		Type:   "Item",
-		Fields: map[string]*sqlgraph.FieldSpec{},
+		Type: "Item",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			item.FieldText: {Type: field.TypeString, Column: item.FieldText},
+		},
 	}
 	graph.Nodes[9] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
@@ -1566,6 +1568,11 @@ func (f *ItemFilter) Where(p entql.P) {
 // WhereID applies the entql string predicate on the id field.
 func (f *ItemFilter) WhereID(p entql.StringP) {
 	f.Where(p.Field(item.FieldID))
+}
+
+// WhereText applies the entql string predicate on the text field.
+func (f *ItemFilter) WhereText(p entql.StringP) {
+	f.Where(p.Field(item.FieldText))
 }
 
 // addPredicate implements the predicateAdder interface.
