@@ -233,7 +233,7 @@ func (Card) Fields() []ent.Field {
 			GoType(&sql.NullString{}),
 		field.Enum("role").
 			// A convertible type to string.
-			GoType(role.Unknown),
+			GoType(role.Role("")),
 		field.Float("decimal").
 			// A ValueScanner type mixed with SchemaType.
 			GoType(decimal.Decimal{}).
