@@ -8,7 +8,7 @@ title: Eager Loading
 `ent` supports querying entities with their associations (through their edges). The associated entities
 are populated to the `Edges` field in the returned object.
 
-Let's give an example how does the API look like for the following schema:
+Let's give an example of what the API looks like for the following schema:
 
 ![er-group-users](https://entgo.io/images/assets/er_user_pets_groups.png)
 
