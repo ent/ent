@@ -80,7 +80,7 @@ However, if you use a custom format for the global unique identifiers, you can c
 ```go
 func (r *queryResolver) Node(ctx context.Context, guid string) (ent.Noder, error) {
 	typ, id := parseGUID(guid)
-	return r.client.Noder(ctx, id, ent.WithNodeType(typ))
+	return r.client.Noder(ctx, id, ent.WithFixedNodeType(typ))
 }
 ```
 
