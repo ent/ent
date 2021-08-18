@@ -238,6 +238,11 @@ func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Na
 {{ $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
+	return c.Query{{ pascal $e.Name }}Id({{ $arg }}.ID)
+}
+
+// Query{{ pascal $e.Name }}Id queries the {{ $e.Name }} edge of a {{ $n.Name }} by its id.
+func (c *{{ $client }}) Query{{ pascal $e.Name }}Id(id {{ $n.ID.Type }}) *{{ $builder }} {
 	query := &{{ $builder }}{config: c.config}
 	query.path = func(ctx context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
 		{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}

@@ -227,15 +227,19 @@ func (c *CommentClient) GetX(ctx context.Context, id int) *Comment {
 
 // QueryPost queries the post edge of a Comment.
 func (c *CommentClient) QueryPost(co *Comment) *PostQuery {
+	return c.QueryPostId(co.ID)
+}
+
+// QueryPostId queries the post edge of a Comment by its id.
+func (c *CommentClient) QueryPostId(id int) *PostQuery {
 	query := &PostQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := co.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(comment.Table, comment.FieldID, id),
 			sqlgraph.To(post.Table, post.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, comment.PostTable, comment.PostColumn),
 		)
-		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -333,15 +337,19 @@ func (c *PostClient) GetX(ctx context.Context, id int) *Post {
 
 // QueryAuthor queries the author edge of a Post.
 func (c *PostClient) QueryAuthor(po *Post) *UserQuery {
+	return c.QueryAuthorId(po.ID)
+}
+
+// QueryAuthorId queries the author edge of a Post by its id.
+func (c *PostClient) QueryAuthorId(id int) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := po.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(post.Table, post.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, post.AuthorTable, post.AuthorColumn),
 		)
-		fromV = sqlgraph.Neighbors(po.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -349,15 +357,19 @@ func (c *PostClient) QueryAuthor(po *Post) *UserQuery {
 
 // QueryComments queries the comments edge of a Post.
 func (c *PostClient) QueryComments(po *Post) *CommentQuery {
+	return c.QueryCommentsId(po.ID)
+}
+
+// QueryCommentsId queries the comments edge of a Post by its id.
+func (c *PostClient) QueryCommentsId(id int) *CommentQuery {
 	query := &CommentQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := po.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(post.Table, post.FieldID, id),
 			sqlgraph.To(comment.Table, comment.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, post.CommentsTable, post.CommentsColumn),
 		)
-		fromV = sqlgraph.Neighbors(po.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -455,15 +467,19 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryPosts queries the posts edge of a User.
 func (c *UserClient) QueryPosts(u *User) *PostQuery {
+	return c.QueryPostsId(u.ID)
+}
+
+// QueryPostsId queries the posts edge of a User by its id.
+func (c *UserClient) QueryPostsId(id int) *PostQuery {
 	query := &PostQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(post.Table, post.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PostsTable, user.PostsColumn),
 		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(c.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query

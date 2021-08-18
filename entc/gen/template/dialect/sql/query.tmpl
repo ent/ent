@@ -237,8 +237,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
 	{{- $ident := $.Scope.Ident -}}
-	{{- $receiver := $.Scope.Receiver -}}
-	id := {{ $receiver }}.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
 		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
@@ -256,7 +254,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
+	{{ $ident }} = sqlgraph.Neighbors(c.driver.Dialect(), step)
 {{ end }}
 
 {{ define "dialect/sql/query/eagerloading" }}

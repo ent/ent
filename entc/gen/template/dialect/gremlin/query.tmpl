@@ -101,14 +101,13 @@ func ({{ $receiver }} *{{ $builder }}) gremlinQuery(context.Context) *dsl.Traver
 {{ define "dialect/gremlin/query/from" }}
 	{{- $n := $ }} {{/* the node we start the query from. */}}
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
-	{{- $receiver := $.Scope.Receiver }}
 	{{- $ident := $.Scope.Ident -}}
 
 	{{- if $e.Bidi }}
-		{{ $ident }} = g.V({{ $receiver }}.ID).Both({{ $n.Package }}.{{ $e.LabelConstant }})
+		{{ $ident }} = g.V(id).Both({{ $n.Package }}.{{ $e.LabelConstant }})
 	{{- else if $e.IsInverse }}
-		{{ $ident }} = g.V({{ $receiver }}.ID).InE({{ $e.Type.Package }}.{{ $e.LabelConstant }}).OutV()
+		{{ $ident }} = g.V(id).InE({{ $e.Type.Package }}.{{ $e.LabelConstant }}).OutV()
 	{{- else }}
-		{{ $ident }} = g.V({{ $receiver }}.ID).OutE({{ $n.Package }}.{{ $e.LabelConstant }}).InV()
+		{{ $ident }} = g.V(id).OutE({{ $n.Package }}.{{ $e.LabelConstant }}).InV()
 	{{- end }}
 {{ end }}
