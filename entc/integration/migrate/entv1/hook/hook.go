@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/migrate/entv1"
 )
 
@@ -197,17 +198,33 @@ func FixedError(err error) entv1.Hook {
 	}
 }
 
+// RejectError returns when an operation is rejected
+type RejectError struct {
+	// Op are the operations that will be rejected
+	Op ent.Op
+	// Rejected operation
+	Rejected ent.Op
+}
+
+func (r RejectError) Error() string {
+	// TODO: string name
+	return fmt.Sprintf("%s operation is not allowed", r.Rejected)
+}
+
 // Reject returns a hook that rejects all operations that match op.
 //
-//	func (T) Hooks() []entv1.Hook {
-//		return []entv1.Hook{
-//			Reject(entv1.Delete|entv1.Update),
+//	func (T) Hooks() []ent.Hook {
+//		return []ent.Hook{
+//			Reject(ent.Delete|ent.Update),
 //		}
 //	}
 //
-func Reject(op entv1.Op) entv1.Hook {
-	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
-	return On(hk, op)
+func Reject(op ent.Op) ent.Hook {
+	return On(func(ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			return nil, &RejectError{Op: op, Rejected: m.Op()}
+		})
+	}, op)
 }
 
 // Chain acts as a list of hooks and is effectively immutable.
