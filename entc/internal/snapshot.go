@@ -8,7 +8,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"entgo.io/ent/entc/gen"
@@ -25,7 +25,7 @@ type Snapshot struct {
 // If there is a conflict between upstream and local snapshots, it is merged
 // before running the code generation.
 func (s *Snapshot) Restore() error {
-	buf, err := ioutil.ReadFile(s.Path)
+	buf, err := os.ReadFile(s.Path)
 	if err != nil {
 		return fmt.Errorf("unable to read snapshot schema %w", err)
 	}

@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -693,7 +692,7 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 		nop  = func() error { return nil }
 		path = filepath.Join(c.Target, "runtime.go")
 	)
-	out, err := ioutil.ReadFile(path)
+	out, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nop, nil
@@ -708,10 +707,10 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 	if len(fi.Imports) == 0 {
 		return nop, nil
 	}
-	if err := ioutil.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
+	if err := os.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
 		return nil, err
 	}
-	return func() error { return ioutil.WriteFile(path, out, 0644) }, nil
+	return func() error { return os.WriteFile(path, out, 0644) }, nil
 }
 
 type (
@@ -733,7 +732,7 @@ func (a assets) write() error {
 		}
 	}
 	for _, file := range a.files {
-		if err := ioutil.WriteFile(file.path, file.content, 0644); err != nil {
+		if err := os.WriteFile(file.path, file.content, 0644); err != nil {
 			return fmt.Errorf("write file %q: %w", file.path, err)
 		}
 	}
@@ -748,7 +747,7 @@ func (a assets) format() error {
 		if err != nil {
 			return fmt.Errorf("format file %s: %w", path, err)
 		}
-		if err := ioutil.WriteFile(path, src, 0644); err != nil {
+		if err := os.WriteFile(path, src, 0644); err != nil {
 			return fmt.Errorf("write file %s: %w", path, err)
 		}
 	}

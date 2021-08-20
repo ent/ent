@@ -5,7 +5,6 @@
 package internal
 
 import (
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -47,7 +46,7 @@ func TestSnapshot_Restore(t *testing.T) {
 // addConflicts adds VCS conflicts to the files that match the given patterns.
 func addConflicts(dir string) error {
 	rand.Seed(time.Now().UnixNano())
-	infos, err := ioutil.ReadDir(dir)
+	infos, err := os.ReadDir(dir)
 	if err != nil {
 		return err
 	}

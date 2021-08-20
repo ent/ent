@@ -8,8 +8,8 @@ package main
 import (
 	"bytes"
 	"go/format"
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"text/template"
 
@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	buf, err := ioutil.ReadFile("internal/types.tmpl")
+	buf, err := os.ReadFile("internal/types.tmpl")
 	if err != nil {
 		log.Fatal("reading template file:", err)
 	}
@@ -59,7 +59,7 @@ func main() {
 	if buf, err = format.Source(b.Bytes()); err != nil {
 		log.Fatal("formatting output:", err)
 	}
-	if err := ioutil.WriteFile("types.go", buf, 0644); err != nil {
+	if err := os.WriteFile("types.go", buf, 0644); err != nil {
 		log.Fatal("writing go file:", err)
 	}
 }
