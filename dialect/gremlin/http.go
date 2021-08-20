@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -69,7 +68,7 @@ func (t *httpTransport) RoundTrip(ctx context.Context, req *Request) (*Response,
 		defer rsp.Body.Close()
 
 		if rsp.StatusCode < http.StatusOK || rsp.StatusCode > http.StatusPartialContent {
-			body, _ := ioutil.ReadAll(rsp.Body)
+			body, _ := io.ReadAll(rsp.Body)
 			return nil, fmt.Errorf("gremlin/http: status=%q, body=%q", rsp.Status, body)
 		}
 		if rsp.ContentLength > MaxResponseSize {

@@ -13,7 +13,6 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -71,7 +70,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 		return nil, err
 	}
 	target := fmt.Sprintf(".entc/%s.go", filename(pkgPath))
-	if err := ioutil.WriteFile(target, buf, 0644); err != nil {
+	if err := os.WriteFile(target, buf, 0644); err != nil {
 		return nil, fmt.Errorf("entc/load: write file %s: %w", target, err)
 	}
 	defer os.RemoveAll(".entc")

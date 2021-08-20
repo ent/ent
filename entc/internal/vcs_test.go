@@ -6,7 +6,6 @@ package internal
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -18,9 +17,9 @@ func TestCheckDir(t *testing.T) {
 	target := filepath.Join(os.TempDir(), "entvcs")
 	require.NoError(t, os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.RemoveAll(target)
-	err := ioutil.WriteFile(filepath.Join(target, "a.go"), []byte(`package schema`), 0644)
+	err := os.WriteFile(filepath.Join(target, "a.go"), []byte(`package schema`), 0644)
 	require.NoError(t, err)
-	err = ioutil.WriteFile(filepath.Join(target, "b.go"), []byte(`package schema
+	err = os.WriteFile(filepath.Join(target, "b.go"), []byte(`package schema
 
 type User struct {
 <<<<<<< local

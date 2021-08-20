@@ -6,8 +6,8 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	"entgo.io/ent/cmd/internal/base"
@@ -32,9 +32,9 @@ func migrate(c *gen.Config) {
 		target = filepath.Join(c.Target, "generate.go")
 		oldCmd = []byte("entgo.io/ent/cmd/entc")
 	)
-	buf, err := ioutil.ReadFile(target)
+	buf, err := os.ReadFile(target)
 	if err != nil || !bytes.Contains(buf, oldCmd) {
 		return
 	}
-	_ = ioutil.WriteFile(target, bytes.ReplaceAll(buf, oldCmd, []byte("entgo.io/ent/cmd/ent")), 0644)
+	_ = os.WriteFile(target, bytes.ReplaceAll(buf, oldCmd, []byte("entgo.io/ent/cmd/ent")), 0644)
 }
