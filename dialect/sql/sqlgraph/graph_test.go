@@ -851,11 +851,9 @@ func TestCreateNode(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `users` (`age`, `name`) VALUES (?, ?)")).
 					WithArgs(30, "a8m").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectCommit()
 			},
 		},
 		{
@@ -872,11 +870,9 @@ func TestCreateNode(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `users` (`age`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `age` = VALUES(`age`), `name` = VALUES(`name`), `id` = LAST_INSERT_ID(`users`.`id`)")).
 					WithArgs(30, "a8m").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectCommit()
 			},
 		},
 		{
@@ -890,11 +886,9 @@ func TestCreateNode(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `users` (`age`, `name`, `id`) VALUES (?, ?, ?)")).
 					WithArgs(30, "a8m", 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectCommit()
 			},
 		},
 		{
@@ -907,11 +901,9 @@ func TestCreateNode(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `users` (`json`) VALUES (?)")).
 					WithArgs([]byte("{}")).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectCommit()
 			},
 		},
 		{
@@ -927,11 +919,9 @@ func TestCreateNode(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `pets` (`name`, `owner_id`) VALUES (?, ?)")).
 					WithArgs("pedro", 2).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectCommit()
 			},
 		},
 		{
@@ -947,11 +937,9 @@ func TestCreateNode(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `cards` (`number`, `owner_id`) VALUES (?, ?)")).
 					WithArgs("0001", 2).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectCommit()
 			},
 		},
 		{
@@ -1156,11 +1144,9 @@ func TestCreateNode(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `mydb`.`users` (`age`, `name`) VALUES (?, ?)")).
 					WithArgs(30, "a8m").
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				m.ExpectCommit()
 			},
 		},
 	}
