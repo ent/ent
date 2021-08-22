@@ -29,7 +29,7 @@ func (d *SQLite) init(ctx context.Context, tx dialect.Tx) error {
 	if !on {
 		// foreign_keys pragma is off, either enable it by execute "PRAGMA foreign_keys=ON"
 		// or add the following parameter in the connection string "_fk=1".
-		return fmt.Errorf("sqlite: foreign_keys pragma is off: missing %q is the connection string", "_fk=1")
+		return fmt.Errorf("sqlite: foreign_keys pragma is off: missing %q in the connection string", "_fk=1")
 	}
 	return nil
 }
