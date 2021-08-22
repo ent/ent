@@ -473,6 +473,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "dakimura",
+      "name": "dakimura",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34202807?v=4",
+      "profile": "https://github.com/dakimura",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
