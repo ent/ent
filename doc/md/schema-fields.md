@@ -399,7 +399,7 @@ The framework provides a few built-in validators for each type:
   - `Match(regexp.Regexp)`
   - `NotEmpty`
 
-- `byte[]`
+- `[]byte`
 	- `MaxLen(i)`
 
 ## Optional
