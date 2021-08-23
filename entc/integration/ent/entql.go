@@ -119,6 +119,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldNullActive:            {Type: field.TypeBool, Column: fieldtype.FieldNullActive},
 			fieldtype.FieldDeleted:               {Type: field.TypeBool, Column: fieldtype.FieldDeleted},
 			fieldtype.FieldDeletedAt:             {Type: field.TypeTime, Column: fieldtype.FieldDeletedAt},
+			fieldtype.FieldRawData:               {Type: field.TypeBytes, Column: fieldtype.FieldRawData},
 			fieldtype.FieldIP:                    {Type: field.TypeBytes, Column: fieldtype.FieldIP},
 			fieldtype.FieldNullInt64:             {Type: field.TypeInt, Column: fieldtype.FieldNullInt64},
 			fieldtype.FieldSchemaInt:             {Type: field.TypeInt, Column: fieldtype.FieldSchemaInt},
@@ -1038,6 +1039,11 @@ func (f *FieldTypeFilter) WhereDeleted(p entql.BoolP) {
 // WhereDeletedAt applies the entql time.Time predicate on the deleted_at field.
 func (f *FieldTypeFilter) WhereDeletedAt(p entql.TimeP) {
 	f.Where(p.Field(fieldtype.FieldDeletedAt))
+}
+
+// WhereRawData applies the entql []byte predicate on the raw_data field.
+func (f *FieldTypeFilter) WhereRawData(p entql.BytesP) {
+	f.Where(p.Field(fieldtype.FieldRawData))
 }
 
 // WhereIP applies the entql []byte predicate on the ip field.

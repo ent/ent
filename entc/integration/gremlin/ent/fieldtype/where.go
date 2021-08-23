@@ -384,6 +384,13 @@ func DeletedAt(v *sql.NullTime) predicate.FieldType {
 	})
 }
 
+// RawData applies equality check predicate on the "raw_data" field. It's identical to RawDataEQ.
+func RawData(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.EQ(v))
+	})
+}
+
 // IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
 func IP(v net.IP) predicate.FieldType {
 	vc := []byte(v)
@@ -3748,6 +3755,84 @@ func DeletedAtIsNil() predicate.FieldType {
 func DeletedAtNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldDeletedAt)
+	})
+}
+
+// RawDataEQ applies the EQ predicate on the "raw_data" field.
+func RawDataEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.EQ(v))
+	})
+}
+
+// RawDataNEQ applies the NEQ predicate on the "raw_data" field.
+func RawDataNEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.NEQ(v))
+	})
+}
+
+// RawDataIn applies the In predicate on the "raw_data" field.
+func RawDataIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.Within(v...))
+	})
+}
+
+// RawDataNotIn applies the NotIn predicate on the "raw_data" field.
+func RawDataNotIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.Without(v...))
+	})
+}
+
+// RawDataGT applies the GT predicate on the "raw_data" field.
+func RawDataGT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.GT(v))
+	})
+}
+
+// RawDataGTE applies the GTE predicate on the "raw_data" field.
+func RawDataGTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.GTE(v))
+	})
+}
+
+// RawDataLT applies the LT predicate on the "raw_data" field.
+func RawDataLT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.LT(v))
+	})
+}
+
+// RawDataLTE applies the LTE predicate on the "raw_data" field.
+func RawDataLTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldRawData, p.LTE(v))
+	})
+}
+
+// RawDataIsNil applies the IsNil predicate on the "raw_data" field.
+func RawDataIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldRawData)
+	})
+}
+
+// RawDataNotNil applies the NotNil predicate on the "raw_data" field.
+func RawDataNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldRawData)
 	})
 }
 

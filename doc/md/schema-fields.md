@@ -399,6 +399,9 @@ The framework provides a few built-in validators for each type:
   - `Match(regexp.Regexp)`
   - `NotEmpty`
 
+- `byte[]`
+	- `MaxLen(i)`
+
 ## Optional
 
 Optional fields are fields that are not required in the entity creation, and

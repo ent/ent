@@ -106,6 +106,8 @@ const (
 	FieldDeleted = "deleted"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldRawData holds the string denoting the raw_data field in the database.
+	FieldRawData = "raw_data"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
 	// FieldNullInt64 holds the string denoting the null_int64 field in the database.
@@ -193,6 +195,7 @@ var Columns = []string{
 	FieldNullActive,
 	FieldDeleted,
 	FieldDeletedAt,
+	FieldRawData,
 	FieldIP,
 	FieldNullInt64,
 	FieldSchemaInt,
@@ -254,6 +257,8 @@ var (
 	DefaultNullStr func() *sql.NullString
 	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	LinkValidator func(string) error
+	// RawDataValidator is a validator for the "raw_data" field. It is called by the builders before save.
+	RawDataValidator func([]byte) error
 	// DefaultIP holds the default value on creation for the "ip" field.
 	DefaultIP func() net.IP
 	// IPValidator is a validator for the "ip" field. It is called by the builders before save.

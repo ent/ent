@@ -221,6 +221,16 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Error(err)
 	require.True(ent.IsNotFound(err))
 
+	_, err = client.FieldType.Create().
+		SetInt(1).
+		SetInt8(8).
+		SetInt16(16).
+		SetInt32(32).
+		SetInt64(64).
+		SetRawData(make([]byte, 40)).
+		Save(ctx)
+	require.Error(err)
+
 	// grouping.
 	var v []struct {
 		Name  string `json:"name"`

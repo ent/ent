@@ -919,6 +919,18 @@ func (ftu *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftu *FieldTypeUpdate) SetRawData(b []byte) *FieldTypeUpdate {
+	ftu.mutation.SetRawData(b)
+	return ftu
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (ftu *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
+	ftu.mutation.ClearRawData()
+	return ftu
+}
+
 // SetIP sets the "ip" field.
 func (ftu *FieldTypeUpdate) SetIP(n net.IP) *FieldTypeUpdate {
 	ftu.mutation.SetIP(n)
@@ -1364,6 +1376,11 @@ func (ftu *FieldTypeUpdate) check() error {
 	if v, ok := ftu.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf("ent: validator failed for field \"raw_data\": %w", err)}
 		}
 	}
 	if v, ok := ftu.mutation.IP(); ok {
@@ -2085,6 +2102,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Column: fieldtype.FieldDeletedAt,
+		})
+	}
+	if value, ok := ftu.mutation.RawData(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldRawData,
+		})
+	}
+	if ftu.mutation.RawDataCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: fieldtype.FieldRawData,
 		})
 	}
 	if value, ok := ftu.mutation.IP(); ok {
@@ -3254,6 +3284,18 @@ func (ftuo *FieldTypeUpdateOne) ClearDeletedAt() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftuo *FieldTypeUpdateOne) SetRawData(b []byte) *FieldTypeUpdateOne {
+	ftuo.mutation.SetRawData(b)
+	return ftuo
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (ftuo *FieldTypeUpdateOne) ClearRawData() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearRawData()
+	return ftuo
+}
+
 // SetIP sets the "ip" field.
 func (ftuo *FieldTypeUpdateOne) SetIP(n net.IP) *FieldTypeUpdateOne {
 	ftuo.mutation.SetIP(n)
@@ -3706,6 +3748,11 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 	if v, ok := ftuo.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf("ent: validator failed for field \"raw_data\": %w", err)}
 		}
 	}
 	if v, ok := ftuo.mutation.IP(); ok {
@@ -4444,6 +4491,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Column: fieldtype.FieldDeletedAt,
+		})
+	}
+	if value, ok := ftuo.mutation.RawData(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldRawData,
+		})
+	}
+	if ftuo.mutation.RawDataCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: fieldtype.FieldRawData,
 		})
 	}
 	if value, ok := ftuo.mutation.IP(); ok {

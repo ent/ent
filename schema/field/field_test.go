@@ -199,6 +199,7 @@ func TestBytes(t *testing.T) {
 		Validate(func(bytes []byte) error {
 			return nil
 		}).
+		MaxLen(50).
 		Descriptor()
 	assert.Equal(t, "active", fd.Name)
 	assert.True(t, fd.Unique)
@@ -206,7 +207,7 @@ func TestBytes(t *testing.T) {
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, []byte("{}"), fd.Default)
 	assert.Equal(t, "comment", fd.Comment)
-	assert.Len(t, fd.Validators, 1)
+	assert.Len(t, fd.Validators, 2)
 
 	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).Descriptor()
 	assert.NoError(t, fd.Err)

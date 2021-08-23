@@ -531,6 +531,12 @@ func (ftc *FieldTypeCreate) SetDeletedAt(st *sql.NullTime) *FieldTypeCreate {
 	return ftc
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftc *FieldTypeCreate) SetRawData(b []byte) *FieldTypeCreate {
+	ftc.mutation.SetRawData(b)
+	return ftc
+}
+
 // SetIP sets the "ip" field.
 func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 	ftc.mutation.SetIP(n)
@@ -889,6 +895,11 @@ func (ftc *FieldTypeCreate) check() error {
 	if v, ok := ftc.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "link": %w`, err)}
+		}
+	}
+	if v, ok := ftc.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "raw_data": %w`, err)}
 		}
 	}
 	if v, ok := ftc.mutation.IP(); ok {
@@ -1281,6 +1292,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if value, ok := ftc.mutation.RawData(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldRawData,
+		})
+		_node.RawData = value
 	}
 	if value, ok := ftc.mutation.IP(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -2205,6 +2224,24 @@ func (u *FieldTypeUpsert) UpdateDeletedAt() *FieldTypeUpsert {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (u *FieldTypeUpsert) ClearDeletedAt() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldDeletedAt)
+	return u
+}
+
+// SetRawData sets the "raw_data" field.
+func (u *FieldTypeUpsert) SetRawData(v []byte) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldRawData, v)
+	return u
+}
+
+// UpdateRawData sets the "raw_data" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateRawData() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldRawData)
+	return u
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (u *FieldTypeUpsert) ClearRawData() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldRawData)
 	return u
 }
 
@@ -3405,6 +3442,27 @@ func (u *FieldTypeUpsertOne) UpdateDeletedAt() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) ClearDeletedAt() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearDeletedAt()
+	})
+}
+
+// SetRawData sets the "raw_data" field.
+func (u *FieldTypeUpsertOne) SetRawData(v []byte) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetRawData(v)
+	})
+}
+
+// UpdateRawData sets the "raw_data" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateRawData() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateRawData()
+	})
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (u *FieldTypeUpsertOne) ClearRawData() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearRawData()
 	})
 }
 
@@ -4820,6 +4878,27 @@ func (u *FieldTypeUpsertBulk) UpdateDeletedAt() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) ClearDeletedAt() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearDeletedAt()
+	})
+}
+
+// SetRawData sets the "raw_data" field.
+func (u *FieldTypeUpsertBulk) SetRawData(v []byte) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetRawData(v)
+	})
+}
+
+// UpdateRawData sets the "raw_data" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateRawData() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateRawData()
+	})
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (u *FieldTypeUpsertBulk) ClearRawData() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearRawData()
 	})
 }
 

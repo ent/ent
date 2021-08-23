@@ -579,6 +579,12 @@ func (b *bytesBuilder) StructTag(s string) *bytesBuilder {
 // In SQLite, it does not have any effect on the type size, which is default to 1B bytes.
 func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
 	b.desc.Size = i
+	b.desc.Validators = append(b.desc.Validators, func(buf []byte) error {
+		if len(buf) > i {
+			return errors.New("value is greater than the required length")
+		}
+		return nil
+	})
 	return b
 }
 
