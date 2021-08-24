@@ -509,6 +509,55 @@ func Select(t *testing.T, client *ent.Client) {
 		}).
 		IntX(ctx)
 	require.Equal(8, n)
+
+	var (
+		p1 []struct {
+			ent.Pet
+			NameLength int `sql:"length"`
+		}
+		p2 = client.Pet.Query().Order(ent.Asc(pet.FieldID)).AllX(ctx)
+	)
+	client.Pet.Query().
+		Order(ent.Asc(pet.FieldID)).
+		Modify(func(s *sql.Selector) {
+			s.AppendSelect("LENGTH(name)")
+		}).
+		ScanX(ctx, &p1)
+	for i := range p2 {
+		require.Equal(p2[i].ID, p1[i].ID)
+		require.Equal(p2[i].Age, p1[i].Age)
+		require.Equal(p2[i].Name, p1[i].Name)
+		require.Equal(len(p1[i].Name), p1[1].NameLength)
+	}
+
+	var (
+		gs []struct {
+			ent.Group
+			UsersCount int `sql:"users_count"`
+		}
+		inf = client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+		hub = client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfo(inf).AddUsers(a8m).SaveX(ctx)
+		lab = client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf).AddUsers(users...).SaveX(ctx)
+	)
+	client.Group.Query().
+		Order(ent.Asc(group.FieldID)).
+		Modify(func(s *sql.Selector) {
+			t := sql.Table(group.UsersTable)
+			s.LeftJoin(t).
+				On(
+					s.C(group.FieldID),
+					t.C(group.UsersPrimaryKey[1]),
+				).
+				// Append the "users_count" column to the selected columns.
+				AppendSelect(
+					sql.As(sql.Count(t.C(group.UsersPrimaryKey[1])), "users_count"),
+				).
+				GroupBy(s.C(group.FieldID))
+		}).
+		ScanX(ctx, &gs)
+	require.Len(gs, 2)
+	require.Equal(hub.QueryUsers().CountX(ctx), gs[0].UsersCount)
+	require.Equal(lab.QueryUsers().CountX(ctx), gs[1].UsersCount)
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
@@ -922,6 +971,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	}
 	client.User.Query().
 		Where(user.IDIn(foo.ID, bar.ID)).
+		Order(ent.Asc(user.FieldID)).
 		GroupBy(user.FieldID, user.FieldName).
 		Aggregate(func(s *sql.Selector) string {
 			// Join with pet table and calculate the

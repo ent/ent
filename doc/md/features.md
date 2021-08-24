@@ -130,11 +130,26 @@ client.Pet.
 
 // SELECT SUM(LENGTH(name)) FROM `pet`
 
+var p1 []struct {
+	ent.Pet
+	NameLength int `sql:"length"`
+}
+
+client.Pet.Query().
+	Order(ent.Asc(pet.FieldID)).
+	Modify(func(s *sql.Selector) {
+		s.AppendSelect("LENGTH(name)")
+	}).
+	ScanX(ctx, &p1)
+
+// SELECT `pet`.*, LENGTH(name) FROM `pet` ORDER BY `pet`.`id` ASC
+
 var v []struct {
 	Count     int       `json:"count"`
 	Price     int       `json:"price"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
 client.User.
 	Query().
 	Where(
@@ -156,6 +171,34 @@ client.User.
 // FROM `users` WHERE created_at > x AND created_at < y
 // GROUP BY DATE(created_at)
 // ORDER BY DATE(created_at) DESC
+
+var gs []struct {
+	ent.Group
+	UsersCount int `sql:"users_count"`
+}
+
+client.Group.Query().
+	Order(ent.Asc(group.FieldID)).
+	Modify(func(s *sql.Selector) {
+		t := sql.Table(group.UsersTable)
+		s.LeftJoin(t).
+			On(
+				s.C(group.FieldID),
+				t.C(group.UsersPrimaryKey[1]),
+			).
+			// Append the "users_count" column to the selected columns.
+			AppendSelect(
+				sql.As(sql.Count(t.C(group.UsersPrimaryKey[1])), "users_count"),
+			).
+			GroupBy(s.C(group.FieldID))
+	}).
+	ScanX(ctx, &gs)
+
+// SELECT `groups`.*, COUNT(`t1`.`group_id`) AS `users_count`
+// FROM `groups` LEFT JOIN `user_groups` AS `t1`
+// ON `groups`.`id` = `t1`.`group_id`
+// GROUP BY `groups`.`id`
+// ORDER BY `groups`.`id` ASC
 ```
 
 #### Upsert
