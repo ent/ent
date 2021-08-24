@@ -117,7 +117,6 @@ func Types(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	require.False(exists)
 
-	// err on MaxLen validator
 	_, err = client.FieldType.Create().
 		SetInt(1).
 		SetInt8(8).
@@ -126,8 +125,8 @@ func Types(t *testing.T, client *ent.Client) {
 		SetInt64(64).
 		SetRawData(make([]byte, 40)).
 		Save(ctx)
+	// err on MaxLen validator
 	require.Error(err)
-	// err on MinLen validator
 	_, err = client.FieldType.Create().
 		SetInt(1).
 		SetInt8(8).
@@ -136,6 +135,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetInt64(64).
 		SetRawData(make([]byte, 2)).
 		Save(ctx)
+	// err on MinLen validator
 	require.Error(err)
 	ft = ft.Update().
 		SetInt(1).
