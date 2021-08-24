@@ -93,22 +93,26 @@ func init() {
 	fieldtypeDescLink := fieldtypeFields[36].Descriptor()
 	// fieldtype.LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	fieldtype.LinkValidator = fieldtypeDescLink.Validators[0].(func(string) error)
+	// fieldtypeDescRawData is the schema descriptor for raw_data field.
+	fieldtypeDescRawData := fieldtypeFields[42].Descriptor()
+	// fieldtype.RawDataValidator is a validator for the "raw_data" field. It is called by the builders before save.
+	fieldtype.RawDataValidator = fieldtypeDescRawData.Validators[0].(func([]byte) error)
 	// fieldtypeDescIP is the schema descriptor for ip field.
-	fieldtypeDescIP := fieldtypeFields[42].Descriptor()
+	fieldtypeDescIP := fieldtypeFields[43].Descriptor()
 	// fieldtype.DefaultIP holds the default value on creation for the ip field.
 	fieldtype.DefaultIP = fieldtypeDescIP.Default.(func() net.IP)
 	// fieldtype.IPValidator is a validator for the "ip" field. It is called by the builders before save.
 	fieldtype.IPValidator = fieldtypeDescIP.Validators[0].(func([]byte) error)
 	// fieldtypeDescPair is the schema descriptor for pair field.
-	fieldtypeDescPair := fieldtypeFields[55].Descriptor()
+	fieldtypeDescPair := fieldtypeFields[56].Descriptor()
 	// fieldtype.DefaultPair holds the default value on creation for the pair field.
 	fieldtype.DefaultPair = fieldtypeDescPair.Default.(func() schema.Pair)
 	// fieldtypeDescVstring is the schema descriptor for vstring field.
-	fieldtypeDescVstring := fieldtypeFields[57].Descriptor()
+	fieldtypeDescVstring := fieldtypeFields[58].Descriptor()
 	// fieldtype.DefaultVstring holds the default value on creation for the vstring field.
 	fieldtype.DefaultVstring = fieldtypeDescVstring.Default.(func() schema.VString)
 	// fieldtypeDescTriple is the schema descriptor for triple field.
-	fieldtypeDescTriple := fieldtypeFields[58].Descriptor()
+	fieldtypeDescTriple := fieldtypeFields[59].Descriptor()
 	// fieldtype.DefaultTriple holds the default value on creation for the triple field.
 	fieldtype.DefaultTriple = fieldtypeDescTriple.Default.(func() schema.Triple)
 	fileFields := schema.File{}.Fields()

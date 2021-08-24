@@ -531,6 +531,12 @@ func (ftc *FieldTypeCreate) SetDeletedAt(st *sql.NullTime) *FieldTypeCreate {
 	return ftc
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftc *FieldTypeCreate) SetRawData(b []byte) *FieldTypeCreate {
+	ftc.mutation.SetRawData(b)
+	return ftc
+}
+
 // SetIP sets the "ip" field.
 func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 	ftc.mutation.SetIP(n)
@@ -891,6 +897,11 @@ func (ftc *FieldTypeCreate) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "link": %w`, err)}
 		}
 	}
+	if v, ok := ftc.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "raw_data": %w`, err)}
+		}
+	}
 	if v, ok := ftc.mutation.IP(); ok {
 		if err := fieldtype.IPValidator([]byte(v)); err != nil {
 			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "ip": %w`, err)}
@@ -1064,6 +1075,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.DeletedAt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
+	}
+	if value, ok := ftc.mutation.RawData(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRawData, value)
 	}
 	if value, ok := ftc.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)

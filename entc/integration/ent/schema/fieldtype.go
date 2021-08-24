@@ -195,6 +195,9 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		field.Time("deleted_at").
 			Optional().
 			GoType(&sql.NullTime{}),
+		field.Bytes("raw_data").
+			Optional().
+			MaxLen(20),
 		field.Bytes("ip").
 			Optional().
 			GoType(net.IP("127.0.0.1")).

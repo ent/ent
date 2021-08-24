@@ -79,6 +79,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNilPair(&schema.Pair{K: []byte("K"), V: []byte("V")}).
 		SetStringArray([]string{"foo", "bar", "baz"}).
 		SetBigInt(bigint).
+		SetRawData([]byte{1, 2, 3}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)
@@ -89,6 +90,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int16(math.MinInt16), *ft.NillableInt16)
 	require.Equal(int32(math.MinInt32), *ft.NillableInt32)
 	require.Equal(int64(math.MinInt64), *ft.NillableInt64)
+	require.Equal([]byte{1, 2, 3}, ft.RawData)
 	require.Equal(http.Dir("dir"), ft.Dir)
 	require.NotNil(*ft.Ndir)
 	require.Equal(http.Dir("ndir"), *ft.Ndir)
@@ -114,6 +116,16 @@ func Types(t *testing.T, client *ent.Client) {
 	exists, err = client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour)).Exist(ctx)
 	require.NoError(err)
 	require.False(exists)
+
+	_, err = client.FieldType.Create().
+		SetInt(1).
+		SetInt8(8).
+		SetInt16(16).
+		SetInt32(32).
+		SetInt64(64).
+		SetRawData(make([]byte, 40)).
+		Save(ctx)
+	require.Error(err)
 
 	ft = ft.Update().
 		SetInt(1).

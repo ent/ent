@@ -110,6 +110,8 @@ type FieldType struct {
 	Deleted *sql.NullBool `json:"deleted,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *sql.NullTime `json:"deleted_at,omitempty"`
+	// RawData holds the value of the "raw_data" field.
+	RawData []byte `json:"raw_data,omitempty"`
 	// IP holds the value of the "ip" field.
 	IP net.IP `json:"ip,omitempty"`
 	// NullInt64 holds the value of the "null_int64" field.
@@ -164,7 +166,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullScanner{S: new(schema.StringScanner)}
 		case fieldtype.FieldNillableUUID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case fieldtype.FieldIP, fieldtype.FieldStrings:
+		case fieldtype.FieldRawData, fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = new([]byte)
 		case fieldtype.FieldPriority:
 			values[i] = new(role.Priority)
@@ -479,6 +481,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				ft.DeletedAt = value
 			}
+		case fieldtype.FieldRawData:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field raw_data", values[i])
+			} else if value != nil {
+				ft.RawData = *value
+			}
 		case fieldtype.FieldIP:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
@@ -736,6 +744,8 @@ func (ft *FieldType) String() string {
 	}
 	builder.WriteString(", deleted_at=")
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
+	builder.WriteString(", raw_data=")
+	builder.WriteString(fmt.Sprintf("%v", ft.RawData))
 	builder.WriteString(", ip=")
 	builder.WriteString(fmt.Sprintf("%v", ft.IP))
 	builder.WriteString(", null_int64=")

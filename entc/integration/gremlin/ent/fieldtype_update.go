@@ -921,6 +921,18 @@ func (ftu *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftu *FieldTypeUpdate) SetRawData(b []byte) *FieldTypeUpdate {
+	ftu.mutation.SetRawData(b)
+	return ftu
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (ftu *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
+	ftu.mutation.ClearRawData()
+	return ftu
+}
+
 // SetIP sets the "ip" field.
 func (ftu *FieldTypeUpdate) SetIP(n net.IP) *FieldTypeUpdate {
 	ftu.mutation.SetIP(n)
@@ -1368,6 +1380,11 @@ func (ftu *FieldTypeUpdate) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
 		}
 	}
+	if v, ok := ftu.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf("ent: validator failed for field \"raw_data\": %w", err)}
+		}
+	}
 	if v, ok := ftu.mutation.IP(); ok {
 		if err := fieldtype.IPValidator([]byte(v)); err != nil {
 			return &ValidationError{Name: "ip", err: fmt.Errorf("ent: validator failed for field \"ip\": %w", err)}
@@ -1607,6 +1624,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.DeletedAt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
 	}
+	if value, ok := ftu.mutation.RawData(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRawData, value)
+	}
 	if value, ok := ftu.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)
 	}
@@ -1790,6 +1810,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.DeletedAtCleared() {
 		properties = append(properties, fieldtype.FieldDeletedAt)
+	}
+	if ftu.mutation.RawDataCleared() {
+		properties = append(properties, fieldtype.FieldRawData)
 	}
 	if ftu.mutation.IPCleared() {
 		properties = append(properties, fieldtype.FieldIP)
@@ -2735,6 +2758,18 @@ func (ftuo *FieldTypeUpdateOne) ClearDeletedAt() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftuo *FieldTypeUpdateOne) SetRawData(b []byte) *FieldTypeUpdateOne {
+	ftuo.mutation.SetRawData(b)
+	return ftuo
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (ftuo *FieldTypeUpdateOne) ClearRawData() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearRawData()
+	return ftuo
+}
+
 // SetIP sets the "ip" field.
 func (ftuo *FieldTypeUpdateOne) SetIP(n net.IP) *FieldTypeUpdateOne {
 	ftuo.mutation.SetIP(n)
@@ -3189,6 +3224,11 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
 		}
 	}
+	if v, ok := ftuo.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf("ent: validator failed for field \"raw_data\": %w", err)}
+		}
+	}
 	if v, ok := ftuo.mutation.IP(); ok {
 		if err := fieldtype.IPValidator([]byte(v)); err != nil {
 			return &ValidationError{Name: "ip", err: fmt.Errorf("ent: validator failed for field \"ip\": %w", err)}
@@ -3433,6 +3473,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.DeletedAt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
 	}
+	if value, ok := ftuo.mutation.RawData(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRawData, value)
+	}
 	if value, ok := ftuo.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)
 	}
@@ -3616,6 +3659,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.DeletedAtCleared() {
 		properties = append(properties, fieldtype.FieldDeletedAt)
+	}
+	if ftuo.mutation.RawDataCleared() {
+		properties = append(properties, fieldtype.FieldRawData)
 	}
 	if ftuo.mutation.IPCleared() {
 		properties = append(properties, fieldtype.FieldIP)
