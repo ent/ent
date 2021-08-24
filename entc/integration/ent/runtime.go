@@ -96,7 +96,21 @@ func init() {
 	// fieldtypeDescRawData is the schema descriptor for raw_data field.
 	fieldtypeDescRawData := fieldtypeFields[42].Descriptor()
 	// fieldtype.RawDataValidator is a validator for the "raw_data" field. It is called by the builders before save.
-	fieldtype.RawDataValidator = fieldtypeDescRawData.Validators[0].(func([]byte) error)
+	fieldtype.RawDataValidator = func() func([]byte) error {
+		validators := fieldtypeDescRawData.Validators
+		fns := [...]func([]byte) error{
+			validators[0].(func([]byte) error),
+			validators[1].(func([]byte) error),
+		}
+		return func(raw_data []byte) error {
+			for _, fn := range fns {
+				if err := fn(raw_data); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	// fieldtypeDescIP is the schema descriptor for ip field.
 	fieldtypeDescIP := fieldtypeFields[43].Descriptor()
 	// fieldtype.DefaultIP holds the default value on creation for the ip field.

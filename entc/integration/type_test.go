@@ -134,7 +134,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetInt16(16).
 		SetInt32(32).
 		SetInt64(64).
-		SetRawData(make([]byte, 5)).
+		SetRawData(make([]byte, 2)).
 		Save(ctx)
 	require.Error(err)
 	ft = ft.Update().
