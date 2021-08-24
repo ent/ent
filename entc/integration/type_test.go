@@ -125,8 +125,16 @@ func Types(t *testing.T, client *ent.Client) {
 		SetInt64(64).
 		SetRawData(make([]byte, 40)).
 		Save(ctx)
-	require.Error(err)
-
+	require.Error(err, "MaxLen validator should reject this operation")
+	_, err = client.FieldType.Create().
+		SetInt(1).
+		SetInt8(8).
+		SetInt16(16).
+		SetInt32(32).
+		SetInt64(64).
+		SetRawData(make([]byte, 2)).
+		Save(ctx)
+	require.Error(err, "MinLen validator should reject this operation")
 	ft = ft.Update().
 		SetInt(1).
 		SetInt8(math.MaxInt8).

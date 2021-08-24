@@ -588,6 +588,18 @@ func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
 	return b
 }
 
+// MinLen adds a length validator for this field.
+// Operation fails if the length of the buffer is less than the given value.
+func (b *bytesBuilder) MinLen(i int) *bytesBuilder {
+	b.desc.Validators = append(b.desc.Validators, func(b []byte) error {
+		if len(b) < i {
+			return errors.New("value is less than the required length")
+		}
+		return nil
+	})
+	return b
+}
+
 // Validate adds a validator for this field. Operation fails if the validation fails.
 //
 //	field.Bytes("blob").
