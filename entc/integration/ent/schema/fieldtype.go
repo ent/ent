@@ -197,7 +197,8 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			GoType(&sql.NullTime{}),
 		field.Bytes("raw_data").
 			Optional().
-			MaxLen(20),
+			MaxLen(20).
+			MinLen(10),
 		field.Bytes("ip").
 			Optional().
 			GoType(net.IP("127.0.0.1")).
