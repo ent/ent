@@ -600,6 +600,12 @@ func (b *bytesBuilder) MinLen(i int) *bytesBuilder {
 	return b
 }
 
+// NotEmpty adds a length validator for this field.
+// Operation fails if the length of the buffer is zero.
+func (b *bytesBuilder) NotEmpty() *bytesBuilder {
+	return b.MinLen(1)
+}
+
 // Validate adds a validator for this field. Operation fails if the validation fails.
 //
 //	field.Bytes("blob").
