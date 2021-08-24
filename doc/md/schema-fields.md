@@ -400,7 +400,7 @@ The framework provides a few built-in validators for each type:
   - `NotEmpty`
 
 - `[]byte`
-	- `MaxLen(i)`
+  - `MaxLen(i)`
 
 ## Optional
 
