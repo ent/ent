@@ -6,7 +6,7 @@ authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
 authorTwitter: itsamitush
 ---
 
-Joining an existing project with a large codebase can be a daunting task. Understanding the data model of an application is key for developers to start working on an existing project. One of the common tools to help developers grasp an application's data model is an ER (Entity Relation) diagram. ER diagrams provide a visual representation of your data model and detail each field of the entities. Many tools can help create them. For example, Jetbrains DataGrip can generate an ER diagram by connecting to and inspecting an existing database:
+Joining an existing project with a large codebase can be a daunting task. Understanding the data model of an application is key for developers to start working on an existing project. One of the common tools to help developers grasp an application's data model is an [ER (Entity Relation) diagram](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model). ER diagrams provide a visual representation of your data model and detail each field of the entities. Many tools can help create them. For example, Jetbrains DataGrip can generate an ER diagram by connecting to and inspecting an existing database:
 
 ![Datagrip ER diagram](https://link/to/image)
 
@@ -37,7 +37,7 @@ err := entc.Generate("./schema", &gen.Config{}, entc.Extensions(entviz.Extension
    log.Fatalf("running ent codegen: %v", err)
  }
 ```
-Let’s say we have a simple schema with a user entity, and some fields:
+Let’s say we have a simple schema with a user entity and some fields:
 ```go title="ent/schema/user.go"
 // Fields of the User.
 func (User) Fields() []ent.Field {
@@ -53,14 +53,14 @@ Now, entviz will automatically generate a visualization of our graph everytime w
 ```bash
 go generate ./...
 ```
-You should now see a new file called `schema-viz.html` in your ent directory
+You should now see a new file called `schema-viz.html` in your ent directory:
 ```bash
 ll ./ent/schema-viz.html
 -rw-r--r-- 1 hedwigz hedwigz 7.3K Aug 27 09:00 schema-viz.html
 ```
 Open the html file with your favorite browser to see the visualization
 ![tutorial image](https://link/to/image)
-Next, let’s add another entity - Post, and see how our visualization
+Next, let’s add another entity - Post, and see how our visualization changes:
 ```bash
 ent init Post
 ```
@@ -74,7 +74,7 @@ func (Post) Fields() []ent.Field {
  }
 }
 ```
-Now we add an edge ([O2M](http://localhost:3000/docs/schema-edges/#o2m-two-types))  from User to Post:
+Now we add an ([O2M](http://localhost:3000/docs/schema-edges/#o2m-two-types)) edge from User to Post:
 ```go title="ent/schema/post.go"
 // Edges of the User.
 func (User) Edges() []ent.Edge {
@@ -85,13 +85,13 @@ func (User) Edges() []ent.Edge {
 ```
 Finally, regenerate the code:
 ```bash
-go generate ./…
+go generate ./...
 ```
 Refresh your browser to see the updated result! 
 ![tutorial image 2](https://link/to/image)
 
 ### Implementation
-Entviz was implemented by extending ent via its extension API.
+Entviz was implemented by extending ent via its [extension API](https://github.com/ent/ent/blob/1304dc3d795b3ea2de7101c7ca745918def668ef/entc/entc.go#L197).
 Ent extension API lets you aggregate multiple [templates](https://entgo.io/docs/templates/), [hooks](https://entgo.io/docs/hooks/), [options](https://entgo.io/docs/code-gen/#code-generation-options) and [annotations](https://entgo.io/docs/templates/#annotations).
 For instance, entviz uses templates to add another go file, `entviz.go`, which exposes the `ServeEntviz` method that can be used as an http handler
 ```go
@@ -149,7 +149,7 @@ We saw how ER diagrams help developers keep track of their data model.
 Next, we introduced entviz - an Ent extension that automatically generates an ER diagram for Ent schema.
 We saw how entviz utilizes Ent's extension API to extend the code generation and add extra functionality.
 Finally, we saw how to install and use entviz in your own project.
-If you like the code and/or want to contribute - feel free to checkout the [code in github](https://github.com/hedwigz/entviz)
+If you like the code and/or want to contribute - feel free to checkout the [code in github](https://github.com/hedwigz/entviz).
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
