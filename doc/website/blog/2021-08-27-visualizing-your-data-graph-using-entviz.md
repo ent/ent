@@ -55,7 +55,7 @@ go generate ./...
 ```
 You should now see a new file called `schema-viz.html` in your ent directory:
 ```bash
-ll ./ent/schema-viz.html
+$ ll ./ent/schema-viz.html
 -rw-r--r-- 1 hedwigz hedwigz 7.3K Aug 27 09:00 schema-viz.html
 ```
 Open the html file with your favorite browser to see the visualization
@@ -93,7 +93,7 @@ Refresh your browser to see the updated result!
 ### Implementation
 Entviz was implemented by extending ent via its [extension API](https://github.com/ent/ent/blob/1304dc3d795b3ea2de7101c7ca745918def668ef/entc/entc.go#L197).
 Ent extension API lets you aggregate multiple [templates](https://entgo.io/docs/templates/), [hooks](https://entgo.io/docs/hooks/), [options](https://entgo.io/docs/code-gen/#code-generation-options) and [annotations](https://entgo.io/docs/templates/#annotations).
-For instance, entviz uses templates to add another go file, `entviz.go`, which exposes the `ServeEntviz` method that can be used as an http handler
+For instance, entviz uses templates to add another go file, `entviz.go`, which exposes the `ServeEntviz` method that can be used as an http handler, like so:
 ```go
 func main() {
  http.ListenAndServe("localhost:3002", ent.ServeEntviz())
