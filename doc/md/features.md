@@ -120,6 +120,8 @@ The `sql/modifier` option lets add custom SQL modifiers to the builders and muta
 
 This option can be added to a project using the `--feature sql/modifier` flag.
 
+**Example 1**
+
 ```go
 client.Pet.
 	Query().
@@ -127,9 +129,17 @@ client.Pet.
 		s.Select("SUM(LENGTH(name))")
 	}).
 	IntX(ctx)
+```
 
-// SELECT SUM(LENGTH(name)) FROM `pet`
+The above code will produce the following SQL query:
 
+```sql
+SELECT SUM(LENGTH(name)) FROM `pet`
+```
+
+**Example 2**
+
+```go
 var p1 []struct {
 	ent.Pet
 	NameLength int `sql:"length"`
@@ -141,9 +151,17 @@ client.Pet.Query().
 		s.AppendSelect("LENGTH(name)")
 	}).
 	ScanX(ctx, &p1)
+```
 
-// SELECT `pet`.*, LENGTH(name) FROM `pet` ORDER BY `pet`.`id` ASC
+The above code will produce the following SQL query:
 
+```sql
+SELECT `pet`.*, LENGTH(name) FROM `pet` ORDER BY `pet`.`id` ASC
+```
+
+**Example 3**
+
+```go
 var v []struct {
 	Count     int       `json:"count"`
 	Price     int       `json:"price"`
@@ -166,12 +184,28 @@ client.User.
 		OrderBy(sql.Desc("DATE(created_at)"))
 	}).
 	ScanX(ctx, &v)
+```
 
-// SELECT COUNT(*) AS `count`, SUM(`price`) AS `price`, DATE(created_at) AS `created_at`
-// FROM `users` WHERE created_at > x AND created_at < y
-// GROUP BY DATE(created_at)
-// ORDER BY DATE(created_at) DESC
+The above code will produce the following SQL query:
 
+```sql
+SELECT
+    COUNT(*) AS `count`,
+    SUM(`price`) AS `price`,
+    DATE(created_at) AS `created_at`
+FROM
+    `users`
+WHERE
+    `created_at` > x AND `created_at` < y
+GROUP BY
+    DATE(created_at)
+ORDER BY
+    DATE(created_at) DESC
+```
+
+**Example 4**
+
+```go
 var gs []struct {
 	ent.Group
 	UsersCount int `sql:"users_count"`
@@ -193,12 +227,22 @@ client.Group.Query().
 			GroupBy(s.C(group.FieldID))
 	}).
 	ScanX(ctx, &gs)
+```
 
-// SELECT `groups`.*, COUNT(`t1`.`group_id`) AS `users_count`
-// FROM `groups` LEFT JOIN `user_groups` AS `t1`
-// ON `groups`.`id` = `t1`.`group_id`
-// GROUP BY `groups`.`id`
-// ORDER BY `groups`.`id` ASC
+The above code will produce the following SQL query:
+
+```sql
+SELECT
+    `groups`.*,
+    COUNT(`t1`.`group_id`) AS `users_count`
+FROM
+    `groups` LEFT JOIN `user_groups` AS `t1`
+ON
+    `groups`.`id` = `t1`.`group_id`
+GROUP BY
+    `groups`.`id`
+ORDER BY
+    `groups`.`id` ASC
 ```
 
 #### Upsert
