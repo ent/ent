@@ -20,7 +20,7 @@ On top of all of this, wouldn’t it be great to automatically generate ER diagr
 ![Entviz example output](https://link/to/image)
 Most ER diagram generation tools need to connect to your database and introspect it, which makes it harder to maintain an up-to-date diagram of the DB. Since entviz integrates directly to your Ent schema, it does not need to connect to your database, and it automatically generates fresh visualization every time you modify your schema.
 
-If you want to know more about ent how entviz was implemented, checkout the [implementation section](#implementation).
+If you want to know more about how entviz was implemented, checkout the [implementation section](#implementation).
 
   
 ### Usage
