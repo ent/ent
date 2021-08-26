@@ -22,7 +22,7 @@ func main() {
 		log.Fatal("reading template file:", err)
 	}
 	intTmpl := template.Must(template.New("numeric").
-		Funcs(template.FuncMap{"title": strings.Title, "hasPrefix": strings.HasPrefix}).
+		Funcs(template.FuncMap{"title": strings.Title, "hasPrefix": strings.HasPrefix, "toUpper": strings.ToUpper}).
 		Parse(string(buf)))
 	b := &bytes.Buffer{}
 	if err := intTmpl.Execute(b, struct {

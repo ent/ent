@@ -273,9 +273,7 @@ func (b *intBuilder) GoType(typ interface{}) *intBuilder {
 // codegen extensions.
 //
 //	field.Int("int").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("INT"))
 //
 func (b *intBuilder) Annotations(annotations ...schema.Annotation) *intBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -444,9 +442,7 @@ func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
 // codegen extensions.
 //
 //	field.Uint("uint").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("UINT"))
 //
 func (b *uintBuilder) Annotations(annotations ...schema.Annotation) *uintBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -625,9 +621,7 @@ func (b *int8Builder) GoType(typ interface{}) *int8Builder {
 // codegen extensions.
 //
 //	field.Int8("int8").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("INT8"))
 //
 func (b *int8Builder) Annotations(annotations ...schema.Annotation) *int8Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -806,9 +800,7 @@ func (b *int16Builder) GoType(typ interface{}) *int16Builder {
 // codegen extensions.
 //
 //	field.Int16("int16").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("INT16"))
 //
 func (b *int16Builder) Annotations(annotations ...schema.Annotation) *int16Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -987,9 +979,7 @@ func (b *int32Builder) GoType(typ interface{}) *int32Builder {
 // codegen extensions.
 //
 //	field.Int32("int32").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("INT32"))
 //
 func (b *int32Builder) Annotations(annotations ...schema.Annotation) *int32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -1168,9 +1158,7 @@ func (b *int64Builder) GoType(typ interface{}) *int64Builder {
 // codegen extensions.
 //
 //	field.Int64("int64").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("INT64"))
 //
 func (b *int64Builder) Annotations(annotations ...schema.Annotation) *int64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -1339,9 +1327,7 @@ func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
 // codegen extensions.
 //
 //	field.Uint8("uint8").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("UINT8"))
 //
 func (b *uint8Builder) Annotations(annotations ...schema.Annotation) *uint8Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -1510,9 +1496,7 @@ func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
 // codegen extensions.
 //
 //	field.Uint16("uint16").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("UINT16"))
 //
 func (b *uint16Builder) Annotations(annotations ...schema.Annotation) *uint16Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -1681,9 +1665,7 @@ func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
 // codegen extensions.
 //
 //	field.Uint32("uint32").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("UINT32"))
 //
 func (b *uint32Builder) Annotations(annotations ...schema.Annotation) *uint32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -1852,9 +1834,7 @@ func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
 // codegen extensions.
 //
 //	field.Uint64("uint64").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("UINT64"))
 //
 func (b *uint64Builder) Annotations(annotations ...schema.Annotation) *uint64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -2023,9 +2003,7 @@ func (b *float64Builder) GoType(typ interface{}) *float64Builder {
 // codegen extensions.
 //
 //	field.Float64("float64").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("FLOAT64"))
 //
 func (b *float64Builder) Annotations(annotations ...schema.Annotation) *float64Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -2178,9 +2156,7 @@ func (b *float32Builder) GoType(typ interface{}) *float32Builder {
 // codegen extensions.
 //
 //	field.Float32("float32").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("FLOAT32"))
 //
 func (b *float32Builder) Annotations(annotations ...schema.Annotation) *float32Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)

@@ -208,9 +208,7 @@ func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
 // codegen extensions.
 //
 //	field.{{ $tt }}("{{ $t }}").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("{{ $t.String | toUpper }}"))
 //
 func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $builder }} {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
@@ -379,9 +377,7 @@ func (b *{{ $builder }}) GoType(typ interface{}) *{{ $builder }} {
 // codegen extensions.
 //
 //	field.{{ $tt }}("{{ $t }}").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(entgql.OrderField("{{ $t.String | toUpper }}"))
 //
 func (b *{{ $builder }}) Annotations(annotations ...schema.Annotation) *{{ $builder }} {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
