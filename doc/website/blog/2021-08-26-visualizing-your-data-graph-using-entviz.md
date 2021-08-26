@@ -1,5 +1,5 @@
 ---
-title: Visualizing your data graph using entviz
+title: Visualizing your Data Graph Using entviz
 author: Amit Shani
 authorURL: "https://github.com/hedwigz"
 authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
