@@ -135,23 +135,21 @@ The template file is the code that we want to generate:
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 import (
- _ "embed"
- 
- "net/http"
- "strings"
- "time"
+	_ "embed"
+	"net/http"
+	"strings"
+	"time"
 )
- 
+
 //go:embed schema-viz.html
 var html string
- 
+
 func ServeEntviz() http.Handler {
- generateTime := time.Now()
- return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-   http.ServeContent(w, req, "schema-viz.html", generateTime, strings.NewReader(html))
- })
+	generateTime := time.Now()
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		http.ServeContent(w, req, "schema-viz.html", generateTime, strings.NewReader(html))
+	})
 }
- 
 {{ end }}
 ```
 That's it! now we have a new method in ent package.  
