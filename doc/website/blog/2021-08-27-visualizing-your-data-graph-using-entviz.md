@@ -6,25 +6,35 @@ authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
 authorTwitter: itsamitush
 ---
 
-Joining an existing project with a large codebase can be a daunting task. Understanding the data model of an application is key for developers to start working on an existing project. One of the common tools to help developers grasp an application's data model is an [ER (Entity Relation) diagram](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model). ER diagrams provide a visual representation of your data model and detail each field of the entities. Many tools can help create them. For example, Jetbrains DataGrip can generate an ER diagram by connecting to and inspecting an existing database:
+Joining an existing project with a large codebase can be a daunting task.  
 
-![Datagrip ER diagram](https://link/to/image)
+Understanding the data model of an application is key for developers to start working on an existing project. One  commonly used tool to help overcome this challenge, and enable developers to grasp an application's data model is an [ER (Entity Relation) diagram](https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model).  
 
+ER diagrams provide a visual representation of your data model, and details each field of the entities. Many tools can help create these, where one example is Jetbrains DataGrip, that can generate an ER diagram by connecting to and inspecting an existing database:
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Datagrip ER diagram" src="https://entgo.io/images/assets/entviz/datagrip_er_diagram.png" />
+  <p style={{fontSize: 12}}>DataGrip ER diagram example</p>
+</div>
 
 [Ent](https://entgo.io/docs/getting-started/), a simple, yet powerful entity framework for Go, was originally developed inside Facebook specifically for dealing with projects with large and complex data models.
-This is why Ent uses code generation - it gives type-safety and code-completion out-of-the-box which helps explain the data model and improves dev velocity.
+This is why Ent uses code generation - it gives type-safety and code-completion out-of-the-box which helps explain the data model and improves developer velocity.
 On top of all of this, wouldn’t it be great to automatically generate ER diagrams that maintain a high-level view of the data model in a visually appealing representation? (I mean, who doesn’t love visualizations?) 
 
 ### Introducing entviz
 [entviz](https://github.com/hedwigz/entviz) is an ent extension that automatically generates a static HTML page that visualizes your data graph.
-![Entviz example output](https://link/to/image)
+
+<div style={{textAlign: 'center'}}>
+  <img width="600px" alt="Entviz example output" src="https://entgo.io/images/assets/entviz/entviz-example-visualization.png" />
+  <p style={{fontSize: 12}}>Entviz example output</p>
+</div>
 Most ER diagram generation tools need to connect to your database and introspect it, which makes it harder to maintain an up-to-date diagram of the DB. Since entviz integrates directly to your Ent schema, it does not need to connect to your database, and it automatically generates fresh visualization every time you modify your schema.
 
 If you want to know more about how entviz was implemented, checkout the [implementation section](#implementation).
 
   
-### Usage
-First, let’s add entviz extension to our entc.go file:
+### See it in action
+First, let’s add the entviz extension to our entc.go file:
 ```bash
 go get github.com/hedwigz/entviz
 ```
@@ -59,7 +69,9 @@ $ ll ./ent/schema-viz.html
 -rw-r--r-- 1 hedwigz hedwigz 7.3K Aug 27 09:00 schema-viz.html
 ```
 Open the html file with your favorite browser to see the visualization
-![tutorial image](https://link/to/image)
+
+![tutorial image](https://entgo.io/images/assets/entviz/entviz-tutorial-1.png)
+
 Next, let’s add another entity - Post, and see how our visualization changes:
 ```bash
 ent init Post
@@ -87,12 +99,14 @@ Finally, regenerate the code:
 ```bash
 go generate ./...
 ```
-Refresh your browser to see the updated result! 
-![tutorial image 2](https://link/to/image)
+Refresh your browser to see the updated result!
+
+![tutorial image 2](https://entgo.io/images/assets/entviz/entviz-tutorial-2.png)
+
 
 ### Implementation
 Entviz was implemented by extending ent via its [extension API](https://github.com/ent/ent/blob/1304dc3d795b3ea2de7101c7ca745918def668ef/entc/entc.go#L197).
-Ent extension API lets you aggregate multiple [templates](https://entgo.io/docs/templates/), [hooks](https://entgo.io/docs/hooks/), [options](https://entgo.io/docs/code-gen/#code-generation-options) and [annotations](https://entgo.io/docs/templates/#annotations).
+The Ent extension API lets you aggregate multiple [templates](https://entgo.io/docs/templates/), [hooks](https://entgo.io/docs/hooks/), [options](https://entgo.io/docs/code-gen/#code-generation-options) and [annotations](https://entgo.io/docs/templates/#annotations).
 For instance, entviz uses templates to add another go file, `entviz.go`, which exposes the `ServeEntviz` method that can be used as an http handler, like so:
 ```go
 func main() {
@@ -115,7 +129,7 @@ func (Extension) Templates() []*gen.Template {
 }
 
 ```
-And the template file is the code that we want to be generated:
+The template file is the code that we want to generate:
 ```gotemplate
 {{ define "entviz"}}
  
@@ -145,11 +159,7 @@ That's it! now we have a new method in ent package.
 
 ### Wrapping-Up
 
-We saw how ER diagrams help developers keep track of their data model.
-Next, we introduced entviz - an Ent extension that automatically generates an ER diagram for Ent schema.
-We saw how entviz utilizes Ent's extension API to extend the code generation and add extra functionality.
-Finally, we saw how to install and use entviz in your own project.
-If you like the code and/or want to contribute - feel free to checkout the [code in github](https://github.com/hedwigz/entviz).
+We saw how ER diagrams help developers keep track of their data model. Next, we introduced entviz - an Ent extension that automatically generates an ER diagram for Ent schemas. We saw how entviz utilizes Ent's extension API to extend the code generation and add extra functionality. Finally, you got to see it in action by installing and use entviz in your own project. If you like the code and/or want to contribute - feel free to checkout the [project on github](https://github.com/hedwigz/entviz).
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
