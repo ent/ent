@@ -19,7 +19,7 @@ ER diagrams provide a visual representation of your data model, and details each
 
 [Ent](https://entgo.io/docs/getting-started/), a simple, yet powerful entity framework for Go, was originally developed inside Facebook specifically for dealing with projects with large and complex data models.
 This is why Ent uses code generation - it gives type-safety and code-completion out-of-the-box which helps explain the data model and improves developer velocity.
-On top of all of this, wouldn’t it be great to automatically generate ER diagrams that maintain a high-level view of the data model in a visually appealing representation? (I mean, who doesn’t love visualizations?) 
+On top of all of this, wouldn't it be great to automatically generate ER diagrams that maintain a high-level view of the data model in a visually appealing representation? (I mean, who doesn't love visualizations?) 
 
 ### Introducing entviz
 [entviz](https://github.com/hedwigz/entviz) is an ent extension that automatically generates a static HTML page that visualizes your data graph.
@@ -28,13 +28,13 @@ On top of all of this, wouldn’t it be great to automatically generate ER diagr
   <img width="600px" alt="Entviz example output" src="https://entgo.io/images/assets/entviz/entviz-example-visualization.png" />
   <p style={{fontSize: 12}}>Entviz example output</p>
 </div>
-Most ER diagram generation tools need to connect to your database and introspect it, which makes it harder to maintain an up-to-date diagram of the DB. Since entviz integrates directly to your Ent schema, it does not need to connect to your database, and it automatically generates fresh visualization every time you modify your schema.
+Most ER diagram generation tools need to connect to your database and introspect it, which makes it harder to maintain an up-to-date diagram of the database schema. Since entviz integrates directly to your Ent schema, it does not need to connect to your database, and it automatically generates fresh visualization every time you modify your schema.
 
 If you want to know more about how entviz was implemented, checkout the [implementation section](#implementation).
 
   
 ### See it in action
-First, let’s add the entviz extension to our entc.go file:
+First, let's add the entviz extension to our entc.go file:
 ```bash
 go get github.com/hedwigz/entviz
 ```
@@ -43,20 +43,20 @@ If you are not familiar with `entc` you're welcome to read [entc documentation](
 :::
 ```go title="ent/entc.go"
 err := entc.Generate("./schema", &gen.Config{}, entc.Extensions(entviz.Extension{}))
- if err != nil {
-   log.Fatalf("running ent codegen: %v", err)
- }
+if err != nil {
+	log.Fatalf("running ent codegen: %v", err)
+}
 ```
-Let’s say we have a simple schema with a user entity and some fields:
+Let's say we have a simple schema with a user entity and some fields:
 ```go title="ent/schema/user.go"
 // Fields of the User.
 func (User) Fields() []ent.Field {
- return []ent.Field{
-   field.String("name"),
-   field.String("email"),
-   field.Time("created").
-     Default(time.Now),
- }
+	return []ent.Field{
+		field.String("name"),
+		field.String("email"),
+		field.Time("created").
+			Default(time.Now),
+	}
 }
 ```
 Now, entviz will automatically generate a visualization of our graph everytime we run: 
@@ -72,27 +72,27 @@ Open the html file with your favorite browser to see the visualization
 
 ![tutorial image](https://entgo.io/images/assets/entviz/entviz-tutorial-1.png)
 
-Next, let’s add another entity - Post, and see how our visualization changes:
+Next, let's add another entity named Post, and see how our visualization changes:
 ```bash
 ent init Post
 ```
 ```go title="ent/schema/post.go"
 // Fields of the Post.
 func (Post) Fields() []ent.Field {
- return []ent.Field{
-   field.String("content"),
-   field.Time("created").
-     Default(time.Now),
- }
+	return []ent.Field{
+		field.String("content"),
+		field.Time("created").
+			Default(time.Now),
+	}
 }
 ```
-Now we add an ([O2M](http://localhost:3000/docs/schema-edges/#o2m-two-types)) edge from User to Post:
+Now we add an ([O2M](https://entgo.io/docs/schema-edges/#o2m-two-types)) edge from User to Post:
 ```go title="ent/schema/post.go"
 // Edges of the User.
 func (User) Edges() []ent.Edge {
- return []ent.Edge{
-   edge.To("posts", Post.Type),
- }
+	return []ent.Edge{
+		edge.To("posts", Post.Type),
+	}
 }
 ```
 Finally, regenerate the code:
@@ -110,7 +110,7 @@ The Ent extension API lets you aggregate multiple [templates](https://entgo.io/d
 For instance, entviz uses templates to add another go file, `entviz.go`, which exposes the `ServeEntviz` method that can be used as an http handler, like so:
 ```go
 func main() {
- http.ListenAndServe("localhost:3002", ent.ServeEntviz())
+	http.ListenAndServe("localhost:3002", ent.ServeEntviz())
 }
 ```
 We define an extension struct which embeds the default extension, and we export our template via the `Templates` method:
@@ -119,15 +119,14 @@ We define an extension struct which embeds the default extension, and we export 
 var tmplfile string
  
 type Extension struct {
- entc.DefaultExtension
+	entc.DefaultExtension
 }
  
 func (Extension) Templates() []*gen.Template {
- return []*gen.Template{
-   gen.MustParse(gen.NewTemplate("entviz").Parse(tmplfile)),
- }
+	return []*gen.Template{
+		gen.MustParse(gen.NewTemplate("entviz").Parse(tmplfile)),
+	}
 }
-
 ```
 The template file is the code that we want to generate:
 ```gotemplate
