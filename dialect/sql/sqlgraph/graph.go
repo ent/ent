@@ -472,10 +472,6 @@ type DeleteSpec struct {
 
 // DeleteNodes applies the DeleteSpec on the graph.
 func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int, error) {
-	tx, err := drv.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
 	var (
 		res     sql.Result
 		builder = sql.Dialect(drv.Dialect())
@@ -487,14 +483,14 @@ func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int
 		pred(selector)
 	}
 	query, args := builder.Delete(spec.Node.Table).Schema(spec.Node.Schema).FromSelect(selector).Query()
-	if err := tx.Exec(ctx, query, args, &res); err != nil {
-		return 0, rollback(tx, err)
+	if err := drv.Exec(ctx, query, args, &res); err != nil {
+		return 0, err
 	}
 	affected, err := res.RowsAffected()
 	if err != nil {
-		return 0, rollback(tx, err)
+		return 0, err
 	}
-	return int(affected), tx.Commit()
+	return int(affected), nil
 }
 
 // QuerySpec holds the information for querying
