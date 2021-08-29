@@ -773,7 +773,7 @@ func (User) Fields() []ent.Field {
 After code generation usage is trivial:
 ```go
 func main() {
-	client, err := ent.Open("sqlite3", "file:db?cache=shared&_fk=1")
+	client, err := ent.Open("mysql", "root:password@tcp(127.0.0.1:3306)/zelda?parseTime=True")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
