@@ -613,6 +613,214 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+## Enum Fields
+
+Enum fields can be defined in three ways:
+
+Basic, use Ent API to generate Enum type and define values:
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		field.Enum("race").
+			Values(
+				"hylians",
+				"sheikah",
+				"gerudo",
+				"zora",
+				"gorons",
+			),
+	}
+}
+```
+
+When having your own type that you want to use and it is stringable:
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		// A convertible type to string.
+		field.Enum("threat").
+			GoType(zelda.Threat("")),
+	}
+}
+```
+
+We implement the EnumValues interface. 
+```go
+package zelda
+
+type Threat string
+
+const (
+	Friend  Threat = "FRIEND"
+	Foe     Threat = "FOE"
+	Neutral Threat = "NEUTRAL"
+)
+
+// Values provides list valid values for Enum.
+func (Threat) Values() (roles []string) {
+	for _, r := range []Threat{Friend, Foe, Neutral} {
+		roles = append(roles, string(r))
+	}
+	return
+}
+```
+When having your own type that you want to use and it is not stringable:
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		field.Enum("level").
+			GoType(zelda.Level(0)),
+	}
+}
+```
+We implement the EnumValues,Valuer and Scanner interfaces.
+
+```go
+package zelda
+
+import "database/sql/driver"
+
+type Level int
+
+const (
+	Unknown Level = iota
+	Low
+	High
+)
+
+func (p Level) String() string {
+	switch p {
+	case Low:
+		return "LOW"
+	case High:
+		return "HIGH"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+// Values provides list valid values for Enum.
+func (Level) Values() []string {
+	return []string{Unknown.String(), Low.String(), High.String()}
+}
+
+// Value provides the DB a string from int.
+func (p Level) Value() (driver.Value, error) {
+	return p.String(), nil
+}
+
+// Scan tells our code how to read the enum into our type.
+func (p *Level) Scan(val interface{}) error {
+	var s string
+
+	switch v := val.(type) {
+	case nil:
+		return nil
+	case string:
+		s = v
+	case []uint8:
+		s = string(v)
+	}
+
+	switch s {
+	case "LOW":
+		*p = Low
+	case "HIGH":
+		*p = High
+	default:
+		*p = Unknown
+	}
+
+	return nil
+}
+```
+
+Combining it all together:
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		field.Enum("race").
+			Values(
+				"hylians",
+				"sheikah",
+				"gerudo",
+				"zora",
+				"gorons",
+			),
+		// A convertible type to string.
+		field.Enum("threat").
+			GoType(zelda.Threat("")),
+		// Add conversion to and from string
+		field.Enum("level").
+			GoType(zelda.Level(0)),
+	}
+}
+```
+
+After code generation usage is trivial:
+```go
+func main() {
+	client, err := ent.Open("sqlite3", "file:db?cache=shared&_fk=1")
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+	client.User.Create().
+		SetFirstName("Zelda").
+		SetLastName("Hyrule").
+		SetRace(user.RaceHylians).
+		SetThreat(zelda.Foe).
+		SetLevel(zelda.High).
+		SaveX(context.Background())
+
+	user := client.User.Query().FirstX(context.Background())
+	log.Println(user)
+}
+```
+
+Running this example on MySql:
+```
++------------+----------------------------------------------------+------+-----+---------+----------------+
+| Field      | Type                                               | Null | Key | Default | Extra          |
++------------+----------------------------------------------------+------+-----+---------+----------------+
+| id         | bigint                                             | NO   | PRI | <null>  | auto_increment |
+| first_name | varchar(255)                                       | NO   |     | <null>  |                |
+| last_name  | varchar(255)                                       | NO   |     | <null>  |                |
+| race       | enum('hylians','sheikah','gerudo','zora','gorons') | NO   |     | <null>  |                |
+| threat     | enum('FRIEND','FOE','NEUTRAL')                     | NO   |     | <null>  |                |
+| level      | enum('UNKNOWN','LOW','HIGH')                       | NO   |     | <null>  |                |
++------------+----------------------------------------------------+------+-----+---------+----------------+
+6 rows in set
+Time: 0.011s
+MySQL root@localhost:zelda> select * from users;
++----+------------+-----------+---------+--------+-------+
+| id | first_name | last_name | race    | threat | level |
++----+------------+-----------+---------+--------+-------+
+| 1  | Zelda      | Hyrule    | hylians | FOE    | HIGH  |
++----+------------+-----------+---------+--------+-------+
+1 row in set
+Time: 0.008s
+MySQL root@localhost:zelda>
+```
+
+
 ## Annotations
 
 `Annotations` is used to attach arbitrary metadata to the field object in code generation.
