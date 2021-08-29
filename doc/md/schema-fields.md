@@ -615,8 +615,6 @@ func (User) Fields() []ent.Field {
 
 ## Enum Fields
 
-Enum fields can be defined in three ways:
-
 Use Ent API to generate Enum type and define possible values:
 ```go
 // Fields of the User.
@@ -624,13 +622,10 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("first_name"),
 		field.String("last_name"),
-		field.Enum("race").
+		field.Enum("size").
 			Values(
-				"hylians",
-				"sheikah",
-				"gerudo",
-				"zora",
-				"gorons",
+				"big",
+				"small",
 			),
 	}
 }
@@ -645,31 +640,31 @@ func (User) Fields() []ent.Field {
 		field.String("first_name"),
 		field.String("last_name"),
 		// A convertible type to string.
-		field.Enum("threat").
-			GoType(zelda.Threat("")),
+		field.Enum("shape").
+			GoType(property.Shape("")),
 	}
 }
 ```
 
 We must implement the [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface.
 ```go
-package zelda
+package property
 
-type Threat string
+type Shape string
 
 const (
-	Friend  Threat = "FRIEND"
-	Foe     Threat = "FOE"
-	Neutral Threat = "NEUTRAL"
+	Triangle Shape = "TRIANGLE"
+	Circle   Shape = "CIRCLE"
 )
 
 // Values provides list valid values for Enum.
-func (Threat) Values() (roles []string) {
-	for _, r := range []Threat{Friend, Foe, Neutral} {
+func (Shape) Values() (roles []string) {
+	for _, r := range []Shape{Triangle, Circle} {
 		roles = append(roles, string(r))
 	}
 	return
 }
+
 ```
 The custom type is not convertible to the Go basic type:
 
@@ -679,15 +674,16 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("first_name"),
 		field.String("last_name"),
+		// Add conversion to and from string
 		field.Enum("level").
-			GoType(zelda.Level(0)),
+			GoType(property.Level(0)),
 	}
 }
 ```
 Implement the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface.
 
 ```go
-package zelda
+package property
 
 import "database/sql/driver"
 
@@ -723,7 +719,6 @@ func (p Level) Value() (driver.Value, error) {
 // Scan tells our code how to read the enum into our type.
 func (p *Level) Scan(val interface{}) error {
 	var s string
-
 	switch v := val.(type) {
 	case nil:
 		return nil
@@ -732,7 +727,6 @@ func (p *Level) Scan(val interface{}) error {
 	case []uint8:
 		s = string(v)
 	}
-
 	switch s {
 	case "LOW":
 		*p = Low
@@ -741,7 +735,6 @@ func (p *Level) Scan(val interface{}) error {
 	default:
 		*p = Unknown
 	}
-
 	return nil
 }
 ```
@@ -753,74 +746,34 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("first_name"),
 		field.String("last_name"),
-		field.Enum("race").
+		field.Enum("size").
 			Values(
-				"hylians",
-				"sheikah",
-				"gerudo",
-				"zora",
-				"gorons",
+				"big",
+				"small",
 			),
 		// A convertible type to string.
-		field.Enum("threat").
-			GoType(zelda.Threat("")),
+		field.Enum("shape").
+			GoType(property.Shape("")),
 		// Add conversion to and from string
 		field.Enum("level").
-			GoType(zelda.Level(0)),
+			GoType(property.Level(0)),
 	}
 }
 ```
 
 After code generation usage is trivial:
-```go
-func main() {
-	client, err := ent.Open("mysql", "root:password@tcp(127.0.0.1:3306)/zelda?parseTime=True")
-	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
-	}
-	defer client.Close()
-	// Run the auto migration tool.
-	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
-	client.User.Create().
-		SetFirstName("Zelda").
-		SetLastName("Hyrule").
-		SetRace(user.RaceHylians).
-		SetThreat(zelda.Foe).
-		SetLevel(zelda.High).
+```go 
+client.User.Create().
+		SetFirstName("John").
+		SetLastName("Dow").
+		SetSize(user.SizeSmall).
+		SetShape(property.Triangle).
+		SetLevel(property.Low).
 		SaveX(context.Background())
 
-	user := client.User.Query().FirstX(context.Background())
-	log.Println(user) // 2021/08/29 15:03:18 User(id=1, first_name=Zelda, last_name=Hyrule, race=hylians, threat=FOE, level=HIGH)
-}
+	john := client.User.Query().FirstX(context.Background())
+	fmt.Println(john) // User(id=1, first_name=John, last_name=Dow, size=small, shape=TRIANGLE, level=LOW)
 ```
-
-Querying the Database:
-```
-+------------+----------------------------------------------------+------+-----+---------+----------------+
-| Field      | Type                                               | Null | Key | Default | Extra          |
-+------------+----------------------------------------------------+------+-----+---------+----------------+
-| id         | bigint                                             | NO   | PRI | <null>  | auto_increment |
-| first_name | varchar(255)                                       | NO   |     | <null>  |                |
-| last_name  | varchar(255)                                       | NO   |     | <null>  |                |
-| race       | enum('hylians','sheikah','gerudo','zora','gorons') | NO   |     | <null>  |                |
-| threat     | enum('FRIEND','FOE','NEUTRAL')                     | NO   |     | <null>  |                |
-| level      | enum('UNKNOWN','LOW','HIGH')                       | NO   |     | <null>  |                |
-+------------+----------------------------------------------------+------+-----+---------+----------------+
-6 rows in set
-Time: 0.011s
-MySQL root@localhost:zelda> select * from users;
-+----+------------+-----------+---------+--------+-------+
-| id | first_name | last_name | race    | threat | level |
-+----+------------+-----------+---------+--------+-------+
-| 1  | Zelda      | Hyrule    | hylians | FOE    | HIGH  |
-+----+------------+-----------+---------+--------+-------+
-1 row in set
-Time: 0.008s
-MySQL root@localhost:zelda>
-```
-
 
 ## Annotations
 
