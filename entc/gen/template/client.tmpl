@@ -120,6 +120,15 @@ func (c *Client) Debug() *Client {
 	return client
 }
 
+// WithSqlComments returns a new client which adds support for sqlcomments.
+func (c *Client) WithSqlComments(options ...sqlcommenter.Option) *Client {
+	cfg := c.config
+	cfg.driver = sqlcommenter.NewCommentDriver(c.driver, options...)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
 	return c.driver.Close()

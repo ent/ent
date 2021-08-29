@@ -4,20 +4,24 @@ import (
 	"context"
 )
 
+type Commenter interface {
+	GetComments(context.Context) SqlComments
+}
+
 type (
 	CommentsHandler func(context.Context) SqlComments
 	Option          func(*options)
 	options         struct {
-		commenters     []CommentsHandler
+		commenters     []Commenter
 		globalComments SqlComments
 	}
 )
 
 // WithCommenter overrides the default comments generator handler.
 // default comments added via WithComments will still be applied.
-func WithCommenter(commentsHandlers ...CommentsHandler) Option {
+func WithCommenter(commenters ...Commenter) Option {
 	return func(opts *options) {
-		opts.commenters = commentsHandlers
+		opts.commenters = append(opts.commenters, commenters...)
 	}
 }
 

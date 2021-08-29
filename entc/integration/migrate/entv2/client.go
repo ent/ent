@@ -24,6 +24,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sqlcommenter"
 )
 
 // Client is the client that holds all ent builders.
@@ -146,6 +147,15 @@ func (c *Client) Debug() *Client {
 	}
 	cfg := c.config
 	cfg.driver = dialect.Debug(c.driver, c.log)
+	client := &Client{config: cfg}
+	client.init()
+	return client
+}
+
+// WithSqlComments returns a new client which adds support for sqlcomments.
+func (c *Client) WithSqlComments(options ...sqlcommenter.Option) *Client {
+	cfg := c.config
+	cfg.driver = sqlcommenter.NewCommentDriver(c.driver, options...)
 	client := &Client{config: cfg}
 	client.init()
 	return client

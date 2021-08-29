@@ -26,15 +26,16 @@ type (
 )
 
 func NewCommentDriver(drv dialect.Driver, options ...Option) dialect.Driver {
-	opts := buildOptions(options)
+	defaultCommenters := []Commenter{NewDriverVersionCommenter()}
+	opts := buildOptions(append(options, WithCommenter(defaultCommenters...)))
 	return &CommentDriver{drv, commenter{opts}}
 }
 
 func (c commenter) getComments(ctx context.Context) SqlComments {
-	var cmts SqlComments
+	cmts := make(SqlComments)
 	cmts.Append(c.globalComments)
 	for _, h := range c.commenters {
-		cmts.Append(h(ctx))
+		cmts.Append(h.GetComments(ctx))
 	}
 	return cmts
 }
