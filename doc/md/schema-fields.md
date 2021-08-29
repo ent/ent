@@ -631,7 +631,7 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-The custom type that is convertible to the Go basic type:
+When custom type that is convertible to the Go basic type:
 
 ```go
 // Fields of the User.
@@ -646,7 +646,7 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-We must implement the [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface.
+Implement the [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface.
 ```go
 package property
 
@@ -666,7 +666,7 @@ func (Shape) Values() (roles []string) {
 }
 
 ```
-The custom type is not convertible to the Go basic type:
+When custom type is not convertible to the Go basic type:
 
 ```go
 // Fields of the User.
@@ -680,7 +680,7 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
-Implement the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface.
+Implement also the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface.
 
 ```go
 package property
