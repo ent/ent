@@ -617,7 +617,7 @@ func (User) Fields() []ent.Field {
 
 Enum fields can be defined in three ways:
 
-Basic, use Ent API to generate Enum type and define values:
+Use Ent API to generate Enum type and define possible values:
 ```go
 // Fields of the User.
 func (User) Fields() []ent.Field {
@@ -636,7 +636,7 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-When having your own type that you want to use and it is stringable:
+The custom type that is convertible to the Go basic type:
 
 ```go
 // Fields of the User.
@@ -651,7 +651,7 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-We implement the EnumValues interface. 
+We must implement the [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface.
 ```go
 package zelda
 
@@ -671,7 +671,8 @@ func (Threat) Values() (roles []string) {
 	return
 }
 ```
-When having your own type that you want to use and it is not stringable:
+The custom type is not convertible to the Go basic type:
+
 ```go
 // Fields of the User.
 func (User) Fields() []ent.Field {
@@ -683,7 +684,7 @@ func (User) Fields() []ent.Field {
 	}
 }
 ```
-We implement the EnumValues,Valuer and Scanner interfaces.
+Implement the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface.
 
 ```go
 package zelda
@@ -791,11 +792,11 @@ func main() {
 		SaveX(context.Background())
 
 	user := client.User.Query().FirstX(context.Background())
-	log.Println(user)
+	log.Println(user) // 2021/08/29 15:03:18 User(id=1, first_name=Zelda, last_name=Hyrule, race=hylians, threat=FOE, level=HIGH)
 }
 ```
 
-Running this example on MySql:
+Querying the Database:
 ```
 +------------+----------------------------------------------------+------+-----+---------+----------------+
 | Field      | Type                                               | Null | Key | Default | Extra          |
