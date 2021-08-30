@@ -21,7 +21,7 @@ func NewDriverVersionCommenter() DriverVersionCommenter {
 
 func (dc DriverVersionCommenter) GetComments(ctx context.Context) SqlComments {
 	return SqlComments{
-		"db_driver": CommentValue(dc.version),
+		DbDriverCommentKey: CommentValue(dc.version),
 	}
 }
 
