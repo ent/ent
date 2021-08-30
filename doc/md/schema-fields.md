@@ -770,9 +770,9 @@ client.User.Create().
 	SetLevel(property.Low).
 	SaveX(context.Background())
 	
-	john := client.User.Query().FirstX(context.Background())
-	fmt.Println(john)
-	// User(id=1, first_name=John, last_name=Dow, size=small, shape=TRIANGLE, level=LOW)
+john := client.User.Query().FirstX(context.Background())
+fmt.Println(john)
+// User(id=1, first_name=John, last_name=Dow, size=small, shape=TRIANGLE, level=LOW)
 ```
 
 ## Annotations
