@@ -134,8 +134,8 @@ func (c *Client) Debug() *Client {
 	return client
 }
 
-// WithSqlComments returns a new client which adds support for sqlcomments.
-func (c *Client) WithSqlComments(options ...sqlcommenter.Option) *Client {
+// SqlComments returns a new client which adds sqlcomments on every query.
+func (c *Client) SqlComments(options ...sqlcommenter.Option) *Client {
 	cfg := c.config
 	cfg.driver = sqlcommenter.NewCommentDriver(c.driver, options...)
 	client := &Client{config: cfg}
