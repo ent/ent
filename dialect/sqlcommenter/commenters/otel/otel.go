@@ -35,9 +35,9 @@ func (c CommentCarrier) Keys() []string {
 	return keys
 }
 
-// ref: https://github1s.com/open-telemetry/opentelemetry-go-contrib/blob/main/instrumentation/github.com/emicklei/go-restful/otelrestful/restful_test.go
 func (hc HttpCommenter) GetComments(ctx context.Context) sc.SqlComments {
 	comments := NewCommentCarrier()
 	otel.GetTextMapPropagator().Inject(ctx, comments)
+
 	return sc.SqlComments(comments)
 }

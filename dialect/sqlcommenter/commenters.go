@@ -24,3 +24,26 @@ func (dc DriverVersionCommenter) GetComments(ctx context.Context) SqlComments {
 		"db_driver": CommentValue(dc.version),
 	}
 }
+
+type ContextMapper struct {
+	contextKey interface{}
+	commentKey CommentKey
+}
+
+func NewContextMapper(commentKey CommentKey, contextKey interface{}) ContextMapper {
+	return ContextMapper{
+		commentKey: commentKey,
+		contextKey: contextKey,
+	}
+}
+
+func (cm ContextMapper) GetComments(ctx context.Context) SqlComments {
+	switch v := ctx.Value(cm.contextKey).(type) {
+	case string:
+		return SqlComments{cm.commentKey: CommentValue(v)}
+	case CommentValue:
+		return SqlComments{cm.commentKey: v}
+	default:
+		return nil
+	}
+}
