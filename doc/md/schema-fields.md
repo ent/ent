@@ -615,7 +615,8 @@ func (User) Fields() []ent.Field {
 
 ## Enum Fields
 
-Use Ent API to generate Enum type and define possible values:
+The `Enum` builder allows creating enum fields with a list of permitted values. 
+
 ```go
 // Fields of the User.
 func (User) Fields() []ent.Field {
@@ -623,15 +624,16 @@ func (User) Fields() []ent.Field {
 		field.String("first_name"),
 		field.String("last_name"),
 		field.Enum("size").
-			Values(
-				"big",
-				"small",
-			),
+			Values("big", "small"),
 	}
 }
 ```
 
-When custom type that is convertible to the Go basic type:
+When a custom [`GoType`](#go-type) is being used, it is must be convertible to the basic `string` type or it needs to implement the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner) interface. 
+
+The [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface is also required by the custom Go type to tell Ent what are the permitted values of the enum. 
+
+The following example shows how to define an `Enum` field with a custom Go type that is convertible to `string`: 
 
 ```go
 // Fields of the User.
@@ -658,15 +660,15 @@ const (
 )
 
 // Values provides list valid values for Enum.
-func (Shape) Values() (roles []string) {
+func (Shape) Values() (kinds []string) {
 	for _, r := range []Shape{Triangle, Circle} {
-		roles = append(roles, string(r))
+		kinds = append(kinds, string(r))
 	}
 	return
 }
 
 ```
-When custom type is not convertible to the Go basic type:
+The following example shows how to define an `Enum` field with a custom Go type that is not convertible to `string`, but it implements the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner) interface: 
 
 ```go
 // Fields of the User.
@@ -747,14 +749,11 @@ func (User) Fields() []ent.Field {
 		field.String("first_name"),
 		field.String("last_name"),
 		field.Enum("size").
-			Values(
-				"big",
-				"small",
-			),
+			Values("big", "small"),
 		// A convertible type to string.
 		field.Enum("shape").
 			GoType(property.Shape("")),
-		// Add conversion to and from string
+		// Add conversion to and from string.
 		field.Enum("level").
 			GoType(property.Level(0)),
 	}
@@ -764,15 +763,16 @@ func (User) Fields() []ent.Field {
 After code generation usage is trivial:
 ```go 
 client.User.Create().
-		SetFirstName("John").
-		SetLastName("Dow").
-		SetSize(user.SizeSmall).
-		SetShape(property.Triangle).
-		SetLevel(property.Low).
-		SaveX(context.Background())
-
+	SetFirstName("John").
+	SetLastName("Dow").
+	SetSize(user.SizeSmall).
+	SetShape(property.Triangle).
+	SetLevel(property.Low).
+	SaveX(context.Background())
+	
 	john := client.User.Query().FirstX(context.Background())
-	fmt.Println(john) // User(id=1, first_name=John, last_name=Dow, size=small, shape=TRIANGLE, level=LOW)
+	fmt.Println(john)
+	// User(id=1, first_name=John, last_name=Dow, size=small, shape=TRIANGLE, level=LOW)
 ```
 
 ## Annotations
