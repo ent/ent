@@ -661,8 +661,8 @@ const (
 
 // Values provides list valid values for Enum.
 func (Shape) Values() (kinds []string) {
-	for _, r := range []Shape{Triangle, Circle} {
-		kinds = append(kinds, string(r))
+	for _, s := range []Shape{Triangle, Circle} {
+		kinds = append(kinds, string(s))
 	}
 	return
 }
