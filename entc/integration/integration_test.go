@@ -194,17 +194,17 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.False(client.User.Query().Where(user.HasPetsWith(pet.NameHasPrefix("pan"))).ExistX(ctx))
 	require.Equal(child.Name, client.User.Query().Order(ent.Asc("name")).FirstX(ctx).Name)
 	require.Equal(usr2.Name, client.User.Query().Order(ent.Desc("name")).FirstX(ctx).Name)
-	// update fields.
+	// Update fields.
 	client.User.Update().Where(user.ID(child.ID)).SetName("Ariel").SaveX(ctx)
 	client.User.Query().Where(user.Name("Ariel")).OnlyX(ctx)
-	// update edges.
+	// Update edges.
 	require.Empty(child.QueryPets().AllX(ctx))
 	require.NoError(client.Pet.UpdateOne(pt).ClearOwner().Exec(ctx))
 	client.User.Update().Where(user.ID(child.ID)).AddPets(pt).SaveX(ctx)
 	require.NotEmpty(child.QueryPets().AllX(ctx))
 	client.User.Update().Where(user.ID(child.ID)).RemovePets(pt).SaveX(ctx)
 	require.Empty(child.QueryPets().AllX(ctx))
-	// remove edges.
+	// Remove edges.
 	client.User.Update().ClearSpouse().SaveX(ctx)
 	require.Empty(client.User.Query().Where(user.HasSpouse()).AllX(ctx))
 	client.User.Update().AddFriends(child).RemoveGroups(grp).Where(user.ID(usr.ID)).SaveX(ctx)
@@ -212,16 +212,23 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Empty(usr.QueryGroups().AllX(ctx))
 	require.Len(child.QueryFriends().AllX(ctx), 1)
 	require.Len(usr.QueryFriends().AllX(ctx), 1)
-	// update one vertex.
+	// Update one node.
 	usr = client.User.UpdateOne(usr).SetName("baz").AddGroups(grp).SaveX(ctx)
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(usr.QueryGroups().AllX(ctx))
-	// update unknown vertex.
+	// Update unknown node.
 	err := client.User.UpdateOneID(usr.ID + math.MaxInt8).SetName("foo").Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsNotFound(err))
+	// Update a vertex with filter.
+	u := client.User.UpdateOneID(usr.ID)
+	u.Mutation().Where(user.Name("baz"))
+	require.NoError(u.Exec(ctx))
+	u = client.User.UpdateOneID(usr.ID)
+	u.Mutation().Where(user.Name("bar"))
+	require.Error(u.Exec(ctx))
+	require.True(ent.IsNotFound(err))
 
-	// grouping.
 	var v []struct {
 		Name  string `json:"name"`
 		Age   int    `json:"age"`
