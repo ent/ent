@@ -981,12 +981,12 @@ func Relation(t *testing.T, client *ent.Client) {
 		Where(user.IDIn(foo.ID, bar.ID)).
 		Order(ent.Asc(user.FieldID)).
 		GroupBy(user.FieldID, user.FieldName).
-		Aggregate(func(s *entsql.Selector) []string {
+		Aggregate(func(s *sql.Selector) []string {
 			// Join with pet table and calculate the
 			// average age of the pets of each user and number of pets of each user.
 			t := sql.Table(pet.Table)
 			s.Join(t).On(s.C(user.FieldID), t.C(pet.OwnerColumn))
-			return []string{sql.As(sql.Avg(t.C(pet.FieldAge)), "average"), sql.As(entsql.Count("*"), "count")}
+			return []string{sql.As(sql.Avg(t.C(pet.FieldAge)), "average"), sql.As(sql.Count("*"), "count")}
 		}).
 		ScanX(ctx, &v3)
 	require.Len(v3, 2)
