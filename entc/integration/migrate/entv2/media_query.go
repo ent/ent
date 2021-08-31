@@ -676,7 +676,7 @@ func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
 	selector := mgb.sql.Select()
 	aggregation := make([]string, 0, len(mgb.fns))
 	for _, fn := range mgb.fns {
-		aggregation = append(aggregation, fn(selector))
+		aggregation = append(aggregation, fn(selector)...)
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.

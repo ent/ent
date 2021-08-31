@@ -748,7 +748,7 @@ func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 	selector := ftgb.sql.Select()
 	aggregation := make([]string, 0, len(ftgb.fns))
 	for _, fn := range ftgb.fns {
-		aggregation = append(aggregation, fn(selector))
+		aggregation = append(aggregation, fn(selector)...)
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.

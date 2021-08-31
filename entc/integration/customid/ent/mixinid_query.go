@@ -677,7 +677,7 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 	selector := migb.sql.Select()
 	aggregation := make([]string, 0, len(migb.fns))
 	for _, fn := range migb.fns {
-		aggregation = append(aggregation, fn(selector))
+		aggregation = append(aggregation, fn(selector)...)
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.

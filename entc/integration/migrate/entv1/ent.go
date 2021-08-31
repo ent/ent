@@ -84,7 +84,7 @@ func Desc(fields ...string) OrderFunc {
 }
 
 // AggregateFunc applies an aggregation step on the group-by traversal/selector.
-type AggregateFunc func(*sql.Selector) string
+type AggregateFunc func(*sql.Selector) []string
 
 // As is a pseudo aggregation function for renaming another other functions with custom names. For example:
 //
@@ -93,21 +93,25 @@ type AggregateFunc func(*sql.Selector) string
 //	Scan(ctx, &v)
 //
 func As(fn AggregateFunc, end string) AggregateFunc {
-	return func(s *sql.Selector) string {
-		return sql.As(fn(s), end)
+	return func(s *sql.Selector) []string {
+		results := make([]string, 0)
+		for _, f := range fn {
+			results = append(results, sql.As(f(s), end))
+		}
+		return results
 	}
 }
 
 // Count applies the "count" aggregation function on each group.
 func Count() AggregateFunc {
-	return func(s *sql.Selector) string {
+	return func(s *sql.Selector) []string {
 		return sql.Count("*")
 	}
 }
 
 // Max applies the "max" aggregation function on the given field of each group.
 func Max(field string) AggregateFunc {
-	return func(s *sql.Selector) string {
+	return func(s *sql.Selector) []string {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
 			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("entv1: %w", err)})
@@ -119,7 +123,7 @@ func Max(field string) AggregateFunc {
 
 // Mean applies the "mean" aggregation function on the given field of each group.
 func Mean(field string) AggregateFunc {
-	return func(s *sql.Selector) string {
+	return func(s *sql.Selector) []string {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
 			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("entv1: %w", err)})
@@ -131,7 +135,7 @@ func Mean(field string) AggregateFunc {
 
 // Min applies the "min" aggregation function on the given field of each group.
 func Min(field string) AggregateFunc {
-	return func(s *sql.Selector) string {
+	return func(s *sql.Selector) []string {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
 			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("entv1: %w", err)})
@@ -143,7 +147,7 @@ func Min(field string) AggregateFunc {
 
 // Sum applies the "sum" aggregation function on the given field of each group.
 func Sum(field string) AggregateFunc {
-	return func(s *sql.Selector) string {
+	return func(s *sql.Selector) []string {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
 			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("entv1: %w", err)})

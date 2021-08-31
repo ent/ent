@@ -760,7 +760,7 @@ func (sgb *SpecGroupBy) sqlQuery() *sql.Selector {
 	selector := sgb.sql.Select()
 	aggregation := make([]string, 0, len(sgb.fns))
 	for _, fn := range sgb.fns {
-		aggregation = append(aggregation, fn(selector))
+		aggregation = append(aggregation, fn(selector)...)
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.

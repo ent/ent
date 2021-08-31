@@ -821,7 +821,7 @@ func (dgb *DocGroupBy) sqlQuery() *sql.Selector {
 	selector := dgb.sql.Select()
 	aggregation := make([]string, 0, len(dgb.fns))
 	for _, fn := range dgb.fns {
-		aggregation = append(aggregation, fn(selector))
+		aggregation = append(aggregation, fn(selector)...)
 	}
 	// If no columns were selected in a custom aggregation function, the default
 	// selection is the fields used for "group-by", and the aggregation functions.

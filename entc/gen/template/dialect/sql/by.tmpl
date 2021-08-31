@@ -63,7 +63,7 @@ func columnChecker(table string) func(string) error {
 {{ define "dialect/sql/group/func" -}}
 	{{- $fn := $.Scope.Func -}}
 	{{- $withField := $.Scope.WithField -}}
-	func(s *sql.Selector) string {
+	func(s *sql.Selector) []string {
 		{{- if $withField }}
 			check := columnChecker(s.TableName())
 			if err := check(field); err != nil {
