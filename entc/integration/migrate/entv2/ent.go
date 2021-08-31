@@ -101,8 +101,8 @@ type AggregateFunc func(*sql.Selector) []string
 func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(s *sql.Selector) []string {
 		results := make([]string, 0)
-		for _, f := range fn {
-			results = append(results, sql.As(f(s), end))
+		for _, f := range fn(s) {
+			results = append(results, sql.As(f, end))
 		}
 		return results
 	}
@@ -111,7 +111,7 @@ func As(fn AggregateFunc, end string) AggregateFunc {
 // Count applies the "count" aggregation function on each group.
 func Count() AggregateFunc {
 	return func(s *sql.Selector) []string {
-		return sql.Count("*")
+		return []string{sql.Count("*")}
 	}
 }
 
@@ -121,9 +121,9 @@ func Max(field string) AggregateFunc {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
 			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("entv2: %w", err)})
-			return ""
+			return []string{}
 		}
-		return sql.Max(s.C(field))
+		return []string{sql.Max(s.C(field))}
 	}
 }
 
@@ -133,9 +133,9 @@ func Mean(field string) AggregateFunc {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
 			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("entv2: %w", err)})
-			return ""
+			return []string{}
 		}
-		return sql.Avg(s.C(field))
+		return []string{sql.Avg(s.C(field))}
 	}
 }
 
@@ -145,9 +145,9 @@ func Min(field string) AggregateFunc {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
 			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("entv2: %w", err)})
-			return ""
+			return []string{}
 		}
-		return sql.Min(s.C(field))
+		return []string{sql.Min(s.C(field))}
 	}
 }
 
@@ -157,9 +157,9 @@ func Sum(field string) AggregateFunc {
 		check := columnChecker(s.TableName())
 		if err := check(field); err != nil {
 			s.AddError(&ValidationError{Name: field, err: fmt.Errorf("entv2: %w", err)})
-			return ""
+			return []string{}
 		}
-		return sql.Sum(s.C(field))
+		return []string{sql.Sum(s.C(field))}
 	}
 }
 

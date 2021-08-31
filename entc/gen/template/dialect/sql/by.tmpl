@@ -53,8 +53,8 @@ func columnChecker(table string) func(string) error {
 {{ define "dialect/sql/group/as" -}}
 	func(s *sql.Selector) []string {
 			results := make([]string, 0)
-			for _, f := range fn {
-				results = append(results, sql.As(f(s), end))
+			for _, f := range fn(s) {
+				results = append(results, sql.As(f, end))
 			}
 			return results
 	}
@@ -68,9 +68,9 @@ func columnChecker(table string) func(string) error {
 			check := columnChecker(s.TableName())
 			if err := check(field); err != nil {
 				s.AddError(&ValidationError{Name: field, err: fmt.Errorf("{{ base $.Config.Package }}: %w", err)})
-				return ""
+				return []string{}
 			}
 		{{- end }}
-		return sql.{{ if eq $fn "Mean" }}Avg{{ else }}{{ $fn }}{{ end }}({{ if $withField }}s.C(field){{ else }}"*"{{ end }})
+		return []string{sql.{{ if eq $fn "Mean" }}Avg{{ else }}{{ $fn }}{{ end }}({{ if $withField }}s.C(field){{ else }}"*"{{ end }})}
 	}
 {{- end }}
