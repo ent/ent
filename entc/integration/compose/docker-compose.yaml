@@ -118,8 +118,9 @@ services:
 
   gremlin:
     platform: linux/amd64
-    image: entgo/gremlin-server
-    build: gremlin-server
+    image: tinkerpop/gremlin-server:3.4.1
     restart: on-failure
     ports:
       - 8182:8182
+    volumes: 
+      - ./gremlin-server/:/opt/gremlin-server/conf/
