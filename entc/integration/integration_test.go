@@ -799,25 +799,28 @@ func Relation(t *testing.T, client *ent.Client) {
 		ID      int
 		Name    string
 		Average float64
+		Count int
 	}
 	client.User.Query().
 		Where(user.IDIn(foo.ID, bar.ID)).
 		GroupBy(user.FieldID, user.FieldName).
-		Aggregate(func(s *entsql.Selector) string {
+		Aggregate(func(s *entsql.Selector) []string {
 			// Join with pet table and calculate the
 			// average age of the pets of each user.
 			t := entsql.Table(pet.Table)
 			s.Join(t).On(s.C(user.FieldID), t.C(pet.OwnerColumn))
-			return entsql.As(entsql.Avg(t.C(pet.FieldAge)), "average")
+			return []string{entsql.As(entsql.Avg(t.C(pet.FieldAge)), "average"), entsql.As(entsql.Count("*"), "count")}
 		}).
 		ScanX(ctx, &v3)
 	require.Len(v3, 2)
 	require.Equal(foo.ID, v3[0].ID)
 	require.Equal(foo.Name, v3[0].Name)
 	require.Equal(8.5, v3[0].Average)
+	require.Equal(2, v3[0].Count)
 	require.Equal(bar.ID, v3[1].ID)
 	require.Equal(bar.Name, v3[1].Name)
 	require.Equal(7.5, v3[1].Average)
+	require.Equal(2, v3[1].Count)
 }
 
 func ClearFields(t *testing.T, client *ent.Client) {
