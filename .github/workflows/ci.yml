@@ -205,7 +205,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       gremlin-server:
-        image: entgo/gremlin-server
+        image: tinkerpop/gremlin-server:3.4.1
         ports:
           - 8182:8182
         options: >-
@@ -213,6 +213,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        volumes:
+          - ${{github.workspace}}/entc/integration/compose/gremlin-server/:/opt/gremlin-server/conf/
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: actions/setup-go@v2
@@ -359,7 +361,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       gremlin-server:
-        image: entgo/gremlin-server
+        image: tinkerpop/gremlin-server:3.4.1
         ports:
           - 8182:8182
         options: >-
@@ -367,6 +369,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        volumes:
+          - ${{github.workspace}}/entc/integration/compose/gremlin-server/:/opt/gremlin-server/conf/
     steps:
       - uses: actions/checkout@v2.3.4
         with:
