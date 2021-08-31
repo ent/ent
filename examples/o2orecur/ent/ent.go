@@ -89,8 +89,8 @@ type AggregateFunc func(*sql.Selector) []string
 func As(fn AggregateFunc, end []string) AggregateFunc {
 	return func(s *sql.Selector) []string {
 		results := make([]string, 0)
-		for i := range fn(s) {
-			results = append(results[i], sql.As(f, end[i]))
+		for i, f := range fn(s) {
+			results = append(results, sql.As(f, end[i]))
 		}
 		return results
 	}
