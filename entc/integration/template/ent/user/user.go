@@ -19,14 +19,14 @@ const (
 	EdgeFriends = "friends"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// PetsTable is the table the holds the pets relation/edge.
+	// PetsTable is the table that holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "user_pets"
-	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
+	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "user_friends"
 )
 

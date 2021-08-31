@@ -225,16 +225,18 @@ func (e *state) evalBinary(expr *entql.BinaryExpr) *sql.Predicate {
 			_, ok = expr.Y.(*entql.Value)
 		}
 		expect(ok, "expr.Y to be *entql.Field or *entql.Value (got %T)", expr.X)
-		return sql.P(func(b *sql.Builder) {
-			b.Ident(e.field(field))
-			b.WriteOp(binary[expr.Op])
-			switch x := expr.Y.(type) {
-			case *entql.Field:
-				b.Ident(e.field(x))
-			case *entql.Value:
+		switch x := expr.Y.(type) {
+		case *entql.Field:
+			return sql.ColumnsOp(e.field(field), e.field(x), binary[expr.Op])
+		case *entql.Value:
+			c := e.field(field)
+			return sql.P(func(b *sql.Builder) {
+				b.Ident(c).WriteOp(binary[expr.Op])
 				args(b, x)
-			}
-		})
+			})
+		default:
+			panic("unreachable")
+		}
 	}
 }
 
@@ -273,7 +275,7 @@ func (e *state) evalEdge(name string, exprs ...entql.Expr) *sql.Predicate {
 func (e *state) field(f *entql.Field) string {
 	_, ok := e.context.Fields[f.Name]
 	expect(ok || e.context.ID.Column == f.Name, "field %q was not found for node %q", f.Name, e.context.Type)
-	return f.Name
+	return e.selector.C(f.Name)
 }
 
 func args(b *sql.Builder, v *entql.Value) {

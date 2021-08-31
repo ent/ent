@@ -8,21 +8,4 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* custom errors and errors handlers for sql dialects */}}
 {{ define "dialect/sql/errors" }}
-func isSQLConstraintError(err error) (*ConstraintError, bool) {
-	if sqlgraph.IsConstraintError(err) {
-		return &ConstraintError{err.Error(), err}, true
-	}
-	return nil, false
-}
-
-// rollback calls tx.Rollback and wraps the given error with the rollback error if present.
-func rollback(tx dialect.Tx, err error) error {
-	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%w: %v", err, rerr)
-	}
-	if err, ok := isSQLConstraintError(err); ok {
-		return err
-	}
-	return err
-}
 {{ end }}

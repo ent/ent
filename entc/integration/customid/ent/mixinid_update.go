@@ -24,9 +24,9 @@ type MixinIDUpdate struct {
 	mutation *MixinIDMutation
 }
 
-// Where adds a new predicate for the MixinIDUpdate builder.
+// Where appends a list predicates to the MixinIDUpdate builder.
 func (miu *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
-	miu.mutation.predicates = append(miu.mutation.predicates, ps...)
+	miu.mutation.Where(ps...)
 	return miu
 }
 
@@ -67,6 +67,9 @@ func (miu *MixinIDUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(miu.hooks) - 1; i >= 0; i-- {
+			if miu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = miu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, miu.mutation); err != nil {
@@ -133,8 +136,8 @@ func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, miu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{mixinid.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -193,6 +196,9 @@ func (miuo *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
 			return node, err
 		})
 		for i := len(miuo.hooks) - 1; i >= 0; i-- {
+			if miuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = miuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, miuo.mutation); err != nil {
@@ -279,8 +285,8 @@ func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err 
 	if err = sqlgraph.UpdateNode(ctx, miuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{mixinid.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

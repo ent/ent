@@ -24,9 +24,9 @@ type MediaDelete struct {
 	mutation *MediaMutation
 }
 
-// Where adds a new predicate to the MediaDelete builder.
+// Where appends a list predicates to the MediaDelete builder.
 func (md *MediaDelete) Where(ps ...predicate.Media) *MediaDelete {
-	md.mutation.predicates = append(md.mutation.predicates, ps...)
+	md.mutation.Where(ps...)
 	return md
 }
 
@@ -50,6 +50,9 @@ func (md *MediaDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(md.hooks) - 1; i >= 0; i-- {
+			if md.hooks[i] == nil {
+				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = md.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, md.mutation); err != nil {

@@ -6,20 +6,18 @@ package gen
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
 	"text/template/parse"
-
-	"entgo.io/ent/entc/gen/internal"
 )
-
-//go:generate go run github.com/go-bindata/go-bindata/go-bindata -o=internal/bindata.go -pkg=internal -mode=420 -modtime=1 ./template/...
 
 type (
 	// TypeTemplate specifies a template that is executed with
@@ -45,6 +43,10 @@ var (
 		{
 			Name:   "create",
 			Format: pkgf("%s_create.go"),
+			ExtendPatterns: []string{
+				"dialect/*/create/fields/additional/*",
+				"dialect/*/create_bulk/fields/additional/*",
+			},
 		},
 		{
 			Name:   "update",
@@ -55,9 +57,11 @@ var (
 			Format: pkgf("%s_delete.go"),
 		},
 		{
-			Name:           "query",
-			Format:         pkgf("%s_query.go"),
-			ExtendPatterns: []string{"dialect/*/query/fields/additional/*"},
+			Name:   "query",
+			Format: pkgf("%s_query.go"),
+			ExtendPatterns: []string{
+				"dialect/*/query/fields/additional/*",
+			},
 		},
 		{
 			Name:   "model",
@@ -160,6 +164,8 @@ var (
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
+		"client/additional/*",
+		"client/additional/*/*",
 		"config/*/*",
 		"create/additional/*",
 		"delete/additional/*",
@@ -168,8 +174,11 @@ var (
 		"dialect/*/config/*/*",
 		"dialect/*/import/additional/*",
 		"dialect/*/query/selector/*",
+		"dialect/sql/create/additional/*",
+		"dialect/sql/create_bulk/additional/*",
 		"dialect/sql/model/additional/*",
 		"dialect/sql/model/fields/*",
+		"dialect/sql/select/additional/*",
 		"dialect/sql/predicate/edge/*/*",
 		"dialect/sql/query/additional/*",
 		"dialect/sql/query/from/*",
@@ -180,17 +189,17 @@ var (
 		"update/additional/*",
 		"query/additional/*",
 	}
-	// templates holds the Go templates for the code generation.
-	templates *Template
 	// importPkg are the import packages used for code generation.
 	importPkg = make(map[string]string)
+	// templates holds the Go templates for the code generation.
+	templates *Template
+	//go:embed template/*
+	templateDir embed.FS
 )
 
 func initTemplates() {
-	templates = NewTemplate("templates")
-	for _, asset := range internal.AssetNames() {
-		templates = MustParse(templates.Parse(string(internal.MustAsset(asset))))
-	}
+	templates = MustParse(NewTemplate("templates").
+		ParseFS(templateDir, "template/*.tmpl", "template/*/*.tmpl", "template/*/*/*.tmpl", "template/*/*/*/*.tmpl"))
 	b := bytes.NewBuffer([]byte("package main\n"))
 	check(templates.ExecuteTemplate(b, "import", Type{Config: &Config{}}), "load imports")
 	f, err := parser.ParseFile(token.NewFileSet(), "", b, parser.ImportsOnly)
@@ -220,7 +229,7 @@ func NewTemplate(name string) *Template {
 	return t.Funcs(Funcs)
 }
 
-// Funcs merges the given funcMap to the template functions.
+// Funcs merges the given funcMap with the template functions.
 func (t *Template) Funcs(funcMap template.FuncMap) *Template {
 	t.Template.Funcs(funcMap)
 	if t.FuncMap == nil {
@@ -273,6 +282,15 @@ func (t *Template) ParseDir(path string) (*Template, error) {
 		return err
 	})
 	return t, err
+}
+
+// ParseFS is like ParseFiles or ParseGlob but reads from the file system fsys
+// instead of the host operating system's file system.
+func (t *Template) ParseFS(fsys fs.FS, patterns ...string) (*Template, error) {
+	if _, err := t.Template.ParseFS(fsys, patterns...); err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
 // AddParseTree adds the given parse tree to the template.

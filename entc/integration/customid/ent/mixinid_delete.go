@@ -24,9 +24,9 @@ type MixinIDDelete struct {
 	mutation *MixinIDMutation
 }
 
-// Where adds a new predicate to the MixinIDDelete builder.
+// Where appends a list predicates to the MixinIDDelete builder.
 func (mid *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
-	mid.mutation.predicates = append(mid.mutation.predicates, ps...)
+	mid.mutation.Where(ps...)
 	return mid
 }
 
@@ -50,6 +50,9 @@ func (mid *MixinIDDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(mid.hooks) - 1; i >= 0; i-- {
+			if mid.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = mid.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mid.mutation); err != nil {

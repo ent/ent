@@ -329,8 +329,8 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Select(pet.FieldName).
 //		Scan(ctx, &v)
 //
-func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
-	pq.fields = append([]string{field}, fields...)
+func (pq *PetQuery) Select(fields ...string) *PetSelect {
+	pq.fields = append(pq.fields, fields...)
 	return &PetSelect{PetQuery: pq}
 }
 
@@ -481,10 +481,14 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
 	t1 := builder.Table(pet.Table)
-	selector := builder.Select(t1.Columns(pet.Columns...)...).From(t1)
+	columns := pq.fields
+	if len(columns) == 0 {
+		columns = pet.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if pq.sql != nil {
 		selector = pq.sql
-		selector.Select(selector.Columns(pet.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range pq.predicates {
 		p(selector)
@@ -985,16 +989,10 @@ func (ps *PetSelect) BoolX(ctx context.Context) bool {
 
 func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ps.sqlQuery().Query()
+	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ps *PetSelect) sqlQuery() sql.Querier {
-	selector := ps.sql
-	selector.Select(selector.Columns(ps.fields...)...)
-	return selector
 }

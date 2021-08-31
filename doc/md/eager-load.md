@@ -8,7 +8,7 @@ title: Eager Loading
 `ent` supports querying entities with their associations (through their edges). The associated entities
 are populated to the `Edges` field in the returned object.
 
-Let's give an example hows does the API look like for the following schema:
+Let's give an example of what the API looks like for the following schema:
 
 ![er-group-users](https://entgo.io/images/assets/er_user_pets_groups.png)
 
@@ -58,7 +58,7 @@ admins, err := client.User.
 	// Populate the first 5 `groups` that associated with the `admins`.
 	WithGroups(func(q *ent.GroupQuery) {
 		q.Limit(5) 				// Limit to 5.
-		q.WithUsers().Limit(5)	// Populate the `users` of each `groups`. 
+		q.WithUsers()           // Populate the `users` of each `groups`.
 	}).
 	All(ctx)
 if err != nil {

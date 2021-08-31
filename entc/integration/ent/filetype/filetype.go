@@ -25,7 +25,7 @@ const (
 	EdgeFiles = "files"
 	// Table holds the table name of the filetype in the database.
 	Table = "file_types"
-	// FilesTable is the table the holds the files relation/edge.
+	// FilesTable is the table that holds the files relation/edge.
 	FilesTable = "files"
 	// FilesInverseTable is the table name for the File entity.
 	// It exists in this package in order to avoid circular dependency with the "file" package.

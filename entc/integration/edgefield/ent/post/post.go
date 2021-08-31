@@ -19,7 +19,7 @@ const (
 	EdgeAuthor = "author"
 	// Table holds the table name of the post in the database.
 	Table = "posts"
-	// AuthorTable is the table the holds the author relation/edge.
+	// AuthorTable is the table that holds the author relation/edge.
 	AuthorTable = "posts"
 	// AuthorInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.

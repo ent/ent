@@ -19,7 +19,7 @@ const (
 	EdgeFriends = "friends"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
+	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "user_friends"
 )
 

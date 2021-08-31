@@ -365,8 +365,8 @@ func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 //		Select(doc.FieldText).
 //		Scan(ctx, &v)
 //
-func (dq *DocQuery) Select(field string, fields ...string) *DocSelect {
-	dq.fields = append([]string{field}, fields...)
+func (dq *DocQuery) Select(fields ...string) *DocSelect {
+	dq.fields = append(dq.fields, fields...)
 	return &DocSelect{DocQuery: dq}
 }
 
@@ -547,10 +547,14 @@ func (dq *DocQuery) querySpec() *sqlgraph.QuerySpec {
 func (dq *DocQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(dq.driver.Dialect())
 	t1 := builder.Table(doc.Table)
-	selector := builder.Select(t1.Columns(doc.Columns...)...).From(t1)
+	columns := dq.fields
+	if len(columns) == 0 {
+		columns = doc.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if dq.sql != nil {
 		selector = dq.sql
-		selector.Select(selector.Columns(doc.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range dq.predicates {
 		p(selector)
@@ -1051,16 +1055,10 @@ func (ds *DocSelect) BoolX(ctx context.Context) bool {
 
 func (ds *DocSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ds.sqlQuery().Query()
+	query, args := ds.sql.Query()
 	if err := ds.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ds *DocSelect) sqlQuery() sql.Querier {
-	selector := ds.sql
-	selector.Select(selector.Columns(ds.fields...)...)
-	return selector
 }

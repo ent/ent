@@ -169,7 +169,7 @@ n, err := client.User.			// UserClient.
 	Update().					// Pet update builder.
 	Where(						//
 		user.Or(				// (age >= 30 OR name = "bar") 
-			user.AgeEQ(30), 	//
+			user.AgeGT(30), 	//
 			user.Name("bar"),	// AND
 		),						//  
 		user.HasFollowers(),	// UserHasFollowers()  
@@ -193,6 +193,113 @@ n, err := client.User.			// UserClient.
 	).							//
 	SetName("a8m").				// Set field name.
 	Save(ctx)					// exec and return.
+```
+
+## Upsert One
+
+Ent supports [upsert](https://en.wikipedia.org/wiki/Merge_(SQL)) records using the [`sql/upsert`](features.md#upsert)
+feature-flag.
+
+```go
+err := client.User.
+	Create().
+	SetAge(30).
+	SetName("Ariel").
+	OnConflict().
+	// Use the new values that were set on create.
+	UpdateNewValues().
+	Exec(ctx)
+
+id, err := client.User.
+	Create().
+	SetAge(30).
+	SetName("Ariel").
+	OnConflict().
+	// Use the "age" that was set on create.
+	UpdateAge().
+	// Set a different "name" in case of conflict.
+	SetName("Mashraki").
+	ID(ctx)
+
+// Customize the UPDATE clause.
+err := client.User.
+	Create().
+	SetAge(30).
+	SetName("Ariel").
+	OnConflict().
+	UpdateNewValues().
+	// Override some of the fields with a custom update.
+	Update(func(u *ent.UserUpsert) {
+		u.SetAddress("localhost")
+	}).
+	Exec(ctx)
+```
+
+In PostgreSQL, the [conflict target](https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT) is required:
+
+```go
+// Setting the column names using the fluent API.
+err := client.User.
+	Create().
+	SetName("Ariel").
+	OnConflictColumns(user.FieldName).
+	UpdateNewValues().
+	Exec(ctx)
+
+// Setting the column names using the SQL API.
+err := client.User.
+	Create().
+	SetName("Ariel").
+	OnConflict(
+	    sql.ConflictColumns(user.FieldName),	
+	).
+	UpdateNewValues().
+	Exec(ctx)
+
+// Setting the constraint name using the SQL API.
+err := client.User.
+	Create().
+	SetName("Ariel").
+	OnConflict(
+	    sql.ConflictConstraint(constraint),	
+	).
+	UpdateNewValues().
+	Exec(ctx)
+```
+
+In order to customize the executed statement, use the SQL API:
+
+```go
+id, err := client.User.
+	Create().
+	OnConflict(
+		sql.ConflictColumns(...),
+		sql.ConflictWhere(...),
+		sql.UpdateWhere(...),
+	).
+	Update(func(u *ent.UserUpsert) {
+		u.SetAge(30)
+		u.UpadteName()
+	}).
+	ID(ctx)
+
+// INSERT INTO "users" (...) VALUES (...) ON CONFLICT WHERE ... DO UPDATE SET ... WHERE ...
+```
+
+:::info
+Since the upsert API is implemented using the `ON CONFLICT` clause (and `ON DUPLICATE KEY` in MySQL),
+Ent executes only one statement to the database, and therefore, only create [hooks](hooks.md) are applied
+for such operations.
+:::
+
+## Upsert Many
+
+```go
+err := client.User.             // UserClient
+	CreateBulk(builders...).    // User bulk create.
+	OnConflict().               // User bulk upsert.
+	UpdateNewValues().          // Use the values that were set on create in case of conflict.
+	Exec(ctx)                   // Execute the statement.
 ```
 
 ## Query The Graph

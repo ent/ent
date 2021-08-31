@@ -24,9 +24,9 @@ type TeamDelete struct {
 	mutation *TeamMutation
 }
 
-// Where adds a new predicate to the TeamDelete builder.
+// Where appends a list predicates to the TeamDelete builder.
 func (td *TeamDelete) Where(ps ...predicate.Team) *TeamDelete {
-	td.mutation.predicates = append(td.mutation.predicates, ps...)
+	td.mutation.Where(ps...)
 	return td
 }
 
@@ -50,6 +50,9 @@ func (td *TeamDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(td.hooks) - 1; i >= 0; i-- {
+			if td.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = td.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, td.mutation); err != nil {

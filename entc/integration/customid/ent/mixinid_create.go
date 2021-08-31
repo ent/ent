@@ -69,11 +69,17 @@ func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 				return nil, err
 			}
 			mic.mutation = mutation
-			node, err = mic.sqlSave(ctx)
+			if node, err = mic.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(mic.hooks) - 1; i >= 0; i-- {
+			if mic.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = mic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mic.mutation); err != nil {
@@ -92,6 +98,19 @@ func (mic *MixinIDCreate) SaveX(ctx context.Context) *MixinID {
 	return v
 }
 
+// Exec executes the query.
+func (mic *MixinIDCreate) Exec(ctx context.Context) error {
+	_, err := mic.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mic *MixinIDCreate) ExecX(ctx context.Context) {
+	if err := mic.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (mic *MixinIDCreate) defaults() {
 	if _, ok := mic.mutation.ID(); !ok {
@@ -103,10 +122,10 @@ func (mic *MixinIDCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (mic *MixinIDCreate) check() error {
 	if _, ok := mic.mutation.SomeField(); !ok {
-		return &ValidationError{Name: "some_field", err: errors.New("ent: missing required field \"some_field\"")}
+		return &ValidationError{Name: "some_field", err: errors.New(`ent: missing required field "some_field"`)}
 	}
 	if _, ok := mic.mutation.MixinField(); !ok {
-		return &ValidationError{Name: "mixin_field", err: errors.New("ent: missing required field \"mixin_field\"")}
+		return &ValidationError{Name: "mixin_field", err: errors.New(`ent: missing required field "mixin_field"`)}
 	}
 	return nil
 }
@@ -114,10 +133,13 @@ func (mic *MixinIDCreate) check() error {
 func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 	_node, _spec := mic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mic.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -185,17 +207,19 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, micb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, micb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, micb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -219,4 +243,17 @@ func (micb *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (micb *MixinIDCreateBulk) Exec(ctx context.Context) error {
+	_, err := micb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (micb *MixinIDCreateBulk) ExecX(ctx context.Context) {
+	if err := micb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

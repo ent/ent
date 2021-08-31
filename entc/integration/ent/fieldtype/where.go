@@ -297,6 +297,13 @@ func StringArray(v schema.Strings) predicate.FieldType {
 	})
 }
 
+// Password applies equality check predicate on the "password" field. It's identical to PasswordEQ.
+func Password(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPassword), v))
+	})
+}
+
 // StringScanner applies equality check predicate on the "string_scanner" field. It's identical to StringScannerEQ.
 func StringScanner(v schema.StringScanner) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -383,6 +390,13 @@ func Deleted(v *sql.NullBool) predicate.FieldType {
 func DeletedAt(v *sql.NullTime) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldDeletedAt), v))
+	})
+}
+
+// RawData applies equality check predicate on the "raw_data" field. It's identical to RawDataEQ.
+func RawData(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRawData), v))
 	})
 }
 
@@ -487,6 +501,20 @@ func Vstring(v schema.VString) predicate.FieldType {
 func Triple(v schema.Triple) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldTriple), v))
+	})
+}
+
+// BigInt applies equality check predicate on the "big_int" field. It's identical to BigIntEQ.
+func BigInt(v schema.BigInt) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBigInt), v))
+	})
+}
+
+// PasswordOther applies equality check predicate on the "password_other" field. It's identical to PasswordOtherEQ.
+func PasswordOther(v schema.Password) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPasswordOther), v))
 	})
 }
 
@@ -3042,6 +3070,131 @@ func StringArrayNotNil() predicate.FieldType {
 	})
 }
 
+// PasswordEQ applies the EQ predicate on the "password" field.
+func PasswordEQ(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordNEQ applies the NEQ predicate on the "password" field.
+func PasswordNEQ(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordIn applies the In predicate on the "password" field.
+func PasswordIn(vs ...string) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPassword), v...))
+	})
+}
+
+// PasswordNotIn applies the NotIn predicate on the "password" field.
+func PasswordNotIn(vs ...string) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPassword), v...))
+	})
+}
+
+// PasswordGT applies the GT predicate on the "password" field.
+func PasswordGT(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordGTE applies the GTE predicate on the "password" field.
+func PasswordGTE(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordLT applies the LT predicate on the "password" field.
+func PasswordLT(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordLTE applies the LTE predicate on the "password" field.
+func PasswordLTE(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordContains applies the Contains predicate on the "password" field.
+func PasswordContains(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordHasPrefix applies the HasPrefix predicate on the "password" field.
+func PasswordHasPrefix(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordHasSuffix applies the HasSuffix predicate on the "password" field.
+func PasswordHasSuffix(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordIsNil applies the IsNil predicate on the "password" field.
+func PasswordIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPassword)))
+	})
+}
+
+// PasswordNotNil applies the NotNil predicate on the "password" field.
+func PasswordNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPassword)))
+	})
+}
+
+// PasswordEqualFold applies the EqualFold predicate on the "password" field.
+func PasswordEqualFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordContainsFold applies the ContainsFold predicate on the "password" field.
+func PasswordContainsFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldPassword), v))
+	})
+}
+
 // StringScannerEQ applies the EQ predicate on the "string_scanner" field.
 func StringScannerEQ(v schema.StringScanner) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -4224,6 +4377,96 @@ func DeletedAtNotNil() predicate.FieldType {
 	})
 }
 
+// RawDataEQ applies the EQ predicate on the "raw_data" field.
+func RawDataEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataNEQ applies the NEQ predicate on the "raw_data" field.
+func RawDataNEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataIn applies the In predicate on the "raw_data" field.
+func RawDataIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRawData), v...))
+	})
+}
+
+// RawDataNotIn applies the NotIn predicate on the "raw_data" field.
+func RawDataNotIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRawData), v...))
+	})
+}
+
+// RawDataGT applies the GT predicate on the "raw_data" field.
+func RawDataGT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataGTE applies the GTE predicate on the "raw_data" field.
+func RawDataGTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataLT applies the LT predicate on the "raw_data" field.
+func RawDataLT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataLTE applies the LTE predicate on the "raw_data" field.
+func RawDataLTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataIsNil applies the IsNil predicate on the "raw_data" field.
+func RawDataIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRawData)))
+	})
+}
+
+// RawDataNotNil applies the NotNil predicate on the "raw_data" field.
+func RawDataNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRawData)))
+	})
+}
+
 // IPEQ applies the EQ predicate on the "ip" field.
 func IPEQ(v net.IP) predicate.FieldType {
 	vc := []byte(v)
@@ -5030,6 +5273,68 @@ func RoleNotIn(vs ...role.Role) predicate.FieldType {
 	})
 }
 
+// PriorityEQ applies the EQ predicate on the "priority" field.
+func PriorityEQ(v role.Priority) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPriority), v))
+	})
+}
+
+// PriorityNEQ applies the NEQ predicate on the "priority" field.
+func PriorityNEQ(v role.Priority) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPriority), v))
+	})
+}
+
+// PriorityIn applies the In predicate on the "priority" field.
+func PriorityIn(vs ...role.Priority) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPriority), v...))
+	})
+}
+
+// PriorityNotIn applies the NotIn predicate on the "priority" field.
+func PriorityNotIn(vs ...role.Priority) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPriority), v...))
+	})
+}
+
+// PriorityIsNil applies the IsNil predicate on the "priority" field.
+func PriorityIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPriority)))
+	})
+}
+
+// PriorityNotNil applies the NotNil predicate on the "priority" field.
+func PriorityNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPriority)))
+	})
+}
+
 // UUIDEQ applies the EQ predicate on the "uuid" field.
 func UUIDEQ(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -5579,6 +5884,186 @@ func TripleLT(v schema.Triple) predicate.FieldType {
 func TripleLTE(v schema.Triple) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldTriple), v))
+	})
+}
+
+// BigIntEQ applies the EQ predicate on the "big_int" field.
+func BigIntEQ(v schema.BigInt) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldBigInt), v))
+	})
+}
+
+// BigIntNEQ applies the NEQ predicate on the "big_int" field.
+func BigIntNEQ(v schema.BigInt) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldBigInt), v))
+	})
+}
+
+// BigIntIn applies the In predicate on the "big_int" field.
+func BigIntIn(vs ...schema.BigInt) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldBigInt), v...))
+	})
+}
+
+// BigIntNotIn applies the NotIn predicate on the "big_int" field.
+func BigIntNotIn(vs ...schema.BigInt) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldBigInt), v...))
+	})
+}
+
+// BigIntGT applies the GT predicate on the "big_int" field.
+func BigIntGT(v schema.BigInt) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldBigInt), v))
+	})
+}
+
+// BigIntGTE applies the GTE predicate on the "big_int" field.
+func BigIntGTE(v schema.BigInt) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldBigInt), v))
+	})
+}
+
+// BigIntLT applies the LT predicate on the "big_int" field.
+func BigIntLT(v schema.BigInt) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldBigInt), v))
+	})
+}
+
+// BigIntLTE applies the LTE predicate on the "big_int" field.
+func BigIntLTE(v schema.BigInt) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldBigInt), v))
+	})
+}
+
+// BigIntIsNil applies the IsNil predicate on the "big_int" field.
+func BigIntIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldBigInt)))
+	})
+}
+
+// BigIntNotNil applies the NotNil predicate on the "big_int" field.
+func BigIntNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldBigInt)))
+	})
+}
+
+// PasswordOtherEQ applies the EQ predicate on the "password_other" field.
+func PasswordOtherEQ(v schema.Password) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPasswordOther), v))
+	})
+}
+
+// PasswordOtherNEQ applies the NEQ predicate on the "password_other" field.
+func PasswordOtherNEQ(v schema.Password) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPasswordOther), v))
+	})
+}
+
+// PasswordOtherIn applies the In predicate on the "password_other" field.
+func PasswordOtherIn(vs ...schema.Password) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldPasswordOther), v...))
+	})
+}
+
+// PasswordOtherNotIn applies the NotIn predicate on the "password_other" field.
+func PasswordOtherNotIn(vs ...schema.Password) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldPasswordOther), v...))
+	})
+}
+
+// PasswordOtherGT applies the GT predicate on the "password_other" field.
+func PasswordOtherGT(v schema.Password) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPasswordOther), v))
+	})
+}
+
+// PasswordOtherGTE applies the GTE predicate on the "password_other" field.
+func PasswordOtherGTE(v schema.Password) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPasswordOther), v))
+	})
+}
+
+// PasswordOtherLT applies the LT predicate on the "password_other" field.
+func PasswordOtherLT(v schema.Password) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPasswordOther), v))
+	})
+}
+
+// PasswordOtherLTE applies the LTE predicate on the "password_other" field.
+func PasswordOtherLTE(v schema.Password) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPasswordOther), v))
+	})
+}
+
+// PasswordOtherIsNil applies the IsNil predicate on the "password_other" field.
+func PasswordOtherIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldPasswordOther)))
+	})
+}
+
+// PasswordOtherNotNil applies the NotNil predicate on the "password_other" field.
+func PasswordOtherNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldPasswordOther)))
 	})
 }
 

@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/comment"
@@ -28,6 +29,7 @@ type CommentQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Comment
+	modifiers  []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -291,8 +293,8 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //		Select(comment.FieldUniqueInt).
 //		Scan(ctx, &v)
 //
-func (cq *CommentQuery) Select(field string, fields ...string) *CommentSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CommentSelect{CommentQuery: cq}
 }
 
@@ -329,6 +331,9 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 		node := nodes[len(nodes)-1]
 		return node.assignValues(columns, values)
 	}
+	if len(cq.modifiers) > 0 {
+		_spec.Modifiers = cq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -340,6 +345,9 @@ func (cq *CommentQuery) sqlAll(ctx context.Context) ([]*Comment, error) {
 
 func (cq *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	if len(cq.modifiers) > 0 {
+		_spec.Modifiers = cq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 
@@ -402,10 +410,17 @@ func (cq *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(comment.Table)
-	selector := builder.Select(t1.Columns(comment.Columns...)...).From(t1)
+	columns := cq.fields
+	if len(columns) == 0 {
+		columns = comment.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if cq.sql != nil {
 		selector = cq.sql
-		selector.Select(selector.Columns(comment.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
+	}
+	for _, m := range cq.modifiers {
+		m(selector)
 	}
 	for _, p := range cq.predicates {
 		p(selector)
@@ -422,6 +437,38 @@ func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (cq *CommentQuery) ForUpdate(opts ...sql.LockOption) *CommentQuery {
+	if cq.driver.Dialect() == dialect.Postgres {
+		cq.Unique(false)
+	}
+	cq.modifiers = append(cq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return cq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (cq *CommentQuery) ForShare(opts ...sql.LockOption) *CommentQuery {
+	if cq.driver.Dialect() == dialect.Postgres {
+		cq.Unique(false)
+	}
+	cq.modifiers = append(cq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return cq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cq *CommentQuery) Modify(modifiers ...func(s *sql.Selector)) *CommentSelect {
+	cq.modifiers = append(cq.modifiers, modifiers...)
+	return cq.Select()
 }
 
 // CommentGroupBy is the group-by builder for Comment entities.
@@ -906,7 +953,7 @@ func (cs *CommentSelect) BoolX(ctx context.Context) bool {
 
 func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := cs.sqlQuery().Query()
+	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -914,8 +961,8 @@ func (cs *CommentSelect) sqlScan(ctx context.Context, v interface{}) error {
 	return sql.ScanSlice(rows, v)
 }
 
-func (cs *CommentSelect) sqlQuery() sql.Querier {
-	selector := cs.sql
-	selector.Select(selector.Columns(cs.fields...)...)
-	return selector
+// Modify adds a query modifier for attaching custom logic to queries.
+func (cs *CommentSelect) Modify(modifiers ...func(s *sql.Selector)) *CommentSelect {
+	cs.modifiers = append(cs.modifiers, modifiers...)
+	return cs
 }

@@ -365,8 +365,8 @@ func (pq *PostQuery) GroupBy(field string, fields ...string) *PostGroupBy {
 //		Select(post.FieldText).
 //		Scan(ctx, &v)
 //
-func (pq *PostQuery) Select(field string, fields ...string) *PostSelect {
-	pq.fields = append([]string{field}, fields...)
+func (pq *PostQuery) Select(fields ...string) *PostSelect {
+	pq.fields = append(pq.fields, fields...)
 	return &PostSelect{PostQuery: pq}
 }
 
@@ -533,10 +533,14 @@ func (pq *PostQuery) querySpec() *sqlgraph.QuerySpec {
 func (pq *PostQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
 	t1 := builder.Table(post.Table)
-	selector := builder.Select(t1.Columns(post.Columns...)...).From(t1)
+	columns := pq.fields
+	if len(columns) == 0 {
+		columns = post.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if pq.sql != nil {
 		selector = pq.sql
-		selector.Select(selector.Columns(post.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range pq.predicates {
 		p(selector)
@@ -1037,16 +1041,10 @@ func (ps *PostSelect) BoolX(ctx context.Context) bool {
 
 func (ps *PostSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ps.sqlQuery().Query()
+	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ps *PostSelect) sqlQuery() sql.Querier {
-	selector := ps.sql
-	selector.Select(selector.Columns(ps.fields...)...)
-	return selector
 }

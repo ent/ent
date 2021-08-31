@@ -8,8 +8,8 @@ package main
 import (
 	"bytes"
 	"go/format"
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"text/template"
 
@@ -17,12 +17,12 @@ import (
 )
 
 func main() {
-	buf, err := ioutil.ReadFile("internal/numeric.tmpl")
+	buf, err := os.ReadFile("internal/numeric.tmpl")
 	if err != nil {
 		log.Fatal("reading template file:", err)
 	}
 	intTmpl := template.Must(template.New("numeric").
-		Funcs(template.FuncMap{"title": strings.Title, "hasPrefix": strings.HasPrefix}).
+		Funcs(template.FuncMap{"title": strings.Title, "hasPrefix": strings.HasPrefix, "toUpper": strings.ToUpper}).
 		Parse(string(buf)))
 	b := &bytes.Buffer{}
 	if err := intTmpl.Execute(b, struct {
@@ -50,7 +50,7 @@ func main() {
 	if buf, err = format.Source(b.Bytes()); err != nil {
 		log.Fatal("formatting output:", err)
 	}
-	if err := ioutil.WriteFile("numeric.go", buf, 0644); err != nil {
+	if err := os.WriteFile("numeric.go", buf, 0644); err != nil {
 		log.Fatal("writing go file:", err)
 	}
 }

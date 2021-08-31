@@ -18,7 +18,9 @@ sidebar_label: FAQ
 [How to define a spatial data type field in MySQL?](#how-to-define-a-spatial-data-type-field-in-mysql)  
 [How to extend the generated models?](#how-to-extend-the-generated-models)  
 [How to extend the generated builders?](#how-to-extend-the-generated-builders)   
-[How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)
+[How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)  
+[How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)  
+[How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)
 
 ## Answers
 
@@ -361,7 +363,7 @@ func (BaseMixin) Hooks() []ent.Hook {
 }
 
 func IDHook() ent.Hook {
-    sf := sonyflake.NewSonyflake(sonyflage.Settings{})
+    sf := sonyflake.NewSonyflake(sonyflake.Settings{})
 	type IDSetter interface {
 		SetID(uint64)
 	}
@@ -599,12 +601,6 @@ func main() {
 
 #### How to store Protobuf objects in a BLOB column?
 
-:::info
-This solution relies on a recent bugfix that is currently available on the `master` branch and
-will be released in `v.0.8.0`
-:::
-
-
 Assuming we have a Protobuf message defined:
 ```protobuf
 syntax = "proto3";
@@ -658,15 +654,16 @@ package main
 
 import (
 	"context"
+	"testing"
+
 	"project/ent/enttest"
 	"project/pb"
-	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
 )
 
-func Test(t *testing.T) {
+func TestMain(t *testing.T) {
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	defer client.Close()
 
@@ -679,5 +676,68 @@ func Test(t *testing.T) {
 	ret := client.Message.GetX(context.TODO(), msg.ID)
 	require.Equal(t, "hello", ret.Hi.Greeting)
 }
+```
 
+#### How to add `CHECK` constraints to table?
+
+The [`entsql.Annotation`](schema-annotations.md) option allows adding custom `CHECK` constraints to the `CREATE TABLE`
+statement. In order to add `CHECK` constraints to your schema, use the following example:
+
+```go
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		&entsql.Annotation{
+			// The `Check` option allows adding an
+			// unnamed CHECK constraint to table DDL.
+			Check: "website <> 'entgo.io'",
+
+			// The `Checks` option allows adding multiple CHECK constraints
+			// to table creation. The keys are used as the constraint names.
+			Checks: map[string]string{
+				"valid_nickname":  "nickname <> firstname",
+				"valid_firstname": "length(first_name) > 1",
+			},
+		},
+	}
+}
+```
+
+#### How to define a custom precision numeric field?
+
+Using [GoType](schema-fields.md#go-type) and [SchemaType](schema-fields.md#database-type) it is possible to define
+custom precision numeric fields. For example, defining a field that uses [big.Int](https://golang.org/pkg/math/big/).
+
+```go
+func (T) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("precise").
+			GoType(new(BigInt)).
+			SchemaType(map[string]string{
+				dialect.SQLite:   "numeric(78, 0)",
+				dialect.Postgres: "numeric(78, 0)",
+			}),
+	}
+}
+
+type BigInt struct {
+	big.Int
+}
+
+func (b *BigInt) Scan(src interface{}) error {
+	var i sql.NullString
+	if err := i.Scan(src); err != nil {
+		return err
+	}
+	if !i.Valid {
+		return nil
+	}
+	if _, ok := b.Int.SetString(i.String, 10); ok {
+		return nil
+	}
+	return fmt.Errorf("could not scan type %T with value %v into BigInt", src, src)
+}
+
+func (b *BigInt) Value() (driver.Value, error) {
+	return b.String(), nil
+}
 ```

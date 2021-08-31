@@ -15,6 +15,8 @@ const (
 	FieldSource = "source"
 	// FieldSourceURI holds the string denoting the source_uri field in the database.
 	FieldSourceURI = "source_uri"
+	// FieldText holds the string denoting the text field in the database.
+	FieldText = "text"
 	// Table holds the table name of the media in the database.
 	Table = "media"
 )
@@ -24,6 +26,7 @@ var Columns = []string{
 	FieldID,
 	FieldSource,
 	FieldSourceURI,
+	FieldText,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

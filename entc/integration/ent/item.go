@@ -16,9 +16,11 @@ import (
 
 // Item is the model entity for the Item schema.
 type Item struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -26,8 +28,8 @@ func (*Item) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case item.FieldID:
-			values[i] = new(sql.NullInt64)
+		case item.FieldID, item.FieldText:
+			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Item", columns[i])
 		}
@@ -44,11 +46,17 @@ func (i *Item) assignValues(columns []string, values []interface{}) error {
 	for j := range columns {
 		switch columns[j] {
 		case item.FieldID:
-			value, ok := values[j].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[j].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[j])
+			} else if value.Valid {
+				i.ID = value.String
 			}
-			i.ID = int(value.Int64)
+		case item.FieldText:
+			if value, ok := values[j].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field text", values[j])
+			} else if value.Valid {
+				i.Text = value.String
+			}
 		}
 	}
 	return nil
@@ -77,6 +85,8 @@ func (i *Item) String() string {
 	var builder strings.Builder
 	builder.WriteString("Item(")
 	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
+	builder.WriteString(", text=")
+	builder.WriteString(i.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

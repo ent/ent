@@ -25,9 +25,9 @@ type SpecDelete struct {
 	mutation *SpecMutation
 }
 
-// Where adds a new predicate to the SpecDelete builder.
+// Where appends a list predicates to the SpecDelete builder.
 func (sd *SpecDelete) Where(ps ...predicate.Spec) *SpecDelete {
-	sd.mutation.predicates = append(sd.mutation.predicates, ps...)
+	sd.mutation.Where(ps...)
 	return sd
 }
 
@@ -51,6 +51,9 @@ func (sd *SpecDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(sd.hooks) - 1; i >= 0; i-- {
+			if sd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = sd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sd.mutation); err != nil {

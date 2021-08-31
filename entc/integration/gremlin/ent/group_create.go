@@ -165,11 +165,17 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 				return nil, err
 			}
 			gc.mutation = mutation
-			node, err = gc.gremlinSave(ctx)
+			if node, err = gc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(gc.hooks) - 1; i >= 0; i-- {
+			if gc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
@@ -188,6 +194,19 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 	return v
 }
 
+// Exec executes the query.
+func (gc *GroupCreate) Exec(ctx context.Context) error {
+	_, err := gc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gc *GroupCreate) ExecX(ctx context.Context) {
+	if err := gc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (gc *GroupCreate) defaults() {
 	if _, ok := gc.mutation.Active(); !ok {
@@ -203,27 +222,27 @@ func (gc *GroupCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.Active(); !ok {
-		return &ValidationError{Name: "active", err: errors.New("ent: missing required field \"active\"")}
+		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "active"`)}
 	}
 	if _, ok := gc.mutation.Expire(); !ok {
-		return &ValidationError{Name: "expire", err: errors.New("ent: missing required field \"expire\"")}
+		return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "expire"`)}
 	}
 	if v, ok := gc.mutation.GetType(); ok {
 		if err := group.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "type": %w`, err)}
 		}
 	}
 	if v, ok := gc.mutation.MaxUsers(); ok {
 		if err := group.MaxUsersValidator(v); err != nil {
-			return &ValidationError{Name: "max_users", err: fmt.Errorf("ent: validator failed for field \"max_users\": %w", err)}
+			return &ValidationError{Name: "max_users", err: fmt.Errorf(`ent: validator failed for field "max_users": %w`, err)}
 		}
 	}
 	if _, ok := gc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
 	if v, ok := gc.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
 		}
 	}
 	if _, ok := gc.mutation.InfoID(); !ok {

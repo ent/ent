@@ -7,6 +7,7 @@ package schema
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -108,6 +109,15 @@ func (t *Table) column(name string) (*Column, bool) {
 		if c.Name == name {
 			return c, true
 		}
+	}
+	return nil, false
+}
+
+// Index returns a table index by its exact name.
+func (t *Table) Index(name string) (*Index, bool) {
+	idx, ok := t.index(name)
+	if ok && idx.Name == name {
+		return idx, ok
 	}
 	return nil, false
 }
@@ -407,12 +417,13 @@ func (r ReferenceOption) ConstName() string {
 
 // Index definition for table index.
 type Index struct {
-	Name     string    // index name.
-	Unique   bool      // uniqueness.
-	Columns  []*Column // actual table columns.
-	columns  []string  // columns loaded from query scan.
-	primary  bool      // primary key index.
-	realname string    // real name in the database (Postgres only).
+	Name       string                  // index name.
+	Unique     bool                    // uniqueness.
+	Columns    []*Column               // actual table columns.
+	Annotation *entsql.IndexAnnotation // index annotation.
+	columns    []string                // columns loaded from query scan.
+	primary    bool                    // primary key index.
+	realname   string                  // real name in the database (Postgres only).
 }
 
 // Builder returns the query builder for index creation. The DSL is identical in all dialects.
@@ -531,4 +542,34 @@ func compare(v1, v2 int) int {
 		return -1
 	}
 	return 1
+}
+
+// addChecks appends the CHECK clauses from the entsql.Annotation.
+func addChecks(t *sql.TableBuilder, ant *entsql.Annotation) {
+	if check := ant.Check; check != "" {
+		t.Checks(func(b *sql.Builder) {
+			b.WriteString("CHECK " + checkExpr(check))
+		})
+	}
+	if checks := ant.Checks; len(ant.Checks) > 0 {
+		names := make([]string, 0, len(checks))
+		for name := range checks {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		for _, name := range names {
+			t.Checks(func(b *sql.Builder) {
+				b.WriteString("CONSTRAINT ").Ident(name).WriteString(" CHECK " + checkExpr(checks[name]))
+			})
+		}
+	}
+}
+
+// checkExpr formats the CHECK expression.
+func checkExpr(expr string) string {
+	expr = strings.TrimSpace(expr)
+	if !strings.HasPrefix(expr, "(") && !strings.HasSuffix(expr, ")") {
+		expr = "(" + expr + ")"
+	}
+	return expr
 }

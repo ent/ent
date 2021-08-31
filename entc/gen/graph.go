@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 	"text/template/parse"
 
 	"entgo.io/ent/dialect/sql/schema"
@@ -418,7 +418,7 @@ func resolve(t *Type) error {
 }
 
 // Tables returns the schema definitions of SQL tables for the graph.
-func (g *Graph) Tables() (all []*schema.Table) {
+func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
 		table := schema.NewTable(n.Table()).
@@ -444,7 +444,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 				// and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, Nullable: true}
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
 				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
@@ -456,7 +456,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Nullable: true}
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
 				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
@@ -507,6 +507,9 @@ func (g *Graph) Tables() (all []*schema.Table) {
 		table := tables[n.Table()]
 		for _, idx := range n.Indexes {
 			table.AddIndex(idx.Name, idx.Unique, idx.Columns)
+			// Set the entsql.IndexAnnotation from the schema if exists.
+			index, _ := table.Index(idx.Name)
+			index.Annotation = entsqlIndexAnnotate(idx.Annotations)
 		}
 	}
 	return
@@ -595,11 +598,15 @@ func (g *Graph) typ(name string) (*Type, bool) {
 	return nil, false
 }
 
-// templates returns the template.Template for the code and external templates
-// to execute on the Graph object if provided.
+// templates returns the Template to execute on the Graph,
+// and a list of optional external templates if provided.
 func (g *Graph) templates() (*Template, []GraphTemplate) {
 	initTemplates()
-	external := make([]GraphTemplate, 0, len(g.Templates))
+	var (
+		roots    = make(map[string]struct{})
+		helpers  = make(map[string]struct{})
+		external = make([]GraphTemplate, 0, len(g.Templates))
+	)
 	for _, rootT := range g.Templates {
 		templates.Funcs(rootT.FuncMap)
 		for _, tmpl := range rootT.Templates() {
@@ -607,16 +614,35 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 				continue
 			}
 			name := tmpl.Name()
-			// If the template does not override or extend one of
-			// the builtin templates, generate it in a new file.
-			if templates.Lookup(name) == nil && !extendExisting(name) {
+			switch {
+			// Helper templates can be either global (prefixed with "helper/"),
+			// or local, where their names follow the format: "<root-tmpl>/helper/.+").
+			case strings.HasPrefix(name, "helper/"):
+			case strings.Contains(name, "/helper/"):
+				helpers[name] = struct{}{}
+			case templates.Lookup(name) == nil && !extendExisting(name):
+				// If the template does not override or extend one of
+				// the builtin templates, generate it in a new file.
 				external = append(external, GraphTemplate{
 					Name:   name,
 					Format: snake(name) + ".go",
 				})
+				roots[name] = struct{}{}
 			}
 			templates = MustParse(templates.AddParseTree(name, tmpl.Tree))
 		}
+	}
+	for name := range helpers {
+		root := name[:strings.Index(name, "/helper/")]
+		// If the name is prefixed with a name of a root
+		// template, we treat it as a local helper template.
+		if _, ok := roots[root]; ok {
+			continue
+		}
+		external = append(external, GraphTemplate{
+			Name:   name,
+			Format: snake(name) + ".go",
+		})
 	}
 	for _, f := range g.Features {
 		external = append(external, f.GraphTemplates...)
@@ -666,7 +692,7 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 		nop  = func() error { return nil }
 		path = filepath.Join(c.Target, "runtime.go")
 	)
-	out, err := ioutil.ReadFile(path)
+	out, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nop, nil
@@ -681,10 +707,10 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 	if len(fi.Imports) == 0 {
 		return nop, nil
 	}
-	if err := ioutil.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
+	if err := os.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
 		return nil, err
 	}
-	return func() error { return ioutil.WriteFile(path, out, 0644) }, nil
+	return func() error { return os.WriteFile(path, out, 0644) }, nil
 }
 
 type (
@@ -706,7 +732,7 @@ func (a assets) write() error {
 		}
 	}
 	for _, file := range a.files {
-		if err := ioutil.WriteFile(file.path, file.content, 0644); err != nil {
+		if err := os.WriteFile(file.path, file.content, 0644); err != nil {
 			return fmt.Errorf("write file %q: %w", file.path, err)
 		}
 	}
@@ -721,7 +747,7 @@ func (a assets) format() error {
 		if err != nil {
 			return fmt.Errorf("format file %s: %w", path, err)
 		}
-		if err := ioutil.WriteFile(path, src, 0644); err != nil {
+		if err := os.WriteFile(path, src, 0644); err != nil {
 			return fmt.Errorf("write file %s: %w", path, err)
 		}
 	}

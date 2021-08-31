@@ -97,11 +97,17 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 				return nil, err
 			}
 			bc.mutation = mutation
-			node, err = bc.sqlSave(ctx)
+			if node, err = bc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(bc.hooks) - 1; i >= 0; i-- {
+			if bc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = bc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, bc.mutation); err != nil {
@@ -120,6 +126,19 @@ func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
 	return v
 }
 
+// Exec executes the query.
+func (bc *BlobCreate) Exec(ctx context.Context) error {
+	_, err := bc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (bc *BlobCreate) ExecX(ctx context.Context) {
+	if err := bc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (bc *BlobCreate) defaults() {
 	if _, ok := bc.mutation.UUID(); !ok {
@@ -135,7 +154,7 @@ func (bc *BlobCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (bc *BlobCreate) check() error {
 	if _, ok := bc.mutation.UUID(); !ok {
-		return &ValidationError{Name: "uuid", err: errors.New("ent: missing required field \"uuid\"")}
+		return &ValidationError{Name: "uuid", err: errors.New(`ent: missing required field "uuid"`)}
 	}
 	return nil
 }
@@ -143,10 +162,13 @@ func (bc *BlobCreate) check() error {
 func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 	_node, _spec := bc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(uuid.UUID)
 	}
 	return _node, nil
 }
@@ -245,17 +267,19 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, bcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, bcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -279,4 +303,17 @@ func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (bcb *BlobCreateBulk) Exec(ctx context.Context) error {
+	_, err := bcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (bcb *BlobCreateBulk) ExecX(ctx context.Context) {
+	if err := bcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

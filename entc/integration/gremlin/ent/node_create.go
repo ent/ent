@@ -103,11 +103,17 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 				return nil, err
 			}
 			nc.mutation = mutation
-			node, err = nc.gremlinSave(ctx)
+			if node, err = nc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(nc.hooks) - 1; i >= 0; i-- {
+			if nc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
@@ -124,6 +130,19 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (nc *NodeCreate) Exec(ctx context.Context) error {
+	_, err := nc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (nc *NodeCreate) ExecX(ctx context.Context) {
+	if err := nc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.

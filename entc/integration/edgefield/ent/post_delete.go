@@ -24,9 +24,9 @@ type PostDelete struct {
 	mutation *PostMutation
 }
 
-// Where adds a new predicate to the PostDelete builder.
+// Where appends a list predicates to the PostDelete builder.
 func (pd *PostDelete) Where(ps ...predicate.Post) *PostDelete {
-	pd.mutation.predicates = append(pd.mutation.predicates, ps...)
+	pd.mutation.Where(ps...)
 	return pd
 }
 
@@ -50,6 +50,9 @@ func (pd *PostDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(pd.hooks) - 1; i >= 0; i-- {
+			if pd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pd.mutation); err != nil {

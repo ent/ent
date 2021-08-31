@@ -64,11 +64,17 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 				return nil, err
 			}
 			sc.mutation = mutation
-			node, err = sc.gremlinSave(ctx)
+			if node, err = sc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(sc.hooks) - 1; i >= 0; i-- {
+			if sc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = sc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
@@ -85,6 +91,19 @@ func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (sc *SpecCreate) Exec(ctx context.Context) error {
+	_, err := sc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (sc *SpecCreate) ExecX(ctx context.Context) {
+	if err := sc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.

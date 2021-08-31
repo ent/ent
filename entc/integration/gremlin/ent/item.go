@@ -15,9 +15,11 @@ import (
 
 // Item is the model entity for the Item schema.
 type Item struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Item.
@@ -27,12 +29,14 @@ func (i *Item) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scani struct {
-		ID string `json:"id,omitempty"`
+		ID   string `json:"id,omitempty"`
+		Text string `json:"text,omitempty"`
 	}
 	if err := vmap.Decode(&scani); err != nil {
 		return err
 	}
 	i.ID = scani.ID
+	i.Text = scani.Text
 	return nil
 }
 
@@ -59,6 +63,8 @@ func (i *Item) String() string {
 	var builder strings.Builder
 	builder.WriteString("Item(")
 	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
+	builder.WriteString(", text=")
+	builder.WriteString(i.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -73,14 +79,16 @@ func (i *Items) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scani []struct {
-		ID string `json:"id,omitempty"`
+		ID   string `json:"id,omitempty"`
+		Text string `json:"text,omitempty"`
 	}
 	if err := vmap.Decode(&scani); err != nil {
 		return err
 	}
 	for _, v := range scani {
 		*i = append(*i, &Item{
-			ID: v.ID,
+			ID:   v.ID,
+			Text: v.Text,
 		})
 	}
 	return nil

@@ -24,9 +24,9 @@ type FileDelete struct {
 	mutation *FileMutation
 }
 
-// Where adds a new predicate to the FileDelete builder.
+// Where appends a list predicates to the FileDelete builder.
 func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
-	fd.mutation.predicates = append(fd.mutation.predicates, ps...)
+	fd.mutation.Where(ps...)
 	return fd
 }
 
@@ -50,6 +50,9 @@ func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(fd.hooks) - 1; i >= 0; i-- {
+			if fd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = fd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, fd.mutation); err != nil {

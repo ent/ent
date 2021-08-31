@@ -329,8 +329,8 @@ func (sq *StreetQuery) GroupBy(field string, fields ...string) *StreetGroupBy {
 //		Select(street.FieldName).
 //		Scan(ctx, &v)
 //
-func (sq *StreetQuery) Select(field string, fields ...string) *StreetSelect {
-	sq.fields = append([]string{field}, fields...)
+func (sq *StreetQuery) Select(fields ...string) *StreetSelect {
+	sq.fields = append(sq.fields, fields...)
 	return &StreetSelect{StreetQuery: sq}
 }
 
@@ -481,10 +481,14 @@ func (sq *StreetQuery) querySpec() *sqlgraph.QuerySpec {
 func (sq *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sq.driver.Dialect())
 	t1 := builder.Table(street.Table)
-	selector := builder.Select(t1.Columns(street.Columns...)...).From(t1)
+	columns := sq.fields
+	if len(columns) == 0 {
+		columns = street.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if sq.sql != nil {
 		selector = sq.sql
-		selector.Select(selector.Columns(street.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range sq.predicates {
 		p(selector)
@@ -985,16 +989,10 @@ func (ss *StreetSelect) BoolX(ctx context.Context) bool {
 
 func (ss *StreetSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ss.sqlQuery().Query()
+	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ss *StreetSelect) sqlQuery() sql.Querier {
-	selector := ss.sql
-	selector.Select(selector.Columns(ss.fields...)...)
-	return selector
 }

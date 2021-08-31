@@ -20,10 +20,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	{{ range $_, $n := $.Nodes -}}
+	{{- range $n := $.Nodes }}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
-	{{ end }}
+	{{- end }}
 
 	// lazily loaded.
 	client     *Client
@@ -109,9 +109,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	{{ range $_, $n := $.Nodes -}}
+	{{- range $n := $.Nodes }}
 		tx.{{ $n.Name }} = New{{ $n.Name }}Client(tx.config)
-	{{ end -}}
+	{{- end }}
 }
 
 {{/* first node for doc example */}}

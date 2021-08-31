@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -190,7 +189,7 @@ func initEnv(target string, names []string) error {
 			return fmt.Errorf("executing template %s: %w", name, err)
 		}
 		newFileTarget := filepath.Join(target, strings.ToLower(name+".go"))
-		if err := ioutil.WriteFile(newFileTarget, b.Bytes(), 0644); err != nil {
+		if err := os.WriteFile(newFileTarget, b.Bytes(), 0644); err != nil {
 			return fmt.Errorf("writing file %s: %w", newFileTarget, err)
 		}
 	}
@@ -208,7 +207,7 @@ func createDir(target string) error {
 	if target != defaultSchema {
 		return nil
 	}
-	if err := ioutil.WriteFile("ent/generate.go", []byte(genFile), 0644); err != nil {
+	if err := os.WriteFile("ent/generate.go", []byte(genFile), 0644); err != nil {
 		return fmt.Errorf("creating generate.go file: %w", err)
 	}
 	return nil

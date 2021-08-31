@@ -111,7 +111,9 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 		err  error
 		node *Task
 	)
-	tc.defaults()
+	if err := tc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(tc.hooks) == 0 {
 		if err = tc.check(); err != nil {
 			return nil, err
@@ -127,11 +129,17 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 				return nil, err
 			}
 			tc.mutation = mutation
-			node, err = tc.sqlSave(ctx)
+			if node, err = tc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(tc.hooks) - 1; i >= 0; i-- {
+			if tc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
@@ -150,30 +158,44 @@ func (tc *TaskCreate) SaveX(ctx context.Context) *Task {
 	return v
 }
 
+// Exec executes the query.
+func (tc *TaskCreate) Exec(ctx context.Context) error {
+	_, err := tc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tc *TaskCreate) ExecX(ctx context.Context) {
+	if err := tc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
-func (tc *TaskCreate) defaults() {
+func (tc *TaskCreate) defaults() error {
 	if _, ok := tc.mutation.Status(); !ok {
 		v := task.DefaultStatus
 		tc.mutation.SetStatus(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TaskCreate) check() error {
 	if _, ok := tc.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New("ent: missing required field \"title\"")}
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "title"`)}
 	}
 	if v, ok := tc.mutation.Title(); ok {
 		if err := task.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf("ent: validator failed for field \"title\": %w", err)}
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "title": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New("ent: missing required field \"status\"")}
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "status"`)}
 	}
 	if v, ok := tc.mutation.Status(); ok {
 		if err := task.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("ent: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "status": %w`, err)}
 		}
 	}
 	return nil
@@ -182,8 +204,8 @@ func (tc *TaskCreate) check() error {
 func (tc *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
 	_node, _spec := tc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -306,19 +328,23 @@ func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, tcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, tcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -342,4 +368,17 @@ func (tcb *TaskCreateBulk) SaveX(ctx context.Context) []*Task {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (tcb *TaskCreateBulk) Exec(ctx context.Context) error {
+	_, err := tcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tcb *TaskCreateBulk) ExecX(ctx context.Context) {
+	if err := tcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

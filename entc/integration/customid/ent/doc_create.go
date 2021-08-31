@@ -112,11 +112,17 @@ func (dc *DocCreate) Save(ctx context.Context) (*Doc, error) {
 				return nil, err
 			}
 			dc.mutation = mutation
-			node, err = dc.sqlSave(ctx)
+			if node, err = dc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(dc.hooks) - 1; i >= 0; i-- {
+			if dc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = dc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, dc.mutation); err != nil {
@@ -135,6 +141,19 @@ func (dc *DocCreate) SaveX(ctx context.Context) *Doc {
 	return v
 }
 
+// Exec executes the query.
+func (dc *DocCreate) Exec(ctx context.Context) error {
+	_, err := dc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (dc *DocCreate) ExecX(ctx context.Context) {
+	if err := dc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (dc *DocCreate) defaults() {
 	if _, ok := dc.mutation.ID(); !ok {
@@ -147,7 +166,7 @@ func (dc *DocCreate) defaults() {
 func (dc *DocCreate) check() error {
 	if v, ok := dc.mutation.ID(); ok {
 		if err := doc.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
 		}
 	}
 	return nil
@@ -156,10 +175,13 @@ func (dc *DocCreate) check() error {
 func (dc *DocCreate) sqlSave(ctx context.Context) (*Doc, error) {
 	_node, _spec := dc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, dc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(schema.DocID)
 	}
 	return _node, nil
 }
@@ -258,17 +280,19 @@ func (dcb *DocCreateBulk) Save(ctx context.Context) ([]*Doc, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, dcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, dcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, dcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -292,4 +316,17 @@ func (dcb *DocCreateBulk) SaveX(ctx context.Context) []*Doc {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (dcb *DocCreateBulk) Exec(ctx context.Context) error {
+	_, err := dcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (dcb *DocCreateBulk) ExecX(ctx context.Context) {
+	if err := dcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

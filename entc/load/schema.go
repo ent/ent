@@ -76,10 +76,11 @@ type Edge struct {
 
 // Index represents an ent.Index that was loaded from a complied user package.
 type Index struct {
-	Unique     bool     `json:"unique,omitempty"`
-	Edges      []string `json:"edges,omitempty"`
-	Fields     []string `json:"fields,omitempty"`
-	StorageKey string   `json:"storage_key,omitempty"`
+	Unique      bool                   `json:"unique,omitempty"`
+	Edges       []string               `json:"edges,omitempty"`
+	Fields      []string               `json:"fields,omitempty"`
+	StorageKey  string                 `json:"storage_key,omitempty"`
+	Annotations map[string]interface{} `json:"annotations,omitempty"`
 }
 
 // NewEdge creates an loaded edge from edge descriptor.
@@ -151,16 +152,21 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 
 // NewIndex creates an loaded index from index descriptor.
 func NewIndex(idx *index.Descriptor) *Index {
-	return &Index{
-		Edges:      idx.Edges,
-		Fields:     idx.Fields,
-		Unique:     idx.Unique,
-		StorageKey: idx.StorageKey,
+	ni := &Index{
+		Edges:       idx.Edges,
+		Fields:      idx.Fields,
+		Unique:      idx.Unique,
+		StorageKey:  idx.StorageKey,
+		Annotations: make(map[string]interface{}),
 	}
+	for _, at := range idx.Annotations {
+		ni.addAnnotation(at)
+	}
+	return ni
 }
 
-// MarshalSchema encode the ent.Schema interface into a JSON
-// that can be decoded into the Schema object object.
+// MarshalSchema encodes the ent.Schema interface into a JSON
+// that can be decoded into the Schema objects declared above.
 func MarshalSchema(schema ent.Interface) (b []byte, err error) {
 	s := &Schema{
 		Config:      schema.Config(),
@@ -334,24 +340,25 @@ func (s *Schema) addAnnotation(an schema.Annotation) {
 }
 
 func (e *Edge) addAnnotation(an schema.Annotation) {
-	curr, ok := e.Annotations[an.Name()]
-	if !ok {
-		e.Annotations[an.Name()] = an
-		return
-	}
-	if m, ok := curr.(schema.Merger); ok {
-		e.Annotations[an.Name()] = m.Merge(an)
-	}
+	addAnnotation(e.Annotations, an)
+}
+
+func (i *Index) addAnnotation(an schema.Annotation) {
+	addAnnotation(i.Annotations, an)
 }
 
 func (f *Field) addAnnotation(an schema.Annotation) {
-	curr, ok := f.Annotations[an.Name()]
+	addAnnotation(f.Annotations, an)
+}
+
+func addAnnotation(annotations map[string]interface{}, an schema.Annotation) {
+	curr, ok := annotations[an.Name()]
 	if !ok {
-		f.Annotations[an.Name()] = an
+		annotations[an.Name()] = an
 		return
 	}
 	if m, ok := curr.(schema.Merger); ok {
-		f.Annotations[an.Name()] = m.Merge(an)
+		annotations[an.Name()] = m.Merge(an)
 	}
 }
 

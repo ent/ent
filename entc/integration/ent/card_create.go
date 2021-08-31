@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/spec"
@@ -24,6 +25,7 @@ type CardCreate struct {
 	config
 	mutation *CardMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetCreateTime sets the "create_time" field.
@@ -149,11 +151,17 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 				return nil, err
 			}
 			cc.mutation = mutation
-			node, err = cc.sqlSave(ctx)
+			if node, err = cc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			if cc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
@@ -170,6 +178,19 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (cc *CardCreate) Exec(ctx context.Context) error {
+	_, err := cc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (cc *CardCreate) ExecX(ctx context.Context) {
+	if err := cc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // defaults sets the default values of the builder before save.
@@ -191,25 +212,25 @@ func (cc *CardCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
 	if _, ok := cc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New("ent: missing required field \"create_time\"")}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
 	}
 	if _, ok := cc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New("ent: missing required field \"update_time\"")}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
 	}
 	if _, ok := cc.mutation.Balance(); !ok {
-		return &ValidationError{Name: "balance", err: errors.New("ent: missing required field \"balance\"")}
+		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "balance"`)}
 	}
 	if _, ok := cc.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
+		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "number"`)}
 	}
 	if v, ok := cc.mutation.Number(); ok {
 		if err := card.NumberValidator(v); err != nil {
-			return &ValidationError{Name: "number", err: fmt.Errorf("ent: validator failed for field \"number\": %w", err)}
+			return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "number": %w`, err)}
 		}
 	}
 	if v, ok := cc.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
 		}
 	}
 	return nil
@@ -218,8 +239,8 @@ func (cc *CardCreate) check() error {
 func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -239,6 +260,7 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	_spec.OnConflict = cc.conflict
 	if value, ok := cc.mutation.CreateTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -321,10 +343,280 @@ func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Card.Create().
+//		SetCreateTime(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.CardUpsert) {
+//			SetCreateTime(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (cc *CardCreate) OnConflict(opts ...sql.ConflictOption) *CardUpsertOne {
+	cc.conflict = opts
+	return &CardUpsertOne{
+		create: cc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Card.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func (cc *CardCreate) OnConflictColumns(columns ...string) *CardUpsertOne {
+	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
+	return &CardUpsertOne{
+		create: cc,
+	}
+}
+
+type (
+	// CardUpsertOne is the builder for "upsert"-ing
+	//  one Card node.
+	CardUpsertOne struct {
+		create *CardCreate
+	}
+
+	// CardUpsert is the "OnConflict" setter.
+	CardUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetCreateTime sets the "create_time" field.
+func (u *CardUpsert) SetCreateTime(v time.Time) *CardUpsert {
+	u.Set(card.FieldCreateTime, v)
+	return u
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *CardUpsert) UpdateCreateTime() *CardUpsert {
+	u.SetExcluded(card.FieldCreateTime)
+	return u
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (u *CardUpsert) SetUpdateTime(v time.Time) *CardUpsert {
+	u.Set(card.FieldUpdateTime, v)
+	return u
+}
+
+// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
+func (u *CardUpsert) UpdateUpdateTime() *CardUpsert {
+	u.SetExcluded(card.FieldUpdateTime)
+	return u
+}
+
+// SetBalance sets the "balance" field.
+func (u *CardUpsert) SetBalance(v float64) *CardUpsert {
+	u.Set(card.FieldBalance, v)
+	return u
+}
+
+// UpdateBalance sets the "balance" field to the value that was provided on create.
+func (u *CardUpsert) UpdateBalance() *CardUpsert {
+	u.SetExcluded(card.FieldBalance)
+	return u
+}
+
+// SetNumber sets the "number" field.
+func (u *CardUpsert) SetNumber(v string) *CardUpsert {
+	u.Set(card.FieldNumber, v)
+	return u
+}
+
+// UpdateNumber sets the "number" field to the value that was provided on create.
+func (u *CardUpsert) UpdateNumber() *CardUpsert {
+	u.SetExcluded(card.FieldNumber)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *CardUpsert) SetName(v string) *CardUpsert {
+	u.Set(card.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *CardUpsert) UpdateName() *CardUpsert {
+	u.SetExcluded(card.FieldName)
+	return u
+}
+
+// ClearName clears the value of the "name" field.
+func (u *CardUpsert) ClearName() *CardUpsert {
+	u.SetNull(card.FieldName)
+	return u
+}
+
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.Card.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+//
+func (u *CardUpsertOne) UpdateNewValues() *CardUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.Card.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *CardUpsertOne) Ignore() *CardUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *CardUpsertOne) DoNothing() *CardUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the CardCreate.OnConflict
+// documentation for more info.
+func (u *CardUpsertOne) Update(set func(*CardUpsert)) *CardUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&CardUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (u *CardUpsertOne) SetCreateTime(v time.Time) *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.SetCreateTime(v)
+	})
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *CardUpsertOne) UpdateCreateTime() *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateCreateTime()
+	})
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (u *CardUpsertOne) SetUpdateTime(v time.Time) *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.SetUpdateTime(v)
+	})
+}
+
+// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
+func (u *CardUpsertOne) UpdateUpdateTime() *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateUpdateTime()
+	})
+}
+
+// SetBalance sets the "balance" field.
+func (u *CardUpsertOne) SetBalance(v float64) *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.SetBalance(v)
+	})
+}
+
+// UpdateBalance sets the "balance" field to the value that was provided on create.
+func (u *CardUpsertOne) UpdateBalance() *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateBalance()
+	})
+}
+
+// SetNumber sets the "number" field.
+func (u *CardUpsertOne) SetNumber(v string) *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.SetNumber(v)
+	})
+}
+
+// UpdateNumber sets the "number" field to the value that was provided on create.
+func (u *CardUpsertOne) UpdateNumber() *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateNumber()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *CardUpsertOne) SetName(v string) *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *CardUpsertOne) UpdateName() *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateName()
+	})
+}
+
+// ClearName clears the value of the "name" field.
+func (u *CardUpsertOne) ClearName() *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.ClearName()
+	})
+}
+
+// Exec executes the query.
+func (u *CardUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for CardCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *CardUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *CardUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *CardUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // CardCreateBulk is the builder for creating many Card entities in bulk.
 type CardCreateBulk struct {
 	config
 	builders []*CardCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Card entities in the database.
@@ -350,19 +642,24 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = ccb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -386,4 +683,199 @@ func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (ccb *CardCreateBulk) Exec(ctx context.Context) error {
+	_, err := ccb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ccb *CardCreateBulk) ExecX(ctx context.Context) {
+	if err := ccb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Card.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.CardUpsert) {
+//			SetCreateTime(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (ccb *CardCreateBulk) OnConflict(opts ...sql.ConflictOption) *CardUpsertBulk {
+	ccb.conflict = opts
+	return &CardUpsertBulk{
+		create: ccb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Card.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func (ccb *CardCreateBulk) OnConflictColumns(columns ...string) *CardUpsertBulk {
+	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
+	return &CardUpsertBulk{
+		create: ccb,
+	}
+}
+
+// CardUpsertBulk is the builder for "upsert"-ing
+// a bulk of Card nodes.
+type CardUpsertBulk struct {
+	create *CardCreateBulk
+}
+
+// UpdateNewValues updates the fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Card.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+//
+func (u *CardUpsertBulk) UpdateNewValues() *CardUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Card.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+//
+func (u *CardUpsertBulk) Ignore() *CardUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *CardUpsertBulk) DoNothing() *CardUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the CardCreateBulk.OnConflict
+// documentation for more info.
+func (u *CardUpsertBulk) Update(set func(*CardUpsert)) *CardUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&CardUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetCreateTime sets the "create_time" field.
+func (u *CardUpsertBulk) SetCreateTime(v time.Time) *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.SetCreateTime(v)
+	})
+}
+
+// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
+func (u *CardUpsertBulk) UpdateCreateTime() *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateCreateTime()
+	})
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (u *CardUpsertBulk) SetUpdateTime(v time.Time) *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.SetUpdateTime(v)
+	})
+}
+
+// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
+func (u *CardUpsertBulk) UpdateUpdateTime() *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateUpdateTime()
+	})
+}
+
+// SetBalance sets the "balance" field.
+func (u *CardUpsertBulk) SetBalance(v float64) *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.SetBalance(v)
+	})
+}
+
+// UpdateBalance sets the "balance" field to the value that was provided on create.
+func (u *CardUpsertBulk) UpdateBalance() *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateBalance()
+	})
+}
+
+// SetNumber sets the "number" field.
+func (u *CardUpsertBulk) SetNumber(v string) *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.SetNumber(v)
+	})
+}
+
+// UpdateNumber sets the "number" field to the value that was provided on create.
+func (u *CardUpsertBulk) UpdateNumber() *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateNumber()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *CardUpsertBulk) SetName(v string) *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *CardUpsertBulk) UpdateName() *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.UpdateName()
+	})
+}
+
+// ClearName clears the value of the "name" field.
+func (u *CardUpsertBulk) ClearName() *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.ClearName()
+	})
+}
+
+// Exec executes the query.
+func (u *CardUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CardCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for CardCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *CardUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

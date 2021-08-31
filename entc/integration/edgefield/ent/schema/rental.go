@@ -7,6 +7,8 @@ package schema
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -23,8 +25,8 @@ func (Rental) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("date").
 			Default(time.Now),
-		field.Int("car_id"),
 		field.Int("user_id"),
+		field.UUID("car_id", uuid.UUID{}),
 	}
 }
 

@@ -25,9 +25,9 @@ type MetadataUpdate struct {
 	mutation *MetadataMutation
 }
 
-// Where adds a new predicate for the MetadataUpdate builder.
+// Where appends a list predicates to the MetadataUpdate builder.
 func (mu *MetadataUpdate) Where(ps ...predicate.Metadata) *MetadataUpdate {
-	mu.mutation.predicates = append(mu.mutation.predicates, ps...)
+	mu.mutation.Where(ps...)
 	return mu
 }
 
@@ -52,6 +52,26 @@ func (mu *MetadataUpdate) AddAge(i int) *MetadataUpdate {
 	return mu
 }
 
+// SetParentID sets the "parent_id" field.
+func (mu *MetadataUpdate) SetParentID(i int) *MetadataUpdate {
+	mu.mutation.SetParentID(i)
+	return mu
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (mu *MetadataUpdate) SetNillableParentID(i *int) *MetadataUpdate {
+	if i != nil {
+		mu.SetParentID(*i)
+	}
+	return mu
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (mu *MetadataUpdate) ClearParentID() *MetadataUpdate {
+	mu.mutation.ClearParentID()
+	return mu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (mu *MetadataUpdate) SetUserID(id int) *MetadataUpdate {
 	mu.mutation.SetUserID(id)
@@ -71,6 +91,26 @@ func (mu *MetadataUpdate) SetUser(u *User) *MetadataUpdate {
 	return mu.SetUserID(u.ID)
 }
 
+// AddChildIDs adds the "children" edge to the Metadata entity by IDs.
+func (mu *MetadataUpdate) AddChildIDs(ids ...int) *MetadataUpdate {
+	mu.mutation.AddChildIDs(ids...)
+	return mu
+}
+
+// AddChildren adds the "children" edges to the Metadata entity.
+func (mu *MetadataUpdate) AddChildren(m ...*Metadata) *MetadataUpdate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return mu.AddChildIDs(ids...)
+}
+
+// SetParent sets the "parent" edge to the Metadata entity.
+func (mu *MetadataUpdate) SetParent(m *Metadata) *MetadataUpdate {
+	return mu.SetParentID(m.ID)
+}
+
 // Mutation returns the MetadataMutation object of the builder.
 func (mu *MetadataUpdate) Mutation() *MetadataMutation {
 	return mu.mutation
@@ -79,6 +119,33 @@ func (mu *MetadataUpdate) Mutation() *MetadataMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (mu *MetadataUpdate) ClearUser() *MetadataUpdate {
 	mu.mutation.ClearUser()
+	return mu
+}
+
+// ClearChildren clears all "children" edges to the Metadata entity.
+func (mu *MetadataUpdate) ClearChildren() *MetadataUpdate {
+	mu.mutation.ClearChildren()
+	return mu
+}
+
+// RemoveChildIDs removes the "children" edge to Metadata entities by IDs.
+func (mu *MetadataUpdate) RemoveChildIDs(ids ...int) *MetadataUpdate {
+	mu.mutation.RemoveChildIDs(ids...)
+	return mu
+}
+
+// RemoveChildren removes "children" edges to Metadata entities.
+func (mu *MetadataUpdate) RemoveChildren(m ...*Metadata) *MetadataUpdate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return mu.RemoveChildIDs(ids...)
+}
+
+// ClearParent clears the "parent" edge to the Metadata entity.
+func (mu *MetadataUpdate) ClearParent() *MetadataUpdate {
+	mu.mutation.ClearParent()
 	return mu
 }
 
@@ -102,6 +169,9 @@ func (mu *MetadataUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(mu.hooks) - 1; i >= 0; i-- {
+			if mu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = mu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mu.mutation); err != nil {
@@ -200,11 +270,100 @@ func (mu *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if mu.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   metadata.ChildrenTable,
+			Columns: []string{metadata.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !mu.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   metadata.ChildrenTable,
+			Columns: []string{metadata.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.ChildrenIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   metadata.ChildrenTable,
+			Columns: []string{metadata.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mu.mutation.ParentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   metadata.ParentTable,
+			Columns: []string{metadata.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   metadata.ParentTable,
+			Columns: []string{metadata.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{metadata.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -240,6 +399,26 @@ func (muo *MetadataUpdateOne) AddAge(i int) *MetadataUpdateOne {
 	return muo
 }
 
+// SetParentID sets the "parent_id" field.
+func (muo *MetadataUpdateOne) SetParentID(i int) *MetadataUpdateOne {
+	muo.mutation.SetParentID(i)
+	return muo
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (muo *MetadataUpdateOne) SetNillableParentID(i *int) *MetadataUpdateOne {
+	if i != nil {
+		muo.SetParentID(*i)
+	}
+	return muo
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (muo *MetadataUpdateOne) ClearParentID() *MetadataUpdateOne {
+	muo.mutation.ClearParentID()
+	return muo
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (muo *MetadataUpdateOne) SetUserID(id int) *MetadataUpdateOne {
 	muo.mutation.SetUserID(id)
@@ -259,6 +438,26 @@ func (muo *MetadataUpdateOne) SetUser(u *User) *MetadataUpdateOne {
 	return muo.SetUserID(u.ID)
 }
 
+// AddChildIDs adds the "children" edge to the Metadata entity by IDs.
+func (muo *MetadataUpdateOne) AddChildIDs(ids ...int) *MetadataUpdateOne {
+	muo.mutation.AddChildIDs(ids...)
+	return muo
+}
+
+// AddChildren adds the "children" edges to the Metadata entity.
+func (muo *MetadataUpdateOne) AddChildren(m ...*Metadata) *MetadataUpdateOne {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return muo.AddChildIDs(ids...)
+}
+
+// SetParent sets the "parent" edge to the Metadata entity.
+func (muo *MetadataUpdateOne) SetParent(m *Metadata) *MetadataUpdateOne {
+	return muo.SetParentID(m.ID)
+}
+
 // Mutation returns the MetadataMutation object of the builder.
 func (muo *MetadataUpdateOne) Mutation() *MetadataMutation {
 	return muo.mutation
@@ -267,6 +466,33 @@ func (muo *MetadataUpdateOne) Mutation() *MetadataMutation {
 // ClearUser clears the "user" edge to the User entity.
 func (muo *MetadataUpdateOne) ClearUser() *MetadataUpdateOne {
 	muo.mutation.ClearUser()
+	return muo
+}
+
+// ClearChildren clears all "children" edges to the Metadata entity.
+func (muo *MetadataUpdateOne) ClearChildren() *MetadataUpdateOne {
+	muo.mutation.ClearChildren()
+	return muo
+}
+
+// RemoveChildIDs removes the "children" edge to Metadata entities by IDs.
+func (muo *MetadataUpdateOne) RemoveChildIDs(ids ...int) *MetadataUpdateOne {
+	muo.mutation.RemoveChildIDs(ids...)
+	return muo
+}
+
+// RemoveChildren removes "children" edges to Metadata entities.
+func (muo *MetadataUpdateOne) RemoveChildren(m ...*Metadata) *MetadataUpdateOne {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return muo.RemoveChildIDs(ids...)
+}
+
+// ClearParent clears the "parent" edge to the Metadata entity.
+func (muo *MetadataUpdateOne) ClearParent() *MetadataUpdateOne {
+	muo.mutation.ClearParent()
 	return muo
 }
 
@@ -297,6 +523,9 @@ func (muo *MetadataUpdateOne) Save(ctx context.Context) (*Metadata, error) {
 			return node, err
 		})
 		for i := len(muo.hooks) - 1; i >= 0; i-- {
+			if muo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = muo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, muo.mutation); err != nil {
@@ -412,14 +641,103 @@ func (muo *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if muo.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   metadata.ChildrenTable,
+			Columns: []string{metadata.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !muo.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   metadata.ChildrenTable,
+			Columns: []string{metadata.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.ChildrenIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   metadata.ChildrenTable,
+			Columns: []string{metadata.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if muo.mutation.ParentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   metadata.ParentTable,
+			Columns: []string{metadata.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   metadata.ParentTable,
+			Columns: []string{metadata.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_node = &Metadata{config: muo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, muo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{metadata.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

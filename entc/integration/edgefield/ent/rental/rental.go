@@ -17,24 +17,24 @@ const (
 	FieldID = "id"
 	// FieldDate holds the string denoting the date field in the database.
 	FieldDate = "date"
-	// FieldCarID holds the string denoting the car_id field in the database.
-	FieldCarID = "car_id"
 	// FieldUserID holds the string denoting the user_id field in the database.
 	FieldUserID = "user_id"
+	// FieldCarID holds the string denoting the car_id field in the database.
+	FieldCarID = "car_id"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
 	// Table holds the table name of the rental in the database.
 	Table = "rentals"
-	// UserTable is the table the holds the user relation/edge.
+	// UserTable is the table that holds the user relation/edge.
 	UserTable = "rentals"
 	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
-	// CarTable is the table the holds the car relation/edge.
+	// CarTable is the table that holds the car relation/edge.
 	CarTable = "rentals"
 	// CarInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.
@@ -47,8 +47,8 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldDate,
-	FieldCarID,
 	FieldUserID,
+	FieldCarID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

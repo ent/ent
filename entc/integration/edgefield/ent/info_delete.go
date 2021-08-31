@@ -24,9 +24,9 @@ type InfoDelete struct {
 	mutation *InfoMutation
 }
 
-// Where adds a new predicate to the InfoDelete builder.
+// Where appends a list predicates to the InfoDelete builder.
 func (id *InfoDelete) Where(ps ...predicate.Info) *InfoDelete {
-	id.mutation.predicates = append(id.mutation.predicates, ps...)
+	id.mutation.Where(ps...)
 	return id
 }
 
@@ -50,6 +50,9 @@ func (id *InfoDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(id.hooks) - 1; i >= 0; i-- {
+			if id.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = id.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, id.mutation); err != nil {

@@ -19,7 +19,7 @@ const (
 	EdgeGroups = "groups"
 	// Table holds the table name of the groupinfo in the database.
 	Table = "group_infos"
-	// GroupsTable is the table the holds the groups relation/edge.
+	// GroupsTable is the table that holds the groups relation/edge.
 	GroupsTable = "groups"
 	// GroupsInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.

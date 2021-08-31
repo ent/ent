@@ -170,11 +170,17 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 				return nil, err
 			}
 			fc.mutation = mutation
-			node, err = fc.gremlinSave(ctx)
+			if node, err = fc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(fc.hooks) - 1; i >= 0; i-- {
+			if fc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = fc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, fc.mutation); err != nil {
@@ -193,6 +199,19 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 	return v
 }
 
+// Exec executes the query.
+func (fc *FileCreate) Exec(ctx context.Context) error {
+	_, err := fc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (fc *FileCreate) ExecX(ctx context.Context) {
+	if err := fc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (fc *FileCreate) defaults() {
 	if _, ok := fc.mutation.Size(); !ok {
@@ -204,15 +223,15 @@ func (fc *FileCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
 	if _, ok := fc.mutation.Size(); !ok {
-		return &ValidationError{Name: "size", err: errors.New("ent: missing required field \"size\"")}
+		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "size"`)}
 	}
 	if v, ok := fc.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
-			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "size": %w`, err)}
 		}
 	}
 	if _, ok := fc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
 	return nil
 }

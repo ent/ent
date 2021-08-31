@@ -45,6 +45,9 @@ func TestMySQL(t *testing.T) {
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
+			if version == "8" {
+				CheckConstraint(t, clientv2)
+			}
 		})
 	}
 }
@@ -73,6 +76,7 @@ func TestPostgres(t *testing.T) {
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
+			CheckConstraint(t, clientv2)
 		})
 	}
 }
@@ -101,6 +105,7 @@ func TestSQLite(t *testing.T) {
 	require.NoError(t, err)
 	EqualFold(t, client)
 	ContainsFold(t, client)
+	CheckConstraint(t, client)
 }
 
 func TestStorageKey(t *testing.T) {
@@ -292,6 +297,15 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 			require.Equal(t, strconv.FormatUint(math.MaxUint64, 10), max.Uint64ToString)
 		}
 	}
+}
+
+func CheckConstraint(t *testing.T, client *entv2.Client) {
+	ctx := context.Background()
+	t.Log("testing check constraints")
+	_, err := client.Media.Create().SetText("boring").Save(ctx)
+	require.Error(t, err)
+	_, err = client.Media.Create().SetSourceURI("entgo.io").Save(ctx)
+	require.Error(t, err)
 }
 
 func EqualFold(t *testing.T, client *entv2.Client) {

@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"github.com/google/uuid"
 
 	"entgo.io/ent"
 )
@@ -50,7 +51,7 @@ type CarMutation struct {
 	config
 	op             Op
 	typ            string
-	id             *int
+	id             *uuid.UUID
 	number         *string
 	clearedFields  map[string]struct{}
 	rentals        map[int]struct{}
@@ -81,7 +82,7 @@ func newCarMutation(c config, op Op, opts ...carOption) *CarMutation {
 }
 
 // withCarID sets the ID field of the mutation.
-func withCarID(id int) carOption {
+func withCarID(id uuid.UUID) carOption {
 	return func(m *CarMutation) {
 		var (
 			err   error
@@ -131,9 +132,15 @@ func (m CarMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
-func (m *CarMutation) ID() (id int, exists bool) {
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Car entities.
+func (m *CarMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CarMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -215,6 +222,7 @@ func (m *CarMutation) RemoveRentalIDs(ids ...int) {
 		m.removedrentals = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.rentals, ids[i])
 		m.removedrentals[ids[i]] = struct{}{}
 	}
 }
@@ -240,6 +248,11 @@ func (m *CarMutation) ResetRentals() {
 	m.rentals = nil
 	m.clearedrentals = false
 	m.removedrentals = nil
+}
+
+// Where appends a list predicates to the CarMutation builder.
+func (m *CarMutation) Where(ps ...predicate.Car) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -531,8 +544,8 @@ func (m CardMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CardMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -662,6 +675,11 @@ func (m *CardMutation) OwnerIDs() (ids []int) {
 func (m *CardMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
+}
+
+// Where appends a list predicates to the CardMutation builder.
+func (m *CardMutation) Where(ps ...predicate.Card) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -977,8 +995,8 @@ func (m *InfoMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *InfoMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1059,6 +1077,11 @@ func (m *InfoMutation) UserIDs() (ids []int) {
 func (m *InfoMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
+}
+
+// Where appends a list predicates to the InfoMutation builder.
+func (m *InfoMutation) Where(ps ...predicate.Info) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1251,17 +1274,22 @@ func (m *InfoMutation) ResetEdge(name string) error {
 // MetadataMutation represents an operation that mutates the Metadata nodes in the graph.
 type MetadataMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	age           *int
-	addage        *int
-	clearedFields map[string]struct{}
-	user          *int
-	cleareduser   bool
-	done          bool
-	oldValue      func(context.Context) (*Metadata, error)
-	predicates    []predicate.Metadata
+	op              Op
+	typ             string
+	id              *int
+	age             *int
+	addage          *int
+	clearedFields   map[string]struct{}
+	user            *int
+	cleareduser     bool
+	children        map[int]struct{}
+	removedchildren map[int]struct{}
+	clearedchildren bool
+	parent          *int
+	clearedparent   bool
+	done            bool
+	oldValue        func(context.Context) (*Metadata, error)
+	predicates      []predicate.Metadata
 }
 
 var _ ent.Mutation = (*MetadataMutation)(nil)
@@ -1340,8 +1368,8 @@ func (m *MetadataMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *MetadataMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1405,6 +1433,55 @@ func (m *MetadataMutation) ResetAge() {
 	m.addage = nil
 }
 
+// SetParentID sets the "parent_id" field.
+func (m *MetadataMutation) SetParentID(i int) {
+	m.parent = &i
+}
+
+// ParentID returns the value of the "parent_id" field in the mutation.
+func (m *MetadataMutation) ParentID() (r int, exists bool) {
+	v := m.parent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentID returns the old "parent_id" field's value of the Metadata entity.
+// If the Metadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetadataMutation) OldParentID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldParentID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldParentID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentID: %w", err)
+	}
+	return oldValue.ParentID, nil
+}
+
+// ClearParentID clears the value of the "parent_id" field.
+func (m *MetadataMutation) ClearParentID() {
+	m.parent = nil
+	m.clearedFields[metadata.FieldParentID] = struct{}{}
+}
+
+// ParentIDCleared returns if the "parent_id" field was cleared in this mutation.
+func (m *MetadataMutation) ParentIDCleared() bool {
+	_, ok := m.clearedFields[metadata.FieldParentID]
+	return ok
+}
+
+// ResetParentID resets all changes to the "parent_id" field.
+func (m *MetadataMutation) ResetParentID() {
+	m.parent = nil
+	delete(m.clearedFields, metadata.FieldParentID)
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *MetadataMutation) SetUserID(id int) {
 	m.user = &id
@@ -1444,6 +1521,91 @@ func (m *MetadataMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// AddChildIDs adds the "children" edge to the Metadata entity by ids.
+func (m *MetadataMutation) AddChildIDs(ids ...int) {
+	if m.children == nil {
+		m.children = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.children[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChildren clears the "children" edge to the Metadata entity.
+func (m *MetadataMutation) ClearChildren() {
+	m.clearedchildren = true
+}
+
+// ChildrenCleared reports if the "children" edge to the Metadata entity was cleared.
+func (m *MetadataMutation) ChildrenCleared() bool {
+	return m.clearedchildren
+}
+
+// RemoveChildIDs removes the "children" edge to the Metadata entity by IDs.
+func (m *MetadataMutation) RemoveChildIDs(ids ...int) {
+	if m.removedchildren == nil {
+		m.removedchildren = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.children, ids[i])
+		m.removedchildren[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChildren returns the removed IDs of the "children" edge to the Metadata entity.
+func (m *MetadataMutation) RemovedChildrenIDs() (ids []int) {
+	for id := range m.removedchildren {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChildrenIDs returns the "children" edge IDs in the mutation.
+func (m *MetadataMutation) ChildrenIDs() (ids []int) {
+	for id := range m.children {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChildren resets all changes to the "children" edge.
+func (m *MetadataMutation) ResetChildren() {
+	m.children = nil
+	m.clearedchildren = false
+	m.removedchildren = nil
+}
+
+// ClearParent clears the "parent" edge to the Metadata entity.
+func (m *MetadataMutation) ClearParent() {
+	m.clearedparent = true
+}
+
+// ParentCleared reports if the "parent" edge to the Metadata entity was cleared.
+func (m *MetadataMutation) ParentCleared() bool {
+	return m.ParentIDCleared() || m.clearedparent
+}
+
+// ParentIDs returns the "parent" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ParentID instead. It exists only for internal usage by the builders.
+func (m *MetadataMutation) ParentIDs() (ids []int) {
+	if id := m.parent; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetParent resets all changes to the "parent" edge.
+func (m *MetadataMutation) ResetParent() {
+	m.parent = nil
+	m.clearedparent = false
+}
+
+// Where appends a list predicates to the MetadataMutation builder.
+func (m *MetadataMutation) Where(ps ...predicate.Metadata) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *MetadataMutation) Op() Op {
 	return m.op
@@ -1458,9 +1620,12 @@ func (m *MetadataMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MetadataMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.age != nil {
 		fields = append(fields, metadata.FieldAge)
+	}
+	if m.parent != nil {
+		fields = append(fields, metadata.FieldParentID)
 	}
 	return fields
 }
@@ -1472,6 +1637,8 @@ func (m *MetadataMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case metadata.FieldAge:
 		return m.Age()
+	case metadata.FieldParentID:
+		return m.ParentID()
 	}
 	return nil, false
 }
@@ -1483,6 +1650,8 @@ func (m *MetadataMutation) OldField(ctx context.Context, name string) (ent.Value
 	switch name {
 	case metadata.FieldAge:
 		return m.OldAge(ctx)
+	case metadata.FieldParentID:
+		return m.OldParentID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Metadata field %s", name)
 }
@@ -1498,6 +1667,13 @@ func (m *MetadataMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAge(v)
+		return nil
+	case metadata.FieldParentID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Metadata field %s", name)
@@ -1543,7 +1719,11 @@ func (m *MetadataMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *MetadataMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(metadata.FieldParentID) {
+		fields = append(fields, metadata.FieldParentID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1556,6 +1736,11 @@ func (m *MetadataMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *MetadataMutation) ClearField(name string) error {
+	switch name {
+	case metadata.FieldParentID:
+		m.ClearParentID()
+		return nil
+	}
 	return fmt.Errorf("unknown Metadata nullable field %s", name)
 }
 
@@ -1566,15 +1751,24 @@ func (m *MetadataMutation) ResetField(name string) error {
 	case metadata.FieldAge:
 		m.ResetAge()
 		return nil
+	case metadata.FieldParentID:
+		m.ResetParentID()
+		return nil
 	}
 	return fmt.Errorf("unknown Metadata field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MetadataMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.user != nil {
 		edges = append(edges, metadata.EdgeUser)
+	}
+	if m.children != nil {
+		edges = append(edges, metadata.EdgeChildren)
+	}
+	if m.parent != nil {
+		edges = append(edges, metadata.EdgeParent)
 	}
 	return edges
 }
@@ -1587,13 +1781,26 @@ func (m *MetadataMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
+	case metadata.EdgeChildren:
+		ids := make([]ent.Value, 0, len(m.children))
+		for id := range m.children {
+			ids = append(ids, id)
+		}
+		return ids
+	case metadata.EdgeParent:
+		if id := m.parent; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MetadataMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
+	if m.removedchildren != nil {
+		edges = append(edges, metadata.EdgeChildren)
+	}
 	return edges
 }
 
@@ -1601,15 +1808,27 @@ func (m *MetadataMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *MetadataMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
+	case metadata.EdgeChildren:
+		ids := make([]ent.Value, 0, len(m.removedchildren))
+		for id := range m.removedchildren {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MetadataMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.cleareduser {
 		edges = append(edges, metadata.EdgeUser)
+	}
+	if m.clearedchildren {
+		edges = append(edges, metadata.EdgeChildren)
+	}
+	if m.clearedparent {
+		edges = append(edges, metadata.EdgeParent)
 	}
 	return edges
 }
@@ -1620,6 +1839,10 @@ func (m *MetadataMutation) EdgeCleared(name string) bool {
 	switch name {
 	case metadata.EdgeUser:
 		return m.cleareduser
+	case metadata.EdgeChildren:
+		return m.clearedchildren
+	case metadata.EdgeParent:
+		return m.clearedparent
 	}
 	return false
 }
@@ -1631,6 +1854,9 @@ func (m *MetadataMutation) ClearEdge(name string) error {
 	case metadata.EdgeUser:
 		m.ClearUser()
 		return nil
+	case metadata.EdgeParent:
+		m.ClearParent()
+		return nil
 	}
 	return fmt.Errorf("unknown Metadata unique edge %s", name)
 }
@@ -1641,6 +1867,12 @@ func (m *MetadataMutation) ResetEdge(name string) error {
 	switch name {
 	case metadata.EdgeUser:
 		m.ResetUser()
+		return nil
+	case metadata.EdgeChildren:
+		m.ResetChildren()
+		return nil
+	case metadata.EdgeParent:
+		m.ResetParent()
 		return nil
 	}
 	return fmt.Errorf("unknown Metadata edge %s", name)
@@ -1730,8 +1962,8 @@ func (m PetMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *PetMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1812,6 +2044,11 @@ func (m *PetMutation) OwnerIDs() (ids []int) {
 func (m *PetMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
+}
+
+// Where appends a list predicates to the PetMutation builder.
+func (m *PetMutation) Where(ps ...predicate.Pet) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2098,8 +2335,8 @@ func (m PostMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *PostMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -2216,6 +2453,11 @@ func (m *PostMutation) AuthorIDs() (ids []int) {
 func (m *PostMutation) ResetAuthor() {
 	m.author = nil
 	m.clearedauthor = false
+}
+
+// Where appends a list predicates to the PostMutation builder.
+func (m *PostMutation) Where(ps ...predicate.Post) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2444,7 +2686,7 @@ type RentalMutation struct {
 	clearedFields map[string]struct{}
 	user          *int
 	cleareduser   bool
-	car           *int
+	car           *uuid.UUID
 	clearedcar    bool
 	done          bool
 	oldValue      func(context.Context) (*Rental, error)
@@ -2521,8 +2763,8 @@ func (m RentalMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *RentalMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -2566,42 +2808,6 @@ func (m *RentalMutation) ResetDate() {
 	m.date = nil
 }
 
-// SetCarID sets the "car_id" field.
-func (m *RentalMutation) SetCarID(i int) {
-	m.car = &i
-}
-
-// CarID returns the value of the "car_id" field in the mutation.
-func (m *RentalMutation) CarID() (r int, exists bool) {
-	v := m.car
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCarID returns the old "car_id" field's value of the Rental entity.
-// If the Rental object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RentalMutation) OldCarID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCarID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCarID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCarID: %w", err)
-	}
-	return oldValue.CarID, nil
-}
-
-// ResetCarID resets all changes to the "car_id" field.
-func (m *RentalMutation) ResetCarID() {
-	m.car = nil
-}
-
 // SetUserID sets the "user_id" field.
 func (m *RentalMutation) SetUserID(i int) {
 	m.user = &i
@@ -2636,6 +2842,42 @@ func (m *RentalMutation) OldUserID(ctx context.Context) (v int, err error) {
 // ResetUserID resets all changes to the "user_id" field.
 func (m *RentalMutation) ResetUserID() {
 	m.user = nil
+}
+
+// SetCarID sets the "car_id" field.
+func (m *RentalMutation) SetCarID(u uuid.UUID) {
+	m.car = &u
+}
+
+// CarID returns the value of the "car_id" field in the mutation.
+func (m *RentalMutation) CarID() (r uuid.UUID, exists bool) {
+	v := m.car
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCarID returns the old "car_id" field's value of the Rental entity.
+// If the Rental object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RentalMutation) OldCarID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCarID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCarID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCarID: %w", err)
+	}
+	return oldValue.CarID, nil
+}
+
+// ResetCarID resets all changes to the "car_id" field.
+func (m *RentalMutation) ResetCarID() {
+	m.car = nil
 }
 
 // ClearUser clears the "user" edge to the User entity.
@@ -2677,7 +2919,7 @@ func (m *RentalMutation) CarCleared() bool {
 // CarIDs returns the "car" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // CarID instead. It exists only for internal usage by the builders.
-func (m *RentalMutation) CarIDs() (ids []int) {
+func (m *RentalMutation) CarIDs() (ids []uuid.UUID) {
 	if id := m.car; id != nil {
 		ids = append(ids, *id)
 	}
@@ -2688,6 +2930,11 @@ func (m *RentalMutation) CarIDs() (ids []int) {
 func (m *RentalMutation) ResetCar() {
 	m.car = nil
 	m.clearedcar = false
+}
+
+// Where appends a list predicates to the RentalMutation builder.
+func (m *RentalMutation) Where(ps ...predicate.Rental) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2708,11 +2955,11 @@ func (m *RentalMutation) Fields() []string {
 	if m.date != nil {
 		fields = append(fields, rental.FieldDate)
 	}
-	if m.car != nil {
-		fields = append(fields, rental.FieldCarID)
-	}
 	if m.user != nil {
 		fields = append(fields, rental.FieldUserID)
+	}
+	if m.car != nil {
+		fields = append(fields, rental.FieldCarID)
 	}
 	return fields
 }
@@ -2724,10 +2971,10 @@ func (m *RentalMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case rental.FieldDate:
 		return m.Date()
-	case rental.FieldCarID:
-		return m.CarID()
 	case rental.FieldUserID:
 		return m.UserID()
+	case rental.FieldCarID:
+		return m.CarID()
 	}
 	return nil, false
 }
@@ -2739,10 +2986,10 @@ func (m *RentalMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case rental.FieldDate:
 		return m.OldDate(ctx)
-	case rental.FieldCarID:
-		return m.OldCarID(ctx)
 	case rental.FieldUserID:
 		return m.OldUserID(ctx)
+	case rental.FieldCarID:
+		return m.OldCarID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Rental field %s", name)
 }
@@ -2759,19 +3006,19 @@ func (m *RentalMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDate(v)
 		return nil
-	case rental.FieldCarID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCarID(v)
-		return nil
 	case rental.FieldUserID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUserID(v)
+		return nil
+	case rental.FieldCarID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCarID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Rental field %s", name)
@@ -2828,11 +3075,11 @@ func (m *RentalMutation) ResetField(name string) error {
 	case rental.FieldDate:
 		m.ResetDate()
 		return nil
-	case rental.FieldCarID:
-		m.ResetCarID()
-		return nil
 	case rental.FieldUserID:
 		m.ResetUserID()
+		return nil
+	case rental.FieldCarID:
+		m.ResetCarID()
 		return nil
 	}
 	return fmt.Errorf("unknown Rental field %s", name)
@@ -3034,8 +3281,14 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of User entities.
+func (m *UserMutation) SetID(id int) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -3167,6 +3420,7 @@ func (m *UserMutation) RemovePetIDs(ids ...int) {
 		m.removedpets = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.pets, ids[i])
 		m.removedpets[ids[i]] = struct{}{}
 	}
 }
@@ -3246,6 +3500,7 @@ func (m *UserMutation) RemoveChildIDs(ids ...int) {
 		m.removedchildren = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -3403,6 +3658,7 @@ func (m *UserMutation) RemoveInfoIDs(ids ...int) {
 		m.removedinfo = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.info, ids[i])
 		m.removedinfo[ids[i]] = struct{}{}
 	}
 }
@@ -3456,6 +3712,7 @@ func (m *UserMutation) RemoveRentalIDs(ids ...int) {
 		m.removedrentals = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.rentals, ids[i])
 		m.removedrentals[ids[i]] = struct{}{}
 	}
 }
@@ -3481,6 +3738,11 @@ func (m *UserMutation) ResetRentals() {
 	m.rentals = nil
 	m.clearedrentals = false
 	m.removedrentals = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

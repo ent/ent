@@ -291,8 +291,8 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 //		Select(customtype.FieldCustom).
 //		Scan(ctx, &v)
 //
-func (ctq *CustomTypeQuery) Select(field string, fields ...string) *CustomTypeSelect {
-	ctq.fields = append([]string{field}, fields...)
+func (ctq *CustomTypeQuery) Select(fields ...string) *CustomTypeSelect {
+	ctq.fields = append(ctq.fields, fields...)
 	return &CustomTypeSelect{CustomTypeQuery: ctq}
 }
 
@@ -402,10 +402,14 @@ func (ctq *CustomTypeQuery) querySpec() *sqlgraph.QuerySpec {
 func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ctq.driver.Dialect())
 	t1 := builder.Table(customtype.Table)
-	selector := builder.Select(t1.Columns(customtype.Columns...)...).From(t1)
+	columns := ctq.fields
+	if len(columns) == 0 {
+		columns = customtype.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if ctq.sql != nil {
 		selector = ctq.sql
-		selector.Select(selector.Columns(customtype.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range ctq.predicates {
 		p(selector)
@@ -906,16 +910,10 @@ func (cts *CustomTypeSelect) BoolX(ctx context.Context) bool {
 
 func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := cts.sqlQuery().Query()
+	query, args := cts.sql.Query()
 	if err := cts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (cts *CustomTypeSelect) sqlQuery() sql.Querier {
-	selector := cts.sql
-	selector.Select(selector.Columns(cts.fields...)...)
-	return selector
 }

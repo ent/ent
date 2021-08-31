@@ -32,9 +32,9 @@ type FieldTypeUpdate struct {
 	mutation *FieldTypeMutation
 }
 
-// Where adds a new predicate for the FieldTypeUpdate builder.
+// Where appends a list predicates to the FieldTypeUpdate builder.
 func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
-	ftu.mutation.predicates = append(ftu.mutation.predicates, ps...)
+	ftu.mutation.Where(ps...)
 	return ftu
 }
 
@@ -700,6 +700,26 @@ func (ftu *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetPassword sets the "password" field.
+func (ftu *FieldTypeUpdate) SetPassword(s string) *FieldTypeUpdate {
+	ftu.mutation.SetPassword(s)
+	return ftu
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePassword(s *string) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetPassword(*s)
+	}
+	return ftu
+}
+
+// ClearPassword clears the value of the "password" field.
+func (ftu *FieldTypeUpdate) ClearPassword() *FieldTypeUpdate {
+	ftu.mutation.ClearPassword()
+	return ftu
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (ftu *FieldTypeUpdate) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdate {
 	ftu.mutation.SetStringScanner(ss)
@@ -724,14 +744,6 @@ func (ftu *FieldTypeUpdate) ClearStringScanner() *FieldTypeUpdate {
 func (ftu *FieldTypeUpdate) SetDuration(t time.Duration) *FieldTypeUpdate {
 	ftu.mutation.ResetDuration()
 	ftu.mutation.SetDuration(t)
-	return ftu
-}
-
-// SetNillableDuration sets the "duration" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableDuration(t *time.Duration) *FieldTypeUpdate {
-	if t != nil {
-		ftu.SetDuration(*t)
-	}
 	return ftu
 }
 
@@ -909,6 +921,18 @@ func (ftu *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftu *FieldTypeUpdate) SetRawData(b []byte) *FieldTypeUpdate {
+	ftu.mutation.SetRawData(b)
+	return ftu
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (ftu *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
+	ftu.mutation.ClearRawData()
+	return ftu
+}
+
 // SetIP sets the "ip" field.
 func (ftu *FieldTypeUpdate) SetIP(n net.IP) *FieldTypeUpdate {
 	ftu.mutation.SetIP(n)
@@ -923,7 +947,6 @@ func (ftu *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
 
 // SetNullInt64 sets the "null_int64" field.
 func (ftu *FieldTypeUpdate) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdate {
-	ftu.mutation.ResetNullInt64()
 	ftu.mutation.SetNullInt64(si)
 	return ftu
 }
@@ -1071,7 +1094,6 @@ func (ftu *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
 
 // SetNullFloat sets the "null_float" field.
 func (ftu *FieldTypeUpdate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdate {
-	ftu.mutation.ResetNullFloat()
 	ftu.mutation.SetNullFloat(sf)
 	return ftu
 }
@@ -1093,6 +1115,26 @@ func (ftu *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
 	if r != nil {
 		ftu.SetRole(*r)
 	}
+	return ftu
+}
+
+// SetPriority sets the "priority" field.
+func (ftu *FieldTypeUpdate) SetPriority(r role.Priority) *FieldTypeUpdate {
+	ftu.mutation.SetPriority(r)
+	return ftu
+}
+
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePriority(r *role.Priority) *FieldTypeUpdate {
+	if r != nil {
+		ftu.SetPriority(*r)
+	}
+	return ftu
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (ftu *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
+	ftu.mutation.ClearPriority()
 	return ftu
 }
 
@@ -1186,6 +1228,53 @@ func (ftu *FieldTypeUpdate) SetNillableTriple(s *schema.Triple) *FieldTypeUpdate
 	return ftu
 }
 
+// SetBigInt sets the "big_int" field.
+func (ftu *FieldTypeUpdate) SetBigInt(si schema.BigInt) *FieldTypeUpdate {
+	ftu.mutation.ResetBigInt()
+	ftu.mutation.SetBigInt(si)
+	return ftu
+}
+
+// SetNillableBigInt sets the "big_int" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableBigInt(si *schema.BigInt) *FieldTypeUpdate {
+	if si != nil {
+		ftu.SetBigInt(*si)
+	}
+	return ftu
+}
+
+// AddBigInt adds si to the "big_int" field.
+func (ftu *FieldTypeUpdate) AddBigInt(si schema.BigInt) *FieldTypeUpdate {
+	ftu.mutation.AddBigInt(si)
+	return ftu
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (ftu *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate {
+	ftu.mutation.ClearBigInt()
+	return ftu
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (ftu *FieldTypeUpdate) SetPasswordOther(s schema.Password) *FieldTypeUpdate {
+	ftu.mutation.SetPasswordOther(s)
+	return ftu
+}
+
+// SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillablePasswordOther(s *schema.Password) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetPasswordOther(*s)
+	}
+	return ftu
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (ftu *FieldTypeUpdate) ClearPasswordOther() *FieldTypeUpdate {
+	ftu.mutation.ClearPasswordOther()
+	return ftu
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftu *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 	return ftu.mutation
@@ -1197,6 +1286,7 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	ftu.defaults()
 	if len(ftu.hooks) == 0 {
 		if err = ftu.check(); err != nil {
 			return 0, err
@@ -1217,6 +1307,9 @@ func (ftu *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ftu.hooks) - 1; i >= 0; i-- {
+			if ftu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ftu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftu.mutation); err != nil {
@@ -1248,6 +1341,18 @@ func (ftu *FieldTypeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ftu *FieldTypeUpdate) defaults() {
+	if _, ok := ftu.mutation.Int64(); !ok {
+		v := fieldtype.UpdateDefaultInt64()
+		ftu.mutation.SetInt64(v)
+	}
+	if _, ok := ftu.mutation.Duration(); !ok && !ftu.mutation.DurationCleared() {
+		v := fieldtype.UpdateDefaultDuration()
+		ftu.mutation.SetDuration(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ftu *FieldTypeUpdate) check() error {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
@@ -1275,9 +1380,24 @@ func (ftu *FieldTypeUpdate) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
 		}
 	}
+	if v, ok := ftu.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf("ent: validator failed for field \"raw_data\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.IP(); ok {
+		if err := fieldtype.IPValidator([]byte(v)); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf("ent: validator failed for field \"ip\": %w", err)}
+		}
+	}
 	if v, ok := ftu.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftu.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	return nil
@@ -1462,6 +1582,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
+	if value, ok := ftu.mutation.Password(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPassword, value)
+	}
 	if value, ok := ftu.mutation.StringScanner(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
 	}
@@ -1500,6 +1623,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftu.mutation.DeletedAt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
+	}
+	if value, ok := ftu.mutation.RawData(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRawData, value)
 	}
 	if value, ok := ftu.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)
@@ -1543,6 +1669,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
+	if value, ok := ftu.mutation.Priority(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPriority, value)
+	}
 	if value, ok := ftu.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
@@ -1563,6 +1692,15 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftu.mutation.Triple(); ok {
 		v.Property(dsl.Single, fieldtype.FieldTriple, value)
+	}
+	if value, ok := ftu.mutation.BigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, value)
+	}
+	if value, ok := ftu.mutation.AddedBigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, __.Union(__.Values(fieldtype.FieldBigInt), __.Constant(value)).Sum())
+	}
+	if value, ok := ftu.mutation.PasswordOther(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPasswordOther, value)
 	}
 	var properties []interface{}
 	if ftu.mutation.OptionalIntCleared() {
@@ -1637,6 +1775,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if ftu.mutation.StringArrayCleared() {
 		properties = append(properties, fieldtype.FieldStringArray)
 	}
+	if ftu.mutation.PasswordCleared() {
+		properties = append(properties, fieldtype.FieldPassword)
+	}
 	if ftu.mutation.StringScannerCleared() {
 		properties = append(properties, fieldtype.FieldStringScanner)
 	}
@@ -1670,6 +1811,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if ftu.mutation.DeletedAtCleared() {
 		properties = append(properties, fieldtype.FieldDeletedAt)
 	}
+	if ftu.mutation.RawDataCleared() {
+		properties = append(properties, fieldtype.FieldRawData)
+	}
 	if ftu.mutation.IPCleared() {
 		properties = append(properties, fieldtype.FieldIP)
 	}
@@ -1694,6 +1838,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if ftu.mutation.NullFloatCleared() {
 		properties = append(properties, fieldtype.FieldNullFloat)
 	}
+	if ftu.mutation.PriorityCleared() {
+		properties = append(properties, fieldtype.FieldPriority)
+	}
 	if ftu.mutation.UUIDCleared() {
 		properties = append(properties, fieldtype.FieldUUID)
 	}
@@ -1705,6 +1852,12 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.NilPairCleared() {
 		properties = append(properties, fieldtype.FieldNilPair)
+	}
+	if ftu.mutation.BigIntCleared() {
+		properties = append(properties, fieldtype.FieldBigInt)
+	}
+	if ftu.mutation.PasswordOtherCleared() {
+		properties = append(properties, fieldtype.FieldPasswordOther)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -2384,6 +2537,26 @@ func (ftuo *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetPassword sets the "password" field.
+func (ftuo *FieldTypeUpdateOne) SetPassword(s string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPassword(s)
+	return ftuo
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePassword(s *string) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetPassword(*s)
+	}
+	return ftuo
+}
+
+// ClearPassword clears the value of the "password" field.
+func (ftuo *FieldTypeUpdateOne) ClearPassword() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPassword()
+	return ftuo
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (ftuo *FieldTypeUpdateOne) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdateOne {
 	ftuo.mutation.SetStringScanner(ss)
@@ -2408,14 +2581,6 @@ func (ftuo *FieldTypeUpdateOne) ClearStringScanner() *FieldTypeUpdateOne {
 func (ftuo *FieldTypeUpdateOne) SetDuration(t time.Duration) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetDuration()
 	ftuo.mutation.SetDuration(t)
-	return ftuo
-}
-
-// SetNillableDuration sets the "duration" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableDuration(t *time.Duration) *FieldTypeUpdateOne {
-	if t != nil {
-		ftuo.SetDuration(*t)
-	}
 	return ftuo
 }
 
@@ -2593,6 +2758,18 @@ func (ftuo *FieldTypeUpdateOne) ClearDeletedAt() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftuo *FieldTypeUpdateOne) SetRawData(b []byte) *FieldTypeUpdateOne {
+	ftuo.mutation.SetRawData(b)
+	return ftuo
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (ftuo *FieldTypeUpdateOne) ClearRawData() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearRawData()
+	return ftuo
+}
+
 // SetIP sets the "ip" field.
 func (ftuo *FieldTypeUpdateOne) SetIP(n net.IP) *FieldTypeUpdateOne {
 	ftuo.mutation.SetIP(n)
@@ -2607,7 +2784,6 @@ func (ftuo *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
 
 // SetNullInt64 sets the "null_int64" field.
 func (ftuo *FieldTypeUpdateOne) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdateOne {
-	ftuo.mutation.ResetNullInt64()
 	ftuo.mutation.SetNullInt64(si)
 	return ftuo
 }
@@ -2755,7 +2931,6 @@ func (ftuo *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
 
 // SetNullFloat sets the "null_float" field.
 func (ftuo *FieldTypeUpdateOne) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdateOne {
-	ftuo.mutation.ResetNullFloat()
 	ftuo.mutation.SetNullFloat(sf)
 	return ftuo
 }
@@ -2777,6 +2952,26 @@ func (ftuo *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOn
 	if r != nil {
 		ftuo.SetRole(*r)
 	}
+	return ftuo
+}
+
+// SetPriority sets the "priority" field.
+func (ftuo *FieldTypeUpdateOne) SetPriority(r role.Priority) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPriority(r)
+	return ftuo
+}
+
+// SetNillablePriority sets the "priority" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePriority(r *role.Priority) *FieldTypeUpdateOne {
+	if r != nil {
+		ftuo.SetPriority(*r)
+	}
+	return ftuo
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (ftuo *FieldTypeUpdateOne) ClearPriority() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPriority()
 	return ftuo
 }
 
@@ -2870,6 +3065,53 @@ func (ftuo *FieldTypeUpdateOne) SetNillableTriple(s *schema.Triple) *FieldTypeUp
 	return ftuo
 }
 
+// SetBigInt sets the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) SetBigInt(si schema.BigInt) *FieldTypeUpdateOne {
+	ftuo.mutation.ResetBigInt()
+	ftuo.mutation.SetBigInt(si)
+	return ftuo
+}
+
+// SetNillableBigInt sets the "big_int" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableBigInt(si *schema.BigInt) *FieldTypeUpdateOne {
+	if si != nil {
+		ftuo.SetBigInt(*si)
+	}
+	return ftuo
+}
+
+// AddBigInt adds si to the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) AddBigInt(si schema.BigInt) *FieldTypeUpdateOne {
+	ftuo.mutation.AddBigInt(si)
+	return ftuo
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (ftuo *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearBigInt()
+	return ftuo
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (ftuo *FieldTypeUpdateOne) SetPasswordOther(s schema.Password) *FieldTypeUpdateOne {
+	ftuo.mutation.SetPasswordOther(s)
+	return ftuo
+}
+
+// SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillablePasswordOther(s *schema.Password) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetPasswordOther(*s)
+	}
+	return ftuo
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (ftuo *FieldTypeUpdateOne) ClearPasswordOther() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearPasswordOther()
+	return ftuo
+}
+
 // Mutation returns the FieldTypeMutation object of the builder.
 func (ftuo *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
 	return ftuo.mutation
@@ -2888,6 +3130,7 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 		err  error
 		node *FieldType
 	)
+	ftuo.defaults()
 	if len(ftuo.hooks) == 0 {
 		if err = ftuo.check(); err != nil {
 			return nil, err
@@ -2908,6 +3151,9 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 			return node, err
 		})
 		for i := len(ftuo.hooks) - 1; i >= 0; i-- {
+			if ftuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ftuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftuo.mutation); err != nil {
@@ -2939,6 +3185,18 @@ func (ftuo *FieldTypeUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ftuo *FieldTypeUpdateOne) defaults() {
+	if _, ok := ftuo.mutation.Int64(); !ok {
+		v := fieldtype.UpdateDefaultInt64()
+		ftuo.mutation.SetInt64(v)
+	}
+	if _, ok := ftuo.mutation.Duration(); !ok && !ftuo.mutation.DurationCleared() {
+		v := fieldtype.UpdateDefaultDuration()
+		ftuo.mutation.SetDuration(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ftuo *FieldTypeUpdateOne) check() error {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
@@ -2966,9 +3224,24 @@ func (ftuo *FieldTypeUpdateOne) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
 		}
 	}
+	if v, ok := ftuo.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf("ent: validator failed for field \"raw_data\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.IP(); ok {
+		if err := fieldtype.IPValidator([]byte(v)); err != nil {
+			return &ValidationError{Name: "ip", err: fmt.Errorf("ent: validator failed for field \"ip\": %w", err)}
+		}
+	}
 	if v, ok := ftuo.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+		}
+	}
+	if v, ok := ftuo.mutation.Priority(); ok {
+		if err := fieldtype.PriorityValidator(v); err != nil {
+			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
 		}
 	}
 	return nil
@@ -3158,6 +3431,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
+	if value, ok := ftuo.mutation.Password(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPassword, value)
+	}
 	if value, ok := ftuo.mutation.StringScanner(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
 	}
@@ -3196,6 +3472,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value, ok := ftuo.mutation.DeletedAt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
+	}
+	if value, ok := ftuo.mutation.RawData(); ok {
+		v.Property(dsl.Single, fieldtype.FieldRawData, value)
 	}
 	if value, ok := ftuo.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)
@@ -3239,6 +3518,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
+	if value, ok := ftuo.mutation.Priority(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPriority, value)
+	}
 	if value, ok := ftuo.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
@@ -3259,6 +3541,15 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value, ok := ftuo.mutation.Triple(); ok {
 		v.Property(dsl.Single, fieldtype.FieldTriple, value)
+	}
+	if value, ok := ftuo.mutation.BigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, value)
+	}
+	if value, ok := ftuo.mutation.AddedBigInt(); ok {
+		v.Property(dsl.Single, fieldtype.FieldBigInt, __.Union(__.Values(fieldtype.FieldBigInt), __.Constant(value)).Sum())
+	}
+	if value, ok := ftuo.mutation.PasswordOther(); ok {
+		v.Property(dsl.Single, fieldtype.FieldPasswordOther, value)
 	}
 	var properties []interface{}
 	if ftuo.mutation.OptionalIntCleared() {
@@ -3333,6 +3624,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if ftuo.mutation.StringArrayCleared() {
 		properties = append(properties, fieldtype.FieldStringArray)
 	}
+	if ftuo.mutation.PasswordCleared() {
+		properties = append(properties, fieldtype.FieldPassword)
+	}
 	if ftuo.mutation.StringScannerCleared() {
 		properties = append(properties, fieldtype.FieldStringScanner)
 	}
@@ -3366,6 +3660,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if ftuo.mutation.DeletedAtCleared() {
 		properties = append(properties, fieldtype.FieldDeletedAt)
 	}
+	if ftuo.mutation.RawDataCleared() {
+		properties = append(properties, fieldtype.FieldRawData)
+	}
 	if ftuo.mutation.IPCleared() {
 		properties = append(properties, fieldtype.FieldIP)
 	}
@@ -3390,6 +3687,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if ftuo.mutation.NullFloatCleared() {
 		properties = append(properties, fieldtype.FieldNullFloat)
 	}
+	if ftuo.mutation.PriorityCleared() {
+		properties = append(properties, fieldtype.FieldPriority)
+	}
 	if ftuo.mutation.UUIDCleared() {
 		properties = append(properties, fieldtype.FieldUUID)
 	}
@@ -3401,6 +3701,12 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.NilPairCleared() {
 		properties = append(properties, fieldtype.FieldNilPair)
+	}
+	if ftuo.mutation.BigIntCleared() {
+		properties = append(properties, fieldtype.FieldBigInt)
+	}
+	if ftuo.mutation.PasswordOtherCleared() {
+		properties = append(properties, fieldtype.FieldPasswordOther)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

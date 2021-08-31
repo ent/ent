@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/pet"
@@ -33,6 +34,7 @@ type PetQuery struct {
 	withTeam  *UserQuery
 	withOwner *UserQuery
 	withFKs   bool
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -364,8 +366,8 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Select(pet.FieldAge).
 //		Scan(ctx, &v)
 //
-func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
-	pq.fields = append([]string{field}, fields...)
+func (pq *PetQuery) Select(fields ...string) *PetSelect {
+	pq.fields = append(pq.fields, fields...)
 	return &PetSelect{PetQuery: pq}
 }
 
@@ -413,6 +415,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		node := nodes[len(nodes)-1]
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(pq.modifiers) > 0 {
+		_spec.Modifiers = pq.modifiers
 	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err
@@ -484,6 +489,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
+	if len(pq.modifiers) > 0 {
+		_spec.Modifiers = pq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
 }
 
@@ -546,10 +554,17 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
 	t1 := builder.Table(pet.Table)
-	selector := builder.Select(t1.Columns(pet.Columns...)...).From(t1)
+	columns := pq.fields
+	if len(columns) == 0 {
+		columns = pet.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if pq.sql != nil {
 		selector = pq.sql
-		selector.Select(selector.Columns(pet.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
+	}
+	for _, m := range pq.modifiers {
+		m(selector)
 	}
 	for _, p := range pq.predicates {
 		p(selector)
@@ -566,6 +581,38 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (pq *PetQuery) ForUpdate(opts ...sql.LockOption) *PetQuery {
+	if pq.driver.Dialect() == dialect.Postgres {
+		pq.Unique(false)
+	}
+	pq.modifiers = append(pq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return pq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (pq *PetQuery) ForShare(opts ...sql.LockOption) *PetQuery {
+	if pq.driver.Dialect() == dialect.Postgres {
+		pq.Unique(false)
+	}
+	pq.modifiers = append(pq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return pq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (pq *PetQuery) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
+	pq.modifiers = append(pq.modifiers, modifiers...)
+	return pq.Select()
 }
 
 // PetGroupBy is the group-by builder for Pet entities.
@@ -1050,7 +1097,7 @@ func (ps *PetSelect) BoolX(ctx context.Context) bool {
 
 func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ps.sqlQuery().Query()
+	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -1058,8 +1105,8 @@ func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
 	return sql.ScanSlice(rows, v)
 }
 
-func (ps *PetSelect) sqlQuery() sql.Querier {
-	selector := ps.sql
-	selector.Select(selector.Columns(ps.fields...)...)
-	return selector
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ps *PetSelect) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
+	ps.modifiers = append(ps.modifiers, modifiers...)
+	return ps
 }

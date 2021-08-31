@@ -27,23 +27,27 @@ func init() {
 	// user.DefaultMixedString holds the default value on creation for the mixed_string field.
 	user.DefaultMixedString = userDescMixedString.Default.(string)
 	// userDescNickname is the schema descriptor for nickname field.
-	userDescNickname := userFields[3].Descriptor()
+	userDescNickname := userFields[4].Descriptor()
 	// user.NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
 	user.NicknameValidator = userDescNickname.Validators[0].(func(string) error)
 	// userDescPhone is the schema descriptor for phone field.
-	userDescPhone := userFields[4].Descriptor()
+	userDescPhone := userFields[5].Descriptor()
 	// user.DefaultPhone holds the default value on creation for the phone field.
 	user.DefaultPhone = userDescPhone.Default.(string)
 	// userDescBuffer is the schema descriptor for buffer field.
-	userDescBuffer := userFields[5].Descriptor()
+	userDescBuffer := userFields[6].Descriptor()
 	// user.DefaultBuffer holds the default value on creation for the buffer field.
 	user.DefaultBuffer = userDescBuffer.Default.(func() []byte)
 	// userDescTitle is the schema descriptor for title field.
-	userDescTitle := userFields[6].Descriptor()
+	userDescTitle := userFields[7].Descriptor()
 	// user.DefaultTitle holds the default value on creation for the title field.
 	user.DefaultTitle = userDescTitle.Default.(string)
+	// userDescBlob is the schema descriptor for blob field.
+	userDescBlob := userFields[9].Descriptor()
+	// user.BlobValidator is a validator for the "blob" field. It is called by the builders before save.
+	user.BlobValidator = userDescBlob.Validators[0].(func([]byte) error)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[12].Descriptor()
+	userDescCreatedAt := userFields[13].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 }

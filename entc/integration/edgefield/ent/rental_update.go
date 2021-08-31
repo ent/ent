@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // RentalUpdate is the builder for updating Rental entities.
@@ -28,9 +29,9 @@ type RentalUpdate struct {
 	mutation *RentalMutation
 }
 
-// Where adds a new predicate for the RentalUpdate builder.
+// Where appends a list predicates to the RentalUpdate builder.
 func (ru *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
-	ru.mutation.predicates = append(ru.mutation.predicates, ps...)
+	ru.mutation.Where(ps...)
 	return ru
 }
 
@@ -48,17 +49,15 @@ func (ru *RentalUpdate) SetNillableDate(t *time.Time) *RentalUpdate {
 	return ru
 }
 
-// SetCarID sets the "car_id" field.
-func (ru *RentalUpdate) SetCarID(i int) *RentalUpdate {
-	ru.mutation.ResetCarID()
-	ru.mutation.SetCarID(i)
+// SetUserID sets the "user_id" field.
+func (ru *RentalUpdate) SetUserID(i int) *RentalUpdate {
+	ru.mutation.SetUserID(i)
 	return ru
 }
 
-// SetUserID sets the "user_id" field.
-func (ru *RentalUpdate) SetUserID(i int) *RentalUpdate {
-	ru.mutation.ResetUserID()
-	ru.mutation.SetUserID(i)
+// SetCarID sets the "car_id" field.
+func (ru *RentalUpdate) SetCarID(u uuid.UUID) *RentalUpdate {
+	ru.mutation.SetCarID(u)
 	return ru
 }
 
@@ -115,6 +114,9 @@ func (ru *RentalUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ru.hooks) - 1; i >= 0; i-- {
+			if ru.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ru.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ru.mutation); err != nil {
@@ -226,7 +228,7 @@ func (ru *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: car.FieldID,
 				},
 			},
@@ -242,7 +244,7 @@ func (ru *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: car.FieldID,
 				},
 			},
@@ -255,8 +257,8 @@ func (ru *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{rental.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -285,17 +287,15 @@ func (ruo *RentalUpdateOne) SetNillableDate(t *time.Time) *RentalUpdateOne {
 	return ruo
 }
 
-// SetCarID sets the "car_id" field.
-func (ruo *RentalUpdateOne) SetCarID(i int) *RentalUpdateOne {
-	ruo.mutation.ResetCarID()
-	ruo.mutation.SetCarID(i)
+// SetUserID sets the "user_id" field.
+func (ruo *RentalUpdateOne) SetUserID(i int) *RentalUpdateOne {
+	ruo.mutation.SetUserID(i)
 	return ruo
 }
 
-// SetUserID sets the "user_id" field.
-func (ruo *RentalUpdateOne) SetUserID(i int) *RentalUpdateOne {
-	ruo.mutation.ResetUserID()
-	ruo.mutation.SetUserID(i)
+// SetCarID sets the "car_id" field.
+func (ruo *RentalUpdateOne) SetCarID(u uuid.UUID) *RentalUpdateOne {
+	ruo.mutation.SetCarID(u)
 	return ruo
 }
 
@@ -359,6 +359,9 @@ func (ruo *RentalUpdateOne) Save(ctx context.Context) (*Rental, error) {
 			return node, err
 		})
 		for i := len(ruo.hooks) - 1; i >= 0; i-- {
+			if ruo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ruo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ruo.mutation); err != nil {
@@ -487,7 +490,7 @@ func (ruo *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: car.FieldID,
 				},
 			},
@@ -503,7 +506,7 @@ func (ruo *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: car.FieldID,
 				},
 			},
@@ -519,8 +522,8 @@ func (ruo *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err err
 	if err = sqlgraph.UpdateNode(ctx, ruo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{rental.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

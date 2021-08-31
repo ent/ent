@@ -38,6 +38,20 @@ func (mc *MetadataCreate) SetNillableAge(i *int) *MetadataCreate {
 	return mc
 }
 
+// SetParentID sets the "parent_id" field.
+func (mc *MetadataCreate) SetParentID(i int) *MetadataCreate {
+	mc.mutation.SetParentID(i)
+	return mc
+}
+
+// SetNillableParentID sets the "parent_id" field if the given value is not nil.
+func (mc *MetadataCreate) SetNillableParentID(i *int) *MetadataCreate {
+	if i != nil {
+		mc.SetParentID(*i)
+	}
+	return mc
+}
+
 // SetID sets the "id" field.
 func (mc *MetadataCreate) SetID(i int) *MetadataCreate {
 	mc.mutation.SetID(i)
@@ -61,6 +75,26 @@ func (mc *MetadataCreate) SetNillableUserID(id *int) *MetadataCreate {
 // SetUser sets the "user" edge to the User entity.
 func (mc *MetadataCreate) SetUser(u *User) *MetadataCreate {
 	return mc.SetUserID(u.ID)
+}
+
+// AddChildIDs adds the "children" edge to the Metadata entity by IDs.
+func (mc *MetadataCreate) AddChildIDs(ids ...int) *MetadataCreate {
+	mc.mutation.AddChildIDs(ids...)
+	return mc
+}
+
+// AddChildren adds the "children" edges to the Metadata entity.
+func (mc *MetadataCreate) AddChildren(m ...*Metadata) *MetadataCreate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return mc.AddChildIDs(ids...)
+}
+
+// SetParent sets the "parent" edge to the Metadata entity.
+func (mc *MetadataCreate) SetParent(m *Metadata) *MetadataCreate {
+	return mc.SetParentID(m.ID)
 }
 
 // Mutation returns the MetadataMutation object of the builder.
@@ -90,11 +124,17 @@ func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 				return nil, err
 			}
 			mc.mutation = mutation
-			node, err = mc.sqlSave(ctx)
+			if node, err = mc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(mc.hooks) - 1; i >= 0; i-- {
+			if mc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = mc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mc.mutation); err != nil {
@@ -113,6 +153,19 @@ func (mc *MetadataCreate) SaveX(ctx context.Context) *Metadata {
 	return v
 }
 
+// Exec executes the query.
+func (mc *MetadataCreate) Exec(ctx context.Context) error {
+	_, err := mc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mc *MetadataCreate) ExecX(ctx context.Context) {
+	if err := mc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (mc *MetadataCreate) defaults() {
 	if _, ok := mc.mutation.Age(); !ok {
@@ -124,7 +177,7 @@ func (mc *MetadataCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (mc *MetadataCreate) check() error {
 	if _, ok := mc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "age"`)}
 	}
 	return nil
 }
@@ -132,12 +185,12 @@ func (mc *MetadataCreate) check() error {
 func (mc *MetadataCreate) sqlSave(ctx context.Context) (*Metadata, error) {
 	_node, _spec := mc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
-	if _node.ID == 0 {
+	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
@@ -187,6 +240,45 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 		_node.ID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := mc.mutation.ChildrenIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   metadata.ChildrenTable,
+			Columns: []string{metadata.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.ParentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   metadata.ParentTable,
+			Columns: []string{metadata.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metadata.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.ParentID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -219,18 +311,20 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				if nodes[i].ID == 0 {
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
@@ -257,4 +351,17 @@ func (mcb *MetadataCreateBulk) SaveX(ctx context.Context) []*Metadata {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (mcb *MetadataCreateBulk) Exec(ctx context.Context) error {
+	_, err := mcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mcb *MetadataCreateBulk) ExecX(ctx context.Context) {
+	if err := mcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

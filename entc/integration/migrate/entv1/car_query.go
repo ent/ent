@@ -305,8 +305,8 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (cq *CarQuery) Select(field string, fields ...string) *CarSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *CarQuery) Select(fields ...string) *CarSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &CarSelect{CarQuery: cq}
 }
 
@@ -457,10 +457,14 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 func (cq *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(car.Table)
-	selector := builder.Select(t1.Columns(car.Columns...)...).From(t1)
+	columns := cq.fields
+	if len(columns) == 0 {
+		columns = car.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if cq.sql != nil {
 		selector = cq.sql
-		selector.Select(selector.Columns(car.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range cq.predicates {
 		p(selector)
@@ -961,16 +965,10 @@ func (cs *CarSelect) BoolX(ctx context.Context) bool {
 
 func (cs *CarSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := cs.sqlQuery().Query()
+	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (cs *CarSelect) sqlQuery() sql.Querier {
-	selector := cs.sql
-	selector.Select(selector.Columns(cs.fields...)...)
-	return selector
 }

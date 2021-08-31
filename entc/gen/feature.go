@@ -5,7 +5,6 @@
 package gen
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -69,12 +68,39 @@ var (
 		},
 	}
 
+	// FeatureLock provides a feature-flag for sql locking extension for ent.
+	FeatureLock = Feature{
+		Name:        "sql/lock",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to use row-level locking in SQL using the 'FOR {UPDATE|SHARE}' clauses",
+	}
+
+	// FeatureModifier provides a feature-flag for adding query modifiers.
+	FeatureModifier = Feature{
+		Name:        "sql/modifier",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to attach custom modifiers to queries",
+	}
+
+	// FeatureUpsert provides a feature-flag for adding upsert (ON CONFLICT) capabilities to create builders.
+	FeatureUpsert = Feature{
+		Name:        "sql/upsert",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to configure the `ON CONFLICT`/`ON DUPLICATE KEY` clause for `INSERT` statements",
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
 		FeatureEntQL,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
+		FeatureLock,
+		FeatureModifier,
+		FeatureUpsert,
 	}
 )
 
@@ -137,7 +163,7 @@ func remove(dir, file string) error {
 		}
 		return err
 	}
-	infos, err := ioutil.ReadDir(dir)
+	infos, err := os.ReadDir(dir)
 	if err != nil {
 		return err
 	}

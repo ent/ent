@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"github.com/google/uuid"
 )
 
 // Rental is the model entity for the Rental schema.
@@ -24,10 +25,10 @@ type Rental struct {
 	ID int `json:"id,omitempty"`
 	// Date holds the value of the "date" field.
 	Date time.Time `json:"date,omitempty"`
-	// CarID holds the value of the "car_id" field.
-	CarID int `json:"car_id,omitempty"`
 	// UserID holds the value of the "user_id" field.
 	UserID int `json:"user_id,omitempty"`
+	// CarID holds the value of the "car_id" field.
+	CarID uuid.UUID `json:"car_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RentalQuery when eager-loading is set.
 	Edges RentalEdges `json:"edges"`
@@ -77,10 +78,12 @@ func (*Rental) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case rental.FieldID, rental.FieldCarID, rental.FieldUserID:
+		case rental.FieldID, rental.FieldUserID:
 			values[i] = new(sql.NullInt64)
 		case rental.FieldDate:
 			values[i] = new(sql.NullTime)
+		case rental.FieldCarID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Rental", columns[i])
 		}
@@ -108,17 +111,17 @@ func (r *Rental) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				r.Date = value.Time
 			}
-		case rental.FieldCarID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field car_id", values[i])
-			} else if value.Valid {
-				r.CarID = int(value.Int64)
-			}
 		case rental.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
 				r.UserID = int(value.Int64)
+			}
+		case rental.FieldCarID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field car_id", values[i])
+			} else if value != nil {
+				r.CarID = *value
 			}
 		}
 	}
@@ -160,10 +163,10 @@ func (r *Rental) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", r.ID))
 	builder.WriteString(", date=")
 	builder.WriteString(r.Date.Format(time.ANSIC))
-	builder.WriteString(", car_id=")
-	builder.WriteString(fmt.Sprintf("%v", r.CarID))
 	builder.WriteString(", user_id=")
 	builder.WriteString(fmt.Sprintf("%v", r.UserID))
+	builder.WriteString(", car_id=")
+	builder.WriteString(fmt.Sprintf("%v", r.CarID))
 	builder.WriteByte(')')
 	return builder.String()
 }

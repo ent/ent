@@ -20,6 +20,8 @@ func (Metadata) Fields() []ent.Field {
 		field.Int("id"),
 		field.Int("age").
 			Default(0),
+		field.Int("parent_id").
+			Optional(),
 	}
 }
 func (Metadata) Edges() []ent.Edge {
@@ -27,5 +29,9 @@ func (Metadata) Edges() []ent.Edge {
 		edge.From("user", User.Type).
 			Ref("metadata").
 			Unique(),
+		edge.To("parent", Metadata.Type).
+			Field("parent_id").
+			Unique().
+			From("children"),
 	}
 }

@@ -50,6 +50,20 @@ func (mc *MediaCreate) SetNillableSourceURI(s *string) *MediaCreate {
 	return mc
 }
 
+// SetText sets the "text" field.
+func (mc *MediaCreate) SetText(s string) *MediaCreate {
+	mc.mutation.SetText(s)
+	return mc
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (mc *MediaCreate) SetNillableText(s *string) *MediaCreate {
+	if s != nil {
+		mc.SetText(*s)
+	}
+	return mc
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (mc *MediaCreate) Mutation() *MediaMutation {
 	return mc.mutation
@@ -76,11 +90,17 @@ func (mc *MediaCreate) Save(ctx context.Context) (*Media, error) {
 				return nil, err
 			}
 			mc.mutation = mutation
-			node, err = mc.sqlSave(ctx)
+			if node, err = mc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(mc.hooks) - 1; i >= 0; i-- {
+			if mc.hooks[i] == nil {
+				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = mc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mc.mutation); err != nil {
@@ -99,6 +119,19 @@ func (mc *MediaCreate) SaveX(ctx context.Context) *Media {
 	return v
 }
 
+// Exec executes the query.
+func (mc *MediaCreate) Exec(ctx context.Context) error {
+	_, err := mc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mc *MediaCreate) ExecX(ctx context.Context) {
+	if err := mc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (mc *MediaCreate) check() error {
 	return nil
@@ -107,8 +140,8 @@ func (mc *MediaCreate) check() error {
 func (mc *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
 	_node, _spec := mc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -144,6 +177,14 @@ func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		})
 		_node.SourceURI = value
 	}
+	if value, ok := mc.mutation.Text(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: media.FieldText,
+		})
+		_node.Text = value
+	}
 	return _node, _spec
 }
 
@@ -175,19 +216,23 @@ func (mcb *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -211,4 +256,17 @@ func (mcb *MediaCreateBulk) SaveX(ctx context.Context) []*Media {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (mcb *MediaCreateBulk) Exec(ctx context.Context) error {
+	_, err := mcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (mcb *MediaCreateBulk) ExecX(ctx context.Context) {
+	if err := mcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

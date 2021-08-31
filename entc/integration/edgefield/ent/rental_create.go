@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // RentalCreate is the builder for creating a Rental entity.
@@ -40,15 +41,15 @@ func (rc *RentalCreate) SetNillableDate(t *time.Time) *RentalCreate {
 	return rc
 }
 
-// SetCarID sets the "car_id" field.
-func (rc *RentalCreate) SetCarID(i int) *RentalCreate {
-	rc.mutation.SetCarID(i)
-	return rc
-}
-
 // SetUserID sets the "user_id" field.
 func (rc *RentalCreate) SetUserID(i int) *RentalCreate {
 	rc.mutation.SetUserID(i)
+	return rc
+}
+
+// SetCarID sets the "car_id" field.
+func (rc *RentalCreate) SetCarID(u uuid.UUID) *RentalCreate {
+	rc.mutation.SetCarID(u)
 	return rc
 }
 
@@ -89,11 +90,17 @@ func (rc *RentalCreate) Save(ctx context.Context) (*Rental, error) {
 				return nil, err
 			}
 			rc.mutation = mutation
-			node, err = rc.sqlSave(ctx)
+			if node, err = rc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(rc.hooks) - 1; i >= 0; i-- {
+			if rc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = rc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, rc.mutation); err != nil {
@@ -112,6 +119,19 @@ func (rc *RentalCreate) SaveX(ctx context.Context) *Rental {
 	return v
 }
 
+// Exec executes the query.
+func (rc *RentalCreate) Exec(ctx context.Context) error {
+	_, err := rc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (rc *RentalCreate) ExecX(ctx context.Context) {
+	if err := rc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (rc *RentalCreate) defaults() {
 	if _, ok := rc.mutation.Date(); !ok {
@@ -123,13 +143,13 @@ func (rc *RentalCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (rc *RentalCreate) check() error {
 	if _, ok := rc.mutation.Date(); !ok {
-		return &ValidationError{Name: "date", err: errors.New("ent: missing required field \"date\"")}
-	}
-	if _, ok := rc.mutation.CarID(); !ok {
-		return &ValidationError{Name: "car_id", err: errors.New("ent: missing required field \"car_id\"")}
+		return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "date"`)}
 	}
 	if _, ok := rc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New("ent: missing required field \"user_id\"")}
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "user_id"`)}
+	}
+	if _, ok := rc.mutation.CarID(); !ok {
+		return &ValidationError{Name: "car_id", err: errors.New(`ent: missing required field "car_id"`)}
 	}
 	if _, ok := rc.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
@@ -143,8 +163,8 @@ func (rc *RentalCreate) check() error {
 func (rc *RentalCreate) sqlSave(ctx context.Context) (*Rental, error) {
 	_node, _spec := rc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -201,7 +221,7 @@ func (rc *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: car.FieldID,
 				},
 			},
@@ -244,19 +264,23 @@ func (rcb *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, rcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, rcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -280,4 +304,17 @@ func (rcb *RentalCreateBulk) SaveX(ctx context.Context) []*Rental {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (rcb *RentalCreateBulk) Exec(ctx context.Context) error {
+	_, err := rcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (rcb *RentalCreateBulk) ExecX(ctx context.Context) {
+	if err := rcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -119,8 +119,8 @@ func (m CarMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CarMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -165,6 +165,11 @@ func (m *CarMutation) OwnerIDs() (ids []int) {
 func (m *CarMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
+}
+
+// Where appends a list predicates to the CarMutation builder.
+func (m *CarMutation) Where(ps ...predicate.Car) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -428,8 +433,8 @@ func (m ConversionMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ConversionMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1046,6 +1051,11 @@ func (m *ConversionMutation) ResetUint64ToString() {
 	delete(m.clearedFields, conversion.FieldUint64ToString)
 }
 
+// Where appends a list predicates to the ConversionMutation builder.
+func (m *ConversionMutation) Where(ps ...predicate.Conversion) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *ConversionMutation) Op() Op {
 	return m.op
@@ -1580,8 +1590,8 @@ func (m CustomTypeMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CustomTypeMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1636,6 +1646,11 @@ func (m *CustomTypeMutation) CustomCleared() bool {
 func (m *CustomTypeMutation) ResetCustom() {
 	m.custom = nil
 	delete(m.clearedFields, customtype.FieldCustom)
+}
+
+// Where appends a list predicates to the CustomTypeMutation builder.
+func (m *CustomTypeMutation) Where(ps ...predicate.CustomType) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1815,6 +1830,7 @@ type UserMutation struct {
 	age             *int32
 	addage          *int32
 	name            *string
+	description     *string
 	nickname        *string
 	address         *string
 	renamed         *string
@@ -1913,8 +1929,8 @@ func (m *UserMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -2012,6 +2028,55 @@ func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *UserMutation) ResetName() {
 	m.name = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *UserMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *UserMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *UserMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[user.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *UserMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[user.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *UserMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, user.FieldDescription)
 }
 
 // SetNickname sets the "nickname" field.
@@ -2409,6 +2474,7 @@ func (m *UserMutation) RemoveChildIDs(ids ...int) {
 		m.removedchildren = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -2514,6 +2580,11 @@ func (m *UserMutation) ResetCar() {
 	m.clearedcar = false
 }
 
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
@@ -2528,12 +2599,15 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
 	}
 	if m.name != nil {
 		fields = append(fields, user.FieldName)
+	}
+	if m.description != nil {
+		fields = append(fields, user.FieldDescription)
 	}
 	if m.nickname != nil {
 		fields = append(fields, user.FieldNickname)
@@ -2568,6 +2642,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Age()
 	case user.FieldName:
 		return m.Name()
+	case user.FieldDescription:
+		return m.Description()
 	case user.FieldNickname:
 		return m.Nickname()
 	case user.FieldAddress:
@@ -2595,6 +2671,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldAge(ctx)
 	case user.FieldName:
 		return m.OldName(ctx)
+	case user.FieldDescription:
+		return m.OldDescription(ctx)
 	case user.FieldNickname:
 		return m.OldNickname(ctx)
 	case user.FieldAddress:
@@ -2631,6 +2709,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case user.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	case user.FieldNickname:
 		v, ok := value.(string)
@@ -2726,6 +2811,9 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(user.FieldDescription) {
+		fields = append(fields, user.FieldDescription)
+	}
 	if m.FieldCleared(user.FieldAddress) {
 		fields = append(fields, user.FieldAddress)
 	}
@@ -2758,6 +2846,9 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
 	switch name {
+	case user.FieldDescription:
+		m.ClearDescription()
+		return nil
 	case user.FieldAddress:
 		m.ClearAddress()
 		return nil
@@ -2789,6 +2880,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldName:
 		m.ResetName()
+		return nil
+	case user.FieldDescription:
+		m.ResetDescription()
 		return nil
 	case user.FieldNickname:
 		m.ResetNickname()

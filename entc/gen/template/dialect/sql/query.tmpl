@@ -13,7 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- end }}
 	{{- with $tmpls := matchTemplate "dialect/sql/query/fields/additional/*" }}
 		{{- range $tmpl := $tmpls }}
-			{{ xtemplate $tmpl $ }}
+			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
 {{- end }}
@@ -169,10 +169,14 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect({{ $receiver }}.driver.Dialect())
 	t1 := builder.Table({{ $.Package }}.Table)
-	selector := builder.Select(t1.Columns({{ $.Package }}.Columns...)...).From(t1)
+	columns := {{ $receiver }}.fields
+	if len(columns) == 0 {
+		columns = {{ $.Package }}.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if {{ $receiver }}.sql != nil {
 		selector = {{ $receiver }}.sql
-		selector.Select(selector.Columns({{ $.Package }}.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	{{- /* Allow mutating the sql.Selector by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/query/selector/*" }}

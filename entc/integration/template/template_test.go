@@ -10,9 +10,11 @@ import (
 	"reflect"
 	"testing"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/template/ent"
 	"entgo.io/ent/entc/integration/template/ent/hook"
 	"entgo.io/ent/entc/integration/template/ent/migrate"
+	"entgo.io/ent/entc/integration/template/ent/pet"
 	"entgo.io/ent/entc/integration/template/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -65,4 +67,28 @@ func TestCustomTemplate(t *testing.T) {
 	result := client.User.Query().Where(user.NameGlob("a8*")).
 		AllX(ctx)
 	require.Equal(t, 1, len(result))
+
+	var v []struct{ ID, Owner int }
+	client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			t := sql.Table(user.Table)
+			s.Join(t).On(s.C(pet.OwnerColumn), t.C(user.FieldID))
+			s.Select(s.C(pet.FieldID), sql.As(t.C(user.FieldID), "owner"))
+		}).
+		Select().
+		ScanX(ctx, &v)
+	require.Equal(t, p.ID, v[0].ID)
+	require.Equal(t, u.ID, v[0].Owner)
+
+	var sum int
+	for _, age := range client.Pet.Query().Select(pet.FieldAge).IntsX(ctx) {
+		sum += age
+	}
+	got := client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.Select(sql.Sum(pet.FieldAge))
+		}).
+		Select().
+		IntX(ctx)
+	require.Equal(t, sum, got)
 }

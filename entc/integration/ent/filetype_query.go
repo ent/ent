@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/file"
@@ -32,6 +33,7 @@ type FileTypeQuery struct {
 	predicates []predicate.FileType
 	// eager-loading edges.
 	withFiles *FileQuery
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -329,8 +331,8 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 //		Select(filetype.FieldName).
 //		Scan(ctx, &v)
 //
-func (ftq *FileTypeQuery) Select(field string, fields ...string) *FileTypeSelect {
-	ftq.fields = append([]string{field}, fields...)
+func (ftq *FileTypeQuery) Select(fields ...string) *FileTypeSelect {
+	ftq.fields = append(ftq.fields, fields...)
 	return &FileTypeSelect{FileTypeQuery: ftq}
 }
 
@@ -370,6 +372,9 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 		node := nodes[len(nodes)-1]
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(ftq.modifiers) > 0 {
+		_spec.Modifiers = ftq.modifiers
 	}
 	if err := sqlgraph.QueryNodes(ctx, ftq.driver, _spec); err != nil {
 		return nil, err
@@ -412,6 +417,9 @@ func (ftq *FileTypeQuery) sqlAll(ctx context.Context) ([]*FileType, error) {
 
 func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ftq.querySpec()
+	if len(ftq.modifiers) > 0 {
+		_spec.Modifiers = ftq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, ftq.driver, _spec)
 }
 
@@ -474,10 +482,17 @@ func (ftq *FileTypeQuery) querySpec() *sqlgraph.QuerySpec {
 func (ftq *FileTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(ftq.driver.Dialect())
 	t1 := builder.Table(filetype.Table)
-	selector := builder.Select(t1.Columns(filetype.Columns...)...).From(t1)
+	columns := ftq.fields
+	if len(columns) == 0 {
+		columns = filetype.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if ftq.sql != nil {
 		selector = ftq.sql
-		selector.Select(selector.Columns(filetype.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
+	}
+	for _, m := range ftq.modifiers {
+		m(selector)
 	}
 	for _, p := range ftq.predicates {
 		p(selector)
@@ -494,6 +509,38 @@ func (ftq *FileTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (ftq *FileTypeQuery) ForUpdate(opts ...sql.LockOption) *FileTypeQuery {
+	if ftq.driver.Dialect() == dialect.Postgres {
+		ftq.Unique(false)
+	}
+	ftq.modifiers = append(ftq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return ftq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (ftq *FileTypeQuery) ForShare(opts ...sql.LockOption) *FileTypeQuery {
+	if ftq.driver.Dialect() == dialect.Postgres {
+		ftq.Unique(false)
+	}
+	ftq.modifiers = append(ftq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return ftq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ftq *FileTypeQuery) Modify(modifiers ...func(s *sql.Selector)) *FileTypeSelect {
+	ftq.modifiers = append(ftq.modifiers, modifiers...)
+	return ftq.Select()
 }
 
 // FileTypeGroupBy is the group-by builder for FileType entities.
@@ -978,7 +1025,7 @@ func (fts *FileTypeSelect) BoolX(ctx context.Context) bool {
 
 func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := fts.sqlQuery().Query()
+	query, args := fts.sql.Query()
 	if err := fts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -986,8 +1033,8 @@ func (fts *FileTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
 	return sql.ScanSlice(rows, v)
 }
 
-func (fts *FileTypeSelect) sqlQuery() sql.Querier {
-	selector := fts.sql
-	selector.Select(selector.Columns(fts.fields...)...)
-	return selector
+// Modify adds a query modifier for attaching custom logic to queries.
+func (fts *FileTypeSelect) Modify(modifiers ...func(s *sql.Selector)) *FileTypeSelect {
+	fts.modifiers = append(fts.modifiers, modifiers...)
+	return fts
 }

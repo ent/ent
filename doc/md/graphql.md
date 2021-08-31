@@ -28,10 +28,11 @@ import (
 )
 
 func main() {
-	err := entc.Generate("./schema", &gen.Config{
-		Templates: entgql.AllTemplates,
-	})
+	ex, err := entgql.NewExtension()
 	if err != nil {
+		log.Fatalf("creating entgql extension: %v", err)
+	}
+	if err := entc.Generate("./schema", &gen.Config{}, entc.Extensions(ex)); err != nil {
 		log.Fatalf("running ent codegen: %v", err)
 	}
 }
@@ -59,7 +60,7 @@ After running codegen, the following add-ons will be added to your project.
 
 ## Node API
 
-A new file named `ent/node.go` was created that implements the [Relay Node interface](https://relay.dev/docs/en/graphql-server-specification.html#object-identification).
+A new file named `ent/node.go` was created that implements the [Relay Node interface](https://relay.dev/graphql/objectidentification.htm).
 
 In order to use the new generated `ent.Noder` interface in the [GraphQL resolver](https://gqlgen.com/reference/resolvers/),
 add the `Node` method to the query resolver, and look at the [configuration](#gql-configuration) section to understand
@@ -79,7 +80,7 @@ However, if you use a custom format for the global unique identifiers, you can c
 ```go
 func (r *queryResolver) Node(ctx context.Context, guid string) (ent.Noder, error) {
 	typ, id := parseGUID(guid)
-	return r.client.Noder(ctx, id, ent.WithNodeType(typ))
+	return r.client.Noder(ctx, id, ent.WithFixedNodeType(typ))
 }
 ```
 

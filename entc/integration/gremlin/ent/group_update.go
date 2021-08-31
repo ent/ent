@@ -29,9 +29,9 @@ type GroupUpdate struct {
 	mutation *GroupMutation
 }
 
-// Where adds a new predicate for the GroupUpdate builder.
+// Where appends a list predicates to the GroupUpdate builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
+	gu.mutation.Where(ps...)
 	return gu
 }
 
@@ -264,6 +264,9 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gu.hooks) - 1; i >= 0; i-- {
+			if gu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
@@ -669,6 +672,9 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 			return node, err
 		})
 		for i := len(guo.hooks) - 1; i >= 0; i-- {
+			if guo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = guo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {

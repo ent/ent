@@ -24,9 +24,9 @@ type GroupInfoDelete struct {
 	mutation *GroupInfoMutation
 }
 
-// Where adds a new predicate to the GroupInfoDelete builder.
+// Where appends a list predicates to the GroupInfoDelete builder.
 func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
-	gid.mutation.predicates = append(gid.mutation.predicates, ps...)
+	gid.mutation.Where(ps...)
 	return gid
 }
 
@@ -50,6 +50,9 @@ func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gid.hooks) - 1; i >= 0; i-- {
+			if gid.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gid.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gid.mutation); err != nil {

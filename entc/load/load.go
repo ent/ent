@@ -7,16 +7,15 @@ package load
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
 	"go/token"
 	"go/types"
-	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
@@ -24,27 +23,27 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/entc/load/internal"
-
 	"golang.org/x/tools/go/packages"
 )
 
-// A SchemaSpec holds a serializable version of an ent.Schema
-// and its Go package information.
-type SchemaSpec struct {
-	// Schemas are the schema descriptors.
-	Schemas []*Schema
-	// PkgPath is the package path of the loaded ent.Schema.
-	PkgPath string
-}
+type (
+	// A SchemaSpec holds a serializable version of an ent.Schema
+	// and its Go package information.
+	SchemaSpec struct {
+		// Schemas are the schema descriptors.
+		Schemas []*Schema
+		// PkgPath is the package path of the loaded ent.Schema.
+		PkgPath string
+	}
 
-// Config holds the configuration for package building.
-type Config struct {
-	// Path is the path for the schema package.
-	Path string
-	// Names are the schema names to load. Empty means all schemas in the directory.
-	Names []string
-}
+	// Config holds the configuration for loading an ent/schema package.
+	Config struct {
+		// Path is the path for the schema package.
+		Path string
+		// Names are the schema names to load. Empty means all schemas in the directory.
+		Names []string
+	}
+)
 
 // Load loads the schemas package and build the Go plugin with this info.
 func (c *Config) Load() (*SchemaSpec, error) {
@@ -71,7 +70,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 		return nil, err
 	}
 	target := fmt.Sprintf(".entc/%s.go", filename(pkgPath))
-	if err := ioutil.WriteFile(target, buf, 0644); err != nil {
+	if err := os.WriteFile(target, buf, 0644); err != nil {
 		return nil, fmt.Errorf("entc/load: write file %s: %w", target, err)
 	}
 	defer os.RemoveAll(".entc")
@@ -134,35 +133,36 @@ func (c *Config) load() (string, error) {
 	return pkg.PkgPath, nil
 }
 
-//go:generate go run github.com/go-bindata/go-bindata/go-bindata -pkg=internal -o=internal/bindata.go -mode=420 -modtime=1 ./template/... schema.go
-
-var buildTmpl = templates()
+var (
+	//go:embed template/main.tmpl schema.go
+	files     embed.FS
+	buildTmpl = templates()
+)
 
 func templates() *template.Template {
-	tmpl := template.New("templates").Funcs(template.FuncMap{"base": filepath.Base})
-	tmpl = template.Must(tmpl.Parse(string(internal.MustAsset("template/main.tmpl"))))
-	// Turns the schema file and its imports into templates.
 	tmpls, err := schemaTemplates()
 	if err != nil {
 		panic(err)
 	}
+	tmpl := template.Must(template.New("templates").
+		ParseFS(files, "template/main.tmpl"))
 	for _, t := range tmpls {
 		tmpl = template.Must(tmpl.Parse(t))
 	}
 	return tmpl
 }
 
-// schemaTemplates returns the templates needed for loading the schema.go file.
+// schemaTemplates turns the schema.go file and its import block into templates.
 func schemaTemplates() ([]string, error) {
-	const name = "schema.go"
 	var (
 		imports []string
 		code    bytes.Buffer
 		fset    = token.NewFileSet()
+		src, _  = files.ReadFile("schema.go")
 	)
-	f, err := parser.ParseFile(fset, name, string(internal.MustAsset(name)), parser.AllErrors)
+	f, err := parser.ParseFile(fset, "schema.go", src, parser.AllErrors)
 	if err != nil {
-		return nil, fmt.Errorf("parse file: %s: %w", name, err)
+		return nil, fmt.Errorf("parse schema file: %w", err)
 	}
 	for _, decl := range f.Decls {
 		if decl, ok := decl.(*ast.GenDecl); ok && decl.Tok == token.IMPORT {

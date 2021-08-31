@@ -24,9 +24,9 @@ type ItemDelete struct {
 	mutation *ItemMutation
 }
 
-// Where adds a new predicate to the ItemDelete builder.
+// Where appends a list predicates to the ItemDelete builder.
 func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	id.mutation.predicates = append(id.mutation.predicates, ps...)
+	id.mutation.Where(ps...)
 	return id
 }
 
@@ -50,6 +50,9 @@ func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(id.hooks) - 1; i >= 0; i-- {
+			if id.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = id.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, id.mutation); err != nil {
@@ -73,7 +76,7 @@ func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: item.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: item.FieldID,
 			},
 		},

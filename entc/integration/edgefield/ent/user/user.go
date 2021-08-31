@@ -33,47 +33,47 @@ const (
 	EdgeRentals = "rentals"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// PetsTable is the table the holds the pets relation/edge.
+	// PetsTable is the table that holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "owner_id"
-	// ParentTable is the table the holds the parent relation/edge.
+	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "parent_id"
-	// ChildrenTable is the table the holds the children relation/edge.
+	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "parent_id"
-	// SpouseTable is the table the holds the spouse relation/edge.
+	// SpouseTable is the table that holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
 	SpouseColumn = "spouse_id"
-	// CardTable is the table the holds the card relation/edge.
+	// CardTable is the table that holds the card relation/edge.
 	CardTable = "cards"
 	// CardInverseTable is the table name for the Card entity.
 	// It exists in this package in order to avoid circular dependency with the "card" package.
 	CardInverseTable = "cards"
 	// CardColumn is the table column denoting the card relation/edge.
 	CardColumn = "owner_id"
-	// MetadataTable is the table the holds the metadata relation/edge.
+	// MetadataTable is the table that holds the metadata relation/edge.
 	MetadataTable = "metadata"
 	// MetadataInverseTable is the table name for the Metadata entity.
 	// It exists in this package in order to avoid circular dependency with the "metadata" package.
 	MetadataInverseTable = "metadata"
 	// MetadataColumn is the table column denoting the metadata relation/edge.
 	MetadataColumn = "id"
-	// InfoTable is the table the holds the info relation/edge.
+	// InfoTable is the table that holds the info relation/edge.
 	InfoTable = "infos"
 	// InfoInverseTable is the table name for the Info entity.
 	// It exists in this package in order to avoid circular dependency with the "info" package.
 	InfoInverseTable = "infos"
 	// InfoColumn is the table column denoting the info relation/edge.
 	InfoColumn = "id"
-	// RentalsTable is the table the holds the rentals relation/edge.
+	// RentalsTable is the table that holds the rentals relation/edge.
 	RentalsTable = "rentals"
 	// RentalsInverseTable is the table name for the Rental entity.
 	// It exists in this package in order to avoid circular dependency with the "rental" package.

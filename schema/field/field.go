@@ -72,20 +72,21 @@ func Time(name string) *timeBuilder {
 //
 func JSON(name string, typ interface{}) *jsonBuilder {
 	t := reflect.TypeOf(typ)
-	info := &TypeInfo{
-		Type:    TypeJSON,
-		Ident:   t.String(),
-		PkgPath: t.PkgPath(),
-	}
+	b := &jsonBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{
+			Type:    TypeJSON,
+			Ident:   t.String(),
+			PkgPath: t.PkgPath(),
+		},
+	}}
+	b.desc.goType(typ, t)
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
-		info.Nillable = true
-		info.PkgPath = pkgPath(t)
+		b.desc.Info.Nillable = true
+		b.desc.Info.PkgPath = pkgPath(t)
 	}
-	return &jsonBuilder{&Descriptor{
-		Name: name,
-		Info: info,
-	}}
+	return b
 }
 
 // Strings returns a new JSON Field with type []string.
@@ -548,6 +549,13 @@ func (b *bytesBuilder) Optional() *bytesBuilder {
 	return b
 }
 
+// Unique makes the field unique within all vertices of this type.
+// Only supported in PostgreSQL.
+func (b *bytesBuilder) Unique() *bytesBuilder {
+	b.desc.Unique = true
+	return b
+}
+
 // Immutable indicates that this field cannot be updated.
 func (b *bytesBuilder) Immutable() *bytesBuilder {
 	b.desc.Immutable = true
@@ -571,6 +579,45 @@ func (b *bytesBuilder) StructTag(s string) *bytesBuilder {
 // In SQLite, it does not have any effect on the type size, which is default to 1B bytes.
 func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
 	b.desc.Size = i
+	b.desc.Validators = append(b.desc.Validators, func(buf []byte) error {
+		if len(buf) > i {
+			return errors.New("value is greater than the required length")
+		}
+		return nil
+	})
+	return b
+}
+
+// MinLen adds a length validator for this field.
+// Operation fails if the length of the buffer is less than the given value.
+func (b *bytesBuilder) MinLen(i int) *bytesBuilder {
+	b.desc.Validators = append(b.desc.Validators, func(b []byte) error {
+		if len(b) < i {
+			return errors.New("value is less than the required length")
+		}
+		return nil
+	})
+	return b
+}
+
+// NotEmpty adds a length validator for this field.
+// Operation fails if the length of the buffer is zero.
+func (b *bytesBuilder) NotEmpty() *bytesBuilder {
+	return b.MinLen(1)
+}
+
+// Validate adds a validator for this field. Operation fails if the validation fails.
+//
+//	field.Bytes("blob").
+//		Validate(func(b []byte) error {
+//			if len(b) % 2 == 0 {
+//				return fmt.Errorf("ent/schema: blob length is even: %d", len(b))
+//			}
+//			return nil
+//		})
+//
+func (b *bytesBuilder) Validate(fn func([]byte) error) *bytesBuilder {
+	b.desc.Validators = append(b.desc.Validators, fn)
 	return b
 }
 
@@ -708,9 +755,9 @@ func (b *enumBuilder) Values(values ...string) *enumBuilder {
 //
 //	field.Enum("priority").
 //		NamedValues(
-//			"LOW", "low",
-//			"MID", "mid",
-//			"HIGH", "high",
+//			"Low", "LOW",
+//			"Mid", "MID",
+//			"High", "HIGH",
 //		)
 //
 func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
@@ -808,6 +855,12 @@ type EnumValues interface {
 func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
 	b.Values(ev.Values()...)
 	b.desc.goType(ev, stringType)
+	// If an error already exists, let that be returned instead.
+	// Otherwise check that the underlying type is either a string
+	// or implements Stringer.
+	if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.Stringer() {
+		b.desc.Err = errors.New("enum values which implement ValueScanner must also implement Stringer")
+	}
 	return b
 }
 
@@ -1108,20 +1161,21 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 }
 
 func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {
-	typ := reflect.TypeOf(d.Default)
-	if typ.Kind() != reflect.Func || d.Err != nil {
-		return
-	}
-	err := fmt.Errorf("expect type (func() %s) for default value", d.Info)
-	if typ.NumIn() != 0 || typ.NumOut() != 1 {
-		d.Err = err
-	}
-	rtype := expectType
-	if d.Info.RType != nil {
-		rtype = d.Info.RType.rtype
-	}
-	if !typ.Out(0).AssignableTo(rtype) {
-		d.Err = err
+	for _, typ := range []reflect.Type{reflect.TypeOf(d.Default), reflect.TypeOf(d.UpdateDefault)} {
+		if typ == nil || typ.Kind() != reflect.Func || d.Err != nil {
+			continue
+		}
+		err := fmt.Errorf("expect type (func() %s) for default value", d.Info)
+		if typ.NumIn() != 0 || typ.NumOut() != 1 {
+			d.Err = err
+		}
+		rtype := expectType
+		if d.Info.RType != nil {
+			rtype = d.Info.RType.rtype
+		}
+		if !typ.Out(0).AssignableTo(rtype) {
+			d.Err = err
+		}
 	}
 }
 

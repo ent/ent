@@ -15,8 +15,8 @@ server, you can clone the repository and checkout `v0.1.0` as follows:
 
 ```console
 git clone git@github.com:a8m/ent-graphql-example.git
+cd ent-graphql-example
 git checkout v0.1.0
-cd ent-graphql-example 
 go run ./cmd/todo/
 ```
 
@@ -163,12 +163,16 @@ import (
 )
 
 func main() {
-    err := entc.Generate("./schema", &gen.Config{
-        Templates: entgql.AllTemplates,
-    })
-    if err != nil {
-        log.Fatalf("running ent codegen: %v", err)
-    }
+	ex, err := entgql.NewExtension()
+	if err != nil {
+		log.Fatalf("creating entgql extension: %v", err)
+	}
+	opts := []entc.Option{
+		entc.Extensions(ex),
+	}
+	if err := entc.Generate("./schema", &gen.Config{}, opts...); err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
 }
 ```
 

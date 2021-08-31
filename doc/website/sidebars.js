@@ -59,7 +59,9 @@ module.exports = {
         'generating-ent-schemas',
         'feature-flags',
         'translations',
-        'contributors'
+        'contributors',
+        'writing-docs',
+        'slack'
       ],
       collapsed: false,
     },
@@ -84,8 +86,23 @@ module.exports = {
         'tutorial-todo-gql-field-collection',
         'tutorial-todo-gql-tx-mutation',
         'tutorial-todo-gql-mutation-input',
+        'tutorial-todo-gql-filter-input',
       ],
       collapsed: false,
     },
+    {
+      type: 'category',
+      collapsed: false,
+      label: 'gRPC',
+      items: [
+          'grpc-intro',
+          'grpc-setting-up',
+          'grpc-generating-proto',
+          'grpc-generating-a-service',
+          'grpc-server-and-client',
+          'grpc-edges',
+          'grpc-optional-fields',
+      ]
+    }
   ]
 }

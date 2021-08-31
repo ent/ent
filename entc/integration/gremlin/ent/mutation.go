@@ -24,6 +24,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	"entgo.io/ent/entc/integration/gremlin/ent/item"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
@@ -153,8 +154,8 @@ func (m CardMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CardMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -440,6 +441,7 @@ func (m *CardMutation) RemoveSpecIDs(ids ...string) {
 		m.removedspec = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.spec, ids[i])
 		m.removedspec[ids[i]] = struct{}{}
 	}
 }
@@ -465,6 +467,11 @@ func (m *CardMutation) ResetSpec() {
 	m.spec = nil
 	m.clearedspec = false
 	m.removedspec = nil
+}
+
+// Where appends a list predicates to the CardMutation builder.
+func (m *CardMutation) Where(ps ...predicate.Card) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -860,8 +867,8 @@ func (m CommentMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CommentMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -1049,6 +1056,11 @@ func (m *CommentMutation) ResetNillableInt() {
 	m.nillable_int = nil
 	m.addnillable_int = nil
 	delete(m.clearedFields, comment.FieldNillableInt)
+}
+
+// Where appends a list predicates to the CommentMutation builder.
+func (m *CommentMutation) Where(ps ...predicate.Comment) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1351,6 +1363,7 @@ type FieldTypeMutation struct {
 	link_other                 **schema.Link
 	mac                        *schema.MAC
 	string_array               *schema.Strings
+	password                   *string
 	string_scanner             *schema.StringScanner
 	duration                   *time.Duration
 	addduration                *time.Duration
@@ -1364,6 +1377,7 @@ type FieldTypeMutation struct {
 	null_active                *schema.Status
 	deleted                    **sql.NullBool
 	deleted_at                 **sql.NullTime
+	raw_data                   *[]byte
 	ip                         *net.IP
 	null_int64                 **sql.NullInt64
 	schema_int                 *schema.Int
@@ -1378,6 +1392,7 @@ type FieldTypeMutation struct {
 	addschema_float32          *schema.Float32
 	null_float                 **sql.NullFloat64
 	role                       *role.Role
+	priority                   *role.Priority
 	uuid                       *uuid.UUID
 	nillable_uuid              *uuid.UUID
 	strings                    *[]string
@@ -1385,6 +1400,9 @@ type FieldTypeMutation struct {
 	nil_pair                   **schema.Pair
 	vstring                    *schema.VString
 	triple                     *schema.Triple
+	big_int                    *schema.BigInt
+	addbig_int                 *schema.BigInt
+	password_other             *schema.Password
 	clearedFields              map[string]struct{}
 	done                       bool
 	oldValue                   func(context.Context) (*FieldType, error)
@@ -1461,8 +1479,8 @@ func (m FieldTypeMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *FieldTypeMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -3325,6 +3343,55 @@ func (m *FieldTypeMutation) ResetStringArray() {
 	delete(m.clearedFields, fieldtype.FieldStringArray)
 }
 
+// SetPassword sets the "password" field.
+func (m *FieldTypeMutation) SetPassword(s string) {
+	m.password = &s
+}
+
+// Password returns the value of the "password" field in the mutation.
+func (m *FieldTypeMutation) Password() (r string, exists bool) {
+	v := m.password
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPassword returns the old "password" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldPassword(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPassword is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPassword requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPassword: %w", err)
+	}
+	return oldValue.Password, nil
+}
+
+// ClearPassword clears the value of the "password" field.
+func (m *FieldTypeMutation) ClearPassword() {
+	m.password = nil
+	m.clearedFields[fieldtype.FieldPassword] = struct{}{}
+}
+
+// PasswordCleared returns if the "password" field was cleared in this mutation.
+func (m *FieldTypeMutation) PasswordCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldPassword]
+	return ok
+}
+
+// ResetPassword resets all changes to the "password" field.
+func (m *FieldTypeMutation) ResetPassword() {
+	m.password = nil
+	delete(m.clearedFields, fieldtype.FieldPassword)
+}
+
 // SetStringScanner sets the "string_scanner" field.
 func (m *FieldTypeMutation) SetStringScanner(ss schema.StringScanner) {
 	m.string_scanner = &ss
@@ -3921,6 +3988,55 @@ func (m *FieldTypeMutation) ResetDeletedAt() {
 	delete(m.clearedFields, fieldtype.FieldDeletedAt)
 }
 
+// SetRawData sets the "raw_data" field.
+func (m *FieldTypeMutation) SetRawData(b []byte) {
+	m.raw_data = &b
+}
+
+// RawData returns the value of the "raw_data" field in the mutation.
+func (m *FieldTypeMutation) RawData() (r []byte, exists bool) {
+	v := m.raw_data
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRawData returns the old "raw_data" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldRawData(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRawData is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRawData requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRawData: %w", err)
+	}
+	return oldValue.RawData, nil
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (m *FieldTypeMutation) ClearRawData() {
+	m.raw_data = nil
+	m.clearedFields[fieldtype.FieldRawData] = struct{}{}
+}
+
+// RawDataCleared returns if the "raw_data" field was cleared in this mutation.
+func (m *FieldTypeMutation) RawDataCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldRawData]
+	return ok
+}
+
+// ResetRawData resets all changes to the "raw_data" field.
+func (m *FieldTypeMutation) ResetRawData() {
+	m.raw_data = nil
+	delete(m.clearedFields, fieldtype.FieldRawData)
+}
+
 // SetIP sets the "ip" field.
 func (m *FieldTypeMutation) SetIP(n net.IP) {
 	m.ip = &n
@@ -4454,6 +4570,55 @@ func (m *FieldTypeMutation) ResetRole() {
 	m.role = nil
 }
 
+// SetPriority sets the "priority" field.
+func (m *FieldTypeMutation) SetPriority(r role.Priority) {
+	m.priority = &r
+}
+
+// Priority returns the value of the "priority" field in the mutation.
+func (m *FieldTypeMutation) Priority() (r role.Priority, exists bool) {
+	v := m.priority
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPriority returns the old "priority" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldPriority(ctx context.Context) (v role.Priority, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPriority is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPriority requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPriority: %w", err)
+	}
+	return oldValue.Priority, nil
+}
+
+// ClearPriority clears the value of the "priority" field.
+func (m *FieldTypeMutation) ClearPriority() {
+	m.priority = nil
+	m.clearedFields[fieldtype.FieldPriority] = struct{}{}
+}
+
+// PriorityCleared returns if the "priority" field was cleared in this mutation.
+func (m *FieldTypeMutation) PriorityCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldPriority]
+	return ok
+}
+
+// ResetPriority resets all changes to the "priority" field.
+func (m *FieldTypeMutation) ResetPriority() {
+	m.priority = nil
+	delete(m.clearedFields, fieldtype.FieldPriority)
+}
+
 // SetUUID sets the "uuid" field.
 func (m *FieldTypeMutation) SetUUID(u uuid.UUID) {
 	m.uuid = &u
@@ -4758,6 +4923,130 @@ func (m *FieldTypeMutation) ResetTriple() {
 	m.triple = nil
 }
 
+// SetBigInt sets the "big_int" field.
+func (m *FieldTypeMutation) SetBigInt(si schema.BigInt) {
+	m.big_int = &si
+	m.addbig_int = nil
+}
+
+// BigInt returns the value of the "big_int" field in the mutation.
+func (m *FieldTypeMutation) BigInt() (r schema.BigInt, exists bool) {
+	v := m.big_int
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBigInt returns the old "big_int" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldBigInt(ctx context.Context) (v schema.BigInt, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldBigInt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldBigInt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBigInt: %w", err)
+	}
+	return oldValue.BigInt, nil
+}
+
+// AddBigInt adds si to the "big_int" field.
+func (m *FieldTypeMutation) AddBigInt(si schema.BigInt) {
+	if m.addbig_int != nil {
+		*m.addbig_int = m.addbig_int.Add(si)
+	} else {
+		m.addbig_int = &si
+	}
+}
+
+// AddedBigInt returns the value that was added to the "big_int" field in this mutation.
+func (m *FieldTypeMutation) AddedBigInt() (r schema.BigInt, exists bool) {
+	v := m.addbig_int
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearBigInt clears the value of the "big_int" field.
+func (m *FieldTypeMutation) ClearBigInt() {
+	m.big_int = nil
+	m.addbig_int = nil
+	m.clearedFields[fieldtype.FieldBigInt] = struct{}{}
+}
+
+// BigIntCleared returns if the "big_int" field was cleared in this mutation.
+func (m *FieldTypeMutation) BigIntCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldBigInt]
+	return ok
+}
+
+// ResetBigInt resets all changes to the "big_int" field.
+func (m *FieldTypeMutation) ResetBigInt() {
+	m.big_int = nil
+	m.addbig_int = nil
+	delete(m.clearedFields, fieldtype.FieldBigInt)
+}
+
+// SetPasswordOther sets the "password_other" field.
+func (m *FieldTypeMutation) SetPasswordOther(s schema.Password) {
+	m.password_other = &s
+}
+
+// PasswordOther returns the value of the "password_other" field in the mutation.
+func (m *FieldTypeMutation) PasswordOther() (r schema.Password, exists bool) {
+	v := m.password_other
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPasswordOther returns the old "password_other" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldPasswordOther(ctx context.Context) (v schema.Password, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPasswordOther is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPasswordOther requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPasswordOther: %w", err)
+	}
+	return oldValue.PasswordOther, nil
+}
+
+// ClearPasswordOther clears the value of the "password_other" field.
+func (m *FieldTypeMutation) ClearPasswordOther() {
+	m.password_other = nil
+	m.clearedFields[fieldtype.FieldPasswordOther] = struct{}{}
+}
+
+// PasswordOtherCleared returns if the "password_other" field was cleared in this mutation.
+func (m *FieldTypeMutation) PasswordOtherCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldPasswordOther]
+	return ok
+}
+
+// ResetPasswordOther resets all changes to the "password_other" field.
+func (m *FieldTypeMutation) ResetPasswordOther() {
+	m.password_other = nil
+	delete(m.clearedFields, fieldtype.FieldPasswordOther)
+}
+
+// Where appends a list predicates to the FieldTypeMutation builder.
+func (m *FieldTypeMutation) Where(ps ...predicate.FieldType) {
+	m.predicates = append(m.predicates, ps...)
+}
+
 // Op returns the operation name.
 func (m *FieldTypeMutation) Op() Op {
 	return m.op
@@ -4772,7 +5061,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 57)
+	fields := make([]string, 0, 62)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -4860,6 +5149,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.string_array != nil {
 		fields = append(fields, fieldtype.FieldStringArray)
 	}
+	if m.password != nil {
+		fields = append(fields, fieldtype.FieldPassword)
+	}
 	if m.string_scanner != nil {
 		fields = append(fields, fieldtype.FieldStringScanner)
 	}
@@ -4896,6 +5188,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.deleted_at != nil {
 		fields = append(fields, fieldtype.FieldDeletedAt)
 	}
+	if m.raw_data != nil {
+		fields = append(fields, fieldtype.FieldRawData)
+	}
 	if m.ip != nil {
 		fields = append(fields, fieldtype.FieldIP)
 	}
@@ -4923,6 +5218,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.role != nil {
 		fields = append(fields, fieldtype.FieldRole)
 	}
+	if m.priority != nil {
+		fields = append(fields, fieldtype.FieldPriority)
+	}
 	if m.uuid != nil {
 		fields = append(fields, fieldtype.FieldUUID)
 	}
@@ -4943,6 +5241,12 @@ func (m *FieldTypeMutation) Fields() []string {
 	}
 	if m.triple != nil {
 		fields = append(fields, fieldtype.FieldTriple)
+	}
+	if m.big_int != nil {
+		fields = append(fields, fieldtype.FieldBigInt)
+	}
+	if m.password_other != nil {
+		fields = append(fields, fieldtype.FieldPasswordOther)
 	}
 	return fields
 }
@@ -5010,6 +5314,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.MAC()
 	case fieldtype.FieldStringArray:
 		return m.StringArray()
+	case fieldtype.FieldPassword:
+		return m.Password()
 	case fieldtype.FieldStringScanner:
 		return m.StringScanner()
 	case fieldtype.FieldDuration:
@@ -5034,6 +5340,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Deleted()
 	case fieldtype.FieldDeletedAt:
 		return m.DeletedAt()
+	case fieldtype.FieldRawData:
+		return m.RawData()
 	case fieldtype.FieldIP:
 		return m.IP()
 	case fieldtype.FieldNullInt64:
@@ -5052,6 +5360,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.NullFloat()
 	case fieldtype.FieldRole:
 		return m.Role()
+	case fieldtype.FieldPriority:
+		return m.Priority()
 	case fieldtype.FieldUUID:
 		return m.UUID()
 	case fieldtype.FieldNillableUUID:
@@ -5066,6 +5376,10 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Vstring()
 	case fieldtype.FieldTriple:
 		return m.Triple()
+	case fieldtype.FieldBigInt:
+		return m.BigInt()
+	case fieldtype.FieldPasswordOther:
+		return m.PasswordOther()
 	}
 	return nil, false
 }
@@ -5133,6 +5447,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldMAC(ctx)
 	case fieldtype.FieldStringArray:
 		return m.OldStringArray(ctx)
+	case fieldtype.FieldPassword:
+		return m.OldPassword(ctx)
 	case fieldtype.FieldStringScanner:
 		return m.OldStringScanner(ctx)
 	case fieldtype.FieldDuration:
@@ -5157,6 +5473,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldDeleted(ctx)
 	case fieldtype.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case fieldtype.FieldRawData:
+		return m.OldRawData(ctx)
 	case fieldtype.FieldIP:
 		return m.OldIP(ctx)
 	case fieldtype.FieldNullInt64:
@@ -5175,6 +5493,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldNullFloat(ctx)
 	case fieldtype.FieldRole:
 		return m.OldRole(ctx)
+	case fieldtype.FieldPriority:
+		return m.OldPriority(ctx)
 	case fieldtype.FieldUUID:
 		return m.OldUUID(ctx)
 	case fieldtype.FieldNillableUUID:
@@ -5189,6 +5509,10 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldVstring(ctx)
 	case fieldtype.FieldTriple:
 		return m.OldTriple(ctx)
+	case fieldtype.FieldBigInt:
+		return m.OldBigInt(ctx)
+	case fieldtype.FieldPasswordOther:
+		return m.OldPasswordOther(ctx)
 	}
 	return nil, fmt.Errorf("unknown FieldType field %s", name)
 }
@@ -5401,6 +5725,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStringArray(v)
 		return nil
+	case fieldtype.FieldPassword:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPassword(v)
+		return nil
 	case fieldtype.FieldStringScanner:
 		v, ok := value.(schema.StringScanner)
 		if !ok {
@@ -5485,6 +5816,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDeletedAt(v)
 		return nil
+	case fieldtype.FieldRawData:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRawData(v)
+		return nil
 	case fieldtype.FieldIP:
 		v, ok := value.(net.IP)
 		if !ok {
@@ -5548,6 +5886,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRole(v)
 		return nil
+	case fieldtype.FieldPriority:
+		v, ok := value.(role.Priority)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPriority(v)
+		return nil
 	case fieldtype.FieldUUID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
@@ -5596,6 +5941,20 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTriple(v)
+		return nil
+	case fieldtype.FieldBigInt:
+		v, ok := value.(schema.BigInt)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBigInt(v)
+		return nil
+	case fieldtype.FieldPasswordOther:
+		v, ok := value.(schema.Password)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPasswordOther(v)
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -5695,6 +6054,9 @@ func (m *FieldTypeMutation) AddedFields() []string {
 	if m.addschema_float32 != nil {
 		fields = append(fields, fieldtype.FieldSchemaFloat32)
 	}
+	if m.addbig_int != nil {
+		fields = append(fields, fieldtype.FieldBigInt)
+	}
 	return fields
 }
 
@@ -5763,6 +6125,8 @@ func (m *FieldTypeMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedSchemaFloat()
 	case fieldtype.FieldSchemaFloat32:
 		return m.AddedSchemaFloat32()
+	case fieldtype.FieldBigInt:
+		return m.AddedBigInt()
 	}
 	return nil, false
 }
@@ -5982,6 +6346,13 @@ func (m *FieldTypeMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddSchemaFloat32(v)
 		return nil
+	case fieldtype.FieldBigInt:
+		v, ok := value.(schema.BigInt)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBigInt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown FieldType numeric field %s", name)
 }
@@ -6062,6 +6433,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldStringArray) {
 		fields = append(fields, fieldtype.FieldStringArray)
 	}
+	if m.FieldCleared(fieldtype.FieldPassword) {
+		fields = append(fields, fieldtype.FieldPassword)
+	}
 	if m.FieldCleared(fieldtype.FieldStringScanner) {
 		fields = append(fields, fieldtype.FieldStringScanner)
 	}
@@ -6095,6 +6469,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldDeletedAt) {
 		fields = append(fields, fieldtype.FieldDeletedAt)
 	}
+	if m.FieldCleared(fieldtype.FieldRawData) {
+		fields = append(fields, fieldtype.FieldRawData)
+	}
 	if m.FieldCleared(fieldtype.FieldIP) {
 		fields = append(fields, fieldtype.FieldIP)
 	}
@@ -6119,6 +6496,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldNullFloat) {
 		fields = append(fields, fieldtype.FieldNullFloat)
 	}
+	if m.FieldCleared(fieldtype.FieldPriority) {
+		fields = append(fields, fieldtype.FieldPriority)
+	}
 	if m.FieldCleared(fieldtype.FieldUUID) {
 		fields = append(fields, fieldtype.FieldUUID)
 	}
@@ -6130,6 +6510,12 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(fieldtype.FieldNilPair) {
 		fields = append(fields, fieldtype.FieldNilPair)
+	}
+	if m.FieldCleared(fieldtype.FieldBigInt) {
+		fields = append(fields, fieldtype.FieldBigInt)
+	}
+	if m.FieldCleared(fieldtype.FieldPasswordOther) {
+		fields = append(fields, fieldtype.FieldPasswordOther)
 	}
 	return fields
 }
@@ -6217,6 +6603,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 	case fieldtype.FieldStringArray:
 		m.ClearStringArray()
 		return nil
+	case fieldtype.FieldPassword:
+		m.ClearPassword()
+		return nil
 	case fieldtype.FieldStringScanner:
 		m.ClearStringScanner()
 		return nil
@@ -6250,6 +6639,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 	case fieldtype.FieldDeletedAt:
 		m.ClearDeletedAt()
 		return nil
+	case fieldtype.FieldRawData:
+		m.ClearRawData()
+		return nil
 	case fieldtype.FieldIP:
 		m.ClearIP()
 		return nil
@@ -6274,6 +6666,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 	case fieldtype.FieldNullFloat:
 		m.ClearNullFloat()
 		return nil
+	case fieldtype.FieldPriority:
+		m.ClearPriority()
+		return nil
 	case fieldtype.FieldUUID:
 		m.ClearUUID()
 		return nil
@@ -6285,6 +6680,12 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldNilPair:
 		m.ClearNilPair()
+		return nil
+	case fieldtype.FieldBigInt:
+		m.ClearBigInt()
+		return nil
+	case fieldtype.FieldPasswordOther:
+		m.ClearPasswordOther()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType nullable field %s", name)
@@ -6381,6 +6782,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 	case fieldtype.FieldStringArray:
 		m.ResetStringArray()
 		return nil
+	case fieldtype.FieldPassword:
+		m.ResetPassword()
+		return nil
 	case fieldtype.FieldStringScanner:
 		m.ResetStringScanner()
 		return nil
@@ -6417,6 +6821,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 	case fieldtype.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
+	case fieldtype.FieldRawData:
+		m.ResetRawData()
+		return nil
 	case fieldtype.FieldIP:
 		m.ResetIP()
 		return nil
@@ -6444,6 +6851,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 	case fieldtype.FieldRole:
 		m.ResetRole()
 		return nil
+	case fieldtype.FieldPriority:
+		m.ResetPriority()
+		return nil
 	case fieldtype.FieldUUID:
 		m.ResetUUID()
 		return nil
@@ -6464,6 +6874,12 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldTriple:
 		m.ResetTriple()
+		return nil
+	case fieldtype.FieldBigInt:
+		m.ResetBigInt()
+		return nil
+	case fieldtype.FieldPasswordOther:
+		m.ResetPasswordOther()
 		return nil
 	}
 	return fmt.Errorf("unknown FieldType field %s", name)
@@ -6612,8 +7028,8 @@ func (m FileMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *FileMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -6964,6 +7380,7 @@ func (m *FileMutation) RemoveFieldIDs(ids ...string) {
 		m.removedfield = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.field, ids[i])
 		m.removedfield[ids[i]] = struct{}{}
 	}
 }
@@ -6989,6 +7406,11 @@ func (m *FileMutation) ResetFieldEdge() {
 	m.field = nil
 	m.clearedfield = false
 	m.removedfield = nil
+}
+
+// Where appends a list predicates to the FileMutation builder.
+func (m *FileMutation) Where(ps ...predicate.File) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -7414,8 +7836,8 @@ func (m FileTypeMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *FileTypeMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -7557,6 +7979,7 @@ func (m *FileTypeMutation) RemoveFileIDs(ids ...string) {
 		m.removedfiles = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.files, ids[i])
 		m.removedfiles[ids[i]] = struct{}{}
 	}
 }
@@ -7582,6 +8005,11 @@ func (m *FileTypeMutation) ResetFiles() {
 	m.files = nil
 	m.clearedfiles = false
 	m.removedfiles = nil
+}
+
+// Where appends a list predicates to the FileTypeMutation builder.
+func (m *FileTypeMutation) Where(ps ...predicate.FileType) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -7895,13 +8323,18 @@ func (m GoodsMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *GoodsMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
+}
+
+// Where appends a list predicates to the GoodsMutation builder.
+func (m *GoodsMutation) Where(ps ...predicate.Goods) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -8137,8 +8570,8 @@ func (m GroupMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *GroupMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -8399,6 +8832,7 @@ func (m *GroupMutation) RemoveFileIDs(ids ...string) {
 		m.removedfiles = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.files, ids[i])
 		m.removedfiles[ids[i]] = struct{}{}
 	}
 }
@@ -8452,6 +8886,7 @@ func (m *GroupMutation) RemoveBlockedIDs(ids ...string) {
 		m.removedblocked = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.blocked, ids[i])
 		m.removedblocked[ids[i]] = struct{}{}
 	}
 }
@@ -8505,6 +8940,7 @@ func (m *GroupMutation) RemoveUserIDs(ids ...string) {
 		m.removedusers = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.users, ids[i])
 		m.removedusers[ids[i]] = struct{}{}
 	}
 }
@@ -8569,6 +9005,11 @@ func (m *GroupMutation) InfoIDs() (ids []string) {
 func (m *GroupMutation) ResetInfo() {
 	m.info = nil
 	m.clearedinfo = false
+}
+
+// Where appends a list predicates to the GroupMutation builder.
+func (m *GroupMutation) Where(ps ...predicate.Group) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -9022,8 +9463,8 @@ func (m GroupInfoMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *GroupInfoMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -9149,6 +9590,7 @@ func (m *GroupInfoMutation) RemoveGroupIDs(ids ...string) {
 		m.removedgroups = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.groups, ids[i])
 		m.removedgroups[ids[i]] = struct{}{}
 	}
 }
@@ -9174,6 +9616,11 @@ func (m *GroupInfoMutation) ResetGroups() {
 	m.groups = nil
 	m.clearedgroups = false
 	m.removedgroups = nil
+}
+
+// Where appends a list predicates to the GroupInfoMutation builder.
+func (m *GroupInfoMutation) Where(ps ...predicate.GroupInfo) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -9409,6 +9856,7 @@ type ItemMutation struct {
 	op            Op
 	typ           string
 	id            *string
+	text          *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Item, error)
@@ -9485,13 +9933,73 @@ func (m ItemMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Item entities.
+func (m *ItemMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *ItemMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
 	}
 	return *m.id, true
+}
+
+// SetText sets the "text" field.
+func (m *ItemMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *ItemMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ClearText clears the value of the "text" field.
+func (m *ItemMutation) ClearText() {
+	m.text = nil
+	m.clearedFields[item.FieldText] = struct{}{}
+}
+
+// TextCleared returns if the "text" field was cleared in this mutation.
+func (m *ItemMutation) TextCleared() bool {
+	_, ok := m.clearedFields[item.FieldText]
+	return ok
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *ItemMutation) ResetText() {
+	m.text = nil
+	delete(m.clearedFields, item.FieldText)
+}
+
+// Where appends a list predicates to the ItemMutation builder.
+func (m *ItemMutation) Where(ps ...predicate.Item) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -9508,7 +10016,10 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 1)
+	if m.text != nil {
+		fields = append(fields, item.FieldText)
+	}
 	return fields
 }
 
@@ -9516,6 +10027,10 @@ func (m *ItemMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *ItemMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case item.FieldText:
+		return m.Text()
+	}
 	return nil, false
 }
 
@@ -9523,6 +10038,10 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case item.FieldText:
+		return m.OldText(ctx)
+	}
 	return nil, fmt.Errorf("unknown Item field %s", name)
 }
 
@@ -9531,6 +10050,13 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *ItemMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case item.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item field %s", name)
 }
@@ -9552,13 +10078,19 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *ItemMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Item numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ItemMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(item.FieldText) {
+		fields = append(fields, item.FieldText)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -9571,12 +10103,22 @@ func (m *ItemMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ItemMutation) ClearField(name string) error {
+	switch name {
+	case item.FieldText:
+		m.ClearText()
+		return nil
+	}
 	return fmt.Errorf("unknown Item nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *ItemMutation) ResetField(name string) error {
+	switch name {
+	case item.FieldText:
+		m.ResetText()
+		return nil
+	}
 	return fmt.Errorf("unknown Item field %s", name)
 }
 
@@ -9716,8 +10258,8 @@ func (m NodeMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *NodeMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -9871,6 +10413,11 @@ func (m *NodeMutation) NextIDs() (ids []string) {
 func (m *NodeMutation) ResetNext() {
 	m.next = nil
 	m.clearednext = false
+}
+
+// Where appends a list predicates to the NodeMutation builder.
+func (m *NodeMutation) Where(ps ...predicate.Node) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -10192,8 +10739,8 @@ func (m PetMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *PetMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -10418,6 +10965,11 @@ func (m *PetMutation) OwnerIDs() (ids []string) {
 func (m *PetMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
+}
+
+// Where appends a list predicates to the PetMutation builder.
+func (m *PetMutation) Where(ps ...predicate.Pet) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -10768,8 +11320,8 @@ func (m SpecMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *SpecMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -10803,6 +11355,7 @@ func (m *SpecMutation) RemoveCardIDs(ids ...string) {
 		m.removedcard = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.card, ids[i])
 		m.removedcard[ids[i]] = struct{}{}
 	}
 }
@@ -10828,6 +11381,11 @@ func (m *SpecMutation) ResetCard() {
 	m.card = nil
 	m.clearedcard = false
 	m.removedcard = nil
+}
+
+// Where appends a list predicates to the SpecMutation builder.
+func (m *SpecMutation) Where(ps ...predicate.Spec) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -11084,8 +11642,8 @@ func (m TaskMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *TaskMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -11147,6 +11705,11 @@ func (m *TaskMutation) AddedPriority() (r schema.Priority, exists bool) {
 func (m *TaskMutation) ResetPriority() {
 	m.priority = nil
 	m.addpriority = nil
+}
+
+// Where appends a list predicates to the TaskMutation builder.
+func (m *TaskMutation) Where(ps ...predicate.Task) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -11446,8 +12009,8 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -11999,6 +12562,7 @@ func (m *UserMutation) RemovePetIDs(ids ...string) {
 		m.removedpets = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.pets, ids[i])
 		m.removedpets[ids[i]] = struct{}{}
 	}
 }
@@ -12052,6 +12616,7 @@ func (m *UserMutation) RemoveFileIDs(ids ...string) {
 		m.removedfiles = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.files, ids[i])
 		m.removedfiles[ids[i]] = struct{}{}
 	}
 }
@@ -12105,6 +12670,7 @@ func (m *UserMutation) RemoveGroupIDs(ids ...string) {
 		m.removedgroups = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.groups, ids[i])
 		m.removedgroups[ids[i]] = struct{}{}
 	}
 }
@@ -12158,6 +12724,7 @@ func (m *UserMutation) RemoveFriendIDs(ids ...string) {
 		m.removedfriends = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.friends, ids[i])
 		m.removedfriends[ids[i]] = struct{}{}
 	}
 }
@@ -12211,6 +12778,7 @@ func (m *UserMutation) RemoveFollowerIDs(ids ...string) {
 		m.removedfollowers = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.followers, ids[i])
 		m.removedfollowers[ids[i]] = struct{}{}
 	}
 }
@@ -12264,6 +12832,7 @@ func (m *UserMutation) RemoveFollowingIDs(ids ...string) {
 		m.removedfollowing = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.following, ids[i])
 		m.removedfollowing[ids[i]] = struct{}{}
 	}
 }
@@ -12395,6 +12964,7 @@ func (m *UserMutation) RemoveChildIDs(ids ...string) {
 		m.removedchildren = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -12459,6 +13029,11 @@ func (m *UserMutation) ParentIDs() (ids []string) {
 func (m *UserMutation) ResetParent() {
 	m.parent = nil
 	m.clearedparent = false
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

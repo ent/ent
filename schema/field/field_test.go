@@ -7,6 +7,7 @@ package field_test
 import (
 	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"net"
 	"net/http"
 	"net/url"
@@ -104,6 +105,11 @@ func TestInt_DefaultFunc(t *testing.T) {
 	f2 := func() int { return 1000 }
 	fd = field.Int("dir").GoType(CustomInt(0)).DefaultFunc(f2).Descriptor()
 	assert.Error(t, fd.Err, "`var _ CustomInt = f2()` should fail")
+
+	fd = field.Int("id").DefaultFunc(f2).UpdateDefault(f2).Descriptor()
+	assert.NoError(t, fd.Err)
+	assert.NotNil(t, fd.Default)
+	assert.NotNil(t, fd.UpdateDefault)
 }
 
 func TestFloat(t *testing.T) {
@@ -186,12 +192,22 @@ func (*Pair) Scan(interface{}) error      { return nil }
 func (Pair) Value() (driver.Value, error) { return nil, nil }
 
 func TestBytes(t *testing.T) {
-	fd := field.Bytes("active").Default([]byte("{}")).Comment("comment").Descriptor()
+	fd := field.Bytes("active").
+		Unique().
+		Default([]byte("{}")).
+		Comment("comment").
+		Validate(func(bytes []byte) error {
+			return nil
+		}).
+		MaxLen(50).
+		Descriptor()
 	assert.Equal(t, "active", fd.Name)
+	assert.True(t, fd.Unique)
 	assert.Equal(t, field.TypeBytes, fd.Info.Type)
 	assert.NotNil(t, fd.Default)
 	assert.Equal(t, []byte("{}"), fd.Default)
 	assert.Equal(t, "comment", fd.Comment)
+	assert.Len(t, fd.Validators, 2)
 
 	fd = field.Bytes("ip").GoType(net.IP("127.0.0.1")).Descriptor()
 	assert.NoError(t, fd.Err)
@@ -426,6 +442,18 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, field.TypeJSON, fd.Info.Type)
 	assert.Equal(t, "map[string]string", fd.Info.String())
 	assert.Equal(t, "comment", fd.Comment)
+	assert.True(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.RType.IsPtr())
+
+	type T struct{ S string }
+	fd = field.JSON("name", &T{}).
+		Descriptor()
+	assert.True(t, fd.Info.Nillable)
+	assert.Equal(t, "*field_test.T", fd.Info.Ident)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
+	assert.True(t, fd.Info.RType.IsPtr())
+	assert.Equal(t, "T", fd.Info.RType.Name)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.RType.PkgPath)
 
 	fd = field.JSON("dir", http.Dir("dir")).
 		Optional().
@@ -435,6 +463,7 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, "dir", fd.Name)
 	assert.Equal(t, "net/http", fd.Info.PkgPath)
 	assert.Equal(t, "http.Dir", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
 
 	fd = field.Strings("strings").
 		Optional().
@@ -468,6 +497,45 @@ type Role string
 
 func (Role) Values() []string {
 	return []string{"admin", "owner"}
+}
+
+type RoleInt int32
+
+func (RoleInt) Values() []string {
+	return []string{"unknown", "admin", "owner"}
+}
+
+func (i RoleInt) String() string {
+	switch i {
+	case 1:
+		return "admin"
+	case 2:
+		return "owner"
+	default:
+		return "unknown"
+	}
+}
+
+func (i RoleInt) Value() (driver.Value, error) {
+	return i.String(), nil
+}
+
+func (i *RoleInt) Scan(val interface{}) error {
+	switch v := val.(type) {
+	case string:
+		switch v {
+		case "admin":
+			*i = 1
+		case "owner":
+			*i = 2
+		default:
+			*i = 0
+		}
+	default:
+		return errors.New("bad enum value")
+	}
+
+	return nil
 }
 
 func TestField_Enums(t *testing.T) {
@@ -505,6 +573,18 @@ func TestField_Enums(t *testing.T) {
 	assert.False(t, fd.Info.ValueScanner())
 	assert.Equal(t, "admin", fd.Enums[0].V)
 	assert.Equal(t, "owner", fd.Enums[1].V)
+	assert.False(t, fd.Info.Stringer())
+
+	fd = field.Enum("role").GoType(RoleInt(0)).Descriptor()
+	assert.Equal(t, "field_test.RoleInt", fd.Info.Ident)
+	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
+	assert.Equal(t, "field_test.RoleInt", fd.Info.String())
+	assert.False(t, fd.Info.Nillable)
+	assert.True(t, fd.Info.ValueScanner())
+	assert.Equal(t, "unknown", fd.Enums[0].V)
+	assert.Equal(t, "admin", fd.Enums[1].V)
+	assert.Equal(t, "owner", fd.Enums[2].V)
+	assert.True(t, fd.Info.Stringer())
 }
 
 func TestField_UUID(t *testing.T) {

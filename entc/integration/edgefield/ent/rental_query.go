@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // RentalQuery is the builder for querying Rental entities.
@@ -364,8 +365,8 @@ func (rq *RentalQuery) GroupBy(field string, fields ...string) *RentalGroupBy {
 //		Select(rental.FieldDate).
 //		Scan(ctx, &v)
 //
-func (rq *RentalQuery) Select(field string, fields ...string) *RentalSelect {
-	rq.fields = append([]string{field}, fields...)
+func (rq *RentalQuery) Select(fields ...string) *RentalSelect {
+	rq.fields = append(rq.fields, fields...)
 	return &RentalSelect{RentalQuery: rq}
 }
 
@@ -441,8 +442,8 @@ func (rq *RentalQuery) sqlAll(ctx context.Context) ([]*Rental, error) {
 	}
 
 	if query := rq.withCar; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Rental)
+		ids := make([]uuid.UUID, 0, len(nodes))
+		nodeids := make(map[uuid.UUID][]*Rental)
 		for i := range nodes {
 			fk := nodes[i].CarID
 			if _, ok := nodeids[fk]; !ok {
@@ -533,10 +534,14 @@ func (rq *RentalQuery) querySpec() *sqlgraph.QuerySpec {
 func (rq *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rq.driver.Dialect())
 	t1 := builder.Table(rental.Table)
-	selector := builder.Select(t1.Columns(rental.Columns...)...).From(t1)
+	columns := rq.fields
+	if len(columns) == 0 {
+		columns = rental.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if rq.sql != nil {
 		selector = rq.sql
-		selector.Select(selector.Columns(rental.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range rq.predicates {
 		p(selector)
@@ -1037,16 +1042,10 @@ func (rs *RentalSelect) BoolX(ctx context.Context) bool {
 
 func (rs *RentalSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := rs.sqlQuery().Query()
+	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (rs *RentalSelect) sqlQuery() sql.Querier {
-	selector := rs.sql
-	selector.Select(selector.Columns(rs.fields...)...)
-	return selector
 }

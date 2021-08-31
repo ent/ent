@@ -24,9 +24,9 @@ type MetadataDelete struct {
 	mutation *MetadataMutation
 }
 
-// Where adds a new predicate to the MetadataDelete builder.
+// Where appends a list predicates to the MetadataDelete builder.
 func (md *MetadataDelete) Where(ps ...predicate.Metadata) *MetadataDelete {
-	md.mutation.predicates = append(md.mutation.predicates, ps...)
+	md.mutation.Where(ps...)
 	return md
 }
 
@@ -50,6 +50,9 @@ func (md *MetadataDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(md.hooks) - 1; i >= 0; i-- {
+			if md.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = md.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, md.mutation); err != nil {

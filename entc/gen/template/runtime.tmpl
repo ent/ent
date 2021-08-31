@@ -163,7 +163,7 @@ func init() {
 			{{- if $f.UpdateDefault }}
 				{{- $default := print $pkg "." $f.UpdateDefaultName }}
 				// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
-				{{ $default }} = {{ $desc }}.UpdateDefault.({{ if $f.IsTime }}func() {{ end }}{{ $f.Type }})
+				{{ $default }} = {{ $desc }}.UpdateDefault.(func() {{ $f.Type }})
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := print $pkg "." $f.Validator }}

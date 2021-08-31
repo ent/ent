@@ -24,9 +24,9 @@ type RentalDelete struct {
 	mutation *RentalMutation
 }
 
-// Where adds a new predicate to the RentalDelete builder.
+// Where appends a list predicates to the RentalDelete builder.
 func (rd *RentalDelete) Where(ps ...predicate.Rental) *RentalDelete {
-	rd.mutation.predicates = append(rd.mutation.predicates, ps...)
+	rd.mutation.Where(ps...)
 	return rd
 }
 
@@ -50,6 +50,9 @@ func (rd *RentalDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(rd.hooks) - 1; i >= 0; i-- {
+			if rd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = rd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, rd.mutation); err != nil {

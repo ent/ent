@@ -125,8 +125,15 @@ func FeatureNames(names ...string) Option {
 	}
 }
 
+// Annotation is used to attach arbitrary metadata to the schema objects in codegen.
+// Unlike schema annotations, being serializable to JSON raw value is not mandatory.
+//
+// Template extensions can retrieve this metadata and use it inside their execution.
+// Read more about it in ent website: https://entgo.io/docs/templates/#annotations.
+type Annotation = schema.Annotation
+
 // Annotations appends the given annotations to the codegen config.
-func Annotations(annotations ...schema.Annotation) Option {
+func Annotations(annotations ...Annotation) Option {
 	return func(cfg *gen.Config) error {
 		if cfg.Annotations == nil {
 			cfg.Annotations = gen.Annotations{}
@@ -165,6 +172,96 @@ func TemplateDir(path string) Option {
 		return t.ParseDir(path)
 	})
 }
+
+type (
+	// Extension describes an Ent code generation extension that
+	// allows customizing the code generation and integrate with
+	// other tools and libraries (e.g. GraphQL, gRPC, OpenAPI) by
+	// by registering hooks, templates and global annotations in
+	// one simple call.
+	//
+	//	ex, err := entgql.NewExtension(
+	//		entgql.WithConfig("../gqlgen.yml"),
+	//		entgql.WithSchema("../schema.graphql"),
+	//	)
+	//	if err != nil {
+	//		log.Fatalf("creating graphql extension: %v", err)
+	//	}
+	//	err = entc.Generate("./schema", &gen.Config{
+	//		Templates: entswag.Templates,
+	//	}, entc.Extensions(ex))
+	//	if err != nil {
+	//		log.Fatalf("running ent codegen: %v", err)
+	//	}
+	//
+	Extension interface {
+		// Hooks holds an optional list of Hooks to apply
+		// on the graph before/after the code-generation.
+		Hooks() []gen.Hook
+
+		// Annotations injects global annotations to the gen.Config object that
+		// can be accessed globally in all templates. Unlike schema annotations,
+		// being serializable to JSON raw value is not mandatory.
+		//
+		//	{{- with $.Config.Annotations.GQL }}
+		//		{{/* Annotation usage goes here. */}}
+		//	{{- end }}
+		//
+		Annotations() []Annotation
+
+		// Templates specifies a list of alternative templates
+		// to execute or to override the default.
+		Templates() []*gen.Template
+
+		// Options specifies a list of entc.Options to evaluate on
+		// the gen.Config before executing the code generation.
+		Options() []Option
+	}
+)
+
+// Extensions evaluates the list of Extensions on the gen.Config.
+func Extensions(extensions ...Extension) Option {
+	return func(cfg *gen.Config) error {
+		for _, ex := range extensions {
+			cfg.Hooks = append(cfg.Hooks, ex.Hooks()...)
+			cfg.Templates = append(cfg.Templates, ex.Templates()...)
+			for _, opt := range ex.Options() {
+				if err := opt(cfg); err != nil {
+					return err
+				}
+			}
+			if err := Annotations(ex.Annotations()...)(cfg); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}
+
+// DefaultExtension is the default implementation for entc.Extension.
+//
+// Embedding this type allow third-party packages to create extensions
+// without implementing all methods.
+//
+//	type Extension struct {
+//		entc.DefaultExtension
+//	}
+//
+type DefaultExtension struct{}
+
+// Hooks of the extensions.
+func (DefaultExtension) Hooks() []gen.Hook { return nil }
+
+// Annotations of the extensions.
+func (DefaultExtension) Annotations() []Annotation { return nil }
+
+// Templates of the extensions.
+func (DefaultExtension) Templates() []*gen.Template { return nil }
+
+// Options of the extensions.
+func (DefaultExtension) Options() []Option { return nil }
+
+var _ Extension = (*DefaultExtension)(nil)
 
 // templateOption ensures the template instantiate
 // once for config and execute the given Option.

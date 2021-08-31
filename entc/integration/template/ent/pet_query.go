@@ -32,10 +32,9 @@ type PetQuery struct {
 	// eager-loading edges.
 	withOwner *UserQuery
 	withFKs   bool
-
 	// additional query fields.
-	extra string
-
+	extra     string
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -333,8 +332,8 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //		Select(pet.FieldAge).
 //		Scan(ctx, &v)
 //
-func (pq *PetQuery) Select(field string, fields ...string) *PetSelect {
-	pq.fields = append([]string{field}, fields...)
+func (pq *PetQuery) Select(fields ...string) *PetSelect {
+	pq.fields = append(pq.fields, fields...)
 	return &PetSelect{PetQuery: pq}
 }
 
@@ -382,6 +381,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(pq.modifiers) > 0 {
+		_spec.Modifiers = pq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -423,6 +425,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 
 func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
+	if len(pq.modifiers) > 0 {
+		_spec.Modifiers = pq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
 }
 
@@ -485,10 +490,17 @@ func (pq *PetQuery) querySpec() *sqlgraph.QuerySpec {
 func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(pq.driver.Dialect())
 	t1 := builder.Table(pet.Table)
-	selector := builder.Select(t1.Columns(pet.Columns...)...).From(t1)
+	columns := pq.fields
+	if len(columns) == 0 {
+		columns = pet.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if pq.sql != nil {
 		selector = pq.sql
-		selector.Select(selector.Columns(pet.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
+	}
+	for _, m := range pq.modifiers {
+		m(selector)
 	}
 	for _, p := range pq.predicates {
 		p(selector)
@@ -505,6 +517,11 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+func (pq *PetQuery) Modify(modifier func(s *sql.Selector)) *PetQuery {
+	pq.modifiers = append(pq.modifiers, modifier)
+	return pq
 }
 
 // PetGroupBy is the group-by builder for Pet entities.
@@ -989,16 +1006,10 @@ func (ps *PetSelect) BoolX(ctx context.Context) bool {
 
 func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ps.sqlQuery().Query()
+	query, args := ps.sql.Query()
 	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ps *PetSelect) sqlQuery() sql.Querier {
-	selector := ps.sql
-	selector.Select(selector.Columns(ps.fields...)...)
-	return selector
 }

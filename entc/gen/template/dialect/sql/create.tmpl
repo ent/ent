@@ -14,19 +14,21 @@ in the LICENSE file in the root directory of this source tree.
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
 	_node, _spec := {{ $receiver }}.createSpec()
 	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
-	{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
-		{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
+	{{- if and $.ID.UserDefined (not $.ID.Type.Numeric) }}
+		if _spec.ID.Value != nil {
+			_node.ID = _spec.ID.Value.({{ $.ID.Type }})
+		}
 	{{- else }}
 		{{- if $.ID.UserDefined }}
-			if _node.ID == 0 {
+			if _spec.ID.Value != _node.ID {
 		{{- end }}
-			id := _spec.ID.Value.(int64)
-			_node.ID = {{ $.ID.Type }}(id)
+				id := _spec.ID.Value.(int64)
+				_node.ID = {{ $.ID.Type }}(id)
 		{{- if $.ID.UserDefined }}
 			}
 		{{- end }}
@@ -82,7 +84,32 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	return _node, _spec
 }
 
+{{- /* Allow adding methods to the create-builder by ent extensions or user templates.*/}}
+{{- with $tmpls := matchTemplate "dialect/sql/create/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 {{ end }}
+
+{{/* Additional fields for the create builder. */}}
+{{ define "dialect/sql/create/fields" }}
+	{{- with $tmpls := matchTemplate "dialect/sql/create/fields/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
+{{/* Additional fields for the create_bulk builder. */}}
+{{ define "dialect/sql/create_bulk/fields" }}
+	{{- with $tmpls := matchTemplate "dialect/sql/create_bulk/fields/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
 
 {{ define "dialect/sql/create_bulk" }}
 {{ $builder := pascal $.Scope.Builder }}
@@ -113,28 +140,32 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, {{ $receiver }}.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					{{- /* Allow mutating the sqlgraph.BatchCreateSpec by ent extensions or user templates.*/}}
+					{{- with $tmpls := matchTemplate "dialect/sql/create_bulk/spec/*" }}
+						{{- range $tmpl := $tmpls }}
+							{{- xtemplate $tmpl $ }}
+						{{- end }}
+					{{- end }}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, {{ $receiver }}.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, {{ $receiver }}.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID) }}
+				mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
+				mutation.done = true
+				{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes) }}
 					{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
 				{{- else }}
-					{{- if $.ID.UserDefined }}
-						if nodes[i].ID == 0 {
-					{{- end }}
+					if specs[i].ID.Value != nil {{ if $.ID.UserDefined }}&& nodes[i].ID == 0{{ end }} {
 						id := specs[i].ID.Value.(int64)
 						nodes[i].ID = {{ $.ID.Type }}(id)
-					{{- if $.ID.UserDefined }}
-						}
-					{{- end }}
+					}
 				{{- end }}
 				return nodes[i], nil
 			})
@@ -160,4 +191,24 @@ func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) []*{{ $.Name }
 	}
 	return v
 }
+
+// Exec executes the query.
+func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) error {
+	_, err := {{ $receiver }}.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
+	if err := {{ $receiver }}.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+{{- /* Allow adding methods to the create_bulk builder by ent extensions or user templates.*/}}
+{{- with $tmpls := matchTemplate "dialect/sql/create_bulk/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 {{ end }}

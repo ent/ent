@@ -18,7 +18,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
-		{{ range $_, $f := $.Fields }}
+		{{ range $f := $.Fields }}
 			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
@@ -26,7 +26,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	{{ $receiver }}.ID = {{ $scan }}.ID
-	{{ range $_, $f := $.Fields }}
+	{{ range $f := $.Fields }}
 		{{- $receiver }}.{{ $f.StructField }} = {{ if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, {{ $scan }}.{{ $f.StructField }}) {{ else }}{{- $scan }}.{{ $f.StructField }}{{ end }}
 	{{ end -}}
 	return nil
@@ -46,7 +46,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	{{- $scan := print "scan" $receiver }}
 	var {{ $scan }} []struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
-		{{ range $_, $f := $.Fields }}
+		{{ range $f := $.Fields }}
 			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
@@ -56,9 +56,9 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	for _, v := range {{ $scan }} {
 		*{{ $receiver }} = append(*{{ $receiver }}, &{{ $.Name }}{
 			ID: v.ID,
-			{{ range $_, $f := $.Fields }}
-				{{- $f.StructField }}: {{- if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, v.{{ $f.StructField }}) {{ else }}v.{{ $f.StructField }}{{ end }},
-			{{ end -}}
+			{{- range $f := $.Fields }}
+				{{ $f.StructField }}: {{- if and $f.IsTime (not $f.HasGoType) }}time.Unix(0, v.{{ $f.StructField }}) {{ else }}v.{{ $f.StructField }}{{ end }},
+			{{- end }}
 		})
 	}
 	return nil

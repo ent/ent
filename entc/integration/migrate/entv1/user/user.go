@@ -19,6 +19,8 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
 	// FieldAddress holds the string denoting the address field in the database.
@@ -45,19 +47,19 @@ const (
 	CarFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// ParentTable is the table the holds the parent relation/edge.
+	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "user_children"
-	// ChildrenTable is the table the holds the children relation/edge.
+	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "user_children"
-	// SpouseTable is the table the holds the spouse relation/edge.
+	// SpouseTable is the table that holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
 	SpouseColumn = "user_spouse"
-	// CarTable is the table the holds the car relation/edge.
+	// CarTable is the table that holds the car relation/edge.
 	CarTable = "cars"
 	// CarInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.
@@ -71,6 +73,7 @@ var Columns = []string{
 	FieldID,
 	FieldAge,
 	FieldName,
+	FieldDescription,
 	FieldNickname,
 	FieldAddress,
 	FieldRenamed,
@@ -105,6 +108,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// BlobValidator is a validator for the "blob" field. It is called by the builders before save.
+	BlobValidator func([]byte) error
 	// WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.
 	WorkplaceValidator func(string) error
 )

@@ -86,8 +86,11 @@ func TestBuilder(t *testing.T) {
 				).
 				PrimaryKey("id", "name").
 				ForeignKeys(ForeignKey().Columns("card_id").
-					Reference(Reference().Table("cards").Columns("id")).OnDelete("SET NULL")),
-			wantQuery: "CREATE TABLE IF NOT EXISTS `users`(`id` int auto_increment, `card_id` int, `doc` longtext CHECK (JSON_VALID(`doc`)), PRIMARY KEY(`id`, `name`), FOREIGN KEY(`card_id`) REFERENCES `cards`(`id`) ON DELETE SET NULL)",
+					Reference(Reference().Table("cards").Columns("id")).OnDelete("SET NULL")).
+				Checks(func(b *Builder) {
+					b.WriteString("CONSTRAINT ").Ident("valid_card").WriteString(" CHECK (").Ident("card_id").WriteString(" > 0)")
+				}),
+			wantQuery: "CREATE TABLE IF NOT EXISTS `users`(`id` int auto_increment, `card_id` int, `doc` longtext CHECK (JSON_VALID(`doc`)), PRIMARY KEY(`id`, `name`), FOREIGN KEY(`card_id`) REFERENCES `cards`(`id`) ON DELETE SET NULL, CONSTRAINT `valid_card` CHECK (`card_id` > 0))",
 		},
 		{
 			input: Dialect(dialect.Postgres).CreateTable("users").
@@ -514,6 +517,23 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"BAR", "BAZ"},
 		},
 		{
+			input: func() Querier {
+				t1, t2 := Table("users"), Table("pets")
+				return Dialect(dialect.Postgres).
+					Select().
+					From(t1).
+					Where(GT(t1.C("age"), 30)).
+					Where(
+						And(
+							Exists(Select().From(t2).Where(ColumnsEQ(t2.C("owner_id"), t1.C("id")))),
+							NotExists(Select().From(t2).Where(ColumnsEQ(t2.C("owner_id"), t1.C("id")))),
+						),
+					)
+			}(),
+			wantQuery: `SELECT * FROM "users" WHERE "users"."age" > $1 AND (EXISTS (SELECT * FROM "pets" WHERE "pets"."owner_id" = "users"."id") AND NOT EXISTS (SELECT * FROM "pets" WHERE "pets"."owner_id" = "users"."id"))`,
+			wantArgs:  []interface{}{30},
+		},
+		{
 			input: Update("users").
 				Set("name", "foo").
 				Set("age", 10).
@@ -936,7 +956,15 @@ func TestBuilder(t *testing.T) {
 				Select().
 				From(Table("users")).
 				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
-			wantQuery: `SELECT * FROM "users" WHERE LOWER("name") = $1 OR LOWER("name") = $2`,
+			wantQuery: `SELECT * FROM "users" WHERE "name" ILIKE $1 OR "name" ILIKE $2`,
+			wantArgs:  []interface{}{"bar", "baz"},
+		},
+		{
+			input: Dialect(dialect.MySQL).
+				Select().
+				From(Table("users")).
+				Where(Or(EqualFold("name", "BAR"), EqualFold("name", "BAZ"))),
+			wantQuery: "SELECT * FROM `users` WHERE `name` COLLATE utf8mb4_general_ci = ? OR `name` COLLATE utf8mb4_general_ci = ?",
 			wantArgs:  []interface{}{"bar", "baz"},
 		},
 		{
@@ -970,7 +998,7 @@ func TestBuilder(t *testing.T) {
 					Where(Not(And(EQ("name", "foo"), EQ("age", "bar"))))
 				return Queries{With("users_view").As(s1), Select("name").From(Table("users_view"))}
 			}(),
-			wantQuery: "WITH users_view AS (SELECT * FROM `users` WHERE NOT (`name` = ? AND `age` = ?)) SELECT `name` FROM `users_view`",
+			wantQuery: "WITH `users_view` AS (SELECT * FROM `users` WHERE NOT (`name` = ? AND `age` = ?)) SELECT `name` FROM `users_view`",
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -981,7 +1009,7 @@ func TestBuilder(t *testing.T) {
 					Where(Not(And(EQ("name", "foo"), EQ("age", "bar"))))
 				return Queries{d.With("users_view").As(s1), d.Select("name").From(Table("users_view"))}
 			}(),
-			wantQuery: `WITH users_view AS (SELECT * FROM "users" WHERE NOT ("name" = $1 AND "age" = $2)) SELECT "name" FROM "users_view"`,
+			wantQuery: `WITH "users_view" AS (SELECT * FROM "users" WHERE NOT ("name" = $1 AND "age" = $2)) SELECT "name" FROM "users_view"`,
 			wantArgs:  []interface{}{"foo", "bar"},
 		},
 		{
@@ -1200,14 +1228,14 @@ func TestBuilder(t *testing.T) {
 		},
 		{
 			input:     Queries{With("users_view").As(Select().From(Table("users"))), Select().From(Table("users_view"))},
-			wantQuery: "WITH users_view AS (SELECT * FROM `users`) SELECT * FROM `users_view`",
+			wantQuery: "WITH `users_view` AS (SELECT * FROM `users`) SELECT * FROM `users_view`",
 		},
 		{
 			input: func() Querier {
 				base := Select("*").From(Table("groups"))
 				return Queries{With("groups").As(base.Clone().Where(EQ("name", "bar"))), base.Select("age")}
 			}(),
-			wantQuery: "WITH groups AS (SELECT * FROM `groups` WHERE `name` = ?) SELECT `age` FROM `groups`",
+			wantQuery: "WITH `groups` AS (SELECT * FROM `groups` WHERE `name` = ?) SELECT `age` FROM `groups`",
 			wantArgs:  []interface{}{"bar"},
 		},
 		{
@@ -1283,6 +1311,32 @@ func TestBuilder(t *testing.T) {
 				Table("users").
 				Column("name"),
 			wantQuery: `CREATE INDEX "name_index" ON "users"("name")`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				CreateIndex("name_index").
+				IfNotExists().
+				Table("users").
+				Column("name"),
+			wantQuery: `CREATE INDEX IF NOT EXISTS "name_index" ON "users"("name")`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				CreateIndex("name_index").
+				IfNotExists().
+				Table("users").
+				Using("gin").
+				Column("name"),
+			wantQuery: `CREATE INDEX IF NOT EXISTS "name_index" ON "users" USING "gin"("name")`,
+		},
+		{
+			input: Dialect(dialect.MySQL).
+				CreateIndex("name_index").
+				IfNotExists().
+				Table("users").
+				Using("HASH").
+				Column("name"),
+			wantQuery: "CREATE INDEX IF NOT EXISTS `name_index` ON `users`(`name`) USING HASH",
 		},
 		{
 			input:     CreateIndex("unique_name").Unique().Table("users").Columns("first", "last"),
@@ -1438,41 +1492,6 @@ WHERE (((("users"."id1" = "users"."id2" AND "users"."id1" <> "users"."id2")
 AND "users"."id1" > "users"."id2") AND "users"."id1" >= "users"."id2") 
 AND "users"."id1" < "users"."id2") AND "users"."id1" <= "users"."id2"`, "\n", ""),
 		},
-		{
-			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").ConflictColumns("id").UpdateSet("email", "user-1@example.com"),
-			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "excluded"."id", "email" = "excluded"."email"`,
-			wantArgs:  []interface{}{"1", "user@example.com"},
-		},
-		{
-			input:     Dialect(dialect.Postgres).Insert("users").Columns("id", "email").Values("1", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("id"),
-			wantQuery: `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("id") DO UPDATE SET "id" = "id", "email" = "email"`,
-			wantArgs:  []interface{}{"1", "user@example.com"},
-		},
-		{
-			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithAlternateValues).UpdateSet("email", "user-1@example.com").ConflictColumns("email"),
-			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = ?",
-			wantArgs:  []interface{}{"user@example.com", "user-1@example.com"},
-		},
-		{
-			input:     Dialect(dialect.Postgres).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithAlternateValues).UpdateSet("email", "user-1@example.com").ConflictColumns("email"),
-			wantQuery: `INSERT INTO "users" ("email") VALUES ($1) ON CONFLICT ("email") DO UPDATE SET "email" = $2`,
-			wantArgs:  []interface{}{"user@example.com", "user-1@example.com"},
-		},
-		{
-			input:     Dialect(dialect.Postgres).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("email"),
-			wantQuery: `INSERT INTO "users" ("email") VALUES ($1) ON CONFLICT ("email") DO UPDATE SET "email" = "email"`,
-			wantArgs:  []interface{}{"user@example.com"},
-		},
-		{
-			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithIgnore).ConflictColumns("email"),
-			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = `email`",
-			wantArgs:  []interface{}{"user@example.com"},
-		},
-		{
-			input:     Dialect(dialect.MySQL).Insert("users").Set("email", "user@example.com").OnConflict(OpResolveWithNewValues).ConflictColumns("email"),
-			wantQuery: "INSERT INTO `users` (`email`) VALUES (?) ON DUPLICATE KEY UPDATE `email` = VALUES(`email`)",
-			wantArgs:  []interface{}{"user@example.com"},
-		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -1506,6 +1525,64 @@ func TestSelector_OrderByExpr(t *testing.T) {
 		Query()
 	require.Equal(t, "SELECT * FROM `users` WHERE `age` > ? ORDER BY `name`, CASE WHEN id=? THEN id WHEN id=? THEN name END DESC", query)
 	require.Equal(t, []interface{}{28, 1, 2}, args)
+}
+
+func TestSelector_Union(t *testing.T) {
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Union(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		UnionAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" WHERE "is_active" = $2 AND "age" > $3 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $4 AND "age" < $5`, query)
+	require.Equal(t, []interface{}{true, true, 20, "true", 18}, args)
+
+	t1, t2, t3 := Table("files"), Table("files"), Table("path")
+	n := Queries{
+		WithRecursive("path", "id", "name", "parent_id").
+			As(Select(t1.Columns("id", "name", "parent_id")...).
+				From(t1).
+				Where(
+					And(
+						IsNull(t1.C("parent_id")),
+						EQ(t1.C("deleted"), false),
+					),
+				).
+				UnionAll(
+					Select(t2.Columns("id", "name", "parent_id")...).
+						From(t2).
+						Join(t3).
+						On(t2.C("parent_id"), t3.C("id")).
+						Where(
+							EQ(t2.C("deleted"), false),
+						),
+				),
+			),
+		Select(t3.Columns("id", "name", "parent_id")...).
+			From(t3),
+	}
+	query, args = n.Query()
+	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND `files`.`deleted` = ? UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE `files`.`deleted` = ?) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
+	require.Equal(t, []interface{}{false, false}, args)
 }
 
 func TestBuilderContext(t *testing.T) {
@@ -1546,4 +1623,210 @@ func TestParamFormatter(t *testing.T) {
 		Query()
 	require.Equal(t, "SELECT * FROM `users` WHERE `point` = ST_GeomFromWKB(?)", query)
 	require.Equal(t, p, args[0])
+}
+
+func TestSelectWithLock(t *testing.T) {
+	query, args := Dialect(dialect.MySQL).
+		Select().
+		From(Table("users")).
+		Where(EQ("id", 1)).
+		ForUpdate().
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `id` = ? FOR UPDATE", query)
+	require.Equal(t, 1, args[0])
+
+	query, args = Dialect(dialect.Postgres).
+		Select().
+		From(Table("users")).
+		Where(EQ("id", 1)).
+		ForUpdate(WithLockAction(NoWait)).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "id" = $1 FOR UPDATE NOWAIT`, query)
+	require.Equal(t, 1, args[0])
+
+	users, pets := Table("users"), Table("pets")
+	query, args = Dialect(dialect.Postgres).
+		Select().
+		From(pets).
+		Join(users).
+		On(pets.C("owner_id"), users.C("id")).
+		Where(EQ("id", 20)).
+		ForUpdate(
+			WithLockAction(SkipLocked),
+			WithLockTables("pets"),
+		).
+		Query()
+	require.Equal(t, `SELECT * FROM "pets" JOIN "users" AS "t1" ON "pets"."owner_id" = "t1"."id" WHERE "id" = $1 FOR UPDATE OF "pets" SKIP LOCKED`, query)
+	require.Equal(t, 20, args[0])
+
+	query, args = Dialect(dialect.MySQL).
+		Select().
+		From(Table("users")).
+		Where(EQ("id", 20)).
+		ForShare(WithLockClause("LOCK IN SHARE MODE")).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `id` = ? LOCK IN SHARE MODE", query)
+	require.Equal(t, 20, args[0])
+
+	s := Dialect(dialect.SQLite).
+		Select().
+		From(Table("users")).
+		Where(EQ("id", 1)).
+		ForUpdate()
+	s.Query()
+	require.EqualError(t, s.Err(), "sql: SELECT .. FOR UPDATE/SHARE not supported in SQLite")
+}
+
+func TestSelector_UnionOrderBy(t *testing.T) {
+	table := Table("users")
+	query, _ := Dialect(dialect.Postgres).
+		Select("*").
+		From(table).
+		Where(EQ("active", true)).
+		Union(Select("*").From(Table("old_users1"))).
+		OrderBy(table.C("whatever")).
+		Query()
+	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
+}
+
+func TestUpdateBuilder_SetExpr(t *testing.T) {
+	d := Dialect(dialect.Postgres)
+	excluded := d.Table("excluded")
+	query, args := d.Update("users").
+		Set("name", "Ariel").
+		Set("active", Expr("NOT(active)")).
+		Set("age", Expr(excluded.C("age"))).
+		Set("x", ExprFunc(func(b *Builder) {
+			b.WriteString(excluded.C("x")).WriteString(" || ' (formerly ' || ").Ident("x").WriteString(" || ')'")
+		})).
+		Set("y", ExprFunc(func(b *Builder) {
+			b.Arg("~").WriteOp(OpAdd).WriteString(excluded.C("y")).WriteOp(OpAdd).Arg("~")
+		})).
+		Query()
+	require.Equal(t, `UPDATE "users" SET "name" = $1, "active" = NOT(active), "age" = "excluded"."age", "x" = "excluded"."x" || ' (formerly ' || "x" || ')', "y" = $2 + "excluded"."y" + $3`, query)
+	require.Equal(t, []interface{}{"Ariel", "~", "~"}, args)
+}
+
+func TestInsert_OnConflict(t *testing.T) {
+	t.Run("Postgres", func(t *testing.T) { // And SQLite.
+		query, args := Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id", "email").
+			Values("1", "user@example.com").
+			OnConflict(
+				ConflictColumns("email"),
+				ConflictWhere(EQ("name", "Ariel")),
+				ResolveWithNewValues(),
+				// Update all new values excepts id field.
+				ResolveWith(func(u *UpdateSet) {
+					u.SetIgnore("id")
+				}),
+				UpdateWhere(NEQ("updated_at", 0)),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email" WHERE "updated_at" <> $4`, query)
+		require.Equal(t, []interface{}{"1", "user@example.com", "Ariel", 0}, args)
+
+		query, args = Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id", "name").
+			Values("1", "Mashraki").
+			OnConflict(
+				ConflictConstraint("users_pkey"),
+				DoNothing(),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id", "name") VALUES ($1, $2) ON CONFLICT ON CONSTRAINT "users_pkey" DO NOTHING`, query)
+		require.Equal(t, []interface{}{"1", "Mashraki"}, args)
+
+		query, args = Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id").
+			Values(1).
+			OnConflict(
+				DoNothing(),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id") VALUES ($1) ON CONFLICT DO NOTHING`, query)
+		require.Equal(t, []interface{}{1}, args)
+
+		query, args = Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id").
+			Values(1).
+			OnConflict(
+				ConflictColumns("id"),
+				ResolveWithIgnore(),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id") VALUES ($1) ON CONFLICT ("id") DO UPDATE SET "id" = "users"."id"`, query)
+		require.Equal(t, []interface{}{1}, args)
+
+		query, args = Dialect(dialect.Postgres).
+			Insert("users").
+			Columns("id", "name").
+			Values(1, "Mashraki").
+			OnConflict(
+				ConflictColumns("name"),
+				ResolveWith(func(s *UpdateSet) {
+					s.SetExcluded("name")
+					s.SetNull("created_at")
+				}),
+			).
+			Query()
+		require.Equal(t, `INSERT INTO "users" ("id", "name") VALUES ($1, $2) ON CONFLICT ("name") DO UPDATE SET "created_at" = NULL, "name" = "excluded"."name"`, query)
+		require.Equal(t, []interface{}{1, "Mashraki"}, args)
+	})
+
+	t.Run("MySQL", func(t *testing.T) {
+		query, args := Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("id", "email").
+			Values("1", "user@example.com").
+			OnConflict(
+				ResolveWithNewValues(),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`id`, `email`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `email` = VALUES(`email`)", query)
+		require.Equal(t, []interface{}{"1", "user@example.com"}, args)
+
+		query, args = Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("id", "email").
+			Values("1", "user@example.com").
+			OnConflict(
+				ResolveWithIgnore(),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`id`, `email`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `id` = `users`.`id`, `email` = `users`.`email`", query)
+		require.Equal(t, []interface{}{"1", "user@example.com"}, args)
+
+		query, args = Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("id", "name").
+			Values("1", "Mashraki").
+			OnConflict(
+				ResolveWith(func(s *UpdateSet) {
+					s.SetExcluded("name")
+					s.SetNull("created_at")
+				}),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `created_at` = NULL, `name` = VALUES(`name`)", query)
+		require.Equal(t, []interface{}{"1", "Mashraki"}, args)
+
+		query, args = Dialect(dialect.MySQL).
+			Insert("users").
+			Columns("name").
+			Values("Mashraki").
+			OnConflict(
+				ResolveWithNewValues(),
+				ResolveWith(func(s *UpdateSet) {
+					s.Set("id", Expr("LAST_INSERT_ID(`id`)"))
+				}),
+			).
+			Query()
+		require.Equal(t, "INSERT INTO `users` (`name`) VALUES (?) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `id` = LAST_INSERT_ID(`id`)", query)
+		require.Equal(t, []interface{}{"Mashraki"}, args)
+	})
 }

@@ -365,8 +365,8 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 //		Select(blob.FieldUUID).
 //		Scan(ctx, &v)
 //
-func (bq *BlobQuery) Select(field string, fields ...string) *BlobSelect {
-	bq.fields = append([]string{field}, fields...)
+func (bq *BlobQuery) Select(fields ...string) *BlobSelect {
+	bq.fields = append(bq.fields, fields...)
 	return &BlobSelect{BlobQuery: bq}
 }
 
@@ -583,10 +583,14 @@ func (bq *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(bq.driver.Dialect())
 	t1 := builder.Table(blob.Table)
-	selector := builder.Select(t1.Columns(blob.Columns...)...).From(t1)
+	columns := bq.fields
+	if len(columns) == 0 {
+		columns = blob.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if bq.sql != nil {
 		selector = bq.sql
-		selector.Select(selector.Columns(blob.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range bq.predicates {
 		p(selector)
@@ -1087,16 +1091,10 @@ func (bs *BlobSelect) BoolX(ctx context.Context) bool {
 
 func (bs *BlobSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := bs.sqlQuery().Query()
+	query, args := bs.sql.Query()
 	if err := bs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (bs *BlobSelect) sqlQuery() sql.Querier {
-	selector := bs.sql
-	selector.Select(selector.Columns(bs.fields...)...)
-	return selector
 }

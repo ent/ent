@@ -14,6 +14,7 @@ package sql
 import (
 	"context"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -107,14 +108,15 @@ func (c *ColumnBuilder) Query() (string, []interface{}) {
 // TableBuilder is a query builder for `CREATE TABLE` statement.
 type TableBuilder struct {
 	Builder
-	name        string    // table name.
-	exists      bool      // check existence.
-	charset     string    // table charset.
-	collation   string    // table collation.
-	options     string    // table options.
-	columns     []Querier // table columns.
-	primary     []string  // primary key.
-	constraints []Querier // foreign keys and indices.
+	name        string           // table name.
+	exists      bool             // check existence.
+	charset     string           // table charset.
+	collation   string           // table collation.
+	options     string           // table options.
+	columns     []Querier        // table columns.
+	primary     []string         // primary key.
+	constraints []Querier        // foreign keys and indices.
+	checks      []func(*Builder) // check constraints.
 }
 
 // CreateTable returns a query builder for the `CREATE TABLE` statement.
@@ -177,6 +179,12 @@ func (t *TableBuilder) Constraints(fks ...*ForeignKeyBuilder) *TableBuilder {
 	return t
 }
 
+// Checks adds CHECK clauses to the CREATE TABLE statement.
+func (t *TableBuilder) Checks(checks ...func(*Builder)) *TableBuilder {
+	t.checks = append(t.checks, checks...)
+	return t
+}
+
 // Charset appends the `CHARACTER SET` clause to the statement. MySQL only.
 func (t *TableBuilder) Charset(s string) *TableBuilder {
 	t.charset = s
@@ -217,6 +225,9 @@ func (t *TableBuilder) Query() (string, []interface{}) {
 		}
 		if len(t.constraints) > 0 {
 			b.Comma().JoinComma(t.constraints...)
+		}
+		for _, check := range t.checks {
+			check(b.Comma())
 		}
 	})
 	if t.charset != "" {
@@ -514,7 +525,9 @@ type IndexBuilder struct {
 	Builder
 	name    string
 	unique  bool
+	exists  bool
 	table   string
+	method  string
 	columns []string
 }
 
@@ -536,6 +549,12 @@ func CreateIndex(name string) *IndexBuilder {
 	return &IndexBuilder{name: name}
 }
 
+// IfNotExists appends the `IF NOT EXISTS` clause to the `CREATE INDEX` statement.
+func (i *IndexBuilder) IfNotExists() *IndexBuilder {
+	i.exists = true
+	return i
+}
+
 // Unique sets the index to be a unique index.
 func (i *IndexBuilder) Unique() *IndexBuilder {
 	i.unique = true
@@ -545,6 +564,12 @@ func (i *IndexBuilder) Unique() *IndexBuilder {
 // Table defines the table for the index.
 func (i *IndexBuilder) Table(table string) *IndexBuilder {
 	i.table = table
+	return i
+}
+
+// Using sets the method to create the index with.
+func (i *IndexBuilder) Using(method string) *IndexBuilder {
+	i.method = method
 	return i
 }
 
@@ -567,11 +592,32 @@ func (i *IndexBuilder) Query() (string, []interface{}) {
 		i.WriteString("UNIQUE ")
 	}
 	i.WriteString("INDEX ")
+	if i.exists {
+		i.WriteString("IF NOT EXISTS ")
+	}
 	i.Ident(i.name)
 	i.WriteString(" ON ")
-	i.Ident(i.table).Nested(func(b *Builder) {
-		b.IdentComma(i.columns...)
-	})
+	i.Ident(i.table)
+	switch i.dialect {
+	case dialect.Postgres:
+		if i.method != "" {
+			i.WriteString(" USING ").Ident(i.method)
+		}
+		i.Nested(func(b *Builder) {
+			b.IdentComma(i.columns...)
+		})
+	case dialect.MySQL:
+		i.Nested(func(b *Builder) {
+			b.IdentComma(i.columns...)
+		})
+		if i.method != "" {
+			i.WriteString(" USING " + i.method)
+		}
+	default:
+		i.Nested(func(b *Builder) {
+			b.IdentComma(i.columns...)
+		})
+	}
 	return i.String(), nil
 }
 
@@ -626,12 +672,7 @@ type InsertBuilder struct {
 	defaults  bool
 	returning []string
 	values    [][]interface{}
-
-	// Upsert
-	conflictColumns []string
-	updateColumns   []string
-	updateValues    []interface{}
-	onConflictOp    ConflictResolutionOp
+	conflict  *conflict
 }
 
 // Insert creates a builder for the `INSERT INTO` statement.
@@ -667,37 +708,6 @@ func (i *InsertBuilder) Columns(columns ...string) *InsertBuilder {
 	return i
 }
 
-// ConflictColumns sets the unique constraints that trigger the conflict resolution on insert
-// to perform an upsert operation. The columns must have a unqiue constraint applied to trigger this behaviour.
-func (i *InsertBuilder) ConflictColumns(values ...string) *InsertBuilder {
-	i.conflictColumns = append(i.conflictColumns, values...)
-	return i
-}
-
-// A ConflictResolutionOp represents a possible action to take when an insert conflict occurrs.
-type ConflictResolutionOp int
-
-// Conflict Operations
-const (
-	OpResolveWithNewValues       ConflictResolutionOp = iota // Update conflict columns using EXCLUDED.column (postres) or c = VALUES(c) (mysql)
-	OpResolveWithIgnore                                      // Sets each column to itself to force an update and return the ID, otherwise does not change any data. This may still trigger update hooks in the database.
-	OpResolveWithAlternateValues                             // Update using provided values across all rows.
-)
-
-// OnConflict sets the conflict resolution behaviour when a unique constraint
-// violation occurrs, triggering an upsert.
-func (i *InsertBuilder) OnConflict(op ConflictResolutionOp) *InsertBuilder {
-	i.onConflictOp = op
-	return i
-}
-
-// UpdateSet sets a column and a its value for use on upsert
-func (i *InsertBuilder) UpdateSet(column string, v interface{}) *InsertBuilder {
-	i.updateColumns = append(i.updateColumns, column)
-	i.updateValues = append(i.updateValues, v)
-	return i
-}
-
 // Values append a value tuple for the insert statement.
 func (i *InsertBuilder) Values(values ...interface{}) *InsertBuilder {
 	i.values = append(i.values, values)
@@ -710,19 +720,244 @@ func (i *InsertBuilder) Default() *InsertBuilder {
 	return i
 }
 
-func (i *InsertBuilder) writeDefault() {
-	switch i.Dialect() {
-	case dialect.MySQL:
-		i.WriteString("VALUES ()")
-	case dialect.SQLite, dialect.Postgres:
-		i.WriteString("DEFAULT VALUES")
-	}
-}
-
 // Returning adds the `RETURNING` clause to the insert statement. PostgreSQL only.
 func (i *InsertBuilder) Returning(columns ...string) *InsertBuilder {
 	i.returning = columns
 	return i
+}
+
+type (
+	// conflict holds the configuration for the
+	// `ON CONFLICT` / `ON DUPLICATE KEY` clause.
+	conflict struct {
+		target struct {
+			constraint string
+			columns    []string
+			where      *Predicate
+		}
+		action struct {
+			nothing bool
+			where   *Predicate
+			update  []func(*UpdateSet)
+		}
+	}
+
+	// ConflictOption allows configuring the
+	// conflict config using functional options.
+	ConflictOption func(*conflict)
+)
+
+// ConflictColumns sets the unique constraints that trigger the conflict
+// resolution on insert to perform an upsert operation. The columns must
+// have a unique constraint applied to trigger this behaviour.
+//
+//	sql.Insert("users").
+//		Columns("id", "name").
+//		Values(1, "Mashraki").
+//		OnConflict(
+//			sql.ConflictColumns("id"),
+//			sql.ResolveWithNewValues(),
+//		)
+//
+func ConflictColumns(names ...string) ConflictOption {
+	return func(c *conflict) {
+		c.target.columns = names
+	}
+}
+
+// ConflictConstraint allows setting the constraint
+// name (i.e. `ON CONSTRAINT <name>`) for PostgreSQL.
+//
+//	sql.Insert("users").
+//		Columns("id", "name").
+//		Values(1, "Mashraki").
+//		OnConflict(
+//			sql.ConflictConstraint("users_pkey"),
+//			sql.ResolveWithNewValues(),
+//		)
+//
+func ConflictConstraint(name string) ConflictOption {
+	return func(c *conflict) {
+		c.target.constraint = name
+	}
+}
+
+// ConflictWhere allows inference of partial unique indexes. See, PostgreSQL
+// doc: https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT
+func ConflictWhere(p *Predicate) ConflictOption {
+	return func(c *conflict) {
+		c.target.where = p
+	}
+}
+
+// UpdateWhere allows setting the an update condition. Only rows
+// for which this expression returns true will be updated.
+func UpdateWhere(p *Predicate) ConflictOption {
+	return func(c *conflict) {
+		c.action.where = p
+	}
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported by SQLite and PostgreSQL.
+//
+//	sql.Insert("users").
+//		Columns("id", "name").
+//		Values(1, "Mashraki").
+//		OnConflict(
+//			sql.ConflictColumns("id"),
+//			sql.DoNothing()
+//		)
+//
+func DoNothing() ConflictOption {
+	return func(c *conflict) {
+		c.action.nothing = true
+	}
+}
+
+// ResolveWithIgnore sets each column to itself to force an update and return the ID,
+// otherwise does not change any data. This may still trigger update hooks in the database.
+//
+//	sql.Insert("users").
+//		Columns("id").
+//		Values(1).
+//		OnConflict(
+//			sql.ConflictColumns("id"),
+//			sql.ResolveWithIgnore()
+//		)
+//
+//	// Output:
+//	// MySQL: INSERT INTO `users` (`id`) VALUES(1) ON DUPLICATE KEY UPDATE `id` = `users`.`id`
+//	// PostgreSQL: INSERT INTO "users" ("id") VALUES(1) ON CONFLICT ("id") DO UPDATE SET "id" = "users"."id
+//
+func ResolveWithIgnore() ConflictOption {
+	return func(c *conflict) {
+		c.action.update = append(c.action.update, func(u *UpdateSet) {
+			for _, c := range u.columns {
+				u.SetIgnore(c)
+			}
+		})
+	}
+}
+
+// ResolveWithNewValues updates columns using the new values proposed
+// for insertion using the special EXCLUDED/VALUES table.
+//
+//	sql.Insert("users").
+//		Columns("id", "name").
+//		Values(1, "Mashraki").
+//		OnConflict(
+//			sql.ConflictColumns("id"),
+//			sql.ResolveWithNewValues()
+//		)
+//
+//	// Output:
+//	// MySQL: INSERT INTO `users` (`id`, `name`) VALUES(1, 'Mashraki) ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `name` = VALUES(`name`),
+//	// PostgreSQL: INSERT INTO "users" ("id") VALUES(1) ON CONFLICT ("id") DO UPDATE SET "id" = "excluded"."id, "name" = "excluded"."name"
+//
+func ResolveWithNewValues() ConflictOption {
+	return func(c *conflict) {
+		c.action.update = append(c.action.update, func(u *UpdateSet) {
+			for _, c := range u.columns {
+				u.SetExcluded(c)
+			}
+		})
+	}
+}
+
+// ResolveWith allows setting a custom function to set the `UPDATE` clause.
+//
+//	Insert("users").
+//		Columns("id", "name").
+//		Values(1, "Mashraki").
+//		OnConflict(
+//			ConflictColumns("name"),
+//			ResolveWith(func(u *UpdateSet) {
+//				u.SetIgnore("id")
+//				u.SetNull("created_at")
+//				u.Set("name", Expr(u.Excluded().C("name")))
+//			}),
+//		)
+//
+func ResolveWith(fn func(*UpdateSet)) ConflictOption {
+	return func(c *conflict) {
+		c.action.update = append(c.action.update, fn)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	sql.Insert("users").
+//		Columns("id", "name").
+//		Values(1, "Mashraki").
+//		OnConflict(
+//			sql.ConflictColumns("id"),
+//			sql.ResolveWithNewValues()
+//		)
+//
+func (i *InsertBuilder) OnConflict(opts ...ConflictOption) *InsertBuilder {
+	if i.conflict == nil {
+		i.conflict = &conflict{}
+	}
+	for _, opt := range opts {
+		opt(i.conflict)
+	}
+	return i
+}
+
+// UpdateSet describes a set of changes of the `DO UPDATE` clause.
+type UpdateSet struct {
+	table   string
+	columns []string
+	update  *UpdateBuilder
+}
+
+// Table returns the table the `UPSERT` statement is executed on.
+func (u *UpdateSet) Table() *SelectTable {
+	return Dialect(u.update.dialect).Table(u.table)
+}
+
+// Columns returns all columns in the `INSERT` statement.
+func (u *UpdateSet) Columns() []string {
+	return u.columns
+}
+
+// UpdateColumns returns all columns in the `UPDATE` statement.
+func (u *UpdateSet) UpdateColumns() []string {
+	return append(u.update.nulls, u.update.columns...)
+}
+
+// Set sets a column to a given value.
+func (u *UpdateSet) Set(column string, v interface{}) *UpdateSet {
+	u.update.Set(column, v)
+	return u
+}
+
+// SetNull sets a column as null value.
+func (u *UpdateSet) SetNull(column string) *UpdateSet {
+	u.update.SetNull(column)
+	return u
+}
+
+// SetIgnore sets the column to itself. For example, "id" = "users"."id".
+func (u *UpdateSet) SetIgnore(name string) *UpdateSet {
+	return u.Set(name, Expr(u.Table().C(name)))
+}
+
+// SetExcluded sets the column name to its EXCLUDED/VALUES value.
+// For example, "c" = "excluded"."c", or `c` = VALUES(`c`).
+func (u *UpdateSet) SetExcluded(name string) *UpdateSet {
+	switch u.update.Dialect() {
+	case dialect.MySQL:
+		u.update.Set(name, ExprFunc(func(b *Builder) {
+			b.WriteString("VALUES(").Ident(name).WriteByte(')')
+		}))
+	default:
+		t := Dialect(u.update.dialect).Table("excluded")
+		u.update.Set(name, Expr(t.C(name)))
+	}
+	return u
 }
 
 // Query returns query representation of an `INSERT INTO` statement.
@@ -742,79 +977,62 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 			i.WriteByte('(').Args(v...).WriteByte(')')
 		}
 	}
-	if len(i.conflictColumns) > 0 {
-		i.buildConflictHandling()
+	if i.conflict != nil {
+		i.writeConflict()
 	}
-	if len(i.returning) > 0 && i.postgres() {
+	if len(i.returning) > 0 && !i.mysql() {
 		i.WriteString(" RETURNING ")
 		i.IdentComma(i.returning...)
 	}
 	return i.String(), i.args
 }
 
-func (i *InsertBuilder) buildConflictHandling() {
+func (i *InsertBuilder) writeDefault() {
 	switch i.Dialect() {
-	case dialect.Postgres, dialect.SQLite:
-		i.Pad().
-			WriteString("ON CONFLICT").
-			Pad().
-			Nested(func(b *Builder) {
-				b.IdentComma(i.conflictColumns...)
-			}).
-			Pad().
-			WriteString("DO UPDATE SET ")
-
-		switch i.onConflictOp {
-		case OpResolveWithNewValues:
-			for j, c := range i.columns {
-				if j > 0 {
-					i.Comma()
-				}
-				i.Ident(c).WriteOp(OpEQ).Ident("excluded").WriteByte('.').Ident(c)
-			}
-		case OpResolveWithIgnore:
-			writeIgnoreValues(i)
-		case OpResolveWithAlternateValues:
-			writeUpdateValues(i, i.updateColumns, i.updateValues)
-		}
-
 	case dialect.MySQL:
-		i.Pad().WriteString("ON DUPLICATE KEY UPDATE ")
-
-		switch i.onConflictOp {
-		case OpResolveWithIgnore:
-			writeIgnoreValues(i)
-		case OpResolveWithNewValues:
-			for j, c := range i.columns {
-				if j > 0 {
-					i.Comma()
-				}
-				// update column with the value we tried to insert
-				i.Ident(c).WriteOp(OpEQ).WriteString("VALUES").WriteByte('(').Ident(c).WriteByte(')')
-			}
-		case OpResolveWithAlternateValues:
-			writeUpdateValues(i, i.updateColumns, i.updateValues)
-		}
+		i.WriteString("VALUES ()")
+	case dialect.SQLite, dialect.Postgres:
+		i.WriteString("DEFAULT VALUES")
 	}
 }
 
-func writeUpdateValues(builder *InsertBuilder, columns []string, values []interface{}) {
-	for i, c := range columns {
-		if i > 0 {
-			builder.Comma()
+func (i *InsertBuilder) writeConflict() {
+	switch i.Dialect() {
+	case dialect.MySQL:
+		i.WriteString(" ON DUPLICATE KEY UPDATE ")
+		if i.conflict.action.nothing {
+			i.AddError(fmt.Errorf("invalid CONFLICT action ('DO NOTHING')"))
 		}
-		builder.Ident(c).WriteString(" = ").Arg(builder.updateValues[i])
+	case dialect.SQLite, dialect.Postgres:
+		i.WriteString(" ON CONFLICT")
+		switch t := i.conflict.target; {
+		case t.constraint != "" && len(t.columns) != 0:
+			i.AddError(fmt.Errorf("duplicate CONFLICT clauses: %q, %q", t.constraint, t.columns))
+		case t.constraint != "":
+			i.WriteString(" ON CONSTRAINT ").Ident(t.constraint)
+		case len(t.columns) != 0:
+			i.WriteString(" (").IdentComma(t.columns...).WriteByte(')')
+		}
+		if p := i.conflict.target.where; p != nil {
+			i.WriteString(" WHERE ").Join(p)
+		}
+		if i.conflict.action.nothing {
+			i.WriteString(" DO NOTHING")
+			return
+		}
+		i.WriteString(" DO UPDATE SET ")
 	}
-}
-
-// writeIgnoreValues ignores conflicts by setting each column to itself e.g. "c" = "c",
-// performimg an update without changing any values so that it returns the record ID.
-func writeIgnoreValues(builder *InsertBuilder) {
-	for j, c := range builder.columns {
-		if j > 0 {
-			builder.Comma()
-		}
-		builder.Ident(c).WriteOp(OpEQ).Ident(c)
+	if len(i.conflict.action.update) == 0 {
+		i.AddError(errors.New("missing action for 'DO UPDATE SET' clause"))
+	}
+	u := &UpdateSet{table: i.table, columns: i.columns, update: &UpdateBuilder{}}
+	u.update.Builder = i.Builder
+	for _, f := range i.conflict.action.update {
+		f(u)
+	}
+	u.update.writeSetter(&i.Builder)
+	if p := i.conflict.action.where; p != nil {
+		i.WriteString(" WHERE ").Join(p)
 	}
 }
 
@@ -841,8 +1059,15 @@ func (u *UpdateBuilder) Schema(name string) *UpdateBuilder {
 	return u
 }
 
-// Set sets a column and a its value.
+// Set sets a column to a given value. If `Set` was called before with
+// the same column name, it overrides the value of the previous call.
 func (u *UpdateBuilder) Set(column string, v interface{}) *UpdateBuilder {
+	for i := range u.columns {
+		if column == u.columns[i] {
+			u.values[i] = v
+			return u
+		}
+	}
 	u.columns = append(u.columns, column)
 	u.values = append(u.values, v)
 	return u
@@ -850,8 +1075,7 @@ func (u *UpdateBuilder) Set(column string, v interface{}) *UpdateBuilder {
 
 // Add adds a numeric value to the given column.
 func (u *UpdateBuilder) Add(column string, v interface{}) *UpdateBuilder {
-	u.columns = append(u.columns, column)
-	u.values = append(u.values, P().Append(func(b *Builder) {
+	return u.Set(column, ExprFunc(func(b *Builder) {
 		b.WriteString("COALESCE")
 		b.Nested(func(b *Builder) {
 			b.Ident(column).Comma().Arg(0)
@@ -859,7 +1083,6 @@ func (u *UpdateBuilder) Add(column string, v interface{}) *UpdateBuilder {
 		b.WriteString(" + ")
 		b.Arg(v)
 	}))
-	return u
 }
 
 // SetNull sets a column as null value.
@@ -894,35 +1117,41 @@ func (u *UpdateBuilder) Empty() bool {
 
 // Query returns query representation of an `UPDATE` statement.
 func (u *UpdateBuilder) Query() (string, []interface{}) {
-	u.WriteString("UPDATE ")
-	u.writeSchema(u.schema)
-	u.Ident(u.table).WriteString(" SET ")
+	b := u.Builder.clone()
+	b.WriteString("UPDATE ")
+	b.writeSchema(u.schema)
+	b.Ident(u.table).WriteString(" SET ")
+	u.writeSetter(&b)
+	if u.where != nil {
+		b.WriteString(" WHERE ")
+		b.Join(u.where)
+	}
+	return b.String(), b.args
+}
+
+// writeSetter writes the "SET" clause for the UPDATE statement.
+func (u *UpdateBuilder) writeSetter(b *Builder) {
 	for i, c := range u.nulls {
 		if i > 0 {
-			u.Comma()
+			b.Comma()
 		}
-		u.Ident(c).WriteString(" = NULL")
+		b.Ident(c).WriteString(" = NULL")
 	}
 	if len(u.nulls) > 0 && len(u.columns) > 0 {
-		u.Comma()
+		b.Comma()
 	}
 	for i, c := range u.columns {
 		if i > 0 {
-			u.Comma()
+			b.Comma()
 		}
-		u.Ident(c).WriteString(" = ")
+		b.Ident(c).WriteString(" = ")
 		switch v := u.values[i].(type) {
 		case Querier:
-			u.Join(v)
+			b.Join(v)
 		default:
-			u.Arg(v)
+			b.Arg(v)
 		}
 	}
-	if u.where != nil {
-		u.WriteString(" WHERE ")
-		u.Join(u.where)
-	}
-	return u.String(), u.args
 }
 
 // DeleteBuilder is a builder for `DELETE` statement.
@@ -1056,7 +1285,13 @@ func (p *Predicate) Not() *Predicate {
 	})
 }
 
-func (p *Predicate) columnsOp(col1, col2 string, op Op) *Predicate {
+// ColumnsOp returns a new predicate between 2 columns.
+func ColumnsOp(col1, col2 string, op Op) *Predicate {
+	return P().ColumnsOp(col1, col2, op)
+}
+
+// ColumnsOp appends the given predicate between 2 columns.
+func (p *Predicate) ColumnsOp(col1, col2 string, op Op) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col1)
 		b.WriteOp(op)
@@ -1087,13 +1322,13 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsEQ appends a "=" predicate between 2 columns.
-func ColumnsEQ(col1 string, col2 string) *Predicate {
+func ColumnsEQ(col1, col2 string) *Predicate {
 	return P().ColumnsEQ(col1, col2)
 }
 
 // ColumnsEQ appends a "=" predicate between 2 columns.
-func (p *Predicate) ColumnsEQ(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpEQ)
+func (p *Predicate) ColumnsEQ(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpEQ)
 }
 
 // NEQ returns a "<>" predicate.
@@ -1111,13 +1346,13 @@ func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsNEQ appends a "<>" predicate between 2 columns.
-func ColumnsNEQ(col1 string, col2 string) *Predicate {
+func ColumnsNEQ(col1, col2 string) *Predicate {
 	return P().ColumnsNEQ(col1, col2)
 }
 
 // ColumnsNEQ appends a "<>" predicate between 2 columns.
-func (p *Predicate) ColumnsNEQ(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpNEQ)
+func (p *Predicate) ColumnsNEQ(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpNEQ)
 }
 
 // LT returns a "<" predicate.
@@ -1135,13 +1370,13 @@ func (p *Predicate) LT(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsLT appends a "<" predicate between 2 columns.
-func ColumnsLT(col1 string, col2 string) *Predicate {
+func ColumnsLT(col1, col2 string) *Predicate {
 	return P().ColumnsLT(col1, col2)
 }
 
 // ColumnsLT appends a "<" predicate between 2 columns.
-func (p *Predicate) ColumnsLT(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpLT)
+func (p *Predicate) ColumnsLT(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpLT)
 }
 
 // LTE returns a "<=" predicate.
@@ -1159,13 +1394,13 @@ func (p *Predicate) LTE(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsLTE appends a "<=" predicate between 2 columns.
-func ColumnsLTE(col1 string, col2 string) *Predicate {
+func ColumnsLTE(col1, col2 string) *Predicate {
 	return P().ColumnsLTE(col1, col2)
 }
 
 // ColumnsLTE appends a "<=" predicate between 2 columns.
-func (p *Predicate) ColumnsLTE(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpLTE)
+func (p *Predicate) ColumnsLTE(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpLTE)
 }
 
 // GT returns a ">" predicate.
@@ -1183,13 +1418,13 @@ func (p *Predicate) GT(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsGT appends a ">" predicate between 2 columns.
-func ColumnsGT(col1 string, col2 string) *Predicate {
+func ColumnsGT(col1, col2 string) *Predicate {
 	return P().ColumnsGT(col1, col2)
 }
 
 // ColumnsGT appends a ">" predicate between 2 columns.
-func (p *Predicate) ColumnsGT(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpGT)
+func (p *Predicate) ColumnsGT(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpGT)
 }
 
 // GTE returns a ">=" predicate.
@@ -1207,13 +1442,13 @@ func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsGTE appends a ">=" predicate between 2 columns.
-func ColumnsGTE(col1 string, col2 string) *Predicate {
+func ColumnsGTE(col1, col2 string) *Predicate {
 	return P().ColumnsGTE(col1, col2)
 }
 
 // ColumnsGTE appends a ">=" predicate between 2 columns.
-func (p *Predicate) ColumnsGTE(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpGTE)
+func (p *Predicate) ColumnsGTE(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpGTE)
 }
 
 // NotNull returns the `IS NOT NULL` predicate.
@@ -1312,6 +1547,36 @@ func (p *Predicate) NotIn(col string, args ...interface{}) *Predicate {
 	})
 }
 
+// Exists returns the `Exists` predicate.
+func Exists(query Querier) *Predicate {
+	return P().Exists(query)
+}
+
+// Exists appends the `EXISTS` predicate with the given query.
+func (p *Predicate) Exists(query Querier) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.WriteString("EXISTS ")
+		b.Nested(func(b *Builder) {
+			b.Join(query)
+		})
+	})
+}
+
+// NotExists returns the `NotExists` predicate.
+func NotExists(query Querier) *Predicate {
+	return P().NotExists(query)
+}
+
+// NotExists appends the `NOT EXISTS` predicate with the given query.
+func (p *Predicate) NotExists(query Querier) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.WriteString("NOT EXISTS ")
+		b.Nested(func(b *Builder) {
+			b.Join(query)
+		})
+	})
+}
+
 // Like returns the `LIKE` predicate.
 func Like(col, pattern string) *Predicate {
 	return P().Like(col, pattern)
@@ -1351,9 +1616,18 @@ func (p *Predicate) EqualFold(col, sub string) *Predicate {
 	return p.Append(func(b *Builder) {
 		f := &Func{}
 		f.SetDialect(b.dialect)
-		f.Lower(col)
-		b.WriteString(f.String())
-		b.WriteOp(OpEQ)
+		switch b.dialect {
+		case dialect.MySQL:
+			// We assume the CHARACTER SET is configured to utf8mb4,
+			// because this how it is defined in dialect/sql/schema.
+			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci = ")
+		case dialect.Postgres:
+			b.Ident(col).WriteString(" ILIKE ")
+		default: // SQLite.
+			f.Lower(col)
+			b.WriteString(f.String())
+			b.WriteOp(OpEQ)
+		}
 		b.Arg(strings.ToLower(sub))
 	})
 }
@@ -1721,6 +1995,9 @@ type Selector struct {
 	limit    *int
 	offset   *int
 	distinct bool
+	union    []union
+	prefix   Queries
+	lock     *LockOptions
 }
 
 // WithContext sets the context into the *Selector.
@@ -1758,6 +2035,12 @@ func Select(columns ...string) *Selector {
 // Empty selection means all columns *.
 func (s *Selector) Select(columns ...string) *Selector {
 	s.columns = columns
+	return s
+}
+
+// AppendSelect appends additional columns/expressions to the SELECT statement.
+func (s *Selector) AppendSelect(columns ...string) *Selector {
+	s.columns = append(s.columns, columns...)
 	return s
 }
 
@@ -1853,9 +2136,16 @@ func (s *Selector) Table() *SelectTable {
 	return s.from.(*SelectTable)
 }
 
-// TableName returns the name of the selected table.
+// TableName returns the name of the selected table or alias of selector.
 func (s *Selector) TableName() string {
-	return s.Table().name
+	switch view := s.from.(type) {
+	case *SelectTable:
+		return view.name
+	case *Selector:
+		return view.as
+	default:
+		panic(fmt.Sprintf("unhandled TableView type %T", s.from))
+	}
 }
 
 // Join appends a `JOIN` clause to the statement.
@@ -1892,6 +2182,52 @@ func (s *Selector) join(kind string, t TableView) *Selector {
 	if st, ok := t.(state); ok {
 		st.SetDialect(s.dialect)
 	}
+	return s
+}
+
+// unionType describes an UNION type.
+type unionType string
+
+const (
+	unionAll      unionType = "ALL"
+	unionDistinct unionType = "DISTINCT"
+)
+
+// union query option.
+type union struct {
+	unionType
+	TableView
+}
+
+// Union appends the UNION clause to the query.
+func (s *Selector) Union(t TableView) *Selector {
+	s.union = append(s.union, union{
+		TableView: t,
+	})
+	return s
+}
+
+// UnionAll appends the UNION ALL clause to the query.
+func (s *Selector) UnionAll(t TableView) *Selector {
+	s.union = append(s.union, union{
+		unionType: unionAll,
+		TableView: t,
+	})
+	return s
+}
+
+// UnionDistinct appends the UNION DISTINCT clause to the query.
+func (s *Selector) UnionDistinct(t TableView) *Selector {
+	s.union = append(s.union, union{
+		unionType: unionDistinct,
+		TableView: t,
+	})
+	return s
+}
+
+// Prefix prefixes the query with list of queries.
+func (s *Selector) Prefix(queries ...Querier) *Selector {
+	s.prefix = append(s.prefix, queries...)
 	return s
 }
 
@@ -1954,6 +2290,99 @@ func (s *Selector) Count(columns ...string) *Selector {
 	}
 	s.columns = []string{Count(column)}
 	return s
+}
+
+// LockAction tells the transaction what to do in case of
+// requesting a row that is locked by other transaction.
+type LockAction string
+
+const (
+	// NoWait means never wait and returns an error.
+	NoWait LockAction = "NOWAIT"
+	// SkipLocked means never wait and skip.
+	SkipLocked LockAction = "SKIP LOCKED"
+)
+
+// LockStrength defines the strength of the lock (see the list below).
+type LockStrength string
+
+// A list of all locking clauses.
+const (
+	LockShare       LockStrength = "SHARE"
+	LockUpdate      LockStrength = "UPDATE"
+	LockNoKeyUpdate LockStrength = "NO KEY UPDATE"
+	LockKeyShare    LockStrength = "KEY SHARE"
+)
+
+type (
+	// LockOptions defines a SELECT statement
+	// lock for protecting concurrent updates.
+	LockOptions struct {
+		// Strength of the lock.
+		Strength LockStrength
+		// Action of the lock.
+		Action LockAction
+		// Tables are an option tables.
+		Tables []string
+		// custom clause for locking.
+		clause string
+	}
+	// LockOption allows configuring the LockConfig using functional options.
+	LockOption func(*LockOptions)
+)
+
+// WithLockAction sets the Action of the lock.
+func WithLockAction(action LockAction) LockOption {
+	return func(c *LockOptions) {
+		c.Action = action
+	}
+}
+
+// WithLockTables sets the Tables of the lock.
+func WithLockTables(tables ...string) LockOption {
+	return func(c *LockOptions) {
+		c.Tables = tables
+	}
+}
+
+// WithLockClause allows providing a custom clause for
+// locking the statement. For example, in MySQL <= 8.22:
+//
+//	Select().
+//	From(Table("users")).
+//	ForShare(
+//		WithLockClause("LOCK IN SHARE MODE"),
+//	)
+//
+func WithLockClause(clause string) LockOption {
+	return func(c *LockOptions) {
+		c.clause = clause
+	}
+}
+
+// For sets the lock configuration for suffixing the `SELECT`
+// statement with the `FOR [SHARE | UPDATE] ...` clause.
+func (s *Selector) For(l LockStrength, opts ...LockOption) *Selector {
+	if s.Dialect() == dialect.SQLite {
+		s.AddError(errors.New("sql: SELECT .. FOR UPDATE/SHARE not supported in SQLite"))
+	}
+	s.lock = &LockOptions{Strength: l}
+	for _, opt := range opts {
+		opt(s.lock)
+	}
+	return s
+}
+
+// ForShare sets the lock configuration for suffixing the
+// `SELECT` statement with the `FOR SHARE` clause.
+func (s *Selector) ForShare(opts ...LockOption) *Selector {
+	return s.For(LockShare, opts...)
+}
+
+// LockUpdate sets the lock configuration for suffixing the
+// `SELECT` statement with the `FOR UPDATE` clause.
+func (s *Selector) ForUpdate(opts ...LockOption) *Selector {
+	return s.For(LockUpdate, opts...)
 }
 
 // Clone returns a duplicate of the selector, including all associated steps. It can be
@@ -2031,6 +2460,7 @@ func (s *Selector) Having(p *Predicate) *Selector {
 // Query returns query representation of a `SELECT` statement.
 func (s *Selector) Query() (string, []interface{}) {
 	b := s.Builder.clone()
+	s.joinPrefix(&b)
 	b.WriteString("SELECT ")
 	if s.distinct {
 		b.WriteString("DISTINCT ")
@@ -2052,6 +2482,9 @@ func (s *Selector) Query() (string, []interface{}) {
 		})
 		b.WriteString(" AS ")
 		b.Ident(t.as)
+	case *WithBuilder:
+		t.SetDialect(s.dialect)
+		b.Ident(t.name)
 	}
 	for _, join := range s.joins {
 		b.WriteString(" " + join.kind + " ")
@@ -2066,6 +2499,9 @@ func (s *Selector) Query() (string, []interface{}) {
 			})
 			b.WriteString(" AS ")
 			b.Ident(view.as)
+		case *WithBuilder:
+			view.SetDialect(s.dialect)
+			b.Ident(view.name)
 		}
 		if join.on != nil {
 			b.WriteString(" ON ")
@@ -2084,6 +2520,9 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString(" HAVING ")
 		b.Join(s.having)
 	}
+	if len(s.union) > 0 {
+		s.joinUnion(&b)
+	}
 	if len(s.order) > 0 {
 		s.joinOrder(&b)
 	}
@@ -2095,9 +2534,56 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString(" OFFSET ")
 		b.WriteString(strconv.Itoa(*s.offset))
 	}
+	s.joinLock(&b)
 	s.total = b.total
 	s.AddError(b.Err())
 	return b.String(), b.args
+}
+
+func (s *Selector) joinPrefix(b *Builder) {
+	if len(s.prefix) > 0 {
+		b.join(s.prefix, " ")
+		b.Pad()
+	}
+}
+
+func (s *Selector) joinLock(b *Builder) {
+	if s.lock == nil {
+		return
+	}
+	b.Pad()
+	if s.lock.clause != "" {
+		b.WriteString(s.lock.clause)
+		return
+	}
+	b.WriteString("FOR ").WriteString(string(s.lock.Strength))
+	if len(s.lock.Tables) > 0 {
+		b.WriteString(" OF ").IdentComma(s.lock.Tables...)
+	}
+	if s.lock.Action != "" {
+		b.Pad().WriteString(string(s.lock.Action))
+	}
+}
+
+func (s *Selector) joinUnion(b *Builder) {
+	for _, union := range s.union {
+		b.WriteString(" UNION ")
+		if union.unionType != "" {
+			b.WriteString(string(union.unionType) + " ")
+		}
+		switch view := union.TableView.(type) {
+		case *SelectTable:
+			view.SetDialect(s.dialect)
+			b.WriteString(view.ref())
+		case *Selector:
+			view.SetDialect(s.dialect)
+			b.Join(view)
+			if view.as != "" {
+				b.WriteString(" AS ")
+				b.Ident(view.as)
+			}
+		}
+	}
 }
 
 func (s *Selector) joinOrder(b *Builder) {
@@ -2121,17 +2607,34 @@ func (*Selector) view() {}
 // WithBuilder is the builder for the `WITH` statement.
 type WithBuilder struct {
 	Builder
-	name string
-	s    *Selector
+	recursive bool
+	name      string
+	columns   []string
+	s         *Selector
 }
 
 // With returns a new builder for the `WITH` statement.
 //
-//	n := Queries{With("users_view").As(Select().From(Table("users"))), Select().From(Table("users_view"))}
+//	n := Queries{
+//		With("users_view").As(Select().From(Table("users"))),
+//		Select().From(Table("users_view")),
+//	}
 //	return n.Query()
 //
-func With(name string) *WithBuilder {
-	return &WithBuilder{name: name}
+func With(name string, columns ...string) *WithBuilder {
+	return &WithBuilder{name: name, columns: columns}
+}
+
+// WithRecursive returns a new builder for the `WITH RECURSIVE` statement.
+//
+//	n := Queries{
+//		WithRecursive("users_view").As(Select().From(Table("users"))),
+//		Select().From(Table("users_view")),
+//	}
+//	return n.Query()
+//
+func WithRecursive(name string, columns ...string) *WithBuilder {
+	return &WithBuilder{name: name, columns: columns, recursive: true}
 }
 
 // Name returns the name of the view.
@@ -2143,9 +2646,26 @@ func (w *WithBuilder) As(s *Selector) *WithBuilder {
 	return w
 }
 
+// C returns a formatted string for the WITH column.
+func (w *WithBuilder) C(column string) string {
+	b := &Builder{dialect: w.dialect}
+	b.Ident(w.name).WriteByte('.').Ident(column)
+	return b.String()
+}
+
 // Query returns query representation of a `WITH` clause.
 func (w *WithBuilder) Query() (string, []interface{}) {
-	w.WriteString(fmt.Sprintf("WITH %s AS ", w.name))
+	w.WriteString("WITH ")
+	if w.recursive {
+		w.WriteString("RECURSIVE ")
+	}
+	w.Ident(w.name)
+	if len(w.columns) > 0 {
+		w.WriteByte('(')
+		w.IdentComma(w.columns...)
+		w.WriteByte(')')
+	}
+	w.WriteString(" AS ")
 	w.Nested(func(b *Builder) {
 		b.Join(w.s)
 	})
@@ -2215,6 +2735,29 @@ type expr struct {
 }
 
 func (e *expr) Query() (string, []interface{}) { return e.s, e.args }
+
+// ExprFunc returns an expression function that implements the Querier interface.
+//
+//	Update("users").
+//		Set("x", ExprFunc(func(b *Builder) {
+//			// The sql.Builder config (argc and dialect)
+//			// was set before the function was executed.
+//			b.Ident("x").WriteOp(OpAdd).Arg(1)
+//		}))
+//
+func ExprFunc(fn func(*Builder)) Querier {
+	return &exprFunc{fn: fn}
+}
+
+type exprFunc struct {
+	Builder
+	fn func(*Builder)
+}
+
+func (e *exprFunc) Query() (string, []interface{}) {
+	e.fn(&e.Builder)
+	return e.Builder.Query()
+}
 
 // Queries are list of queries join with space between them.
 type Queries []Querier
@@ -2361,12 +2904,12 @@ func (b *Builder) Err() error {
 	return fmt.Errorf(br.String())
 }
 
-// An Op represents a predicate operator.
+// An Op represents an operator.
 type Op int
 
-// Predicate operators
 const (
-	OpEQ      Op = iota // logical and.
+	// Predicate operators.
+	OpEQ      Op = iota // =
 	OpNEQ               // <>
 	OpGT                // >
 	OpGTE               // >=
@@ -2377,6 +2920,13 @@ const (
 	OpLike              // LIKE
 	OpIsNull            // IS NULL
 	OpNotNull           // IS NOT NULL
+
+	// Arithmetic operators.
+	OpAdd // +
+	OpSub // -
+	OpMul // *
+	OpDiv // / (Quotient)
+	OpMod // % (Reminder)
 )
 
 var ops = [...]string{
@@ -2391,12 +2941,17 @@ var ops = [...]string{
 	OpLike:    "LIKE",
 	OpIsNull:  "IS NULL",
 	OpNotNull: "IS NOT NULL",
+	OpAdd:     "+",
+	OpSub:     "-",
+	OpMul:     "*",
+	OpDiv:     "/",
+	OpMod:     "%",
 }
 
 // WriteOp writes an operator to the builder.
 func (b *Builder) WriteOp(op Op) *Builder {
 	switch {
-	case op >= OpEQ && op <= OpLike:
+	case op >= OpEQ && op <= OpLike || op >= OpAdd && op <= OpMod:
 		b.Pad().WriteString(ops[op]).Pad()
 	case op == OpIsNull || op == OpNotNull:
 		b.Pad().WriteString(ops[op])
@@ -2559,6 +3114,11 @@ func (b Builder) clone() Builder {
 // postgres reports if the builder dialect is PostgreSQL.
 func (b Builder) postgres() bool {
 	return b.Dialect() == dialect.Postgres
+}
+
+// mysql reports if the builder dialect is MySQL.
+func (b Builder) mysql() bool {
+	return b.Dialect() == dialect.MySQL
 }
 
 // fromIdent sets the builder dialect from the identifier format.

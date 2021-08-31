@@ -117,8 +117,8 @@ func (m CityMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CityMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -188,6 +188,7 @@ func (m *CityMutation) RemoveStreetIDs(ids ...int) {
 		m.removedstreets = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.streets, ids[i])
 		m.removedstreets[ids[i]] = struct{}{}
 	}
 }
@@ -213,6 +214,11 @@ func (m *CityMutation) ResetStreets() {
 	m.streets = nil
 	m.clearedstreets = false
 	m.removedstreets = nil
+}
+
+// Where appends a list predicates to the CityMutation builder.
+func (m *CityMutation) Where(ps ...predicate.City) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -495,8 +501,8 @@ func (m StreetMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *StreetMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -577,6 +583,11 @@ func (m *StreetMutation) CityIDs() (ids []int) {
 func (m *StreetMutation) ResetCity() {
 	m.city = nil
 	m.clearedcity = false
+}
+
+// Where appends a list predicates to the StreetMutation builder.
+func (m *StreetMutation) Where(ps ...predicate.Street) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

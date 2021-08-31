@@ -25,9 +25,9 @@ type NoteUpdate struct {
 	mutation *NoteMutation
 }
 
-// Where adds a new predicate for the NoteUpdate builder.
+// Where appends a list predicates to the NoteUpdate builder.
 func (nu *NoteUpdate) Where(ps ...predicate.Note) *NoteUpdate {
-	nu.mutation.predicates = append(nu.mutation.predicates, ps...)
+	nu.mutation.Where(ps...)
 	return nu
 }
 
@@ -137,6 +137,9 @@ func (nu *NoteUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(nu.hooks) - 1; i >= 0; i-- {
+			if nu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nu.mutation); err != nil {
@@ -291,8 +294,8 @@ func (nu *NoteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, nu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{note.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -420,6 +423,9 @@ func (nuo *NoteUpdateOne) Save(ctx context.Context) (*Note, error) {
 			return node, err
 		})
 		for i := len(nuo.hooks) - 1; i >= 0; i-- {
+			if nuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nuo.mutation); err != nil {
@@ -594,8 +600,8 @@ func (nuo *NoteUpdateOne) sqlSave(ctx context.Context) (_node *Note, err error) 
 	if err = sqlgraph.UpdateNode(ctx, nuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{note.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

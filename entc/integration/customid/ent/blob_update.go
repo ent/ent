@@ -25,9 +25,9 @@ type BlobUpdate struct {
 	mutation *BlobMutation
 }
 
-// Where adds a new predicate for the BlobUpdate builder.
+// Where appends a list predicates to the BlobUpdate builder.
 func (bu *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
-	bu.mutation.predicates = append(bu.mutation.predicates, ps...)
+	bu.mutation.Where(ps...)
 	return bu
 }
 
@@ -123,6 +123,9 @@ func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(bu.hooks) - 1; i >= 0; i-- {
+			if bu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = bu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, bu.mutation); err != nil {
@@ -271,8 +274,8 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blob.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -386,6 +389,9 @@ func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
 			return node, err
 		})
 		for i := len(buo.hooks) - 1; i >= 0; i-- {
+			if buo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = buo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, buo.mutation); err != nil {
@@ -554,8 +560,8 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 	if err = sqlgraph.UpdateNode(ctx, buo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blob.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

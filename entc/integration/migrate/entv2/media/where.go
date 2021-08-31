@@ -108,6 +108,13 @@ func SourceURI(v string) predicate.Media {
 	})
 }
 
+// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
+func Text(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldText), v))
+	})
+}
+
 // SourceEQ applies the EQ predicate on the "source" field.
 func SourceEQ(v string) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
@@ -355,6 +362,131 @@ func SourceURIEqualFold(v string) predicate.Media {
 func SourceURIContainsFold(v string) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldSourceURI), v))
+	})
+}
+
+// TextEQ applies the EQ predicate on the "text" field.
+func TextEQ(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldText), v))
+	})
+}
+
+// TextNEQ applies the NEQ predicate on the "text" field.
+func TextNEQ(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldText), v))
+	})
+}
+
+// TextIn applies the In predicate on the "text" field.
+func TextIn(vs ...string) predicate.Media {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Media(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldText), v...))
+	})
+}
+
+// TextNotIn applies the NotIn predicate on the "text" field.
+func TextNotIn(vs ...string) predicate.Media {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Media(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldText), v...))
+	})
+}
+
+// TextGT applies the GT predicate on the "text" field.
+func TextGT(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldText), v))
+	})
+}
+
+// TextGTE applies the GTE predicate on the "text" field.
+func TextGTE(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldText), v))
+	})
+}
+
+// TextLT applies the LT predicate on the "text" field.
+func TextLT(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldText), v))
+	})
+}
+
+// TextLTE applies the LTE predicate on the "text" field.
+func TextLTE(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldText), v))
+	})
+}
+
+// TextContains applies the Contains predicate on the "text" field.
+func TextContains(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldText), v))
+	})
+}
+
+// TextHasPrefix applies the HasPrefix predicate on the "text" field.
+func TextHasPrefix(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldText), v))
+	})
+}
+
+// TextHasSuffix applies the HasSuffix predicate on the "text" field.
+func TextHasSuffix(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldText), v))
+	})
+}
+
+// TextIsNil applies the IsNil predicate on the "text" field.
+func TextIsNil() predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldText)))
+	})
+}
+
+// TextNotNil applies the NotNil predicate on the "text" field.
+func TextNotNil() predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldText)))
+	})
+}
+
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldText), v))
+	})
+}
+
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldText), v))
 	})
 }
 

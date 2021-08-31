@@ -82,11 +82,17 @@ func (ic *InfoCreate) Save(ctx context.Context) (*Info, error) {
 				return nil, err
 			}
 			ic.mutation = mutation
-			node, err = ic.sqlSave(ctx)
+			if node, err = ic.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(ic.hooks) - 1; i >= 0; i-- {
+			if ic.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
@@ -105,10 +111,23 @@ func (ic *InfoCreate) SaveX(ctx context.Context) *Info {
 	return v
 }
 
+// Exec executes the query.
+func (ic *InfoCreate) Exec(ctx context.Context) error {
+	_, err := ic.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ic *InfoCreate) ExecX(ctx context.Context) {
+	if err := ic.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ic *InfoCreate) check() error {
 	if _, ok := ic.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New("ent: missing required field \"content\"")}
+		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "content"`)}
 	}
 	return nil
 }
@@ -116,12 +135,12 @@ func (ic *InfoCreate) check() error {
 func (ic *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
 	_node, _spec := ic.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
-	if _node.ID == 0 {
+	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
@@ -202,18 +221,20 @@ func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, icb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, icb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, icb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				if nodes[i].ID == 0 {
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
@@ -240,4 +261,17 @@ func (icb *InfoCreateBulk) SaveX(ctx context.Context) []*Info {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (icb *InfoCreateBulk) Exec(ctx context.Context) error {
+	_, err := icb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (icb *InfoCreateBulk) ExecX(ctx context.Context) {
+	if err := icb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

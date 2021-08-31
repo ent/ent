@@ -61,7 +61,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						Column: {{ $.Package }}.{{ $f.Constant }},
 					})
 				}
-				{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+				{{- if $f.SupportsMutationAdd }}
 					if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
 						_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 							Type: field.{{ $f.Type.ConstName }},
@@ -120,8 +120,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- end }}
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{ {{ $.Package }}.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return {{ $zero }}, err
 	}

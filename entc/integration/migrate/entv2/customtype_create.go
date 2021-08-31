@@ -62,11 +62,17 @@ func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 				return nil, err
 			}
 			ctc.mutation = mutation
-			node, err = ctc.sqlSave(ctx)
+			if node, err = ctc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(ctc.hooks) - 1; i >= 0; i-- {
+			if ctc.hooks[i] == nil {
+				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = ctc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ctc.mutation); err != nil {
@@ -85,6 +91,19 @@ func (ctc *CustomTypeCreate) SaveX(ctx context.Context) *CustomType {
 	return v
 }
 
+// Exec executes the query.
+func (ctc *CustomTypeCreate) Exec(ctx context.Context) error {
+	_, err := ctc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ctc *CustomTypeCreate) ExecX(ctx context.Context) {
+	if err := ctc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ctc *CustomTypeCreate) check() error {
 	return nil
@@ -93,8 +112,8 @@ func (ctc *CustomTypeCreate) check() error {
 func (ctc *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
 	_node, _spec := ctc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ctc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -153,19 +172,23 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ctcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ctcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, ctcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -189,4 +212,17 @@ func (ctcb *CustomTypeCreateBulk) SaveX(ctx context.Context) []*CustomType {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (ctcb *CustomTypeCreateBulk) Exec(ctx context.Context) error {
+	_, err := ctcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ctcb *CustomTypeCreateBulk) ExecX(ctx context.Context) {
+	if err := ctcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

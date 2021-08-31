@@ -21,9 +21,9 @@ const (
 	EdgeFollowing = "following"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// FollowersTable is the table the holds the followers relation/edge. The primary key declared below.
+	// FollowersTable is the table that holds the followers relation/edge. The primary key declared below.
 	FollowersTable = "user_following"
-	// FollowingTable is the table the holds the following relation/edge. The primary key declared below.
+	// FollowingTable is the table that holds the following relation/edge. The primary key declared below.
 	FollowingTable = "user_following"
 )
 

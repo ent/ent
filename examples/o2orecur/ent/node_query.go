@@ -364,8 +364,8 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Select(node.FieldValue).
 //		Scan(ctx, &v)
 //
-func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
-	nq.fields = append([]string{field}, fields...)
+func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
+	nq.fields = append(nq.fields, fields...)
 	return &NodeSelect{NodeQuery: nq}
 }
 
@@ -545,10 +545,14 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(nq.driver.Dialect())
 	t1 := builder.Table(node.Table)
-	selector := builder.Select(t1.Columns(node.Columns...)...).From(t1)
+	columns := nq.fields
+	if len(columns) == 0 {
+		columns = node.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if nq.sql != nil {
 		selector = nq.sql
-		selector.Select(selector.Columns(node.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range nq.predicates {
 		p(selector)
@@ -1049,16 +1053,10 @@ func (ns *NodeSelect) BoolX(ctx context.Context) bool {
 
 func (ns *NodeSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ns.sqlQuery().Query()
+	query, args := ns.sql.Query()
 	if err := ns.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ns *NodeSelect) sqlQuery() sql.Querier {
-	selector := ns.sql
-	selector.Select(selector.Columns(ns.fields...)...)
-	return selector
 }

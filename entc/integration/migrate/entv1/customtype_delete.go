@@ -24,9 +24,9 @@ type CustomTypeDelete struct {
 	mutation *CustomTypeMutation
 }
 
-// Where adds a new predicate to the CustomTypeDelete builder.
+// Where appends a list predicates to the CustomTypeDelete builder.
 func (ctd *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete {
-	ctd.mutation.predicates = append(ctd.mutation.predicates, ps...)
+	ctd.mutation.Where(ps...)
 	return ctd
 }
 
@@ -50,6 +50,9 @@ func (ctd *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ctd.hooks) - 1; i >= 0; i-- {
+			if ctd.hooks[i] == nil {
+				return 0, fmt.Errorf("entv1: uninitialized hook (forgotten import entv1/runtime?)")
+			}
 			mut = ctd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ctd.mutation); err != nil {

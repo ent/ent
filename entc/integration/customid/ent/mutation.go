@@ -139,8 +139,8 @@ func (m *BlobMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *BlobMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -249,6 +249,7 @@ func (m *BlobMutation) RemoveLinkIDs(ids ...uuid.UUID) {
 		m.removedlinks = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
+		delete(m.links, ids[i])
 		m.removedlinks[ids[i]] = struct{}{}
 	}
 }
@@ -274,6 +275,11 @@ func (m *BlobMutation) ResetLinks() {
 	m.links = nil
 	m.clearedlinks = false
 	m.removedlinks = nil
+}
+
+// Where appends a list predicates to the BlobMutation builder.
+func (m *BlobMutation) Where(ps ...predicate.Blob) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -584,8 +590,8 @@ func (m *CarMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CarMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -806,6 +812,11 @@ func (m *CarMutation) OwnerIDs() (ids []string) {
 func (m *CarMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
+}
+
+// Where appends a list predicates to the CarMutation builder.
+func (m *CarMutation) Where(ps ...predicate.Car) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1165,8 +1176,8 @@ func (m *DocMutation) SetID(id schema.DocID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *DocMutation) ID() (id schema.DocID, exists bool) {
 	if m.id == nil {
 		return
@@ -1288,6 +1299,7 @@ func (m *DocMutation) RemoveChildIDs(ids ...schema.DocID) {
 		m.removedchildren = make(map[schema.DocID]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -1313,6 +1325,11 @@ func (m *DocMutation) ResetChildren() {
 	m.children = nil
 	m.clearedchildren = false
 	m.removedchildren = nil
+}
+
+// Where appends a list predicates to the DocMutation builder.
+func (m *DocMutation) Where(ps ...predicate.Doc) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1628,8 +1645,8 @@ func (m *GroupMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *GroupMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1663,6 +1680,7 @@ func (m *GroupMutation) RemoveUserIDs(ids ...int) {
 		m.removedusers = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.users, ids[i])
 		m.removedusers[ids[i]] = struct{}{}
 	}
 }
@@ -1688,6 +1706,11 @@ func (m *GroupMutation) ResetUsers() {
 	m.users = nil
 	m.clearedusers = false
 	m.removedusers = nil
+}
+
+// Where appends a list predicates to the GroupMutation builder.
+func (m *GroupMutation) Where(ps ...predicate.Group) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1950,8 +1973,8 @@ func (m *MixinIDMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *MixinIDMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
@@ -2029,6 +2052,11 @@ func (m *MixinIDMutation) OldMixinField(ctx context.Context) (v string, err erro
 // ResetMixinField resets all changes to the "mixin_field" field.
 func (m *MixinIDMutation) ResetMixinField() {
 	m.mixin_field = nil
+}
+
+// Where appends a list predicates to the MixinIDMutation builder.
+func (m *MixinIDMutation) Where(ps ...predicate.MixinID) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2301,8 +2329,8 @@ func (m *NoteMutation) SetID(id schema.NoteID) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *NoteMutation) ID() (id schema.NoteID, exists bool) {
 	if m.id == nil {
 		return
@@ -2424,6 +2452,7 @@ func (m *NoteMutation) RemoveChildIDs(ids ...schema.NoteID) {
 		m.removedchildren = make(map[schema.NoteID]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -2449,6 +2478,11 @@ func (m *NoteMutation) ResetChildren() {
 	m.children = nil
 	m.clearedchildren = false
 	m.removedchildren = nil
+}
+
+// Where appends a list predicates to the NoteMutation builder.
+func (m *NoteMutation) Where(ps ...predicate.Note) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -2771,8 +2805,8 @@ func (m *PetMutation) SetID(id string) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *PetMutation) ID() (id string, exists bool) {
 	if m.id == nil {
 		return
@@ -2845,6 +2879,7 @@ func (m *PetMutation) RemoveCarIDs(ids ...int) {
 		m.removedcars = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.cars, ids[i])
 		m.removedcars[ids[i]] = struct{}{}
 	}
 }
@@ -2898,6 +2933,7 @@ func (m *PetMutation) RemoveFriendIDs(ids ...string) {
 		m.removedfriends = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.friends, ids[i])
 		m.removedfriends[ids[i]] = struct{}{}
 	}
 }
@@ -2962,6 +2998,11 @@ func (m *PetMutation) BestFriendIDs() (ids []string) {
 func (m *PetMutation) ResetBestFriend() {
 	m.best_friend = nil
 	m.clearedbest_friend = false
+}
+
+// Where appends a list predicates to the PetMutation builder.
+func (m *PetMutation) Where(ps ...predicate.Pet) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -3295,8 +3336,8 @@ func (m *UserMutation) SetID(id int) {
 	m.id = &id
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -3330,6 +3371,7 @@ func (m *UserMutation) RemoveGroupIDs(ids ...int) {
 		m.removedgroups = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.groups, ids[i])
 		m.removedgroups[ids[i]] = struct{}{}
 	}
 }
@@ -3422,6 +3464,7 @@ func (m *UserMutation) RemoveChildIDs(ids ...int) {
 		m.removedchildren = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.children, ids[i])
 		m.removedchildren[ids[i]] = struct{}{}
 	}
 }
@@ -3475,6 +3518,7 @@ func (m *UserMutation) RemovePetIDs(ids ...string) {
 		m.removedpets = make(map[string]struct{})
 	}
 	for i := range ids {
+		delete(m.pets, ids[i])
 		m.removedpets[ids[i]] = struct{}{}
 	}
 }
@@ -3500,6 +3544,11 @@ func (m *UserMutation) ResetPets() {
 	m.pets = nil
 	m.clearedpets = false
 	m.removedpets = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

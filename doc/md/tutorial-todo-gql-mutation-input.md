@@ -81,13 +81,17 @@ The full documentation for the template API (Go types and functions) is availabl
 
 Now, we tell the Ent code generator to execute this template by passing it as an argument in the `ent/entc.go` file:
 
-```diff
+```go {8} title="ent/entc.go"
 func main() {
-	err := entc.Generate("./schema", &gen.Config{
-		Templates: entgql.AllTemplates,
--	})
-+	}, entc.TemplateDir("./template"))
+	ex, err := entgql.NewExtension()
 	if err != nil {
+		log.Fatalf("creating entgql extension: %v", err)
+	}
+	opts := []entc.Option{
+		entc.Extensions(ex),
+		entc.TemplateDir("./template"),
+	}
+	if err := entc.Generate("./schema", &gen.Config{}, opts...); err != nil {
 		log.Fatalf("running ent codegen: %v", err)
 	}
 } 

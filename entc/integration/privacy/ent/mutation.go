@@ -125,8 +125,8 @@ func (m TaskMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *TaskMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -330,6 +330,7 @@ func (m *TaskMutation) RemoveTeamIDs(ids ...int) {
 		m.removedteams = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.teams, ids[i])
 		m.removedteams[ids[i]] = struct{}{}
 	}
 }
@@ -394,6 +395,11 @@ func (m *TaskMutation) OwnerIDs() (ids []int) {
 func (m *TaskMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
+}
+
+// Where appends a list predicates to the TaskMutation builder.
+func (m *TaskMutation) Where(ps ...predicate.Task) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -764,8 +770,8 @@ func (m TeamMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *TeamMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -835,6 +841,7 @@ func (m *TeamMutation) RemoveTaskIDs(ids ...int) {
 		m.removedtasks = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.tasks, ids[i])
 		m.removedtasks[ids[i]] = struct{}{}
 	}
 }
@@ -888,6 +895,7 @@ func (m *TeamMutation) RemoveUserIDs(ids ...int) {
 		m.removedusers = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.users, ids[i])
 		m.removedusers[ids[i]] = struct{}{}
 	}
 }
@@ -913,6 +921,11 @@ func (m *TeamMutation) ResetUsers() {
 	m.users = nil
 	m.clearedusers = false
 	m.removedusers = nil
+}
+
+// Where appends a list predicates to the TeamMutation builder.
+func (m *TeamMutation) Where(ps ...predicate.Team) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1227,8 +1240,8 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1368,6 +1381,7 @@ func (m *UserMutation) RemoveTeamIDs(ids ...int) {
 		m.removedteams = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.teams, ids[i])
 		m.removedteams[ids[i]] = struct{}{}
 	}
 }
@@ -1421,6 +1435,7 @@ func (m *UserMutation) RemoveTaskIDs(ids ...int) {
 		m.removedtasks = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.tasks, ids[i])
 		m.removedtasks[ids[i]] = struct{}{}
 	}
 }
@@ -1446,6 +1461,11 @@ func (m *UserMutation) ResetTasks() {
 	m.tasks = nil
 	m.clearedtasks = false
 	m.removedtasks = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

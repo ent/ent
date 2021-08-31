@@ -25,9 +25,9 @@ type FileTypeUpdate struct {
 	mutation *FileTypeMutation
 }
 
-// Where adds a new predicate for the FileTypeUpdate builder.
+// Where appends a list predicates to the FileTypeUpdate builder.
 func (ftu *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
-	ftu.mutation.predicates = append(ftu.mutation.predicates, ps...)
+	ftu.mutation.Where(ps...)
 	return ftu
 }
 
@@ -132,6 +132,9 @@ func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ftu.hooks) - 1; i >= 0; i-- {
+			if ftu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ftu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftu.mutation); err != nil {
@@ -274,8 +277,8 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{filetype.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -398,6 +401,9 @@ func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 			return node, err
 		})
 		for i := len(ftuo.hooks) - 1; i >= 0; i-- {
+			if ftuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ftuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftuo.mutation); err != nil {
@@ -560,8 +566,8 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{filetype.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

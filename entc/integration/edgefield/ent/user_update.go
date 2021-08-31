@@ -29,15 +29,14 @@ type UserUpdate struct {
 	mutation *UserMutation
 }
 
-// Where adds a new predicate for the UserUpdate builder.
+// Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.predicates = append(uu.mutation.predicates, ps...)
+	uu.mutation.Where(ps...)
 	return uu
 }
 
 // SetParentID sets the "parent_id" field.
 func (uu *UserUpdate) SetParentID(i int) *UserUpdate {
-	uu.mutation.ResetParentID()
 	uu.mutation.SetParentID(i)
 	return uu
 }
@@ -58,7 +57,6 @@ func (uu *UserUpdate) ClearParentID() *UserUpdate {
 
 // SetSpouseID sets the "spouse_id" field.
 func (uu *UserUpdate) SetSpouseID(i int) *UserUpdate {
-	uu.mutation.ResetSpouseID()
 	uu.mutation.SetSpouseID(i)
 	return uu
 }
@@ -318,6 +316,9 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(uu.hooks) - 1; i >= 0; i-- {
+			if uu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
@@ -726,8 +727,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -744,7 +745,6 @@ type UserUpdateOne struct {
 
 // SetParentID sets the "parent_id" field.
 func (uuo *UserUpdateOne) SetParentID(i int) *UserUpdateOne {
-	uuo.mutation.ResetParentID()
 	uuo.mutation.SetParentID(i)
 	return uuo
 }
@@ -765,7 +765,6 @@ func (uuo *UserUpdateOne) ClearParentID() *UserUpdateOne {
 
 // SetSpouseID sets the "spouse_id" field.
 func (uuo *UserUpdateOne) SetSpouseID(i int) *UserUpdateOne {
-	uuo.mutation.ResetSpouseID()
 	uuo.mutation.SetSpouseID(i)
 	return uuo
 }
@@ -1032,6 +1031,9 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uuo.hooks) - 1; i >= 0; i-- {
+			if uuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
@@ -1460,8 +1462,8 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

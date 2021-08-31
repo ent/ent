@@ -17,7 +17,7 @@
 For the purpose of the example, we'll generate the following graph:
 
 
-![er-traversal-graph](https://entgo.io/assets/er_traversal_graph.png)
+![er-traversal-graph](https://entgo.io/images/assets/er_traversal_graph.png)
 
 The first step is to generate the 3 schemas: `Pet`, `User`, `Group`.
 
@@ -166,7 +166,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 
 Let's go over a few traversals, and show the code for them:
 
-![er-traversal-graph-gopher](https://entgo.io/assets/er_traversal_graph_gopher.png)
+![er-traversal-graph-gopher](https://entgo.io/images/assets/er_traversal_graph_gopher.png)
 
 The traversal above starts from a `Group` entity, continues to its `admin` (edge),
 continues to its `friends` (edge), gets their `pets` (edge), gets each pet's `friends` (edge),
@@ -195,7 +195,7 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 
 What about the following traversal?
 
-![er-traversal-graph-gopher-query](https://entgo.io/assets/er_traversal_graph_gopher_query.png)
+![er-traversal-graph-gopher-query](https://entgo.io/images/assets/er_traversal_graph_gopher_query.png)
 
 We want to get all pets (entities) that have an `owner` (`edge`) that is a `friend`
 (edge) of some group `admin` (edge).
@@ -222,14 +222,14 @@ func Traverse(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/traversal).
 
 
 ## Relationship
 
 ## O2O Two Types
 
-![er-user-card](https://entgo.io/assets/er_user_card.png)
+![er-user-card](https://entgo.io/images/assets/er_user_card.png)
 
 In this example, a user **has only one** credit-card, and a card **has only one** owner.
 
@@ -304,11 +304,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2o2types).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2o2types).
 
 ## O2O Same Type
 
-![er-linked-list](https://entgo.io/assets/er_linked_list.png)
+![er-linked-list](https://entgo.io/images/assets/er_linked_list.png)
 
 In this linked-list example, we have a **recursive relation** named `next`/`prev`. Each node in the list can
 **have only one** `next` node. If a node A points (using `next`) to node B, B can get its pointer using `prev` (the back-reference edge).   
@@ -400,11 +400,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2o2recur).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2o2recur).
 
 ## O2O Bidirectional
 
-![er-user-spouse](https://entgo.io/assets/er_user_spouse.png)
+![er-user-spouse](https://entgo.io/images/assets/er_user_spouse.png)
 
 In this user-spouse example, we have a **symmetric O2O relation** named `spouse`. Each user can **have only one** spouse.
 If user A sets its spouse (using `spouse`) to B, B can get its spouse using the `spouse` edge.
@@ -474,11 +474,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2obidi).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2obidi).
 
 ## O2M Two Types
 
-![er-user-pets](https://entgo.io/assets/er_user_pets.png)
+![er-user-pets](https://entgo.io/images/assets/er_user_pets.png)
 
 In this user-pets example, we have a O2M relation between user and its pets.
 Each user **has many** pets, and a pet **has one** owner.
@@ -555,11 +555,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 	return nil
 }
 ```
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2m2types).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2m2types).
 
 ## O2M Same Type
 
-![er-tree](https://entgo.io/assets/er_tree.png)
+![er-tree](https://entgo.io/images/assets/er_tree.png)
 
 In this example, we have a recursive O2M relation between tree's nodes and their children (or their parent).  
 Each node in the tree **has many** children, and **has one** parent. If node A adds B to its children,
@@ -664,11 +664,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2mrecur).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2mrecur).
 
 ## M2M Two Types
 
-![er-user-groups](https://entgo.io/assets/er_user_groups.png)
+![er-user-groups](https://entgo.io/images/assets/er_user_groups.png)
 
 In this groups-users example, we have a M2M relation between groups and their users.
 Each group **has many** users, and each user can be joined to **many** groups.
@@ -756,11 +756,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2m2types).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2m2types).
 
 ## M2M Same Type
 
-![er-following-followers](https://entgo.io/assets/er_following_followers.png)
+![er-following-followers](https://entgo.io/images/assets/er_following_followers.png)
 
 In this following-followers example, we have a M2M relation between users to their followers. Each user 
 can follow **many** users, and can have **many** followers.
@@ -849,12 +849,12 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2mrecur).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2mrecur).
 
 
 ## M2M Bidirectional
 
-![er-user-friends](https://entgo.io/assets/er_user_friends.png)
+![er-user-friends](https://entgo.io/images/assets/er_user_friends.png)
 
 In this user-friends example, we have a **symmetric M2M relation** named `friends`.
 Each user can **have many** friends. If user A becomes a friend of B, B is also a friend of A.
@@ -912,7 +912,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2mbidi).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2mbidi).
 
 ## Indexes
 
@@ -922,7 +922,7 @@ The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/
 Indexes can be configured on composition of fields and edges. The main use-case
 is setting uniqueness on fields under a specific relation. Let's take an example:
 
-![er-city-streets](https://entgo.io/assets/er_city_streets.png)
+![er-city-streets](https://entgo.io/images/assets/er_city_streets.png)
 
 In the example above, we have a `City` with many `Street`s, and we want to set the
 street name to be unique under each city.
@@ -1020,5 +1020,5 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/edgeindex).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/edgeindex).
 

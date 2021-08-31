@@ -118,8 +118,8 @@ func (m CommentMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *CommentMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -223,6 +223,11 @@ func (m *CommentMutation) PostIDs() (ids []int) {
 func (m *CommentMutation) ResetPost() {
 	m.post = nil
 	m.clearedpost = false
+}
+
+// Where appends a list predicates to the CommentMutation builder.
+func (m *CommentMutation) Where(ps ...predicate.Comment) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -520,8 +525,8 @@ func (m PostMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *PostMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -666,6 +671,7 @@ func (m *PostMutation) RemoveCommentIDs(ids ...int) {
 		m.removedcomments = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.comments, ids[i])
 		m.removedcomments[ids[i]] = struct{}{}
 	}
 }
@@ -691,6 +697,11 @@ func (m *PostMutation) ResetComments() {
 	m.comments = nil
 	m.clearedcomments = false
 	m.removedcomments = nil
+}
+
+// Where appends a list predicates to the PostMutation builder.
+func (m *PostMutation) Where(ps ...predicate.Post) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
@@ -1021,8 +1032,8 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
@@ -1092,6 +1103,7 @@ func (m *UserMutation) RemovePostIDs(ids ...int) {
 		m.removedposts = make(map[int]struct{})
 	}
 	for i := range ids {
+		delete(m.posts, ids[i])
 		m.removedposts[ids[i]] = struct{}{}
 	}
 }
@@ -1117,6 +1129,11 @@ func (m *UserMutation) ResetPosts() {
 	m.posts = nil
 	m.clearedposts = false
 	m.removedposts = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

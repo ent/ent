@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/item"
@@ -28,6 +29,7 @@ type ItemQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Item
+	modifiers  []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -88,8 +90,8 @@ func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
 
 // FirstID returns the first Item ID from the query.
 // Returns a *NotFoundError when no Item ID was found.
-func (iq *ItemQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = iq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -101,7 +103,7 @@ func (iq *ItemQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (iq *ItemQuery) FirstIDX(ctx context.Context) int {
+func (iq *ItemQuery) FirstIDX(ctx context.Context) string {
 	id, err := iq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -139,8 +141,8 @@ func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
 // OnlyID is like Only, but returns the only Item ID in the query.
 // Returns a *NotSingularError when exactly one Item ID is not found.
 // Returns a *NotFoundError when no entities are found.
-func (iq *ItemQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = iq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -156,7 +158,7 @@ func (iq *ItemQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (iq *ItemQuery) OnlyIDX(ctx context.Context) int {
+func (iq *ItemQuery) OnlyIDX(ctx context.Context) string {
 	id, err := iq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -182,8 +184,8 @@ func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
 }
 
 // IDs executes the query and returns a list of Item IDs.
-func (iq *ItemQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (iq *ItemQuery) IDs(ctx context.Context) ([]string, error) {
+	var ids []string
 	if err := iq.Select(item.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -191,7 +193,7 @@ func (iq *ItemQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (iq *ItemQuery) IDsX(ctx context.Context) []int {
+func (iq *ItemQuery) IDsX(ctx context.Context) []string {
 	ids, err := iq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -253,6 +255,19 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Text string `json:"text,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Item.Query().
+//		GroupBy(item.FieldText).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+//
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 	group := &ItemGroupBy{config: iq.config}
 	group.fields = append([]string{field}, fields...)
@@ -267,8 +282,19 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (iq *ItemQuery) Select(field string, fields ...string) *ItemSelect {
-	iq.fields = append([]string{field}, fields...)
+//
+// Example:
+//
+//	var v []struct {
+//		Text string `json:"text,omitempty"`
+//	}
+//
+//	client.Item.Query().
+//		Select(item.FieldText).
+//		Scan(ctx, &v)
+//
+func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
+	iq.fields = append(iq.fields, fields...)
 	return &ItemSelect{ItemQuery: iq}
 }
 
@@ -305,6 +331,9 @@ func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
 		node := nodes[len(nodes)-1]
 		return node.assignValues(columns, values)
 	}
+	if len(iq.modifiers) > 0 {
+		_spec.Modifiers = iq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, iq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -316,6 +345,9 @@ func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
 
 func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := iq.querySpec()
+	if len(iq.modifiers) > 0 {
+		_spec.Modifiers = iq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, iq.driver, _spec)
 }
 
@@ -333,7 +365,7 @@ func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   item.Table,
 			Columns: item.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: item.FieldID,
 			},
 		},
@@ -378,10 +410,17 @@ func (iq *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 func (iq *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(iq.driver.Dialect())
 	t1 := builder.Table(item.Table)
-	selector := builder.Select(t1.Columns(item.Columns...)...).From(t1)
+	columns := iq.fields
+	if len(columns) == 0 {
+		columns = item.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if iq.sql != nil {
 		selector = iq.sql
-		selector.Select(selector.Columns(item.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
+	}
+	for _, m := range iq.modifiers {
+		m(selector)
 	}
 	for _, p := range iq.predicates {
 		p(selector)
@@ -398,6 +437,38 @@ func (iq *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (iq *ItemQuery) ForUpdate(opts ...sql.LockOption) *ItemQuery {
+	if iq.driver.Dialect() == dialect.Postgres {
+		iq.Unique(false)
+	}
+	iq.modifiers = append(iq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return iq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (iq *ItemQuery) ForShare(opts ...sql.LockOption) *ItemQuery {
+	if iq.driver.Dialect() == dialect.Postgres {
+		iq.Unique(false)
+	}
+	iq.modifiers = append(iq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return iq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (iq *ItemQuery) Modify(modifiers ...func(s *sql.Selector)) *ItemSelect {
+	iq.modifiers = append(iq.modifiers, modifiers...)
+	return iq.Select()
 }
 
 // ItemGroupBy is the group-by builder for Item entities.
@@ -882,7 +953,7 @@ func (is *ItemSelect) BoolX(ctx context.Context) bool {
 
 func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := is.sqlQuery().Query()
+	query, args := is.sql.Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -890,8 +961,8 @@ func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {
 	return sql.ScanSlice(rows, v)
 }
 
-func (is *ItemSelect) sqlQuery() sql.Querier {
-	selector := is.sql
-	selector.Select(selector.Columns(is.fields...)...)
-	return selector
+// Modify adds a query modifier for attaching custom logic to queries.
+func (is *ItemSelect) Modify(modifiers ...func(s *sql.Selector)) *ItemSelect {
+	is.modifiers = append(is.modifiers, modifiers...)
+	return is
 }

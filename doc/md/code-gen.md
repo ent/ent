@@ -42,6 +42,7 @@ The `generate` command generates the following assets for the schemas:
 - Entity object (Go struct) for each of the schema types.
 - Package containing constants and predicates used for interacting with the builders.
 - A `migrate` package for SQL dialects. See [Migration](migrate.md) for more info.
+- A `hook` package for adding mutation middlewares. See [Hooks](hooks.md) for more info.
 
 ## Version Compatibility Between `entc` And `ent`
 
@@ -221,7 +222,7 @@ func EnsureStructTag(name string) gen.Hook {
 				for _, field := range node.Fields {
 					tag := reflect.StructTag(field.StructTag)
 					if _, ok := tag.Lookup(name); !ok {
-						return fmt.Errorf("struct tag %q is missing for field %s.%s", name, node.Name, f.Name)
+						return fmt.Errorf("struct tag %q is missing for field %s.%s", name, node.Name, field.Name)
 					}
 				}
 			}

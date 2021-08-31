@@ -17,7 +17,7 @@ const (
 	EdgePosts = "posts"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// PostsTable is the table the holds the posts relation/edge.
+	// PostsTable is the table that holds the posts relation/edge.
 	PostsTable = "posts"
 	// PostsInverseTable is the table name for the Post entity.
 	// It exists in this package in order to avoid circular dependency with the "post" package.

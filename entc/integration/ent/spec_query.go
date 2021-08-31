@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/card"
@@ -31,7 +32,8 @@ type SpecQuery struct {
 	fields     []string
 	predicates []predicate.Spec
 	// eager-loading edges.
-	withCard *CardQuery
+	withCard  *CardQuery
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -305,8 +307,8 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (sq *SpecQuery) Select(field string, fields ...string) *SpecSelect {
-	sq.fields = append([]string{field}, fields...)
+func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
+	sq.fields = append(sq.fields, fields...)
 	return &SpecSelect{SpecQuery: sq}
 }
 
@@ -346,6 +348,9 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 		node := nodes[len(nodes)-1]
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(sq.modifiers) > 0 {
+		_spec.Modifiers = sq.modifiers
 	}
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
 		return nil, err
@@ -424,6 +429,9 @@ func (sq *SpecQuery) sqlAll(ctx context.Context) ([]*Spec, error) {
 
 func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := sq.querySpec()
+	if len(sq.modifiers) > 0 {
+		_spec.Modifiers = sq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
 }
 
@@ -486,10 +494,17 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(sq.driver.Dialect())
 	t1 := builder.Table(spec.Table)
-	selector := builder.Select(t1.Columns(spec.Columns...)...).From(t1)
+	columns := sq.fields
+	if len(columns) == 0 {
+		columns = spec.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if sq.sql != nil {
 		selector = sq.sql
-		selector.Select(selector.Columns(spec.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
+	}
+	for _, m := range sq.modifiers {
+		m(selector)
 	}
 	for _, p := range sq.predicates {
 		p(selector)
@@ -506,6 +521,38 @@ func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (sq *SpecQuery) ForUpdate(opts ...sql.LockOption) *SpecQuery {
+	if sq.driver.Dialect() == dialect.Postgres {
+		sq.Unique(false)
+	}
+	sq.modifiers = append(sq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return sq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (sq *SpecQuery) ForShare(opts ...sql.LockOption) *SpecQuery {
+	if sq.driver.Dialect() == dialect.Postgres {
+		sq.Unique(false)
+	}
+	sq.modifiers = append(sq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return sq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (sq *SpecQuery) Modify(modifiers ...func(s *sql.Selector)) *SpecSelect {
+	sq.modifiers = append(sq.modifiers, modifiers...)
+	return sq.Select()
 }
 
 // SpecGroupBy is the group-by builder for Spec entities.
@@ -990,7 +1037,7 @@ func (ss *SpecSelect) BoolX(ctx context.Context) bool {
 
 func (ss *SpecSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ss.sqlQuery().Query()
+	query, args := ss.sql.Query()
 	if err := ss.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -998,8 +1045,8 @@ func (ss *SpecSelect) sqlScan(ctx context.Context, v interface{}) error {
 	return sql.ScanSlice(rows, v)
 }
 
-func (ss *SpecSelect) sqlQuery() sql.Querier {
-	selector := ss.sql
-	selector.Select(selector.Columns(ss.fields...)...)
-	return selector
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ss *SpecSelect) Modify(modifiers ...func(s *sql.Selector)) *SpecSelect {
+	ss.modifiers = append(ss.modifiers, modifiers...)
+	return ss
 }

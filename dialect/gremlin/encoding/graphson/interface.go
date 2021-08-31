@@ -6,6 +6,7 @@ package graphson
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"reflect"
@@ -13,7 +14,6 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/modern-go/reflect2"
-	"github.com/pkg/errors"
 )
 
 // DecoratorOfInterface decorates a value decoder of an interface type.
@@ -122,7 +122,7 @@ func (efaceDecoder) reflectType(typ Type) reflect2.Type {
 func (efaceDecoder) reflectSlice(data []byte) (reflect2.Type, error) {
 	var elem interface{}
 	if err := Unmarshal(data, &[...]*interface{}{&elem}); err != nil {
-		return nil, errors.Wrap(err, "cannot read first list element")
+		return nil, fmt.Errorf("cannot read first list element: %w", err)
 	}
 
 	if elem == nil {
@@ -139,7 +139,7 @@ func (efaceDecoder) reflectMap(data []byte) (reflect2.Type, error) {
 		bytes.Replace(data, []byte(mapType), []byte(listType), 1),
 		&[...]*interface{}{&key, &elem},
 	); err != nil {
-		return nil, errors.Wrap(err, "cannot unmarshal first map item")
+		return nil, fmt.Errorf("cannot unmarshal first map item: %w", err)
 	}
 
 	if key == nil {

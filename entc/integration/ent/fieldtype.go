@@ -84,6 +84,8 @@ type FieldType struct {
 	MAC schema.MAC `json:"mac,omitempty"`
 	// StringArray holds the value of the "string_array" field.
 	StringArray schema.Strings `json:"string_array,omitempty"`
+	// Password holds the value of the "password" field.
+	Password string `json:"-"`
 	// StringScanner holds the value of the "string_scanner" field.
 	StringScanner *schema.StringScanner `json:"string_scanner,omitempty"`
 	// Duration holds the value of the "duration" field.
@@ -108,6 +110,8 @@ type FieldType struct {
 	Deleted *sql.NullBool `json:"deleted,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt *sql.NullTime `json:"deleted_at,omitempty"`
+	// RawData holds the value of the "raw_data" field.
+	RawData []byte `json:"raw_data,omitempty"`
 	// IP holds the value of the "ip" field.
 	IP net.IP `json:"ip,omitempty"`
 	// NullInt64 holds the value of the "null_int64" field.
@@ -126,6 +130,8 @@ type FieldType struct {
 	NullFloat *sql.NullFloat64 `json:"null_float,omitempty"`
 	// Role holds the value of the "role" field.
 	Role role.Role `json:"role,omitempty"`
+	// Priority holds the value of the "priority" field.
+	Priority role.Priority `json:"priority,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
 	// NillableUUID holds the value of the "nillable_uuid" field.
@@ -139,8 +145,12 @@ type FieldType struct {
 	// Vstring holds the value of the "vstring" field.
 	Vstring schema.VString `json:"vstring,omitempty"`
 	// Triple holds the value of the "triple" field.
-	Triple     schema.Triple `json:"triple,omitempty"`
-	file_field *int
+	Triple schema.Triple `json:"triple,omitempty"`
+	// BigInt holds the value of the "big_int" field.
+	BigInt schema.BigInt `json:"big_int,omitempty"`
+	// PasswordOther holds the value of the "password_other" field.
+	PasswordOther schema.Password `json:"-"`
+	file_field    *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -156,14 +166,20 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullScanner{S: new(schema.StringScanner)}
 		case fieldtype.FieldNillableUUID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case fieldtype.FieldIP, fieldtype.FieldStrings:
+		case fieldtype.FieldRawData, fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = new([]byte)
+		case fieldtype.FieldPriority:
+			values[i] = new(role.Priority)
+		case fieldtype.FieldBigInt:
+			values[i] = new(schema.BigInt)
 		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
 			values[i] = new(schema.Link)
 		case fieldtype.FieldMAC:
 			values[i] = new(schema.MAC)
 		case fieldtype.FieldPair:
 			values[i] = new(schema.Pair)
+		case fieldtype.FieldPasswordOther:
+			values[i] = new(schema.Password)
 		case fieldtype.FieldStringArray:
 			values[i] = new(schema.Strings)
 		case fieldtype.FieldTriple:
@@ -176,7 +192,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullFloat64)
 		case fieldtype.FieldID, fieldtype.FieldInt, fieldtype.FieldInt8, fieldtype.FieldInt16, fieldtype.FieldInt32, fieldtype.FieldInt64, fieldtype.FieldOptionalInt, fieldtype.FieldOptionalInt8, fieldtype.FieldOptionalInt16, fieldtype.FieldOptionalInt32, fieldtype.FieldOptionalInt64, fieldtype.FieldNillableInt, fieldtype.FieldNillableInt8, fieldtype.FieldNillableInt16, fieldtype.FieldNillableInt32, fieldtype.FieldNillableInt64, fieldtype.FieldValidateOptionalInt32, fieldtype.FieldOptionalUint, fieldtype.FieldOptionalUint8, fieldtype.FieldOptionalUint16, fieldtype.FieldOptionalUint32, fieldtype.FieldOptionalUint64, fieldtype.FieldDuration, fieldtype.FieldNullInt64, fieldtype.FieldSchemaInt, fieldtype.FieldSchemaInt8, fieldtype.FieldSchemaInt64:
 			values[i] = new(sql.NullInt64)
-		case fieldtype.FieldState, fieldtype.FieldDir, fieldtype.FieldNdir, fieldtype.FieldStr, fieldtype.FieldNullStr, fieldtype.FieldRole:
+		case fieldtype.FieldState, fieldtype.FieldPassword, fieldtype.FieldDir, fieldtype.FieldNdir, fieldtype.FieldStr, fieldtype.FieldNullStr, fieldtype.FieldRole:
 			values[i] = new(sql.NullString)
 		case fieldtype.FieldDatetime, fieldtype.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -384,6 +400,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value != nil {
 				ft.StringArray = *value
 			}
+		case fieldtype.FieldPassword:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field password", values[i])
+			} else if value.Valid {
+				ft.Password = value.String
+			}
 		case fieldtype.FieldStringScanner:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field string_scanner", values[i])
@@ -459,6 +481,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				ft.DeletedAt = value
 			}
+		case fieldtype.FieldRawData:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field raw_data", values[i])
+			} else if value != nil {
+				ft.RawData = *value
+			}
 		case fieldtype.FieldIP:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field ip", values[i])
@@ -513,6 +541,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				ft.Role = role.Role(value.String)
 			}
+		case fieldtype.FieldPriority:
+			if value, ok := values[i].(*role.Priority); !ok {
+				return fmt.Errorf("unexpected type %T for field priority", values[i])
+			} else if value != nil {
+				ft.Priority = *value
+			}
 		case fieldtype.FieldUUID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field uuid", values[i])
@@ -557,6 +591,18 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				return fmt.Errorf("unexpected type %T for field triple", values[i])
 			} else if value != nil {
 				ft.Triple = *value
+			}
+		case fieldtype.FieldBigInt:
+			if value, ok := values[i].(*schema.BigInt); !ok {
+				return fmt.Errorf("unexpected type %T for field big_int", values[i])
+			} else if value != nil {
+				ft.BigInt = *value
+			}
+		case fieldtype.FieldPasswordOther:
+			if value, ok := values[i].(*schema.Password); !ok {
+				return fmt.Errorf("unexpected type %T for field password_other", values[i])
+			} else if value != nil {
+				ft.PasswordOther = *value
 			}
 		case fieldtype.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -661,6 +707,7 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", string_array=")
 	builder.WriteString(fmt.Sprintf("%v", ft.StringArray))
+	builder.WriteString(", password=<sensitive>")
 	if v := ft.StringScanner; v != nil {
 		builder.WriteString(", string_scanner=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
@@ -697,6 +744,8 @@ func (ft *FieldType) String() string {
 	}
 	builder.WriteString(", deleted_at=")
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
+	builder.WriteString(", raw_data=")
+	builder.WriteString(fmt.Sprintf("%v", ft.RawData))
 	builder.WriteString(", ip=")
 	builder.WriteString(fmt.Sprintf("%v", ft.IP))
 	builder.WriteString(", null_int64=")
@@ -715,6 +764,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
+	builder.WriteString(", priority=")
+	builder.WriteString(fmt.Sprintf("%v", ft.Priority))
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
 	if v := ft.NillableUUID; v != nil {
@@ -733,6 +784,9 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Vstring))
 	builder.WriteString(", triple=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Triple))
+	builder.WriteString(", big_int=")
+	builder.WriteString(fmt.Sprintf("%v", ft.BigInt))
+	builder.WriteString(", password_other=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

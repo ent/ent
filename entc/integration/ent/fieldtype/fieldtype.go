@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/role"
@@ -79,6 +80,8 @@ const (
 	FieldMAC = "mac"
 	// FieldStringArray holds the string denoting the string_array field in the database.
 	FieldStringArray = "string_array"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
 	// FieldStringScanner holds the string denoting the string_scanner field in the database.
 	FieldStringScanner = "string_scanner"
 	// FieldDuration holds the string denoting the duration field in the database.
@@ -103,6 +106,8 @@ const (
 	FieldDeleted = "deleted"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldRawData holds the string denoting the raw_data field in the database.
+	FieldRawData = "raw_data"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
 	// FieldNullInt64 holds the string denoting the null_int64 field in the database.
@@ -121,6 +126,8 @@ const (
 	FieldNullFloat = "null_float"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
+	// FieldPriority holds the string denoting the priority field in the database.
+	FieldPriority = "priority"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
 	// FieldNillableUUID holds the string denoting the nillable_uuid field in the database.
@@ -135,6 +142,10 @@ const (
 	FieldVstring = "vstring"
 	// FieldTriple holds the string denoting the triple field in the database.
 	FieldTriple = "triple"
+	// FieldBigInt holds the string denoting the big_int field in the database.
+	FieldBigInt = "big_int"
+	// FieldPasswordOther holds the string denoting the password_other field in the database.
+	FieldPasswordOther = "password_other"
 	// Table holds the table name of the fieldtype in the database.
 	Table = "field_types"
 )
@@ -171,6 +182,7 @@ var Columns = []string{
 	FieldLinkOther,
 	FieldMAC,
 	FieldStringArray,
+	FieldPassword,
 	FieldStringScanner,
 	FieldDuration,
 	FieldDir,
@@ -183,6 +195,7 @@ var Columns = []string{
 	FieldNullActive,
 	FieldDeleted,
 	FieldDeletedAt,
+	FieldRawData,
 	FieldIP,
 	FieldNullInt64,
 	FieldSchemaInt,
@@ -192,6 +205,7 @@ var Columns = []string{
 	FieldSchemaFloat32,
 	FieldNullFloat,
 	FieldRole,
+	FieldPriority,
 	FieldUUID,
 	FieldNillableUUID,
 	FieldStrings,
@@ -199,6 +213,8 @@ var Columns = []string{
 	FieldNilPair,
 	FieldVstring,
 	FieldTriple,
+	FieldBigInt,
+	FieldPasswordOther,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "field_types"
@@ -223,10 +239,14 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// UpdateDefaultInt64 holds the default value on update for the "int64" field.
+	UpdateDefaultInt64 func() int64
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	ValidateOptionalInt32Validator func(int32) error
 	// MACValidator is a validator for the "mac" field. It is called by the builders before save.
 	MACValidator func(string) error
+	// UpdateDefaultDuration holds the default value on update for the "duration" field.
+	UpdateDefaultDuration func() time.Duration
 	// DefaultDir holds the default value on creation for the "dir" field.
 	DefaultDir func() http.Dir
 	// NdirValidator is a validator for the "ndir" field. It is called by the builders before save.
@@ -237,8 +257,12 @@ var (
 	DefaultNullStr func() *sql.NullString
 	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	LinkValidator func(string) error
+	// RawDataValidator is a validator for the "raw_data" field. It is called by the builders before save.
+	RawDataValidator func([]byte) error
 	// DefaultIP holds the default value on creation for the "ip" field.
 	DefaultIP func() net.IP
+	// IPValidator is a validator for the "ip" field. It is called by the builders before save.
+	IPValidator func([]byte) error
 	// DefaultPair holds the default value on creation for the "pair" field.
 	DefaultPair func() schema.Pair
 	// DefaultVstring holds the default value on creation for the "vstring" field.
@@ -279,6 +303,16 @@ func RoleValidator(r role.Role) error {
 		return nil
 	default:
 		return fmt.Errorf("fieldtype: invalid enum value for role field: %q", r)
+	}
+}
+
+// PriorityValidator is a validator for the "priority" field enum values. It is called by the builders before save.
+func PriorityValidator(pr role.Priority) error {
+	switch pr.String() {
+	case "UNKNOWN", "LOW", "HIGH":
+		return nil
+	default:
+		return fmt.Errorf("fieldtype: invalid enum value for priority field: %q", pr)
 	}
 }
 

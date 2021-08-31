@@ -224,9 +224,6 @@ func TestType_AddIndex(t *testing.T) {
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"id"}})
 	require.NoError(t, err, "valid index for ID field")
 
-	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"text"}})
-	require.Error(t, err, "index size exceeded")
-
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"parent"}})
 	require.Error(t, err, "missing edge")
 

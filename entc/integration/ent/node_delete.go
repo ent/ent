@@ -24,9 +24,9 @@ type NodeDelete struct {
 	mutation *NodeMutation
 }
 
-// Where adds a new predicate to the NodeDelete builder.
+// Where appends a list predicates to the NodeDelete builder.
 func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
-	nd.mutation.predicates = append(nd.mutation.predicates, ps...)
+	nd.mutation.Where(ps...)
 	return nd
 }
 
@@ -50,6 +50,9 @@ func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(nd.hooks) - 1; i >= 0; i-- {
+			if nd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nd.mutation); err != nil {

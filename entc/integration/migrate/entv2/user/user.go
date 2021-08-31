@@ -24,6 +24,8 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
 	// FieldPhone holds the string denoting the phone field in the database.
@@ -56,21 +58,21 @@ const (
 	PetFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// CarTable is the table the holds the car relation/edge.
+	// CarTable is the table that holds the car relation/edge.
 	CarTable = "cars"
 	// CarInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.
 	CarInverseTable = "cars"
 	// CarColumn is the table column denoting the car relation/edge.
 	CarColumn = "user_car"
-	// PetsTable is the table the holds the pets relation/edge.
+	// PetsTable is the table that holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "owner_id"
-	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
+	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "friends"
 )
 
@@ -81,6 +83,7 @@ var Columns = []string{
 	FieldMixedEnum,
 	FieldAge,
 	FieldName,
+	FieldDescription,
 	FieldNickname,
 	FieldPhone,
 	FieldBuffer,
@@ -120,6 +123,8 @@ var (
 	DefaultBuffer func() []byte
 	// DefaultTitle holds the default value on creation for the "title" field.
 	DefaultTitle string
+	// BlobValidator is a validator for the "blob" field. It is called by the builders before save.
+	BlobValidator func([]byte) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )

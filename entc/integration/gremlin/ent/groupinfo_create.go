@@ -89,11 +89,17 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 				return nil, err
 			}
 			gic.mutation = mutation
-			node, err = gic.gremlinSave(ctx)
+			if node, err = gic.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(gic.hooks) - 1; i >= 0; i-- {
+			if gic.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gic.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gic.mutation); err != nil {
@@ -112,6 +118,19 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 	return v
 }
 
+// Exec executes the query.
+func (gic *GroupInfoCreate) Exec(ctx context.Context) error {
+	_, err := gic.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gic *GroupInfoCreate) ExecX(ctx context.Context) {
+	if err := gic.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (gic *GroupInfoCreate) defaults() {
 	if _, ok := gic.mutation.MaxUsers(); !ok {
@@ -123,10 +142,10 @@ func (gic *GroupInfoCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gic *GroupInfoCreate) check() error {
 	if _, ok := gic.mutation.Desc(); !ok {
-		return &ValidationError{Name: "desc", err: errors.New("ent: missing required field \"desc\"")}
+		return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "desc"`)}
 	}
 	if _, ok := gic.mutation.MaxUsers(); !ok {
-		return &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
+		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "max_users"`)}
 	}
 	return nil
 }

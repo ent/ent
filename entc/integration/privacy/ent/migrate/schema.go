@@ -42,10 +42,9 @@ var (
 	}
 	// TeamsTable holds the schema information for the "teams" table.
 	TeamsTable = &schema.Table{
-		Name:        "teams",
-		Columns:     TeamsColumns,
-		PrimaryKey:  []*schema.Column{TeamsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "teams",
+		Columns:    TeamsColumns,
+		PrimaryKey: []*schema.Column{TeamsColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -55,10 +54,9 @@ var (
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
 	// TaskTeamsColumns holds the columns for the "task_teams" table.
 	TaskTeamsColumns = []*schema.Column{

@@ -291,8 +291,8 @@ func (tq *TenantQuery) GroupBy(field string, fields ...string) *TenantGroupBy {
 //		Select(tenant.FieldName).
 //		Scan(ctx, &v)
 //
-func (tq *TenantQuery) Select(field string, fields ...string) *TenantSelect {
-	tq.fields = append([]string{field}, fields...)
+func (tq *TenantQuery) Select(fields ...string) *TenantSelect {
+	tq.fields = append(tq.fields, fields...)
 	return &TenantSelect{TenantQuery: tq}
 }
 
@@ -408,10 +408,14 @@ func (tq *TenantQuery) querySpec() *sqlgraph.QuerySpec {
 func (tq *TenantQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tq.driver.Dialect())
 	t1 := builder.Table(tenant.Table)
-	selector := builder.Select(t1.Columns(tenant.Columns...)...).From(t1)
+	columns := tq.fields
+	if len(columns) == 0 {
+		columns = tenant.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if tq.sql != nil {
 		selector = tq.sql
-		selector.Select(selector.Columns(tenant.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range tq.predicates {
 		p(selector)
@@ -912,16 +916,10 @@ func (ts *TenantSelect) BoolX(ctx context.Context) bool {
 
 func (ts *TenantSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := ts.sqlQuery().Query()
+	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (ts *TenantSelect) sqlQuery() sql.Querier {
-	selector := ts.sql
-	selector.Select(selector.Columns(ts.fields...)...)
-	return selector
 }

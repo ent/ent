@@ -328,8 +328,8 @@ func (iq *InfoQuery) GroupBy(field string, fields ...string) *InfoGroupBy {
 //		Select(info.FieldContent).
 //		Scan(ctx, &v)
 //
-func (iq *InfoQuery) Select(field string, fields ...string) *InfoSelect {
-	iq.fields = append([]string{field}, fields...)
+func (iq *InfoQuery) Select(fields ...string) *InfoSelect {
+	iq.fields = append(iq.fields, fields...)
 	return &InfoSelect{InfoQuery: iq}
 }
 
@@ -470,10 +470,14 @@ func (iq *InfoQuery) querySpec() *sqlgraph.QuerySpec {
 func (iq *InfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(iq.driver.Dialect())
 	t1 := builder.Table(info.Table)
-	selector := builder.Select(t1.Columns(info.Columns...)...).From(t1)
+	columns := iq.fields
+	if len(columns) == 0 {
+		columns = info.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if iq.sql != nil {
 		selector = iq.sql
-		selector.Select(selector.Columns(info.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range iq.predicates {
 		p(selector)
@@ -974,16 +978,10 @@ func (is *InfoSelect) BoolX(ctx context.Context) bool {
 
 func (is *InfoSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := is.sqlQuery().Query()
+	query, args := is.sql.Query()
 	if err := is.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (is *InfoSelect) sqlQuery() sql.Querier {
-	selector := is.sql
-	selector.Select(selector.Columns(is.fields...)...)
-	return selector
 }

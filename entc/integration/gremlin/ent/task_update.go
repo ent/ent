@@ -26,9 +26,9 @@ type TaskUpdate struct {
 	mutation *TaskMutation
 }
 
-// Where adds a new predicate for the TaskUpdate builder.
+// Where appends a list predicates to the TaskUpdate builder.
 func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	tu.mutation.predicates = append(tu.mutation.predicates, ps...)
+	tu.mutation.Where(ps...)
 	return tu
 }
 
@@ -84,6 +84,9 @@ func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(tu.hooks) - 1; i >= 0; i-- {
+			if tu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tu.mutation); err != nil {
@@ -223,6 +226,9 @@ func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 			return node, err
 		})
 		for i := len(tuo.hooks) - 1; i >= 0; i-- {
+			if tuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tuo.mutation); err != nil {

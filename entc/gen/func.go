@@ -26,7 +26,7 @@ var (
 	// Funcs are the predefined template
 	// functions used by the codegen.
 	Funcs = template.FuncMap{
-		"ops":           ops,
+		"ops":           fieldOps,
 		"add":           add,
 		"append":        reflect.Append,
 		"appends":       reflect.AppendSlice,
@@ -73,27 +73,27 @@ var (
 	acronyms = make(map[string]struct{})
 )
 
-// ops returns all operations for given field.
-func ops(f *Field) (op []Op) {
+// fieldOps returns all predicate operations for a given field.
+func fieldOps(f *Field) (ops []Op) {
 	switch t := f.Type.Type; {
 	case f.HasGoType() && !f.ConvertedToBasic() && !f.Type.Valuer():
 	case t == field.TypeJSON:
 	case t == field.TypeBool:
-		op = boolOps
+		ops = boolOps
 	case t == field.TypeString && strings.ToLower(f.Name) != "id":
-		op = stringOps
+		ops = stringOps
 		if f.HasGoType() && !f.ConvertedToBasic() && f.Type.Valuer() {
-			op = numericOps
+			ops = numericOps
 		}
 	case t == field.TypeEnum || f.IsEdgeField():
-		op = enumOps
+		ops = enumOps
 	default:
-		op = numericOps
+		ops = numericOps
 	}
 	if f.Optional {
-		op = append(op, nillableOps...)
+		ops = append(ops, nillableOps...)
 	}
-	return op
+	return ops
 }
 
 // xrange generates a slice of len n.
@@ -351,12 +351,22 @@ func hasTemplate(name string) bool {
 	return false
 }
 
-// matchTemplate returns all template names that match the given pattern.
-func matchTemplate(pattern string) []string {
-	var names []string
-	for _, t := range templates.Templates() {
-		if match, _ := filepath.Match(pattern, t.Name()); match {
-			names = append(names, t.Name())
+// matchTemplate returns all template names that match the given patterns.
+func matchTemplate(patterns ...string) []string {
+	var (
+		names  []string
+		exists = make(map[string]struct{})
+	)
+	for _, pattern := range patterns {
+		for _, t := range templates.Templates() {
+			name := t.Name()
+			if _, ok := exists[name]; ok {
+				continue
+			}
+			if match, _ := filepath.Match(pattern, name); match {
+				names = append(names, name)
+				exists[name] = struct{}{}
+			}
 		}
 	}
 	sort.Strings(names)

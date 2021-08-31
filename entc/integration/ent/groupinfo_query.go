@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/group"
@@ -32,6 +33,7 @@ type GroupInfoQuery struct {
 	predicates []predicate.GroupInfo
 	// eager-loading edges.
 	withGroups *GroupQuery
+	modifiers  []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -329,8 +331,8 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //		Select(groupinfo.FieldDesc).
 //		Scan(ctx, &v)
 //
-func (giq *GroupInfoQuery) Select(field string, fields ...string) *GroupInfoSelect {
-	giq.fields = append([]string{field}, fields...)
+func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
+	giq.fields = append(giq.fields, fields...)
 	return &GroupInfoSelect{GroupInfoQuery: giq}
 }
 
@@ -370,6 +372,9 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 		node := nodes[len(nodes)-1]
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(giq.modifiers) > 0 {
+		_spec.Modifiers = giq.modifiers
 	}
 	if err := sqlgraph.QueryNodes(ctx, giq.driver, _spec); err != nil {
 		return nil, err
@@ -412,6 +417,9 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 
 func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := giq.querySpec()
+	if len(giq.modifiers) > 0 {
+		_spec.Modifiers = giq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, giq.driver, _spec)
 }
 
@@ -474,10 +482,17 @@ func (giq *GroupInfoQuery) querySpec() *sqlgraph.QuerySpec {
 func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(giq.driver.Dialect())
 	t1 := builder.Table(groupinfo.Table)
-	selector := builder.Select(t1.Columns(groupinfo.Columns...)...).From(t1)
+	columns := giq.fields
+	if len(columns) == 0 {
+		columns = groupinfo.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if giq.sql != nil {
 		selector = giq.sql
-		selector.Select(selector.Columns(groupinfo.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
+	}
+	for _, m := range giq.modifiers {
+		m(selector)
 	}
 	for _, p := range giq.predicates {
 		p(selector)
@@ -494,6 +509,38 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (giq *GroupInfoQuery) ForUpdate(opts ...sql.LockOption) *GroupInfoQuery {
+	if giq.driver.Dialect() == dialect.Postgres {
+		giq.Unique(false)
+	}
+	giq.modifiers = append(giq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return giq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (giq *GroupInfoQuery) ForShare(opts ...sql.LockOption) *GroupInfoQuery {
+	if giq.driver.Dialect() == dialect.Postgres {
+		giq.Unique(false)
+	}
+	giq.modifiers = append(giq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return giq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (giq *GroupInfoQuery) Modify(modifiers ...func(s *sql.Selector)) *GroupInfoSelect {
+	giq.modifiers = append(giq.modifiers, modifiers...)
+	return giq.Select()
 }
 
 // GroupInfoGroupBy is the group-by builder for GroupInfo entities.
@@ -978,7 +1025,7 @@ func (gis *GroupInfoSelect) BoolX(ctx context.Context) bool {
 
 func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := gis.sqlQuery().Query()
+	query, args := gis.sql.Query()
 	if err := gis.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -986,8 +1033,8 @@ func (gis *GroupInfoSelect) sqlScan(ctx context.Context, v interface{}) error {
 	return sql.ScanSlice(rows, v)
 }
 
-func (gis *GroupInfoSelect) sqlQuery() sql.Querier {
-	selector := gis.sql
-	selector.Select(selector.Columns(gis.fields...)...)
-	return selector
+// Modify adds a query modifier for attaching custom logic to queries.
+func (gis *GroupInfoSelect) Modify(modifiers ...func(s *sql.Selector)) *GroupInfoSelect {
+	gis.modifiers = append(gis.modifiers, modifiers...)
+	return gis
 }

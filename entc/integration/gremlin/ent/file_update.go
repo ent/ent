@@ -28,9 +28,9 @@ type FileUpdate struct {
 	mutation *FileMutation
 }
 
-// Where adds a new predicate for the FileUpdate builder.
+// Where appends a list predicates to the FileUpdate builder.
 func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
-	fu.mutation.predicates = append(fu.mutation.predicates, ps...)
+	fu.mutation.Where(ps...)
 	return fu
 }
 
@@ -238,6 +238,9 @@ func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(fu.hooks) - 1; i >= 0; i-- {
+			if fu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = fu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, fu.mutation); err != nil {
@@ -597,6 +600,9 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 			return node, err
 		})
 		for i := len(fuo.hooks) - 1; i >= 0; i-- {
+			if fuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = fuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, fuo.mutation); err != nil {

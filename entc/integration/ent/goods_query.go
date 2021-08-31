@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/goods"
@@ -28,6 +29,7 @@ type GoodsQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Goods
+	modifiers  []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -267,8 +269,8 @@ func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (gq *GoodsQuery) Select(field string, fields ...string) *GoodsSelect {
-	gq.fields = append([]string{field}, fields...)
+func (gq *GoodsQuery) Select(fields ...string) *GoodsSelect {
+	gq.fields = append(gq.fields, fields...)
 	return &GoodsSelect{GoodsQuery: gq}
 }
 
@@ -305,6 +307,9 @@ func (gq *GoodsQuery) sqlAll(ctx context.Context) ([]*Goods, error) {
 		node := nodes[len(nodes)-1]
 		return node.assignValues(columns, values)
 	}
+	if len(gq.modifiers) > 0 {
+		_spec.Modifiers = gq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -316,6 +321,9 @@ func (gq *GoodsQuery) sqlAll(ctx context.Context) ([]*Goods, error) {
 
 func (gq *GoodsQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gq.querySpec()
+	if len(gq.modifiers) > 0 {
+		_spec.Modifiers = gq.modifiers
+	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
 
@@ -378,10 +386,17 @@ func (gq *GoodsQuery) querySpec() *sqlgraph.QuerySpec {
 func (gq *GoodsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(gq.driver.Dialect())
 	t1 := builder.Table(goods.Table)
-	selector := builder.Select(t1.Columns(goods.Columns...)...).From(t1)
+	columns := gq.fields
+	if len(columns) == 0 {
+		columns = goods.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if gq.sql != nil {
 		selector = gq.sql
-		selector.Select(selector.Columns(goods.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
+	}
+	for _, m := range gq.modifiers {
+		m(selector)
 	}
 	for _, p := range gq.predicates {
 		p(selector)
@@ -398,6 +413,38 @@ func (gq *GoodsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (gq *GoodsQuery) ForUpdate(opts ...sql.LockOption) *GoodsQuery {
+	if gq.driver.Dialect() == dialect.Postgres {
+		gq.Unique(false)
+	}
+	gq.modifiers = append(gq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return gq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (gq *GoodsQuery) ForShare(opts ...sql.LockOption) *GoodsQuery {
+	if gq.driver.Dialect() == dialect.Postgres {
+		gq.Unique(false)
+	}
+	gq.modifiers = append(gq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return gq
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (gq *GoodsQuery) Modify(modifiers ...func(s *sql.Selector)) *GoodsSelect {
+	gq.modifiers = append(gq.modifiers, modifiers...)
+	return gq.Select()
 }
 
 // GoodsGroupBy is the group-by builder for Goods entities.
@@ -882,7 +929,7 @@ func (gs *GoodsSelect) BoolX(ctx context.Context) bool {
 
 func (gs *GoodsSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := gs.sqlQuery().Query()
+	query, args := gs.sql.Query()
 	if err := gs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -890,8 +937,8 @@ func (gs *GoodsSelect) sqlScan(ctx context.Context, v interface{}) error {
 	return sql.ScanSlice(rows, v)
 }
 
-func (gs *GoodsSelect) sqlQuery() sql.Querier {
-	selector := gs.sql
-	selector.Select(selector.Columns(gs.fields...)...)
-	return selector
+// Modify adds a query modifier for attaching custom logic to queries.
+func (gs *GoodsSelect) Modify(modifiers ...func(s *sql.Selector)) *GoodsSelect {
+	gs.modifiers = append(gs.modifiers, modifiers...)
+	return gs
 }

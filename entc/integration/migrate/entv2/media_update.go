@@ -24,9 +24,9 @@ type MediaUpdate struct {
 	mutation *MediaMutation
 }
 
-// Where adds a new predicate for the MediaUpdate builder.
+// Where appends a list predicates to the MediaUpdate builder.
 func (mu *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
-	mu.mutation.predicates = append(mu.mutation.predicates, ps...)
+	mu.mutation.Where(ps...)
 	return mu
 }
 
@@ -70,6 +70,26 @@ func (mu *MediaUpdate) ClearSourceURI() *MediaUpdate {
 	return mu
 }
 
+// SetText sets the "text" field.
+func (mu *MediaUpdate) SetText(s string) *MediaUpdate {
+	mu.mutation.SetText(s)
+	return mu
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (mu *MediaUpdate) SetNillableText(s *string) *MediaUpdate {
+	if s != nil {
+		mu.SetText(*s)
+	}
+	return mu
+}
+
+// ClearText clears the value of the "text" field.
+func (mu *MediaUpdate) ClearText() *MediaUpdate {
+	mu.mutation.ClearText()
+	return mu
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (mu *MediaUpdate) Mutation() *MediaMutation {
 	return mu.mutation
@@ -95,6 +115,9 @@ func (mu *MediaUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(mu.hooks) - 1; i >= 0; i-- {
+			if mu.hooks[i] == nil {
+				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = mu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, mu.mutation); err != nil {
@@ -170,11 +193,24 @@ func (mu *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: media.FieldSourceURI,
 		})
 	}
+	if value, ok := mu.mutation.Text(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: media.FieldText,
+		})
+	}
+	if mu.mutation.TextCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: media.FieldText,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{media.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -229,6 +265,26 @@ func (muo *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
 	return muo
 }
 
+// SetText sets the "text" field.
+func (muo *MediaUpdateOne) SetText(s string) *MediaUpdateOne {
+	muo.mutation.SetText(s)
+	return muo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (muo *MediaUpdateOne) SetNillableText(s *string) *MediaUpdateOne {
+	if s != nil {
+		muo.SetText(*s)
+	}
+	return muo
+}
+
+// ClearText clears the value of the "text" field.
+func (muo *MediaUpdateOne) ClearText() *MediaUpdateOne {
+	muo.mutation.ClearText()
+	return muo
+}
+
 // Mutation returns the MediaMutation object of the builder.
 func (muo *MediaUpdateOne) Mutation() *MediaMutation {
 	return muo.mutation
@@ -261,6 +317,9 @@ func (muo *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
 			return node, err
 		})
 		for i := len(muo.hooks) - 1; i >= 0; i-- {
+			if muo.hooks[i] == nil {
+				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = muo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, muo.mutation); err != nil {
@@ -353,14 +412,27 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 			Column: media.FieldSourceURI,
 		})
 	}
+	if value, ok := muo.mutation.Text(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: media.FieldText,
+		})
+	}
+	if muo.mutation.TextCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: media.FieldText,
+		})
+	}
 	_node = &Media{config: muo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, muo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{media.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

@@ -43,7 +43,7 @@ module.exports={
         "pinned": true
       }
     ],
-    "slackChannel": "https://app.slack.com/client/T029RQSE6/C01FMSQDT53",
+    "slackChannel": "/docs/slack",
     "newsletter": "https://www.getrevue.co/profile/ent",
     "githubRepo": "https://github.com/ent/ent"
   },
@@ -60,7 +60,9 @@ module.exports={
           sidebarPath: require.resolve('./sidebars.js'),
         },
         "blog": {
-          "path": "blog"
+          "path": "blog",
+          "blogSidebarCount": 'ALL',
+          "blogSidebarTitle": 'All our posts',
         },
         "theme": {
           "customCss": ["../src/css/custom.css"],
@@ -71,7 +73,7 @@ module.exports={
   "plugins": [],
   "themeConfig": {
     prism: {
-      additionalLanguages: ['gotemplate'],
+      additionalLanguages: ['gotemplate', 'protobuf'],
     },
     algolia: {
       apiKey: "bfc8175da1bd5078f1c02e5c8a6fe782",
@@ -107,7 +109,7 @@ module.exports={
         },
         {to: 'blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://app.slack.com/client/T029RQSE6/C01FMSQDT53',
+          href: '/docs/slack',
           position: 'right',
           className: 'header-slack-link',
           'aria-label': 'Slack channel',
@@ -161,7 +163,7 @@ module.exports={
           "title": "Community",
           "items": [
             {"label": "GitHub", "to": "https://github.com/ent/ent"},
-            {"label": "Slack", "to": "https://app.slack.com/client/T029RQSE6/C01FMSQDT53"},
+            {"label": "Slack", "to": "/docs/slack"},
             {"label": "Newsletter", "to": "https://www.getrevue.co/profile/ent"},
             {"label": "Discussions", "to": "https://github.com/ent/ent/discussions"},
             {
@@ -216,8 +218,8 @@ module.exports={
       "trackingID": "UA-189726777-1"
     },
     announcementBar: {
-      id: 'version-08', // Identify this message.
-      content: 'Version v0.8.0 has been released! <a target="_blank" rel="noopener noreferrer" href="https://github.com/ent/ent/releases/tag/v0.8.0">Read the release notes on GitHub.</a>️',
+      id: 'star-repo', // Identify this message.
+      content: '⭐️ If you like Ent, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/ent/ent">GitHub</a>! ⭐',
       backgroundColor: '#fafbfc',
       textColor: '#091E42',
       isCloseable: true,

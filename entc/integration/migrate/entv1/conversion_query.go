@@ -291,8 +291,8 @@ func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGr
 //		Select(conversion.FieldName).
 //		Scan(ctx, &v)
 //
-func (cq *ConversionQuery) Select(field string, fields ...string) *ConversionSelect {
-	cq.fields = append([]string{field}, fields...)
+func (cq *ConversionQuery) Select(fields ...string) *ConversionSelect {
+	cq.fields = append(cq.fields, fields...)
 	return &ConversionSelect{ConversionQuery: cq}
 }
 
@@ -402,10 +402,14 @@ func (cq *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
 func (cq *ConversionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
 	t1 := builder.Table(conversion.Table)
-	selector := builder.Select(t1.Columns(conversion.Columns...)...).From(t1)
+	columns := cq.fields
+	if len(columns) == 0 {
+		columns = conversion.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if cq.sql != nil {
 		selector = cq.sql
-		selector.Select(selector.Columns(conversion.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range cq.predicates {
 		p(selector)
@@ -906,16 +910,10 @@ func (cs *ConversionSelect) BoolX(ctx context.Context) bool {
 
 func (cs *ConversionSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := cs.sqlQuery().Query()
+	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (cs *ConversionSelect) sqlQuery() sql.Querier {
-	selector := cs.sql
-	selector.Select(selector.Columns(cs.fields...)...)
-	return selector
 }

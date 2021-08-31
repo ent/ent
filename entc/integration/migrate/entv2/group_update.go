@@ -24,9 +24,9 @@ type GroupUpdate struct {
 	mutation *GroupMutation
 }
 
-// Where adds a new predicate for the GroupUpdate builder.
+// Where appends a list predicates to the GroupUpdate builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
+	gu.mutation.Where(ps...)
 	return gu
 }
 
@@ -55,6 +55,9 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gu.hooks) - 1; i >= 0; i-- {
+			if gu.hooks[i] == nil {
+				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = gu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
@@ -107,8 +110,8 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -155,6 +158,9 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 			return node, err
 		})
 		for i := len(guo.hooks) - 1; i >= 0; i-- {
+			if guo.hooks[i] == nil {
+				return nil, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = guo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
@@ -227,8 +233,8 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

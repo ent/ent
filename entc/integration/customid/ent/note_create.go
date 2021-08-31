@@ -112,11 +112,17 @@ func (nc *NoteCreate) Save(ctx context.Context) (*Note, error) {
 				return nil, err
 			}
 			nc.mutation = mutation
-			node, err = nc.sqlSave(ctx)
+			if node, err = nc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(nc.hooks) - 1; i >= 0; i-- {
+			if nc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
@@ -135,6 +141,19 @@ func (nc *NoteCreate) SaveX(ctx context.Context) *Note {
 	return v
 }
 
+// Exec executes the query.
+func (nc *NoteCreate) Exec(ctx context.Context) error {
+	_, err := nc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (nc *NoteCreate) ExecX(ctx context.Context) {
+	if err := nc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (nc *NoteCreate) defaults() {
 	if _, ok := nc.mutation.ID(); !ok {
@@ -147,7 +166,7 @@ func (nc *NoteCreate) defaults() {
 func (nc *NoteCreate) check() error {
 	if v, ok := nc.mutation.ID(); ok {
 		if err := note.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf("ent: validator failed for field \"id\": %w", err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
 		}
 	}
 	return nil
@@ -156,10 +175,13 @@ func (nc *NoteCreate) check() error {
 func (nc *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
 	_node, _spec := nc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(schema.NoteID)
 	}
 	return _node, nil
 }
@@ -258,17 +280,19 @@ func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ncb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ncb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, ncb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
+				mutation.id = &nodes[i].ID
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -292,4 +316,17 @@ func (ncb *NoteCreateBulk) SaveX(ctx context.Context) []*Note {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (ncb *NoteCreateBulk) Exec(ctx context.Context) error {
+	_, err := ncb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ncb *NoteCreateBulk) ExecX(ctx context.Context) {
+	if err := ncb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -50,10 +50,10 @@ The following types are currently supported by the framework:
 - `bool`
 - `string`
 - `time.Time`
+- `UUID`
 - `[]byte` (SQL only).
 - `JSON` (SQL only).
 - `Enum` (SQL only).
-- `UUID` (SQL only).
 - `Other` (SQL only).
 
 ```go
@@ -127,7 +127,8 @@ func (Group) Fields() []ent.Field {
 func (Blob) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New),
+			Default(uuid.New).
+			StorageKey("oid"),
 	}
 }
 
@@ -210,6 +211,7 @@ import (
     "entgo.io/ent"
     "entgo.io/ent/dialect"
     "entgo.io/ent/schema/field"
+    "github.com/shopspring/decimal"
 )
 
 // Amount is a custom Go type that's convertible to the basic float64 type.
@@ -231,7 +233,14 @@ func (Card) Fields() []ent.Field {
 			GoType(&sql.NullString{}),
 		field.Enum("role").
 			// A convertible type to string.
-			GoType(role.Unknown),
+			GoType(role.Role("")),
+		field.Float("decimal").
+			// A ValueScanner type mixed with SchemaType.
+			GoType(decimal.Decimal{}).
+			SchemaType(map[string]string{
+			    dialect.MySQL:    "decimal(6,2)",
+			    dialect.Postgres: "numeric",
+			}),
 	}
 }
 ```
@@ -390,6 +399,11 @@ The framework provides a few built-in validators for each type:
   - `Match(regexp.Regexp)`
   - `NotEmpty`
 
+- `[]byte`
+  - `MaxLen(i)`
+  - `MinLen(i)`
+  - `NotEmpty`
+
 ## Optional
 
 Optional fields are fields that are not required in the entity creation, and
@@ -411,12 +425,12 @@ func (User) Fields() []ent.Field {
 
 ## Nillable
 Sometimes you want to be able to distinguish between the zero value of fields
-and `nil`; for example if the database column contains `0` or `NULL`.
+and `nil`; for example, if the database column contains `0` or `NULL`.
 The `Nillable` option exists exactly for this.
 
 If you have an `Optional` field of type `T`, setting it to `Nillable` will generate
 a struct field with type `*T`. Hence, if the database returns `NULL` for this field,
-the struct field will be `nil`. Otherwise, it will contains a pointer to the actual data.
+the struct field will be `nil`. Otherwise, it will contain a pointer to the actual data.
 
 For example, given this schema:
 ```go
@@ -597,6 +611,168 @@ func (User) Fields() []ent.Field {
 			Sensitive(),
 	}
 }
+```
+
+## Enum Fields
+
+The `Enum` builder allows creating enum fields with a list of permitted values. 
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		field.Enum("size").
+			Values("big", "small"),
+	}
+}
+```
+
+When a custom [`GoType`](#go-type) is being used, it is must be convertible to the basic `string` type or it needs to implement the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner) interface. 
+
+The [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface is also required by the custom Go type to tell Ent what are the permitted values of the enum. 
+
+The following example shows how to define an `Enum` field with a custom Go type that is convertible to `string`: 
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		// A convertible type to string.
+		field.Enum("shape").
+			GoType(property.Shape("")),
+	}
+}
+```
+
+Implement the [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface.
+```go
+package property
+
+type Shape string
+
+const (
+	Triangle Shape = "TRIANGLE"
+	Circle   Shape = "CIRCLE"
+)
+
+// Values provides list valid values for Enum.
+func (Shape) Values() (kinds []string) {
+	for _, s := range []Shape{Triangle, Circle} {
+		kinds = append(kinds, string(s))
+	}
+	return
+}
+
+```
+The following example shows how to define an `Enum` field with a custom Go type that is not convertible to `string`, but it implements the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner) interface: 
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		// Add conversion to and from string
+		field.Enum("level").
+			GoType(property.Level(0)),
+	}
+}
+```
+Implement also the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface.
+
+```go
+package property
+
+import "database/sql/driver"
+
+type Level int
+
+const (
+	Unknown Level = iota
+	Low
+	High
+)
+
+func (p Level) String() string {
+	switch p {
+	case Low:
+		return "LOW"
+	case High:
+		return "HIGH"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+// Values provides list valid values for Enum.
+func (Level) Values() []string {
+	return []string{Unknown.String(), Low.String(), High.String()}
+}
+
+// Value provides the DB a string from int.
+func (p Level) Value() (driver.Value, error) {
+	return p.String(), nil
+}
+
+// Scan tells our code how to read the enum into our type.
+func (p *Level) Scan(val interface{}) error {
+	var s string
+	switch v := val.(type) {
+	case nil:
+		return nil
+	case string:
+		s = v
+	case []uint8:
+		s = string(v)
+	}
+	switch s {
+	case "LOW":
+		*p = Low
+	case "HIGH":
+		*p = High
+	default:
+		*p = Unknown
+	}
+	return nil
+}
+```
+
+Combining it all together:
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		field.Enum("size").
+			Values("big", "small"),
+		// A convertible type to string.
+		field.Enum("shape").
+			GoType(property.Shape("")),
+		// Add conversion to and from string.
+		field.Enum("level").
+			GoType(property.Level(0)),
+	}
+}
+```
+
+After code generation usage is trivial:
+```go 
+client.User.Create().
+	SetFirstName("John").
+	SetLastName("Dow").
+	SetSize(user.SizeSmall).
+	SetShape(property.Triangle).
+	SetLevel(property.Low).
+	SaveX(context.Background())
+	
+john := client.User.Query().FirstX(context.Background())
+fmt.Println(john)
+// User(id=1, first_name=John, last_name=Dow, size=small, shape=TRIANGLE, level=LOW)
 ```
 
 ## Annotations

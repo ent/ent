@@ -292,8 +292,8 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 //		Select(mixinid.FieldSomeField).
 //		Scan(ctx, &v)
 //
-func (miq *MixinIDQuery) Select(field string, fields ...string) *MixinIDSelect {
-	miq.fields = append([]string{field}, fields...)
+func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
+	miq.fields = append(miq.fields, fields...)
 	return &MixinIDSelect{MixinIDQuery: miq}
 }
 
@@ -403,10 +403,14 @@ func (miq *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 func (miq *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(miq.driver.Dialect())
 	t1 := builder.Table(mixinid.Table)
-	selector := builder.Select(t1.Columns(mixinid.Columns...)...).From(t1)
+	columns := miq.fields
+	if len(columns) == 0 {
+		columns = mixinid.Columns
+	}
+	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if miq.sql != nil {
 		selector = miq.sql
-		selector.Select(selector.Columns(mixinid.Columns...)...)
+		selector.Select(selector.Columns(columns...)...)
 	}
 	for _, p := range miq.predicates {
 		p(selector)
@@ -907,16 +911,10 @@ func (mis *MixinIDSelect) BoolX(ctx context.Context) bool {
 
 func (mis *MixinIDSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
-	query, args := mis.sqlQuery().Query()
+	query, args := mis.sql.Query()
 	if err := mis.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
-}
-
-func (mis *MixinIDSelect) sqlQuery() sql.Querier {
-	selector := mis.sql
-	selector.Select(selector.Columns(mis.fields...)...)
-	return selector
 }

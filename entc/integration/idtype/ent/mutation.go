@@ -120,8 +120,8 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID
-// is only available if it was provided to the builder.
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
 func (m *UserMutation) ID() (id uint64, exists bool) {
 	if m.id == nil {
 		return
@@ -230,6 +230,7 @@ func (m *UserMutation) RemoveFollowerIDs(ids ...uint64) {
 		m.removedfollowers = make(map[uint64]struct{})
 	}
 	for i := range ids {
+		delete(m.followers, ids[i])
 		m.removedfollowers[ids[i]] = struct{}{}
 	}
 }
@@ -283,6 +284,7 @@ func (m *UserMutation) RemoveFollowingIDs(ids ...uint64) {
 		m.removedfollowing = make(map[uint64]struct{})
 	}
 	for i := range ids {
+		delete(m.following, ids[i])
 		m.removedfollowing[ids[i]] = struct{}{}
 	}
 }
@@ -308,6 +310,11 @@ func (m *UserMutation) ResetFollowing() {
 	m.following = nil
 	m.clearedfollowing = false
 	m.removedfollowing = nil
+}
+
+// Where appends a list predicates to the UserMutation builder.
+func (m *UserMutation) Where(ps ...predicate.User) {
+	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.

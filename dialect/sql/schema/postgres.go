@@ -90,7 +90,10 @@ func (d *Postgres) setRange(ctx context.Context, tx dialect.Tx, t *Table, value 
 func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Table, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Dialect(dialect.Postgres).
-		Select("column_name", "data_type", "is_nullable", "column_default", "udt_name").
+		Select(
+			"column_name", "data_type", "is_nullable", "column_default", "udt_name",
+			"numeric_precision", "numeric_scale",
+		).
 		From(sql.Table("columns").Schema("information_schema")).
 		Where(sql.And(
 			d.matchSchema(),
@@ -226,11 +229,13 @@ const maxCharSize = 10 << 20
 // scanColumn scans the information a column from column description.
 func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
-		nullable sql.NullString
-		defaults sql.NullString
-		udt      sql.NullString
+		nullable         sql.NullString
+		defaults         sql.NullString
+		udt              sql.NullString
+		numericPrecision sql.NullInt64
+		numericScale     sql.NullInt64
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt, &numericPrecision, &numericScale); err != nil {
 		return fmt.Errorf("scanning column description: %w", err)
 	}
 	if nullable.Valid {
@@ -247,8 +252,15 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeInt64
 	case "real":
 		c.Type = field.TypeFloat32
-	case "numeric", "decimal", "double precision":
+	case "double precision":
 		c.Type = field.TypeFloat64
+	case "numeric", "decimal":
+		c.Type = field.TypeFloat64
+		// If precision is specified then we should take that into account.
+		if numericPrecision.Valid {
+			schemaType := fmt.Sprintf("%s(%d,%d)", c.typ, numericPrecision.Int64, numericScale.Int64)
+			c.SchemaType = map[string]string{dialect.Postgres: schemaType}
+		}
 	case "text":
 		c.Type = field.TypeString
 		c.Size = maxCharSize + 1
@@ -303,6 +315,9 @@ func (d *Postgres) tBuilder(t *Table) *sql.TableBuilder {
 	}
 	for _, pk := range t.PrimaryKey {
 		b.PrimaryKey(pk.Name)
+	}
+	if t.Annotation != nil {
+		addChecks(b, t.Annotation)
 	}
 	return b
 }
@@ -394,7 +409,7 @@ func hasUniqueName(i *Index) bool {
 	return name != suffix
 }
 
-// addIndex returns the querying for adding an index to PostgreSQL.
+// addIndex returns the query for adding an index to PostgreSQL.
 func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
 	name := i.Name
 	if !hasUniqueName(i) {
@@ -403,7 +418,7 @@ func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
 		name = fmt.Sprintf("%s_%s", table, i.Name)
 	}
 	idx := sql.Dialect(dialect.Postgres).
-		CreateIndex(name).Table(table)
+		CreateIndex(name).IfNotExists().Table(table)
 	if i.Unique {
 		idx.Unique()
 	}
