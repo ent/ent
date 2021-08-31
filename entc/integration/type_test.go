@@ -117,23 +117,23 @@ func Types(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	require.False(exists)
 
-	_, err = client.FieldType.Create().
+	err = client.FieldType.Create().
 		SetInt(1).
 		SetInt8(8).
 		SetInt16(16).
 		SetInt32(32).
 		SetInt64(64).
 		SetRawData(make([]byte, 40)).
-		Save(ctx)
+		Exec(ctx)
 	require.Error(err, "MaxLen validator should reject this operation")
-	_, err = client.FieldType.Create().
+	err = client.FieldType.Create().
 		SetInt(1).
 		SetInt8(8).
 		SetInt16(16).
 		SetInt32(32).
 		SetInt64(64).
 		SetRawData(make([]byte, 2)).
-		Save(ctx)
+		Exec(ctx)
 	require.Error(err, "MinLen validator should reject this operation")
 	ft = ft.Update().
 		SetInt(1).
@@ -198,13 +198,13 @@ func Types(t *testing.T, client *ent.Client) {
 	require.EqualValues(100, ft.Int64, "UpdateDefault sets the value to 100")
 	require.EqualValues(100, ft.Duration, "UpdateDefault sets the value to 100ns")
 
-	_, err = client.Task.CreateBulk(
+	err = client.Task.CreateBulk(
 		client.Task.Create().SetPriority(schema.PriorityLow),
 		client.Task.Create().SetPriority(schema.PriorityMid),
 		client.Task.Create().SetPriority(schema.PriorityHigh),
-	).Save(ctx)
+	).Exec(ctx)
 	require.NoError(err)
-	_, err = client.Task.Create().SetPriority(schema.Priority(10)).Save(ctx)
+	err = client.Task.Create().SetPriority(schema.Priority(10)).Exec(ctx)
 	require.Error(err)
 
 	tasks := client.Task.Query().Order(ent.Asc(task.FieldPriority)).AllX(ctx)
