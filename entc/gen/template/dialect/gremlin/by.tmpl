@@ -28,8 +28,10 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 
 {{ define "dialect/gremlin/group/as" -}}
-	func(start, _ string) (string, *dsl.Traversal) {
-		return fn(start, end)
+	func As(fn AggregateFunc, end string) AggregateFunc {
+		return func(start, _ string) (string, *dsl.Traversal) {
+			return fn(start, end)
+		}
 	}
 {{- end }}
 

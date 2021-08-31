@@ -51,12 +51,17 @@ func columnChecker(table string) func(string) error {
 {{- end }}
 
 {{ define "dialect/sql/group/as" -}}
-	func(s *sql.Selector) []string {
-			results := make([]string, 0)
-			for i, f := range fn(s) {
-				results = append(results, sql.As(f, end[i]))
-			}
-			return results
+	func As(fn AggregateFunc, ends ...string) AggregateFunc {
+		return func(s *sql.Selector) []string {
+				results := make([]string, len(ends))
+				for i, ag := range fn(s) {
+					if i >= len(ends) {
+						break
+					}
+					results[i] = sql.As(ag, ends[i])
+				}
+				return results
+		}
 	}
 {{- end }}
 
