@@ -975,7 +975,7 @@ func Relation(t *testing.T, client *ent.Client) {
 		ID      int
 		Name    string
 		Average float64
-		Count int
+		Count   int
 	}
 	client.User.Query().
 		Where(user.IDIn(foo.ID, bar.ID)).
