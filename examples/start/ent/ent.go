@@ -90,11 +90,11 @@ type AggregateFunc func(*sql.Selector) []string
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn AggregateFunc, end string) AggregateFunc {
+func As(fn AggregateFunc, end []string) AggregateFunc {
 	return func(s *sql.Selector) []string {
 		results := make([]string, 0)
-		for _, f := range fn(s) {
-			results = append(results, sql.As(f, end))
+		for i := range fn(s) {
+			results = append(results[i], sql.As(f, end[i]))
 		}
 		return results
 	}

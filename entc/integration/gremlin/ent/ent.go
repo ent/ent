@@ -63,7 +63,7 @@ type AggregateFunc func(string, string) (string, *dsl.Traversal)
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn AggregateFunc, end string) AggregateFunc {
+func As(fn AggregateFunc, end []string) AggregateFunc {
 	return func(start, _ string) (string, *dsl.Traversal) {
 		return fn(start, end)
 	}

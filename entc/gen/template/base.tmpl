@@ -50,7 +50,7 @@ type (
 //	Aggregate({{ $pkg }}.As({{ $pkg }}.Sum(field1), "sum_field1"), ({{ $pkg }}.As({{ $pkg }}.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
 //
-func As(fn AggregateFunc, end string) AggregateFunc {
+func As(fn AggregateFunc, end []string) AggregateFunc {
 	{{- $tmpl = printf "dialect/%s/group/as" $.Storage }}
 	return {{ xtemplate $tmpl . }}
 }
