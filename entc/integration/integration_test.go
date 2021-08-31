@@ -806,7 +806,7 @@ func Relation(t *testing.T, client *ent.Client) {
 		GroupBy(user.FieldID, user.FieldName).
 		Aggregate(func(s *entsql.Selector) []string {
 			// Join with pet table and calculate the
-			// average age of the pets of each user.
+			// average age of the pets of each user and number of pets of each user.
 			t := entsql.Table(pet.Table)
 			s.Join(t).On(s.C(user.FieldID), t.C(pet.OwnerColumn))
 			return []string{entsql.As(entsql.Avg(t.C(pet.FieldAge)), "average"), entsql.As(entsql.Count("*"), "count")}
