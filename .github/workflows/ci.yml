@@ -204,17 +204,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      gremlin-server:
-        image: tinkerpop/gremlin-server:3.4.1
-        ports:
-          - 8182:8182
-        options: >-
-          --health-cmd "netstat -an | grep -q 8182"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        volumes:
-          - ${{github.workspace}}/entc/integration/compose/gremlin-server/:/opt/gremlin-server/conf/
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: actions/setup-go@v2
@@ -226,6 +215,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Run Gremlin Server
+        working-directory: entc/integration/compose
+        run: docker-compose up -d gremlin && sleep 10 && docker-compose logs
       - name: Run integration tests
         working-directory: entc/integration
         run: go test -race -count=2 -tags='json1' ./...
@@ -360,17 +352,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      gremlin-server:
-        image: tinkerpop/gremlin-server:3.4.1
-        ports:
-          - 8182:8182
-        options: >-
-          --health-cmd "netstat -an | grep -q 8182"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        volumes:
-          - ${{github.workspace}}/entc/integration/compose/gremlin-server/:/opt/gremlin-server/conf/
     steps:
       - uses: actions/checkout@v2.3.4
         with:
@@ -384,6 +365,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Run Gremlin Server
+        working-directory: entc/integration/compose
+        run: docker-compose up -d gremlin && sleep 10 && docker-compose logs
       - name: Checkout origin/master
         run: git checkout origin/master
       - name: Run integration on origin/master
