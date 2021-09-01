@@ -253,7 +253,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	)
 
 	// Blob type was extended.
-	err = u.Update().SetBlob(make([]byte, 256)).SetState(user.StateLoggedOut).Exec(ctx)
+	u, err = u.Update().SetBlob(make([]byte, 256)).SetState(user.StateLoggedOut).Save(ctx)
 	require.NoError(t, err, "data type blob was extended in v2")
 	require.Equal(t, make([]byte, 256), u.Blob)
 
