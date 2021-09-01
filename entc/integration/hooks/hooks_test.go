@@ -25,7 +25,7 @@ func TestSchemaHooks(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
-	_, err := client.Card.Create().SetNumber("123").Save(ctx)
+	err := client.Card.Create().SetNumber("123").Exec(ctx)
 	require.EqualError(t, err, "card number is too short", "error is returned from hook")
 	crd := client.Card.Create().SetNumber("1234").SaveX(ctx)
 	require.Equal(t, "unknown", crd.Name, "name was set by hook")
@@ -37,7 +37,7 @@ func TestSchemaHooks(t *testing.T) {
 		})
 	})
 	client.Card.Create().SetNumber("1234").SaveX(ctx)
-	_, err = client.Card.Update().Save(ctx)
+	err = client.Card.Update().Exec(ctx)
 	require.EqualError(t, err, "OpUpdate operation is not allowed")
 }
 
@@ -257,7 +257,7 @@ func TestOldValues(t *testing.T) {
 	}, ^ent.OpUpdateOne))
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	require.Equal(t, "a8m", a8m.Name)
-	_, err := client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version).Save(ctx)
+	err := client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version).Exec(ctx)
 	require.EqualError(t, err, "version field must be incremented by 1")
 	a8m = client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version + 1).SaveX(ctx)
 	require.Equal(t, "Ariel", a8m.Name)
