@@ -227,17 +227,17 @@ After adding the rules above and running the code-generation, we expect the priv
 func Do(ctx context.Context, client *ent.Client) error {
 	// Expect operation to fail, because viewer-context
 	// is missing (first mutation rule check).
-	if _, err := client.User.Create().Save(ctx); !errors.Is(err, privacy.Deny) {
+	if err := client.User.Create().Exec(ctx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Apply the same operation with "Admin" role.
 	admin := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.Admin})
-	if _, err := client.User.Create().Save(admin); err != nil {
+	if err := client.User.Create().Exec(admin); err != nil {
 		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
 	// Apply the same operation with "ViewOnly" role.
 	viewOnly := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
-	if _, err := client.User.Create().Save(viewOnly); !errors.Is(err, privacy.Deny) {
+	if err := client.User.Create().Exec(viewOnly); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Allow all viewers to query users.
@@ -259,7 +259,7 @@ can use the `privacy.DecisionContext` function to create a new context with a pr
 func Do(ctx context.Context, client *ent.Client) error {
 	// Bind a privacy decision to the context (bypass all other rules).
 	allow := privacy.DecisionContext(ctx, privacy.Allow)
-	if _, err := client.User.Create().Save(allow); err != nil {
+	if err := client.User.Create().Exec(allow); err != nil {
 		return fmt.Errorf("expect operation to pass, but got %w", err)
 	}
     return nil
@@ -332,12 +332,12 @@ Then, we expect the following code to run successfully:
 func Do(ctx context.Context, client *ent.Client) error {
 	// Expect operation to fail, because viewer-context
 	// is missing (first mutation rule check).
-	if _, err := client.Tenant.Create().Save(ctx); !errors.Is(err, privacy.Deny) {
+	if err := client.Tenant.Create().Exec(ctx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Deny tenant creation if the viewer is not admin.
 	viewCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
-	if _, err := client.Tenant.Create().Save(viewCtx); !errors.Is(err, privacy.Deny) {
+	if err := client.Tenant.Create().Exec(viewCtx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Apply the same operation with "Admin" role, expect it to pass.
@@ -512,11 +512,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Expect operation to fail because the DenyMismatchedTenants rule
 	// makes sure the group and the users are connected to the same tenant.
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser).Save(adminCtx)
+	err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser).Exec(adminCtx)
 	if !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since user (nati) is not connected to the same tenant")
 	}
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser, hubUser).Save(adminCtx)
+	err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser, hubUser).Exec(adminCtx)
 	if !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since some users (nati) are not connected to the same tenant")
 	}

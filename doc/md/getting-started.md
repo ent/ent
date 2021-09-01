@@ -452,47 +452,47 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 		return err
 	}
 	// Then, create the cars, and attach them to the users in the creation.
-	_, err = client.Car.
+	err = client.Car.
 		Create().
 		SetModel("Tesla").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(a8m).               // attach this graph to Ariel.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Car.
+	err = client.Car.
 		Create().
 		SetModel("Mazda").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(a8m).               // attach this graph to Ariel.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Car.
+	err = client.Car.
 		Create().
 		SetModel("Ford").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(neta).              // attach this graph to Neta.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
 	// Create the groups, and add their users in the creation.
-	_, err = client.Group.
+	err = client.Group.
 		Create().
 		SetName("GitLab").
 		AddUsers(neta, a8m).
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Group.
+	err = client.Group.
 		Create().
 		SetName("GitHub").
 		AddUsers(a8m).
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
