@@ -139,7 +139,7 @@ func (s *GreetExtension) Hooks() []gen.Hook {
     }
 }
 
-// DisallowTypeName ensures a type of name "name" doesn not exist.
+// DisallowTypeName ensures a type of name "name" does not exist.
 func DisallowTypeName(name string) gen.Hook {
 	return func(next gen.Generator) gen.Generator {
 		return gen.GenerateFunc(func(g *gen.Graph) error {
