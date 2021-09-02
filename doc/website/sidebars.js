@@ -52,6 +52,7 @@ module.exports = {
       label: 'Misc',
       items: [
         'templates',
+        'extensions',
         'graphql',
         'sql-integration',
         'testing',
