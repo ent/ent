@@ -19,7 +19,7 @@ execution output to a file with the same name as the template. For example:
 {{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
-{{/* Loop over all nodes and add implement the "GoStringer" interface */}}
+{{/* Loop over all nodes and implement the "GoStringer" interface */}}
 {{ range $n := $.Nodes }}
 	{{ $receiver := $n.Receiver }}
 	func ({{ $receiver }} *{{ $n.Name }}) GoString() string {
