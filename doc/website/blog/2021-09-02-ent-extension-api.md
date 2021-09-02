@@ -130,6 +130,16 @@ To do this, let's add a new external template file and place it in `ent/template
 {{ end }}
 ```
 
+Next, let's implement the `Templates` method:
+
+```go title="ent/entc.go"
+func (*GreetExtension) Templates() []*gen.Template {
+	return []*gen.Template{
+		gen.MustParse(gen.NewTemplate("greet").ParseFiles("templates/greet.tmpl")),
+	}
+}
+```
+
 Next, let's kick the tires on our extension. Add a new schema for the `User` type in a file
 named `ent/schema/user.go`:
 
