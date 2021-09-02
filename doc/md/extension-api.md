@@ -78,14 +78,9 @@ method:
 ```
 ```go
 func (*GreetExtension) Templates() []*gen.Template {
-    greet, err := gen.NewTemplate("greet").
-    ParseFiles("templates/greet.tmpl")
-    if err != nil {
-        log.Fatal("entc: failed parsing greet template")
-    }
-    return []*gen.Template{
-        greet,
-    }
+	return []*gen.Template{
+		gen.MustParse(gen.NewTemplate("greet").ParseFiles("templates/greet.tmpl")),
+	}
 }
 ```
 
