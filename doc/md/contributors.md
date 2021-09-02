@@ -77,6 +77,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/sadmansakib"><img src="https://avatars.githubusercontent.com/u/17023844?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sadman Sakib</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=sadmansakib" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/dakimura"><img src="https://avatars.githubusercontent.com/u/34202807?v=4?s=100" width="100px;" alt=""/><br /><sub><b>dakimura</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=dakimura" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/RiskyFeryansyahP"><img src="https://avatars.githubusercontent.com/u/36788585?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Risky Feryansyah</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=RiskyFeryansyahP" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/seiichi1101"><img src="https://avatars.githubusercontent.com/u/20941952?v=4?s=100" width="100px;" alt=""/><br /><sub><b>seiichi </b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=seiichi1101" title="Code">💻</a></td>
   </tr>
 </table>
 
