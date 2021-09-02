@@ -17,7 +17,7 @@ Many open-source ecosystems thrive specifically because they excel at providing 
 easy and structured way to extend a small, core system. Much criticism has been made of the 
 Node.js ecosystem (even by its [original creator Ryan Dahl](https://www.youtube.com/watch?v=M3BM9TB-8yA))
 but it is very hard to argue that the ease of publishing and consuming new `npm` modules
-facilitated the explosion in it's popularity. I've discussed on my personal blog how 
+facilitated the explosion in its popularity. I've discussed on my personal blog how 
 [protoc's plugin system works](https://rotemtam.com/2021/03/22/creating-a-protoc-plugin-to-gen-go-code/) 
 and how that made the Protobuf ecosystem thrive. In short, ecosystems are only created under
 modular designs. 
