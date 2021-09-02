@@ -54,7 +54,7 @@ type GreetExtension {
 ### Adding Templates
 
 Ent supports adding [external templates](templates.md) that will be rendered during
-code generation.  To bundle such external templates on an extension, implement the `Templates`
+code generation. To bundle such external templates on an extension, implement the `Templates`
 method:
 ```gotemplate title="templates/greet.tmpl"
 {{ define "greet" }}
