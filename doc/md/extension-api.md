@@ -57,6 +57,9 @@ Ent supports adding [external templates](templates.md) that will be rendered dur
 code generation. To bundle such external templates on an extension, implement the `Templates`
 method:
 ```gotemplate title="templates/greet.tmpl"
+{{/* Tell Intellij/GoLand to enable the autocompletion based on the *gen.Graph type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "greet" }}
 
 {{/* Add the base header for the generated file */}}
