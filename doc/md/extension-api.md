@@ -6,7 +6,7 @@ title: Extensions
 ### Introduction
 
 The Ent [Extension API](https://pkg.go.dev/entgo.io/ent/entc#Extension)
-facilitates that creation of code-generation extensions that bundle together [Code-gen Hooks](code-gen.md#code-generation-hooks),
+facilitates that creation of code-generation extensions that bundle together [codegen hooks](code-gen.md#code-generation-hooks),
 [Templates](templates.md) and [Annotations](templates.md#annotations) to create reusable components
 that add new rich functionality to Ent's core.
 
