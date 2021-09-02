@@ -1,5 +1,5 @@
 ---
-id: extension-api
+id: extensions
 title: Extension API
 ---
 
