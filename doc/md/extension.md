@@ -6,9 +6,10 @@ title: Extensions
 ### Introduction
 
 The Ent [Extension API](https://pkg.go.dev/entgo.io/ent/entc#Extension)
-facilitates that creation of code-generation extensions that bundle together [codegen hooks](code-gen.md#code-generation-hooks),
-[Templates](templates.md) and [Annotations](templates.md#annotations) to create reusable components
-that add new rich functionality to Ent's core.
+facilitates the creation of code-generation extensions that bundle together [codegen hooks](code-gen.md#code-generation-hooks),
+[templates](templates.md) and [annotations](templates.md#annotations) to create reusable components
+that add new rich functionality to Ent's core. For example, Ent's [entgql plugin](https://pkg.go.dev/entgo.io/contrib/entgql#Extension)
+exposes an `Extension` that automatically generates GraphQL servers from an Ent schema.
 
 ### Defining a New Extension
 
@@ -126,8 +127,8 @@ func ({{ $receiver }} *{{ $n.Name }}) Greet() string {
 
 ### Adding Hooks
 
-The entc package provides an option to add a list of hooks (middlewares) to the
-code-generation phase. This option is ideal for adding custom validators for the
+The entc package provides an option to add a list of [hooks](code-gen.md#code-generation-hooks)
+(middlewares) to the code-generation phase. This option is ideal for adding custom validators for the
 schema, or for generating additional assets using the graph schema. To bundle
 code generation hooks with your extension, implement the `Hooks` method:
 

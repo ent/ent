@@ -35,7 +35,6 @@ module.exports = {
         'predicates',
         'aggregate',
         'paging',
-        'extension-api'
       ],
       collapsed: false,
     },
@@ -53,6 +52,7 @@ module.exports = {
       label: 'Misc',
       items: [
         'templates',
+        'extensions',
         'graphql',
         'sql-integration',
         'testing',
