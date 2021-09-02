@@ -35,6 +35,7 @@ module.exports = {
         'predicates',
         'aggregate',
         'paging',
+        'extension-api'
       ],
       collapsed: false,
     },
