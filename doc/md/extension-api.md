@@ -1,6 +1,6 @@
 ---
 id: extensions
-title: Extension API
+title: Extensions
 ---
 
 ### Introduction
