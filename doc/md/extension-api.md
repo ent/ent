@@ -93,9 +93,10 @@ to provide users with the ability to configure the greeting word in the generate
 code:
 
 ```go
-// GreetingWord implements entc.Annotation
+// GreetingWord implements entc.Annotation.
 type GreetingWord string
 
+// Name of the annotation. Used by the codegen templates.
 func (GreetingWord) Name() string {
 	return "GreetingWord"
 }
