@@ -7,10 +7,10 @@ authorTwitter: _rtam
 ---
 
 A few months ago, [Ariel](https://github.com/a8m) made a silent but highly-impactful contribution
-to Ent's core, the [Extension API](https://entgo.io/docs/extension-api). While Ent has had extension capabilities (such as [Code-gen Hooks](https://entgo.io/docs/code-gen/#code-generation-hooks),
+to Ent's core, the [Extension API](https://entgo.io/docs/extensions). While Ent has had extension capabilities (such as [Code-gen Hooks](https://entgo.io/docs/code-gen/#code-generation-hooks),
 [External Templates](https://entgo.io/docs/templates/), and [Annotations](https://entgo.io/docs/templates/#annotations))
 for a long time, there wasn't a convenient way to bundle together all of these moving parts into a 
-coherent, self-contained component. The [Extension API](https://entgo.io/docs/extension-api) which we 
+coherent, self-contained component. The [Extension API](https://entgo.io/docs/extensions) which we 
 discuss in the post does exactly that. 
 
 Many open-source ecosystems thrive specifically because they excel at providing developers an
@@ -253,7 +253,7 @@ generated `Greet` method!
 In addition to templates and annotations, the Extension API allows developers to bundle 
 `gen.Hook`s and `entc.Option`s in extensions to further control the behavior of your code-generation.
 In this post we will not discuss these possibilities, but if you are interested in using them
-head over to the [documentation](https://entgo.io/docs/extension-api).
+head over to the [documentation](https://entgo.io/docs/extensions).
 
 ### Wrapping Up
 
