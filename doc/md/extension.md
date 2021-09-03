@@ -111,7 +111,6 @@ type GreetExtension struct {
 ```
 Next, implement the `Annotations` method:
 ```go
-
 func (s *GreetExtension) Annotations() []entc.Annotation {
 	return []entc.Annotation{
 		s.word,
@@ -159,7 +158,7 @@ func DisallowTypeName(name string) gen.Hook {
 To use an extension in our code-generation configuration, use `entc.Extensions`, a helper
 method that returns an `entc.Option` that applies our chosen extensions:
 
-```go title=ent/entc.go
+```go title="ent/entc.go"
 //+build ignore
 
 package main
