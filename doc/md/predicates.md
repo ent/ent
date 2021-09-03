@@ -184,3 +184,21 @@ SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` JOIN `c
 -- `EXISTS` version.
 SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` WHERE EXISTS (SELECT * FROM `cars` WHERE `cars`.`model` = 'Tesla' AND `users`.`id` = `cars`.`owner_id`)
 ```
+
+#### Get all pets where pet name contains a specific pattern 
+
+A probable ent query should look like this:
+
+```go
+pets := client.Pet.Query().
+	Where(func(s *sql.Selector){
+		s.Where(sql.Like(pet.Name,"B"))
+	}).
+	AllX(ctx)
+```
+
+A probable ent query should look like this:
+
+```sql
+SELECT DISTINCT `pets`.`id`, `pets`.`owner_id`, `pets`.`name`, `pets`.`age`, `pets`.`species` FROM `pets` WHERE `name` LIKE 'B'
+```
