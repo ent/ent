@@ -180,6 +180,9 @@ func (dc *DocCreate) sqlSave(ctx context.Context) (*Doc, error) {
 		}
 		return nil, err
 	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(schema.DocID)
+	}
 	return _node, nil
 }
 

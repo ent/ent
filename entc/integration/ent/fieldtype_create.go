@@ -531,6 +531,12 @@ func (ftc *FieldTypeCreate) SetDeletedAt(st *sql.NullTime) *FieldTypeCreate {
 	return ftc
 }
 
+// SetRawData sets the "raw_data" field.
+func (ftc *FieldTypeCreate) SetRawData(b []byte) *FieldTypeCreate {
+	ftc.mutation.SetRawData(b)
+	return ftc
+}
+
 // SetIP sets the "ip" field.
 func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 	ftc.mutation.SetIP(n)
@@ -889,6 +895,11 @@ func (ftc *FieldTypeCreate) check() error {
 	if v, ok := ftc.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "link": %w`, err)}
+		}
+	}
+	if v, ok := ftc.mutation.RawData(); ok {
+		if err := fieldtype.RawDataValidator(v); err != nil {
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "raw_data": %w`, err)}
 		}
 	}
 	if v, ok := ftc.mutation.IP(); ok {
@@ -1282,6 +1293,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		})
 		_node.DeletedAt = value
 	}
+	if value, ok := ftc.mutation.RawData(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldRawData,
+		})
+		_node.RawData = value
+	}
 	if value, ok := ftc.mutation.IP(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
@@ -1464,9 +1483,9 @@ func (ftc *FieldTypeCreate) OnConflict(opts ...sql.ConflictOption) *FieldTypeUps
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (ftc *FieldTypeCreate) OnConflictColumns(columns ...string) *FieldTypeUpsertOne {
 	ftc.conflict = append(ftc.conflict, sql.ConflictColumns(columns...))
@@ -2208,6 +2227,24 @@ func (u *FieldTypeUpsert) ClearDeletedAt() *FieldTypeUpsert {
 	return u
 }
 
+// SetRawData sets the "raw_data" field.
+func (u *FieldTypeUpsert) SetRawData(v []byte) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldRawData, v)
+	return u
+}
+
+// UpdateRawData sets the "raw_data" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateRawData() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldRawData)
+	return u
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (u *FieldTypeUpsert) ClearRawData() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldRawData)
+	return u
+}
+
 // SetIP sets the "ip" field.
 func (u *FieldTypeUpsert) SetIP(v net.IP) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldIP, v)
@@ -2526,12 +2563,14 @@ func (u *FieldTypeUpsert) ClearPasswordOther() *FieldTypeUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *FieldTypeUpsertOne) UpdateNewValues() *FieldTypeUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -3406,6 +3445,27 @@ func (u *FieldTypeUpsertOne) ClearDeletedAt() *FieldTypeUpsertOne {
 	})
 }
 
+// SetRawData sets the "raw_data" field.
+func (u *FieldTypeUpsertOne) SetRawData(v []byte) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetRawData(v)
+	})
+}
+
+// UpdateRawData sets the "raw_data" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateRawData() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateRawData()
+	})
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (u *FieldTypeUpsertOne) ClearRawData() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearRawData()
+	})
+}
+
 // SetIP sets the "ip" field.
 func (u *FieldTypeUpsertOne) SetIP(v net.IP) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -3922,9 +3982,9 @@ func (ftcb *FieldTypeCreateBulk) OnConflict(opts ...sql.ConflictOption) *FieldTy
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (ftcb *FieldTypeCreateBulk) OnConflictColumns(columns ...string) *FieldTypeUpsertBulk {
 	ftcb.conflict = append(ftcb.conflict, sql.ConflictColumns(columns...))
@@ -3942,9 +4002,11 @@ type FieldTypeUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *FieldTypeUpsertBulk) UpdateNewValues() *FieldTypeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -3954,9 +4016,9 @@ func (u *FieldTypeUpsertBulk) UpdateNewValues() *FieldTypeUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.FieldType.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.FieldType.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *FieldTypeUpsertBulk) Ignore() *FieldTypeUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
@@ -4816,6 +4878,27 @@ func (u *FieldTypeUpsertBulk) UpdateDeletedAt() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) ClearDeletedAt() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearDeletedAt()
+	})
+}
+
+// SetRawData sets the "raw_data" field.
+func (u *FieldTypeUpsertBulk) SetRawData(v []byte) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetRawData(v)
+	})
+}
+
+// UpdateRawData sets the "raw_data" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateRawData() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateRawData()
+	})
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (u *FieldTypeUpsertBulk) ClearRawData() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearRawData()
 	})
 }
 

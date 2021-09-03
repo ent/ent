@@ -13,13 +13,20 @@ go generate ./...
 
 ```
 docker-compose -f compose/docker-compose.yaml up -d --scale gremlin=0
-go test 
+go test .
+```
+
+In order to run the Gremlin tests, run:
+
+```
+docker-compose -f compose/docker-compose.yaml up -d gremlin
+go test ./gremlin/...
 ```
 
 Use the `-run` flag for running specific test or set of tests. For example:
+
 ```
 go test -run=MySQL
 
 go test -run=SQLite/Sanity
 ```
-

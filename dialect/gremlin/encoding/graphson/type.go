@@ -5,13 +5,13 @@
 package graphson
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/modern-go/reflect2"
-	"github.com/pkg/errors"
 )
 
 // A Type is a graphson type.
@@ -45,7 +45,7 @@ func (typ Type) String() string {
 // CheckType implements typeChecker interface.
 func (typ Type) CheckType(other Type) error {
 	if typ != other {
-		return errors.Errorf("expect type %s, but found %s", typ, other)
+		return fmt.Errorf("expect type %s, but found %s", typ, other)
 	}
 	return nil
 }
@@ -80,7 +80,7 @@ func (types Types) String() string {
 // CheckType implements typeChecker interface.
 func (types Types) CheckType(typ Type) error {
 	if !types.Contains(typ) {
-		return errors.Errorf("expect any of %s, but found %s", types, typ)
+		return fmt.Errorf("expect any of %s, but found %s", types, typ)
 	}
 	return nil
 }

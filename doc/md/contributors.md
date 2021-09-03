@@ -37,7 +37,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/idoshveki"><img src="https://avatars.githubusercontent.com/u/11615669?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ido shveki</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=idoshveki" title="Code">💻</a></td>
   </tr>
   <tr>
-    <td align="center"><a href="https://github.com/masseelch"><img src="https://avatars.githubusercontent.com/u/12862103?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jannik C</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=masseelch" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/masseelch"><img src="https://avatars.githubusercontent.com/u/12862103?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MasseElch</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=masseelch" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/kidlj"><img src="https://avatars.githubusercontent.com/u/300616?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jian Li</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=kidlj" title="Code">💻</a></td>
     <td align="center"><a href="https://noah.je/"><img src="https://avatars.githubusercontent.com/u/5778728?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Noah-Jerome Lotzer</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=nolotz" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/danf0rth"><img src="https://avatars.githubusercontent.com/u/14220891?v=4?s=100" width="100px;" alt=""/><br /><sub><b>danforth</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=danf0rth" title="Code">💻</a></td>
@@ -74,6 +74,10 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://ie.linkedin.com/in/boris-shomodjvarac-51970879"><img src="https://avatars.githubusercontent.com/u/304768?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Boris Shomodjvarac</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=shomodj" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/sadmansakib"><img src="https://avatars.githubusercontent.com/u/17023844?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sadman Sakib</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=sadmansakib" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/dakimura"><img src="https://avatars.githubusercontent.com/u/34202807?v=4?s=100" width="100px;" alt=""/><br /><sub><b>dakimura</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=dakimura" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/RiskyFeryansyahP"><img src="https://avatars.githubusercontent.com/u/36788585?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Risky Feryansyah</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=RiskyFeryansyahP" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/seiichi1101"><img src="https://avatars.githubusercontent.com/u/20941952?v=4?s=100" width="100px;" alt=""/><br /><sub><b>seiichi </b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=seiichi1101" title="Code">💻</a></td>
   </tr>
 </table>
 

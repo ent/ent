@@ -112,6 +112,7 @@ var (
 		{Name: "null_active", Type: field.TypeBool, Nullable: true},
 		{Name: "deleted", Type: field.TypeBool, Nullable: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "raw_data", Type: field.TypeBytes, Nullable: true, Size: 20},
 		{Name: "ip", Type: field.TypeBytes, Nullable: true},
 		{Name: "null_int64", Type: field.TypeInt, Nullable: true},
 		{Name: "schema_int", Type: field.TypeInt, Nullable: true},
@@ -141,7 +142,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "field_types_files_field",
-				Columns:    []*schema.Column{FieldTypesColumns[62]},
+				Columns:    []*schema.Column{FieldTypesColumns[63]},
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -274,6 +275,7 @@ var (
 	// ItemsColumns holds the columns for the "items" table.
 	ItemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Size: 64},
+		{Name: "text", Type: field.TypeString, Unique: true, Nullable: true, Size: 128},
 	}
 	// ItemsTable holds the schema information for the "items" table.
 	ItemsTable = &schema.Table{

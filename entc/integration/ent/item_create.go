@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/item"
@@ -25,9 +26,31 @@ type ItemCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetText sets the "text" field.
+func (ic *ItemCreate) SetText(s string) *ItemCreate {
+	ic.mutation.SetText(s)
+	return ic
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ic *ItemCreate) SetNillableText(s *string) *ItemCreate {
+	if s != nil {
+		ic.SetText(*s)
+	}
+	return ic
+}
+
 // SetID sets the "id" field.
 func (ic *ItemCreate) SetID(s string) *ItemCreate {
 	ic.mutation.SetID(s)
+	return ic
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ic *ItemCreate) SetNillableID(s *string) *ItemCreate {
+	if s != nil {
+		ic.SetID(*s)
+	}
 	return ic
 }
 
@@ -42,6 +65,7 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 		err  error
 		node *Item
 	)
+	ic.defaults()
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err
@@ -99,8 +123,21 @@ func (ic *ItemCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ic *ItemCreate) defaults() {
+	if _, ok := ic.mutation.ID(); !ok {
+		v := item.DefaultID()
+		ic.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ic *ItemCreate) check() error {
+	if v, ok := ic.mutation.Text(); ok {
+		if err := item.TextValidator(v); err != nil {
+			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "text": %w`, err)}
+		}
+	}
 	if v, ok := ic.mutation.ID(); ok {
 		if err := item.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
@@ -116,6 +153,9 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
+	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(string)
 	}
 	return _node, nil
 }
@@ -136,6 +176,14 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
+	if value, ok := ic.mutation.Text(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: item.FieldText,
+		})
+		_node.Text = value
+	}
 	return _node, _spec
 }
 
@@ -143,11 +191,17 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Item.Create().
+//		SetText(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ItemUpsert) {
+//			SetText(v+v).
+//		}).
 //		Exec(ctx)
 //
 func (ic *ItemCreate) OnConflict(opts ...sql.ConflictOption) *ItemUpsertOne {
@@ -160,9 +214,9 @@ func (ic *ItemCreate) OnConflict(opts ...sql.ConflictOption) *ItemUpsertOne {
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Item.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Item.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (ic *ItemCreate) OnConflictColumns(columns ...string) *ItemUpsertOne {
 	ic.conflict = append(ic.conflict, sql.ConflictColumns(columns...))
@@ -184,15 +238,43 @@ type (
 	}
 )
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// SetText sets the "text" field.
+func (u *ItemUpsert) SetText(v string) *ItemUpsert {
+	u.Set(item.FieldText, v)
+	return u
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *ItemUpsert) UpdateText() *ItemUpsert {
+	u.SetExcluded(item.FieldText)
+	return u
+}
+
+// ClearText clears the value of the "text" field.
+func (u *ItemUpsert) ClearText() *ItemUpsert {
+	u.SetNull(item.FieldText)
+	return u
+}
+
+// UpdateNewValues updates the fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
 //
-//  client.Item.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Item.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(item.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
 //
 func (u *ItemUpsertOne) UpdateNewValues() *ItemUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(item.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -224,6 +306,27 @@ func (u *ItemUpsertOne) Update(set func(*ItemUpsert)) *ItemUpsertOne {
 	return u
 }
 
+// SetText sets the "text" field.
+func (u *ItemUpsertOne) SetText(v string) *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *ItemUpsertOne) UpdateText() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateText()
+	})
+}
+
+// ClearText clears the value of the "text" field.
+func (u *ItemUpsertOne) ClearText() *ItemUpsertOne {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearText()
+	})
+}
+
 // Exec executes the query.
 func (u *ItemUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -241,6 +344,11 @@ func (u *ItemUpsertOne) ExecX(ctx context.Context) {
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
 func (u *ItemUpsertOne) ID(ctx context.Context) (id string, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: ItemUpsertOne.ID is not supported by MySQL driver. Use ItemUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -272,6 +380,7 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 	for i := range icb.builders {
 		func(i int, root context.Context) {
 			builder := icb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ItemMutation)
 				if !ok {
@@ -347,6 +456,11 @@ func (icb *ItemCreateBulk) ExecX(ctx context.Context) {
 //			// the was proposed for insertion.
 //			sql.ResolveWithNewValues(),
 //		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ItemUpsert) {
+//			SetText(v+v).
+//		}).
 //		Exec(ctx)
 //
 func (icb *ItemCreateBulk) OnConflict(opts ...sql.ConflictOption) *ItemUpsertBulk {
@@ -359,9 +473,9 @@ func (icb *ItemCreateBulk) OnConflict(opts ...sql.ConflictOption) *ItemUpsertBul
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Item.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Item.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (icb *ItemCreateBulk) OnConflictColumns(columns ...string) *ItemUpsertBulk {
 	icb.conflict = append(icb.conflict, sql.ConflictColumns(columns...))
@@ -379,21 +493,34 @@ type ItemUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.Item.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Item.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(item.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
 //
 func (u *ItemUpsertBulk) UpdateNewValues() *ItemUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(item.FieldID)
+				return
+			}
+		}
+	}))
 	return u
 }
 
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Item.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.Item.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *ItemUpsertBulk) Ignore() *ItemUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
@@ -414,6 +541,27 @@ func (u *ItemUpsertBulk) Update(set func(*ItemUpsert)) *ItemUpsertBulk {
 		set(&ItemUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetText sets the "text" field.
+func (u *ItemUpsertBulk) SetText(v string) *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *ItemUpsertBulk) UpdateText() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.UpdateText()
+	})
+}
+
+// ClearText clears the value of the "text" field.
+func (u *ItemUpsertBulk) ClearText() *ItemUpsertBulk {
+	return u.Update(func(s *ItemUpsert) {
+		s.ClearText()
+	})
 }
 
 // Exec executes the query.

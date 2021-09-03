@@ -14,6 +14,7 @@ package sql
 import (
 	"context"
 	"database/sql/driver"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -833,7 +834,7 @@ func ResolveWithIgnore() ConflictOption {
 	return func(c *conflict) {
 		c.action.update = append(c.action.update, func(u *UpdateSet) {
 			for _, c := range u.columns {
-				u.Set(c, Expr(u.Table().C(c)))
+				u.SetIgnore(c)
 			}
 		})
 	}
@@ -871,9 +872,10 @@ func ResolveWithNewValues() ConflictOption {
 //		Values(1, "Mashraki").
 //		OnConflict(
 //			ConflictColumns("name"),
-//			ResolveWith(func(s *UpdateSet) {
-//				s.SetNull("created_at")
-//				s.Set("name", Expr(s.Excluded().C("name")))
+//			ResolveWith(func(u *UpdateSet) {
+//				u.SetIgnore("id")
+//				u.SetNull("created_at")
+//				u.Set("name", Expr(u.Excluded().C("name")))
 //			}),
 //		)
 //
@@ -938,6 +940,11 @@ func (u *UpdateSet) SetNull(column string) *UpdateSet {
 	return u
 }
 
+// SetIgnore sets the column to itself. For example, "id" = "users"."id".
+func (u *UpdateSet) SetIgnore(name string) *UpdateSet {
+	return u.Set(name, Expr(u.Table().C(name)))
+}
+
 // SetExcluded sets the column name to its EXCLUDED/VALUES value.
 // For example, "c" = "excluded"."c", or `c` = VALUES(`c`).
 func (u *UpdateSet) SetExcluded(name string) *UpdateSet {
@@ -973,7 +980,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 	if i.conflict != nil {
 		i.writeConflict()
 	}
-	if len(i.returning) > 0 && i.postgres() {
+	if len(i.returning) > 0 && !i.mysql() {
 		i.WriteString(" RETURNING ")
 		i.IdentComma(i.returning...)
 	}
@@ -1014,6 +1021,9 @@ func (i *InsertBuilder) writeConflict() {
 			return
 		}
 		i.WriteString(" DO UPDATE SET ")
+	}
+	if len(i.conflict.action.update) == 0 {
+		i.AddError(errors.New("missing action for 'DO UPDATE SET' clause"))
 	}
 	u := &UpdateSet{table: i.table, columns: i.columns, update: &UpdateBuilder{}}
 	u.update.Builder = i.Builder
@@ -1275,7 +1285,13 @@ func (p *Predicate) Not() *Predicate {
 	})
 }
 
-func (p *Predicate) columnsOp(col1, col2 string, op Op) *Predicate {
+// ColumnsOp returns a new predicate between 2 columns.
+func ColumnsOp(col1, col2 string, op Op) *Predicate {
+	return P().ColumnsOp(col1, col2, op)
+}
+
+// ColumnsOp appends the given predicate between 2 columns.
+func (p *Predicate) ColumnsOp(col1, col2 string, op Op) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col1)
 		b.WriteOp(op)
@@ -1306,13 +1322,13 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsEQ appends a "=" predicate between 2 columns.
-func ColumnsEQ(col1 string, col2 string) *Predicate {
+func ColumnsEQ(col1, col2 string) *Predicate {
 	return P().ColumnsEQ(col1, col2)
 }
 
 // ColumnsEQ appends a "=" predicate between 2 columns.
-func (p *Predicate) ColumnsEQ(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpEQ)
+func (p *Predicate) ColumnsEQ(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpEQ)
 }
 
 // NEQ returns a "<>" predicate.
@@ -1330,13 +1346,13 @@ func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsNEQ appends a "<>" predicate between 2 columns.
-func ColumnsNEQ(col1 string, col2 string) *Predicate {
+func ColumnsNEQ(col1, col2 string) *Predicate {
 	return P().ColumnsNEQ(col1, col2)
 }
 
 // ColumnsNEQ appends a "<>" predicate between 2 columns.
-func (p *Predicate) ColumnsNEQ(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpNEQ)
+func (p *Predicate) ColumnsNEQ(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpNEQ)
 }
 
 // LT returns a "<" predicate.
@@ -1354,13 +1370,13 @@ func (p *Predicate) LT(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsLT appends a "<" predicate between 2 columns.
-func ColumnsLT(col1 string, col2 string) *Predicate {
+func ColumnsLT(col1, col2 string) *Predicate {
 	return P().ColumnsLT(col1, col2)
 }
 
 // ColumnsLT appends a "<" predicate between 2 columns.
-func (p *Predicate) ColumnsLT(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpLT)
+func (p *Predicate) ColumnsLT(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpLT)
 }
 
 // LTE returns a "<=" predicate.
@@ -1378,13 +1394,13 @@ func (p *Predicate) LTE(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsLTE appends a "<=" predicate between 2 columns.
-func ColumnsLTE(col1 string, col2 string) *Predicate {
+func ColumnsLTE(col1, col2 string) *Predicate {
 	return P().ColumnsLTE(col1, col2)
 }
 
 // ColumnsLTE appends a "<=" predicate between 2 columns.
-func (p *Predicate) ColumnsLTE(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpLTE)
+func (p *Predicate) ColumnsLTE(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpLTE)
 }
 
 // GT returns a ">" predicate.
@@ -1402,13 +1418,13 @@ func (p *Predicate) GT(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsGT appends a ">" predicate between 2 columns.
-func ColumnsGT(col1 string, col2 string) *Predicate {
+func ColumnsGT(col1, col2 string) *Predicate {
 	return P().ColumnsGT(col1, col2)
 }
 
 // ColumnsGT appends a ">" predicate between 2 columns.
-func (p *Predicate) ColumnsGT(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpGT)
+func (p *Predicate) ColumnsGT(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpGT)
 }
 
 // GTE returns a ">=" predicate.
@@ -1426,13 +1442,13 @@ func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 }
 
 // ColumnsGTE appends a ">=" predicate between 2 columns.
-func ColumnsGTE(col1 string, col2 string) *Predicate {
+func ColumnsGTE(col1, col2 string) *Predicate {
 	return P().ColumnsGTE(col1, col2)
 }
 
 // ColumnsGTE appends a ">=" predicate between 2 columns.
-func (p *Predicate) ColumnsGTE(col1 string, col2 string) *Predicate {
-	return p.columnsOp(col1, col2, OpGTE)
+func (p *Predicate) ColumnsGTE(col1, col2 string) *Predicate {
+	return p.ColumnsOp(col1, col2, OpGTE)
 }
 
 // NotNull returns the `IS NOT NULL` predicate.
@@ -2347,6 +2363,9 @@ func WithLockClause(clause string) LockOption {
 // For sets the lock configuration for suffixing the `SELECT`
 // statement with the `FOR [SHARE | UPDATE] ...` clause.
 func (s *Selector) For(l LockStrength, opts ...LockOption) *Selector {
+	if s.Dialect() == dialect.SQLite {
+		s.AddError(errors.New("sql: SELECT .. FOR UPDATE/SHARE not supported in SQLite"))
+	}
 	s.lock = &LockOptions{Strength: l}
 	for _, opt := range opts {
 		opt(s.lock)
@@ -3095,6 +3114,11 @@ func (b Builder) clone() Builder {
 // postgres reports if the builder dialect is PostgreSQL.
 func (b Builder) postgres() bool {
 	return b.Dialect() == dialect.Postgres
+}
+
+// mysql reports if the builder dialect is MySQL.
+func (b Builder) mysql() bool {
+	return b.Dialect() == dialect.MySQL
 }
 
 // fromIdent sets the builder dialect from the identifier format.

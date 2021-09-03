@@ -5,7 +5,6 @@
 package gen
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -164,7 +163,7 @@ func remove(dir, file string) error {
 		}
 		return err
 	}
-	infos, err := ioutil.ReadDir(dir)
+	infos, err := os.ReadDir(dir)
 	if err != nil {
 		return err
 	}

@@ -209,9 +209,9 @@ func (cc *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOn
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Comment.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Comment.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (cc *CommentCreate) OnConflictColumns(columns ...string) *CommentUpsertOne {
 	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
@@ -275,12 +275,14 @@ func (u *CommentUpsert) ClearNillableInt() *CommentUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that
-// were set on create. Using this option is equivalent to using:
+// UpdateNewValues updates the fields using the new values that were set on create.
+// Using this option is equivalent to using:
 //
-//  client.Comment.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Comment.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *CommentUpsertOne) UpdateNewValues() *CommentUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -508,9 +510,9 @@ func (ccb *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUps
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//  client.Comment.Create().
-//      OnConflict(sql.ConflictColumns(columns...)).
-//      Exec(ctx)
+//	client.Comment.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
 //
 func (ccb *CommentCreateBulk) OnConflictColumns(columns ...string) *CommentUpsertBulk {
 	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
@@ -528,9 +530,11 @@ type CommentUpsertBulk struct {
 // UpdateNewValues updates the fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//  client.Comment.Create().
-//      OnConflict(sql.ResolveWithNewValues()).
-//      Exec(ctx)
+//	client.Comment.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
 //
 func (u *CommentUpsertBulk) UpdateNewValues() *CommentUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
@@ -540,9 +544,9 @@ func (u *CommentUpsertBulk) UpdateNewValues() *CommentUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Comment.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
+//	client.Comment.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
 //
 func (u *CommentUpsertBulk) Ignore() *CommentUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())

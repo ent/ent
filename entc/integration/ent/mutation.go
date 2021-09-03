@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
+	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
@@ -1376,6 +1377,7 @@ type FieldTypeMutation struct {
 	null_active                *schema.Status
 	deleted                    **sql.NullBool
 	deleted_at                 **sql.NullTime
+	raw_data                   *[]byte
 	ip                         *net.IP
 	null_int64                 **sql.NullInt64
 	schema_int                 *schema.Int
@@ -3986,6 +3988,55 @@ func (m *FieldTypeMutation) ResetDeletedAt() {
 	delete(m.clearedFields, fieldtype.FieldDeletedAt)
 }
 
+// SetRawData sets the "raw_data" field.
+func (m *FieldTypeMutation) SetRawData(b []byte) {
+	m.raw_data = &b
+}
+
+// RawData returns the value of the "raw_data" field in the mutation.
+func (m *FieldTypeMutation) RawData() (r []byte, exists bool) {
+	v := m.raw_data
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRawData returns the old "raw_data" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldRawData(ctx context.Context) (v []byte, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldRawData is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldRawData requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRawData: %w", err)
+	}
+	return oldValue.RawData, nil
+}
+
+// ClearRawData clears the value of the "raw_data" field.
+func (m *FieldTypeMutation) ClearRawData() {
+	m.raw_data = nil
+	m.clearedFields[fieldtype.FieldRawData] = struct{}{}
+}
+
+// RawDataCleared returns if the "raw_data" field was cleared in this mutation.
+func (m *FieldTypeMutation) RawDataCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldRawData]
+	return ok
+}
+
+// ResetRawData resets all changes to the "raw_data" field.
+func (m *FieldTypeMutation) ResetRawData() {
+	m.raw_data = nil
+	delete(m.clearedFields, fieldtype.FieldRawData)
+}
+
 // SetIP sets the "ip" field.
 func (m *FieldTypeMutation) SetIP(n net.IP) {
 	m.ip = &n
@@ -5010,7 +5061,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 61)
+	fields := make([]string, 0, 62)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -5136,6 +5187,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, fieldtype.FieldDeletedAt)
+	}
+	if m.raw_data != nil {
+		fields = append(fields, fieldtype.FieldRawData)
 	}
 	if m.ip != nil {
 		fields = append(fields, fieldtype.FieldIP)
@@ -5286,6 +5340,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Deleted()
 	case fieldtype.FieldDeletedAt:
 		return m.DeletedAt()
+	case fieldtype.FieldRawData:
+		return m.RawData()
 	case fieldtype.FieldIP:
 		return m.IP()
 	case fieldtype.FieldNullInt64:
@@ -5417,6 +5473,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldDeleted(ctx)
 	case fieldtype.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case fieldtype.FieldRawData:
+		return m.OldRawData(ctx)
 	case fieldtype.FieldIP:
 		return m.OldIP(ctx)
 	case fieldtype.FieldNullInt64:
@@ -5757,6 +5815,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
+		return nil
+	case fieldtype.FieldRawData:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRawData(v)
 		return nil
 	case fieldtype.FieldIP:
 		v, ok := value.(net.IP)
@@ -6404,6 +6469,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldDeletedAt) {
 		fields = append(fields, fieldtype.FieldDeletedAt)
 	}
+	if m.FieldCleared(fieldtype.FieldRawData) {
+		fields = append(fields, fieldtype.FieldRawData)
+	}
 	if m.FieldCleared(fieldtype.FieldIP) {
 		fields = append(fields, fieldtype.FieldIP)
 	}
@@ -6570,6 +6638,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldDeletedAt:
 		m.ClearDeletedAt()
+		return nil
+	case fieldtype.FieldRawData:
+		m.ClearRawData()
 		return nil
 	case fieldtype.FieldIP:
 		m.ClearIP()
@@ -6749,6 +6820,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldDeletedAt:
 		m.ResetDeletedAt()
+		return nil
+	case fieldtype.FieldRawData:
+		m.ResetRawData()
 		return nil
 	case fieldtype.FieldIP:
 		m.ResetIP()
@@ -9782,6 +9856,7 @@ type ItemMutation struct {
 	op            Op
 	typ           string
 	id            *string
+	text          *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Item, error)
@@ -9873,6 +9948,55 @@ func (m *ItemMutation) ID() (id string, exists bool) {
 	return *m.id, true
 }
 
+// SetText sets the "text" field.
+func (m *ItemMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *ItemMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the Item entity.
+// If the Item object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ItemMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ClearText clears the value of the "text" field.
+func (m *ItemMutation) ClearText() {
+	m.text = nil
+	m.clearedFields[item.FieldText] = struct{}{}
+}
+
+// TextCleared returns if the "text" field was cleared in this mutation.
+func (m *ItemMutation) TextCleared() bool {
+	_, ok := m.clearedFields[item.FieldText]
+	return ok
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *ItemMutation) ResetText() {
+	m.text = nil
+	delete(m.clearedFields, item.FieldText)
+}
+
 // Where appends a list predicates to the ItemMutation builder.
 func (m *ItemMutation) Where(ps ...predicate.Item) {
 	m.predicates = append(m.predicates, ps...)
@@ -9892,7 +10016,10 @@ func (m *ItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ItemMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 1)
+	if m.text != nil {
+		fields = append(fields, item.FieldText)
+	}
 	return fields
 }
 
@@ -9900,6 +10027,10 @@ func (m *ItemMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *ItemMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case item.FieldText:
+		return m.Text()
+	}
 	return nil, false
 }
 
@@ -9907,6 +10038,10 @@ func (m *ItemMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case item.FieldText:
+		return m.OldText(ctx)
+	}
 	return nil, fmt.Errorf("unknown Item field %s", name)
 }
 
@@ -9915,6 +10050,13 @@ func (m *ItemMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *ItemMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case item.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Item field %s", name)
 }
@@ -9936,13 +10078,19 @@ func (m *ItemMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *ItemMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Item numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ItemMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(item.FieldText) {
+		fields = append(fields, item.FieldText)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -9955,12 +10103,22 @@ func (m *ItemMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ItemMutation) ClearField(name string) error {
+	switch name {
+	case item.FieldText:
+		m.ClearText()
+		return nil
+	}
 	return fmt.Errorf("unknown Item nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *ItemMutation) ResetField(name string) error {
+	switch name {
+	case item.FieldText:
+		m.ResetText()
+		return nil
+	}
 	return fmt.Errorf("unknown Item field %s", name)
 }
 

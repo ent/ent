@@ -119,6 +119,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldNullActive:            {Type: field.TypeBool, Column: fieldtype.FieldNullActive},
 			fieldtype.FieldDeleted:               {Type: field.TypeBool, Column: fieldtype.FieldDeleted},
 			fieldtype.FieldDeletedAt:             {Type: field.TypeTime, Column: fieldtype.FieldDeletedAt},
+			fieldtype.FieldRawData:               {Type: field.TypeBytes, Column: fieldtype.FieldRawData},
 			fieldtype.FieldIP:                    {Type: field.TypeBytes, Column: fieldtype.FieldIP},
 			fieldtype.FieldNullInt64:             {Type: field.TypeInt, Column: fieldtype.FieldNullInt64},
 			fieldtype.FieldSchemaInt:             {Type: field.TypeInt, Column: fieldtype.FieldSchemaInt},
@@ -228,8 +229,10 @@ var schemaGraph = func() *sqlgraph.Schema {
 				Column: item.FieldID,
 			},
 		},
-		Type:   "Item",
-		Fields: map[string]*sqlgraph.FieldSpec{},
+		Type: "Item",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			item.FieldText: {Type: field.TypeString, Column: item.FieldText},
+		},
 	}
 	graph.Nodes[9] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
@@ -1038,6 +1041,11 @@ func (f *FieldTypeFilter) WhereDeletedAt(p entql.TimeP) {
 	f.Where(p.Field(fieldtype.FieldDeletedAt))
 }
 
+// WhereRawData applies the entql []byte predicate on the raw_data field.
+func (f *FieldTypeFilter) WhereRawData(p entql.BytesP) {
+	f.Where(p.Field(fieldtype.FieldRawData))
+}
+
 // WhereIP applies the entql []byte predicate on the ip field.
 func (f *FieldTypeFilter) WhereIP(p entql.BytesP) {
 	f.Where(p.Field(fieldtype.FieldIP))
@@ -1566,6 +1574,11 @@ func (f *ItemFilter) Where(p entql.P) {
 // WhereID applies the entql string predicate on the id field.
 func (f *ItemFilter) WhereID(p entql.StringP) {
 	f.Where(p.Field(item.FieldID))
+}
+
+// WhereText applies the entql string predicate on the text field.
+func (f *ItemFilter) WhereText(p entql.StringP) {
+	f.Where(p.Field(item.FieldText))
 }
 
 // addPredicate implements the predicateAdder interface.

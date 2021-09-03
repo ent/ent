@@ -243,7 +243,7 @@ err := client.User.
 	Create().
 	SetName("Ariel").
 	OnConflictColumns(user.FieldName).
-	UpadteNewValues().
+	UpdateNewValues().
 	Exec(ctx)
 
 // Setting the column names using the SQL API.
@@ -253,7 +253,7 @@ err := client.User.
 	OnConflict(
 	    sql.ConflictColumns(user.FieldName),	
 	).
-	UpadteNewValues().
+	UpdateNewValues().
 	Exec(ctx)
 
 // Setting the constraint name using the SQL API.
@@ -263,7 +263,7 @@ err := client.User.
 	OnConflict(
 	    sql.ConflictConstraint(constraint),	
 	).
-	UpadteNewValues().
+	UpdateNewValues().
 	Exec(ctx)
 ```
 
@@ -298,7 +298,7 @@ for such operations.
 err := client.User.             // UserClient
 	CreateBulk(builders...).    // User bulk create.
 	OnConflict().               // User bulk upsert.
-	UpadteNewValues().          // Use the values that were set on create in case of conflict.
+	UpdateNewValues().          // Use the values that were set on create in case of conflict.
 	Exec(ctx)                   // Execute the statement.
 ```
 

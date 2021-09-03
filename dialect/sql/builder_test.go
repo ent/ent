@@ -1667,6 +1667,14 @@ func TestSelectWithLock(t *testing.T) {
 		Query()
 	require.Equal(t, "SELECT * FROM `users` WHERE `id` = ? LOCK IN SHARE MODE", query)
 	require.Equal(t, 20, args[0])
+
+	s := Dialect(dialect.SQLite).
+		Select().
+		From(Table("users")).
+		Where(EQ("id", 1)).
+		ForUpdate()
+	s.Query()
+	require.EqualError(t, s.Err(), "sql: SELECT .. FOR UPDATE/SHARE not supported in SQLite")
 }
 
 func TestSelector_UnionOrderBy(t *testing.T) {
@@ -1709,10 +1717,14 @@ func TestInsert_OnConflict(t *testing.T) {
 				ConflictColumns("email"),
 				ConflictWhere(EQ("name", "Ariel")),
 				ResolveWithNewValues(),
+				// Update all new values excepts id field.
+				ResolveWith(func(u *UpdateSet) {
+					u.SetIgnore("id")
+				}),
 				UpdateWhere(NEQ("updated_at", 0)),
 			).
 			Query()
-		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "excluded"."id", "email" = "excluded"."email" WHERE "updated_at" <> $4`, query)
+		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email" WHERE "updated_at" <> $4`, query)
 		require.Equal(t, []interface{}{"1", "user@example.com", "Ariel", 0}, args)
 
 		query, args = Dialect(dialect.Postgres).

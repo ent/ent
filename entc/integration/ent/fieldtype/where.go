@@ -393,6 +393,13 @@ func DeletedAt(v *sql.NullTime) predicate.FieldType {
 	})
 }
 
+// RawData applies equality check predicate on the "raw_data" field. It's identical to RawDataEQ.
+func RawData(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRawData), v))
+	})
+}
+
 // IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
 func IP(v net.IP) predicate.FieldType {
 	vc := []byte(v)
@@ -4367,6 +4374,96 @@ func DeletedAtIsNil() predicate.FieldType {
 func DeletedAtNotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldDeletedAt)))
+	})
+}
+
+// RawDataEQ applies the EQ predicate on the "raw_data" field.
+func RawDataEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataNEQ applies the NEQ predicate on the "raw_data" field.
+func RawDataNEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataIn applies the In predicate on the "raw_data" field.
+func RawDataIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldRawData), v...))
+	})
+}
+
+// RawDataNotIn applies the NotIn predicate on the "raw_data" field.
+func RawDataNotIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldRawData), v...))
+	})
+}
+
+// RawDataGT applies the GT predicate on the "raw_data" field.
+func RawDataGT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataGTE applies the GTE predicate on the "raw_data" field.
+func RawDataGTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataLT applies the LT predicate on the "raw_data" field.
+func RawDataLT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataLTE applies the LTE predicate on the "raw_data" field.
+func RawDataLTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRawData), v))
+	})
+}
+
+// RawDataIsNil applies the IsNil predicate on the "raw_data" field.
+func RawDataIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldRawData)))
+	})
+}
+
+// RawDataNotNil applies the NotNil predicate on the "raw_data" field.
+func RawDataNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldRawData)))
 	})
 }
 

@@ -381,6 +381,11 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`entv2: missing required field "title"`)}
 	}
+	if v, ok := uc.mutation.Blob(); ok {
+		if err := user.BlobValidator(v); err != nil {
+			return &ValidationError{Name: "blob", err: fmt.Errorf(`entv2: validator failed for field "blob": %w`, err)}
+		}
+	}
 	if v, ok := uc.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`entv2: validator failed for field "state": %w`, err)}
@@ -405,7 +410,7 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	if _node.ID == 0 {
+	if _spec.ID.Value != _node.ID {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}

@@ -3,7 +3,9 @@
 # in the LICENSE file in the root directory of this source tree.
 
 # Fetch base gremlin server image
-FROM tinkerpop/gremlin-server
+# This version compatible with Amazon Neptune Engine Version 1.0.5.0.
+# https://docs.aws.amazon.com/neptune/latest/userguide/engine-releases-1.0.5.0.html
+FROM tinkerpop/gremlin-server:3.4.11
 
 # Copy overriden server configuration.
 COPY gremlin-server.yaml tinkergraph-empty.properties /opt/gremlin-server/conf/

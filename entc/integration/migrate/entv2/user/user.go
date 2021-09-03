@@ -123,6 +123,8 @@ var (
 	DefaultBuffer func() []byte
 	// DefaultTitle holds the default value on creation for the "title" field.
 	DefaultTitle string
+	// BlobValidator is a validator for the "blob" field. It is called by the builders before save.
+	BlobValidator func([]byte) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )

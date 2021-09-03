@@ -6,11 +6,11 @@ package gremlin
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 // ExpandBindings expands the given RoundTripper and expands the request bindings into the Gremlin traversal.
@@ -35,7 +35,7 @@ func ExpandBindings(rt RoundTripper) RoundTripper {
 			for _, k := range keys {
 				s, err := jsoniter.MarshalToString(bindings[k])
 				if err != nil {
-					return nil, errors.WithMessagef(err, "marshal bindings value for key %s", k)
+					return nil, fmt.Errorf("marshal bindings value for key %s: %w", k, err)
 				}
 				kv = append(kv, k, s)
 			}

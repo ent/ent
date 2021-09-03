@@ -225,16 +225,18 @@ func (e *state) evalBinary(expr *entql.BinaryExpr) *sql.Predicate {
 			_, ok = expr.Y.(*entql.Value)
 		}
 		expect(ok, "expr.Y to be *entql.Field or *entql.Value (got %T)", expr.X)
-		return sql.P(func(b *sql.Builder) {
-			b.Ident(e.field(field))
-			b.WriteOp(binary[expr.Op])
-			switch x := expr.Y.(type) {
-			case *entql.Field:
-				b.Ident(e.field(x))
-			case *entql.Value:
+		switch x := expr.Y.(type) {
+		case *entql.Field:
+			return sql.ColumnsOp(e.field(field), e.field(x), binary[expr.Op])
+		case *entql.Value:
+			c := e.field(field)
+			return sql.P(func(b *sql.Builder) {
+				b.Ident(c).WriteOp(binary[expr.Op])
 				args(b, x)
-			}
-		})
+			})
+		default:
+			panic("unreachable")
+		}
 	}
 }
 

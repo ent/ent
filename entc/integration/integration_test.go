@@ -194,17 +194,17 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.False(client.User.Query().Where(user.HasPetsWith(pet.NameHasPrefix("pan"))).ExistX(ctx))
 	require.Equal(child.Name, client.User.Query().Order(ent.Asc("name")).FirstX(ctx).Name)
 	require.Equal(usr2.Name, client.User.Query().Order(ent.Desc("name")).FirstX(ctx).Name)
-	// update fields.
+	// Update fields.
 	client.User.Update().Where(user.ID(child.ID)).SetName("Ariel").SaveX(ctx)
 	client.User.Query().Where(user.Name("Ariel")).OnlyX(ctx)
-	// update edges.
+	// Update edges.
 	require.Empty(child.QueryPets().AllX(ctx))
 	require.NoError(client.Pet.UpdateOne(pt).ClearOwner().Exec(ctx))
 	client.User.Update().Where(user.ID(child.ID)).AddPets(pt).SaveX(ctx)
 	require.NotEmpty(child.QueryPets().AllX(ctx))
 	client.User.Update().Where(user.ID(child.ID)).RemovePets(pt).SaveX(ctx)
 	require.Empty(child.QueryPets().AllX(ctx))
-	// remove edges.
+	// Remove edges.
 	client.User.Update().ClearSpouse().SaveX(ctx)
 	require.Empty(client.User.Query().Where(user.HasSpouse()).AllX(ctx))
 	client.User.Update().AddFriends(child).RemoveGroups(grp).Where(user.ID(usr.ID)).SaveX(ctx)
@@ -212,16 +212,23 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Empty(usr.QueryGroups().AllX(ctx))
 	require.Len(child.QueryFriends().AllX(ctx), 1)
 	require.Len(usr.QueryFriends().AllX(ctx), 1)
-	// update one vertex.
+	// Update one node.
 	usr = client.User.UpdateOne(usr).SetName("baz").AddGroups(grp).SaveX(ctx)
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(usr.QueryGroups().AllX(ctx))
-	// update unknown vertex.
+	// Update unknown node.
 	err := client.User.UpdateOneID(usr.ID + math.MaxInt8).SetName("foo").Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsNotFound(err))
+	// Update a vertex with filter.
+	u := client.User.UpdateOneID(usr.ID)
+	u.Mutation().Where(user.Name("baz"))
+	require.NoError(u.Exec(ctx))
+	u = client.User.UpdateOneID(usr.ID)
+	u.Mutation().Where(user.Name("bar"))
+	require.Error(u.Exec(ctx))
+	require.True(ent.IsNotFound(err))
 
-	// grouping.
 	var v []struct {
 		Name  string `json:"name"`
 		Age   int    `json:"age"`
@@ -307,9 +314,48 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, "1111", users[1].Phone)
 	require.Equal(t, "B", users[1].Name)
 
-	// Setting primary key.
-	client.Item.Create().SetID("A").SaveX(ctx)
-	client.Item.Create().SetID("A").OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().ExecX(ctx)
+	// Setting primary key manually.
+	a := client.Item.Create().SetID("A").SaveX(ctx)
+	require.Equal(t, "A", a.ID)
+	if strings.Contains(t.Name(), "MySQL") || strings.Contains(t.Name(), "Maria") {
+		// MySQL is skipped since it does not support the RETURNING clause. Maria is skipped
+		// as well, because there's no way to distinguish between MySQL and Maria at runtime.
+		client.Item.Create().SetID("A").OnConflict().Ignore().ExecX(ctx)
+		require.Equal(t, 1, client.Item.Query().CountX(ctx))
+		client.Item.Delete().ExecX(ctx)
+
+		// Primary key is set by a default function.
+		b := client.Item.Create().SetText("hello").SaveX(ctx)
+		require.NotZero(t, b.ID)
+		client.Item.Create().SetID(b.ID).SetText("world").OnConflict().UpdateNewValues().ExecX(ctx)
+		cb := client.Item.Query().OnlyX(ctx)
+		require.Equal(t, cb.ID, b.ID)
+		require.Equal(t, "world", cb.Text)
+	} else {
+		aid := client.Item.Create().SetID("A").OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().IDX(ctx)
+		require.Equal(t, a.ID, aid)
+		client.Item.Delete().ExecX(ctx)
+
+		// Primary key is set by a default function.
+		b := client.Item.Create().SetText("hello").SaveX(ctx)
+		require.NotZero(t, b.ID)
+		bid := client.Item.Create().SetID(b.ID).SetText("hello").OnConflictColumns(item.FieldText).Ignore().IDX(ctx)
+		require.Equal(t, b.ID, bid)
+		bid = client.Item.Create().SetText("hello").OnConflictColumns(item.FieldText).UpdateNewValues().IDX(ctx)
+		require.Equal(t, bid, b.ID)
+		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
+		bid = client.Item.Create().SetID(bid).SetText("world").OnConflictColumns(item.FieldID).UpdateNewValues().IDX(ctx)
+		require.Equal(t, bid, b.ID)
+		b = client.Item.Query().OnlyX(ctx)
+		require.Equal(t, bid, b.ID)
+		require.Equal(t, "world", b.Text)
+
+		client.Item.CreateBulk(client.Item.Create().SetID(bid).SetText("hello")).
+			OnConflictColumns(item.FieldID).
+			Ignore().
+			ExecX(ctx)
+		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
+	}
 }
 
 func Clone(t *testing.T, client *ent.Client) {
@@ -470,6 +516,55 @@ func Select(t *testing.T, client *ent.Client) {
 		}).
 		IntX(ctx)
 	require.Equal(8, n)
+
+	var (
+		p1 []struct {
+			ent.Pet
+			NameLength int `sql:"length"`
+		}
+		p2 = client.Pet.Query().Order(ent.Asc(pet.FieldID)).AllX(ctx)
+	)
+	client.Pet.Query().
+		Order(ent.Asc(pet.FieldID)).
+		Modify(func(s *sql.Selector) {
+			s.AppendSelect("LENGTH(name)")
+		}).
+		ScanX(ctx, &p1)
+	for i := range p2 {
+		require.Equal(p2[i].ID, p1[i].ID)
+		require.Equal(p2[i].Age, p1[i].Age)
+		require.Equal(p2[i].Name, p1[i].Name)
+		require.Equal(len(p1[i].Name), p1[1].NameLength)
+	}
+
+	var (
+		gs []struct {
+			ent.Group
+			UsersCount int `sql:"users_count"`
+		}
+		inf = client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+		hub = client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfo(inf).AddUsers(a8m).SaveX(ctx)
+		lab = client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf).AddUsers(users...).SaveX(ctx)
+	)
+	client.Group.Query().
+		Order(ent.Asc(group.FieldID)).
+		Modify(func(s *sql.Selector) {
+			t := sql.Table(group.UsersTable)
+			s.LeftJoin(t).
+				On(
+					s.C(group.FieldID),
+					t.C(group.UsersPrimaryKey[1]),
+				).
+				// Append the "users_count" column to the selected columns.
+				AppendSelect(
+					sql.As(sql.Count(t.C(group.UsersPrimaryKey[1])), "users_count"),
+				).
+				GroupBy(s.C(group.FieldID))
+		}).
+		ScanX(ctx, &gs)
+	require.Len(gs, 2)
+	require.Equal(hub.QueryUsers().CountX(ctx), gs[0].UsersCount)
+	require.Equal(lab.QueryUsers().CountX(ctx), gs[1].UsersCount)
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
@@ -883,6 +978,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	}
 	client.User.Query().
 		Where(user.IDIn(foo.ID, bar.ID)).
+		Order(ent.Asc(user.FieldID)).
 		GroupBy(user.FieldID, user.FieldName).
 		Aggregate(func(s *sql.Selector) string {
 			// Join with pet table and calculate the

@@ -11,6 +11,8 @@ const (
 	Label = "item"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldText holds the string denoting the text field in the database.
+	FieldText = "text"
 	// Table holds the table name of the item in the database.
 	Table = "items"
 )
@@ -18,6 +20,7 @@ const (
 // Columns holds all SQL columns for item fields.
 var Columns = []string{
 	FieldID,
+	FieldText,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -31,6 +34,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// TextValidator is a validator for the "text" field. It is called by the builders before save.
+	TextValidator func(string) error
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
 	// IDValidator is a validator for the "id" field. It is called by the builders before save.
 	IDValidator func(string) error
 )

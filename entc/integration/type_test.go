@@ -79,6 +79,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetNilPair(&schema.Pair{K: []byte("K"), V: []byte("V")}).
 		SetStringArray([]string{"foo", "bar", "baz"}).
 		SetBigInt(bigint).
+		SetRawData([]byte{1, 2, 3}).
 		SaveX(ctx)
 
 	require.Equal(int8(math.MinInt8), ft.OptionalInt8)
@@ -89,6 +90,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(int16(math.MinInt16), *ft.NillableInt16)
 	require.Equal(int32(math.MinInt32), *ft.NillableInt32)
 	require.Equal(int64(math.MinInt64), *ft.NillableInt64)
+	require.Equal([]byte{1, 2, 3}, ft.RawData)
 	require.Equal(http.Dir("dir"), ft.Dir)
 	require.NotNil(*ft.Ndir)
 	require.Equal(http.Dir("ndir"), *ft.Ndir)
@@ -115,6 +117,24 @@ func Types(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	require.False(exists)
 
+	err = client.FieldType.Create().
+		SetInt(1).
+		SetInt8(8).
+		SetInt16(16).
+		SetInt32(32).
+		SetInt64(64).
+		SetRawData(make([]byte, 40)).
+		Exec(ctx)
+	require.Error(err, "MaxLen validator should reject this operation")
+	err = client.FieldType.Create().
+		SetInt(1).
+		SetInt8(8).
+		SetInt16(16).
+		SetInt32(32).
+		SetInt64(64).
+		SetRawData(make([]byte, 2)).
+		Exec(ctx)
+	require.Error(err, "MinLen validator should reject this operation")
 	ft = ft.Update().
 		SetInt(1).
 		SetInt8(math.MaxInt8).
@@ -178,13 +198,13 @@ func Types(t *testing.T, client *ent.Client) {
 	require.EqualValues(100, ft.Int64, "UpdateDefault sets the value to 100")
 	require.EqualValues(100, ft.Duration, "UpdateDefault sets the value to 100ns")
 
-	_, err = client.Task.CreateBulk(
+	err = client.Task.CreateBulk(
 		client.Task.Create().SetPriority(schema.PriorityLow),
 		client.Task.Create().SetPriority(schema.PriorityMid),
 		client.Task.Create().SetPriority(schema.PriorityHigh),
-	).Save(ctx)
+	).Exec(ctx)
 	require.NoError(err)
-	_, err = client.Task.Create().SetPriority(schema.Priority(10)).Save(ctx)
+	err = client.Task.Create().SetPriority(schema.Priority(10)).Exec(ctx)
 	require.Error(err)
 
 	tasks := client.Task.Query().Order(ent.Asc(task.FieldPriority)).AllX(ctx)

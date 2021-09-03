@@ -44,12 +44,12 @@ func Example_PrivacyTenant() {
 func Do(ctx context.Context, client *ent.Client) error {
 	// Expect operation to fail, because viewer-context
 	// is missing (first mutation rule check).
-	if _, err := client.Tenant.Create().Save(ctx); !errors.Is(err, privacy.Deny) {
+	if err := client.Tenant.Create().Exec(ctx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Deny tenant creation if the viewer is not admin.
 	viewCtx := viewer.NewContext(ctx, viewer.UserViewer{Role: viewer.View})
-	if _, err := client.Tenant.Create().Save(viewCtx); !errors.Is(err, privacy.Deny) {
+	if err := client.Tenant.Create().Exec(viewCtx); !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, but got %w", err)
 	}
 	// Apply the same operation with "Admin" role, expect it to pass.
@@ -87,11 +87,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 
 	// Expect operation to fail, because the DenyMismatchedTenants rule makes sure
 	// the group and the users are connected to the same tenant.
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser).Save(adminCtx)
+	err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser).Exec(adminCtx)
 	if !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since user (nati) is not connected to the same tenant")
 	}
-	_, err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser, hubUser).Save(adminCtx)
+	err = client.Group.Create().SetName("entgo.io").SetTenant(hub).AddUsers(labUser, hubUser).Exec(adminCtx)
 	if !errors.Is(err, privacy.Deny) {
 		return fmt.Errorf("expect operation to fail, since some users (nati) are not connected to the same tenant")
 	}

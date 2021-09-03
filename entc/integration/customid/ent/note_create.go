@@ -180,6 +180,9 @@ func (nc *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
 		}
 		return nil, err
 	}
+	if _spec.ID.Value != nil {
+		_node.ID = _spec.ID.Value.(schema.NoteID)
+	}
 	return _node, nil
 }
 

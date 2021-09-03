@@ -204,7 +204,7 @@
     },
     {
       "login": "masseelch",
-      "name": "Jannik C",
+      "name": "MasseElch",
       "avatar_url": "https://avatars.githubusercontent.com/u/12862103?v=4",
       "profile": "https://github.com/masseelch",
       "contributions": [
@@ -463,6 +463,42 @@
       "profile": "https://ie.linkedin.com/in/boris-shomodjvarac-51970879",
       "contributions": [
         "doc"
+      ]
+    },
+    {
+      "login": "sadmansakib",
+      "name": "Sadman Sakib",
+      "avatar_url": "https://avatars.githubusercontent.com/u/17023844?v=4",
+      "profile": "https://github.com/sadmansakib",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "dakimura",
+      "name": "dakimura",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34202807?v=4",
+      "profile": "https://github.com/dakimura",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "RiskyFeryansyahP",
+      "name": "Risky Feryansyah",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36788585?v=4",
+      "profile": "https://github.com/RiskyFeryansyahP",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "seiichi1101",
+      "name": "seiichi ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20941952?v=4",
+      "profile": "https://github.com/seiichi1101",
+      "contributions": [
+        "code"
       ]
     }
   ],

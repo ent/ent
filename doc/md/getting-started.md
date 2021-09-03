@@ -17,15 +17,6 @@ and maintain applications with large data-models and sticks with the following p
 
 ![gopher-schema-as-code](https://entgo.io/images/assets/gopher-schema-as-code.png)
 
-## Installation
-
-```console
-go get entgo.io/ent/cmd/ent
-```
-
-After installing `ent` codegen tool, you should have it in your `PATH`.
-If you don't find it your path, you can also run: `go run entgo.io/ent/cmd/ent <command>`
-
 ## Setup A Go Environment
 
 If your project directory is outside [GOPATH](https://github.com/golang/go/wiki/GOPATH) or you are not familiar with
@@ -34,6 +25,15 @@ GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-star
 ```console
 go mod init <project>
 ```
+
+## Installation
+
+```console
+go get entgo.io/ent/cmd/ent
+```
+
+After installing `ent` codegen tool, you should have it in your `PATH`.
+If you don't find it your path, you can also run: `go run entgo.io/ent/cmd/ent <command>`
 
 ## Create Your First Schema
 
@@ -452,47 +452,47 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 		return err
 	}
 	// Then, create the cars, and attach them to the users in the creation.
-	_, err = client.Car.
+	err = client.Car.
 		Create().
 		SetModel("Tesla").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(a8m).               // attach this graph to Ariel.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Car.
+	err = client.Car.
 		Create().
 		SetModel("Mazda").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(a8m).               // attach this graph to Ariel.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Car.
+	err = client.Car.
 		Create().
 		SetModel("Ford").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(neta).              // attach this graph to Neta.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
 	// Create the groups, and add their users in the creation.
-	_, err = client.Group.
+	err = client.Group.
 		Create().
 		SetName("GitLab").
 		AddUsers(neta, a8m).
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Group.
+	err = client.Group.
 		Create().
 		SetName("GitHub").
 		AddUsers(a8m).
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}

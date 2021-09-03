@@ -12,7 +12,9 @@ import (
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
 )
 
@@ -23,9 +25,31 @@ type ItemCreate struct {
 	hooks    []Hook
 }
 
+// SetText sets the "text" field.
+func (ic *ItemCreate) SetText(s string) *ItemCreate {
+	ic.mutation.SetText(s)
+	return ic
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ic *ItemCreate) SetNillableText(s *string) *ItemCreate {
+	if s != nil {
+		ic.SetText(*s)
+	}
+	return ic
+}
+
 // SetID sets the "id" field.
 func (ic *ItemCreate) SetID(s string) *ItemCreate {
 	ic.mutation.SetID(s)
+	return ic
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ic *ItemCreate) SetNillableID(s *string) *ItemCreate {
+	if s != nil {
+		ic.SetID(*s)
+	}
 	return ic
 }
 
@@ -40,6 +64,7 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 		err  error
 		node *Item
 	)
+	ic.defaults()
 	if len(ic.hooks) == 0 {
 		if err = ic.check(); err != nil {
 			return nil, err
@@ -97,8 +122,21 @@ func (ic *ItemCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ic *ItemCreate) defaults() {
+	if _, ok := ic.mutation.ID(); !ok {
+		v := item.DefaultID()
+		ic.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ic *ItemCreate) check() error {
+	if v, ok := ic.mutation.Text(); ok {
+		if err := item.TextValidator(v); err != nil {
+			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "text": %w`, err)}
+		}
+	}
 	if v, ok := ic.mutation.ID(); ok {
 		if err := item.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
@@ -124,11 +162,30 @@ func (ic *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
 }
 
 func (ic *ItemCreate) gremlin() *dsl.Traversal {
+	type constraint struct {
+		pred *dsl.Traversal // constraint predicate.
+		test *dsl.Traversal // test matches and its constant.
+	}
+	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(item.Label)
 	if id, ok := ic.mutation.ID(); ok {
 		v.Property(dsl.ID, id)
 	}
-	return v.ValueMap(true)
+	if value, ok := ic.mutation.Text(); ok {
+		constraints = append(constraints, &constraint{
+			pred: g.V().Has(item.Label, item.FieldText, value).Count(),
+			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(item.Label, item.FieldText, value)),
+		})
+		v.Property(dsl.Single, item.FieldText, value)
+	}
+	if len(constraints) == 0 {
+		return v.ValueMap(true)
+	}
+	tr := constraints[0].pred.Coalesce(constraints[0].test, v.ValueMap(true))
+	for _, cr := range constraints[1:] {
+		tr = cr.pred.Coalesce(cr.test, tr)
+	}
+	return tr
 }
 
 // ItemCreateBulk is the builder for creating many Item entities in bulk.

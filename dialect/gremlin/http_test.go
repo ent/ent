@@ -7,7 +7,6 @@ package gremlin
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,7 +21,7 @@ import (
 func TestHTTPTransportRoundTripper(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, r.Header.Get("Content-Type"), "application/json")
-		got, err := ioutil.ReadAll(r.Body)
+		got, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
 		assert.JSONEq(t, `{"gremlin": "g.V(1)", "language": "gremlin-groovy"}`, string(got))
 

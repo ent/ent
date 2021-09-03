@@ -371,6 +371,11 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf("entv1: validator failed for field \"name\": %w", err)}
 		}
 	}
+	if v, ok := uu.mutation.Blob(); ok {
+		if err := user.BlobValidator(v); err != nil {
+			return &ValidationError{Name: "blob", err: fmt.Errorf("entv1: validator failed for field \"blob\": %w", err)}
+		}
+	}
 	if v, ok := uu.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf("entv1: validator failed for field \"state\": %w", err)}
@@ -1044,6 +1049,11 @@ func (uuo *UserUpdateOne) check() error {
 	if v, ok := uuo.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf("entv1: validator failed for field \"name\": %w", err)}
+		}
+	}
+	if v, ok := uuo.mutation.Blob(); ok {
+		if err := user.BlobValidator(v); err != nil {
+			return &ValidationError{Name: "blob", err: fmt.Errorf("entv1: validator failed for field \"blob\": %w", err)}
 		}
 	}
 	if v, ok := uuo.mutation.State(); ok {
