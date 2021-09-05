@@ -387,7 +387,7 @@ field.String("name").
 	}).
 	Validate(MaxRuneCount(10))
 field.String("nickname").
-	// Change the underlying data type to varchar(20).
+	//  If using a SQL-database: change the underlying data type to varchar(20).
 	Annotations(entsql.Annotation{
 		Size: 20,
 	}).
