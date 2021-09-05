@@ -362,7 +362,7 @@ func (Group) Fields() []ent.Field {
 }
 ```
 
-`MaxLen` does count bytes which may result in unexpected behavior for multibyte char collation like Russian, Chinese, Japanese, Vietnamese, smileys, ... Here is another example for writing a reusable validator:
+Here is another example for writing a reusable validator:
 
 ```go
 import (
