@@ -381,7 +381,7 @@ func MaxRuneCount(maxLen int) func(s string) error {
 }
 
 field.String("name").
-	// Change the underlying data type to varchar(10).
+	// If using a SQL-database: change the underlying data type to varchar(10).
 	Annotations(entsql.Annotation{
 		Size: 10,
 	}).
