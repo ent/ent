@@ -13,6 +13,7 @@ import (
 func BenchmarkInsertBuilder_Default(b *testing.B) {
 	for _, d := range []string{dialect.SQLite, dialect.MySQL, dialect.Postgres} {
 		b.Run(d, func(b *testing.B) {
+			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
 				Dialect(d).Insert("users").Default().Returning("id").Query()
 			}
@@ -23,6 +24,7 @@ func BenchmarkInsertBuilder_Default(b *testing.B) {
 func BenchmarkInsertBuilder_Small(b *testing.B) {
 	for _, d := range []string{dialect.SQLite, dialect.MySQL, dialect.Postgres} {
 		b.Run(d, func(b *testing.B) {
+			b.ReportAllocs()
 			for i := 0; i < b.N; i++ {
 				Dialect(d).Insert("users").
 					Columns("id", "age", "first_name", "last_name", "nickname", "spouse_id", "created_at", "updated_at").
