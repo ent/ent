@@ -17,7 +17,7 @@ ent是一个简单而又功能强大的Go语言实体框架，ent易于构建和
 
 ## 快速安装
 ```console
-go get entgo.io/ent/cmd/ent
+go install entgo.io/ent/cmd/ent@latest
 ```
 
 请访问[entgo.io website][entgo instal]以使用[Go modules]进行正确安装。
