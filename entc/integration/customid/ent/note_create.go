@@ -166,7 +166,7 @@ func (nc *NoteCreate) defaults() {
 func (nc *NoteCreate) check() error {
 	if v, ok := nc.mutation.ID(); ok {
 		if err := note.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Note.id": %w`, err)}
 		}
 	}
 	return nil

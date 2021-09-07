@@ -122,10 +122,10 @@ func (cc *CommentCreate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.UniqueInt(); !ok {
-		return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "unique_int"`)}
+		return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "Comment.unique_int"`)}
 	}
 	if _, ok := cc.mutation.UniqueFloat(); !ok {
-		return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "unique_float"`)}
+		return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "Comment.unique_float"`)}
 	}
 	return nil
 }

@@ -844,7 +844,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Error(err, "name validator failed")
 	var checkerr schema.CheckError
 	require.True(errors.As(err, &checkerr))
-	require.EqualError(err, "ent: validator failed for field \"name\": last name must begin with uppercase")
+	require.EqualError(err, `ent: validator failed for field "Group.name": last name must begin with uppercase`)
 	require.EqualError(checkerr, "last name must begin with uppercase")
 	err = client.Group.Create().SetInfo(info).SetType("pass").SetName("Github20").SetExpire(time.Now().Add(time.Hour)).Exec(ctx)
 	require.Error(err, "name validator failed")

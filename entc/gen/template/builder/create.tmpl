@@ -140,14 +140,14 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- range $f := $fields }}
 		{{- if and (not $f.Optional) (ne $f.Name $.ID.Name) }}
 			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-				return &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $f.Name }}"`)}
+				return &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $.Name }}.{{ $f.Name }}"`)}
 			}
 		{{- end }}
 		{{- with or $f.Validators $f.IsEnum }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				{{- $basic := $f.BasicType "v" }}
 				if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
-					return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $f.Name }}": %w`, err)}
+					return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 				}
 			}
 		{{- end }}
@@ -159,7 +159,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 			{{- else }}
 				if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
 			{{- end }}
-				return &ValidationError{Name: "{{ $e.Name }}", err: errors.New("{{ $pkg }}: missing required edge \"{{ $e.Name }}\"")}
+				return &ValidationError{Name: "{{ $e.Name }}", err: errors.New(`{{ $pkg }}: missing required edge "{{ $.Name }}.{{ $e.Name }}"`)}
 			}
 		{{- end }}
 	{{- end }}

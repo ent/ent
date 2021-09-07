@@ -180,7 +180,7 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (uu *UserUpdate) check() error {
 	if _, ok := uu.mutation.TenantID(); uu.mutation.TenantCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"tenant\"")
+		return errors.New(`ent: clearing a required unique edge "User.tenant"`)
 	}
 	return nil
 }
@@ -485,7 +485,7 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (uuo *UserUpdateOne) check() error {
 	if _, ok := uuo.mutation.TenantID(); uuo.mutation.TenantCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"tenant\"")
+		return errors.New(`ent: clearing a required unique edge "User.tenant"`)
 	}
 	return nil
 }
@@ -503,7 +503,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := uuo.fields; len(fields) > 0 {

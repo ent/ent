@@ -143,19 +143,19 @@ func (rc *RentalCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (rc *RentalCreate) check() error {
 	if _, ok := rc.mutation.Date(); !ok {
-		return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "date"`)}
+		return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "Rental.date"`)}
 	}
 	if _, ok := rc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "user_id"`)}
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Rental.user_id"`)}
 	}
 	if _, ok := rc.mutation.CarID(); !ok {
-		return &ValidationError{Name: "car_id", err: errors.New(`ent: missing required field "car_id"`)}
+		return &ValidationError{Name: "car_id", err: errors.New(`ent: missing required field "Rental.car_id"`)}
 	}
 	if _, ok := rc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New("ent: missing required edge \"user\"")}
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Rental.user"`)}
 	}
 	if _, ok := rc.mutation.CarID(); !ok {
-		return &ValidationError{Name: "car", err: errors.New("ent: missing required edge \"car\"")}
+		return &ValidationError{Name: "car", err: errors.New(`ent: missing required edge "Rental.car"`)}
 	}
 	return nil
 }

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -179,7 +180,7 @@ func (tu *TeamUpdate) ExecX(ctx context.Context) {
 func (tu *TeamUpdate) check() error {
 	if v, ok := tu.mutation.Name(); ok {
 		if err := team.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Team.name": %w`, err)}
 		}
 	}
 	return nil
@@ -491,7 +492,7 @@ func (tuo *TeamUpdateOne) ExecX(ctx context.Context) {
 func (tuo *TeamUpdateOne) check() error {
 	if v, ok := tuo.mutation.Name(); ok {
 		if err := team.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Team.name": %w`, err)}
 		}
 	}
 	return nil
@@ -510,7 +511,7 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 	}
 	id, ok := tuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Team.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Team.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := tuo.fields; len(fields) > 0 {

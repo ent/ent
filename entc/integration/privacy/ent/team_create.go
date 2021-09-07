@@ -132,11 +132,11 @@ func (tc *TeamCreate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (tc *TeamCreate) check() error {
 	if _, ok := tc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Team.name"`)}
 	}
 	if v, ok := tc.mutation.Name(); ok {
 		if err := team.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Team.name": %w`, err)}
 		}
 	}
 	return nil

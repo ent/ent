@@ -8,6 +8,7 @@ package entv1
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -850,7 +851,7 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Conversion.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`entv1: missing "Conversion.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := cuo.fields; len(fields) > 0 {

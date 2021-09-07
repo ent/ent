@@ -168,7 +168,7 @@ func (gu *GroupUpdate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (gu *GroupUpdate) check() error {
 	if _, ok := gu.mutation.TenantID(); gu.mutation.TenantCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"tenant\"")
+		return errors.New(`ent: clearing a required unique edge "Group.tenant"`)
 	}
 	return nil
 }
@@ -448,7 +448,7 @@ func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (guo *GroupUpdateOne) check() error {
 	if _, ok := guo.mutation.TenantID(); guo.mutation.TenantCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"tenant\"")
+		return errors.New(`ent: clearing a required unique edge "Group.tenant"`)
 	}
 	return nil
 }
@@ -466,7 +466,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	id, ok := guo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Group.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := guo.fields; len(fields) > 0 {

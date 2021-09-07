@@ -122,10 +122,10 @@ func (mic *MixinIDCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (mic *MixinIDCreate) check() error {
 	if _, ok := mic.mutation.SomeField(); !ok {
-		return &ValidationError{Name: "some_field", err: errors.New(`ent: missing required field "some_field"`)}
+		return &ValidationError{Name: "some_field", err: errors.New(`ent: missing required field "MixinID.some_field"`)}
 	}
 	if _, ok := mic.mutation.MixinField(); !ok {
-		return &ValidationError{Name: "mixin_field", err: errors.New(`ent: missing required field "mixin_field"`)}
+		return &ValidationError{Name: "mixin_field", err: errors.New(`ent: missing required field "MixinID.mixin_field"`)}
 	}
 	return nil
 }

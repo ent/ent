@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -170,12 +171,12 @@ func (ftu *FileTypeUpdate) ExecX(ctx context.Context) {
 func (ftu *FileTypeUpdate) check() error {
 	if v, ok := ftu.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.State(); ok {
 		if err := filetype.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
 	}
 	return nil
@@ -439,12 +440,12 @@ func (ftuo *FileTypeUpdateOne) ExecX(ctx context.Context) {
 func (ftuo *FileTypeUpdateOne) check() error {
 	if v, ok := ftuo.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf("ent: validator failed for field \"type\": %w", err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.State(); ok {
 		if err := filetype.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
 	}
 	return nil
@@ -463,7 +464,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 	}
 	id, ok := ftuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FileType.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "FileType.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := ftuo.fields; len(fields) > 0 {
