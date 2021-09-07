@@ -191,7 +191,7 @@ The generated code provides the `HasPrefix`, `HasSuffix`, `Contains`, and `Conta
 ```go
 pets := client.Pet.Query().
 	Where(func(s *sql.Selector){
-		s.Where(sql.Like(pet.Name,"B"))
+		s.Where(sql.Like(pet.Name,"_B%"))
 	}).
 	AllX(ctx)
 ```
