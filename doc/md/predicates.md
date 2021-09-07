@@ -184,3 +184,20 @@ SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` JOIN `c
 -- `EXISTS` version.
 SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` WHERE EXISTS (SELECT * FROM `cars` WHERE `cars`.`model` = 'Tesla' AND `users`.`id` = `cars`.`owner_id`)
 ```
+
+#### Get all pets where pet name contains a specific pattern 
+The generated code provides the `HasPrefix`, `HasSuffix`, `Contains`, and `ContainsFold` predicates for pattern matching. However, in order to use the `LIKE` operator with a custom pattern, use the following example.
+
+```go
+pets := client.Pet.Query().
+	Where(func(s *sql.Selector){
+		s.Where(sql.Like(pet.Name,"_B%"))
+	}).
+	AllX(ctx)
+```
+
+The above code will produce the following SQL query:
+
+```sql
+SELECT DISTINCT `pets`.`id`, `pets`.`owner_id`, `pets`.`name`, `pets`.`age`, `pets`.`species` FROM `pets` WHERE `name` LIKE 'B'
+```
