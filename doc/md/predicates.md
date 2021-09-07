@@ -186,8 +186,7 @@ SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` WHERE E
 ```
 
 #### Get all pets where pet name contains a specific pattern 
-
-A probable ent query should look like this:
+The generated code provides the `HasPrefix`, `HasSuffix`, `Contains`, and `ContainsFold` predicates for pattern matching. However, in order to use the `LIKE` operator with a custom pattern, use the following example.
 
 ```go
 pets := client.Pet.Query().
