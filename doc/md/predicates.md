@@ -186,7 +186,8 @@ SELECT DISTINCT `users`.`id`, `users`.`age`, `users`.`name` FROM `users` WHERE E
 ```
 
 #### Get all pets where pet name contains a specific pattern 
-The generated code provides the `HasPrefix`, `HasSuffix`, `Contains`, and `ContainsFold` predicates for pattern matching. However, in order to use the `LIKE` operator with a custom pattern, use the following example.
+The generated code provides the `HasPrefix`, `HasSuffix`, `Contains`, and `ContainsFold` predicates for pattern matching.
+However, in order to use the `LIKE` operator with a custom pattern, use the following example.
 
 ```go
 pets := client.Pet.Query().
@@ -199,5 +200,5 @@ pets := client.Pet.Query().
 The above code will produce the following SQL query:
 
 ```sql
-SELECT DISTINCT `pets`.`id`, `pets`.`owner_id`, `pets`.`name`, `pets`.`age`, `pets`.`species` FROM `pets` WHERE `name` LIKE 'B'
+SELECT DISTINCT `pets`.`id`, `pets`.`owner_id`, `pets`.`name`, `pets`.`age`, `pets`.`species` FROM `pets` WHERE `name` LIKE '_B%'
 ```
