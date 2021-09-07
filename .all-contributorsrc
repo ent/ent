@@ -500,6 +500,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "odeke-em",
+      "name": "Emmanuel T Odeke",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4898263?v=4",
+      "profile": "https://orijtech.com/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
