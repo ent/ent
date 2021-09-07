@@ -197,7 +197,7 @@ pets := client.Pet.Query().
 	AllX(ctx)
 ```
 
-A probable ent query should look like this:
+The above code will produce the following SQL query:
 
 ```sql
 SELECT DISTINCT `pets`.`id`, `pets`.`owner_id`, `pets`.`name`, `pets`.`age`, `pets`.`species` FROM `pets` WHERE `name` LIKE 'B'
