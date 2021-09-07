@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -214,7 +215,7 @@ func (cu *CardUpdate) defaults() {
 func (cu *CardUpdate) check() error {
 	if v, ok := cu.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -495,7 +496,7 @@ func (cuo *CardUpdateOne) defaults() {
 func (cuo *CardUpdateOne) check() error {
 	if v, ok := cuo.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -505,7 +506,7 @@ func (cuo *CardUpdateOne) gremlinSave(ctx context.Context) (*Card, error) {
 	res := &gremlin.Response{}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Card.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Card.id" for update`)}
 	}
 	query, bindings := cuo.gremlin(id).Query()
 	if err := cuo.driver.Exec(ctx, query, bindings, res); err != nil {

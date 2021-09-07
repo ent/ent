@@ -134,12 +134,12 @@ func (ic *ItemCreate) defaults() {
 func (ic *ItemCreate) check() error {
 	if v, ok := ic.mutation.Text(); ok {
 		if err := item.TextValidator(v); err != nil {
-			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "text": %w`, err)}
+			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
 	}
 	if v, ok := ic.mutation.ID(); ok {
 		if err := item.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
 		}
 	}
 	return nil

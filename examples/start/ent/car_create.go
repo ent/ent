@@ -127,10 +127,10 @@ func (cc *CarCreate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CarCreate) check() error {
 	if _, ok := cc.mutation.Model(); !ok {
-		return &ValidationError{Name: "model", err: errors.New(`ent: missing required field "model"`)}
+		return &ValidationError{Name: "model", err: errors.New(`ent: missing required field "Car.model"`)}
 	}
 	if _, ok := cc.mutation.RegisteredAt(); !ok {
-		return &ValidationError{Name: "registered_at", err: errors.New(`ent: missing required field "registered_at"`)}
+		return &ValidationError{Name: "registered_at", err: errors.New(`ent: missing required field "Car.registered_at"`)}
 	}
 	return nil
 }

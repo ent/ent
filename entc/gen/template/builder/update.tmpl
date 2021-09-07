@@ -325,7 +325,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- $basic := $f.BasicType "v" }}
 					if err := {{ $.Package }}.{{ $f.Validator }}({{ $basic }}); err != nil {
-						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf("{{ $pkg }}: validator failed for field \"{{ $f.Name }}\": %w", err)}
+						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 					}
 				}
 			{{- end }}
@@ -333,7 +333,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{- range $e := $.Edges }}
 			{{- if and $e.Unique (not $e.Optional) }}
 				if _, ok := {{ $mutation }}.{{ $e.StructField }}ID(); {{ $mutation }}.{{ $e.StructField }}Cleared() && !ok {
-					return errors.New("{{ $pkg }}: clearing a required unique edge \"{{ $e.Name }}\"")
+					return errors.New(`{{ $pkg }}: clearing a required unique edge "{{ $.Name }}.{{ $e.Name }}"`)
 				}
 			{{- end }}
 		{{- end }}

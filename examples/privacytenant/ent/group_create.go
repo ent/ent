@@ -148,10 +148,10 @@ func (gc *GroupCreate) defaults() error {
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
 	}
 	if _, ok := gc.mutation.TenantID(); !ok {
-		return &ValidationError{Name: "tenant", err: errors.New("ent: missing required edge \"tenant\"")}
+		return &ValidationError{Name: "tenant", err: errors.New(`ent: missing required edge "Group.tenant"`)}
 	}
 	return nil
 }

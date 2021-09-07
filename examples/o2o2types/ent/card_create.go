@@ -119,13 +119,13 @@ func (cc *CardCreate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
 	if _, ok := cc.mutation.Expired(); !ok {
-		return &ValidationError{Name: "expired", err: errors.New(`ent: missing required field "expired"`)}
+		return &ValidationError{Name: "expired", err: errors.New(`ent: missing required field "Card.expired"`)}
 	}
 	if _, ok := cc.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "number"`)}
+		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
 	}
 	if _, ok := cc.mutation.OwnerID(); !ok {
-		return &ValidationError{Name: "owner", err: errors.New("ent: missing required edge \"owner\"")}
+		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Card.owner"`)}
 	}
 	return nil
 }

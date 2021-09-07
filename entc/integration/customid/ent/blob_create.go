@@ -154,7 +154,7 @@ func (bc *BlobCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (bc *BlobCreate) check() error {
 	if _, ok := bc.mutation.UUID(); !ok {
-		return &ValidationError{Name: "uuid", err: errors.New(`ent: missing required field "uuid"`)}
+		return &ValidationError{Name: "uuid", err: errors.New(`ent: missing required field "Blob.uuid"`)}
 	}
 	return nil
 }

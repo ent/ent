@@ -155,20 +155,20 @@ func (cc *CarCreate) ExecX(ctx context.Context) {
 func (cc *CarCreate) check() error {
 	if v, ok := cc.mutation.BeforeID(); ok {
 		if err := car.BeforeIDValidator(v); err != nil {
-			return &ValidationError{Name: "before_id", err: fmt.Errorf(`ent: validator failed for field "before_id": %w`, err)}
+			return &ValidationError{Name: "before_id", err: fmt.Errorf(`ent: validator failed for field "Car.before_id": %w`, err)}
 		}
 	}
 	if v, ok := cc.mutation.AfterID(); ok {
 		if err := car.AfterIDValidator(v); err != nil {
-			return &ValidationError{Name: "after_id", err: fmt.Errorf(`ent: validator failed for field "after_id": %w`, err)}
+			return &ValidationError{Name: "after_id", err: fmt.Errorf(`ent: validator failed for field "Car.after_id": %w`, err)}
 		}
 	}
 	if _, ok := cc.mutation.Model(); !ok {
-		return &ValidationError{Name: "model", err: errors.New(`ent: missing required field "model"`)}
+		return &ValidationError{Name: "model", err: errors.New(`ent: missing required field "Car.model"`)}
 	}
 	if v, ok := cc.mutation.ID(); ok {
 		if err := car.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Car.id": %w`, err)}
 		}
 	}
 	return nil

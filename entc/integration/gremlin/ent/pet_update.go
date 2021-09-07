@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -429,7 +430,7 @@ func (puo *PetUpdateOne) gremlinSave(ctx context.Context) (*Pet, error) {
 	res := &gremlin.Response{}
 	id, ok := puo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Pet.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Pet.id" for update`)}
 	}
 	query, bindings := puo.gremlin(id).Query()
 	if err := puo.driver.Exec(ctx, query, bindings, res); err != nil {

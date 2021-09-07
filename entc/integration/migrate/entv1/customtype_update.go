@@ -8,6 +8,7 @@ package entv1
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -258,7 +259,7 @@ func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType
 	}
 	id, ok := ctuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing CustomType.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`entv1: missing "CustomType.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := ctuo.fields; len(fields) > 0 {

@@ -166,7 +166,7 @@ func (dc *DocCreate) defaults() {
 func (dc *DocCreate) check() error {
 	if v, ok := dc.mutation.ID(); ok {
 		if err := doc.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Doc.id": %w`, err)}
 		}
 	}
 	return nil

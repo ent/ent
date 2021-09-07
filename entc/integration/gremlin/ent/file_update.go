@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -276,7 +277,7 @@ func (fu *FileUpdate) ExecX(ctx context.Context) {
 func (fu *FileUpdate) check() error {
 	if v, ok := fu.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
-			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
 		}
 	}
 	return nil
@@ -638,7 +639,7 @@ func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
 func (fuo *FileUpdateOne) check() error {
 	if v, ok := fuo.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
-			return &ValidationError{Name: "size", err: fmt.Errorf("ent: validator failed for field \"size\": %w", err)}
+			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
 		}
 	}
 	return nil
@@ -648,7 +649,7 @@ func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
 	res := &gremlin.Response{}
 	id, ok := fuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing File.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "File.id" for update`)}
 	}
 	query, bindings := fuo.gremlin(id).Query()
 	if err := fuo.driver.Exec(ctx, query, bindings, res); err != nil {
