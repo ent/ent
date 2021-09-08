@@ -509,6 +509,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "isoppp",
+      "name": "Hiroki Isogai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16318727?v=4",
+      "profile": "https://isoppp.com",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
