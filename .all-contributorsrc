@@ -518,6 +518,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "tsingsun",
+      "name": "李清山",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5848549?v=4",
+      "profile": "https://github.com/tsingsun",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -81,6 +81,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://orijtech.com/"><img src="https://avatars.githubusercontent.com/u/4898263?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Emmanuel T Odeke</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=odeke-em" title="Code">💻</a></td>
     <td align="center"><a href="https://isoppp.com"><img src="https://avatars.githubusercontent.com/u/16318727?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Hiroki Isogai</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=isoppp" title="Documentation">📖</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/tsingsun"><img src="https://avatars.githubusercontent.com/u/5848549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>李清山</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=tsingsun" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
