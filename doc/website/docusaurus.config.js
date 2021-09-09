@@ -115,6 +115,12 @@ module.exports={
           'aria-label': 'Slack channel',
         },
         {
+          href: 'https://discord.gg/qZmPgTE6RX',
+          position: 'right',
+          className: 'header-discord-link',
+          'aria-label': 'Discord Server',
+        },
+        {
           href: 'https://www.getrevue.co/profile/ent',
           position: 'right',
           className: 'header-newsletter-link',
@@ -164,6 +170,7 @@ module.exports={
           "items": [
             {"label": "GitHub", "to": "https://github.com/ent/ent"},
             {"label": "Slack", "to": "/docs/slack"},
+            {"label": "Discord", "to": "https://discord.gg/qZmPgTE6RX"},
             {"label": "Newsletter", "to": "https://www.getrevue.co/profile/ent"},
             {"label": "Discussions", "to": "https://github.com/ent/ent/discussions"},
             {
