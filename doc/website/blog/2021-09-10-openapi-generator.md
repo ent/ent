@@ -77,7 +77,7 @@ The first step on our way to the OAS file is to create an ent schema graph:
 go run -mod=mod entgo.io/ent/cmd/ent init Fridge Compartment Content
 ```
 
-I have multiple fridges with multiple compartments, and me and my wife want to know its contents at all times. We will
+I have multiple fridges with multiple compartments, and me and my SO want to know its contents at all times. We will
 create a Go server to hold the state and with the generated OAS file you are invited to build a frontend to manage
 fridges and contents in the language or your choice by using the Swagger Codegen. You can find a `generate.go` that uses
 docker to generate a client [here](https://github.com/masseelch/elk/blob/master/internal/openapi/ent/generate.go).
