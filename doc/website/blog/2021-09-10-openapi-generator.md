@@ -181,9 +181,21 @@ go generate ./...
 ```
 
 In addition to the files Ent normally generates, another file named `openapi.json` has been created. Copy its contents
-and paste them into the [Swagger Editor](https://editor.swagger.io/), You should see three groups: **Compartment**, **
-Content** and **Fridge**. If you happen to open up the POST operation tab in the Fridge group, you see a description of
+and paste them into the [Swagger Editor](https://editor.swagger.io/). You should see three groups: **Compartment**, **
+Content** and **Fridge**. 
+
+<div style={{textAlign: 'center'}}>
+  <img alt="This is what Swagger Editor shows" src="https://via.placeholder.com/150" />
+  <p style={{fontSize: 12}}>This is what Swagger Editor shows</p>
+</div>
+
+If you happen to open up the POST operation tab in the Fridge group, you see a description of
 the expected request data and all the possible responses. Great!
+
+<div style={{textAlign: 'center'}}>
+  <img alt="POST operation on Fridge" src="https://via.placeholder.com/150" />
+  <p style={{fontSize: 12}}>POST operation on Fridge</p>
+</div>
 
 ### Basic Configuration
 
@@ -244,7 +256,14 @@ func (Fridge) Annotations() []schema.Annotation {
 }
 ```
 
-And voilà, the DELETE operation is gone. For more information about how `elk`'s policies work and what you can do with
+And voilà, the DELETE operation is gone.
+
+<div style={{textAlign: 'center'}}>
+  <img alt="DELETE operation is gone" src="https://via.placeholder.com/150" />
+  <p style={{fontSize: 12}}>DELETE operation is gone</p>
+</div>
+
+For more information about how `elk`'s policies work and what you can do with
 it, have a look at the [godoc](https://pkg.go.dev/github.com/masseelch/elk).
 
 ### Extend specification
