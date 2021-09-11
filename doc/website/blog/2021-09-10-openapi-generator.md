@@ -28,7 +28,7 @@ requires that we use the `entc` (ent codegen) package as
 described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). Follow the next two steps to enable it and to
 configure Ent to work with the `elk` extension:
 
-1. Create a new Go file named `ent/entc.go` and paste the following content:
+1\. Create a new Go file named `ent/entc.go` and paste the following content:
 
 ```go
 // +build ignore
@@ -57,7 +57,7 @@ func main() {
 }
 ```
 
-2. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
+2\. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
 
 ```go
 package ent
@@ -180,7 +180,7 @@ Now, let's generate the Ent code and the OAS file.
 go generate ./...
 ```
 
-In addition to the files Ent normally generates, another file names `openapi.json` has been created. Copy its contents
+In addition to the files Ent normally generates, another file named `openapi.json` has been created. Copy its contents
 and paste them into the [Swagger Editor](https://editor.swagger.io/), You should see three groups: Compartment, Content
 and Fridge. If you happen to open up the POST operation tab in the Fridge group, you see a description of the expected
 request data and all the possible responses. Great!
@@ -247,7 +247,7 @@ it, have a look at the [godoc](https://pkg.go.dev/github.com/masseelch/elk).
 
 ### Extend specification
 
-The one thing I should be interested the most in this example is the current contents of a fridge.You can customize the
+The one thing I should be interested the most in this example is the current contents of a fridge. You can customize the
 generated OAS to any extend you like by using [Hooks](https://pkg.go.dev/github.com/masseelch/elk#Hook). However, this
 would exceed the scope of this post. An example of how to add an endpoint `fridges/{id}/contents` to the generated OAS
 file can be found [here](https://github.com/masseelch/elk/tree/master/internal/fridge/ent/entc.go).
