@@ -5,12 +5,12 @@ authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
 ---
 
-A while ago, we presented to you [`elk`](https://github.com/masseelch/elk) -
+In a [previous blogpost](https://entgo.io/blog/2021/07/29/generate-a-fully-working-go-crud-http-api-with-ent), we presented to you [`elk`](https://github.com/masseelch/elk) -
 an [extension](https://entgo.io/docs/extensions) to Ent enabling you to generate a fully-working Go CRUD HTTP API from
 your schema. In the today's post I'd like to introduce to you a shiny new feature that recently made it into `elk`:
 a fully compliant [OpenAPI Specification (OAS)](https://swagger.io/resources/open-api/) generator.
 
-The OAS (formerly known as Swagger Specification) is a technical specification defining a standard, language-agnostic
+OAS (formerly known as Swagger Specification) is a technical specification defining a standard, language-agnostic
 interface description for REST APIs. This allows both humans and automated tools to understand the described service
 without the actual source code or additional documentation. Combined with the [Swagger Tooling](https://swagger.io/) you
 can generate both server and client boilerplate code for more than 20 languages, just by passing in the OAS file.
@@ -25,7 +25,7 @@ go install github.com/masseelch/elk
 
 `elk` uses the Ent [Extension API](https://entgo.io/docs/extensions) to integrate with Ent’s code-generation. This
 requires that we use the `entc` (ent codegen) package as
-described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). Follow the next two steps to enable it and to
+described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package) to generate code for our project. Follow the next two steps to enable it and to
 configure Ent to work with the `elk` extension:
 
 1\. Create a new Go file named `ent/entc.go` and paste the following content:
@@ -77,9 +77,12 @@ The first step on our way to the OAS file is to create an Ent schema graph:
 go run -mod=mod entgo.io/ent/cmd/ent init Fridge Compartment Content
 ```
 
-So, for an example: I have multiple fridges with multiple compartments, and me and my SO want to know its contents at all times. We will
-create a Go server to hold the state and with the generated OAS file you are invited to build a frontend to manage
-fridges and contents in the language or your choice by using the Swagger Codegen. You can find a `generate.go` that uses
+To demonstrate `elk`'s OAS generation capabilities, we will build together an example application.  Suppose I have 
+multiple fridges with multiple compartments, and my significant-other and I want to know its contents at all times. 
+To supply ourselves with this incredibly useful information we will create a Go server with a RESTful API.  To ease 
+the creation of client applications that can communicate with our server, we will create an OpenAPI Specification 
+file describing its API. Once we have that, we can build a frontend to manage fridges and contents in a language of 
+our choice by using the Swagger Codegen! You can find an example that uses
 docker to generate a client [here](https://github.com/masseelch/elk/blob/master/internal/openapi/ent/generate.go).
 
 Let's create our schema:
@@ -242,7 +245,7 @@ Rerunning the code generator will create an updated OAS file you can copy-paste 
 
 ### Operation configuration
 
-We do not want to expose endpoints to delete a fridge (who'd want that, for real!) and fortunately `elk` lets us
+We do not want to expose endpoints to delete a fridge (seriously, who would ever want that?!). Fortunately, `elk` lets us
 configure what endpoints to generate and which to ignore. `elk`s default policy is to expose all routes. You can either
 change this behaviour to not expose any route but those explicitly asked for, or you can just tell `elk` to exclude the
 DELETE operation on the Fridge by using an `elk.SchemaAnnotation`:
@@ -256,7 +259,7 @@ func (Fridge) Annotations() []schema.Annotation {
 }
 ```
 
-And voilà, the DELETE operation is gone.
+And voilà! the DELETE operation is gone.
 
 <div style={{textAlign: 'center'}}>
   <img alt="DELETE operation is gone" src="https://via.placeholder.com/150" />
@@ -276,7 +279,7 @@ file can be found [here](https://github.com/masseelch/elk/tree/master/internal/f
 ### Generating an OAS-implementing server
 
 I promised you in the beginning we'd create a server behaving as described in the OAS. `elk` makes this easy, all you
-have to do is calling `elk.GenerateHandlers()` when creating the extension:
+have to do is call `elk.GenerateHandlers()` when you configure the extension:
 
 ```diff title="ent/entc.go"
 [...]
@@ -331,13 +334,12 @@ func main() {
 go run -mod=mod main.go
 ```
 
-Our Fridge API is up and running. With the generated OAS file and the Swagger Tooling you can generate any client stub
-you want and speed up the development by several orders of magnitude.
+Our Fridge API server is up and running. With the generated OAS file and the Swagger Tooling you can now generate a client stub
+in any supported language and forget about writing a RESTful client ever _ever_ again.
 
 ### Wrapping Up
 
-In this post we introduced a new feature of `elk` - OAS generation. This enables you to use the power of Swagger to
-speed up development, have rich documentation and much more.
+In this post we introduced a new feature of `elk` - automatic OpenAPI Specification generation. This feature connects between Ent's code-generation capabilities and OpenAPI/Swagger's rich tooling ecosystem. 
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
