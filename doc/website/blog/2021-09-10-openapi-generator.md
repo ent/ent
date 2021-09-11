@@ -5,7 +5,7 @@ authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
 ---
 
-A while ago, we introduced you to [`elk`](https://github.com/masseelch/elk) -
+A while ago, we presented to you [`elk`](https://github.com/masseelch/elk) -
 an [extension](https://entgo.io/docs/extensions) to Ent enabling you to generate a fully-working Go CRUD HTTP API from
 your schema. In the today's post I'd like to introduce to you a shiny new feature that recently made it into `elk`:
 a fully compliant [OpenAPI Specification (OAS)](https://swagger.io/resources/open-api/) generator.
@@ -66,18 +66,18 @@ package ent
 ```
 
 With these steps complete, all is set up for generating an OAS file from your schema! If you are new to Ent and want to
-learn more about it, how to connect to different types of databases, run migrations or work with entities head over to
-the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/).
+learn more about it, how to connect to different types of databases, run migrations or work with entities, then head
+over to the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/).
 
 ### Generate an OAS file
 
-The first step on our way to the OAS file is to create an ent schema graph:
+The first step on our way to the OAS file is to create an Ent schema graph:
 
 ```shell
 go run -mod=mod entgo.io/ent/cmd/ent init Fridge Compartment Content
 ```
 
-I have multiple fridges with multiple compartments, and me and my SO want to know its contents at all times. We will
+So, for an example: I have multiple fridges with multiple compartments, and me and my SO want to know its contents at all times. We will
 create a Go server to hold the state and with the generated OAS file you are invited to build a frontend to manage
 fridges and contents in the language or your choice by using the Swagger Codegen. You can find a `generate.go` that uses
 docker to generate a client [here](https://github.com/masseelch/elk/blob/master/internal/openapi/ent/generate.go).
@@ -181,13 +181,13 @@ go generate ./...
 ```
 
 In addition to the files Ent normally generates, another file named `openapi.json` has been created. Copy its contents
-and paste them into the [Swagger Editor](https://editor.swagger.io/), You should see three groups: Compartment, Content
-and Fridge. If you happen to open up the POST operation tab in the Fridge group, you see a description of the expected
-request data and all the possible responses. Great!
+and paste them into the [Swagger Editor](https://editor.swagger.io/), You should see three groups: **Compartment**, **
+Content** and **Fridge**. If you happen to open up the POST operation tab in the Fridge group, you see a description of
+the expected request data and all the possible responses. Great!
 
 ### Basic Configuration
 
-The description of our API does not yet reflect what it does, lets change that! `elk` provides easy-to-use configuration
+The description of our API does not yet reflect what it does, let's change that! `elk` provides easy-to-use configuration
 builders to manipulate the generated OAS file. Open up `ent/entc.go` and pass in the updated title and description of
 our Fridge API:
 
@@ -209,8 +209,10 @@ func main() {
 	ex, err := elk.NewExtension(
 		elk.GenerateSpec(
 			"openapi.json",
-			elk.SpecTitle("Fridge CMS"), // It is a Content-Management-System ...
-			elk.SpecDescription("API to manage fridges and their cooled contents. **ICY!**"), // You can use CommonMark syntax.
+			// It is a Content-Management-System ...
+			elk.SpecTitle("Fridge CMS"), 
+			// You can use CommonMark syntax.
+			elk.SpecDescription("API to manage fridges and their cooled contents. **ICY!**"), 
 			elk.SpecVersion("0.0.1"),
 		),
 	)
@@ -228,10 +230,10 @@ Rerunning the code generator will create an updated OAS file you can copy-paste 
 
 ### Operation configuration
 
-We do not want to expose endpoints to delete a fridge (who'd want that, for real!) and happily `elk` lets us configure
-what endpoints to generate and which to ignore. `elk`s default policy is to expose all routes. You can either change
-this behaviour to not expose any route but those explicitly asked for, or you can just tell `elk` to exclude the DELETE
-operation on the Fridge by using an `elk.SchemaAnnotation`:
+We do not want to expose endpoints to delete a fridge (who'd want that, for real!) and fortunately `elk` lets us
+configure what endpoints to generate and which to ignore. `elk`s default policy is to expose all routes. You can either
+change this behaviour to not expose any route but those explicitly asked for, or you can just tell `elk` to exclude the
+DELETE operation on the Fridge by using an `elk.SchemaAnnotation`:
 
 ```go title="ent/schema/fridge.go"
 // Annotations of the Fridge.
@@ -242,7 +244,7 @@ func (Fridge) Annotations() []schema.Annotation {
 }
 ```
 
-And voilà, the DELETE operation is gone. For more information about how `elk`s policies work and what you can do with
+And voilà, the DELETE operation is gone. For more information about how `elk`'s policies work and what you can do with
 it, have a look at the [godoc](https://pkg.go.dev/github.com/masseelch/elk).
 
 ### Extend specification
