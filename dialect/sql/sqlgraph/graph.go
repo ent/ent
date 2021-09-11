@@ -439,17 +439,9 @@ func UpdateNode(ctx context.Context, drv dialect.Driver, spec *UpdateSpec) error
 
 // UpdateNodes applies the UpdateSpec on a set of nodes in the graph.
 func UpdateNodes(ctx context.Context, drv dialect.Driver, spec *UpdateSpec) (int, error) {
-	tx, err := drv.Tx(ctx)
-	if err != nil {
-		return 0, err
-	}
-	gr := graph{tx: tx, builder: sql.Dialect(drv.Dialect())}
+	gr := graph{tx: drv, builder: sql.Dialect(drv.Dialect())}
 	cr := &updater{UpdateSpec: spec, graph: gr}
-	affected, err := cr.nodes(ctx, tx)
-	if err != nil {
-		return 0, rollback(tx, err)
-	}
-	return affected, tx.Commit()
+	return cr.nodes(ctx, drv)
 }
 
 // NotFoundError returns when trying to update an
@@ -706,9 +698,8 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 	return u.scan(rows)
 }
 
-func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error) {
+func (u *updater) nodes(ctx context.Context, drv dialect.Driver) (int, error) {
 	var (
-		ids        []driver.Value
 		addEdges   = EdgeSpecs(u.Edges.Add).GroupRel()
 		clearEdges = EdgeSpecs(u.Edges.Clear).GroupRel()
 		multiple   = hasExternalEdges(addEdges, clearEdges)
@@ -717,13 +708,28 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 				From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
 				WithContext(ctx)
 	)
+	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
+		return 0, err
+	}
 	if pred := u.Predicate; pred != nil {
 		pred(selector)
 	}
-	// If this change-set contains multiple table updates.
-	if multiple {
-		query, args := selector.Query()
-		rows := &sql.Rows{}
+	// In case of single statement update, avoid opening a transaction manually.
+	if !multiple {
+		update.FromSelect(selector)
+		return u.updateTable(ctx, update)
+	}
+	tx, err := drv.Tx(ctx)
+	if err != nil {
+		return 0, err
+	}
+	u.tx = tx
+	affected, err := func() (int, error) {
+		var (
+			ids         []driver.Value
+			rows        = &sql.Rows{}
+			query, args = selector.Query()
+		)
 		if err := u.tx.Query(ctx, query, args, rows); err != nil {
 			return 0, fmt.Errorf("querying table %s: %w", u.Node.Table, err)
 		}
@@ -738,32 +744,39 @@ func (u *updater) nodes(ctx context.Context, tx dialect.ExecQuerier) (int, error
 			return 0, nil
 		}
 		update.Where(matchID(u.Node.ID.Column, ids))
-	} else {
-		update.FromSelect(selector)
-	}
-	if err := u.setTableColumns(update, addEdges, clearEdges); err != nil {
-		return 0, err
-	}
-	if !update.Empty() {
-		var res sql.Result
-		query, args := update.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
+		// In case of multi statement update, that change can
+		// affect more than 1 table, and therefore, we return
+		// the list of ids as number of affected records.
+		if _, err := u.updateTable(ctx, update); err != nil {
 			return 0, err
 		}
-		if !multiple {
-			affected, err := res.RowsAffected()
-			if err != nil {
-				return 0, err
-			}
-			return int(affected), nil
-		}
-	}
-	if len(ids) > 0 {
 		if err := u.setExternalEdges(ctx, ids, addEdges, clearEdges); err != nil {
 			return 0, err
 		}
+		return len(ids), nil
+	}()
+	if err != nil {
+		return 0, rollback(tx, err)
 	}
-	return len(ids), nil
+	return affected, tx.Commit()
+}
+
+func (u *updater) updateTable(ctx context.Context, stmt *sql.UpdateBuilder) (int, error) {
+	if stmt.Empty() {
+		return 0, nil
+	}
+	var (
+		res         sql.Result
+		query, args = stmt.Query()
+	)
+	if err := u.tx.Exec(ctx, query, args, &res); err != nil {
+		return 0, err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(affected), nil
 }
 
 func (u *updater) setExternalEdges(ctx context.Context, ids []driver.Value, addEdges, clearEdges map[Rel][]*EdgeSpec) error {
