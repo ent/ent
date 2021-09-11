@@ -49,6 +49,8 @@ The command above will generate the schema for `User` under `<project>/ent/schem
 
 package schema
 
+import "entgo.io/ent"
+
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
@@ -71,6 +73,11 @@ Add 2 fields to the `User` schema:
 ```go title="<project>/ent/schema/user.go"
 
 package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
 
 // Fields of the User.
 func (User) Fields() []ent.Field {
