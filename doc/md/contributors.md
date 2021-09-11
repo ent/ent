@@ -83,6 +83,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/tsingsun"><img src="https://avatars.githubusercontent.com/u/5848549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>李清山</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=tsingsun" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/s-takehana"><img src="https://avatars.githubusercontent.com/u/3423547?v=4?s=100" width="100px;" alt=""/><br /><sub><b>s-takehana</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=s-takehana" title="Documentation">📖</a></td>
   </tr>
 </table>
 
