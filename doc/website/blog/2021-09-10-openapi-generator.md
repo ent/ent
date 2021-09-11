@@ -5,9 +5,10 @@ authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
 ---
 
-In a [previous blogpost](https://entgo.io/blog/2021/07/29/generate-a-fully-working-go-crud-http-api-with-ent), we presented to you [`elk`](https://github.com/masseelch/elk) -
-an [extension](https://entgo.io/docs/extensions) to Ent enabling you to generate a fully-working Go CRUD HTTP API from
-your schema. In the today's post I'd like to introduce to you a shiny new feature that recently made it into `elk`:
+In a [previous blogpost](https://entgo.io/blog/2021/07/29/generate-a-fully-working-go-crud-http-api-with-ent), we
+presented to you [`elk`](https://github.com/masseelch/elk) - an [extension](https://entgo.io/docs/extensions) to Ent
+enabling you to generate a fully-working Go CRUD HTTP API from your schema. In the today's post I'd like to introduce to
+you a shiny new feature that recently made it into `elk`:
 a fully compliant [OpenAPI Specification (OAS)](https://swagger.io/resources/open-api/) generator.
 
 OAS (formerly known as Swagger Specification) is a technical specification defining a standard, language-agnostic
@@ -25,8 +26,8 @@ go install github.com/masseelch/elk
 
 `elk` uses the Ent [Extension API](https://entgo.io/docs/extensions) to integrate with Ent’s code-generation. This
 requires that we use the `entc` (ent codegen) package as
-described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package) to generate code for our project. Follow the next two steps to enable it and to
-configure Ent to work with the `elk` extension:
+described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package) to generate code for our project. Follow the next
+two steps to enable it and to configure Ent to work with the `elk` extension:
 
 1\. Create a new Go file named `ent/entc.go` and paste the following content:
 
@@ -74,16 +75,16 @@ over to the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/).
 The first step on our way to the OAS file is to create an Ent schema graph:
 
 ```shell
-go run -mod=mod entgo.io/ent/cmd/ent init Fridge Compartment Content
+go run -mod=mod entgo.io/ent/cmd/ent init Fridge Compartment Item
 ```
 
-To demonstrate `elk`'s OAS generation capabilities, we will build together an example application.  Suppose I have 
-multiple fridges with multiple compartments, and my significant-other and I want to know its contents at all times. 
-To supply ourselves with this incredibly useful information we will create a Go server with a RESTful API.  To ease 
-the creation of client applications that can communicate with our server, we will create an OpenAPI Specification 
-file describing its API. Once we have that, we can build a frontend to manage fridges and contents in a language of 
-our choice by using the Swagger Codegen! You can find an example that uses
-docker to generate a client [here](https://github.com/masseelch/elk/blob/master/internal/openapi/ent/generate.go).
+To demonstrate `elk`'s OAS generation capabilities, we will build together an example application. Suppose I have
+multiple fridges with multiple compartments, and my significant-other and I want to know its contents at all times. To
+supply ourselves with this incredibly useful information we will create a Go server with a RESTful API. To ease the
+creation of client applications that can communicate with our server, we will create an OpenAPI Specification file
+describing its API. Once we have that, we can build a frontend to manage fridges and contents in a language of our
+choice by using the Swagger Codegen! You can find an example that uses docker to generate a
+client [here](https://github.com/masseelch/elk/blob/master/internal/openapi/ent/generate.go).
 
 Let's create our schema:
 
@@ -116,7 +117,8 @@ func (Fridge) Edges() []ent.Edge {
 }
 ```
 
-```go title="ent/compartment.go"package schema
+```go title="ent/compartment.go"
+package schema
 
 import (
 	"entgo.io/ent"
@@ -142,12 +144,13 @@ func (Compartment) Edges() []ent.Edge {
 		edge.From("fridge", Fridge.Type).
 			Ref("compartments").
 			Unique(),
-		edge.To("contents", Content.Type),
+		edge.To("contents", Item.Type),
 	}
 }
 ```
 
-```go title="ent/content.go"package schema
+```go title="ent/item.go"
+package schema
 
 import (
 	"entgo.io/ent"
@@ -155,20 +158,20 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Content holds the schema definition for the Content entity.
-type Content struct {
+// Item holds the schema definition for the Item entity.
+type Item struct {
 	ent.Schema
 }
 
-// Fields of the Content.
-func (Content) Fields() []ent.Field {
+// Fields of the Item.
+func (Item) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
 	}
 }
 
-// Edges of the Content.
-func (Content) Edges() []ent.Edge {
+// Edges of the Item.
+func (Item) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("compartment", Compartment.Type).
 			Ref("contents").
@@ -185,7 +188,7 @@ go generate ./...
 
 In addition to the files Ent normally generates, another file named `openapi.json` has been created. Copy its contents
 and paste them into the [Swagger Editor](https://editor.swagger.io/). You should see three groups: **Compartment**, **
-Content** and **Fridge**. 
+Item** and **Fridge**. 
 
 <div style={{textAlign: 'center'}}>
   <img alt="This is what Swagger Editor shows" src="https://via.placeholder.com/150" />
@@ -202,9 +205,9 @@ the expected request data and all the possible responses. Great!
 
 ### Basic Configuration
 
-The description of our API does not yet reflect what it does, let's change that! `elk` provides easy-to-use configuration
-builders to manipulate the generated OAS file. Open up `ent/entc.go` and pass in the updated title and description of
-our Fridge API:
+The description of our API does not yet reflect what it does, let's change that! `elk` provides easy-to-use
+configuration builders to manipulate the generated OAS file. Open up `ent/entc.go` and pass in the updated title and
+description of our Fridge API:
 
 ```go title="ent/entc.go"
 //go:build ignore
@@ -226,7 +229,7 @@ func main() {
 			"openapi.json",
 			// It is a Content-Management-System ...
 			elk.SpecTitle("Fridge CMS"), 
-			// You can use CommonMark syntax.
+			// You can use CommonMark syntax (https://commonmark.org/).
 			elk.SpecDescription("API to manage fridges and their cooled contents. **ICY!**"), 
 			elk.SpecVersion("0.0.1"),
 		),
@@ -243,12 +246,17 @@ func main() {
 
 Rerunning the code generator will create an updated OAS file you can copy-paste into the Swagger Editor.
 
+<div style={{textAlign: 'center'}}>
+  <img alt="Updated API Info" src="https://via.placeholder.com/150" />
+  <p style={{fontSize: 12}}>Updated API Info</p>
+</div>
+
 ### Operation configuration
 
-We do not want to expose endpoints to delete a fridge (seriously, who would ever want that?!). Fortunately, `elk` lets us
-configure what endpoints to generate and which to ignore. `elk`s default policy is to expose all routes. You can either
-change this behaviour to not expose any route but those explicitly asked for, or you can just tell `elk` to exclude the
-DELETE operation on the Fridge by using an `elk.SchemaAnnotation`:
+We do not want to expose endpoints to delete a fridge (seriously, who would ever want that?!). Fortunately, `elk` lets
+us configure what endpoints to generate and which to ignore. `elk`s default policy is to expose all routes. You can
+either change this behaviour to not expose any route but those explicitly asked for, or you can just tell `elk` to
+exclude the DELETE operation on the Fridge by using an `elk.SchemaAnnotation`:
 
 ```go title="ent/schema/fridge.go"
 // Annotations of the Fridge.
@@ -295,7 +303,32 @@ func main() {
 
 ```
 
-After rerunning the code generator you can spin-up the generated server with the following simple `main.go`:
+Next, re-run code generation:
+
+```shell
+go generate ./...
+```
+
+Observe, that a new directory named `ent/http` was created.
+
+```shell
+» tree ent/http
+ent/http
+├── create.go
+├── delete.go
+├── easyjson.go
+├── handler.go
+├── list.go
+├── read.go
+├── relations.go
+├── request.go
+├── response.go
+└── update.go
+
+0 directories, 10 files
+```
+
+You can spin-up the generated server with this very simple `main.go`:
 
 ```go
 package main
@@ -339,7 +372,8 @@ in any supported language and forget about writing a RESTful client ever _ever_ 
 
 ### Wrapping Up
 
-In this post we introduced a new feature of `elk` - automatic OpenAPI Specification generation. This feature connects between Ent's code-generation capabilities and OpenAPI/Swagger's rich tooling ecosystem. 
+In this post we introduced a new feature of `elk` - automatic OpenAPI Specification generation. This feature connects
+between Ent's code-generation capabilities and OpenAPI/Swagger's rich tooling ecosystem. 
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
