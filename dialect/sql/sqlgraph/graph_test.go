@@ -1637,12 +1637,10 @@ func TestUpdateNodes(t *testing.T) {
 				},
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
 				// Apply field changes.
 				mock.ExpectExec(escape("UPDATE `users` SET `age` = ?, `name` = ?")).
 					WithArgs(30, "Ariel").
 					WillReturnResult(sqlmock.NewResult(0, 2))
-				mock.ExpectCommit()
 			},
 			wantAffected: 2,
 		},
@@ -1664,12 +1662,10 @@ func TestUpdateNodes(t *testing.T) {
 				},
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
 				// Clear fields.
 				mock.ExpectExec(escape("UPDATE `users` SET `age` = NULL, `name` = NULL WHERE `name` = ?")).
 					WithArgs("a8m").
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
 			},
 			wantAffected: 1,
 		},
@@ -1692,14 +1688,54 @@ func TestUpdateNodes(t *testing.T) {
 				},
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
 				// Clear "car" and "workplace" foreign_keys and add "card" and a "parent".
 				mock.ExpectExec(escape("UPDATE `users` SET `workplace_id` = NULL, `car_id` = NULL, `parent_id` = ?, `card_id` = ?")).
 					WithArgs(4, 3).
 					WillReturnResult(sqlmock.NewResult(0, 3))
-				mock.ExpectCommit()
 			},
 			wantAffected: 3,
+		},
+		{
+			name: "o2m",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table: "users",
+					ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				},
+				Fields: FieldMut{
+					Add: []*FieldSpec{
+						{Column: "version", Type: field.TypeInt, Value: 1},
+					},
+				},
+				Edges: EdgeMut{
+					Clear: []*EdgeSpec{
+						{Rel: O2M, Table: "cards", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{20, 30}, IDSpec: &FieldSpec{Column: "id"}}},
+					},
+					Add: []*EdgeSpec{
+						{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{40}, IDSpec: &FieldSpec{Column: "id"}}},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				// Get all node ids first.
+				mock.ExpectQuery(escape("SELECT `id` FROM `users`")).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).
+						AddRow(10))
+				mock.ExpectExec(escape("UPDATE `users` SET `version` = COALESCE(`version`, ?) + ? WHERE `id` = ?")).
+					WithArgs(0, 1, 10).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// Clear "owner_id" column in the "cards" table.
+				mock.ExpectExec(escape("UPDATE `cards` SET `owner_id` = NULL WHERE `id` IN (?, ?) AND `owner_id` = ?")).
+					WithArgs(20, 30, 10).
+					WillReturnResult(sqlmock.NewResult(0, 2))
+				// Set "owner_id" column in the "pets" table.
+				mock.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
+					WithArgs(10, 40).
+					WillReturnResult(sqlmock.NewResult(0, 2))
+				mock.ExpectCommit()
+			},
+			wantAffected: 1,
 		},
 		{
 			name: "m2m_one",
