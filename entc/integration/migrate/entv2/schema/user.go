@@ -124,6 +124,10 @@ func (User) Indexes() []ent.Index {
 		// and defining a new one.
 		index.Fields("phone", "age").
 			Unique(),
+		// PostgreSQL CONCURRENTLY option.
+		index.Fields("title").
+			Annotations(entsql.Concurrently(true)).
+			Unique(),
 	}
 }
 

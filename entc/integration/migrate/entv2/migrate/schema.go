@@ -162,6 +162,14 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{UsersColumns[7], UsersColumns[3]},
 			},
+			{
+				Name:    "user_title",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[9]},
+				Annotation: &entsql.IndexAnnotation{
+					Concurrently: true,
+				},
+			},
 		},
 	}
 	// FriendsColumns holds the columns for the "friends" table.
