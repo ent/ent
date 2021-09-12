@@ -202,6 +202,16 @@ type IndexAnnotation struct {
 	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1`(100), `c2`(200), `c3`)
 	//
 	PrefixColumns map[string]uint
+
+	// Concurrently defines to use CONCURRENTLY option.
+	// In PostgreSQL, the following annotation maps to:
+	//
+	//	index.Fields("column").
+	//		Annotation(entsql.Concurrently(true))
+	//
+	//	CREATE INDEX CONCURRENTLY "table_column" ON "table"("column")
+	//
+	Concurrently bool
 }
 
 // Prefix returns a new index annotation with a single string column index.
@@ -237,6 +247,20 @@ func PrefixColumn(name string, prefix uint) *IndexAnnotation {
 	}
 }
 
+// Concurrently returns a new index annotation.
+// In PostgreSQL, the following annotation maps to:
+//
+//	index.Fields("column").
+//		Annotation(entsql.Concurrently(true))
+//
+//	CREATE INDEX CONCURRENTLY "table_column" ON "table"("column")
+//
+func Concurrently(concurrently bool) *IndexAnnotation {
+	return &IndexAnnotation{
+		Concurrently: concurrently,
+	}
+}
+
 // Name describes the annotation name.
 func (IndexAnnotation) Name() string {
 	return "EntSQLIndexes"
@@ -265,6 +289,9 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		for column, prefix := range ant.PrefixColumns {
 			a.PrefixColumns[column] = prefix
 		}
+	}
+	if ant.Concurrently {
+		a.Concurrently = ant.Concurrently
 	}
 	return a
 }
