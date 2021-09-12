@@ -164,7 +164,7 @@ var (
 			},
 			{
 				Name:    "user_title",
-				Unique:  true,
+				Unique:  false,
 				Columns: []*schema.Column{UsersColumns[9]},
 				Annotation: &entsql.IndexAnnotation{
 					Concurrently: true,
