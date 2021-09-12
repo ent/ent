@@ -191,15 +191,15 @@ and paste them into the [Swagger Editor](https://editor.swagger.io/). You should
 Item** and **Fridge**. 
 
 <div style={{textAlign: 'center'}}>
-  <img alt="This is what Swagger Editor shows" src="https://via.placeholder.com/150" />
-  <p style={{fontSize: 12}}>This is what Swagger Editor shows</p>
+  <img alt="Swagger Editor Example" src="https://entgo.io/images/assets/elkopa/1.png" />
+  <p style={{fontSize: 12}}>Swagger Editor Example</p>
 </div>
 
 If you happen to open up the POST operation tab in the Fridge group, you see a description of
 the expected request data and all the possible responses. Great!
 
 <div style={{textAlign: 'center'}}>
-  <img alt="POST operation on Fridge" src="https://via.placeholder.com/150" />
+  <img alt="POST operation on Fridge" src="https://entgo.io/images/assets/elkopa/2.png" />
   <p style={{fontSize: 12}}>POST operation on Fridge</p>
 </div>
 
@@ -247,7 +247,7 @@ func main() {
 Rerunning the code generator will create an updated OAS file you can copy-paste into the Swagger Editor.
 
 <div style={{textAlign: 'center'}}>
-  <img alt="Updated API Info" src="https://via.placeholder.com/150" />
+  <img alt="Updated API Info" src="https://entgo.io/images/assets/elkopa/3.png" />
   <p style={{fontSize: 12}}>Updated API Info</p>
 </div>
 
@@ -270,7 +270,7 @@ func (Fridge) Annotations() []schema.Annotation {
 And voilà! the DELETE operation is gone.
 
 <div style={{textAlign: 'center'}}>
-  <img alt="DELETE operation is gone" src="https://via.placeholder.com/150" />
+  <img alt="DELETE operation is gone" src="https://entgo.io/images/assets/elkopa/4.png" />
   <p style={{fontSize: 12}}>DELETE operation is gone</p>
 </div>
 
