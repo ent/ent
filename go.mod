@@ -13,7 +13,7 @@ require (
 	github.com/lib/pq v1.10.3
 	github.com/mattn/go-sqlite3 v1.14.8
 	github.com/mitchellh/mapstructure v1.4.1
-	github.com/modern-go/reflect2 v1.0.1
+	github.com/modern-go/reflect2 v1.0.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.1.3
 	github.com/stretchr/objx v0.2.0 // indirect
