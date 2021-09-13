@@ -425,6 +425,9 @@ func (d *Postgres) addIndex(i *Index, table string) *sql.IndexBuilder {
 	for _, c := range i.Columns {
 		idx.Column(c.Name)
 	}
+	if i.Annotation.Concurrently {
+		idx.Concurrently()
+	}
 	return idx
 }
 

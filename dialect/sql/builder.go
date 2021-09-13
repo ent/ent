@@ -523,12 +523,13 @@ func (r *ReferenceBuilder) Query() (string, []interface{}) {
 // IndexBuilder is a builder for `CREATE INDEX` statement.
 type IndexBuilder struct {
 	Builder
-	name    string
-	unique  bool
-	exists  bool
-	table   string
-	method  string
-	columns []string
+	name         string
+	unique       bool
+	exists       bool
+	table        string
+	method       string
+	columns      []string
+	concurrently bool // PostgreSQL CONCURRENTLY option.
 }
 
 // CreateIndex creates a builder for the `CREATE INDEX` statement.
@@ -585,6 +586,12 @@ func (i *IndexBuilder) Columns(columns ...string) *IndexBuilder {
 	return i
 }
 
+// Concurrently appends the `CONCURRENTLY` clause to the `CREATE INDEX` statement.
+func (i *IndexBuilder) Concurrently() *IndexBuilder {
+	i.concurrently = true
+	return i
+}
+
 // Query returns query representation of a reference clause.
 func (i *IndexBuilder) Query() (string, []interface{}) {
 	i.WriteString("CREATE ")
@@ -592,6 +599,9 @@ func (i *IndexBuilder) Query() (string, []interface{}) {
 		i.WriteString("UNIQUE ")
 	}
 	i.WriteString("INDEX ")
+	if i.postgres() && i.concurrently {
+		i.WriteString("CONCURRENTLY ")
+	}
 	if i.exists {
 		i.WriteString("IF NOT EXISTS ")
 	}
