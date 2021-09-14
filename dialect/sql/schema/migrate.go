@@ -208,12 +208,8 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 					return err
 				}
 			}
-			// indexes.
-			for _, idx := range t.Indexes {
-				query, args := m.addIndex(idx, t.Name).Query()
-				if err := tx.Exec(ctx, query, args, nil); err != nil {
-					return fmt.Errorf("create index %q: %w", idx.Name, err)
-				}
+			if err := m.createIndexes(ctx, tx, t.Indexes, t.Name); err != nil {
+				return err
 			}
 		}
 	}
@@ -280,11 +276,8 @@ func (m *Migrate) apply(ctx context.Context, tx dialect.Tx, table string, change
 			return fmt.Errorf("alter table %q: %w", table, err)
 		}
 	}
-	for _, idx := range change.index.add {
-		query, args := m.addIndex(idx, table).Query()
-		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create index %q: %w", table, err)
-		}
+	if err := m.createIndexes(ctx, tx, change.index.add, table); err != nil {
+		return err
 	}
 	return nil
 }
@@ -607,6 +600,16 @@ func (m *Migrate) symbol(name string) string {
 		return name
 	}
 	return fmt.Sprintf("%s_%x", name[:size-33], md5.Sum([]byte(name)))
+}
+
+func (m *Migrate) createIndexes(ctx context.Context, tx dialect.Tx, indexes Indexes, table string) error {
+	for _, idx := range indexes {
+		query, args := m.addIndex(idx, table).Query()
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
+			return fmt.Errorf("create index %q: %w", idx.Name, err)
+		}
+	}
+	return nil
 }
 
 // rollback calls to tx.Rollback and wraps the given error with the rollback error if occurred.
