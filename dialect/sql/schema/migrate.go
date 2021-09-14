@@ -602,10 +602,16 @@ func (m *Migrate) symbol(name string) string {
 	return fmt.Sprintf("%s_%x", name[:size-33], md5.Sum([]byte(name)))
 }
 
-func (m *Migrate) createIndexes(ctx context.Context, tx dialect.Tx, indexes Indexes, table string) error {
-	for _, idx := range indexes {
-		query, args := m.addIndex(idx, table).Query()
-		if err := tx.Exec(ctx, query, args, nil); err != nil {
+func (m *Migrate) createIndexes(ctx context.Context, tx dialect.Tx, idxs Indexes, table string) error {
+	for _, idx := range idxs {
+		i := m.addIndex(idx, table)
+		query, args := i.Query()
+		if i.Concurrently {
+			// `CREATE INDEX CONCURRENTLY` cannot run inside a transaction block
+			if err := m.Exec(ctx, query, args, nil); err != nil {
+				return fmt.Errorf("create index concurrently %q: %w", idx.Name, err)
+			}
+		} else if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("create index %q: %w", idx.Name, err)
 		}
 	}

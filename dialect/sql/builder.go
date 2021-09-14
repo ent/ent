@@ -529,7 +529,7 @@ type IndexBuilder struct {
 	table        string
 	method       string
 	columns      []string
-	concurrently bool // PostgreSQL CONCURRENTLY option.
+	Concurrently bool // `CONCURRENTLY` option (Postgres only).
 }
 
 // CreateIndex creates a builder for the `CREATE INDEX` statement.
@@ -588,7 +588,7 @@ func (i *IndexBuilder) Columns(columns ...string) *IndexBuilder {
 
 // Concurrently appends the `CONCURRENTLY` clause to the `CREATE INDEX` statement.
 func (i *IndexBuilder) Concurrently() *IndexBuilder {
-	i.concurrently = true
+	i.Concurrently = true
 	return i
 }
 
@@ -599,7 +599,7 @@ func (i *IndexBuilder) Query() (string, []interface{}) {
 		i.WriteString("UNIQUE ")
 	}
 	i.WriteString("INDEX ")
-	if i.postgres() && i.concurrently {
+	if i.Concurrently {
 		i.WriteString("CONCURRENTLY ")
 	}
 	if i.exists {
