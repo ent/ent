@@ -586,12 +586,6 @@ func (i *IndexBuilder) Columns(columns ...string) *IndexBuilder {
 	return i
 }
 
-// Concurrently appends the `CONCURRENTLY` clause to the `CREATE INDEX` statement.
-func (i *IndexBuilder) Concurrently() *IndexBuilder {
-	i.Concurrently = true
-	return i
-}
-
 // Query returns query representation of a reference clause.
 func (i *IndexBuilder) Query() (string, []interface{}) {
 	i.WriteString("CREATE ")
