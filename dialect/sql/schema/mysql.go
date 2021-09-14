@@ -259,10 +259,10 @@ func (d *MySQL) cType(c *Column) (t string) {
 		t = c.scanTypeOr("double")
 	case field.TypeTime:
 		t = c.scanTypeOr("timestamp")
-		// In MySQL < v8.0.2, the TIMESTAMP column has both `DEFAULT CURRENT_TIMESTAMP` and
-		// `ON UPDATE CURRENT_TIMESTAMP` if neither is specified explicitly. this behavior is
+		// In MariaDB or in MySQL < v8.0.2, the TIMESTAMP column has both `DEFAULT CURRENT_TIMESTAMP`
+		// and `ON UPDATE CURRENT_TIMESTAMP` if neither is specified explicitly. this behavior is
 		// suppressed if the column is defined with a `DEFAULT` clause or with the `NULL` attribute.
-		if compareVersions(d.version, "8.0.2") == -1 && c.Default == nil {
+		if _, maria := d.mariadb(); maria || compareVersions(d.version, "8.0.2") == -1 && c.Default == nil {
 			c.Nullable = c.Attr == ""
 		}
 	case field.TypeEnum:
