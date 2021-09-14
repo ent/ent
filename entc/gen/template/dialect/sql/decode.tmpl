@@ -71,7 +71,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 		{{- range $i, $fk := $.UnexportedForeignKeys }}
 			{{- $f := $fk.Field }}
 			case {{ if $fk.UserDefined }}{{ $.Package }}.{{ $.ID.Constant }}{{ else }}{{ $.Package }}.ForeignKeys[{{ $i }}]{{ end }}:
-				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsUUID $.ID.IsBytes)) }}
+				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsUUID $f.IsBytes)) }}
 					{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}
