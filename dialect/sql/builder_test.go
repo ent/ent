@@ -1330,6 +1330,18 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE INDEX IF NOT EXISTS "name_index" ON "users" USING "gin"("name")`,
 		},
 		{
+			input: func() Querier {
+				i := Dialect(dialect.Postgres).
+					CreateIndex("name_index").
+					IfNotExists().
+					Table("users").
+					Column("name")
+				i.Concurrently = true
+				return i
+			}(),
+			wantQuery: `CREATE INDEX CONCURRENTLY IF NOT EXISTS "name_index" ON "users"("name")`,
+		},
+		{
 			input: Dialect(dialect.MySQL).
 				CreateIndex("name_index").
 				IfNotExists().
@@ -1349,6 +1361,18 @@ func TestBuilder(t *testing.T) {
 				Table("users").
 				Columns("first", "last"),
 			wantQuery: `CREATE UNIQUE INDEX "unique_name" ON "users"("first", "last")`,
+		},
+		{
+			input: func() Querier {
+				i := Dialect(dialect.Postgres).
+					CreateIndex("unique_name").
+					Unique().
+					Table("users").
+					Columns("first", "last")
+				i.Concurrently = true
+				return i
+			}(),
+			wantQuery: `CREATE UNIQUE INDEX CONCURRENTLY "unique_name" ON "users"("first", "last")`,
 		},
 		{
 			input:     DropIndex("name_index"),
