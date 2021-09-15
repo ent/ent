@@ -657,8 +657,6 @@ func TestPostgres_Create(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectExec(escape(`CREATE UNIQUE INDEX IF NOT EXISTS "users_age" ON "users"("age")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectExec(escape(`CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "user_score" ON "users"("score")`)).
-					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.tableExists("equipment", true)
 				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("equipment").
@@ -670,6 +668,8 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("users_pkey", "id", "t", "t", 0).
 						AddRow("equipment_score", "score", "f", "f", 0))
 				mock.ExpectCommit()
+				mock.ExpectExec(escape(`CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "user_score" ON "users"("score")`)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 		},
 		{
