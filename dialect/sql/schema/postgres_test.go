@@ -622,7 +622,7 @@ func TestPostgres_Create(t *testing.T) {
 						PrimaryKey: c1[0:1],
 						Indexes: Indexes{
 							// Change non-unique index to unique.
-							{Name: "user_score", Columns: c1[2:3], Unique: true},
+							{Name: "user_score", Columns: c1[2:3], Unique: true, Annotation: &entsql.IndexAnnotation{Concurrently: true}},
 						},
 					},
 					{
@@ -657,7 +657,7 @@ func TestPostgres_Create(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectExec(escape(`CREATE UNIQUE INDEX IF NOT EXISTS "users_age" ON "users"("age")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectExec(escape(`CREATE UNIQUE INDEX IF NOT EXISTS "user_score" ON "users"("score")`)).
+				mock.ExpectExec(escape(`CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "user_score" ON "users"("score")`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.tableExists("equipment", true)
 				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).

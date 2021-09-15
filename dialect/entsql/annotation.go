@@ -247,7 +247,7 @@ func PrefixColumn(name string, prefix uint) *IndexAnnotation {
 	}
 }
 
-// Concurrently returns a new index annotation.
+// Concurrently returns a new index annotation with CONCURRENTLY option.
 // In PostgreSQL, the following annotation maps to:
 //
 //	index.Fields("column").

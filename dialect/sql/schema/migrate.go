@@ -619,7 +619,7 @@ func (m *Migrate) createIndexes(ctx context.Context, tx dialect.Tx, idxs Indexes
 	for _, idx := range idxs {
 		i := m.addIndex(idx, table)
 		if i.Concurrently {
-			// `CREATE INDEX CONCURRENTLY` cannot run inside a transaction block
+			// `CREATE INDEX CONCURRENTLY` cannot run inside a transaction block.
 			m.cIdxs[idx.Name] = i
 			continue
 		}
