@@ -117,7 +117,10 @@ type Migrate struct {
 
 // NewMigrate create a migration structure for the given SQL driver.
 func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
-	m := &Migrate{withForeignKeys: true}
+	m := &Migrate{
+		withForeignKeys: true,
+		cIdxs:           make(map[string]*sql.IndexBuilder),
+	}
 	for _, opt := range opts {
 		opt(m)
 	}
