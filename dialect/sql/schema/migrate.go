@@ -105,13 +105,14 @@ func (f CreateFunc) Create(ctx context.Context, tables ...*Table) error {
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
-	universalID     bool     // global unique ids.
-	dropColumns     bool     // drop deleted columns.
-	dropIndexes     bool     // drop deleted indexes.
-	withFixture     bool     // with fks rename fixture.
-	withForeignKeys bool     // with foreign keys
-	typeRanges      []string // types order by their range.
-	hooks           []Hook   // hooks to apply before creation
+	universalID     bool                         // global unique ids.
+	dropColumns     bool                         // drop deleted columns.
+	dropIndexes     bool                         // drop deleted indexes.
+	withFixture     bool                         // with fks rename fixture.
+	withForeignKeys bool                         // with foreign keys.
+	typeRanges      []string                     // types order by their range.
+	hooks           []Hook                       // hooks to apply before creation.
+	cIdxs           map[string]*sql.IndexBuilder // concurrently indexes.
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
@@ -170,7 +171,16 @@ func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
 	if err := m.txCreate(ctx, tx, tables...); err != nil {
 		return rollback(tx, err)
 	}
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	for name, cIdx := range m.cIdxs {
+		query, args := cIdx.Query()
+		if err := m.Exec(ctx, query, args, nil); err != nil {
+			return fmt.Errorf("create index concurrently %q: %w", name, err)
+		}
+	}
+	return nil
 }
 
 func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table) error {
@@ -605,13 +615,13 @@ func (m *Migrate) symbol(name string) string {
 func (m *Migrate) createIndexes(ctx context.Context, tx dialect.Tx, idxs Indexes, table string) error {
 	for _, idx := range idxs {
 		i := m.addIndex(idx, table)
-		query, args := i.Query()
 		if i.Concurrently {
 			// `CREATE INDEX CONCURRENTLY` cannot run inside a transaction block
-			if err := m.Exec(ctx, query, args, nil); err != nil {
-				return fmt.Errorf("create index concurrently %q: %w", idx.Name, err)
-			}
-		} else if err := tx.Exec(ctx, query, args, nil); err != nil {
+			m.cIdxs[idx.Name] = i
+			continue
+		}
+		query, args := i.Query()
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("create index %q: %w", idx.Name, err)
 		}
 	}
