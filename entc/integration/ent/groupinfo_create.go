@@ -287,6 +287,12 @@ func (u *GroupInfoUpsert) UpdateMaxUsers() *GroupInfoUpsert {
 	return u
 }
 
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupInfoUpsert) AddMaxUsers(v int) *GroupInfoUpsert {
+	u.Add(groupinfo.FieldMaxUsers, v)
+	return u
+}
+
 // UpdateNewValues updates the fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -347,6 +353,13 @@ func (u *GroupInfoUpsertOne) UpdateDesc() *GroupInfoUpsertOne {
 func (u *GroupInfoUpsertOne) SetMaxUsers(v int) *GroupInfoUpsertOne {
 	return u.Update(func(s *GroupInfoUpsert) {
 		s.SetMaxUsers(v)
+	})
+}
+
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupInfoUpsertOne) AddMaxUsers(v int) *GroupInfoUpsertOne {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.AddMaxUsers(v)
 	})
 }
 
@@ -579,6 +592,13 @@ func (u *GroupInfoUpsertBulk) UpdateDesc() *GroupInfoUpsertBulk {
 func (u *GroupInfoUpsertBulk) SetMaxUsers(v int) *GroupInfoUpsertBulk {
 	return u.Update(func(s *GroupInfoUpsert) {
 		s.SetMaxUsers(v)
+	})
+}
+
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupInfoUpsertBulk) AddMaxUsers(v int) *GroupInfoUpsertBulk {
+	return u.Update(func(s *GroupInfoUpsert) {
+		s.AddMaxUsers(v)
 	})
 }
 

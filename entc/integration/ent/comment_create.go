@@ -245,6 +245,12 @@ func (u *CommentUpsert) UpdateUniqueInt() *CommentUpsert {
 	return u
 }
 
+// AddUniqueInt adds v to the "unique_int" field.
+func (u *CommentUpsert) AddUniqueInt(v int) *CommentUpsert {
+	u.Add(comment.FieldUniqueInt, v)
+	return u
+}
+
 // SetUniqueFloat sets the "unique_float" field.
 func (u *CommentUpsert) SetUniqueFloat(v float64) *CommentUpsert {
 	u.Set(comment.FieldUniqueFloat, v)
@@ -257,6 +263,12 @@ func (u *CommentUpsert) UpdateUniqueFloat() *CommentUpsert {
 	return u
 }
 
+// AddUniqueFloat adds v to the "unique_float" field.
+func (u *CommentUpsert) AddUniqueFloat(v float64) *CommentUpsert {
+	u.Add(comment.FieldUniqueFloat, v)
+	return u
+}
+
 // SetNillableInt sets the "nillable_int" field.
 func (u *CommentUpsert) SetNillableInt(v int) *CommentUpsert {
 	u.Set(comment.FieldNillableInt, v)
@@ -266,6 +278,12 @@ func (u *CommentUpsert) SetNillableInt(v int) *CommentUpsert {
 // UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
 func (u *CommentUpsert) UpdateNillableInt() *CommentUpsert {
 	u.SetExcluded(comment.FieldNillableInt)
+	return u
+}
+
+// AddNillableInt adds v to the "nillable_int" field.
+func (u *CommentUpsert) AddNillableInt(v int) *CommentUpsert {
+	u.Add(comment.FieldNillableInt, v)
 	return u
 }
 
@@ -324,6 +342,13 @@ func (u *CommentUpsertOne) SetUniqueInt(v int) *CommentUpsertOne {
 	})
 }
 
+// AddUniqueInt adds v to the "unique_int" field.
+func (u *CommentUpsertOne) AddUniqueInt(v int) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.AddUniqueInt(v)
+	})
+}
+
 // UpdateUniqueInt sets the "unique_int" field to the value that was provided on create.
 func (u *CommentUpsertOne) UpdateUniqueInt() *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
@@ -338,6 +363,13 @@ func (u *CommentUpsertOne) SetUniqueFloat(v float64) *CommentUpsertOne {
 	})
 }
 
+// AddUniqueFloat adds v to the "unique_float" field.
+func (u *CommentUpsertOne) AddUniqueFloat(v float64) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.AddUniqueFloat(v)
+	})
+}
+
 // UpdateUniqueFloat sets the "unique_float" field to the value that was provided on create.
 func (u *CommentUpsertOne) UpdateUniqueFloat() *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
@@ -349,6 +381,13 @@ func (u *CommentUpsertOne) UpdateUniqueFloat() *CommentUpsertOne {
 func (u *CommentUpsertOne) SetNillableInt(v int) *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
 		s.SetNillableInt(v)
+	})
+}
+
+// AddNillableInt adds v to the "nillable_int" field.
+func (u *CommentUpsertOne) AddNillableInt(v int) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.AddNillableInt(v)
 	})
 }
 
@@ -576,6 +615,13 @@ func (u *CommentUpsertBulk) SetUniqueInt(v int) *CommentUpsertBulk {
 	})
 }
 
+// AddUniqueInt adds v to the "unique_int" field.
+func (u *CommentUpsertBulk) AddUniqueInt(v int) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.AddUniqueInt(v)
+	})
+}
+
 // UpdateUniqueInt sets the "unique_int" field to the value that was provided on create.
 func (u *CommentUpsertBulk) UpdateUniqueInt() *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
@@ -590,6 +636,13 @@ func (u *CommentUpsertBulk) SetUniqueFloat(v float64) *CommentUpsertBulk {
 	})
 }
 
+// AddUniqueFloat adds v to the "unique_float" field.
+func (u *CommentUpsertBulk) AddUniqueFloat(v float64) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.AddUniqueFloat(v)
+	})
+}
+
 // UpdateUniqueFloat sets the "unique_float" field to the value that was provided on create.
 func (u *CommentUpsertBulk) UpdateUniqueFloat() *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
@@ -601,6 +654,13 @@ func (u *CommentUpsertBulk) UpdateUniqueFloat() *CommentUpsertBulk {
 func (u *CommentUpsertBulk) SetNillableInt(v int) *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
 		s.SetNillableInt(v)
+	})
+}
+
+// AddNillableInt adds v to the "nillable_int" field.
+func (u *CommentUpsertBulk) AddNillableInt(v int) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.AddNillableInt(v)
 	})
 }
 

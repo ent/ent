@@ -430,6 +430,12 @@ func (u *CardUpsert) UpdateBalance() *CardUpsert {
 	return u
 }
 
+// AddBalance adds v to the "balance" field.
+func (u *CardUpsert) AddBalance(v float64) *CardUpsert {
+	u.Add(card.FieldBalance, v)
+	return u
+}
+
 // SetNumber sets the "number" field.
 func (u *CardUpsert) SetNumber(v string) *CardUpsert {
 	u.Set(card.FieldNumber, v)
@@ -534,6 +540,13 @@ func (u *CardUpsertOne) UpdateUpdateTime() *CardUpsertOne {
 func (u *CardUpsertOne) SetBalance(v float64) *CardUpsertOne {
 	return u.Update(func(s *CardUpsert) {
 		s.SetBalance(v)
+	})
+}
+
+// AddBalance adds v to the "balance" field.
+func (u *CardUpsertOne) AddBalance(v float64) *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.AddBalance(v)
 	})
 }
 
@@ -815,6 +828,13 @@ func (u *CardUpsertBulk) UpdateUpdateTime() *CardUpsertBulk {
 func (u *CardUpsertBulk) SetBalance(v float64) *CardUpsertBulk {
 	return u.Update(func(s *CardUpsert) {
 		s.SetBalance(v)
+	})
+}
+
+// AddBalance adds v to the "balance" field.
+func (u *CardUpsertBulk) AddBalance(v float64) *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.AddBalance(v)
 	})
 }
 

@@ -502,6 +502,12 @@ func (u *GroupUpsert) UpdateMaxUsers() *GroupUpsert {
 	return u
 }
 
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupUpsert) AddMaxUsers(v int) *GroupUpsert {
+	u.Add(group.FieldMaxUsers, v)
+	return u
+}
+
 // ClearMaxUsers clears the value of the "max_users" field.
 func (u *GroupUpsert) ClearMaxUsers() *GroupUpsert {
 	u.SetNull(group.FieldMaxUsers)
@@ -615,6 +621,13 @@ func (u *GroupUpsertOne) ClearType() *GroupUpsertOne {
 func (u *GroupUpsertOne) SetMaxUsers(v int) *GroupUpsertOne {
 	return u.Update(func(s *GroupUpsert) {
 		s.SetMaxUsers(v)
+	})
+}
+
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupUpsertOne) AddMaxUsers(v int) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddMaxUsers(v)
 	})
 }
 
@@ -903,6 +916,13 @@ func (u *GroupUpsertBulk) ClearType() *GroupUpsertBulk {
 func (u *GroupUpsertBulk) SetMaxUsers(v int) *GroupUpsertBulk {
 	return u.Update(func(s *GroupUpsert) {
 		s.SetMaxUsers(v)
+	})
+}
+
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupUpsertBulk) AddMaxUsers(v int) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddMaxUsers(v)
 	})
 }
 

@@ -908,14 +908,13 @@ func (i *InsertBuilder) OnConflict(opts ...ConflictOption) *InsertBuilder {
 
 // UpdateSet describes a set of changes of the `DO UPDATE` clause.
 type UpdateSet struct {
-	table   string
 	columns []string
 	update  *UpdateBuilder
 }
 
 // Table returns the table the `UPSERT` statement is executed on.
 func (u *UpdateSet) Table() *SelectTable {
-	return Dialect(u.update.dialect).Table(u.table)
+	return Dialect(u.update.dialect).Table(u.update.table)
 }
 
 // Columns returns all columns in the `INSERT` statement.
@@ -1031,7 +1030,7 @@ func (i *InsertBuilder) writeConflict() {
 	if len(i.conflict.action.update) == 0 {
 		i.AddError(errors.New("missing action for 'DO UPDATE SET' clause"))
 	}
-	u := &UpdateSet{table: i.table, columns: i.columns, update: &UpdateBuilder{}}
+	u := &UpdateSet{columns: i.columns, update: Dialect(i.dialect).Update(i.table)}
 	u.update.Builder = i.Builder
 	for _, f := range i.conflict.action.update {
 		f(u)
@@ -1084,7 +1083,7 @@ func (u *UpdateBuilder) Add(column string, v interface{}) *UpdateBuilder {
 	return u.Set(column, ExprFunc(func(b *Builder) {
 		b.WriteString("COALESCE")
 		b.Nested(func(b *Builder) {
-			b.Ident(column).Comma().WriteByte('0')
+			b.Ident(Table(u.table).C(column)).Comma().WriteByte('0')
 		})
 		b.WriteString(" + ")
 		b.Arg(v)

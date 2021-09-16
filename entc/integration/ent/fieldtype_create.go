@@ -1519,6 +1519,12 @@ func (u *FieldTypeUpsert) UpdateInt() *FieldTypeUpsert {
 	return u
 }
 
+// AddInt adds v to the "int" field.
+func (u *FieldTypeUpsert) AddInt(v int) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldInt, v)
+	return u
+}
+
 // SetInt8 sets the "int8" field.
 func (u *FieldTypeUpsert) SetInt8(v int8) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldInt8, v)
@@ -1528,6 +1534,12 @@ func (u *FieldTypeUpsert) SetInt8(v int8) *FieldTypeUpsert {
 // UpdateInt8 sets the "int8" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateInt8() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldInt8)
+	return u
+}
+
+// AddInt8 adds v to the "int8" field.
+func (u *FieldTypeUpsert) AddInt8(v int8) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldInt8, v)
 	return u
 }
 
@@ -1543,6 +1555,12 @@ func (u *FieldTypeUpsert) UpdateInt16() *FieldTypeUpsert {
 	return u
 }
 
+// AddInt16 adds v to the "int16" field.
+func (u *FieldTypeUpsert) AddInt16(v int16) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldInt16, v)
+	return u
+}
+
 // SetInt32 sets the "int32" field.
 func (u *FieldTypeUpsert) SetInt32(v int32) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldInt32, v)
@@ -1552,6 +1570,12 @@ func (u *FieldTypeUpsert) SetInt32(v int32) *FieldTypeUpsert {
 // UpdateInt32 sets the "int32" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateInt32() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldInt32)
+	return u
+}
+
+// AddInt32 adds v to the "int32" field.
+func (u *FieldTypeUpsert) AddInt32(v int32) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldInt32, v)
 	return u
 }
 
@@ -1567,6 +1591,12 @@ func (u *FieldTypeUpsert) UpdateInt64() *FieldTypeUpsert {
 	return u
 }
 
+// AddInt64 adds v to the "int64" field.
+func (u *FieldTypeUpsert) AddInt64(v int64) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldInt64, v)
+	return u
+}
+
 // SetOptionalInt sets the "optional_int" field.
 func (u *FieldTypeUpsert) SetOptionalInt(v int) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldOptionalInt, v)
@@ -1576,6 +1606,12 @@ func (u *FieldTypeUpsert) SetOptionalInt(v int) *FieldTypeUpsert {
 // UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateOptionalInt() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldOptionalInt)
+	return u
+}
+
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *FieldTypeUpsert) AddOptionalInt(v int) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalInt, v)
 	return u
 }
 
@@ -1597,6 +1633,12 @@ func (u *FieldTypeUpsert) UpdateOptionalInt8() *FieldTypeUpsert {
 	return u
 }
 
+// AddOptionalInt8 adds v to the "optional_int8" field.
+func (u *FieldTypeUpsert) AddOptionalInt8(v int8) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalInt8, v)
+	return u
+}
+
 // ClearOptionalInt8 clears the value of the "optional_int8" field.
 func (u *FieldTypeUpsert) ClearOptionalInt8() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldOptionalInt8)
@@ -1612,6 +1654,12 @@ func (u *FieldTypeUpsert) SetOptionalInt16(v int16) *FieldTypeUpsert {
 // UpdateOptionalInt16 sets the "optional_int16" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateOptionalInt16() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldOptionalInt16)
+	return u
+}
+
+// AddOptionalInt16 adds v to the "optional_int16" field.
+func (u *FieldTypeUpsert) AddOptionalInt16(v int16) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalInt16, v)
 	return u
 }
 
@@ -1633,6 +1681,12 @@ func (u *FieldTypeUpsert) UpdateOptionalInt32() *FieldTypeUpsert {
 	return u
 }
 
+// AddOptionalInt32 adds v to the "optional_int32" field.
+func (u *FieldTypeUpsert) AddOptionalInt32(v int32) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalInt32, v)
+	return u
+}
+
 // ClearOptionalInt32 clears the value of the "optional_int32" field.
 func (u *FieldTypeUpsert) ClearOptionalInt32() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldOptionalInt32)
@@ -1648,6 +1702,12 @@ func (u *FieldTypeUpsert) SetOptionalInt64(v int64) *FieldTypeUpsert {
 // UpdateOptionalInt64 sets the "optional_int64" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateOptionalInt64() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldOptionalInt64)
+	return u
+}
+
+// AddOptionalInt64 adds v to the "optional_int64" field.
+func (u *FieldTypeUpsert) AddOptionalInt64(v int64) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalInt64, v)
 	return u
 }
 
@@ -1669,6 +1729,12 @@ func (u *FieldTypeUpsert) UpdateNillableInt() *FieldTypeUpsert {
 	return u
 }
 
+// AddNillableInt adds v to the "nillable_int" field.
+func (u *FieldTypeUpsert) AddNillableInt(v int) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldNillableInt, v)
+	return u
+}
+
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (u *FieldTypeUpsert) ClearNillableInt() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldNillableInt)
@@ -1684,6 +1750,12 @@ func (u *FieldTypeUpsert) SetNillableInt8(v int8) *FieldTypeUpsert {
 // UpdateNillableInt8 sets the "nillable_int8" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateNillableInt8() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldNillableInt8)
+	return u
+}
+
+// AddNillableInt8 adds v to the "nillable_int8" field.
+func (u *FieldTypeUpsert) AddNillableInt8(v int8) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldNillableInt8, v)
 	return u
 }
 
@@ -1705,6 +1777,12 @@ func (u *FieldTypeUpsert) UpdateNillableInt16() *FieldTypeUpsert {
 	return u
 }
 
+// AddNillableInt16 adds v to the "nillable_int16" field.
+func (u *FieldTypeUpsert) AddNillableInt16(v int16) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldNillableInt16, v)
+	return u
+}
+
 // ClearNillableInt16 clears the value of the "nillable_int16" field.
 func (u *FieldTypeUpsert) ClearNillableInt16() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldNillableInt16)
@@ -1720,6 +1798,12 @@ func (u *FieldTypeUpsert) SetNillableInt32(v int32) *FieldTypeUpsert {
 // UpdateNillableInt32 sets the "nillable_int32" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateNillableInt32() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldNillableInt32)
+	return u
+}
+
+// AddNillableInt32 adds v to the "nillable_int32" field.
+func (u *FieldTypeUpsert) AddNillableInt32(v int32) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldNillableInt32, v)
 	return u
 }
 
@@ -1741,6 +1825,12 @@ func (u *FieldTypeUpsert) UpdateNillableInt64() *FieldTypeUpsert {
 	return u
 }
 
+// AddNillableInt64 adds v to the "nillable_int64" field.
+func (u *FieldTypeUpsert) AddNillableInt64(v int64) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldNillableInt64, v)
+	return u
+}
+
 // ClearNillableInt64 clears the value of the "nillable_int64" field.
 func (u *FieldTypeUpsert) ClearNillableInt64() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldNillableInt64)
@@ -1756,6 +1846,12 @@ func (u *FieldTypeUpsert) SetValidateOptionalInt32(v int32) *FieldTypeUpsert {
 // UpdateValidateOptionalInt32 sets the "validate_optional_int32" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateValidateOptionalInt32() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldValidateOptionalInt32)
+	return u
+}
+
+// AddValidateOptionalInt32 adds v to the "validate_optional_int32" field.
+func (u *FieldTypeUpsert) AddValidateOptionalInt32(v int32) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldValidateOptionalInt32, v)
 	return u
 }
 
@@ -1777,6 +1873,12 @@ func (u *FieldTypeUpsert) UpdateOptionalUint() *FieldTypeUpsert {
 	return u
 }
 
+// AddOptionalUint adds v to the "optional_uint" field.
+func (u *FieldTypeUpsert) AddOptionalUint(v uint) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalUint, v)
+	return u
+}
+
 // ClearOptionalUint clears the value of the "optional_uint" field.
 func (u *FieldTypeUpsert) ClearOptionalUint() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldOptionalUint)
@@ -1792,6 +1894,12 @@ func (u *FieldTypeUpsert) SetOptionalUint8(v uint8) *FieldTypeUpsert {
 // UpdateOptionalUint8 sets the "optional_uint8" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateOptionalUint8() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldOptionalUint8)
+	return u
+}
+
+// AddOptionalUint8 adds v to the "optional_uint8" field.
+func (u *FieldTypeUpsert) AddOptionalUint8(v uint8) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalUint8, v)
 	return u
 }
 
@@ -1813,6 +1921,12 @@ func (u *FieldTypeUpsert) UpdateOptionalUint16() *FieldTypeUpsert {
 	return u
 }
 
+// AddOptionalUint16 adds v to the "optional_uint16" field.
+func (u *FieldTypeUpsert) AddOptionalUint16(v uint16) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalUint16, v)
+	return u
+}
+
 // ClearOptionalUint16 clears the value of the "optional_uint16" field.
 func (u *FieldTypeUpsert) ClearOptionalUint16() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldOptionalUint16)
@@ -1831,6 +1945,12 @@ func (u *FieldTypeUpsert) UpdateOptionalUint32() *FieldTypeUpsert {
 	return u
 }
 
+// AddOptionalUint32 adds v to the "optional_uint32" field.
+func (u *FieldTypeUpsert) AddOptionalUint32(v uint32) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalUint32, v)
+	return u
+}
+
 // ClearOptionalUint32 clears the value of the "optional_uint32" field.
 func (u *FieldTypeUpsert) ClearOptionalUint32() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldOptionalUint32)
@@ -1846,6 +1966,12 @@ func (u *FieldTypeUpsert) SetOptionalUint64(v uint64) *FieldTypeUpsert {
 // UpdateOptionalUint64 sets the "optional_uint64" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateOptionalUint64() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldOptionalUint64)
+	return u
+}
+
+// AddOptionalUint64 adds v to the "optional_uint64" field.
+func (u *FieldTypeUpsert) AddOptionalUint64(v uint64) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalUint64, v)
 	return u
 }
 
@@ -1885,6 +2011,12 @@ func (u *FieldTypeUpsert) UpdateOptionalFloat() *FieldTypeUpsert {
 	return u
 }
 
+// AddOptionalFloat adds v to the "optional_float" field.
+func (u *FieldTypeUpsert) AddOptionalFloat(v float64) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalFloat, v)
+	return u
+}
+
 // ClearOptionalFloat clears the value of the "optional_float" field.
 func (u *FieldTypeUpsert) ClearOptionalFloat() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldOptionalFloat)
@@ -1900,6 +2032,12 @@ func (u *FieldTypeUpsert) SetOptionalFloat32(v float32) *FieldTypeUpsert {
 // UpdateOptionalFloat32 sets the "optional_float32" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateOptionalFloat32() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldOptionalFloat32)
+	return u
+}
+
+// AddOptionalFloat32 adds v to the "optional_float32" field.
+func (u *FieldTypeUpsert) AddOptionalFloat32(v float32) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldOptionalFloat32, v)
 	return u
 }
 
@@ -1936,6 +2074,12 @@ func (u *FieldTypeUpsert) SetDecimal(v float64) *FieldTypeUpsert {
 // UpdateDecimal sets the "decimal" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateDecimal() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldDecimal)
+	return u
+}
+
+// AddDecimal adds v to the "decimal" field.
+func (u *FieldTypeUpsert) AddDecimal(v float64) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldDecimal, v)
 	return u
 }
 
@@ -2044,6 +2188,12 @@ func (u *FieldTypeUpsert) SetDuration(v time.Duration) *FieldTypeUpsert {
 // UpdateDuration sets the "duration" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateDuration() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldDuration)
+	return u
+}
+
+// AddDuration adds v to the "duration" field.
+func (u *FieldTypeUpsert) AddDuration(v time.Duration) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldDuration, v)
 	return u
 }
 
@@ -2293,6 +2443,12 @@ func (u *FieldTypeUpsert) UpdateSchemaInt() *FieldTypeUpsert {
 	return u
 }
 
+// AddSchemaInt adds v to the "schema_int" field.
+func (u *FieldTypeUpsert) AddSchemaInt(v schema.Int) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldSchemaInt, v)
+	return u
+}
+
 // ClearSchemaInt clears the value of the "schema_int" field.
 func (u *FieldTypeUpsert) ClearSchemaInt() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldSchemaInt)
@@ -2308,6 +2464,12 @@ func (u *FieldTypeUpsert) SetSchemaInt8(v schema.Int8) *FieldTypeUpsert {
 // UpdateSchemaInt8 sets the "schema_int8" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateSchemaInt8() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldSchemaInt8)
+	return u
+}
+
+// AddSchemaInt8 adds v to the "schema_int8" field.
+func (u *FieldTypeUpsert) AddSchemaInt8(v schema.Int8) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldSchemaInt8, v)
 	return u
 }
 
@@ -2329,6 +2491,12 @@ func (u *FieldTypeUpsert) UpdateSchemaInt64() *FieldTypeUpsert {
 	return u
 }
 
+// AddSchemaInt64 adds v to the "schema_int64" field.
+func (u *FieldTypeUpsert) AddSchemaInt64(v schema.Int64) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldSchemaInt64, v)
+	return u
+}
+
 // ClearSchemaInt64 clears the value of the "schema_int64" field.
 func (u *FieldTypeUpsert) ClearSchemaInt64() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldSchemaInt64)
@@ -2347,6 +2515,12 @@ func (u *FieldTypeUpsert) UpdateSchemaFloat() *FieldTypeUpsert {
 	return u
 }
 
+// AddSchemaFloat adds v to the "schema_float" field.
+func (u *FieldTypeUpsert) AddSchemaFloat(v schema.Float64) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldSchemaFloat, v)
+	return u
+}
+
 // ClearSchemaFloat clears the value of the "schema_float" field.
 func (u *FieldTypeUpsert) ClearSchemaFloat() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldSchemaFloat)
@@ -2362,6 +2536,12 @@ func (u *FieldTypeUpsert) SetSchemaFloat32(v schema.Float32) *FieldTypeUpsert {
 // UpdateSchemaFloat32 sets the "schema_float32" field to the value that was provided on create.
 func (u *FieldTypeUpsert) UpdateSchemaFloat32() *FieldTypeUpsert {
 	u.SetExcluded(fieldtype.FieldSchemaFloat32)
+	return u
+}
+
+// AddSchemaFloat32 adds v to the "schema_float32" field.
+func (u *FieldTypeUpsert) AddSchemaFloat32(v schema.Float32) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldSchemaFloat32, v)
 	return u
 }
 
@@ -2539,6 +2719,12 @@ func (u *FieldTypeUpsert) UpdateBigInt() *FieldTypeUpsert {
 	return u
 }
 
+// AddBigInt adds v to the "big_int" field.
+func (u *FieldTypeUpsert) AddBigInt(v schema.BigInt) *FieldTypeUpsert {
+	u.Add(fieldtype.FieldBigInt, v)
+	return u
+}
+
 // ClearBigInt clears the value of the "big_int" field.
 func (u *FieldTypeUpsert) ClearBigInt() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldBigInt)
@@ -2612,6 +2798,13 @@ func (u *FieldTypeUpsertOne) SetInt(v int) *FieldTypeUpsertOne {
 	})
 }
 
+// AddInt adds v to the "int" field.
+func (u *FieldTypeUpsertOne) AddInt(v int) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt(v)
+	})
+}
+
 // UpdateInt sets the "int" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateInt() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2623,6 +2816,13 @@ func (u *FieldTypeUpsertOne) UpdateInt() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetInt8(v int8) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetInt8(v)
+	})
+}
+
+// AddInt8 adds v to the "int8" field.
+func (u *FieldTypeUpsertOne) AddInt8(v int8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt8(v)
 	})
 }
 
@@ -2640,6 +2840,13 @@ func (u *FieldTypeUpsertOne) SetInt16(v int16) *FieldTypeUpsertOne {
 	})
 }
 
+// AddInt16 adds v to the "int16" field.
+func (u *FieldTypeUpsertOne) AddInt16(v int16) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt16(v)
+	})
+}
+
 // UpdateInt16 sets the "int16" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateInt16() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2651,6 +2858,13 @@ func (u *FieldTypeUpsertOne) UpdateInt16() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetInt32(v int32) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetInt32(v)
+	})
+}
+
+// AddInt32 adds v to the "int32" field.
+func (u *FieldTypeUpsertOne) AddInt32(v int32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt32(v)
 	})
 }
 
@@ -2668,6 +2882,13 @@ func (u *FieldTypeUpsertOne) SetInt64(v int64) *FieldTypeUpsertOne {
 	})
 }
 
+// AddInt64 adds v to the "int64" field.
+func (u *FieldTypeUpsertOne) AddInt64(v int64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt64(v)
+	})
+}
+
 // UpdateInt64 sets the "int64" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateInt64() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2679,6 +2900,13 @@ func (u *FieldTypeUpsertOne) UpdateInt64() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetOptionalInt(v int) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalInt(v)
+	})
+}
+
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *FieldTypeUpsertOne) AddOptionalInt(v int) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt(v)
 	})
 }
 
@@ -2703,6 +2931,13 @@ func (u *FieldTypeUpsertOne) SetOptionalInt8(v int8) *FieldTypeUpsertOne {
 	})
 }
 
+// AddOptionalInt8 adds v to the "optional_int8" field.
+func (u *FieldTypeUpsertOne) AddOptionalInt8(v int8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt8(v)
+	})
+}
+
 // UpdateOptionalInt8 sets the "optional_int8" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateOptionalInt8() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2721,6 +2956,13 @@ func (u *FieldTypeUpsertOne) ClearOptionalInt8() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetOptionalInt16(v int16) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalInt16(v)
+	})
+}
+
+// AddOptionalInt16 adds v to the "optional_int16" field.
+func (u *FieldTypeUpsertOne) AddOptionalInt16(v int16) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt16(v)
 	})
 }
 
@@ -2745,6 +2987,13 @@ func (u *FieldTypeUpsertOne) SetOptionalInt32(v int32) *FieldTypeUpsertOne {
 	})
 }
 
+// AddOptionalInt32 adds v to the "optional_int32" field.
+func (u *FieldTypeUpsertOne) AddOptionalInt32(v int32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt32(v)
+	})
+}
+
 // UpdateOptionalInt32 sets the "optional_int32" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateOptionalInt32() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2763,6 +3012,13 @@ func (u *FieldTypeUpsertOne) ClearOptionalInt32() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetOptionalInt64(v int64) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalInt64(v)
+	})
+}
+
+// AddOptionalInt64 adds v to the "optional_int64" field.
+func (u *FieldTypeUpsertOne) AddOptionalInt64(v int64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt64(v)
 	})
 }
 
@@ -2787,6 +3043,13 @@ func (u *FieldTypeUpsertOne) SetNillableInt(v int) *FieldTypeUpsertOne {
 	})
 }
 
+// AddNillableInt adds v to the "nillable_int" field.
+func (u *FieldTypeUpsertOne) AddNillableInt(v int) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt(v)
+	})
+}
+
 // UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateNillableInt() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2805,6 +3068,13 @@ func (u *FieldTypeUpsertOne) ClearNillableInt() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetNillableInt8(v int8) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNillableInt8(v)
+	})
+}
+
+// AddNillableInt8 adds v to the "nillable_int8" field.
+func (u *FieldTypeUpsertOne) AddNillableInt8(v int8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt8(v)
 	})
 }
 
@@ -2829,6 +3099,13 @@ func (u *FieldTypeUpsertOne) SetNillableInt16(v int16) *FieldTypeUpsertOne {
 	})
 }
 
+// AddNillableInt16 adds v to the "nillable_int16" field.
+func (u *FieldTypeUpsertOne) AddNillableInt16(v int16) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt16(v)
+	})
+}
+
 // UpdateNillableInt16 sets the "nillable_int16" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateNillableInt16() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2847,6 +3124,13 @@ func (u *FieldTypeUpsertOne) ClearNillableInt16() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetNillableInt32(v int32) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNillableInt32(v)
+	})
+}
+
+// AddNillableInt32 adds v to the "nillable_int32" field.
+func (u *FieldTypeUpsertOne) AddNillableInt32(v int32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt32(v)
 	})
 }
 
@@ -2871,6 +3155,13 @@ func (u *FieldTypeUpsertOne) SetNillableInt64(v int64) *FieldTypeUpsertOne {
 	})
 }
 
+// AddNillableInt64 adds v to the "nillable_int64" field.
+func (u *FieldTypeUpsertOne) AddNillableInt64(v int64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt64(v)
+	})
+}
+
 // UpdateNillableInt64 sets the "nillable_int64" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateNillableInt64() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2889,6 +3180,13 @@ func (u *FieldTypeUpsertOne) ClearNillableInt64() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetValidateOptionalInt32(v int32) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetValidateOptionalInt32(v)
+	})
+}
+
+// AddValidateOptionalInt32 adds v to the "validate_optional_int32" field.
+func (u *FieldTypeUpsertOne) AddValidateOptionalInt32(v int32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddValidateOptionalInt32(v)
 	})
 }
 
@@ -2913,6 +3211,13 @@ func (u *FieldTypeUpsertOne) SetOptionalUint(v uint) *FieldTypeUpsertOne {
 	})
 }
 
+// AddOptionalUint adds v to the "optional_uint" field.
+func (u *FieldTypeUpsertOne) AddOptionalUint(v uint) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint(v)
+	})
+}
+
 // UpdateOptionalUint sets the "optional_uint" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateOptionalUint() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2931,6 +3236,13 @@ func (u *FieldTypeUpsertOne) ClearOptionalUint() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetOptionalUint8(v uint8) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalUint8(v)
+	})
+}
+
+// AddOptionalUint8 adds v to the "optional_uint8" field.
+func (u *FieldTypeUpsertOne) AddOptionalUint8(v uint8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint8(v)
 	})
 }
 
@@ -2955,6 +3267,13 @@ func (u *FieldTypeUpsertOne) SetOptionalUint16(v uint16) *FieldTypeUpsertOne {
 	})
 }
 
+// AddOptionalUint16 adds v to the "optional_uint16" field.
+func (u *FieldTypeUpsertOne) AddOptionalUint16(v uint16) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint16(v)
+	})
+}
+
 // UpdateOptionalUint16 sets the "optional_uint16" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateOptionalUint16() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2976,6 +3295,13 @@ func (u *FieldTypeUpsertOne) SetOptionalUint32(v uint32) *FieldTypeUpsertOne {
 	})
 }
 
+// AddOptionalUint32 adds v to the "optional_uint32" field.
+func (u *FieldTypeUpsertOne) AddOptionalUint32(v uint32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint32(v)
+	})
+}
+
 // UpdateOptionalUint32 sets the "optional_uint32" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateOptionalUint32() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -2994,6 +3320,13 @@ func (u *FieldTypeUpsertOne) ClearOptionalUint32() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetOptionalUint64(v uint64) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalUint64(v)
+	})
+}
+
+// AddOptionalUint64 adds v to the "optional_uint64" field.
+func (u *FieldTypeUpsertOne) AddOptionalUint64(v uint64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint64(v)
 	})
 }
 
@@ -3039,6 +3372,13 @@ func (u *FieldTypeUpsertOne) SetOptionalFloat(v float64) *FieldTypeUpsertOne {
 	})
 }
 
+// AddOptionalFloat adds v to the "optional_float" field.
+func (u *FieldTypeUpsertOne) AddOptionalFloat(v float64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalFloat(v)
+	})
+}
+
 // UpdateOptionalFloat sets the "optional_float" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateOptionalFloat() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -3057,6 +3397,13 @@ func (u *FieldTypeUpsertOne) ClearOptionalFloat() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetOptionalFloat32(v float32) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalFloat32(v)
+	})
+}
+
+// AddOptionalFloat32 adds v to the "optional_float32" field.
+func (u *FieldTypeUpsertOne) AddOptionalFloat32(v float32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalFloat32(v)
 	})
 }
 
@@ -3099,6 +3446,13 @@ func (u *FieldTypeUpsertOne) ClearDatetime() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetDecimal(v float64) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetDecimal(v)
+	})
+}
+
+// AddDecimal adds v to the "decimal" field.
+func (u *FieldTypeUpsertOne) AddDecimal(v float64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddDecimal(v)
 	})
 }
 
@@ -3225,6 +3579,13 @@ func (u *FieldTypeUpsertOne) ClearStringScanner() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetDuration(v time.Duration) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetDuration(v)
+	})
+}
+
+// AddDuration adds v to the "duration" field.
+func (u *FieldTypeUpsertOne) AddDuration(v time.Duration) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddDuration(v)
 	})
 }
 
@@ -3515,6 +3876,13 @@ func (u *FieldTypeUpsertOne) SetSchemaInt(v schema.Int) *FieldTypeUpsertOne {
 	})
 }
 
+// AddSchemaInt adds v to the "schema_int" field.
+func (u *FieldTypeUpsertOne) AddSchemaInt(v schema.Int) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaInt(v)
+	})
+}
+
 // UpdateSchemaInt sets the "schema_int" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateSchemaInt() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -3533,6 +3901,13 @@ func (u *FieldTypeUpsertOne) ClearSchemaInt() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetSchemaInt8(v schema.Int8) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetSchemaInt8(v)
+	})
+}
+
+// AddSchemaInt8 adds v to the "schema_int8" field.
+func (u *FieldTypeUpsertOne) AddSchemaInt8(v schema.Int8) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaInt8(v)
 	})
 }
 
@@ -3557,6 +3932,13 @@ func (u *FieldTypeUpsertOne) SetSchemaInt64(v schema.Int64) *FieldTypeUpsertOne 
 	})
 }
 
+// AddSchemaInt64 adds v to the "schema_int64" field.
+func (u *FieldTypeUpsertOne) AddSchemaInt64(v schema.Int64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaInt64(v)
+	})
+}
+
 // UpdateSchemaInt64 sets the "schema_int64" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateSchemaInt64() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -3578,6 +3960,13 @@ func (u *FieldTypeUpsertOne) SetSchemaFloat(v schema.Float64) *FieldTypeUpsertOn
 	})
 }
 
+// AddSchemaFloat adds v to the "schema_float" field.
+func (u *FieldTypeUpsertOne) AddSchemaFloat(v schema.Float64) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaFloat(v)
+	})
+}
+
 // UpdateSchemaFloat sets the "schema_float" field to the value that was provided on create.
 func (u *FieldTypeUpsertOne) UpdateSchemaFloat() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -3596,6 +3985,13 @@ func (u *FieldTypeUpsertOne) ClearSchemaFloat() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetSchemaFloat32(v schema.Float32) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetSchemaFloat32(v)
+	})
+}
+
+// AddSchemaFloat32 adds v to the "schema_float32" field.
+func (u *FieldTypeUpsertOne) AddSchemaFloat32(v schema.Float32) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaFloat32(v)
 	})
 }
 
@@ -3799,6 +4195,13 @@ func (u *FieldTypeUpsertOne) UpdateTriple() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) SetBigInt(v schema.BigInt) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetBigInt(v)
+	})
+}
+
+// AddBigInt adds v to the "big_int" field.
+func (u *FieldTypeUpsertOne) AddBigInt(v schema.BigInt) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddBigInt(v)
 	})
 }
 
@@ -4048,6 +4451,13 @@ func (u *FieldTypeUpsertBulk) SetInt(v int) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddInt adds v to the "int" field.
+func (u *FieldTypeUpsertBulk) AddInt(v int) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt(v)
+	})
+}
+
 // UpdateInt sets the "int" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateInt() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4059,6 +4469,13 @@ func (u *FieldTypeUpsertBulk) UpdateInt() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetInt8(v int8) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetInt8(v)
+	})
+}
+
+// AddInt8 adds v to the "int8" field.
+func (u *FieldTypeUpsertBulk) AddInt8(v int8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt8(v)
 	})
 }
 
@@ -4076,6 +4493,13 @@ func (u *FieldTypeUpsertBulk) SetInt16(v int16) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddInt16 adds v to the "int16" field.
+func (u *FieldTypeUpsertBulk) AddInt16(v int16) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt16(v)
+	})
+}
+
 // UpdateInt16 sets the "int16" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateInt16() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4087,6 +4511,13 @@ func (u *FieldTypeUpsertBulk) UpdateInt16() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetInt32(v int32) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetInt32(v)
+	})
+}
+
+// AddInt32 adds v to the "int32" field.
+func (u *FieldTypeUpsertBulk) AddInt32(v int32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt32(v)
 	})
 }
 
@@ -4104,6 +4535,13 @@ func (u *FieldTypeUpsertBulk) SetInt64(v int64) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddInt64 adds v to the "int64" field.
+func (u *FieldTypeUpsertBulk) AddInt64(v int64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddInt64(v)
+	})
+}
+
 // UpdateInt64 sets the "int64" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateInt64() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4115,6 +4553,13 @@ func (u *FieldTypeUpsertBulk) UpdateInt64() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetOptionalInt(v int) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalInt(v)
+	})
+}
+
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *FieldTypeUpsertBulk) AddOptionalInt(v int) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt(v)
 	})
 }
 
@@ -4139,6 +4584,13 @@ func (u *FieldTypeUpsertBulk) SetOptionalInt8(v int8) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddOptionalInt8 adds v to the "optional_int8" field.
+func (u *FieldTypeUpsertBulk) AddOptionalInt8(v int8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt8(v)
+	})
+}
+
 // UpdateOptionalInt8 sets the "optional_int8" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateOptionalInt8() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4157,6 +4609,13 @@ func (u *FieldTypeUpsertBulk) ClearOptionalInt8() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetOptionalInt16(v int16) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalInt16(v)
+	})
+}
+
+// AddOptionalInt16 adds v to the "optional_int16" field.
+func (u *FieldTypeUpsertBulk) AddOptionalInt16(v int16) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt16(v)
 	})
 }
 
@@ -4181,6 +4640,13 @@ func (u *FieldTypeUpsertBulk) SetOptionalInt32(v int32) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddOptionalInt32 adds v to the "optional_int32" field.
+func (u *FieldTypeUpsertBulk) AddOptionalInt32(v int32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt32(v)
+	})
+}
+
 // UpdateOptionalInt32 sets the "optional_int32" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateOptionalInt32() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4199,6 +4665,13 @@ func (u *FieldTypeUpsertBulk) ClearOptionalInt32() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetOptionalInt64(v int64) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalInt64(v)
+	})
+}
+
+// AddOptionalInt64 adds v to the "optional_int64" field.
+func (u *FieldTypeUpsertBulk) AddOptionalInt64(v int64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalInt64(v)
 	})
 }
 
@@ -4223,6 +4696,13 @@ func (u *FieldTypeUpsertBulk) SetNillableInt(v int) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddNillableInt adds v to the "nillable_int" field.
+func (u *FieldTypeUpsertBulk) AddNillableInt(v int) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt(v)
+	})
+}
+
 // UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateNillableInt() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4241,6 +4721,13 @@ func (u *FieldTypeUpsertBulk) ClearNillableInt() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetNillableInt8(v int8) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNillableInt8(v)
+	})
+}
+
+// AddNillableInt8 adds v to the "nillable_int8" field.
+func (u *FieldTypeUpsertBulk) AddNillableInt8(v int8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt8(v)
 	})
 }
 
@@ -4265,6 +4752,13 @@ func (u *FieldTypeUpsertBulk) SetNillableInt16(v int16) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddNillableInt16 adds v to the "nillable_int16" field.
+func (u *FieldTypeUpsertBulk) AddNillableInt16(v int16) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt16(v)
+	})
+}
+
 // UpdateNillableInt16 sets the "nillable_int16" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateNillableInt16() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4283,6 +4777,13 @@ func (u *FieldTypeUpsertBulk) ClearNillableInt16() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetNillableInt32(v int32) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetNillableInt32(v)
+	})
+}
+
+// AddNillableInt32 adds v to the "nillable_int32" field.
+func (u *FieldTypeUpsertBulk) AddNillableInt32(v int32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt32(v)
 	})
 }
 
@@ -4307,6 +4808,13 @@ func (u *FieldTypeUpsertBulk) SetNillableInt64(v int64) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddNillableInt64 adds v to the "nillable_int64" field.
+func (u *FieldTypeUpsertBulk) AddNillableInt64(v int64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddNillableInt64(v)
+	})
+}
+
 // UpdateNillableInt64 sets the "nillable_int64" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateNillableInt64() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4325,6 +4833,13 @@ func (u *FieldTypeUpsertBulk) ClearNillableInt64() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetValidateOptionalInt32(v int32) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetValidateOptionalInt32(v)
+	})
+}
+
+// AddValidateOptionalInt32 adds v to the "validate_optional_int32" field.
+func (u *FieldTypeUpsertBulk) AddValidateOptionalInt32(v int32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddValidateOptionalInt32(v)
 	})
 }
 
@@ -4349,6 +4864,13 @@ func (u *FieldTypeUpsertBulk) SetOptionalUint(v uint) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddOptionalUint adds v to the "optional_uint" field.
+func (u *FieldTypeUpsertBulk) AddOptionalUint(v uint) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint(v)
+	})
+}
+
 // UpdateOptionalUint sets the "optional_uint" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateOptionalUint() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4367,6 +4889,13 @@ func (u *FieldTypeUpsertBulk) ClearOptionalUint() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetOptionalUint8(v uint8) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalUint8(v)
+	})
+}
+
+// AddOptionalUint8 adds v to the "optional_uint8" field.
+func (u *FieldTypeUpsertBulk) AddOptionalUint8(v uint8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint8(v)
 	})
 }
 
@@ -4391,6 +4920,13 @@ func (u *FieldTypeUpsertBulk) SetOptionalUint16(v uint16) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddOptionalUint16 adds v to the "optional_uint16" field.
+func (u *FieldTypeUpsertBulk) AddOptionalUint16(v uint16) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint16(v)
+	})
+}
+
 // UpdateOptionalUint16 sets the "optional_uint16" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateOptionalUint16() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4412,6 +4948,13 @@ func (u *FieldTypeUpsertBulk) SetOptionalUint32(v uint32) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddOptionalUint32 adds v to the "optional_uint32" field.
+func (u *FieldTypeUpsertBulk) AddOptionalUint32(v uint32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint32(v)
+	})
+}
+
 // UpdateOptionalUint32 sets the "optional_uint32" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateOptionalUint32() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4430,6 +4973,13 @@ func (u *FieldTypeUpsertBulk) ClearOptionalUint32() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetOptionalUint64(v uint64) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalUint64(v)
+	})
+}
+
+// AddOptionalUint64 adds v to the "optional_uint64" field.
+func (u *FieldTypeUpsertBulk) AddOptionalUint64(v uint64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalUint64(v)
 	})
 }
 
@@ -4475,6 +5025,13 @@ func (u *FieldTypeUpsertBulk) SetOptionalFloat(v float64) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddOptionalFloat adds v to the "optional_float" field.
+func (u *FieldTypeUpsertBulk) AddOptionalFloat(v float64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalFloat(v)
+	})
+}
+
 // UpdateOptionalFloat sets the "optional_float" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateOptionalFloat() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4493,6 +5050,13 @@ func (u *FieldTypeUpsertBulk) ClearOptionalFloat() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetOptionalFloat32(v float32) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetOptionalFloat32(v)
+	})
+}
+
+// AddOptionalFloat32 adds v to the "optional_float32" field.
+func (u *FieldTypeUpsertBulk) AddOptionalFloat32(v float32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddOptionalFloat32(v)
 	})
 }
 
@@ -4535,6 +5099,13 @@ func (u *FieldTypeUpsertBulk) ClearDatetime() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetDecimal(v float64) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetDecimal(v)
+	})
+}
+
+// AddDecimal adds v to the "decimal" field.
+func (u *FieldTypeUpsertBulk) AddDecimal(v float64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddDecimal(v)
 	})
 }
 
@@ -4661,6 +5232,13 @@ func (u *FieldTypeUpsertBulk) ClearStringScanner() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetDuration(v time.Duration) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetDuration(v)
+	})
+}
+
+// AddDuration adds v to the "duration" field.
+func (u *FieldTypeUpsertBulk) AddDuration(v time.Duration) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddDuration(v)
 	})
 }
 
@@ -4951,6 +5529,13 @@ func (u *FieldTypeUpsertBulk) SetSchemaInt(v schema.Int) *FieldTypeUpsertBulk {
 	})
 }
 
+// AddSchemaInt adds v to the "schema_int" field.
+func (u *FieldTypeUpsertBulk) AddSchemaInt(v schema.Int) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaInt(v)
+	})
+}
+
 // UpdateSchemaInt sets the "schema_int" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateSchemaInt() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -4969,6 +5554,13 @@ func (u *FieldTypeUpsertBulk) ClearSchemaInt() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetSchemaInt8(v schema.Int8) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetSchemaInt8(v)
+	})
+}
+
+// AddSchemaInt8 adds v to the "schema_int8" field.
+func (u *FieldTypeUpsertBulk) AddSchemaInt8(v schema.Int8) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaInt8(v)
 	})
 }
 
@@ -4993,6 +5585,13 @@ func (u *FieldTypeUpsertBulk) SetSchemaInt64(v schema.Int64) *FieldTypeUpsertBul
 	})
 }
 
+// AddSchemaInt64 adds v to the "schema_int64" field.
+func (u *FieldTypeUpsertBulk) AddSchemaInt64(v schema.Int64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaInt64(v)
+	})
+}
+
 // UpdateSchemaInt64 sets the "schema_int64" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateSchemaInt64() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -5014,6 +5613,13 @@ func (u *FieldTypeUpsertBulk) SetSchemaFloat(v schema.Float64) *FieldTypeUpsertB
 	})
 }
 
+// AddSchemaFloat adds v to the "schema_float" field.
+func (u *FieldTypeUpsertBulk) AddSchemaFloat(v schema.Float64) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaFloat(v)
+	})
+}
+
 // UpdateSchemaFloat sets the "schema_float" field to the value that was provided on create.
 func (u *FieldTypeUpsertBulk) UpdateSchemaFloat() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -5032,6 +5638,13 @@ func (u *FieldTypeUpsertBulk) ClearSchemaFloat() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetSchemaFloat32(v schema.Float32) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetSchemaFloat32(v)
+	})
+}
+
+// AddSchemaFloat32 adds v to the "schema_float32" field.
+func (u *FieldTypeUpsertBulk) AddSchemaFloat32(v schema.Float32) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddSchemaFloat32(v)
 	})
 }
 
@@ -5235,6 +5848,13 @@ func (u *FieldTypeUpsertBulk) UpdateTriple() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) SetBigInt(v schema.BigInt) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.SetBigInt(v)
+	})
+}
+
+// AddBigInt adds v to the "big_int" field.
+func (u *FieldTypeUpsertBulk) AddBigInt(v schema.BigInt) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.AddBigInt(v)
 	})
 }
 

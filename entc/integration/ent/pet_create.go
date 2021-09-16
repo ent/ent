@@ -334,6 +334,12 @@ func (u *PetUpsert) UpdateAge() *PetUpsert {
 	return u
 }
 
+// AddAge adds v to the "age" field.
+func (u *PetUpsert) AddAge(v float64) *PetUpsert {
+	u.Add(pet.FieldAge, v)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *PetUpsert) SetName(v string) *PetUpsert {
 	u.Set(pet.FieldName, v)
@@ -410,6 +416,13 @@ func (u *PetUpsertOne) Update(set func(*PetUpsert)) *PetUpsertOne {
 func (u *PetUpsertOne) SetAge(v float64) *PetUpsertOne {
 	return u.Update(func(s *PetUpsert) {
 		s.SetAge(v)
+	})
+}
+
+// AddAge adds v to the "age" field.
+func (u *PetUpsertOne) AddAge(v float64) *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.AddAge(v)
 	})
 }
 
@@ -663,6 +676,13 @@ func (u *PetUpsertBulk) Update(set func(*PetUpsert)) *PetUpsertBulk {
 func (u *PetUpsertBulk) SetAge(v float64) *PetUpsertBulk {
 	return u.Update(func(s *PetUpsert) {
 		s.SetAge(v)
+	})
+}
+
+// AddAge adds v to the "age" field.
+func (u *PetUpsertBulk) AddAge(v float64) *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.AddAge(v)
 	})
 }
 

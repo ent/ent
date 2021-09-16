@@ -297,8 +297,19 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, u.ID, id)
 	u = client.User.GetX(ctx, u.ID)
 	require.Equal(t, "Mashraki", u.Name)
-	require.Equal(t, 33, u.Age, "address was modified by the UPDATE clause")
+	require.Equal(t, 33, u.Age, "age was modified by the UPDATE clause")
 	require.Equal(t, "localhost", u.Address, "address was modified by the UPDATE clause")
+
+	id = client.User.Create().
+		SetName("Boring").
+		SetAge(33).
+		SetPhone("0000").
+		OnConflictColumns(user.FieldPhone).
+		// Override some of the fields with custom update.
+		AddAge(-1).
+		IDX(ctx)
+	u = client.User.GetX(ctx, id)
+	require.Equal(t, 32, u.Age, "age was modified by the UPDATE clause")
 
 	builders := []*ent.UserCreate{
 		client.User.Create().SetName("A").SetAge(1).SetPhone("0000"), // Duplicate
