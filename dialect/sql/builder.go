@@ -934,6 +934,12 @@ func (u *UpdateSet) Set(column string, v interface{}) *UpdateSet {
 	return u
 }
 
+// Add adds a numeric value to the given column.
+func (u *UpdateSet) Add(column string, v interface{}) *UpdateSet {
+	u.update.Add(column, v)
+	return u
+}
+
 // SetNull sets a column as null value.
 func (u *UpdateSet) SetNull(column string) *UpdateSet {
 	u.update.SetNull(column)
