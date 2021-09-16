@@ -1393,7 +1393,7 @@ func TestUpdateNode(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`age`, 0) + ? WHERE `id` = ? AND `deleted` = ?")).
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND `deleted` = ?")).
 					WithArgs(1, 1, false).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ? AND `deleted` = ?")).
@@ -1722,7 +1722,7 @@ func TestUpdateNodes(t *testing.T) {
 				mock.ExpectQuery(escape("SELECT `id` FROM `users`")).
 					WillReturnRows(sqlmock.NewRows([]string{"id"}).
 						AddRow(10))
-				mock.ExpectExec(escape("UPDATE `users` SET `version` = COALESCE(`version`, 0) + ? WHERE `id` = ?")).
+				mock.ExpectExec(escape("UPDATE `users` SET `version` = COALESCE(`users`.`version`, 0) + ? WHERE `id` = ?")).
 					WithArgs(1, 10).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				// Clear "owner_id" column in the "cards" table.

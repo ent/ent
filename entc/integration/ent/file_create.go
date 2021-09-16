@@ -426,6 +426,12 @@ func (u *FileUpsert) UpdateSize() *FileUpsert {
 	return u
 }
 
+// AddSize adds v to the "size" field.
+func (u *FileUpsert) AddSize(v int) *FileUpsert {
+	u.Add(file.FieldSize, v)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *FileUpsert) SetName(v string) *FileUpsert {
 	u.Set(file.FieldName, v)
@@ -538,6 +544,13 @@ func (u *FileUpsertOne) Update(set func(*FileUpsert)) *FileUpsertOne {
 func (u *FileUpsertOne) SetSize(v int) *FileUpsertOne {
 	return u.Update(func(s *FileUpsert) {
 		s.SetSize(v)
+	})
+}
+
+// AddSize adds v to the "size" field.
+func (u *FileUpsertOne) AddSize(v int) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.AddSize(v)
 	})
 }
 
@@ -833,6 +846,13 @@ func (u *FileUpsertBulk) Update(set func(*FileUpsert)) *FileUpsertBulk {
 func (u *FileUpsertBulk) SetSize(v int) *FileUpsertBulk {
 	return u.Update(func(s *FileUpsert) {
 		s.SetSize(v)
+	})
+}
+
+// AddSize adds v to the "size" field.
+func (u *FileUpsertBulk) AddSize(v int) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.AddSize(v)
 	})
 }
 

@@ -445,7 +445,7 @@ func TestBuilder(t *testing.T) {
 			input: Update("users").
 				Add("age", 1).
 				Where(HasPrefix("nickname", "a8m")),
-			wantQuery: "UPDATE `users` SET `age` = COALESCE(`age`, 0) + ? WHERE `nickname` LIKE ?",
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`users`.`age`, 0) + ? WHERE `nickname` LIKE ?",
 			wantArgs:  []interface{}{1, "a8m%"},
 		},
 		{
@@ -453,7 +453,7 @@ func TestBuilder(t *testing.T) {
 				Update("users").
 				Add("age", 1).
 				Where(HasPrefix("nickname", "a8m")),
-			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", 0) + $1 WHERE "nickname" LIKE $2`,
+			wantQuery: `UPDATE "users" SET "age" = COALESCE("users"."age", 0) + $1 WHERE "nickname" LIKE $2`,
 			wantArgs:  []interface{}{1, "a8m%"},
 		},
 		{
@@ -462,7 +462,7 @@ func TestBuilder(t *testing.T) {
 				Set("nickname", "a8m").
 				Add("version", 10).
 				Set("name", "mashraki"),
-			wantQuery: "UPDATE `users` SET `age` = COALESCE(`age`, 0) + ?, `nickname` = ?, `version` = COALESCE(`version`, 0) + ?, `name` = ?",
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`users`.`age`, 0) + ?, `nickname` = ?, `version` = COALESCE(`users`.`version`, 0) + ?, `name` = ?",
 			wantArgs:  []interface{}{1, "a8m", 10, "mashraki"},
 		},
 		{
@@ -472,7 +472,7 @@ func TestBuilder(t *testing.T) {
 				Set("nickname", "a8m").
 				Add("version", 10).
 				Set("name", "mashraki"),
-			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", 0) + $1, "nickname" = $2, "version" = COALESCE("version", 0) + $3, "name" = $4`,
+			wantQuery: `UPDATE "users" SET "age" = COALESCE("users"."age", 0) + $1, "nickname" = $2, "version" = COALESCE("users"."version", 0) + $3, "name" = $4`,
 			wantArgs:  []interface{}{1, "a8m", 10, "mashraki"},
 		},
 		{
@@ -485,7 +485,7 @@ func TestBuilder(t *testing.T) {
 				Set("first", "ariel").
 				Add("score", 1e5).
 				Where(Or(EQ("age", 1), EQ("age", 2))),
-			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", 0) + $1, "nickname" = $2, "version" = COALESCE("version", 0) + $3, "name" = $4, "first" = $5, "score" = COALESCE("score", 0) + $6 WHERE "age" = $7 OR "age" = $8`,
+			wantQuery: `UPDATE "users" SET "age" = COALESCE("users"."age", 0) + $1, "nickname" = $2, "version" = COALESCE("users"."version", 0) + $3, "name" = $4, "first" = $5, "score" = COALESCE("users"."score", 0) + $6 WHERE "age" = $7 OR "age" = $8`,
 			wantArgs:  []interface{}{1, "a8m", 10, "mashraki", "ariel", 1e5, 1, 2},
 		},
 		{
@@ -1725,7 +1725,7 @@ func TestInsert_OnConflict(t *testing.T) {
 				UpdateWhere(NEQ("updated_at", 0)),
 			).
 			Query()
-		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email", "version" = COALESCE("version", 0) + $4 WHERE "updated_at" <> $5`, query)
+		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email", "version" = COALESCE("users"."version", 0) + $4 WHERE "updated_at" <> $5`, query)
 		require.Equal(t, []interface{}{"1", "user@example.com", "Ariel", 1, 0}, args)
 
 		query, args = Dialect(dialect.Postgres).
@@ -1814,7 +1814,7 @@ func TestInsert_OnConflict(t *testing.T) {
 				}),
 			).
 			Query()
-		require.Equal(t, "INSERT INTO `users` (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `created_at` = NULL, `name` = VALUES(`name`), `version` = COALESCE(`version`, 0) + ?", query)
+		require.Equal(t, "INSERT INTO `users` (`id`, `name`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `created_at` = NULL, `name` = VALUES(`name`), `version` = COALESCE(`users`.`version`, 0) + ?", query)
 		require.Equal(t, []interface{}{"1", "Mashraki", 1}, args)
 
 		query, args = Dialect(dialect.MySQL).

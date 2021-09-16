@@ -288,6 +288,12 @@ func (u *NodeUpsert) UpdateValue() *NodeUpsert {
 	return u
 }
 
+// AddValue adds v to the "value" field.
+func (u *NodeUpsert) AddValue(v int) *NodeUpsert {
+	u.Add(node.FieldValue, v)
+	return u
+}
+
 // ClearValue clears the value of the "value" field.
 func (u *NodeUpsert) ClearValue() *NodeUpsert {
 	u.SetNull(node.FieldValue)
@@ -340,6 +346,13 @@ func (u *NodeUpsertOne) Update(set func(*NodeUpsert)) *NodeUpsertOne {
 func (u *NodeUpsertOne) SetValue(v int) *NodeUpsertOne {
 	return u.Update(func(s *NodeUpsert) {
 		s.SetValue(v)
+	})
+}
+
+// AddValue adds v to the "value" field.
+func (u *NodeUpsertOne) AddValue(v int) *NodeUpsertOne {
+	return u.Update(func(s *NodeUpsert) {
+		s.AddValue(v)
 	})
 }
 
@@ -564,6 +577,13 @@ func (u *NodeUpsertBulk) Update(set func(*NodeUpsert)) *NodeUpsertBulk {
 func (u *NodeUpsertBulk) SetValue(v int) *NodeUpsertBulk {
 	return u.Update(func(s *NodeUpsert) {
 		s.SetValue(v)
+	})
+}
+
+// AddValue adds v to the "value" field.
+func (u *NodeUpsertBulk) AddValue(v int) *NodeUpsertBulk {
+	return u.Update(func(s *NodeUpsert) {
+		s.AddValue(v)
 	})
 }
 

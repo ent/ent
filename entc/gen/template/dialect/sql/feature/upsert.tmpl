@@ -123,6 +123,15 @@ type (
 		return u
 	}
 
+	{{ if $f.SupportsMutationAdd }}
+		{{ $func := print "Add" $f.StructField }}
+		// {{ $func }} adds v to the "{{ $f.Name }}" field.
+		func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
+			u.Add({{ $.Package }}.{{ $f.Constant }}, v)
+			return u
+		}
+	{{ end }}
+
 	{{ if $f.Optional }}
 		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
@@ -188,32 +197,8 @@ func (u *{{ $upsertOne }}) Update(set func(*{{ $upsertSet }})) *{{ $upsertOne }}
 	return u
 }
 
-{{ range $f := $.Fields }}
-	{{ $func := print "Set" $f.StructField }}
-	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func (u *{{ $upsertOne }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertOne }} {
-		return u.Update(func(s *{{ $upsertSet }}) {
-			s.{{ $func }}(v)
-		})
-	}
-
-	{{ $func = print "Update" $f.StructField }}
-	// {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
-	func (u *{{ $upsertOne }}) {{ $func }}() *{{ $upsertOne }} {
-		return u.Update(func(s *{{ $upsertSet }}) {
-			s.{{ $func }}()
-		})
-	}
-
-	{{ if $f.Optional }}
-		{{ $func := print "Clear" $f.StructField }}
-		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
-		func (u *{{ $upsertOne }}) {{ $func }}() *{{ $upsertOne }} {
-			return u.Update(func(s *{{ $upsertSet }}) {
-				s.{{ $func }}()
-			})
-		}
-	{{ end }}
+{{ with extend $ "Upsert" $upsertOne "UpsertSet" $upsertSet }}
+	{{ template "helper/upsert/fields" . }}
 {{ end }}
 
 // Exec executes the query.
@@ -378,32 +363,8 @@ func (u *{{ $upsertBulk }}) Update(set func(*{{ $upsertSet }})) *{{ $upsertBulk 
 	return u
 }
 
-{{ range $f := $.Fields }}
-    {{ $func := print "Set" $f.StructField }}
-    // {{ $func }} sets the "{{ $f.Name }}" field.
-	func (u *{{ $upsertBulk }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertBulk }} {
-		return u.Update(func(s *{{ $upsertSet }}) {
-			s.{{ $func }}(v)
-		})
-	}
-
-    {{ $func = print "Update" $f.StructField }}
-    // {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
-    func (u *{{ $upsertBulk }}) {{ $func }}() *{{ $upsertBulk }} {
-        return u.Update(func(s *{{ $upsertSet }}) {
-            s.{{ $func }}()
-        })
-    }
-
-    {{ if $f.Optional }}
-        {{ $func := print "Clear" $f.StructField }}
-        // {{ $func }} clears the value of the "{{ $f.Name }}" field.
-        func (u *{{ $upsertBulk }}) {{ $func }}() *{{ $upsertBulk }} {
-            return u.Update(func(s *{{ $upsertSet }}) {
-                s.{{ $func }}()
-            })
-        }
-    {{ end }}
+{{ with extend $ "Upsert" $upsertBulk "UpsertSet" $upsertSet }}
+	{{ template "helper/upsert/fields" . }}
 {{ end }}
 
 // Exec executes the query.
@@ -426,3 +387,46 @@ func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
 	}
 }
 {{- end }}
+
+{{ define "helper/upsert/fields" }}
+{{ $upsert := $.Scope.Upsert }}
+{{ $upsertSet := $.Scope.UpsertSet }}
+
+{{ range $f := $.Fields }}
+    {{ $func := print "Set" $f.StructField }}
+    // {{ $func }} sets the "{{ $f.Name }}" field.
+	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+		return u.Update(func(s *{{ $upsertSet }}) {
+			s.{{ $func }}(v)
+		})
+	}
+
+	{{ if $f.SupportsMutationAdd }}
+		{{ $func := print "Add" $f.StructField }}
+		// {{ $func }} adds v to the "{{ $f.Name }}" field.
+		func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+			return u.Update(func(s *{{ $upsertSet }}) {
+				s.{{ $func }}(v)
+			})
+		}
+	{{ end }}
+
+    {{ $func = print "Update" $f.StructField }}
+    // {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
+    func (u *{{ $upsert }}) {{ $func }}() *{{ $upsert }} {
+        return u.Update(func(s *{{ $upsertSet }}) {
+            s.{{ $func }}()
+        })
+    }
+
+    {{ if $f.Optional }}
+        {{ $func := print "Clear" $f.StructField }}
+        // {{ $func }} clears the value of the "{{ $f.Name }}" field.
+        func (u *{{ $upsert }}) {{ $func }}() *{{ $upsert }} {
+            return u.Update(func(s *{{ $upsertSet }}) {
+                s.{{ $func }}()
+            })
+        }
+    {{ end }}
+{{ end }}
+{{ end }}

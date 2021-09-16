@@ -229,6 +229,12 @@ func (u *TaskUpsert) UpdatePriority() *TaskUpsert {
 	return u
 }
 
+// AddPriority adds v to the "priority" field.
+func (u *TaskUpsert) AddPriority(v schema.Priority) *TaskUpsert {
+	u.Add(task.FieldPriority, v)
+	return u
+}
+
 // UpdateNewValues updates the fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -275,6 +281,13 @@ func (u *TaskUpsertOne) Update(set func(*TaskUpsert)) *TaskUpsertOne {
 func (u *TaskUpsertOne) SetPriority(v schema.Priority) *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.SetPriority(v)
+	})
+}
+
+// AddPriority adds v to the "priority" field.
+func (u *TaskUpsertOne) AddPriority(v schema.Priority) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.AddPriority(v)
 	})
 }
 
@@ -493,6 +506,13 @@ func (u *TaskUpsertBulk) Update(set func(*TaskUpsert)) *TaskUpsertBulk {
 func (u *TaskUpsertBulk) SetPriority(v schema.Priority) *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.SetPriority(v)
+	})
+}
+
+// AddPriority adds v to the "priority" field.
+func (u *TaskUpsertBulk) AddPriority(v schema.Priority) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.AddPriority(v)
 	})
 }
 

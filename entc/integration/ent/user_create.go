@@ -828,6 +828,12 @@ func (u *UserUpsert) UpdateOptionalInt() *UserUpsert {
 	return u
 }
 
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *UserUpsert) AddOptionalInt(v int) *UserUpsert {
+	u.Add(user.FieldOptionalInt, v)
+	return u
+}
+
 // ClearOptionalInt clears the value of the "optional_int" field.
 func (u *UserUpsert) ClearOptionalInt() *UserUpsert {
 	u.SetNull(user.FieldOptionalInt)
@@ -843,6 +849,12 @@ func (u *UserUpsert) SetAge(v int) *UserUpsert {
 // UpdateAge sets the "age" field to the value that was provided on create.
 func (u *UserUpsert) UpdateAge() *UserUpsert {
 	u.SetExcluded(user.FieldAge)
+	return u
+}
+
+// AddAge adds v to the "age" field.
+func (u *UserUpsert) AddAge(v int) *UserUpsert {
+	u.Add(user.FieldAge, v)
 	return u
 }
 
@@ -1021,6 +1033,13 @@ func (u *UserUpsertOne) SetOptionalInt(v int) *UserUpsertOne {
 	})
 }
 
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *UserUpsertOne) AddOptionalInt(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddOptionalInt(v)
+	})
+}
+
 // UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
 func (u *UserUpsertOne) UpdateOptionalInt() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
@@ -1039,6 +1058,13 @@ func (u *UserUpsertOne) ClearOptionalInt() *UserUpsertOne {
 func (u *UserUpsertOne) SetAge(v int) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetAge(v)
+	})
+}
+
+// AddAge adds v to the "age" field.
+func (u *UserUpsertOne) AddAge(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddAge(v)
 	})
 }
 
@@ -1407,6 +1433,13 @@ func (u *UserUpsertBulk) SetOptionalInt(v int) *UserUpsertBulk {
 	})
 }
 
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *UserUpsertBulk) AddOptionalInt(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddOptionalInt(v)
+	})
+}
+
 // UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
 func (u *UserUpsertBulk) UpdateOptionalInt() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
@@ -1425,6 +1458,13 @@ func (u *UserUpsertBulk) ClearOptionalInt() *UserUpsertBulk {
 func (u *UserUpsertBulk) SetAge(v int) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetAge(v)
+	})
+}
+
+// AddAge adds v to the "age" field.
+func (u *UserUpsertBulk) AddAge(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddAge(v)
 	})
 }
 
