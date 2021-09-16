@@ -445,16 +445,16 @@ func TestBuilder(t *testing.T) {
 			input: Update("users").
 				Add("age", 1).
 				Where(HasPrefix("nickname", "a8m")),
-			wantQuery: "UPDATE `users` SET `age` = COALESCE(`age`, ?) + ? WHERE `nickname` LIKE ?",
-			wantArgs:  []interface{}{0, 1, "a8m%"},
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`age`, 0) + ? WHERE `nickname` LIKE ?",
+			wantArgs:  []interface{}{1, "a8m%"},
 		},
 		{
 			input: Dialect(dialect.Postgres).
 				Update("users").
 				Add("age", 1).
 				Where(HasPrefix("nickname", "a8m")),
-			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", $1) + $2 WHERE "nickname" LIKE $3`,
-			wantArgs:  []interface{}{0, 1, "a8m%"},
+			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", 0) + $1 WHERE "nickname" LIKE $2`,
+			wantArgs:  []interface{}{1, "a8m%"},
 		},
 		{
 			input: Update("users").
@@ -462,8 +462,8 @@ func TestBuilder(t *testing.T) {
 				Set("nickname", "a8m").
 				Add("version", 10).
 				Set("name", "mashraki"),
-			wantQuery: "UPDATE `users` SET `age` = COALESCE(`age`, ?) + ?, `nickname` = ?, `version` = COALESCE(`version`, ?) + ?, `name` = ?",
-			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki"},
+			wantQuery: "UPDATE `users` SET `age` = COALESCE(`age`, 0) + ?, `nickname` = ?, `version` = COALESCE(`version`, 0) + ?, `name` = ?",
+			wantArgs:  []interface{}{1, "a8m", 10, "mashraki"},
 		},
 		{
 			input: Dialect(dialect.Postgres).
@@ -472,8 +472,8 @@ func TestBuilder(t *testing.T) {
 				Set("nickname", "a8m").
 				Add("version", 10).
 				Set("name", "mashraki"),
-			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", $1) + $2, "nickname" = $3, "version" = COALESCE("version", $4) + $5, "name" = $6`,
-			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki"},
+			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", 0) + $1, "nickname" = $2, "version" = COALESCE("version", 0) + $3, "name" = $4`,
+			wantArgs:  []interface{}{1, "a8m", 10, "mashraki"},
 		},
 		{
 			input: Dialect(dialect.Postgres).
@@ -485,8 +485,8 @@ func TestBuilder(t *testing.T) {
 				Set("first", "ariel").
 				Add("score", 1e5).
 				Where(Or(EQ("age", 1), EQ("age", 2))),
-			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", $1) + $2, "nickname" = $3, "version" = COALESCE("version", $4) + $5, "name" = $6, "first" = $7, "score" = COALESCE("score", $8) + $9 WHERE "age" = $10 OR "age" = $11`,
-			wantArgs:  []interface{}{0, 1, "a8m", 0, 10, "mashraki", "ariel", 0, 1e5, 1, 2},
+			wantQuery: `UPDATE "users" SET "age" = COALESCE("age", 0) + $1, "nickname" = $2, "version" = COALESCE("version", 0) + $3, "name" = $4, "first" = $5, "score" = COALESCE("score", 0) + $6 WHERE "age" = $7 OR "age" = $8`,
+			wantArgs:  []interface{}{1, "a8m", 10, "mashraki", "ariel", 1e5, 1, 2},
 		},
 		{
 			input: Select().

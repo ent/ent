@@ -1078,7 +1078,7 @@ func (u *UpdateBuilder) Add(column string, v interface{}) *UpdateBuilder {
 	return u.Set(column, ExprFunc(func(b *Builder) {
 		b.WriteString("COALESCE")
 		b.Nested(func(b *Builder) {
-			b.Ident(column).Comma().Arg(0)
+			b.Ident(column).Comma().WriteByte('0')
 		})
 		b.WriteString(" + ")
 		b.Arg(v)
