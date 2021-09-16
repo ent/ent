@@ -11,8 +11,7 @@ import (
 
 // IsConstraintError returns true if the error resulted from a DB constraint violation
 func IsConstraintError(err error) bool {
-	var e *ConstraintError
-	return errors.As(err, &e) || IsUniqueConstraintError(err) || IsForeignKeyConstraintError(err)
+	return errors.Is(err, &ConstraintError{}) || IsUniqueConstraintError(err) || IsForeignKeyConstraintError(err)
 }
 
 // IsUniqueConstraintError reports if the error resulted from a DB uniqueness constraint violation.

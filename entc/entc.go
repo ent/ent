@@ -297,7 +297,7 @@ func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
 	if enabled, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); !enabled {
 		return err
 	}
-	if !errors.As(err, &packages.Error{}) && !internal.IsBuildError(err) {
+	if !errors.Is(err, &packages.Error{}) && !internal.IsBuildError(err) {
 		return err
 	}
 	// If the build error comes from the schema package.

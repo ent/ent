@@ -169,11 +169,7 @@ func (e *ValidationError) Unwrap() error {
 
 // IsValidationError returns a boolean indicating whether the error is a validation error.
 func IsValidationError(err error) bool {
-	if err == nil {
-		return false
-	}
-	var e *ValidationError
-	return errors.As(err, &e)
+	return errors.Is(err, &ValidationError{})
 }
 
 // NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
@@ -188,11 +184,7 @@ func (e *NotFoundError) Error() string {
 
 // IsNotFound returns a boolean indicating whether the error is a not found error.
 func IsNotFound(err error) bool {
-	if err == nil {
-		return false
-	}
-	var e *NotFoundError
-	return errors.As(err, &e)
+	return errors.Is(err, &NotFoundError{})
 }
 
 // MaskNotFound masks not found error.
@@ -215,11 +207,7 @@ func (e *NotSingularError) Error() string {
 
 // IsNotSingular returns a boolean indicating whether the error is a not singular error.
 func IsNotSingular(err error) bool {
-	if err == nil {
-		return false
-	}
-	var e *NotSingularError
-	return errors.As(err, &e)
+	return errors.Is(err, &NotSingularError{})
 }
 
 // NotLoadedError returns when trying to get a node that was not loaded by the query.
@@ -234,11 +222,7 @@ func (e *NotLoadedError) Error() string {
 
 // IsNotLoaded returns a boolean indicating whether the error is a not loaded error.
 func IsNotLoaded(err error) bool {
-	if err == nil {
-		return false
-	}
-	var e *NotLoadedError
-	return errors.As(err, &e)
+	return errors.Is(err, &NotLoadedError{})
 }
 
 // ConstraintError returns when trying to create/update one or more entities and
@@ -261,9 +245,5 @@ func (e *ConstraintError) Unwrap() error {
 
 // IsConstraintError returns a boolean indicating whether the error is a constraint failure.
 func IsConstraintError(err error) bool {
-	if err == nil {
-		return false
-	}
-	var e *ConstraintError
-	return errors.As(err, &e)
+	return errors.Is(err, &ConstraintError{})
 }
