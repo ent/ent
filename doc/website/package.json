@@ -26,6 +26,8 @@
     "glob-parent": "^5.1.2",
     "trim": "^0.0.3",
     "browserslist": "^4.16.5",
-    "axios": "0.21.3"
+    "axios": "0.21.3",
+    "set-value": "^4.0.1",
+    "immer": "^9.0.6"
   }
 }
