@@ -424,6 +424,9 @@ func (ftq *FieldTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = ftq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if ftq.unique != nil && *ftq.unique {
+		selector.Distinct()
+	}
 	for _, m := range ftq.modifiers {
 		m(selector)
 	}

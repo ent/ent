@@ -498,6 +498,9 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = pq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if pq.unique != nil && *pq.unique {
+		selector.Distinct()
+	}
 	t1.Schema(pq.schemaConfig.Pet)
 	ctx = internal.NewSchemaConfigContext(ctx, pq.schemaConfig)
 	selector.WithContext(ctx)

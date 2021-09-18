@@ -562,6 +562,9 @@ func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = nq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if nq.unique != nil && *nq.unique {
+		selector.Distinct()
+	}
 	for _, m := range nq.modifiers {
 		m(selector)
 	}
