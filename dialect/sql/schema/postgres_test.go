@@ -59,6 +59,7 @@ func TestPostgres_Create(t *testing.T) {
 					},
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeUUID, Default: "uuid_generate_v4()"},
+						{Name: "block_size", Type: field.TypeInt, Default: "current_setting('block_size')::bigint"},
 						{Name: "name", Type: field.TypeString, Nullable: true, Collation: "he_IL"},
 						{Name: "age", Type: field.TypeInt},
 						{Name: "doc", Type: field.TypeJSON, Nullable: true},
@@ -77,7 +78,7 @@ func TestPostgres_Create(t *testing.T) {
 			before: func(mock pgMock) {
 				mock.start("120000")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape(`CREATE TABLE IF NOT EXISTS "users"("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" varchar NULL COLLATE "he_IL", "age" bigint NOT NULL, "doc" jsonb NULL, "enums" varchar NOT NULL DEFAULT 'a', "price" numeric(5,2) NOT NULL, "strings" text[] NULL, PRIMARY KEY("id"), CHECK (price > 0), CONSTRAINT "valid_name" CHECK (name <> ''))`)).
+				mock.ExpectExec(escape(`CREATE TABLE IF NOT EXISTS "users"("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "block_size" bigint NOT NULL DEFAULT current_setting('block_size')::bigint, "name" varchar NULL COLLATE "he_IL", "age" bigint NOT NULL, "doc" jsonb NULL, "enums" varchar NOT NULL DEFAULT 'a', "price" numeric(5,2) NOT NULL, "strings" text[] NULL, PRIMARY KEY("id"), CHECK (price > 0), CONSTRAINT "valid_name" CHECK (name <> ''))`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -184,12 +185,13 @@ func TestPostgres_Create(t *testing.T) {
 			},
 		},
 		{
-			name: "scan table with default set to serial",
+			name: "scan table with default",
 			tables: []*Table{
 				{
 					Name: "users",
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "block_size", Type: field.TypeInt, Default: "current_setting('block_size')::bigint"},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -202,7 +204,8 @@ func TestPostgres_Create(t *testing.T) {
 				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale"}).
-						AddRow("id", "bigint", "NO", "nextval('users_colname_seq'::regclass)", "int4", nil, nil))
+						AddRow("id", "bigint", "NO", "nextval('users_colname_seq'::regclass)", "int4", nil, nil).
+						AddRow("block_size", "bigint", "NO", "current_setting('block_size')::bigint", "int4", nil, nil))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0))
