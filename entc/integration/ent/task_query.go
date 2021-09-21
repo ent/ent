@@ -419,6 +419,9 @@ func (tq *TaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = tq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if tq.unique != nil && *tq.unique {
+		selector.Distinct()
+	}
 	for _, m := range tq.modifiers {
 		m(selector)
 	}

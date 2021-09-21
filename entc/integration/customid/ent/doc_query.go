@@ -556,6 +556,9 @@ func (dq *DocQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = dq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if dq.unique != nil && *dq.unique {
+		selector.Distinct()
+	}
 	for _, p := range dq.predicates {
 		p(selector)
 	}

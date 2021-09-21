@@ -593,6 +593,9 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = uq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if uq.unique != nil && *uq.unique {
+		selector.Distinct()
+	}
 	for _, m := range uq.modifiers {
 		m(selector)
 	}

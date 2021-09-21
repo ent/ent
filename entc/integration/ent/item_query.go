@@ -419,6 +419,9 @@ func (iq *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = iq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if iq.unique != nil && *iq.unique {
+		selector.Distinct()
+	}
 	for _, m := range iq.modifiers {
 		m(selector)
 	}

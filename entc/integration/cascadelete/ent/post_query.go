@@ -542,6 +542,9 @@ func (pq *PostQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = pq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if pq.unique != nil && *pq.unique {
+		selector.Distinct()
+	}
 	for _, p := range pq.predicates {
 		p(selector)
 	}
