@@ -340,6 +340,16 @@ names, err := client.Pet.
 	Strings(ctx)
 ```
 
+Get all unique pet names.
+
+```go
+names, err := client.Pet.
+	Query().
+	Unique(true).
+	Select(pet.FieldName).
+	Strings(ctx)
+```
+
 Select partial objects and partial associations.gs
 Get all pets and their owners, but select and fill only the `ID` and `Name` fields.
 
