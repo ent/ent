@@ -556,6 +556,9 @@ func (nq *NoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = nq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if nq.unique != nil && *nq.unique {
+		selector.Distinct()
+	}
 	for _, p := range nq.predicates {
 		p(selector)
 	}

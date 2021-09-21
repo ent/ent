@@ -411,6 +411,9 @@ func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = ctq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if ctq.unique != nil && *ctq.unique {
+		selector.Distinct()
+	}
 	for _, p := range ctq.predicates {
 		p(selector)
 	}

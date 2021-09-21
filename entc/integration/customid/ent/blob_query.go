@@ -592,6 +592,9 @@ func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = bq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if bq.unique != nil && *bq.unique {
+		selector.Distinct()
+	}
 	for _, p := range bq.predicates {
 		p(selector)
 	}

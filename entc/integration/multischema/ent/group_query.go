@@ -528,6 +528,9 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = gq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if gq.unique != nil && *gq.unique {
+		selector.Distinct()
+	}
 	t1.Schema(gq.schemaConfig.Group)
 	ctx = internal.NewSchemaConfigContext(ctx, gq.schemaConfig)
 	selector.WithContext(ctx)

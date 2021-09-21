@@ -603,6 +603,9 @@ func (mq *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = mq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if mq.unique != nil && *mq.unique {
+		selector.Distinct()
+	}
 	for _, p := range mq.predicates {
 		p(selector)
 	}

@@ -491,6 +491,9 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = giq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if giq.unique != nil && *giq.unique {
+		selector.Distinct()
+	}
 	for _, m := range giq.modifiers {
 		m(selector)
 	}

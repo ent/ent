@@ -503,6 +503,9 @@ func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = sq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if sq.unique != nil && *sq.unique {
+		selector.Distinct()
+	}
 	for _, m := range sq.modifiers {
 		m(selector)
 	}
