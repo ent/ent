@@ -178,9 +178,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 		selector = {{ $receiver }}.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-    if {{ $receiver }}.unique != nil && *{{ $receiver }}.unique {
-        selector.Distinct()
-    }
+	if {{ $receiver }}.unique != nil && *{{ $receiver }}.unique {
+		selector.Distinct()
+	}
 	{{- /* Allow mutating the sql.Selector by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/query/selector/*" }}
 		{{- range $tmpl := $tmpls }}

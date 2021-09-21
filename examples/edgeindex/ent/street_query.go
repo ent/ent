@@ -490,6 +490,9 @@ func (sq *StreetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = sq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if sq.unique != nil && *sq.unique {
+		selector.Distinct()
+	}
 	for _, p := range sq.predicates {
 		p(selector)
 	}
