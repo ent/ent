@@ -419,6 +419,9 @@ func (cq *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = cq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if cq.unique != nil && *cq.unique {
+		selector.Distinct()
+	}
 	for _, m := range cq.modifiers {
 		m(selector)
 	}

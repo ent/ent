@@ -412,6 +412,9 @@ func (miq *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = miq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if miq.unique != nil && *miq.unique {
+		selector.Distinct()
+	}
 	for _, p := range miq.predicates {
 		p(selector)
 	}

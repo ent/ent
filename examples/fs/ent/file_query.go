@@ -540,6 +540,9 @@ func (fq *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = fq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if fq.unique != nil && *fq.unique {
+		selector.Distinct()
+	}
 	for _, p := range fq.predicates {
 		p(selector)
 	}

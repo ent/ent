@@ -484,6 +484,16 @@ func Select(t *testing.T, client *ent.Client) {
 	require.Empty(a8m.Name)
 	require.Empty(a8m.Nickname)
 
+	client.Pet.CreateBulk(
+		client.Pet.Create().SetName("a"),
+		client.Pet.Create().SetName("a"),
+	).ExecX(ctx)
+	names = client.Pet.Query().Select(pet.FieldName).StringsX(ctx)
+	require.Equal([]string{"a", "a"}, names)
+	names = client.Pet.Query().Unique(true).Select(pet.FieldName).StringsX(ctx)
+	require.Equal([]string{"a"}, names)
+	client.Pet.Delete().ExecX(ctx)
+
 	pets := client.Pet.CreateBulk(
 		client.Pet.Create().SetName("a"),
 		client.Pet.Create().SetName("b"),

@@ -519,6 +519,9 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = gq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if gq.unique != nil && *gq.unique {
+		selector.Distinct()
+	}
 	for _, p := range gq.predicates {
 		p(selector)
 	}

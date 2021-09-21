@@ -417,6 +417,9 @@ func (tq *TenantQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = tq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if tq.unique != nil && *tq.unique {
+		selector.Distinct()
+	}
 	for _, p := range tq.predicates {
 		p(selector)
 	}

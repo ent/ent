@@ -597,6 +597,9 @@ func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = uq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if uq.unique != nil && *uq.unique {
+		selector.Distinct()
+	}
 	t1.Schema(uq.schemaConfig.User)
 	ctx = internal.NewSchemaConfigContext(ctx, uq.schemaConfig)
 	selector.WithContext(ctx)

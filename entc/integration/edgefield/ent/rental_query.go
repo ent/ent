@@ -543,6 +543,9 @@ func (rq *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = rq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
+	if rq.unique != nil && *rq.unique {
+		selector.Distinct()
+	}
 	for _, p := range rq.predicates {
 		p(selector)
 	}
