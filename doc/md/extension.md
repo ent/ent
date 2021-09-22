@@ -144,7 +144,7 @@ func DisallowTypeName(name string) gen.Hook {
 		return gen.GenerateFunc(func(g *gen.Graph) error {
 			for _, node := range g.Nodes {
 				if node.Name == name {
-					return fmt.Errorf("entc: validation failed, type named %q not allowed.", name)
+					return fmt.Errorf("entc: validation failed, type named %q not allowed", name)
 				}
 			}
 			return next.Generate(g)
