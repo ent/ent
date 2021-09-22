@@ -461,6 +461,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	case "text":
 		c.Size = math.MaxUint16
 		c.Type = field.TypeString
+	case "mediumtext":
+		c.Size = 1<<24 - 1
+		c.Type = field.TypeString
 	case "longtext":
 		c.Size = math.MaxInt32
 		c.Type = field.TypeString
