@@ -294,16 +294,38 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		}
 		c.SchemaType = map[string]string{dialect.Postgres: udt.String}
 	}
+	return scanPostgresColumnDefault(c, defaults)
+}
+
+// scanPostgresColumnDefault used to scan defaults for postgres column
+func scanPostgresColumnDefault(c *Column, defaults sql.NullString) (err error) {
+	trimmedDefault := defaults.String
 	switch {
-	case !defaults.Valid || c.Type == field.TypeTime || callExpr(defaults.String):
-		return nil
+	case !defaults.Valid || c.Type == field.TypeTime:
+		return
 	case strings.Contains(defaults.String, "::"):
 		parts := strings.Split(defaults.String, "::")
-		defaults.String = strings.Trim(parts[0], "'")
+		trimmedDefault = parts[0]
 		fallthrough
 	default:
-		return c.ScanDefault(defaults.String)
+		switch {
+		case c.Type == field.TypeString:
+			// string must quote
+			if len(trimmedDefault) >= 2 && trimmedDefault[0] == '\'' && trimmedDefault[0] == trimmedDefault[len(trimmedDefault)-1] {
+				trimmedDefault = strings.Trim(trimmedDefault, "'")
+				err = c.ScanDefault(trimmedDefault)
+			}
+		default:
+			trimmedDefault = strings.Trim(trimmedDefault, "'")
+			err = c.ScanDefault(trimmedDefault)
+		}
+
+		// impossible to accurate detect call, use permissive fallback check
+		if err != nil && strings.ContainsRune(defaults.String, '(') && strings.ContainsRune(defaults.String, ')') {
+			err = nil
+		}
 	}
+	return
 }
 
 // tBuilder returns the TableBuilder for the given table.
@@ -539,27 +561,6 @@ func (d *Postgres) alterColumns(table string, add, modify, drop []*Column) sql.Q
 func (d *Postgres) needsConversion(old, new *Column) bool {
 	oldT, newT := d.cType(old), d.cType(new)
 	return oldT != newT && (oldT != "ARRAY" || !arrayType(newT))
-}
-
-// callExpr reports if the given string ~looks like a function call expression.
-func callExpr(s string) bool {
-	if parts := strings.Split(s, "::"); !strings.HasSuffix(s, ")") && strings.HasSuffix(parts[0], ")") {
-		s = parts[0]
-	}
-	i, j := strings.IndexByte(s, '('), strings.LastIndexByte(s, ')')
-	if i == -1 || i > j || j != len(s)-1 {
-		return false
-	}
-	for i, r := range s[:i] {
-		if !isAlpha(r, i > 0) {
-			return false
-		}
-	}
-	return true
-}
-
-func isAlpha(r rune, digit bool) bool {
-	return 'a' <= r && r <= 'z' || 'A' <= r && r <= 'Z' || r == '_' || digit && '0' <= r && r <= '9'
 }
 
 // arrayType reports if the given string is an array type (e.g. int[], text[2]).
