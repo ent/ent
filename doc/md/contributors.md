@@ -85,6 +85,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/tsingsun"><img src="https://avatars.githubusercontent.com/u/5848549?v=4?s=100" width="100px;" alt=""/><br /><sub><b>李清山</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=tsingsun" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/s-takehana"><img src="https://avatars.githubusercontent.com/u/3423547?v=4?s=100" width="100px;" alt=""/><br /><sub><b>s-takehana</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=s-takehana" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/EndlessIdea"><img src="https://avatars.githubusercontent.com/u/1527796?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kuiba</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=EndlessIdea" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/storyicon"><img src="https://avatars.githubusercontent.com/u/29772821?v=4?s=100" width="100px;" alt=""/><br /><sub><b>storyicon</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=storyicon" title="Code">💻</a></td>
   </tr>
 </table>
 
