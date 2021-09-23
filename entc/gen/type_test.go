@@ -147,6 +147,7 @@ func TestField_EnumName(t *testing.T) {
 		{"MP4", "TypeMP4"},
 		{"unknown", "TypeUnknown"},
 		{"user_data", "TypeUserData"},
+		{"test user", "TypeTestUser"},
 	}
 	for _, tt := range tests {
 		require.Equal(t, tt.enum, Field{Name: "Type"}.EnumName(tt.name))

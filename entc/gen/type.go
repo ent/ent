@@ -1371,16 +1371,16 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 	enums := make([]Enum, 0, len(lf.Enums))
 	values := make(map[string]bool, len(lf.Enums))
 	for i := range lf.Enums {
-		switch name, value := lf.Enums[i].N, lf.Enums[i].V; {
+		switch name, value := f.EnumName(lf.Enums[i].N), lf.Enums[i].V; {
 		case value == "":
 			return nil, fmt.Errorf("%q field value cannot be empty", f.Name)
 		case values[value]:
 			return nil, fmt.Errorf("duplicate values %q for enum field %q", value, f.Name)
-		case strings.IndexFunc(value, unicode.IsSpace) != -1:
-			return nil, fmt.Errorf("enum value %q cannot contain spaces", value)
+		case !token.IsIdentifier(name):
+			return nil, fmt.Errorf("enum %q does not have a valid Go indetifier (%q)", value, name)
 		default:
 			values[value] = true
-			enums = append(enums, Enum{Name: f.EnumName(name), Value: value})
+			enums = append(enums, Enum{Name: name, Value: value})
 		}
 	}
 	if value := lf.DefaultValue; value != nil {

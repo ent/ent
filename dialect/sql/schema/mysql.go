@@ -471,9 +471,15 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeJSON
 	case "enum":
 		c.Type = field.TypeEnum
-		c.Enums = make([]string, len(parts)-1)
-		for i, e := range parts[1:] {
-			c.Enums[i] = strings.Trim(e, "'")
+		// Parse the enum values according to the MySQL format.
+		// github.com/mysql/mysql-server/blob/8.0/sql/field.cc#Field_enum::sql_type
+		values := strings.TrimSuffix(strings.TrimPrefix(c.typ, "enum("), ")")
+		if values == "" {
+			return fmt.Errorf("mysql: unexpected enum type: %q", c.typ)
+		}
+		parts := strings.Split(values, "','")
+		for i := range parts {
+			c.Enums = append(c.Enums, strings.Trim(parts[i], "'"))
 		}
 	case "char":
 		c.Type = field.TypeOther
