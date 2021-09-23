@@ -310,6 +310,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldPhone:       {Type: field.TypeString, Column: user.FieldPhone},
 			user.FieldPassword:    {Type: field.TypeString, Column: user.FieldPassword},
 			user.FieldRole:        {Type: field.TypeEnum, Column: user.FieldRole},
+			user.FieldEmployment:  {Type: field.TypeEnum, Column: user.FieldEmployment},
 			user.FieldSSOCert:     {Type: field.TypeString, Column: user.FieldSSOCert},
 		},
 	}
@@ -1914,6 +1915,11 @@ func (f *UserFilter) WherePassword(p entql.StringP) {
 // WhereRole applies the entql string predicate on the role field.
 func (f *UserFilter) WhereRole(p entql.StringP) {
 	f.Where(p.Field(user.FieldRole))
+}
+
+// WhereEmployment applies the entql string predicate on the employment field.
+func (f *UserFilter) WhereEmployment(p entql.StringP) {
+	f.Where(p.Field(user.FieldEmployment))
 }
 
 // WhereSSOCert applies the entql string predicate on the SSOCert field.

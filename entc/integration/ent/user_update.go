@@ -189,6 +189,20 @@ func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
 	return uu
 }
 
+// SetEmployment sets the "employment" field.
+func (uu *UserUpdate) SetEmployment(u user.Employment) *UserUpdate {
+	uu.mutation.SetEmployment(u)
+	return uu
+}
+
+// SetNillableEmployment sets the "employment" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableEmployment(u *user.Employment) *UserUpdate {
+	if u != nil {
+		uu.SetEmployment(*u)
+	}
+	return uu
+}
+
 // SetSSOCert sets the "SSOCert" field.
 func (uu *UserUpdate) SetSSOCert(s string) *UserUpdate {
 	uu.mutation.SetSSOCert(s)
@@ -638,6 +652,11 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
+	if v, ok := uu.mutation.Employment(); ok {
+		if err := user.EmploymentValidator(v); err != nil {
+			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -764,6 +783,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: user.FieldRole,
+		})
+	}
+	if value, ok := uu.mutation.Employment(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldEmployment,
 		})
 	}
 	if value, ok := uu.mutation.SSOCert(); ok {
@@ -1470,6 +1496,20 @@ func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
 	return uuo
 }
 
+// SetEmployment sets the "employment" field.
+func (uuo *UserUpdateOne) SetEmployment(u user.Employment) *UserUpdateOne {
+	uuo.mutation.SetEmployment(u)
+	return uuo
+}
+
+// SetNillableEmployment sets the "employment" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableEmployment(u *user.Employment) *UserUpdateOne {
+	if u != nil {
+		uuo.SetEmployment(*u)
+	}
+	return uuo
+}
+
 // SetSSOCert sets the "SSOCert" field.
 func (uuo *UserUpdateOne) SetSSOCert(s string) *UserUpdateOne {
 	uuo.mutation.SetSSOCert(s)
@@ -1926,6 +1966,11 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
+	if v, ok := uuo.mutation.Employment(); ok {
+		if err := user.EmploymentValidator(v); err != nil {
+			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -2069,6 +2114,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: user.FieldRole,
+		})
+	}
+	if value, ok := uuo.mutation.Employment(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldEmployment,
 		})
 	}
 	if value, ok := uuo.mutation.SSOCert(); ok {

@@ -891,6 +891,42 @@ func RoleNotIn(vs ...Role) predicate.User {
 	})
 }
 
+// EmploymentEQ applies the EQ predicate on the "employment" field.
+func EmploymentEQ(v Employment) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldEmployment, p.EQ(v))
+	})
+}
+
+// EmploymentNEQ applies the NEQ predicate on the "employment" field.
+func EmploymentNEQ(v Employment) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldEmployment, p.NEQ(v))
+	})
+}
+
+// EmploymentIn applies the In predicate on the "employment" field.
+func EmploymentIn(vs ...Employment) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldEmployment, p.Within(v...))
+	})
+}
+
+// EmploymentNotIn applies the NotIn predicate on the "employment" field.
+func EmploymentNotIn(vs ...Employment) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldEmployment, p.Without(v...))
+	})
+}
+
 // SSOCertEQ applies the EQ predicate on the "SSOCert" field.
 func SSOCertEQ(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {

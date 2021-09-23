@@ -33,6 +33,8 @@ const (
 	FieldPassword = "password"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
+	// FieldEmployment holds the string denoting the employment field in the database.
+	FieldEmployment = "employment"
 	// FieldSSOCert holds the string denoting the ssocert field in the database.
 	FieldSSOCert = "sso_cert"
 	// EdgeCard holds the string denoting the card edge name in mutations.
@@ -124,6 +126,7 @@ var Columns = []string{
 	FieldPhone,
 	FieldPassword,
 	FieldRole,
+	FieldEmployment,
 	FieldSSOCert,
 }
 
@@ -202,9 +205,41 @@ func RoleValidator(r Role) error {
 	}
 }
 
+// Employment defines the type for the "employment" enum field.
+type Employment string
+
+// EmploymentFullTime is the default value of the Employment enum.
+const DefaultEmployment = EmploymentFullTime
+
+// Employment values.
+const (
+	EmploymentFullTime Employment = "Full-Time"
+	EmploymentPartTime Employment = "Part-Time"
+	EmploymentContract Employment = "Contract"
+)
+
+func (e Employment) String() string {
+	return string(e)
+}
+
+// EmploymentValidator is a validator for the "employment" field enum values. It is called by the builders before save.
+func EmploymentValidator(e Employment) error {
+	switch e {
+	case EmploymentFullTime, EmploymentPartTime, EmploymentContract:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for employment field: %q", e)
+	}
+}
+
 // Ptr returns a new pointer to the enum value.
 func (r Role) Ptr() *Role {
 	return &r
+}
+
+// Ptr returns a new pointer to the enum value.
+func (e Employment) Ptr() *Employment {
+	return &e
 }
 
 // comment from another template.
