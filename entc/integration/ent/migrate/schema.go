@@ -371,7 +371,7 @@ var (
 		{Name: "address", Type: field.TypeString, Nullable: true},
 		{Name: "phone", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "password", Type: field.TypeString, Nullable: true},
-		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin", "free-user"}, Default: "user"},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"user", "admin", "free-user", "test user"}, Default: "user"},
 		{Name: "sso_cert", Type: field.TypeString, Nullable: true},
 		{Name: "group_blocked", Type: field.TypeInt, Nullable: true},
 		{Name: "user_spouse", Type: field.TypeInt, Unique: true, Nullable: true},
