@@ -187,6 +187,20 @@ func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
 	return uu
 }
 
+// SetEmployment sets the "employment" field.
+func (uu *UserUpdate) SetEmployment(u user.Employment) *UserUpdate {
+	uu.mutation.SetEmployment(u)
+	return uu
+}
+
+// SetNillableEmployment sets the "employment" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableEmployment(u *user.Employment) *UserUpdate {
+	if u != nil {
+		uu.SetEmployment(*u)
+	}
+	return uu
+}
+
 // SetSSOCert sets the "SSOCert" field.
 func (uu *UserUpdate) SetSSOCert(s string) *UserUpdate {
 	uu.mutation.SetSSOCert(s)
@@ -636,6 +650,11 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
+	if v, ok := uu.mutation.Employment(); ok {
+		if err := user.EmploymentValidator(v); err != nil {
+			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -707,6 +726,9 @@ func (uu *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := uu.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)
+	}
+	if value, ok := uu.mutation.Employment(); ok {
+		v.Property(dsl.Single, user.FieldEmployment, value)
 	}
 	if value, ok := uu.mutation.SSOCert(); ok {
 		v.Property(dsl.Single, user.FieldSSOCert, value)
@@ -1011,6 +1033,20 @@ func (uuo *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
 func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
 	if u != nil {
 		uuo.SetRole(*u)
+	}
+	return uuo
+}
+
+// SetEmployment sets the "employment" field.
+func (uuo *UserUpdateOne) SetEmployment(u user.Employment) *UserUpdateOne {
+	uuo.mutation.SetEmployment(u)
+	return uuo
+}
+
+// SetNillableEmployment sets the "employment" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableEmployment(u *user.Employment) *UserUpdateOne {
+	if u != nil {
+		uuo.SetEmployment(*u)
 	}
 	return uuo
 }
@@ -1471,6 +1507,11 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
+	if v, ok := uuo.mutation.Employment(); ok {
+		if err := user.EmploymentValidator(v); err != nil {
+			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1547,6 +1588,9 @@ func (uuo *UserUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value, ok := uuo.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)
+	}
+	if value, ok := uuo.mutation.Employment(); ok {
+		v.Property(dsl.Single, user.FieldEmployment, value)
 	}
 	if value, ok := uuo.mutation.SSOCert(); ok {
 		v.Property(dsl.Single, user.FieldSSOCert, value)

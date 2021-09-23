@@ -139,6 +139,20 @@ func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 	return uc
 }
 
+// SetEmployment sets the "employment" field.
+func (uc *UserCreate) SetEmployment(u user.Employment) *UserCreate {
+	uc.mutation.SetEmployment(u)
+	return uc
+}
+
+// SetNillableEmployment sets the "employment" field if the given value is not nil.
+func (uc *UserCreate) SetNillableEmployment(u *user.Employment) *UserCreate {
+	if u != nil {
+		uc.SetEmployment(*u)
+	}
+	return uc
+}
+
 // SetSSOCert sets the "SSOCert" field.
 func (uc *UserCreate) SetSSOCert(s string) *UserCreate {
 	uc.mutation.SetSSOCert(s)
@@ -417,6 +431,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultRole
 		uc.mutation.SetRole(v)
 	}
+	if _, ok := uc.mutation.Employment(); !ok {
+		v := user.DefaultEmployment
+		uc.mutation.SetEmployment(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -441,6 +459,14 @@ func (uc *UserCreate) check() error {
 	if v, ok := uc.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
+		}
+	}
+	if _, ok := uc.mutation.Employment(); !ok {
+		return &ValidationError{Name: "employment", err: errors.New(`ent: missing required field "User.employment"`)}
+	}
+	if v, ok := uc.mutation.Employment(); ok {
+		if err := user.EmploymentValidator(v); err != nil {
+			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
 		}
 	}
 	return nil
@@ -542,6 +568,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldRole,
 		})
 		_node.Role = value
+	}
+	if value, ok := uc.mutation.Employment(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldEmployment,
+		})
+		_node.Employment = value
 	}
 	if value, ok := uc.mutation.SSOCert(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -966,6 +1000,18 @@ func (u *UserUpsert) UpdateRole() *UserUpsert {
 	return u
 }
 
+// SetEmployment sets the "employment" field.
+func (u *UserUpsert) SetEmployment(v user.Employment) *UserUpsert {
+	u.Set(user.FieldEmployment, v)
+	return u
+}
+
+// UpdateEmployment sets the "employment" field to the value that was provided on create.
+func (u *UserUpsert) UpdateEmployment() *UserUpsert {
+	u.SetExcluded(user.FieldEmployment)
+	return u
+}
+
 // SetSSOCert sets the "SSOCert" field.
 func (u *UserUpsert) SetSSOCert(v string) *UserUpsert {
 	u.Set(user.FieldSSOCert, v)
@@ -1198,6 +1244,20 @@ func (u *UserUpsertOne) SetRole(v user.Role) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateRole() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateRole()
+	})
+}
+
+// SetEmployment sets the "employment" field.
+func (u *UserUpsertOne) SetEmployment(v user.Employment) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetEmployment(v)
+	})
+}
+
+// UpdateEmployment sets the "employment" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateEmployment() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateEmployment()
 	})
 }
 
@@ -1598,6 +1658,20 @@ func (u *UserUpsertBulk) SetRole(v user.Role) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateRole() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateRole()
+	})
+}
+
+// SetEmployment sets the "employment" field.
+func (u *UserUpsertBulk) SetEmployment(v user.Employment) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetEmployment(v)
+	})
+}
+
+// UpdateEmployment sets the "employment" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateEmployment() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateEmployment()
 	})
 }
 

@@ -1094,6 +1094,54 @@ func RoleNotIn(vs ...Role) predicate.User {
 	})
 }
 
+// EmploymentEQ applies the EQ predicate on the "employment" field.
+func EmploymentEQ(v Employment) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEmployment), v))
+	})
+}
+
+// EmploymentNEQ applies the NEQ predicate on the "employment" field.
+func EmploymentNEQ(v Employment) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldEmployment), v))
+	})
+}
+
+// EmploymentIn applies the In predicate on the "employment" field.
+func EmploymentIn(vs ...Employment) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldEmployment), v...))
+	})
+}
+
+// EmploymentNotIn applies the NotIn predicate on the "employment" field.
+func EmploymentNotIn(vs ...Employment) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldEmployment), v...))
+	})
+}
+
 // SSOCertEQ applies the EQ predicate on the "SSOCert" field.
 func SSOCertEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

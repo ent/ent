@@ -903,7 +903,7 @@ func (f Field) EnumValues() []string {
 
 // EnumName returns the constant name for the enum.
 func (f Field) EnumName(enum string) string {
-	if !token.IsExported(enum) {
+	if !token.IsExported(enum) || !token.IsIdentifier(enum) {
 		enum = pascal(enum)
 	}
 	return pascal(f.Name) + enum

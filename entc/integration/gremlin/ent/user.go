@@ -39,6 +39,8 @@ type User struct {
 	Password string `graphql:"-" json:"-"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
+	// Employment holds the value of the "employment" field.
+	Employment user.Employment `json:"employment,omitempty"`
 	// SSOCert holds the value of the "SSOCert" field.
 	SSOCert string `json:"SSOCert,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -201,17 +203,18 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanu struct {
-		ID          string    `json:"id,omitempty"`
-		OptionalInt int       `json:"optional_int,omitempty"`
-		Age         int       `json:"age,omitempty"`
-		Name        string    `json:"name,omitempty"`
-		Last        string    `json:"last,omitempty"`
-		Nickname    string    `json:"nickname,omitempty"`
-		Address     string    `json:"address,omitempty"`
-		Phone       string    `json:"phone,omitempty"`
-		Password    string    `json:"password,omitempty"`
-		Role        user.Role `json:"role,omitempty"`
-		SSOCert     string    `json:"sso_cert,omitempty"`
+		ID          string          `json:"id,omitempty"`
+		OptionalInt int             `json:"optional_int,omitempty"`
+		Age         int             `json:"age,omitempty"`
+		Name        string          `json:"name,omitempty"`
+		Last        string          `json:"last,omitempty"`
+		Nickname    string          `json:"nickname,omitempty"`
+		Address     string          `json:"address,omitempty"`
+		Phone       string          `json:"phone,omitempty"`
+		Password    string          `json:"password,omitempty"`
+		Role        user.Role       `json:"role,omitempty"`
+		Employment  user.Employment `json:"employment,omitempty"`
+		SSOCert     string          `json:"sso_cert,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -226,6 +229,7 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Phone = scanu.Phone
 	u.Password = scanu.Password
 	u.Role = scanu.Role
+	u.Employment = scanu.Employment
 	u.SSOCert = scanu.SSOCert
 	return nil
 }
@@ -325,6 +329,8 @@ func (u *User) String() string {
 	builder.WriteString(", password=<sensitive>")
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	builder.WriteString(", employment=")
+	builder.WriteString(fmt.Sprintf("%v", u.Employment))
 	builder.WriteString(", SSOCert=")
 	builder.WriteString(u.SSOCert)
 	builder.WriteByte(')')
@@ -341,17 +347,18 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanu []struct {
-		ID          string    `json:"id,omitempty"`
-		OptionalInt int       `json:"optional_int,omitempty"`
-		Age         int       `json:"age,omitempty"`
-		Name        string    `json:"name,omitempty"`
-		Last        string    `json:"last,omitempty"`
-		Nickname    string    `json:"nickname,omitempty"`
-		Address     string    `json:"address,omitempty"`
-		Phone       string    `json:"phone,omitempty"`
-		Password    string    `json:"password,omitempty"`
-		Role        user.Role `json:"role,omitempty"`
-		SSOCert     string    `json:"sso_cert,omitempty"`
+		ID          string          `json:"id,omitempty"`
+		OptionalInt int             `json:"optional_int,omitempty"`
+		Age         int             `json:"age,omitempty"`
+		Name        string          `json:"name,omitempty"`
+		Last        string          `json:"last,omitempty"`
+		Nickname    string          `json:"nickname,omitempty"`
+		Address     string          `json:"address,omitempty"`
+		Phone       string          `json:"phone,omitempty"`
+		Password    string          `json:"password,omitempty"`
+		Role        user.Role       `json:"role,omitempty"`
+		Employment  user.Employment `json:"employment,omitempty"`
+		SSOCert     string          `json:"sso_cert,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -368,6 +375,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 			Phone:       v.Phone,
 			Password:    v.Password,
 			Role:        v.Role,
+			Employment:  v.Employment,
 			SSOCert:     v.SSOCert,
 		})
 	}

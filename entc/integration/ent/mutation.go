@@ -11903,6 +11903,7 @@ type UserMutation struct {
 	phone            *string
 	password         *string
 	role             *user.Role
+	employment       *user.Employment
 	_SSOCert         *string
 	clearedFields    map[string]struct{}
 	card             *int
@@ -12446,6 +12447,42 @@ func (m *UserMutation) OldRole(ctx context.Context) (v user.Role, err error) {
 // ResetRole resets all changes to the "role" field.
 func (m *UserMutation) ResetRole() {
 	m.role = nil
+}
+
+// SetEmployment sets the "employment" field.
+func (m *UserMutation) SetEmployment(u user.Employment) {
+	m.employment = &u
+}
+
+// Employment returns the value of the "employment" field in the mutation.
+func (m *UserMutation) Employment() (r user.Employment, exists bool) {
+	v := m.employment
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEmployment returns the old "employment" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldEmployment(ctx context.Context) (v user.Employment, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldEmployment is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldEmployment requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEmployment: %w", err)
+	}
+	return oldValue.Employment, nil
+}
+
+// ResetEmployment resets all changes to the "employment" field.
+func (m *UserMutation) ResetEmployment() {
+	m.employment = nil
 }
 
 // SetSSOCert sets the "SSOCert" field.
@@ -13050,7 +13087,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.optional_int != nil {
 		fields = append(fields, user.FieldOptionalInt)
 	}
@@ -13077,6 +13114,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.role != nil {
 		fields = append(fields, user.FieldRole)
+	}
+	if m.employment != nil {
+		fields = append(fields, user.FieldEmployment)
 	}
 	if m._SSOCert != nil {
 		fields = append(fields, user.FieldSSOCert)
@@ -13107,6 +13147,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Password()
 	case user.FieldRole:
 		return m.Role()
+	case user.FieldEmployment:
+		return m.Employment()
 	case user.FieldSSOCert:
 		return m.SSOCert()
 	}
@@ -13136,6 +13178,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPassword(ctx)
 	case user.FieldRole:
 		return m.OldRole(ctx)
+	case user.FieldEmployment:
+		return m.OldEmployment(ctx)
 	case user.FieldSSOCert:
 		return m.OldSSOCert(ctx)
 	}
@@ -13209,6 +13253,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRole(v)
+		return nil
+	case user.FieldEmployment:
+		v, ok := value.(user.Employment)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEmployment(v)
 		return nil
 	case user.FieldSSOCert:
 		v, ok := value.(string)
@@ -13358,6 +13409,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldRole:
 		m.ResetRole()
+		return nil
+	case user.FieldEmployment:
+		m.ResetEmployment()
 		return nil
 	case user.FieldSSOCert:
 		m.ResetSSOCert()
