@@ -554,6 +554,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "evanlurvey",
+      "name": "Evan Lurvey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/54965655?v=4",
+      "profile": "https://github.com/evanlurvey",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
