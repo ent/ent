@@ -199,6 +199,9 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			Optional().
 			MaxLen(20).
 			MinLen(3),
+		field.Bytes("sensitive").
+			Optional().
+			Sensitive(),
 		field.Bytes("ip").
 			Optional().
 			GoType(net.IP("127.0.0.1")).

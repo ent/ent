@@ -537,6 +537,12 @@ func (ftc *FieldTypeCreate) SetRawData(b []byte) *FieldTypeCreate {
 	return ftc
 }
 
+// SetSensitive sets the "sensitive" field.
+func (ftc *FieldTypeCreate) SetSensitive(b []byte) *FieldTypeCreate {
+	ftc.mutation.SetSensitive(b)
+	return ftc
+}
+
 // SetIP sets the "ip" field.
 func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 	ftc.mutation.SetIP(n)
@@ -1078,6 +1084,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.RawData(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRawData, value)
+	}
+	if value, ok := ftc.mutation.Sensitive(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSensitive, value)
 	}
 	if value, ok := ftc.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)

@@ -120,6 +120,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldDeleted:               {Type: field.TypeBool, Column: fieldtype.FieldDeleted},
 			fieldtype.FieldDeletedAt:             {Type: field.TypeTime, Column: fieldtype.FieldDeletedAt},
 			fieldtype.FieldRawData:               {Type: field.TypeBytes, Column: fieldtype.FieldRawData},
+			fieldtype.FieldSensitive:             {Type: field.TypeBytes, Column: fieldtype.FieldSensitive},
 			fieldtype.FieldIP:                    {Type: field.TypeBytes, Column: fieldtype.FieldIP},
 			fieldtype.FieldNullInt64:             {Type: field.TypeInt, Column: fieldtype.FieldNullInt64},
 			fieldtype.FieldSchemaInt:             {Type: field.TypeInt, Column: fieldtype.FieldSchemaInt},
@@ -1045,6 +1046,11 @@ func (f *FieldTypeFilter) WhereDeletedAt(p entql.TimeP) {
 // WhereRawData applies the entql []byte predicate on the raw_data field.
 func (f *FieldTypeFilter) WhereRawData(p entql.BytesP) {
 	f.Where(p.Field(fieldtype.FieldRawData))
+}
+
+// WhereSensitive applies the entql []byte predicate on the sensitive field.
+func (f *FieldTypeFilter) WhereSensitive(p entql.BytesP) {
+	f.Where(p.Field(fieldtype.FieldSensitive))
 }
 
 // WhereIP applies the entql []byte predicate on the ip field.

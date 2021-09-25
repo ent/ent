@@ -934,6 +934,18 @@ func (ftu *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetSensitive sets the "sensitive" field.
+func (ftu *FieldTypeUpdate) SetSensitive(b []byte) *FieldTypeUpdate {
+	ftu.mutation.SetSensitive(b)
+	return ftu
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (ftu *FieldTypeUpdate) ClearSensitive() *FieldTypeUpdate {
+	ftu.mutation.ClearSensitive()
+	return ftu
+}
+
 // SetIP sets the "ip" field.
 func (ftu *FieldTypeUpdate) SetIP(n net.IP) *FieldTypeUpdate {
 	ftu.mutation.SetIP(n)
@@ -1628,6 +1640,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.RawData(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRawData, value)
 	}
+	if value, ok := ftu.mutation.Sensitive(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSensitive, value)
+	}
 	if value, ok := ftu.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)
 	}
@@ -1814,6 +1829,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.RawDataCleared() {
 		properties = append(properties, fieldtype.FieldRawData)
+	}
+	if ftu.mutation.SensitiveCleared() {
+		properties = append(properties, fieldtype.FieldSensitive)
 	}
 	if ftu.mutation.IPCleared() {
 		properties = append(properties, fieldtype.FieldIP)
@@ -2771,6 +2789,18 @@ func (ftuo *FieldTypeUpdateOne) ClearRawData() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetSensitive sets the "sensitive" field.
+func (ftuo *FieldTypeUpdateOne) SetSensitive(b []byte) *FieldTypeUpdateOne {
+	ftuo.mutation.SetSensitive(b)
+	return ftuo
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (ftuo *FieldTypeUpdateOne) ClearSensitive() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSensitive()
+	return ftuo
+}
+
 // SetIP sets the "ip" field.
 func (ftuo *FieldTypeUpdateOne) SetIP(n net.IP) *FieldTypeUpdateOne {
 	ftuo.mutation.SetIP(n)
@@ -3477,6 +3507,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.RawData(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRawData, value)
 	}
+	if value, ok := ftuo.mutation.Sensitive(); ok {
+		v.Property(dsl.Single, fieldtype.FieldSensitive, value)
+	}
 	if value, ok := ftuo.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)
 	}
@@ -3663,6 +3696,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.RawDataCleared() {
 		properties = append(properties, fieldtype.FieldRawData)
+	}
+	if ftuo.mutation.SensitiveCleared() {
+		properties = append(properties, fieldtype.FieldSensitive)
 	}
 	if ftuo.mutation.IPCleared() {
 		properties = append(properties, fieldtype.FieldIP)
