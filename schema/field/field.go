@@ -549,6 +549,12 @@ func (b *bytesBuilder) Optional() *bytesBuilder {
 	return b
 }
 
+// Sensitive fields not printable and not serializable.
+func (b *bytesBuilder) Sensitive() *bytesBuilder {
+	b.desc.Sensitive = true
+	return b
+}
+
 // Unique makes the field unique within all vertices of this type.
 // Only supported in PostgreSQL.
 func (b *bytesBuilder) Unique() *bytesBuilder {
