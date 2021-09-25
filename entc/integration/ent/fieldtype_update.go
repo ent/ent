@@ -932,6 +932,18 @@ func (ftu *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetSensitive sets the "sensitive" field.
+func (ftu *FieldTypeUpdate) SetSensitive(b []byte) *FieldTypeUpdate {
+	ftu.mutation.SetSensitive(b)
+	return ftu
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (ftu *FieldTypeUpdate) ClearSensitive() *FieldTypeUpdate {
+	ftu.mutation.ClearSensitive()
+	return ftu
+}
+
 // SetIP sets the "ip" field.
 func (ftu *FieldTypeUpdate) SetIP(n net.IP) *FieldTypeUpdate {
 	ftu.mutation.SetIP(n)
@@ -2118,6 +2130,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldRawData,
 		})
 	}
+	if value, ok := ftu.mutation.Sensitive(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldSensitive,
+		})
+	}
+	if ftu.mutation.SensitiveCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: fieldtype.FieldSensitive,
+		})
+	}
 	if value, ok := ftu.mutation.IP(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
@@ -3294,6 +3319,18 @@ func (ftuo *FieldTypeUpdateOne) SetRawData(b []byte) *FieldTypeUpdateOne {
 // ClearRawData clears the value of the "raw_data" field.
 func (ftuo *FieldTypeUpdateOne) ClearRawData() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearRawData()
+	return ftuo
+}
+
+// SetSensitive sets the "sensitive" field.
+func (ftuo *FieldTypeUpdateOne) SetSensitive(b []byte) *FieldTypeUpdateOne {
+	ftuo.mutation.SetSensitive(b)
+	return ftuo
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (ftuo *FieldTypeUpdateOne) ClearSensitive() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSensitive()
 	return ftuo
 }
 
@@ -4505,6 +4542,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Column: fieldtype.FieldRawData,
+		})
+	}
+	if value, ok := ftuo.mutation.Sensitive(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldSensitive,
+		})
+	}
+	if ftuo.mutation.SensitiveCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: fieldtype.FieldSensitive,
 		})
 	}
 	if value, ok := ftuo.mutation.IP(); ok {

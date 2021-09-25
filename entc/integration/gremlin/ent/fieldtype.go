@@ -112,6 +112,8 @@ type FieldType struct {
 	DeletedAt *sql.NullTime `json:"deleted_at,omitempty"`
 	// RawData holds the value of the "raw_data" field.
 	RawData []byte `json:"raw_data,omitempty"`
+	// Sensitive holds the value of the "sensitive" field.
+	Sensitive []byte `json:"-"`
 	// IP holds the value of the "ip" field.
 	IP net.IP `json:"ip,omitempty"`
 	// NullInt64 holds the value of the "null_int64" field.
@@ -203,6 +205,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Deleted               *sql.NullBool         `json:"deleted,omitempty"`
 		DeletedAt             *sql.NullTime         `json:"deleted_at,omitempty"`
 		RawData               []byte                `json:"raw_data,omitempty"`
+		Sensitive             []byte                `json:"sensitive,omitempty"`
 		IP                    net.IP                `json:"ip,omitempty"`
 		NullInt64             *sql.NullInt64        `json:"null_int64,omitempty"`
 		SchemaInt             schema.Int            `json:"schema_int,omitempty"`
@@ -270,6 +273,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Deleted = scanft.Deleted
 	ft.DeletedAt = scanft.DeletedAt
 	ft.RawData = scanft.RawData
+	ft.Sensitive = scanft.Sensitive
 	ft.IP = scanft.IP
 	ft.NullInt64 = scanft.NullInt64
 	ft.SchemaInt = scanft.SchemaInt
@@ -422,6 +426,7 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
 	builder.WriteString(", raw_data=")
 	builder.WriteString(fmt.Sprintf("%v", ft.RawData))
+	builder.WriteString(", sensitive=<sensitive>")
 	builder.WriteString(", ip=")
 	builder.WriteString(fmt.Sprintf("%v", ft.IP))
 	builder.WriteString(", null_int64=")
@@ -521,6 +526,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Deleted               *sql.NullBool         `json:"deleted,omitempty"`
 		DeletedAt             *sql.NullTime         `json:"deleted_at,omitempty"`
 		RawData               []byte                `json:"raw_data,omitempty"`
+		Sensitive             []byte                `json:"sensitive,omitempty"`
 		IP                    net.IP                `json:"ip,omitempty"`
 		NullInt64             *sql.NullInt64        `json:"null_int64,omitempty"`
 		SchemaInt             schema.Int            `json:"schema_int,omitempty"`
@@ -590,6 +596,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Deleted:               v.Deleted,
 			DeletedAt:             v.DeletedAt,
 			RawData:               v.RawData,
+			Sensitive:             v.Sensitive,
 			IP:                    v.IP,
 			NullInt64:             v.NullInt64,
 			SchemaInt:             v.SchemaInt,

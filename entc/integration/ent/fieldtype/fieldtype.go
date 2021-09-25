@@ -108,6 +108,8 @@ const (
 	FieldDeletedAt = "deleted_at"
 	// FieldRawData holds the string denoting the raw_data field in the database.
 	FieldRawData = "raw_data"
+	// FieldSensitive holds the string denoting the sensitive field in the database.
+	FieldSensitive = "sensitive"
 	// FieldIP holds the string denoting the ip field in the database.
 	FieldIP = "ip"
 	// FieldNullInt64 holds the string denoting the null_int64 field in the database.
@@ -196,6 +198,7 @@ var Columns = []string{
 	FieldDeleted,
 	FieldDeletedAt,
 	FieldRawData,
+	FieldSensitive,
 	FieldIP,
 	FieldNullInt64,
 	FieldSchemaInt,

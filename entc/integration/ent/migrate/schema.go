@@ -113,6 +113,7 @@ var (
 		{Name: "deleted", Type: field.TypeBool, Nullable: true},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "raw_data", Type: field.TypeBytes, Nullable: true, Size: 20},
+		{Name: "sensitive", Type: field.TypeBytes, Nullable: true},
 		{Name: "ip", Type: field.TypeBytes, Nullable: true},
 		{Name: "null_int64", Type: field.TypeInt, Nullable: true},
 		{Name: "schema_int", Type: field.TypeInt, Nullable: true},
@@ -142,7 +143,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "field_types_files_field",
-				Columns:    []*schema.Column{FieldTypesColumns[63]},
+				Columns:    []*schema.Column{FieldTypesColumns[64]},
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

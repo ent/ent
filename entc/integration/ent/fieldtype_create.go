@@ -537,6 +537,12 @@ func (ftc *FieldTypeCreate) SetRawData(b []byte) *FieldTypeCreate {
 	return ftc
 }
 
+// SetSensitive sets the "sensitive" field.
+func (ftc *FieldTypeCreate) SetSensitive(b []byte) *FieldTypeCreate {
+	ftc.mutation.SetSensitive(b)
+	return ftc
+}
+
 // SetIP sets the "ip" field.
 func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
 	ftc.mutation.SetIP(n)
@@ -1300,6 +1306,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldRawData,
 		})
 		_node.RawData = value
+	}
+	if value, ok := ftc.mutation.Sensitive(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldSensitive,
+		})
+		_node.Sensitive = value
 	}
 	if value, ok := ftc.mutation.IP(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -2392,6 +2406,24 @@ func (u *FieldTypeUpsert) UpdateRawData() *FieldTypeUpsert {
 // ClearRawData clears the value of the "raw_data" field.
 func (u *FieldTypeUpsert) ClearRawData() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldRawData)
+	return u
+}
+
+// SetSensitive sets the "sensitive" field.
+func (u *FieldTypeUpsert) SetSensitive(v []byte) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldSensitive, v)
+	return u
+}
+
+// UpdateSensitive sets the "sensitive" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateSensitive() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldSensitive)
+	return u
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (u *FieldTypeUpsert) ClearSensitive() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldSensitive)
 	return u
 }
 
@@ -3824,6 +3856,27 @@ func (u *FieldTypeUpsertOne) UpdateRawData() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) ClearRawData() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearRawData()
+	})
+}
+
+// SetSensitive sets the "sensitive" field.
+func (u *FieldTypeUpsertOne) SetSensitive(v []byte) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSensitive(v)
+	})
+}
+
+// UpdateSensitive sets the "sensitive" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateSensitive() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSensitive()
+	})
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (u *FieldTypeUpsertOne) ClearSensitive() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSensitive()
 	})
 }
 
@@ -5477,6 +5530,27 @@ func (u *FieldTypeUpsertBulk) UpdateRawData() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) ClearRawData() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearRawData()
+	})
+}
+
+// SetSensitive sets the "sensitive" field.
+func (u *FieldTypeUpsertBulk) SetSensitive(v []byte) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetSensitive(v)
+	})
+}
+
+// UpdateSensitive sets the "sensitive" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateSensitive() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateSensitive()
+	})
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (u *FieldTypeUpsertBulk) ClearSensitive() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearSensitive()
 	})
 }
 

@@ -391,6 +391,13 @@ func RawData(v []byte) predicate.FieldType {
 	})
 }
 
+// Sensitive applies equality check predicate on the "sensitive" field. It's identical to SensitiveEQ.
+func Sensitive(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.EQ(v))
+	})
+}
+
 // IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
 func IP(v net.IP) predicate.FieldType {
 	vc := []byte(v)
@@ -3833,6 +3840,84 @@ func RawDataIsNil() predicate.FieldType {
 func RawDataNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldRawData)
+	})
+}
+
+// SensitiveEQ applies the EQ predicate on the "sensitive" field.
+func SensitiveEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.EQ(v))
+	})
+}
+
+// SensitiveNEQ applies the NEQ predicate on the "sensitive" field.
+func SensitiveNEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.NEQ(v))
+	})
+}
+
+// SensitiveIn applies the In predicate on the "sensitive" field.
+func SensitiveIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.Within(v...))
+	})
+}
+
+// SensitiveNotIn applies the NotIn predicate on the "sensitive" field.
+func SensitiveNotIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.Without(v...))
+	})
+}
+
+// SensitiveGT applies the GT predicate on the "sensitive" field.
+func SensitiveGT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.GT(v))
+	})
+}
+
+// SensitiveGTE applies the GTE predicate on the "sensitive" field.
+func SensitiveGTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.GTE(v))
+	})
+}
+
+// SensitiveLT applies the LT predicate on the "sensitive" field.
+func SensitiveLT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.LT(v))
+	})
+}
+
+// SensitiveLTE applies the LTE predicate on the "sensitive" field.
+func SensitiveLTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSensitive, p.LTE(v))
+	})
+}
+
+// SensitiveIsNil applies the IsNil predicate on the "sensitive" field.
+func SensitiveIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldSensitive)
+	})
+}
+
+// SensitiveNotNil applies the NotNil predicate on the "sensitive" field.
+func SensitiveNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldSensitive)
 	})
 }
 

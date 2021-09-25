@@ -400,6 +400,13 @@ func RawData(v []byte) predicate.FieldType {
 	})
 }
 
+// Sensitive applies equality check predicate on the "sensitive" field. It's identical to SensitiveEQ.
+func Sensitive(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSensitive), v))
+	})
+}
+
 // IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
 func IP(v net.IP) predicate.FieldType {
 	vc := []byte(v)
@@ -4464,6 +4471,96 @@ func RawDataIsNil() predicate.FieldType {
 func RawDataNotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldRawData)))
+	})
+}
+
+// SensitiveEQ applies the EQ predicate on the "sensitive" field.
+func SensitiveEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldSensitive), v))
+	})
+}
+
+// SensitiveNEQ applies the NEQ predicate on the "sensitive" field.
+func SensitiveNEQ(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldSensitive), v))
+	})
+}
+
+// SensitiveIn applies the In predicate on the "sensitive" field.
+func SensitiveIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldSensitive), v...))
+	})
+}
+
+// SensitiveNotIn applies the NotIn predicate on the "sensitive" field.
+func SensitiveNotIn(vs ...[]byte) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldSensitive), v...))
+	})
+}
+
+// SensitiveGT applies the GT predicate on the "sensitive" field.
+func SensitiveGT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldSensitive), v))
+	})
+}
+
+// SensitiveGTE applies the GTE predicate on the "sensitive" field.
+func SensitiveGTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldSensitive), v))
+	})
+}
+
+// SensitiveLT applies the LT predicate on the "sensitive" field.
+func SensitiveLT(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldSensitive), v))
+	})
+}
+
+// SensitiveLTE applies the LTE predicate on the "sensitive" field.
+func SensitiveLTE(v []byte) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldSensitive), v))
+	})
+}
+
+// SensitiveIsNil applies the IsNil predicate on the "sensitive" field.
+func SensitiveIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSensitive)))
+	})
+}
+
+// SensitiveNotNil applies the NotNil predicate on the "sensitive" field.
+func SensitiveNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSensitive)))
 	})
 }
 
