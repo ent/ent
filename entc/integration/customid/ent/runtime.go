@@ -27,6 +27,10 @@ func init() {
 	blobDescUUID := blobFields[1].Descriptor()
 	// blob.DefaultUUID holds the default value on creation for the uuid field.
 	blob.DefaultUUID = blobDescUUID.Default.(func() uuid.UUID)
+	// blobDescCount is the schema descriptor for count field.
+	blobDescCount := blobFields[2].Descriptor()
+	// blob.DefaultCount holds the default value on creation for the count field.
+	blob.DefaultCount = blobDescCount.Default.(int)
 	// blobDescID is the schema descriptor for id field.
 	blobDescID := blobFields[0].Descriptor()
 	// blob.DefaultID holds the default value on creation for the id field.

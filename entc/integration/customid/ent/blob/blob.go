@@ -17,6 +17,8 @@ const (
 	FieldID = "id"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
+	// FieldCount holds the string denoting the count field in the database.
+	FieldCount = "count"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeLinks holds the string denoting the links edge name in mutations.
@@ -35,6 +37,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldUUID,
+	FieldCount,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "blobs"
@@ -67,6 +70,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultUUID holds the default value on creation for the "uuid" field.
 	DefaultUUID func() uuid.UUID
+	// DefaultCount holds the default value on creation for the "count" field.
+	DefaultCount int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

@@ -16,6 +16,7 @@ var (
 	BlobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true, Default: "uuid_generate_v4()"},
 		{Name: "uuid", Type: field.TypeUUID, Unique: true},
+		{Name: "count", Type: field.TypeInt, Default: 0},
 		{Name: "blob_parent", Type: field.TypeUUID, Unique: true, Nullable: true},
 	}
 	// BlobsTable holds the schema information for the "blobs" table.
@@ -26,7 +27,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "blobs_blobs_parent",
-				Columns:    []*schema.Column{BlobsColumns[2]},
+				Columns:    []*schema.Column{BlobsColumns[3]},
 				RefColumns: []*schema.Column{BlobsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

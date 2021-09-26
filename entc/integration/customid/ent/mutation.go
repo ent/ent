@@ -52,6 +52,8 @@ type BlobMutation struct {
 	typ           string
 	id            *uuid.UUID
 	uuid          *uuid.UUID
+	count         *int
+	addcount      *int
 	clearedFields map[string]struct{}
 	parent        *uuid.UUID
 	clearedparent bool
@@ -184,6 +186,62 @@ func (m *BlobMutation) ResetUUID() {
 	m.uuid = nil
 }
 
+// SetCount sets the "count" field.
+func (m *BlobMutation) SetCount(i int) {
+	m.count = &i
+	m.addcount = nil
+}
+
+// Count returns the value of the "count" field in the mutation.
+func (m *BlobMutation) Count() (r int, exists bool) {
+	v := m.count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCount returns the old "count" field's value of the Blob entity.
+// If the Blob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlobMutation) OldCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCount: %w", err)
+	}
+	return oldValue.Count, nil
+}
+
+// AddCount adds i to the "count" field.
+func (m *BlobMutation) AddCount(i int) {
+	if m.addcount != nil {
+		*m.addcount += i
+	} else {
+		m.addcount = &i
+	}
+}
+
+// AddedCount returns the value that was added to the "count" field in this mutation.
+func (m *BlobMutation) AddedCount() (r int, exists bool) {
+	v := m.addcount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCount resets all changes to the "count" field.
+func (m *BlobMutation) ResetCount() {
+	m.count = nil
+	m.addcount = nil
+}
+
 // SetParentID sets the "parent" edge to the Blob entity by id.
 func (m *BlobMutation) SetParentID(id uuid.UUID) {
 	m.parent = &id
@@ -296,9 +354,12 @@ func (m *BlobMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BlobMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.uuid != nil {
 		fields = append(fields, blob.FieldUUID)
+	}
+	if m.count != nil {
+		fields = append(fields, blob.FieldCount)
 	}
 	return fields
 }
@@ -310,6 +371,8 @@ func (m *BlobMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case blob.FieldUUID:
 		return m.UUID()
+	case blob.FieldCount:
+		return m.Count()
 	}
 	return nil, false
 }
@@ -321,6 +384,8 @@ func (m *BlobMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case blob.FieldUUID:
 		return m.OldUUID(ctx)
+	case blob.FieldCount:
+		return m.OldCount(ctx)
 	}
 	return nil, fmt.Errorf("unknown Blob field %s", name)
 }
@@ -337,6 +402,13 @@ func (m *BlobMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUUID(v)
 		return nil
+	case blob.FieldCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Blob field %s", name)
 }
@@ -344,13 +416,21 @@ func (m *BlobMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *BlobMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addcount != nil {
+		fields = append(fields, blob.FieldCount)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *BlobMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case blob.FieldCount:
+		return m.AddedCount()
+	}
 	return nil, false
 }
 
@@ -359,6 +439,13 @@ func (m *BlobMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *BlobMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case blob.FieldCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Blob numeric field %s", name)
 }
@@ -388,6 +475,9 @@ func (m *BlobMutation) ResetField(name string) error {
 	switch name {
 	case blob.FieldUUID:
 		m.ResetUUID()
+		return nil
+	case blob.FieldCount:
+		m.ResetCount()
 		return nil
 	}
 	return fmt.Errorf("unknown Blob field %s", name)
