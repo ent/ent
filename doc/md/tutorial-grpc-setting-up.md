@@ -43,7 +43,7 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
 )
 
 // User holds the schema definition for the User entity.
