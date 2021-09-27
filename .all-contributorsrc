@@ -563,6 +563,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "attackordie",
+      "name": "Brian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20145334?v=4",
+      "profile": "https://github.com/attackordie",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
