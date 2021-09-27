@@ -1300,17 +1300,23 @@ func (c *creator) insertLastID(ctx context.Context, insert *sql.InsertBuilder) e
 			return err
 		}
 		defer rows.Close()
-		if !c.ID.Type.Numeric() {
+		switch _, ok := c.ID.Value.(field.ValueScanner); {
+		case ok:
+			// If the ID implements the sql.Scanner
+			// interface it should be a pointer type.
+			return sql.ScanOne(rows, c.ID.Value)
+		case c.ID.Type.Numeric():
+			// Normalize the type to int64 to make it
+			// looks like LastInsertId.
+			id, err := sql.ScanInt64(rows)
+			if err != nil {
+				return err
+			}
+			c.ID.Value = id
+			return nil
+		default:
 			return sql.ScanOne(rows, &c.ID.Value)
 		}
-		// Normalize the type to int64 to make it looks
-		// like LastInsertId.
-		id, err := sql.ScanInt64(rows)
-		if err != nil {
-			return err
-		}
-		c.ID.Value = id
-		return nil
 	}
 	// MySQL.
 	var res sql.Result

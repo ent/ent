@@ -15,6 +15,8 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/customid/ent"
+	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 	"github.com/go-sql-driver/mysql"
@@ -164,6 +166,33 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.NotEmpty(t, pdoc.Text)
 	cdoc := client.Doc.Create().SetText("child").SetParent(pdoc).SaveX(ctx)
 	require.NotEmpty(t, cdoc.QueryParent().OnlyIDX(ctx))
+
+	t.Run("Upsert", func(t *testing.T) {
+		id := uuid.New()
+		client.Blob.Create().
+			SetID(id).
+			OnConflictColumns(blob.FieldID).
+			UpdateNewValues().
+			ExecX(ctx)
+		require.Zero(t, client.Blob.GetX(ctx, id).Count)
+		client.Blob.Create().
+			SetID(id).
+			OnConflictColumns(blob.FieldID).
+			Update(func(set *ent.BlobUpsert) {
+				set.AddCount(1)
+			}).
+			ExecX(ctx)
+		require.Equal(t, 1, client.Blob.GetX(ctx, id).Count)
+
+		d := client.Doc.Create().SaveX(ctx)
+		client.Doc.Create().
+			SetID(d.ID).
+			OnConflictColumns(doc.FieldID).
+			SetText("Hello World").
+			UpdateNewValues().
+			ExecX(ctx)
+		require.Equal(t, "Hello World", client.Doc.GetX(ctx, d.ID).Text)
+	})
 }
 
 // clearDefault clears the id's default for non-postgres dialects.
