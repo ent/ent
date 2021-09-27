@@ -87,6 +87,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/EndlessIdea"><img src="https://avatars.githubusercontent.com/u/1527796?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kuiba</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=EndlessIdea" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/storyicon"><img src="https://avatars.githubusercontent.com/u/29772821?v=4?s=100" width="100px;" alt=""/><br /><sub><b>storyicon</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=storyicon" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/evanlurvey"><img src="https://avatars.githubusercontent.com/u/54965655?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Evan Lurvey</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=evanlurvey" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/attackordie"><img src="https://avatars.githubusercontent.com/u/20145334?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Brian</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=attackordie" title="Documentation">📖</a></td>
   </tr>
 </table>
 
