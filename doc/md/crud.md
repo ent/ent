@@ -231,6 +231,8 @@ err := client.User.
 	// Override some of the fields with a custom update.
 	Update(func(u *ent.UserUpsert) {
 		u.SetAddress("localhost")
+		u.AddCount(1)
+		u.ClearPhone()
 	}).
 	Exec(ctx)
 ```

@@ -566,7 +566,7 @@ header ul, ol {
 
 @media only screen and (min-width: 1425px) {
   .homeContainer {
-    padding: 0 19% 20px;
+    padding: 0 19% 50px;
   }
 
   .home-nav {
