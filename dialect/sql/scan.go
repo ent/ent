@@ -12,15 +12,6 @@ import (
 	"strings"
 )
 
-// ColumnScanner is the interface that wraps the
-// four sql.Rows methods used for scanning.
-type ColumnScanner interface {
-	Next() bool
-	Scan(...interface{}) error
-	Columns() ([]string, error)
-	Err() error
-}
-
 // ScanOne scans one row to the given value. It fails if the rows holds more than 1 row.
 func ScanOne(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
