@@ -20,6 +20,8 @@ type Tx struct {
 	Blob *BlobClient
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
+	// Device is the client for interacting with the Device builders.
+	Device *DeviceClient
 	// Doc is the client for interacting with the Doc builders.
 	Doc *DocClient
 	// Group is the client for interacting with the Group builders.
@@ -30,6 +32,8 @@ type Tx struct {
 	Note *NoteClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -169,11 +173,13 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Blob = NewBlobClient(tx.config)
 	tx.Car = NewCarClient(tx.config)
+	tx.Device = NewDeviceClient(tx.config)
 	tx.Doc = NewDocClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.MixinID = NewMixinIDClient(tx.config)
 	tx.Note = NewNoteClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

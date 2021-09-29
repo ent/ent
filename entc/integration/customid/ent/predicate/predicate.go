@@ -16,6 +16,9 @@ type Blob func(*sql.Selector)
 // Car is the predicate function for car builders.
 type Car func(*sql.Selector)
 
+// Device is the predicate function for device builders.
+type Device func(*sql.Selector)
+
 // Doc is the predicate function for doc builders.
 type Doc func(*sql.Selector)
 
@@ -30,6 +33,9 @@ type Note func(*sql.Selector)
 
 // Pet is the predicate function for pet builders.
 type Pet func(*sql.Selector)
+
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

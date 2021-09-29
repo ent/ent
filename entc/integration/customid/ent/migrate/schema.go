@@ -55,6 +55,25 @@ var (
 			},
 		},
 	}
+	// DevicesColumns holds the columns for the "devices" table.
+	DevicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeBytes, Size: 64},
+		{Name: "device_active_session", Type: field.TypeBytes, Nullable: true, Size: 64},
+	}
+	// DevicesTable holds the schema information for the "devices" table.
+	DevicesTable = &schema.Table{
+		Name:       "devices",
+		Columns:    DevicesColumns,
+		PrimaryKey: []*schema.Column{DevicesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "devices_sessions_active_session",
+				Columns:    []*schema.Column{DevicesColumns[1]},
+				RefColumns: []*schema.Column{SessionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// DocsColumns holds the columns for the "docs" table.
 	DocsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -165,6 +184,25 @@ var (
 			},
 		},
 	}
+	// SessionsColumns holds the columns for the "sessions" table.
+	SessionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeBytes, Size: 64},
+		{Name: "device_sessions", Type: field.TypeBytes, Nullable: true, Size: 64},
+	}
+	// SessionsTable holds the schema information for the "sessions" table.
+	SessionsTable = &schema.Table{
+		Name:       "sessions",
+		Columns:    SessionsColumns,
+		PrimaryKey: []*schema.Column{SessionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "sessions_devices_sessions",
+				Columns:    []*schema.Column{SessionsColumns[1]},
+				RefColumns: []*schema.Column{DevicesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "oid", Type: field.TypeInt, Increment: true},
@@ -263,11 +301,13 @@ var (
 	Tables = []*schema.Table{
 		BlobsTable,
 		CarsTable,
+		DevicesTable,
 		DocsTable,
 		GroupsTable,
 		MixinIdsTable,
 		NotesTable,
 		PetsTable,
+		SessionsTable,
 		UsersTable,
 		BlobLinksTable,
 		GroupUsersTable,
@@ -278,10 +318,12 @@ var (
 func init() {
 	BlobsTable.ForeignKeys[0].RefTable = BlobsTable
 	CarsTable.ForeignKeys[0].RefTable = PetsTable
+	DevicesTable.ForeignKeys[0].RefTable = SessionsTable
 	DocsTable.ForeignKeys[0].RefTable = DocsTable
 	NotesTable.ForeignKeys[0].RefTable = NotesTable
 	PetsTable.ForeignKeys[0].RefTable = PetsTable
 	PetsTable.ForeignKeys[1].RefTable = UsersTable
+	SessionsTable.ForeignKeys[0].RefTable = DevicesTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
 	BlobLinksTable.ForeignKeys[0].RefTable = BlobsTable
 	BlobLinksTable.ForeignKeys[1].RefTable = BlobsTable
