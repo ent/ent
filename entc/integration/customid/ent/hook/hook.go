@@ -39,6 +39,19 @@ func (f CarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 	return f(ctx, mv)
 }
 
+// The DeviceFunc type is an adapter to allow the use of ordinary
+// function as Device mutator.
+type DeviceFunc func(context.Context, *ent.DeviceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f DeviceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DeviceMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeviceMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The DocFunc type is an adapter to allow the use of ordinary
 // function as Doc mutator.
 type DocFunc func(context.Context, *ent.DocMutation) (ent.Value, error)
@@ -100,6 +113,19 @@ func (f PetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 	mv, ok := m.(*ent.PetMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PetMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SessionFunc type is an adapter to allow the use of ordinary
+// function as Session mutator.
+type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SessionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
 	}
 	return f(ctx, mv)
 }

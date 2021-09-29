@@ -14,11 +14,13 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 )
 
@@ -42,11 +44,13 @@ func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		blob.Table:    blob.ValidColumn,
 		car.Table:     car.ValidColumn,
+		device.Table:  device.ValidColumn,
 		doc.Table:     doc.ValidColumn,
 		group.Table:   group.ValidColumn,
 		mixinid.Table: mixinid.ValidColumn,
 		note.Table:    note.ValidColumn,
 		pet.Table:     pet.ValidColumn,
+		session.Table: session.ValidColumn,
 		user.Table:    user.ValidColumn,
 	}
 	check, ok := checks[table]

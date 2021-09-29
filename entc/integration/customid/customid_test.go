@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/schema/field"
 	"github.com/go-sql-driver/mysql"
 
 	"github.com/google/uuid"
@@ -45,7 +46,7 @@ func TestMySQL(t *testing.T) {
 			cfg.DBName = "custom_id"
 			client, err := ent.Open("mysql", cfg.FormatDSN())
 			require.NoError(t, err, "connecting to custom_id database")
-			err = client.Schema.Create(context.Background(), schema.WithHooks(clearDefault))
+			err = client.Schema.Create(context.Background(), schema.WithHooks(clearDefault, skipBytesID))
 			require.NoError(t, err)
 			CustomID(t, client)
 		})
@@ -69,6 +70,7 @@ func TestPostgres(t *testing.T) {
 			err = client.Schema.Create(context.Background())
 			require.NoError(t, err)
 			CustomID(t, client)
+			BytesID(t, client)
 		})
 	}
 }
@@ -79,6 +81,7 @@ func TestSQLite(t *testing.T) {
 	defer client.Close()
 	require.NoError(t, client.Schema.Create(context.Background(), schema.WithHooks(clearDefault)))
 	CustomID(t, client)
+	BytesID(t, client)
 }
 
 func CustomID(t *testing.T, client *ent.Client) {
@@ -195,10 +198,34 @@ func CustomID(t *testing.T, client *ent.Client) {
 	})
 }
 
+func BytesID(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	s := client.Session.Create().SaveX(ctx)
+	require.NotEmpty(t, s.ID)
+	client.Device.Create().SetActiveSession(s).AddSessionIDs(s.ID).SaveX(ctx)
+	d := client.Device.Query().WithActiveSession().WithSessions().OnlyX(ctx)
+	require.Equal(t, s.ID, d.Edges.ActiveSession.ID)
+	require.Equal(t, s.ID, d.Edges.Sessions[0].ID)
+}
+
 // clearDefault clears the id's default for non-postgres dialects.
 func clearDefault(c schema.Creator) schema.Creator {
 	return schema.CreateFunc(func(ctx context.Context, tables ...*schema.Table) error {
 		tables[0].Columns[0].Default = nil
 		return c.Create(ctx, tables...)
+	})
+}
+
+// skipBytesID tables with blob ids from the migration.
+func skipBytesID(c schema.Creator) schema.Creator {
+	return schema.CreateFunc(func(ctx context.Context, tables ...*schema.Table) error {
+		t := make([]*schema.Table, 0, len(tables))
+		for i := range tables {
+			if tables[i].PrimaryKey[0].Type == field.TypeBytes {
+				continue
+			}
+			t = append(t, tables[i])
+		}
+		return c.Create(ctx, t...)
 	})
 }

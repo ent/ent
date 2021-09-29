@@ -1330,6 +1330,8 @@ func (f Field) BasicType(ident string) (expr string) {
 	case field.TypeBytes:
 		if rt.Kind == reflect.Slice {
 			expr = fmt.Sprintf("[]byte(%s)", ident)
+		} else if rt.Kind == reflect.Array {
+			expr = ident + "[:]"
 		}
 	case field.TypeTime:
 		switch {

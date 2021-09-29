@@ -9,11 +9,13 @@ package ent
 import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/entc/integration/customid/ent/session"
 	"github.com/google/uuid"
 )
 
@@ -52,6 +54,14 @@ func init() {
 	carDescID := carMixinFields0[1].Descriptor()
 	// car.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	car.IDValidator = carDescID.Validators[0].(func(int) error)
+	deviceFields := schema.Device{}.Fields()
+	_ = deviceFields
+	// deviceDescID is the schema descriptor for id field.
+	deviceDescID := deviceFields[0].Descriptor()
+	// device.DefaultID holds the default value on creation for the id field.
+	device.DefaultID = deviceDescID.Default.(func() schema.ID)
+	// device.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	device.IDValidator = deviceDescID.Validators[0].(func([]byte) error)
 	docFields := schema.Doc{}.Fields()
 	_ = docFields
 	// docDescID is the schema descriptor for id field.
@@ -127,4 +137,12 @@ func init() {
 			return nil
 		}
 	}()
+	sessionFields := schema.Session{}.Fields()
+	_ = sessionFields
+	// sessionDescID is the schema descriptor for id field.
+	sessionDescID := sessionFields[0].Descriptor()
+	// session.DefaultID holds the default value on creation for the id field.
+	session.DefaultID = sessionDescID.Default.(func() schema.ID)
+	// session.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	session.IDValidator = sessionDescID.Validators[0].(func([]byte) error)
 }
