@@ -132,7 +132,7 @@ var _ dialect.Driver = (*Driver)(nil)
 
 type (
 	// Rows wraps the sql.Rows to avoid locks copy.
-	Rows struct{ *sql.Rows }
+	Rows struct{ ColumnScanner }
 	// Result is an alias to sql.Result.
 	Result = sql.Result
 	// NullBool is an alias to sql.NullBool.
@@ -164,4 +164,16 @@ func (n *NullScanner) Scan(value interface{}) error {
 		return n.S.Scan(value)
 	}
 	return nil
+}
+
+// ColumnScanner is the interface that wraps the standard
+// sql.Rows methods used for scanning database rows.
+type ColumnScanner interface {
+	Close() error
+	ColumnTypes() ([]*sql.ColumnType, error)
+	Columns() ([]string, error)
+	Err() error
+	Next() bool
+	NextResultSet() bool
+	Scan(dest ...interface{}) error
 }
