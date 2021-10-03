@@ -26,6 +26,8 @@ type Pet struct {
 	Name string `json:"name,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
+	// Nickname holds the value of the "nickname" field.
+	Nickname string `json:"nickname,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges PetEdges `json:"edges"`
@@ -77,10 +79,11 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanpe struct {
-		ID   string    `json:"id,omitempty"`
-		Age  float64   `json:"age,omitempty"`
-		Name string    `json:"name,omitempty"`
-		UUID uuid.UUID `json:"uuid,omitempty"`
+		ID       string    `json:"id,omitempty"`
+		Age      float64   `json:"age,omitempty"`
+		Name     string    `json:"name,omitempty"`
+		UUID     uuid.UUID `json:"uuid,omitempty"`
+		Nickname string    `json:"nickname,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
@@ -89,6 +92,7 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 	pe.Age = scanpe.Age
 	pe.Name = scanpe.Name
 	pe.UUID = scanpe.UUID
+	pe.Nickname = scanpe.Nickname
 	return nil
 }
 
@@ -131,6 +135,8 @@ func (pe *Pet) String() string {
 	builder.WriteString(pe.Name)
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", pe.UUID))
+	builder.WriteString(", nickname=")
+	builder.WriteString(pe.Nickname)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -145,20 +151,22 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanpe []struct {
-		ID   string    `json:"id,omitempty"`
-		Age  float64   `json:"age,omitempty"`
-		Name string    `json:"name,omitempty"`
-		UUID uuid.UUID `json:"uuid,omitempty"`
+		ID       string    `json:"id,omitempty"`
+		Age      float64   `json:"age,omitempty"`
+		Name     string    `json:"name,omitempty"`
+		UUID     uuid.UUID `json:"uuid,omitempty"`
+		Nickname string    `json:"nickname,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
 	}
 	for _, v := range scanpe {
 		*pe = append(*pe, &Pet{
-			ID:   v.ID,
-			Age:  v.Age,
-			Name: v.Name,
-			UUID: v.UUID,
+			ID:       v.ID,
+			Age:      v.Age,
+			Name:     v.Name,
+			UUID:     v.UUID,
+			Nickname: v.Nickname,
 		})
 	}
 	return nil

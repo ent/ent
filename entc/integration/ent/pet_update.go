@@ -72,6 +72,26 @@ func (pu *PetUpdate) ClearUUID() *PetUpdate {
 	return pu
 }
 
+// SetNickname sets the "nickname" field.
+func (pu *PetUpdate) SetNickname(s string) *PetUpdate {
+	pu.mutation.SetNickname(s)
+	return pu
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableNickname(s *string) *PetUpdate {
+	if s != nil {
+		pu.SetNickname(*s)
+	}
+	return pu
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (pu *PetUpdate) ClearNickname() *PetUpdate {
+	pu.mutation.ClearNickname()
+	return pu
+}
+
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (pu *PetUpdate) SetTeamID(id int) *PetUpdate {
 	pu.mutation.SetTeamID(id)
@@ -233,6 +253,19 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: pet.FieldUUID,
 		})
 	}
+	if value, ok := pu.mutation.Nickname(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: pet.FieldNickname,
+		})
+	}
+	if pu.mutation.NicknameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: pet.FieldNickname,
+		})
+	}
 	if pu.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -358,6 +391,26 @@ func (puo *PetUpdateOne) SetUUID(u uuid.UUID) *PetUpdateOne {
 // ClearUUID clears the value of the "uuid" field.
 func (puo *PetUpdateOne) ClearUUID() *PetUpdateOne {
 	puo.mutation.ClearUUID()
+	return puo
+}
+
+// SetNickname sets the "nickname" field.
+func (puo *PetUpdateOne) SetNickname(s string) *PetUpdateOne {
+	puo.mutation.SetNickname(s)
+	return puo
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableNickname(s *string) *PetUpdateOne {
+	if s != nil {
+		puo.SetNickname(*s)
+	}
+	return puo
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (puo *PetUpdateOne) ClearNickname() *PetUpdateOne {
+	puo.mutation.ClearNickname()
 	return puo
 }
 
@@ -544,6 +597,19 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Column: pet.FieldUUID,
+		})
+	}
+	if value, ok := puo.mutation.Nickname(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: pet.FieldNickname,
+		})
+	}
+	if puo.mutation.NicknameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: pet.FieldNickname,
 		})
 	}
 	if puo.mutation.TeamCleared() {

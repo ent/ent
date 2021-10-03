@@ -53,6 +53,20 @@ func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
 	return pc
 }
 
+// SetNickname sets the "nickname" field.
+func (pc *PetCreate) SetNickname(s string) *PetCreate {
+	pc.mutation.SetNickname(s)
+	return pc
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (pc *PetCreate) SetNillableNickname(s *string) *PetCreate {
+	if s != nil {
+		pc.SetNickname(*s)
+	}
+	return pc
+}
+
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (pc *PetCreate) SetTeamID(id int) *PetCreate {
 	pc.mutation.SetTeamID(id)
@@ -228,6 +242,14 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		})
 		_node.UUID = value
 	}
+	if value, ok := pc.mutation.Nickname(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: pet.FieldNickname,
+		})
+		_node.Nickname = value
+	}
 	if nodes := pc.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -370,6 +392,24 @@ func (u *PetUpsert) ClearUUID() *PetUpsert {
 	return u
 }
 
+// SetNickname sets the "nickname" field.
+func (u *PetUpsert) SetNickname(v string) *PetUpsert {
+	u.Set(pet.FieldNickname, v)
+	return u
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *PetUpsert) UpdateNickname() *PetUpsert {
+	u.SetExcluded(pet.FieldNickname)
+	return u
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *PetUpsert) ClearNickname() *PetUpsert {
+	u.SetNull(pet.FieldNickname)
+	return u
+}
+
 // UpdateNewValues updates the fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -465,6 +505,27 @@ func (u *PetUpsertOne) UpdateUUID() *PetUpsertOne {
 func (u *PetUpsertOne) ClearUUID() *PetUpsertOne {
 	return u.Update(func(s *PetUpsert) {
 		s.ClearUUID()
+	})
+}
+
+// SetNickname sets the "nickname" field.
+func (u *PetUpsertOne) SetNickname(v string) *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.SetNickname(v)
+	})
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *PetUpsertOne) UpdateNickname() *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.UpdateNickname()
+	})
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *PetUpsertOne) ClearNickname() *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.ClearNickname()
 	})
 }
 
@@ -725,6 +786,27 @@ func (u *PetUpsertBulk) UpdateUUID() *PetUpsertBulk {
 func (u *PetUpsertBulk) ClearUUID() *PetUpsertBulk {
 	return u.Update(func(s *PetUpsert) {
 		s.ClearUUID()
+	})
+}
+
+// SetNickname sets the "nickname" field.
+func (u *PetUpsertBulk) SetNickname(v string) *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.SetNickname(v)
+	})
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *PetUpsertBulk) UpdateNickname() *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.UpdateNickname()
+	})
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *PetUpsertBulk) ClearNickname() *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.ClearNickname()
 	})
 }
 
