@@ -44,7 +44,8 @@ import (
 )
 
 func TestSQLite(t *testing.T) {
-	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1", opts)
+	datasource := "file:ent?mode=memory&cache=shared&_fk=1"
+	client := enttest.Open(t, dialect.SQLite, datasource, opts)
 	defer client.Close()
 	for _, tt := range tests {
 		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
@@ -53,13 +54,21 @@ func TestSQLite(t *testing.T) {
 			tt(t, client)
 		})
 	}
+
+	t.Run("inspect", func(t *testing.T) {
+		drv, err := entsql.Open(dialect.SQLite, datasource)
+		require.NoError(t, err)
+		defer drv.Close()
+		Inspect(t, drv)
+	})
 }
 
 func TestMySQL(t *testing.T) {
 	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
 		addr := net.JoinHostPort("localhost", strconv.Itoa(port))
+		datasource := fmt.Sprintf("root:pass@tcp(%s)/test?parseTime=True", addr)
 		t.Run(version, func(t *testing.T) {
-			client := enttest.Open(t, dialect.MySQL, fmt.Sprintf("root:pass@tcp(%s)/test?parseTime=True", addr), opts)
+			client := enttest.Open(t, dialect.MySQL, datasource, opts)
 			defer client.Close()
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
@@ -68,15 +77,48 @@ func TestMySQL(t *testing.T) {
 					tt(t, client)
 				})
 			}
+
+			t.Run("inspect", func(t *testing.T) {
+				drv, err := entsql.Open(dialect.MySQL, datasource)
+				require.NoError(t, err)
+				defer drv.Close()
+				Inspect(t, drv)
+			})
 		})
 	}
 }
 
 func TestMaria(t *testing.T) {
 	for version, port := range map[string]int{"10.5": 4306, "10.2": 4307, "10.3": 4308} {
+		addr := net.JoinHostPort("localhost", strconv.Itoa(port))
+		datasource := fmt.Sprintf("root:pass@tcp(%s)/test?parseTime=True", addr)
 		t.Run(version, func(t *testing.T) {
-			addr := net.JoinHostPort("localhost", strconv.Itoa(port))
-			client := enttest.Open(t, dialect.MySQL, fmt.Sprintf("root:pass@tcp(%s)/test?parseTime=True", addr), opts)
+			client := enttest.Open(t, dialect.MySQL, datasource, opts)
+			defer client.Close()
+			for _, tt := range tests {
+				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
+				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
+					drop(t, client)
+					tt(t, client)
+				})
+			}
+
+			t.Run("inspect", func(t *testing.T) {
+				drv, err := entsql.Open(dialect.MySQL, datasource)
+				require.NoError(t, err)
+				defer drv.Close()
+				Inspect(t, drv)
+			})
+		})
+	}
+}
+
+func TestPostgres(t *testing.T) {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433, "13": 5434} {
+		datasource := fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port)
+
+		t.Run(version, func(t *testing.T) {
+			client := enttest.Open(t, dialect.Postgres, datasource, opts)
 			defer client.Close()
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
@@ -86,21 +128,12 @@ func TestMaria(t *testing.T) {
 				})
 			}
 		})
-	}
-}
 
-func TestPostgres(t *testing.T) {
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433, "13": 5434} {
-		t.Run(version, func(t *testing.T) {
-			client := enttest.Open(t, dialect.Postgres, fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port), opts)
-			defer client.Close()
-			for _, tt := range tests {
-				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
-					drop(t, client)
-					tt(t, client)
-				})
-			}
+		t.Run("inspect", func(t *testing.T) {
+			drv, err := entsql.Open(dialect.Postgres, datasource)
+			require.NoError(t, err)
+			defer drv.Close()
+			Inspect(t, drv)
 		})
 	}
 }
