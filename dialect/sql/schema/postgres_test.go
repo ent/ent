@@ -617,6 +617,7 @@ func TestPostgres_Create(t *testing.T) {
 				c2 := []*Column{
 					{Name: "id", Type: field.TypeInt, Increment: true},
 					{Name: "score", Type: field.TypeInt},
+					{Name: "email", Type: field.TypeString},
 				}
 				return []*Table{
 					{
@@ -633,7 +634,9 @@ func TestPostgres_Create(t *testing.T) {
 						Columns:    c2,
 						PrimaryKey: c2[0:1],
 						Indexes: Indexes{
-							{Name: "equipment_score", Columns: c2[1:]},
+							{Name: "equipment_score", Columns: c2[1:2]},
+							// Index should not be changed.
+							{Name: "equipment_email", Unique: true, Columns: c2[2:]},
 						},
 					},
 				}
@@ -667,11 +670,13 @@ func TestPostgres_Create(t *testing.T) {
 					WithArgs("equipment").
 					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale"}).
 						AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil).
-						AddRow("score", "bigint", "NO", "NULL", "int8", nil, nil))
+						AddRow("score", "bigint", "NO", "NULL", "int8", nil, nil).
+						AddRow("email", "character varying", "YES", "NULL", "varchar", nil, nil))
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "equipment"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0).
-						AddRow("equipment_score", "score", "f", "f", 0))
+						AddRow("equipment_score", "score", "f", "f", 0).
+						AddRow("equipment_email", "email", "f", "t", 0))
 				mock.ExpectCommit()
 			},
 		},

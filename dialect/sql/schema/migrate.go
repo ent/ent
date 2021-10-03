@@ -342,17 +342,28 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			return nil, fmt.Errorf("invalid type %q for column %q", c2.typ, c2.Name)
 		// Modify a non-unique column to unique.
 		case c1.Unique && !c2.Unique:
-			change.index.add.append(&Index{
-				Name:    c1.Name,
-				Unique:  true,
-				Columns: []*Column{c1},
-				columns: []string{c1.Name},
-			})
+			// Make sure the table does not have unique index for this column
+			// before adding it to the changeset, because there are 2 ways to
+			// configure uniqueness on ent.Field (using the Unique modifier or
+			// adding rule on the Indexes option).
+			if idx, ok := curr.index(c1.Name); !ok || !idx.Unique {
+				change.index.add.append(&Index{
+					Name:    c1.Name,
+					Unique:  true,
+					Columns: []*Column{c1},
+					columns: []string{c1.Name},
+				})
+			}
 		// Modify a unique column to non-unique.
 		case !c1.Unique && c2.Unique:
+			// If the uniqueness was defined on the Indexes option,
+			// or was moved from the Unique modifier to the Indexes.
+			if idx, ok := new.index(c1.Name); ok && idx.Unique {
+				continue
+			}
 			idx, ok := curr.index(c2.Name)
 			if !ok {
-				return nil, fmt.Errorf("missing index to drop for column %q", c2.Name)
+				return nil, fmt.Errorf("missing index to drop for unique column %q", c2.Name)
 			}
 			change.index.drop.append(idx)
 		// Extending column types.

@@ -260,9 +260,10 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Pet",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			pet.FieldAge:  {Type: field.TypeFloat64, Column: pet.FieldAge},
-			pet.FieldName: {Type: field.TypeString, Column: pet.FieldName},
-			pet.FieldUUID: {Type: field.TypeUUID, Column: pet.FieldUUID},
+			pet.FieldAge:      {Type: field.TypeFloat64, Column: pet.FieldAge},
+			pet.FieldName:     {Type: field.TypeString, Column: pet.FieldName},
+			pet.FieldUUID:     {Type: field.TypeUUID, Column: pet.FieldUUID},
+			pet.FieldNickname: {Type: field.TypeString, Column: pet.FieldNickname},
 		},
 	}
 	graph.Nodes[11] = &sqlgraph.Node{
@@ -1712,6 +1713,11 @@ func (f *PetFilter) WhereName(p entql.StringP) {
 // WhereUUID applies the entql [16]byte predicate on the uuid field.
 func (f *PetFilter) WhereUUID(p entql.ValueP) {
 	f.Where(p.Field(pet.FieldUUID))
+}
+
+// WhereNickname applies the entql string predicate on the nickname field.
+func (f *PetFilter) WhereNickname(p entql.StringP) {
+	f.Where(p.Field(pet.FieldNickname))
 }
 
 // WhereHasTeam applies a predicate to check if query has an edge team.

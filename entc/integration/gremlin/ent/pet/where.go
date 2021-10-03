@@ -106,6 +106,13 @@ func UUID(v uuid.UUID) predicate.Pet {
 	})
 }
 
+// Nickname applies equality check predicate on the "nickname" field. It's identical to NicknameEQ.
+func Nickname(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.EQ(v))
+	})
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v float64) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
@@ -330,6 +337,105 @@ func UUIDIsNil() predicate.Pet {
 func UUIDNotNil() predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldUUID)
+	})
+}
+
+// NicknameEQ applies the EQ predicate on the "nickname" field.
+func NicknameEQ(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.EQ(v))
+	})
+}
+
+// NicknameNEQ applies the NEQ predicate on the "nickname" field.
+func NicknameNEQ(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.NEQ(v))
+	})
+}
+
+// NicknameIn applies the In predicate on the "nickname" field.
+func NicknameIn(vs ...string) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.Within(v...))
+	})
+}
+
+// NicknameNotIn applies the NotIn predicate on the "nickname" field.
+func NicknameNotIn(vs ...string) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.Without(v...))
+	})
+}
+
+// NicknameGT applies the GT predicate on the "nickname" field.
+func NicknameGT(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.GT(v))
+	})
+}
+
+// NicknameGTE applies the GTE predicate on the "nickname" field.
+func NicknameGTE(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.GTE(v))
+	})
+}
+
+// NicknameLT applies the LT predicate on the "nickname" field.
+func NicknameLT(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.LT(v))
+	})
+}
+
+// NicknameLTE applies the LTE predicate on the "nickname" field.
+func NicknameLTE(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.LTE(v))
+	})
+}
+
+// NicknameContains applies the Contains predicate on the "nickname" field.
+func NicknameContains(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.Containing(v))
+	})
+}
+
+// NicknameHasPrefix applies the HasPrefix predicate on the "nickname" field.
+func NicknameHasPrefix(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.StartingWith(v))
+	})
+}
+
+// NicknameHasSuffix applies the HasSuffix predicate on the "nickname" field.
+func NicknameHasSuffix(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.EndingWith(v))
+	})
+}
+
+// NicknameIsNil applies the IsNil predicate on the "nickname" field.
+func NicknameIsNil() predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldNickname)
+	})
+}
+
+// NicknameNotNil applies the NotNil predicate on the "nickname" field.
+func NicknameNotNil() predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldNickname)
 	})
 }
 

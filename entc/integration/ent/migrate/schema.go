@@ -310,6 +310,7 @@ var (
 		{Name: "age", Type: field.TypeFloat64, Default: 0},
 		{Name: "name", Type: field.TypeString},
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+		{Name: "nickname", Type: field.TypeString, Nullable: true},
 		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
 		{Name: "user_team", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
@@ -321,13 +322,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "pet_users_pets",
-				Columns:    []*schema.Column{PetColumns[4]},
+				Columns:    []*schema.Column{PetColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "pet_users_team",
-				Columns:    []*schema.Column{PetColumns[5]},
+				Columns:    []*schema.Column{PetColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -336,7 +337,12 @@ var (
 			{
 				Name:    "pet_name_user_pets",
 				Unique:  false,
-				Columns: []*schema.Column{PetColumns[2], PetColumns[4]},
+				Columns: []*schema.Column{PetColumns[2], PetColumns[5]},
+			},
+			{
+				Name:    "pet_nickname",
+				Unique:  true,
+				Columns: []*schema.Column{PetColumns[4]},
 			},
 		},
 	}
