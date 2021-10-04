@@ -85,7 +85,9 @@ import (
 )
 
 func main() {
-	ex, err := elk.NewExtension()
+	ex, err := elk.NewExtension(
+		elk.GenerateSpec("openapi.json"),
+		elk.GenerateHandlers()))
 	if err != nil {
 		log.Fatalf("creating elk extension: %v", err)
 	}
