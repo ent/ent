@@ -60,7 +60,7 @@ After running codegen, the following add-ons will be added to your project.
 
 ## Node API
 
-A new file named `ent/node.go` was created that implements the [Relay Node interface](https://relay.dev/graphql/objectidentification.htm).
+A new file named `ent/gql_node.go` was created that implements the [Relay Node interface](https://relay.dev/graphql/objectidentification.htm).
 
 In order to use the new generated `ent.Noder` interface in the [GraphQL resolver](https://gqlgen.com/reference/resolvers/),
 add the `Node` method to the query resolver, and look at the [configuration](#gql-configuration) section to understand
@@ -290,7 +290,7 @@ func (Todo) Edges() []ent.Edge {
 
 ### Usage and Configuration
 
-The GraphQL extension generates also edge-resolvers for the nodes under the `edge.go` file as follows:
+The GraphQL extension generates also edge-resolvers for the nodes under the `gql_edge.go` file as follows:
 ```go
 func (t *Todo) Children(ctx context.Context) ([]*Todo, error) {
 	result, err := t.Edges.ChildrenOrErr()
