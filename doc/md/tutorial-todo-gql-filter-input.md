@@ -79,7 +79,7 @@ After changing the `entc.go` configuration, we're ready to execute the code gene
 go generate ./ent/...
 ```
 
-Observe that Ent has generated `<T>WhereInput` for each type in your schema in a file named `ent/where_input.go`. Ent
+Observe that Ent has generated `<T>WhereInput` for each type in your schema in a file named `ent/gql_where_input.go`. Ent
 also generates a GraphQL schema as well (`ent.graphql`), so you don't need to `autobind` them to `gqlgen` manually.
 For example:
 
