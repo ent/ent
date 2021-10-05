@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -30,6 +31,12 @@ type CardUpdate struct {
 // Where appends a list predicates to the CardUpdate builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	cu.mutation.Where(ps...)
+	return cu
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (cu *CardUpdate) SetUpdateTime(t time.Time) *CardUpdate {
+	cu.mutation.SetUpdateTime(t)
 	return cu
 }
 
@@ -377,6 +384,12 @@ type CardUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CardMutation
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (cuo *CardUpdateOne) SetUpdateTime(t time.Time) *CardUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
+	return cuo
 }
 
 // SetBalance sets the "balance" field.

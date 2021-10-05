@@ -325,7 +325,7 @@ func (u *DocUpsert) ClearText() *DocUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create except the ID field.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Doc.Create().
@@ -559,7 +559,7 @@ type DocUpsertBulk struct {
 	create *DocCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Doc.Create().

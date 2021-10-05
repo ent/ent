@@ -459,6 +459,17 @@ func (t Type) MutableFields() []*Field {
 	return fields
 }
 
+// ImmutableFields returns all type fields that are immutable (for update).
+func (t Type) ImmutableFields() []*Field {
+	fields := make([]*Field, 0, len(t.Fields))
+	for _, f := range t.Fields {
+		if f.Immutable {
+			fields = append(fields, f)
+		}
+	}
+	return fields
+}
+
 // MutationFields returns all the fields that are available on the typed-mutation.
 func (t Type) MutationFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
@@ -864,7 +875,7 @@ func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
 func (f Field) DefaultValue() interface{} { return f.def.DefaultValue }
 
 // DefaultFunc returns a bool stating if the default value is a func. Invoked by the template.
-func (f Field) DefaultFunc() interface{} { return f.def.DefaultKind == reflect.Func }
+func (f Field) DefaultFunc() bool { return f.def.DefaultKind == reflect.Func }
 
 // BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {

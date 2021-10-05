@@ -33,7 +33,6 @@ func TestTimeMixin(t *testing.T) {
 		require.Len(t, fields, 1)
 		desc := fields[0].Descriptor()
 		assert.Equal(t, "update_time", desc.Name)
-		assert.True(t, desc.Immutable)
 		assert.NotNil(t, desc.Default)
 		assert.NotNil(t, desc.UpdateDefault)
 	})

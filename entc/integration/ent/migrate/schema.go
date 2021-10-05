@@ -44,7 +44,7 @@ var (
 			},
 			{
 				Name:    "card_number",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{CardsColumns[4]},
 			},
 			{

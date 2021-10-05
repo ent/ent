@@ -1711,8 +1711,8 @@ func TestInsert_OnConflict(t *testing.T) {
 	t.Run("Postgres", func(t *testing.T) { // And SQLite.
 		query, args := Dialect(dialect.Postgres).
 			Insert("users").
-			Columns("id", "email").
-			Values("1", "user@example.com").
+			Columns("id", "email", "creation_time").
+			Values("1", "user@example.com", 1633279231).
 			OnConflict(
 				ConflictColumns("email"),
 				ConflictWhere(EQ("name", "Ariel")),
@@ -1720,13 +1720,14 @@ func TestInsert_OnConflict(t *testing.T) {
 				// Update all new values excepts id field.
 				ResolveWith(func(u *UpdateSet) {
 					u.SetIgnore("id")
+					u.SetIgnore("creation_time")
 					u.Add("version", 1)
 				}),
 				UpdateWhere(NEQ("updated_at", 0)),
 			).
 			Query()
-		require.Equal(t, `INSERT INTO "users" ("id", "email") VALUES ($1, $2) ON CONFLICT ("email") WHERE "name" = $3 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email", "version" = COALESCE("users"."version", 0) + $4 WHERE "updated_at" <> $5`, query)
-		require.Equal(t, []interface{}{"1", "user@example.com", "Ariel", 1, 0}, args)
+		require.Equal(t, `INSERT INTO "users" ("id", "email", "creation_time") VALUES ($1, $2, $3) ON CONFLICT ("email") WHERE "name" = $4 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email", "creation_time" = "users"."creation_time", "version" = COALESCE("users"."version", 0) + $5 WHERE "updated_at" <> $6`, query)
+		require.Equal(t, []interface{}{"1", "user@example.com", 1633279231, "Ariel", 1, 0}, args)
 
 		query, args = Dialect(dialect.Postgres).
 			Insert("users").

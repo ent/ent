@@ -498,7 +498,7 @@ func (u *FileUpsert) ClearOp() *FileUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.File.Create().
@@ -800,7 +800,7 @@ type FileUpsertBulk struct {
 	create *FileCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.File.Create().

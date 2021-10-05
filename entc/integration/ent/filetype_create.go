@@ -338,7 +338,7 @@ func (u *FileTypeUpsert) UpdateState() *FileTypeUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.FileType.Create().
@@ -584,7 +584,7 @@ type FileTypeUpsertBulk struct {
 	create *FileTypeCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.FileType.Create().
