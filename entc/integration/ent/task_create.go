@@ -235,7 +235,7 @@ func (u *TaskUpsert) AddPriority(v schema.Priority) *TaskUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Task.Create().
@@ -460,7 +460,7 @@ type TaskUpsertBulk struct {
 	create *TaskCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Task.Create().

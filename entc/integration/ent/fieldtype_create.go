@@ -2781,7 +2781,7 @@ func (u *FieldTypeUpsert) ClearPasswordOther() *FieldTypeUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.FieldType.Create().
@@ -4455,7 +4455,7 @@ type FieldTypeUpsertBulk struct {
 	create *FieldTypeCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.FieldType.Create().

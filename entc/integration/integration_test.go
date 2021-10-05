@@ -23,6 +23,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent"
+	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/enttest"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
@@ -367,6 +368,20 @@ func Upsert(t *testing.T, client *ent.Client) {
 			ExecX(ctx)
 		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
 	}
+
+	c1 := client.Card.Create().
+		SetNumber("102030").
+		SetCreateTime(time.Unix(1623279251, 0)).
+		SetUpdateTime(time.Unix(1623279251, 0)).
+		SaveX(ctx)
+	id = client.Card.Create().
+		SetNumber(c1.Number).
+		OnConflictColumns(card.FieldNumber).
+		UpdateNewValues().
+		IDX(ctx)
+	c2 := client.Card.GetX(ctx, id)
+	require.Equal(t, c1.CreateTime.Unix(), c2.CreateTime.Unix())
+	require.NotEqual(t, c1.UpdateTime.Unix(), c2.UpdateTime.Unix())
 }
 
 func Clone(t *testing.T, client *ent.Client) {

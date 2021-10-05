@@ -466,7 +466,7 @@ func (u *CardUpsert) ClearName() *CardUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Card.Create().
@@ -477,6 +477,14 @@ func (u *CardUpsert) ClearName() *CardUpsert {
 //
 func (u *CardUpsertOne) UpdateNewValues() *CardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreateTime(); exists {
+			s.SetIgnore(card.FieldCreateTime)
+		}
+		if _, exists := u.create.mutation.Number(); exists {
+			s.SetIgnore(card.FieldNumber)
+		}
+	}))
 	return u
 }
 
@@ -754,7 +762,7 @@ type CardUpsertBulk struct {
 	create *CardCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Card.Create().
@@ -765,6 +773,16 @@ type CardUpsertBulk struct {
 //
 func (u *CardUpsertBulk) UpdateNewValues() *CardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreateTime(); exists {
+				s.SetIgnore(card.FieldCreateTime)
+			}
+			if _, exists := b.mutation.Number(); exists {
+				s.SetIgnore(card.FieldNumber)
+			}
+		}
+	}))
 	return u
 }
 

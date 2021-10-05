@@ -1030,7 +1030,7 @@ func (u *UserUpsert) ClearSSOCert() *UserUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.User.Create().
@@ -1444,7 +1444,7 @@ type UserUpsertBulk struct {
 	create *UserCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.User.Create().

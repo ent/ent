@@ -526,7 +526,7 @@ func (u *GroupUpsert) UpdateName() *GroupUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Group.Create().
@@ -821,7 +821,7 @@ type GroupUpsertBulk struct {
 	create *GroupCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Group.Create().

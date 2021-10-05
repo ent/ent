@@ -16,7 +16,6 @@ import (
 )
 
 func BenchmarkGraph_Gen(b *testing.B) {
-	b.ReportAllocs()
 	target := filepath.Join(os.TempDir(), "ent")
 	require.NoError(b, os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.RemoveAll(target)

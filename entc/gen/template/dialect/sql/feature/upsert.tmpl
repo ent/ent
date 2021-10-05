@@ -143,7 +143,7 @@ type (
 {{ end }}
 
 
-// UpdateNewValues updates the fields using the new values that were set on create{{ if $.ID.UserDefined }} except the ID field{{ end }}.
+// UpdateNewValues updates the mutable fields using the new values that were set on create{{ if $.ID.UserDefined }} except the ID field{{ end }}.
 // Using this option is equivalent to using:
 //
 //	client.{{ $.Name }}.Create().
@@ -159,11 +159,18 @@ type (
 //
 func (u *{{ $upsertOne }}) UpdateNewValues() *{{ $upsertOne }} {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	{{- if $.ID.UserDefined }}
+	{{- if or $.ID.UserDefined $.ImmutableFields }}
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-			if _, exists := u.create.mutation.ID(); exists {
-				s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
-			}
+			{{- if $.ID.UserDefined }}
+				if _, exists := u.create.mutation.ID(); exists {
+					s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+				}
+			{{- end }}
+			{{- range $f := $.ImmutableFields }}
+				if _, exists := u.create.mutation.{{ $f.MutationGet }}(); exists {
+					s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+				}
+			{{- end }}
 		}))
 	{{- end }}
 	return u
@@ -306,7 +313,7 @@ type {{ $upsertBulk }} struct {
 }
 
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.{{ $.Name }}.Create().
@@ -322,13 +329,20 @@ type {{ $upsertBulk }} struct {
 //
 func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	{{- if $.ID.UserDefined }}
+	{{- if or $.ID.UserDefined $.ImmutableFields }}
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 			for _, b := range u.create.builders {
-				if _, exists := b.mutation.ID(); exists {
-					s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
-					return
-				}
+				{{- if $.ID.UserDefined }}
+					if _, exists := b.mutation.ID(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+						return
+					}
+				{{- end }}
+				{{- range $f := $.ImmutableFields }}
+					if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+					}
+				{{- end }}
 			}
 		}))
 	{{- end }}

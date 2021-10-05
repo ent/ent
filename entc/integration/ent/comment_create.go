@@ -293,7 +293,7 @@ func (u *CommentUpsert) ClearNillableInt() *CommentUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Comment.Create().
@@ -566,7 +566,7 @@ type CommentUpsertBulk struct {
 	create *CommentCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Comment.Create().
