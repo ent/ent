@@ -287,7 +287,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		// database ignores any size or multi-dimensions constraints.
 		c.SchemaType = map[string]string{dialect.Postgres: "ARRAY"}
 		c.typ = udt.String
-	case "USER-DEFINED":
+	case "USER-DEFINED", "tstzrange", "interval":
 		c.Type = field.TypeOther
 		if !udt.Valid {
 			return fmt.Errorf("missing user defined type for column %q", c.Name)
