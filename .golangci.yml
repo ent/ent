@@ -49,6 +49,7 @@ issues:
         - dupl
         - funlen
         - gosec
+        - gocritic
     - linters:
         - unused
       source: ent.Schema
@@ -68,3 +69,6 @@ issues:
     - path: privacy/privacy.go
       linters:
         - stylecheck
+    - path: entc/load/schema.go
+      linters:
+        - staticcheck
