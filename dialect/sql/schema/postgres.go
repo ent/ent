@@ -414,9 +414,8 @@ func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 
 // hasUniqueName reports if the index has a unique name in the schema.
 func hasUniqueName(i *Index) bool {
-	// The "_key" suffix is added by Postgres for implicit indexes.
+	// Trim the "_key" suffix if it was added by Postgres for implicit indexes.
 	name := strings.TrimSuffix(i.Name, "_key")
-
 	suffix := strings.Join(i.columnNames(), "_")
 	if !strings.HasSuffix(name, suffix) {
 		return true // Assume it has a custom storage-key.

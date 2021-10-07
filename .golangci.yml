@@ -31,7 +31,6 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - interfacer
     - misspell
     - staticcheck
     - structcheck
@@ -55,10 +54,6 @@ issues:
       source: ent.Schema
     - path: entc/integration/ent/schema/card.go
       text: "`internal` is unused"
-    - path: dialect/sql/builder.go
-      text: "can be `Querier`"
-      linters:
-        - interfacer
     - path: dialect/sql/builder.go
       text: "SQL string concatenation"
       linters:
