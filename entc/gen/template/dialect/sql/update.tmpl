@@ -26,6 +26,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			},
 		},
 	}
+	if name := {{ $receiver }}.mutation.tableName; name != "" {
+		_spec.Node.Table = name
+	}
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
 		if !ok {
