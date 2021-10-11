@@ -225,7 +225,7 @@ func (t *tables) Load(ctx context.Context, querier querier) ([]string, error) {
 	return tables, err
 }
 
-func (t *tables) load(ctx context.Context, querier querier) ([]string, error) {
+func (*tables) load(ctx context.Context, querier querier) ([]string, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("type").
 		From(sql.Table(schema.TypeTable)).
