@@ -34,7 +34,7 @@ Let's get started.
 
 ### Create a Database
 
-We’re going to start by creating a database. The way I prefer to do it is to use a `Docker` container. We will provide
+We’re going to start by creating a database. The way I prefer to do it is to use a `Docker` container. We will
 use a `docker-compose` which will automatically pass all needed parameters to the MySQL container.
 
 Prerequisites:
@@ -109,8 +109,7 @@ Now that we've created our database, and a baseline schema to demonstrate our ex
 with Ent. In this phase I will explain how to do it. Since eventually we would like to use our imported schema,
 we need to create the Ent directory structure.
 
-If your project directory is outside [GOPATH](https://github.com/golang/go/wiki/GOPATH) or you are not familiar with
-GOPATH, setup a [Go module](https://github.com/golang/go/wiki/Modules#quick-start) project as follows:
+Initialize a new Go project inside a directory called `entimport-example`
 
 ```shell
 go mod init entimport-example
@@ -325,7 +324,7 @@ WHERE name = 'Zeev';
 Great! now let's play a little more with Ent and add some relations:
 
 ```go title="entimport-exmaple/example.go"
-# make sure you add this impport
+// make sure you add this import
 import "entimport-exmaple/ent/user"
 
 // Create Car
