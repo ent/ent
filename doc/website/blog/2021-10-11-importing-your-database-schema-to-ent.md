@@ -34,7 +34,7 @@ Let's get started.
 
 ### Create a Database
 
-We’re going to start by creating a database, the way I prefer to do it is to use a `Docker` container. We will provide
+We’re going to start by creating a database. The way I prefer to do it is to use a `Docker` container. We will provide
 use a `docker-compose` which will automatically pass all needed parameters to the MySQL container.
 
 Prerequisites:
