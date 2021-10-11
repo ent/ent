@@ -57,7 +57,7 @@ type Tx struct {
 		// and returns a {{ $iface }}. For example:
 		//
 		//	hook := func(next ent.{{ $iface }}) ent.{{ $iface }} {
-		//		return ent.{{ $func }}Func(func(context.Context, tx *ent.Tx) error {
+		//		return ent.{{ $func }}Func(func(ctx context.Context, tx *ent.Tx) error {
 		//			// Do some stuff before.
 		//			if err := next.{{ $func }}(ctx, tx); err != nil {
 		//				return err
