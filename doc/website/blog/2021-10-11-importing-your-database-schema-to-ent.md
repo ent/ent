@@ -1,5 +1,5 @@
 ---
-title: Importing You Database Schema To Ent
+title: Importing Your Database Schema To Ent
 author: Zeev Manilovich
 authorURL: "https://github.com/zeevmoney"
 authorImageURL: "https://avatars.githubusercontent.com/u/7361100?v=4"
@@ -25,8 +25,8 @@ high-level, this is what we’re going to do:
 
 1. Create a Database and Schema - we want to show how `entimport` can generate an Ent schema for an existing database.
    To demonstrate that, we will first create a database, and define some tables in it that we can import into Ent.
-2. Initialize an Ent Project - use the Ent cli to create needed directory structure and an Ent schema generation script.
-3. Install `entimport` - download `entimport` using the Go cli.
+2. Initialize an Ent Project - use the Ent CLI to create the needed directory structure and an Ent schema generation script.
+3. Install `entimport`
 4. Run `entimport` against our demo database - import the database schema that we’ve created into our ent project.
 5. Demonstrate how to use Ent with our generated schemas.
 
