@@ -90,6 +90,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/attackordie"><img src="https://avatars.githubusercontent.com/u/20145334?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Brian</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=attackordie" title="Documentation">📖</a></td>
     <td align="center"><a href="http://www.thinkontrol.com"><img src="https://avatars.githubusercontent.com/u/11331554?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Shen Yang</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=ThinkontrolSY" title="Code">💻</a></td>
   </tr>
+  <tr>
+    <td align="center"><a href="https://twitter.com/sivchari"><img src="https://avatars.githubusercontent.com/u/55221074?v=4?s=100" width="100px;" alt=""/><br /><sub><b>sivchari</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=sivchari" title="Code">💻</a></td>
+  </tr>
 </table>
 
 <!-- markdownlint-restore -->
