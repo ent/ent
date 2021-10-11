@@ -24,11 +24,11 @@ To demonstrate how `entimport` works, I want to share a quick example of end to 
 high-level, this is what we’re going to do:
 
 1. Create a Database and Schema - we want to show how `entimport` can generate an Ent schema for an existing database.
-   To demonstrate that, we will first create a database, and define some tables in it that we can import into Ent.
+   We will first create a database, then define some tables in it that we can import into Ent.
 2. Initialize an Ent Project - use the Ent CLI to create the needed directory structure and an Ent schema generation script.
 3. Install `entimport`
 4. Run `entimport` against our demo database - import the database schema that we’ve created into our ent project.
-5. Demonstrate how to use Ent with our generated schemas.
+5. Explain how to use Ent with our generated schemas.
 
 Let's get started.
 
@@ -105,8 +105,8 @@ We created the tables mentioned above, with a One To Many relation:
 
 ### Initialize Ent Project
 
-Now that we've created our database, and a baseline schema to demonstrate our example, we need to create a basic `Go`
-with Ent project. In this phase I will explain how to do it. Since eventually we would like to use our imported schema,
+Now that we've created our database, and a baseline schema to demonstrate our example, we need to create a Go project
+with Ent. In this phase I will explain how to do it. Since eventually we would like to use our imported schema,
 we need to create the Ent directory structure.
 
 If your project directory is outside [GOPATH](https://github.com/golang/go/wiki/GOPATH) or you are not familiar with
@@ -191,7 +191,9 @@ check the file system, and more specifically `ent/schema` directory.
 Let’s see what this gives us - remember that we had two schemas: the `User` schema and the `Car` schema with a one to
 many relationship. Let’s see how `entimport` performed.
 
-```go title="entimport-exmaple/ent/schema/user.go"
+```go
+// entimport-exmaple/ent/schema/user.go
+
 type User struct {
 	ent.Schema
 }
@@ -205,6 +207,8 @@ func (User) Edges() []ent.Edge {
 func (User) Annotations() []schema.Annotation {
 	return nil
 }
+
+// entimport-exmaple/ent/schema/car.go
 type Car struct {
 	ent.Schema
 }
