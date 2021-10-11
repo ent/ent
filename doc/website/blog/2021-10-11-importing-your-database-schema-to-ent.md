@@ -65,8 +65,7 @@ services:
 This file contains the service configuration for a MySQL docker container. Run it with the following command:
 
 ```shell
-docker-compose up
-# to run in the background add -d 
+docker-compose up -d
 ```
 
 Next, we will create a simple schema. For this example we will use a relation between two entities:
@@ -81,29 +80,22 @@ or [similar database tool](mycli.net) that supports MySQL and execute the follow
 # Users Table
 create table users
 (
-    id        bigint auto_increment
-        primary key,
+    id        bigint auto_increment primary key,
     age       bigint       not null,
     name      varchar(255) not null,
     last_name varchar(255) null comment 'surname'
 )
-    collate = utf8mb4_bin;
 
 # Cars Table
-
 create table cars
 (
-    id          bigint auto_increment
-        primary key,
+    id          bigint auto_increment primary key,
     model       varchar(255) not null,
     color       varchar(255) not null,
     engine_size mediumint    not null,
     user_id     bigint       null,
-    constraint cars_owners
-        foreign key (user_id) references users (id)
-            on delete set null
+    constraint cars_owners foreign key (user_id) references users (id) on delete set null
 )
-    collate = utf8mb4_bin;
 ```
 
 We created the tables mentioned above, with a One To Many relation:
@@ -244,10 +236,6 @@ To run the Ent code generation:
 
 ```shell
 go generate ./ent
-
-# OR
-
-go run -mod=mod entgo.io/ent/cmd/ent generate ./schema
 ```
 
 Let's see our `ent` directory:
@@ -288,9 +276,8 @@ import (
 
 func Example_EntImport() {
 	client, err := ent.Open(dialect.MySQL, "root:pass@tcp(localhost:3306)/entimport?parseTime=True")
-
 	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
+		log.Fatalf("failed opening connection to mysql: %v", err)
 	}
 	defer client.Close()
 	ctx := context.Background()
@@ -303,7 +290,7 @@ func Example_EntImport() {
 Let's try to add a user, write the following code at the end of the file:
 
 ```go title="entimport-exmaple/example.go"
-	// Create User
+	// Create a User
 	zeev := client.User.
 		Create().
 		SetAge(33).
@@ -400,7 +387,7 @@ After Running the code above, the DB should hold a user with 2 cars in a O2M rel
 
 ### Syncing DB changes
 
-Since we want to keep the DB in sync, we want `entimport` to be able to change the schema after the db was changed.
+Since we want to keep the database in sync, we want `entimport` to be able to change the schema after the database was changed.
 Let's see how it works.
 
 Run the following SQL code to add a `phone` column with a `unique` index to the `users` table:
@@ -432,7 +419,7 @@ Now we can run `go generate ./ent` again and use the new schema to a `phone` to 
 ## Future Plans
 
 As mentioned above this initial version supports MySQL and PostgreSQL databases.  
-It also supports all types of SQL relations. We have plans to further upgrade the tool and add more features such as
+It also supports all types of SQL relations. I have plans to further upgrade the tool and add more features such as
 more PostgreSQL fields, default values, and more.
 
 ## Wrapping Up
