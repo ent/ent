@@ -191,8 +191,6 @@ check the file system, and more specifically `ent/schema` directory.
 Let’s see what this gives us - remember that we had two schemas: the `User` schema and the `Car` schema with a one to
 many relationship. Let’s see how `entimport` performed.
 
-- User Schema
-
 ```go title="entimport-exmaple/ent/schema/user.go"
 type User struct {
 	ent.Schema
@@ -207,11 +205,6 @@ func (User) Edges() []ent.Edge {
 func (User) Annotations() []schema.Annotation {
 	return nil
 }
-```
-
-- Car Schema:
-
-```go title="entimport-exmaple/ent/schema/car.go"
 type Car struct {
 	ent.Schema
 }
