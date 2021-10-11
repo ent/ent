@@ -11,8 +11,8 @@ A few months ago the Ent project announced
 the [Schema Import Initiative](https://entgo.io/blog/2021/05/04/announcing-schema-imports), its goal is to help support
 many use cases for generating Ent schemas from external resources. Today, I'm happy to share a project I’ve been working
 on: **entimport** - an _importent_ (pun intended) command line tool designed to create Ent schemas from existing SQL
-databases. This is a feature requested by the community for some time, so I hope many people find it useful. It can help
-Ent users or potential users to transition an existing setup in another language, as well as ORM to Ent. It can also
+databases. This is a feature that has been requested by the community for some time, so I hope many people find it useful. It can help
+ease the transition of an existing setup from another language or ORM to Ent. It can also
 help with use cases where you would like to access the same data from different platforms (such as to automatically sync
 between them).  
 The first version supports both MySQL and PostgreSQL databases, with some limitations described below. Support for other
@@ -20,14 +20,14 @@ relational databases such as SQLite is in the works.
 
 ## Getting Started:
 
-To demonstrate how `entimport` works, I want to share a quick example of end to end usage with a MySQL database. On a
+To give you an idea of how `entimport` works, I want to share a quick example of end to end usage with a MySQL database. On a
 high-level, this is what we’re going to do:
 
 1. Create a Database and Schema - we want to show how `entimport` can generate an Ent schema for an existing database.
    We will first create a database, then define some tables in it that we can import into Ent.
-2. Initialize an Ent Project - use the Ent CLI to create the needed directory structure and an Ent schema generation script.
+2. Initialize an Ent Project - we will use the Ent CLI to create the needed directory structure and an Ent schema generation script.
 3. Install `entimport`
-4. Run `entimport` against our demo database - import the database schema that we’ve created into our ent project.
+4. Run `entimport` against our demo database - next, we will import the database schema that we’ve created into our Ent project.
 5. Explain how to use Ent with our generated schemas.
 
 Let's get started.
@@ -135,14 +135,14 @@ The project should look like this:
 
 ### Install entimport
 
-Ok, now the fun begins. We are ready to actually install `entimport` and see it in action.  
+Ok, now the fun begins! We are finally ready to  install `entimport` and see it in action.  
 Let’s start by downloading `entimport`:
 
 ```shell
 go get ariga.io/entimport
 ```
 
-Before we get started, we should check if it’s actually working - you can do that by running this command:
+To verify our installation was successful, run:
 
 ```shell
 go run ariga.io/entimport/cmd/entimport -h
@@ -425,7 +425,7 @@ In this post, I presented `entimport`, a tool that was anticipated and requested
 showed an example of how to use it with Ent. This tool is another addition to Ent schema import tools, which are
 designed to make the integration of ent even easier. For discussion and
 support, [open an issue](https://github.com/ariga/entimport/issues/new). The full example can be
-found [in here](https://github.com/zeevmoney/entimport-example). I hope this was useful.
+found [in here](https://github.com/zeevmoney/entimport-example). I hope you found this blog post useful!
 
 
 :::note For more Ent news and updates:
