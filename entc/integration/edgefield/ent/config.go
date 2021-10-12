@@ -32,6 +32,7 @@ type hooks struct {
 	Card     []ent.Hook
 	Info     []ent.Hook
 	Metadata []ent.Hook
+	Node     []ent.Hook
 	Pet      []ent.Hook
 	Post     []ent.Hook
 	Rental   []ent.Hook

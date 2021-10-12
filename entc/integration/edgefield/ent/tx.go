@@ -24,6 +24,8 @@ type Tx struct {
 	Info *InfoClient
 	// Metadata is the client for interacting with the Metadata builders.
 	Metadata *MetadataClient
+	// Node is the client for interacting with the Node builders.
+	Node *NodeClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// Post is the client for interacting with the Post builders.
@@ -171,6 +173,7 @@ func (tx *Tx) init() {
 	tx.Card = NewCardClient(tx.config)
 	tx.Info = NewInfoClient(tx.config)
 	tx.Metadata = NewMetadataClient(tx.config)
+	tx.Node = NewNodeClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
 	tx.Post = NewPostClient(tx.config)
 	tx.Rental = NewRentalClient(tx.config)

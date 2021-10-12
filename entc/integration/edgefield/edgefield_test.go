@@ -10,11 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"entgo.io/ent/entc/integration/edgefield/ent/rental"
-
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/entc/integration/edgefield/ent"
 	"entgo.io/ent/entc/integration/edgefield/ent/migrate"
+	"entgo.io/ent/entc/integration/edgefield/ent/node"
 	"entgo.io/ent/entc/integration/edgefield/ent/pet"
+	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -22,7 +23,7 @@ import (
 )
 
 func TestEdgeField(t *testing.T) {
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer client.Close()
 	ctx := context.Background()
@@ -105,4 +106,15 @@ func TestEdgeField(t *testing.T) {
 	_, err = client.Rental.Create().SetUserID(a8m.ID).SetCarID(car2.ID).SetDate(dt).Save(ctx)
 	require.Error(t, err)
 	require.True(t, ent.IsConstraintError(err))
+
+	curr := client.Node.Create().SaveX(ctx)
+	for i := 0; i < 5; i++ {
+		curr = client.Node.Create().SetPrevID(curr.ID).SetValue(curr.Value + 1).SaveX(ctx)
+	}
+	head := client.Node.Query().Where(node.Not(node.HasPrev())).OnlyX(ctx)
+	for i := 0; i < 5; i++ {
+		curr = head.QueryNext().OnlyX(ctx)
+		require.Equal(t, head.Value+1, curr.Value)
+		head = curr
+	}
 }
