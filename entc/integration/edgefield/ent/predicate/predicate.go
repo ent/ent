@@ -22,6 +22,9 @@ type Info func(*sql.Selector)
 // Metadata is the predicate function for metadata builders.
 type Metadata func(*sql.Selector)
 
+// Node is the predicate function for node builders.
+type Node func(*sql.Selector)
+
 // Pet is the predicate function for pet builders.
 type Pet func(*sql.Selector)
 

@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
+	"entgo.io/ent/entc/integration/edgefield/ent/node"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/schema"
 	"github.com/google/uuid"
@@ -32,6 +33,12 @@ func init() {
 	metadataDescAge := metadataFields[1].Descriptor()
 	// metadata.DefaultAge holds the default value on creation for the age field.
 	metadata.DefaultAge = metadataDescAge.Default.(int)
+	nodeFields := schema.Node{}.Fields()
+	_ = nodeFields
+	// nodeDescValue is the schema descriptor for value field.
+	nodeDescValue := nodeFields[0].Descriptor()
+	// node.DefaultValue holds the default value on creation for the value field.
+	node.DefaultValue = nodeDescValue.Default.(int)
 	rentalFields := schema.Rental{}.Fields()
 	_ = rentalFields
 	// rentalDescDate is the schema descriptor for date field.

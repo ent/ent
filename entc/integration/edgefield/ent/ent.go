@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/card"
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
+	"entgo.io/ent/entc/integration/edgefield/ent/node"
 	"entgo.io/ent/entc/integration/edgefield/ent/pet"
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
@@ -44,6 +45,7 @@ func columnChecker(table string) func(string) error {
 		card.Table:     card.ValidColumn,
 		info.Table:     info.ValidColumn,
 		metadata.Table: metadata.ValidColumn,
+		node.Table:     node.ValidColumn,
 		pet.Table:      pet.ValidColumn,
 		post.Table:     post.ValidColumn,
 		rental.Table:   rental.ValidColumn,
