@@ -79,7 +79,6 @@ docker-compose exec mysql8 mysql --database=entimport -ppass
 ```
 
 ```sql
-# Users Table
 create table users
 (
     id        bigint auto_increment primary key,
@@ -88,7 +87,6 @@ create table users
     last_name varchar(255) null comment 'surname'
 );
 
-# Cars Table
 create table cars
 (
     id          bigint auto_increment primary key,
@@ -129,8 +127,7 @@ go mod init entimport-example
 Run Ent Init:
 
 ```shell
-go get entgo.io/ent/cmd/ent
-go run entgo.io/ent/cmd/ent init 
+go run -mod=mod entgo.io/ent/cmd/ent init 
 ```
 
 The project should look like this:
@@ -145,7 +142,7 @@ The project should look like this:
 
 ### Install entimport
 
-Ok, now the fun begins! We are finally ready to install `entimport` and see it in action.  
+OK, now the fun begins! We are finally ready to install `entimport` and see it in action.  
 Let’s start by running `entimport`:
 
 ```shell
@@ -293,7 +290,7 @@ Let's try to add a user, write the following code at the end of the file:
 
 ```go title="entimport-example/example.go"
 func example(ctx context.Context, client *ent.Client) {
-	// Create a User
+	// Create a User.
 	zeev := client.User.
 		Create().
 		SetAge(33).
@@ -311,7 +308,6 @@ go run example.go
 ```
 
 This should output:
-> If it's not working, make sure you followed the example, or check the full [example here](https://github.com/zeevmoney/entimport-example)
 
 `# User created: User(id=1, age=33, name=Zeev, last_name=Manilovich)`
 
@@ -334,7 +330,7 @@ the `example()` func:
 > make sure you add `"entimport-example/ent/user"` to the import() declaration
 
 ```go title="entimport-example/example.go"
-// Create Car
+// Create Car.
 vw := client.Car.
     Create().
     SetModel("volkswagen").
@@ -343,14 +339,14 @@ vw := client.Car.
     SaveX(ctx)
 fmt.Println("First car created:", vw)
 
-// Update the user - add the car relation
+// Update the user - add the car relation.
 client.User.Update().Where(user.ID(zeev.ID)).AddCars(vw).SaveX(ctx)
 
-// Query all cars that belong to user
+// Query all cars that belong to the user.
 cars := zeev.QueryCars().AllX(ctx)
 fmt.Println("User cars:", cars)
 
-// Create a second Car
+// Create a second Car.
 delorean := client.Car.
     Create().
     SetModel("delorean").
@@ -359,7 +355,7 @@ delorean := client.Car.
     SaveX(ctx)
 fmt.Println("Second car created:", delorean)
 
-// Update the user - add another the car relation
+// Update the user - add another car relation.
 client.User.Update().Where(user.ID(zeev.ID)).AddCars(delorean).SaveX(ctx)
 
 // Traverse the sub-graph.
