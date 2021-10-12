@@ -1,6 +1,5 @@
 ---
-title: Importing Your Database Schema To Ent
-author: Zeev Manilovich
+title: Generating Ent Schemas from Existing SQL Databases author: Zeev Manilovich
 authorURL: "https://github.com/zeevmoney"
 authorImageURL: "https://avatars.githubusercontent.com/u/7361100?v=4"
 ---
@@ -11,38 +10,36 @@ A few months ago the Ent project announced
 the [Schema Import Initiative](https://entgo.io/blog/2021/05/04/announcing-schema-imports), its goal is to help support
 many use cases for generating Ent schemas from external resources. Today, I'm happy to share a project I’ve been working
 on: **entimport** - an _importent_ (pun intended) command line tool designed to create Ent schemas from existing SQL
-databases. This is a feature that has been requested by the community for some time, so I hope many people find it useful. It can help
-ease the transition of an existing setup from another language or ORM to Ent. It can also
-help with use cases where you would like to access the same data from different platforms (such as to automatically sync
-between them).  
+databases. This is a feature that has been requested by the community for some time, so I hope many people find it
+useful. It can help ease the transition of an existing setup from another language or ORM to Ent. It can also help with
+use cases where you would like to access the same data from different platforms (such as to automatically sync between
+them).  
 The first version supports both MySQL and PostgreSQL databases, with some limitations described below. Support for other
 relational databases such as SQLite is in the works.
 
 ## Getting Started:
 
-To give you an idea of how `entimport` works, I want to share a quick example of end to end usage with a MySQL database. On a
-high-level, this is what we’re going to do:
+To give you an idea of how `entimport` works, I want to share a quick example of end to end usage with a MySQL database.
+On a high-level, this is what we’re going to do:
 
 1. Create a Database and Schema - we want to show how `entimport` can generate an Ent schema for an existing database.
    We will first create a database, then define some tables in it that we can import into Ent.
-2. Initialize an Ent Project - we will use the Ent CLI to create the needed directory structure and an Ent schema generation script.
+2. Initialize an Ent Project - we will use the Ent CLI to create the needed directory structure and an Ent schema
+   generation script.
 3. Install `entimport`
-4. Run `entimport` against our demo database - next, we will import the database schema that we’ve created into our Ent project.
+4. Run `entimport` against our demo database - next, we will import the database schema that we’ve created into our Ent
+   project.
 5. Explain how to use Ent with our generated schemas.
 
 Let's get started.
 
 ### Create a Database
 
-We’re going to start by creating a database. The way I prefer to do it is to use a `Docker` container. We will
-use a `docker-compose` which will automatically pass all needed parameters to the MySQL container.
+We’re going to start by creating a database. The way I prefer to do it is to use
+a [Docker](https://docs.docker.com/get-docker/) container. We will use a `docker-compose` which will automatically pass
+all needed parameters to the MySQL container.
 
-Prerequisites:
-
-- Docker - https://docs.docker.com/get-docker/
-- Golang - https://golang.org/doc/install
-
-Start the project in a new directory called `entimport-exmaple`. Create a file named `docker-compose.yaml` and paste the
+Start the project in a new directory called `entimport-example`. Create a file named `docker-compose.yaml` and paste the
 following content inside:
 
 ```yaml
@@ -73,8 +70,12 @@ Next, we will create a simple schema. For this example we will use a relation be
 - User
 - Car
 
-Connect to the database using [MySQL shell](https://dev.mysql.com/doc/mysql-shell/8.0/en/)
-or [similar database tool](mycli.net) that supports MySQL and execute the following statements:
+Connect to the database using MySQL shell, you can do it with the following command:
+> Make sure you run it from the root project directory
+
+```shell
+docker-compose exec mysql8 mysql --database=entimport -ppass
+```
 
 ```mysql
 # Users Table
@@ -84,7 +85,7 @@ create table users
     age       bigint       not null,
     name      varchar(255) not null,
     last_name varchar(255) null comment 'surname'
-)
+);
 
 # Cars Table
 create table cars
@@ -95,19 +96,28 @@ create table cars
     engine_size mediumint    not null,
     user_id     bigint       null,
     constraint cars_owners foreign key (user_id) references users (id) on delete set null
-)
+);
 ```
 
-We created the tables mentioned above, with a One To Many relation:
+Let's validate that we've created the tables mentioned above, in your MySQL shell, run:
 
-- One user can have many cars
-- Each car can have only one owner.
+```mysql
+show tables;
++---------------------+
+| Tables_in_entimport |
++---------------------+
+| cars                |
+| users               |
++---------------------+
+```
+
+We should see two tables: `users` & `cars`
 
 ### Initialize Ent Project
 
-Now that we've created our database, and a baseline schema to demonstrate our example, we need to create a Go project
-with Ent. In this phase I will explain how to do it. Since eventually we would like to use our imported schema,
-we need to create the Ent directory structure.
+Now that we've created our database, and a baseline schema to demonstrate our example, we need to create
+a [Go](https://golang.org/doc/install) project with Ent. In this phase I will explain how to do it. Since eventually we
+would like to use our imported schema, we need to create the Ent directory structure.
 
 Initialize a new Go project inside a directory called `entimport-example`
 
@@ -134,17 +144,11 @@ The project should look like this:
 
 ### Install entimport
 
-Ok, now the fun begins! We are finally ready to  install `entimport` and see it in action.  
-Let’s start by downloading `entimport`:
+Ok, now the fun begins! We are finally ready to install `entimport` and see it in action.  
+Let’s start by running `entimport`:
 
 ```shell
-go get ariga.io/entimport
-```
-
-To verify our installation was successful, run:
-
-```shell
-go run ariga.io/entimport/cmd/entimport -h
+go run -mod=mod ariga.io/entimport/cmd/entimport -h
 ```
 
 If `entimport` is running correctly the command will print:
@@ -191,7 +195,7 @@ Let’s see what this gives us - remember that we had two schemas: the `User` sc
 many relationship. Let’s see how `entimport` performed.
 
 ```go
-// entimport-exmaple/ent/schema/user.go
+// entimport-example/ent/schema/user.go
 
 type User struct {
 	ent.Schema
@@ -207,7 +211,7 @@ func (User) Annotations() []schema.Annotation {
 	return nil
 }
 
-// entimport-exmaple/ent/schema/car.go
+// entimport-example/ent/schema/car.go
 type Car struct {
 	ent.Schema
 }
@@ -259,33 +263,35 @@ Let’s run a quick example to verify that our schema works:
 
 Create a file named `example.go` in the root of the project, with the following content:
 
-```go title="entimport-exmaple/example.go"
+```go title="entimport-example/example.go"
+package main
+
 import (
 	"context"
+	"fmt"
 	"log"
 
-	"entimport-exmaple/ent"
+	"entimport-example/ent"
 
 	"entgo.io/ent/dialect"
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func Example_EntImport() {
+func main() {
 	client, err := ent.Open(dialect.MySQL, "root:pass@tcp(localhost:3306)/entimport?parseTime=True")
 	if err != nil {
 		log.Fatalf("failed opening connection to mysql: %v", err)
 	}
 	defer client.Close()
 	ctx := context.Background()
-	if err := Do(ctx, client); err != nil {
-		log.Fatal(err)
-	}
+	example(ctx, client)
 }
 ```
 
 Let's try to add a user, write the following code at the end of the file:
 
-```go title="entimport-exmaple/example.go"
+```go title="entimport-example/example.go"
+func example(ctx context.Context, client *ent.Client) {
 	// Create a User
 	zeev := client.User.
 		Create().
@@ -294,6 +300,7 @@ Let's try to add a user, write the following code at the end of the file:
 		SetLastName("Manilovich").
 		SaveX(ctx)
 	fmt.Println("User created:", zeev)
+}
 ```
 
 Then run:
@@ -307,7 +314,7 @@ This should output:
 
 `# User created: User(id=1, age=33, name=Zeev, last_name=Manilovich)`
 
-Let's check with the database if the user was really added:
+Let's check with the database if the user was really added
 
 ```mysql
 SELECT *
@@ -321,11 +328,11 @@ WHERE name = 'Zeev';
 +--+---+----+----------+
 ```
 
-Great! now let's play a little more with Ent and add some relations:
+Great! now let's play a little more with Ent and add some relations, add the following code at the end of
+the `example()` func:
+> make sure you add `"entimport-example/ent/user"` to the import() declaration
 
-```go title="entimport-exmaple/example.go"
-// make sure you add this import
-import "entimport-exmaple/ent/user"
+```go title="entimport-example/example.go"
 
 // Create Car
 vw := client.Car.
@@ -361,17 +368,21 @@ cars = delorean.
     QueryCars().
     AllX(ctx)
 fmt.Println("User cars:", cars)
-return nil
 ```
 
-After Running the code above, the DB should hold a user with 2 cars in a O2M relation.
+Now do: `go run example.go`.  
+After Running the code above, the database should hold a user with 2 cars in a O2M relation.
 
 ```mysql
+SELECT * FROM users;
+
 +--+---+----+----------+
 |id|age|name|last_name |
 +--+---+----+----------+
 |1 |33 |Zeev|Manilovich|
 +--+---+----+----------+
+
+SELECT * FROM cars;
 
 +--+----------+------+-----------+-------+
 |id|model     |color |engine_size|user_id|
@@ -383,8 +394,8 @@ After Running the code above, the DB should hold a user with 2 cars in a O2M rel
 
 ### Syncing DB changes
 
-Since we want to keep the database in sync, we want `entimport` to be able to change the schema after the database was changed.
-Let's see how it works.
+Since we want to keep the database in sync, we want `entimport` to be able to change the schema after the database was
+changed. Let's see how it works.
 
 Run the following SQL code to add a `phone` column with a `unique` index to the `users` table:
 
@@ -396,15 +407,30 @@ create unique index users_phone_uindex
     on users (phone);
 ```
 
+The table should look like this:
+
+```mysql
+describe users;
++-----------+--------------+------+-----+---------+----------------+
+| Field     | Type         | Null | Key | Default | Extra          |
++-----------+--------------+------+-----+---------+----------------+
+| id        | bigint       | NO   | PRI | NULL    | auto_increment |
+| age       | bigint       | NO   |     | NULL    |                |
+| name      | varchar(255) | NO   |     | NULL    |                |
+| last_name | varchar(255) | YES  |     | NULL    |                |
+| phone     | varchar(255) | YES  | UNI | NULL    |                |
++-----------+--------------+------+-----+---------+----------------+
+```
+
 Now let's run `entimport` again to get the latest schema from our database:
 
 ```shell
-go run ariga.io/entimport/cmd/entimport -dialect mysql -dsn "root:pass@tcp(localhost:3306)/entimport"
+go run -mod=mod ariga.io/entimport/cmd/entimport -dialect mysql -dsn "root:pass@tcp(localhost:3306)/entimport"
 ```
 
 We can see that the `user.go` file was changed:
 
-```go title="entimport-exmaple/ent/schema/user.go"
+```go title="entimport-example/ent/schema/user.go"
 func (User) Fields() []ent.Field {
 	return []ent.Field{field.Int("id"), ..., field.String("phone").Optional().Unique()}
 }
@@ -415,8 +441,8 @@ Now we can run `go generate ./ent` again and use the new schema to a `phone` to 
 ## Future Plans
 
 As mentioned above this initial version supports MySQL and PostgreSQL databases.  
-It also supports all types of SQL relations. I have plans to further upgrade the tool and add more features such as
-more PostgreSQL fields, default values, and more.
+It also supports all types of SQL relations. I have plans to further upgrade the tool and add more features such as more
+PostgreSQL fields, default values, and more.
 
 ## Wrapping Up
 
@@ -425,7 +451,6 @@ showed an example of how to use it with Ent. This tool is another addition to En
 designed to make the integration of ent even easier. For discussion and
 support, [open an issue](https://github.com/ariga/entimport/issues/new). The full example can be
 found [in here](https://github.com/zeevmoney/entimport-example). I hope you found this blog post useful!
-
 
 :::note For more Ent news and updates:
 
