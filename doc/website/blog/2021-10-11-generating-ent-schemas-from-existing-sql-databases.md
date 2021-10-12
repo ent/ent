@@ -1,5 +1,6 @@
 ---
-title: Generating Ent Schemas from Existing SQL Databases author: Zeev Manilovich
+title: Generating Ent Schemas from Existing SQL Databases 
+author: Zeev Manilovich
 authorURL: "https://github.com/zeevmoney"
 authorImageURL: "https://avatars.githubusercontent.com/u/7361100?v=4"
 ---
@@ -29,7 +30,7 @@ On a high-level, this is what we’re going to do:
 3. Install `entimport`
 4. Run `entimport` against our demo database - next, we will import the database schema that we’ve created into our Ent
    project.
-5. Explain how to use Ent with our generated schemas.
+5. Explain how to use Ent with our generated schemas.  
 
 Let's get started.
 
@@ -77,7 +78,7 @@ Connect to the database using MySQL shell, you can do it with the following comm
 docker-compose exec mysql8 mysql --database=entimport -ppass
 ```
 
-```mysql
+```sql
 # Users Table
 create table users
 (
@@ -101,7 +102,7 @@ create table cars
 
 Let's validate that we've created the tables mentioned above, in your MySQL shell, run:
 
-```mysql
+```sql
 show tables;
 +---------------------+
 | Tables_in_entimport |
@@ -151,8 +152,7 @@ Let’s start by running `entimport`:
 go run -mod=mod ariga.io/entimport/cmd/entimport -h
 ```
 
-If `entimport` is running correctly the command will print:
-> If it's not working make sure you have Go installed and don't forget the `go get` part above.
+`entimport` will be downloaded and the command will print:
 
 ```
 Usage of entimport:
@@ -171,7 +171,7 @@ Usage of entimport:
 We are now ready to import our MySQL schema to Ent!
 
 We will do it with the following command:
-> This command will import all tables in our schema, you can also limit to specific tables using -tables flag.
+> This command will import all tables in our schema, you can also limit to specific tables using `-tables` flag.
 
 ```shell
 go run ariga.io/entimport/cmd/entimport -dialect mysql -dsn "root:pass@tcp(localhost:3306)/entimport"
@@ -180,7 +180,7 @@ go run ariga.io/entimport/cmd/entimport -dialect mysql -dsn "root:pass@tcp(local
 Like many unix tools, `entimport` doesn't print anything on a successful run. To verify that it ran properly, we will
 check the file system, and more specifically `ent/schema` directory.
 
-``` {5-6}
+```console {5-6}
 ├── docker-compose.yaml
 ├── ent
 │   ├── generate.go
@@ -191,12 +191,10 @@ check the file system, and more specifically `ent/schema` directory.
 └── go.sum
 ```
 
-Let’s see what this gives us - remember that we had two schemas: the `User` schema and the `Car` schema with a one to
+Let’s see what this gives us - remember that we had two schemas: the `users` schema and the `cars` schema with a one to
 many relationship. Let’s see how `entimport` performed.
 
-```go
-// entimport-example/ent/schema/user.go
-
+```go title="entimport-example/ent/schema/user.go"
 type User struct {
 	ent.Schema
 }
@@ -210,8 +208,9 @@ func (User) Edges() []ent.Edge {
 func (User) Annotations() []schema.Annotation {
 	return nil
 }
+```
 
-// entimport-example/ent/schema/car.go
+```go title="entimport-example/ent/schema/car.go"
 type Car struct {
 	ent.Schema
 }
@@ -262,6 +261,8 @@ Let's see our `ent` directory:
 Let’s run a quick example to verify that our schema works:
 
 Create a file named `example.go` in the root of the project, with the following content:
+
+> This part of the example can be found [here](https://github.com/zeevmoney/entimport-example/blob/master/part1/example.go)
 
 ```go title="entimport-example/example.go"
 package main
@@ -316,7 +317,7 @@ This should output:
 
 Let's check with the database if the user was really added
 
-```mysql
+```sql
 SELECT *
 FROM users
 WHERE name = 'Zeev';
@@ -333,7 +334,6 @@ the `example()` func:
 > make sure you add `"entimport-example/ent/user"` to the import() declaration
 
 ```go title="entimport-example/example.go"
-
 // Create Car
 vw := client.Car.
     Create().
@@ -370,11 +370,14 @@ cars = delorean.
 fmt.Println("User cars:", cars)
 ```
 
+> This part of the example can be found [here](https://github.com/zeevmoney/entimport-example/blob/master/part2/example.go)
+
 Now do: `go run example.go`.  
 After Running the code above, the database should hold a user with 2 cars in a O2M relation.
 
-```mysql
-SELECT * FROM users;
+```sql
+SELECT *
+FROM users;
 
 +--+---+----+----------+
 |id|age|name|last_name |
@@ -382,7 +385,8 @@ SELECT * FROM users;
 |1 |33 |Zeev|Manilovich|
 +--+---+----+----------+
 
-SELECT * FROM cars;
+SELECT *
+FROM cars;
 
 +--+----------+------+-----------+-------+
 |id|model     |color |engine_size|user_id|
@@ -399,7 +403,7 @@ changed. Let's see how it works.
 
 Run the following SQL code to add a `phone` column with a `unique` index to the `users` table:
 
-```mysql
+```sql
 alter table users
     add phone varchar(255) null;
 
@@ -409,7 +413,7 @@ create unique index users_phone_uindex
 
 The table should look like this:
 
-```mysql
+```sql
 describe users;
 +-----------+--------------+------+-----+---------+----------------+
 | Field     | Type         | Null | Key | Default | Extra          |
@@ -436,12 +440,12 @@ func (User) Fields() []ent.Field {
 }
 ```
 
-Now we can run `go generate ./ent` again and use the new schema to a `phone` to the User entity.
+Now we can run `go generate ./ent` again and use the new schema to add a `phone` to the User entity.
 
 ## Future Plans
 
 As mentioned above this initial version supports MySQL and PostgreSQL databases.  
-It also supports all types of SQL relations. I have plans to further upgrade the tool and add more features such as more
+It also supports all types of SQL relations. I have plans to further upgrade the tool and add features such as missing
 PostgreSQL fields, default values, and more.
 
 ## Wrapping Up
