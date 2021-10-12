@@ -590,6 +590,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "mookjp",
+      "name": "mook",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1519309?v=4",
+      "profile": "https://blog.mookjp.io",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
