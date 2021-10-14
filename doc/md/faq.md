@@ -20,7 +20,8 @@ sidebar_label: FAQ
 [How to extend the generated builders?](#how-to-extend-the-generated-builders)   
 [How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)  
 [How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)  
-[How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)
+[How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)  
+[How to configure two or more `DB` to separate read and write?](#how-to-configure-two-or-more-db-to-separate-read-and-write)
 
 ## Answers
 
@@ -741,3 +742,64 @@ func (b *BigInt) Value() (driver.Value, error) {
 	return b.String(), nil
 }
 ```
+
+#### How to configure two or more `DB` to separate read and write?
+
+You can wrap the `dialect.Driver` with your own driver and implement this logic. For example.
+
+You can extend it, add support for multiple read replicas and add some load-balancing magic.
+
+```go
+func main() {
+	// ...
+	wd, err := sql.Open(dialect.MySQL, "root:pass@tcp(<addr>)/<database>?parseTime=True")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rd, err := sql.Open(dialect.MySQL, "readonly:pass@tcp(<addr>)/<database>?parseTime=True")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := ent.NewClient(ent.Driver(&multiDriver{w: wd, r: rd}))
+	defer client.Close()
+	// Use the client here.
+}
+
+
+type multiDriver struct {
+	r, w dialect.Driver
+}
+
+var _ dialect.Driver = (*multiDriver)(nil)
+
+func (d *multiDriver) Query(ctx context.Context, query string, args, v interface{}) error {
+	return d.r.Query(ctx, query, args, v)
+}
+
+func (d *multiDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
+	return d.w.Exec(ctx, query, args, v)
+}
+
+func (d *multiDriver) Tx(ctx context.Context) (dialect.Tx, error) {
+	return d.w.Tx(ctx)
+}
+
+func (d *multiDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (dialect.Tx, error) {
+	return d.w.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
+	}).BeginTx(ctx, opts)
+}
+
+func (d *multiDriver) Close() error {
+	rerr := d.r.Close()
+	werr := d.w.Close()
+	if rerr != nil {
+		return rerr
+	}
+	if werr != nil {
+		return werr
+	}
+	return nil
+}
+```
+
