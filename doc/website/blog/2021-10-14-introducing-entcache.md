@@ -53,7 +53,7 @@ for Ent. On a high level, it decorates the Query method of the given driver, and
 
 The package provides a variety of options to configure the TTL of the cache entries, control the hash function, provide
 custom and multi-level cache stores, evict and skip cache entries. See the full documentation in
-[go.dev/entcache](https://go.dev/ariga.io/entcache).
+[https://pkg.go.dev/ariga.io/entcache](https://pkg.go.dev/ariga.io/entcache).
 
 As we mentioned above, correctly configuring caching for an application is a delicate task, and so `entcache` provides
 developers with different caching levels that can be used with it:
