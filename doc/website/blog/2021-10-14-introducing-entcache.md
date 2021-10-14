@@ -139,7 +139,7 @@ if err != nil {
 	log.Fatal("opening database", err)
 }
 // Decorates the sql.Driver with entcache.Driver.
-drv := entcache.NewDriver(drv)
+drv := entcache.NewDriver(db)
 // Create an ent.Client.
 client := ent.NewClient(ent.Driver(drv))
 
