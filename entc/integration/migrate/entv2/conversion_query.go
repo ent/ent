@@ -340,6 +340,10 @@ func (cq *ConversionQuery) sqlAll(ctx context.Context) ([]*Conversion, error) {
 
 func (cq *ConversionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	_spec.Node.Columns = cq.fields
+	if len(cq.fields) > 0 {
+		_spec.Unique = cq.unique != nil && *cq.unique
+	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 

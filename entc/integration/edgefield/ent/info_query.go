@@ -408,6 +408,10 @@ func (iq *InfoQuery) sqlAll(ctx context.Context) ([]*Info, error) {
 
 func (iq *InfoQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := iq.querySpec()
+	_spec.Node.Columns = iq.fields
+	if len(iq.fields) > 0 {
+		_spec.Unique = iq.unique != nil && *iq.unique
+	}
 	return sqlgraph.CountNodes(ctx, iq.driver, _spec)
 }
 

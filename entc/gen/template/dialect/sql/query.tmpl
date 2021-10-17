@@ -91,6 +91,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
+	_spec.Node.Columns = {{ $receiver }}.fields
+	if len({{ $receiver }}.fields) > 0 {
+		{{- /* In case of field selection, configure query to unique only if was explicitly set to true. */}}
+		_spec.Unique = {{ $receiver }}.unique != nil && *{{ $receiver }}.unique
+	}
 	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, _spec)
 }
 

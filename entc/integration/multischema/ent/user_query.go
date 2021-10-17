@@ -526,6 +526,10 @@ func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := uq.querySpec()
 	_spec.Node.Schema = uq.schemaConfig.User
 	ctx = internal.NewSchemaConfigContext(ctx, uq.schemaConfig)
+	_spec.Node.Columns = uq.fields
+	if len(uq.fields) > 0 {
+		_spec.Unique = uq.unique != nil && *uq.unique
+	}
 	return sqlgraph.CountNodes(ctx, uq.driver, _spec)
 }
 

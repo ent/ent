@@ -329,6 +329,18 @@ users, err := a8m.
 	All(ctx)
 ```
 
+Count the number of posts without comments.
+```go
+n, err := client.Post.
+	Query().
+	Where(
+		post.Not(
+		    post.HasComments(),	
+		)
+	).
+	Count(ctx)
+```
+
 More advance traversals can be found in the [next section](traversals.md). 
 
 ## Field Selection
@@ -350,6 +362,16 @@ names, err := client.Pet.
 	Unique(true).
 	Select(pet.FieldName).
 	Strings(ctx)
+```
+
+Count the number of unique pet names.
+
+```go
+n, err := client.Pet.
+	Query().
+	Unique(true).
+	Select(pet.FieldName).
+	Count(ctx)
 ```
 
 Select partial objects and partial associations.gs

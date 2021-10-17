@@ -560,6 +560,10 @@ func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(fq.modifiers) > 0 {
 		_spec.Modifiers = fq.modifiers
 	}
+	_spec.Node.Columns = fq.fields
+	if len(fq.fields) > 0 {
+		_spec.Unique = fq.unique != nil && *fq.unique
+	}
 	return sqlgraph.CountNodes(ctx, fq.driver, _spec)
 }
 

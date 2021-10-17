@@ -432,6 +432,10 @@ func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(sq.modifiers) > 0 {
 		_spec.Modifiers = sq.modifiers
 	}
+	_spec.Node.Columns = sq.fields
+	if len(sq.fields) > 0 {
+		_spec.Unique = sq.unique != nil && *sq.unique
+	}
 	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
 }
 

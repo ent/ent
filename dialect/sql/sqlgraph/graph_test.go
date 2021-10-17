@@ -1893,6 +1893,10 @@ func TestQueryNodes(t *testing.T) {
 		WithArgs(40).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT"}).
 			AddRow(3))
+	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`name`) FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT 3 OFFSET 4 FOR UPDATE NOWAIT")).
+		WithArgs(40).
+		WillReturnRows(sqlmock.NewRows([]string{"COUNT"}).
+			AddRow(3))
 
 	var (
 		users []*user
@@ -1933,7 +1937,14 @@ func TestQueryNodes(t *testing.T) {
 	require.Equal(t, &user{id: 3, age: 30, name: "a8m", edges: struct{ fk1, fk2 int }{1, 1}}, users[2])
 
 	// Count nodes.
+	spec.Node.Columns = nil
 	n, err := CountNodes(context.Background(), sql.OpenDB("", db), spec)
+	require.NoError(t, err)
+	require.Equal(t, 3, n)
+
+	// Count nodes.
+	spec.Node.Columns = []string{"name"}
+	n, err = CountNodes(context.Background(), sql.OpenDB("", db), spec)
 	require.NoError(t, err)
 	require.Equal(t, 3, n)
 }

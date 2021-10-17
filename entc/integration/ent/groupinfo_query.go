@@ -420,6 +420,10 @@ func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(giq.modifiers) > 0 {
 		_spec.Modifiers = giq.modifiers
 	}
+	_spec.Node.Columns = giq.fields
+	if len(giq.fields) > 0 {
+		_spec.Unique = giq.unique != nil && *giq.unique
+	}
 	return sqlgraph.CountNodes(ctx, giq.driver, _spec)
 }
 

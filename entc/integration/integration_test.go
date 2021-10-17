@@ -573,6 +573,14 @@ func Select(t *testing.T, client *ent.Client) {
 		require.Equal(len(p1[i].Name), p1[1].NameLength)
 	}
 
+	// Select count.
+	names = client.Pet.Query().Order(ent.Asc(pet.FieldName)).Select(pet.FieldName).StringsX(ctx)
+	require.Equal([]string{"aa", "bb", "bb", "cc"}, names)
+	count := client.Pet.Query().Select(pet.FieldName).CountX(ctx)
+	require.Equal(4, count)
+	count = client.Pet.Query().Unique(true).Select(pet.FieldName).CountX(ctx)
+	require.Equal(3, count)
+
 	var (
 		gs []struct {
 			ent.Group

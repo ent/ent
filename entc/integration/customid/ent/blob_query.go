@@ -521,6 +521,10 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 
 func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bq.querySpec()
+	_spec.Node.Columns = bq.fields
+	if len(bq.fields) > 0 {
+		_spec.Unique = bq.unique != nil && *bq.unique
+	}
 	return sqlgraph.CountNodes(ctx, bq.driver, _spec)
 }
 

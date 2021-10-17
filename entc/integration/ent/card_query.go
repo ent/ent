@@ -530,6 +530,10 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(cq.modifiers) > 0 {
 		_spec.Modifiers = cq.modifiers
 	}
+	_spec.Node.Columns = cq.fields
+	if len(cq.fields) > 0 {
+		_spec.Unique = cq.unique != nil && *cq.unique
+	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 

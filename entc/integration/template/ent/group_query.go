@@ -349,6 +349,10 @@ func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(gq.modifiers) > 0 {
 		_spec.Modifiers = gq.modifiers
 	}
+	_spec.Node.Columns = gq.fields
+	if len(gq.fields) > 0 {
+		_spec.Unique = gq.unique != nil && *gq.unique
+	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
 
