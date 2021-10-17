@@ -412,6 +412,10 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 
 func (cq *CityQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	_spec.Node.Columns = cq.fields
+	if len(cq.fields) > 0 {
+		_spec.Unique = cq.unique != nil && *cq.unique
+	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 

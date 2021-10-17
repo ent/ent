@@ -522,6 +522,10 @@ func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(uq.modifiers) > 0 {
 		_spec.Modifiers = uq.modifiers
 	}
+	_spec.Node.Columns = uq.fields
+	if len(uq.fields) > 0 {
+		_spec.Unique = uq.unique != nil && *uq.unique
+	}
 	return sqlgraph.CountNodes(ctx, uq.driver, _spec)
 }
 

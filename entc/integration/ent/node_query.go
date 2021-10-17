@@ -491,6 +491,10 @@ func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(nq.modifiers) > 0 {
 		_spec.Modifiers = nq.modifiers
 	}
+	_spec.Node.Columns = nq.fields
+	if len(nq.fields) > 0 {
+		_spec.Unique = nq.unique != nil && *nq.unique
+	}
 	return sqlgraph.CountNodes(ctx, nq.driver, _spec)
 }
 

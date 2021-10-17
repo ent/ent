@@ -599,10 +599,20 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	selector.Count(selector.C(q.Node.ID.Column))
+	// If no columns were selected in count,
+	// the default selection is by node ids.
+	columns := q.Node.Columns
+	if len(columns) == 0 {
+		columns = append(columns, q.Node.ID.Column)
+	}
+	for i, c := range columns {
+		columns[i] = selector.C(c)
+	}
 	if q.Unique {
 		selector.SetDistinct(false)
-		selector.Count(sql.Distinct(selector.C(q.Node.ID.Column)))
+		selector.Count(sql.Distinct(columns...))
+	} else {
+		selector.Count(columns...)
 	}
 	query, args := selector.Query()
 	if err := drv.Query(ctx, query, args, rows); err != nil {

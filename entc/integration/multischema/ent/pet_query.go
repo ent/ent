@@ -427,6 +427,10 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
 	_spec.Node.Schema = pq.schemaConfig.Pet
 	ctx = internal.NewSchemaConfigContext(ctx, pq.schemaConfig)
+	_spec.Node.Columns = pq.fields
+	if len(pq.fields) > 0 {
+		_spec.Unique = pq.unique != nil && *pq.unique
+	}
 	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
 }
 

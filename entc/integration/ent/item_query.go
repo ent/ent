@@ -348,6 +348,10 @@ func (iq *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(iq.modifiers) > 0 {
 		_spec.Modifiers = iq.modifiers
 	}
+	_spec.Node.Columns = iq.fields
+	if len(iq.fields) > 0 {
+		_spec.Unique = iq.unique != nil && *iq.unique
+	}
 	return sqlgraph.CountNodes(ctx, iq.driver, _spec)
 }
 

@@ -419,6 +419,10 @@ func (cq *CarQuery) sqlAll(ctx context.Context) ([]*Car, error) {
 
 func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
+	_spec.Node.Columns = cq.fields
+	if len(cq.fields) > 0 {
+		_spec.Unique = cq.unique != nil && *cq.unique
+	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 

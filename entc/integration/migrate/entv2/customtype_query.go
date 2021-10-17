@@ -340,6 +340,10 @@ func (ctq *CustomTypeQuery) sqlAll(ctx context.Context) ([]*CustomType, error) {
 
 func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ctq.querySpec()
+	_spec.Node.Columns = ctq.fields
+	if len(ctq.fields) > 0 {
+		_spec.Unique = ctq.unique != nil && *ctq.unique
+	}
 	return sqlgraph.CountNodes(ctx, ctq.driver, _spec)
 }
 

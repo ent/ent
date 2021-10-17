@@ -485,6 +485,10 @@ func (nq *NoteQuery) sqlAll(ctx context.Context) ([]*Note, error) {
 
 func (nq *NoteQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := nq.querySpec()
+	_spec.Node.Columns = nq.fields
+	if len(nq.fields) > 0 {
+		_spec.Unique = nq.unique != nil && *nq.unique
+	}
 	return sqlgraph.CountNodes(ctx, nq.driver, _spec)
 }
 

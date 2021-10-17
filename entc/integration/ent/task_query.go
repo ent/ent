@@ -348,6 +348,10 @@ func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(tq.modifiers) > 0 {
 		_spec.Modifiers = tq.modifiers
 	}
+	_spec.Node.Columns = tq.fields
+	if len(tq.fields) > 0 {
+		_spec.Unique = tq.unique != nil && *tq.unique
+	}
 	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
 }
 

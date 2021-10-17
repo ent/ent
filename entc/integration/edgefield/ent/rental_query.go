@@ -472,6 +472,10 @@ func (rq *RentalQuery) sqlAll(ctx context.Context) ([]*Rental, error) {
 
 func (rq *RentalQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := rq.querySpec()
+	_spec.Node.Columns = rq.fields
+	if len(rq.fields) > 0 {
+		_spec.Unique = rq.unique != nil && *rq.unique
+	}
 	return sqlgraph.CountNodes(ctx, rq.driver, _spec)
 }
 

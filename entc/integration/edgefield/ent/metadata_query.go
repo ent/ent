@@ -532,6 +532,10 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context) ([]*Metadata, error) {
 
 func (mq *MetadataQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := mq.querySpec()
+	_spec.Node.Columns = mq.fields
+	if len(mq.fields) > 0 {
+		_spec.Unique = mq.unique != nil && *mq.unique
+	}
 	return sqlgraph.CountNodes(ctx, mq.driver, _spec)
 }
 

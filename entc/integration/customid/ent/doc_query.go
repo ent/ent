@@ -485,6 +485,10 @@ func (dq *DocQuery) sqlAll(ctx context.Context) ([]*Doc, error) {
 
 func (dq *DocQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := dq.querySpec()
+	_spec.Node.Columns = dq.fields
+	if len(dq.fields) > 0 {
+		_spec.Unique = dq.unique != nil && *dq.unique
+	}
 	return sqlgraph.CountNodes(ctx, dq.driver, _spec)
 }
 

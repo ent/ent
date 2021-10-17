@@ -556,6 +556,10 @@ func (tq *TeamQuery) sqlAll(ctx context.Context) ([]*Team, error) {
 
 func (tq *TeamQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tq.querySpec()
+	_spec.Node.Columns = tq.fields
+	if len(tq.fields) > 0 {
+		_spec.Unique = tq.unique != nil && *tq.unique
+	}
 	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
 }
 
