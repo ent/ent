@@ -134,7 +134,7 @@ After installing `entcache`, you can easily add it to your project with the snip
 
 ```go
 // Open the database connection.
-db, err := sql.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
+db, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
 if err != nil {
 	log.Fatal("opening database", err)
 }
