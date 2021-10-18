@@ -42,6 +42,8 @@ go get github.com/hedwigz/entviz
 If you are not familiar with `entc` you're welcome to read [entc documentation](https://entgo.io/docs/code-gen#use-entc-as-a-package) to learn more about it.
 :::
 ```go title="ent/entc.go"
+import "github.com/hedwigz/entviz"
+
 err := entc.Generate("./schema", &gen.Config{}, entc.Extensions(entviz.Extension{}))
 if err != nil {
 	log.Fatalf("running ent codegen: %v", err)
