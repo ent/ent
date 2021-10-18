@@ -49,9 +49,12 @@ import (
 	"entgo.io/ent/entc/gen"
 	"github.com/hedwigz/entviz"
 )
-err := entc.Generate("./schema", &gen.Config{}, entc.Extensions(entviz.Extension{}))
-if err != nil {
-	log.Fatalf("running ent codegen: %v", err)
+
+func main() {
+	err := entc.Generate("./schema", &gen.Config{}, entc.Extensions(entviz.Extension{}))
+	if err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
 }
 ```
 Let's say we have a simple schema with a user entity and some fields:
