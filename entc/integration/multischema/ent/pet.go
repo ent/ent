@@ -22,10 +22,11 @@ type Pet struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// OwnerID holds the value of the "owner_id" field.
+	OwnerID int `json:"owner_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
-	Edges     PetEdges `json:"edges"`
-	user_pets *int
+	Edges PetEdges `json:"edges"`
 }
 
 // PetEdges holds the relations/edges for other nodes in the graph.
@@ -56,12 +57,10 @@ func (*Pet) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pet.FieldID:
+		case pet.FieldID, pet.FieldOwnerID:
 			values[i] = new(sql.NullInt64)
 		case pet.FieldName:
 			values[i] = new(sql.NullString)
-		case pet.ForeignKeys[0]: // user_pets
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Pet", columns[i])
 		}
@@ -89,12 +88,11 @@ func (pe *Pet) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				pe.Name = value.String
 			}
-		case pet.ForeignKeys[0]:
+		case pet.FieldOwnerID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_pets", value)
+				return fmt.Errorf("unexpected type %T for field owner_id", values[i])
 			} else if value.Valid {
-				pe.user_pets = new(int)
-				*pe.user_pets = int(value.Int64)
+				pe.OwnerID = int(value.Int64)
 			}
 		}
 	}
@@ -131,6 +129,8 @@ func (pe *Pet) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(pe.Name)
+	builder.WriteString(", owner_id=")
+	builder.WriteString(fmt.Sprintf("%v", pe.OwnerID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -33,6 +33,7 @@ type GroupQuery struct {
 	predicates []predicate.Group
 	// eager-loading edges.
 	withUsers *UserQuery
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -377,6 +378,9 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 	}
 	_spec.Node.Schema = gq.schemaConfig.Group
 	ctx = internal.NewSchemaConfigContext(ctx, gq.schemaConfig)
+	if len(gq.modifiers) > 0 {
+		_spec.Modifiers = gq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -457,6 +461,9 @@ func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gq.querySpec()
 	_spec.Node.Schema = gq.schemaConfig.Group
 	ctx = internal.NewSchemaConfigContext(ctx, gq.schemaConfig)
+	if len(gq.modifiers) > 0 {
+		_spec.Modifiers = gq.modifiers
+	}
 	_spec.Node.Columns = gq.fields
 	if len(gq.fields) > 0 {
 		_spec.Unique = gq.unique != nil && *gq.unique
@@ -538,6 +545,9 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	t1.Schema(gq.schemaConfig.Group)
 	ctx = internal.NewSchemaConfigContext(ctx, gq.schemaConfig)
 	selector.WithContext(ctx)
+	for _, m := range gq.modifiers {
+		m(selector)
+	}
 	for _, p := range gq.predicates {
 		p(selector)
 	}
@@ -553,6 +563,12 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (gq *GroupQuery) Modify(modifiers ...func(s *sql.Selector)) *GroupSelect {
+	gq.modifiers = append(gq.modifiers, modifiers...)
+	return gq.Select()
 }
 
 // GroupGroupBy is the group-by builder for Group entities.
@@ -1043,4 +1059,10 @@ func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (gs *GroupSelect) Modify(modifiers ...func(s *sql.Selector)) *GroupSelect {
+	gs.modifiers = append(gs.modifiers, modifiers...)
+	return gs
 }

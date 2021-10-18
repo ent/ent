@@ -45,7 +45,29 @@ func TestMySQL(t *testing.T) {
 		client.Group.Create().SetName("GitHub"),
 		client.Group.Create().SetName("GitLab"),
 	).SaveX(ctx)
-	usr := client.User.Create().AddPets(pedro).AddGroups(groups...).SaveX(ctx)
+	usr := client.User.Create().SetName("a8m").AddPets(pedro).AddGroups(groups...).SaveX(ctx)
+
+	// Custom modifier with schema config.
+	var names []struct {
+		User string `sql:"user_name"`
+		Pet  string `sql:"pet_name"`
+	}
+	client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			// The below function is exported using a custom
+			// template defined in ent/template/config.tmpl.
+			cfg := ent.SchemaConfigFromContext(s.Context())
+			t := sql.Table(user.Table).Schema(cfg.User)
+			s.Join(t).On(s.C(pet.FieldOwnerID), t.C(user.FieldID))
+			s.Select(
+				sql.As(t.C(user.FieldName), "user_name"),
+				sql.As(s.C(pet.FieldName), "pet_name"),
+			)
+		}).
+		ScanX(ctx, &names)
+	require.Len(t, names, 1)
+	require.Equal(t, "a8m", names[0].User)
+	require.Equal(t, "Pedro", names[0].Pet)
 
 	id := client.Group.Query().
 		Where(group.HasUsersWith(user.ID(usr.ID))).
