@@ -75,7 +75,7 @@ client := ent.NewClient(ent.Driver(drv))
 
 Now, whenever we execute a query, `sqlcomment` will suffix our SQL query with the tags we set up.
 
-![sqlcomment pipeline](https://entgo.io/images/assets/entviz/entviz-tutorial-1.png)
+![sqlcomment pipeline](https://entgo.io/images/assets/sqlcomment/pipeline2.png)
 
 As you can see, ent outputted an SQL query with a comment at the end, containing all the relevant information associated with that query.  
 
