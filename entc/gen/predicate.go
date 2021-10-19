@@ -9,21 +9,23 @@ type Op int
 
 // List of all builtin predicates.
 const (
-	EQ           Op = iota // =
-	NEQ                    // <>
-	GT                     // >
-	GTE                    // >=
-	LT                     // <
-	LTE                    // <=
-	IsNil                  // IS NULL / has
-	NotNil                 // IS NOT NULL / hasNot
-	In                     // within
-	NotIn                  // without
-	EqualFold              // equals case-insensitive
-	Contains               // containing
-	ContainsFold           // containing case-insensitive
-	HasPrefix              // startingWith
-	HasSuffix              // endingWith
+	EQ            Op = iota // =
+	NEQ                     // <>
+	GT                      // >
+	GTE                     // >=
+	LT                      // <
+	LTE                     // <=
+	IsNil                   // IS NULL / has
+	NotNil                  // IS NOT NULL / hasNot
+	In                      // within
+	NotIn                   // without
+	EqualFold               // equals case-insensitive
+	Contains                // containing
+	ContainsFold            // containing case-insensitive
+	HasPrefix               // startingWith
+	HasSuffix               // endingWith
+	HasPrefixFold           // startingWith case-insensitive
+	HasSuffixFold           // endingWith case-insensitive
 )
 
 // Name returns the string representation of an operator.
@@ -47,21 +49,23 @@ func (o Op) Niladic() bool {
 var (
 	// operations text.
 	opText = [...]string{
-		EQ:           "EQ",
-		NEQ:          "NEQ",
-		GT:           "GT",
-		GTE:          "GTE",
-		LT:           "LT",
-		LTE:          "LTE",
-		IsNil:        "IsNil",
-		NotNil:       "NotNil",
-		EqualFold:    "EqualFold",
-		Contains:     "Contains",
-		ContainsFold: "ContainsFold",
-		HasPrefix:    "HasPrefix",
-		HasSuffix:    "HasSuffix",
-		In:           "In",
-		NotIn:        "NotIn",
+		EQ:            "EQ",
+		NEQ:           "NEQ",
+		GT:            "GT",
+		GTE:           "GTE",
+		LT:            "LT",
+		LTE:           "LTE",
+		IsNil:         "IsNil",
+		NotNil:        "NotNil",
+		EqualFold:     "EqualFold",
+		Contains:      "Contains",
+		ContainsFold:  "ContainsFold",
+		HasPrefix:     "HasPrefix",
+		HasSuffix:     "HasSuffix",
+		HasPrefixFold: "HasPrefixFold",
+		HasSuffixFold: "HasSuffixFold",
+		In:            "In",
+		NotIn:         "NotIn",
 	}
 	// operations per type.
 	boolOps     = []Op{EQ, NEQ}
