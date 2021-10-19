@@ -83,7 +83,7 @@ For more advanced examples, please visit the [github repo](https://github.com/ar
 
 ### Wrapping-Up
 
-In this post we introduced the concept of SQL tags and we saw how they help correlate between source code and database queries. Next, we introduced `sqlcomment` - an Ent driver that adds SQL tags to all of your queries. Finally, we got to see `sqlcomment` in action, by installing and configuring it with Ent. If you like the code and/or want to contribute - feel free to checkout the [project on github](https://github.com/ariga/sqlcomment).
+In this post we showed how adding metadata to queries using SQL comments can help correlate between source code and database queries. Next, we introduced `sqlcomment` - an Ent driver that adds SQL tags to all of your queries. Finally, we got to see `sqlcomment` in action, by installing and configuring it with Ent. If you like the code and/or want to contribute - feel free to checkout the [project on github](https://github.com/ariga/sqlcomment).
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
