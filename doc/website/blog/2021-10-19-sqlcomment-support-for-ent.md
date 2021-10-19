@@ -31,11 +31,11 @@ update users set username = ‘hedwigz’ where id = 88
 /*application='users-mgr',controller='users',route='user_rename',db_driver='ent:v0.9.1'*/
 ```
 
-To get a taste of how the analysis of metadata collected from Sqlcommenter metadata can help us better understand performance issues of our application, consider the following example.  Google Cloud recently launched [https://cloud.google.com/blog/products/databases/get-ahead-of-database-performance-issues-with-cloud-sql-insights](Cloud SQL Insights), a cloud-based SQL performance analysis product.  In the image below, we see a screenshot from the Cloud SQL Insights Dashboard that shows that the HTTP route “demo/charge” is causing many locks on the database. We can also see that this query got called ~500,000 times in the last hour.
+To get a taste of how the analysis of metadata collected from Sqlcommenter metadata can help us better understand performance issues of our application, consider the following example.  Google Cloud recently launched [Cloud SQL Insights](https://cloud.google.com/blog/products/databases/get-ahead-of-database-performance-issues-with-cloud-sql-insights), a cloud-based SQL performance analysis product.  In the image below, we see a screenshot from the Cloud SQL Insights Dashboard that shows that the HTTP route 'api/users' is causing many locks on the database. We can also see that this query got called 16,067 times in the last 6 hours.
 
 <div style={{textAlign: 'center'}}>
-  <img alt="Cloud SQL insights" src="https://storage.googleapis.com/gweb-cloudblog-publish/images/query_insights.max-1300x1300.png" />
-  <p style={{fontSize: 12}}>illustration from <a href="https://cloud.google.com/blog/topics/developers-practitioners/introducing-sqlcommenter-open-source-orm-auto-instrumentation-library">Google's announcement</a></p>
+  <img alt="Cloud SQL insights" src="https://i.ibb.co/K0wShKV/image-7-1.png" />
+  <p style={{fontSize: 12}}>Screenshot from Cloud SQL Insights Dashboard</a></p>
 </div>
 
 This is the power of SQL tags - they provide you correlation between your application-level information and your Database monitors.
