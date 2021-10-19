@@ -7,7 +7,7 @@ authorTwitter: itsamitush
 ---
 
 Ent is a powerful Entity Framework that helps developers write neat code that is translated into (possibly complex) database queries. As the usage of your application grows, it doesn’t take long until you stumble upon performance issues with your database.
-Troubleshooting database performance issues is notoriously hard, especially when you’re not equipped with the right tools/services.  
+Troubleshooting database performance issues is notoriously hard, especially when you’re not equipped with the right tools.  
 
 The following example shows how ent query code is translated into an SQL query.
 
