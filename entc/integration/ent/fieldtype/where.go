@@ -2987,6 +2987,22 @@ func MACContainsFold(v schema.MAC) predicate.FieldType {
 	})
 }
 
+// MACHasPrefixFold applies the HasPrefixFold predicate on the "mac" field.
+func MACHasPrefixFold(v schema.MAC) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldMAC), vc))
+	})
+}
+
+// MACHasSuffixFold applies the HasSuffixFold predicate on the "mac" field.
+func MACHasSuffixFold(v schema.MAC) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldMAC), vc))
+	})
+}
+
 // StringArrayEQ applies the EQ predicate on the "string_array" field.
 func StringArrayEQ(v schema.Strings) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -3202,6 +3218,20 @@ func PasswordContainsFold(v string) predicate.FieldType {
 	})
 }
 
+// PasswordHasPrefixFold applies the HasPrefixFold predicate on the "password" field.
+func PasswordHasPrefixFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordHasSuffixFold applies the HasSuffixFold predicate on the "password" field.
+func PasswordHasSuffixFold(v string) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldPassword), v))
+	})
+}
+
 // StringScannerEQ applies the EQ predicate on the "string_scanner" field.
 func StringScannerEQ(v schema.StringScanner) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -3329,6 +3359,22 @@ func StringScannerContainsFold(v schema.StringScanner) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldStringScanner), vc))
+	})
+}
+
+// StringScannerHasPrefixFold applies the HasPrefixFold predicate on the "string_scanner" field.
+func StringScannerHasPrefixFold(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldStringScanner), vc))
+	})
+}
+
+// StringScannerHasSuffixFold applies the HasSuffixFold predicate on the "string_scanner" field.
+func StringScannerHasSuffixFold(v schema.StringScanner) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldStringScanner), vc))
 	})
 }
 
@@ -3550,6 +3596,22 @@ func DirContainsFold(v http.Dir) predicate.FieldType {
 	})
 }
 
+// DirHasPrefixFold applies the HasPrefixFold predicate on the "dir" field.
+func DirHasPrefixFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldDir), vc))
+	})
+}
+
+// DirHasSuffixFold applies the HasSuffixFold predicate on the "dir" field.
+func DirHasSuffixFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldDir), vc))
+	})
+}
+
 // NdirEQ applies the EQ predicate on the "ndir" field.
 func NdirEQ(v http.Dir) predicate.FieldType {
 	vc := string(v)
@@ -3686,6 +3748,22 @@ func NdirContainsFold(v http.Dir) predicate.FieldType {
 	})
 }
 
+// NdirHasPrefixFold applies the HasPrefixFold predicate on the "ndir" field.
+func NdirHasPrefixFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldNdir), vc))
+	})
+}
+
+// NdirHasSuffixFold applies the HasSuffixFold predicate on the "ndir" field.
+func NdirHasSuffixFold(v http.Dir) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldNdir), vc))
+	})
+}
+
 // StrEQ applies the EQ predicate on the "str" field.
 func StrEQ(v sql.NullString) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -3813,6 +3891,22 @@ func StrContainsFold(v sql.NullString) predicate.FieldType {
 	vc := v.String
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldStr), vc))
+	})
+}
+
+// StrHasPrefixFold applies the HasPrefixFold predicate on the "str" field.
+func StrHasPrefixFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldStr), vc))
+	})
+}
+
+// StrHasSuffixFold applies the HasSuffixFold predicate on the "str" field.
+func StrHasSuffixFold(v sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldStr), vc))
 	})
 }
 
@@ -3946,6 +4040,22 @@ func NullStrContainsFold(v *sql.NullString) predicate.FieldType {
 	})
 }
 
+// NullStrHasPrefixFold applies the HasPrefixFold predicate on the "null_str" field.
+func NullStrHasPrefixFold(v *sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldNullStr), vc))
+	})
+}
+
+// NullStrHasSuffixFold applies the HasSuffixFold predicate on the "null_str" field.
+func NullStrHasSuffixFold(v *sql.NullString) predicate.FieldType {
+	vc := v.String
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldNullStr), vc))
+	})
+}
+
 // LinkEQ applies the EQ predicate on the "link" field.
 func LinkEQ(v schema.Link) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -4076,6 +4186,22 @@ func LinkContainsFold(v schema.Link) predicate.FieldType {
 	})
 }
 
+// LinkHasPrefixFold applies the HasPrefixFold predicate on the "link" field.
+func LinkHasPrefixFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldLink), vc))
+	})
+}
+
+// LinkHasSuffixFold applies the HasSuffixFold predicate on the "link" field.
+func LinkHasSuffixFold(v schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldLink), vc))
+	})
+}
+
 // NullLinkEQ applies the EQ predicate on the "null_link" field.
 func NullLinkEQ(v *schema.Link) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -4203,6 +4329,22 @@ func NullLinkContainsFold(v *schema.Link) predicate.FieldType {
 	vc := v.String()
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkHasPrefixFold applies the HasPrefixFold predicate on the "null_link" field.
+func NullLinkHasPrefixFold(v *schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldNullLink), vc))
+	})
+}
+
+// NullLinkHasSuffixFold applies the HasSuffixFold predicate on the "null_link" field.
+func NullLinkHasSuffixFold(v *schema.Link) predicate.FieldType {
+	vc := v.String()
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldNullLink), vc))
 	})
 }
 
@@ -5905,6 +6047,22 @@ func VstringContainsFold(v schema.VString) predicate.FieldType {
 	vc := string(v)
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldVstring), vc))
+	})
+}
+
+// VstringHasPrefixFold applies the HasPrefixFold predicate on the "vstring" field.
+func VstringHasPrefixFold(v schema.VString) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldVstring), vc))
+	})
+}
+
+// VstringHasSuffixFold applies the HasSuffixFold predicate on the "vstring" field.
+func VstringHasSuffixFold(v schema.VString) predicate.FieldType {
+	vc := string(v)
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldVstring), vc))
 	})
 }
 

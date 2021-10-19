@@ -317,6 +317,20 @@ func NameContainsFold(v string) predicate.File {
 	})
 }
 
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
+	})
+}
+
 // UserEQ applies the EQ predicate on the "user" field.
 func UserEQ(v string) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
@@ -442,6 +456,20 @@ func UserContainsFold(v string) predicate.File {
 	})
 }
 
+// UserHasPrefixFold applies the HasPrefixFold predicate on the "user" field.
+func UserHasPrefixFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldUser), v))
+	})
+}
+
+// UserHasSuffixFold applies the HasSuffixFold predicate on the "user" field.
+func UserHasSuffixFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldUser), v))
+	})
+}
+
 // GroupEQ applies the EQ predicate on the "group" field.
 func GroupEQ(v string) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
@@ -564,6 +592,20 @@ func GroupEqualFold(v string) predicate.File {
 func GroupContainsFold(v string) predicate.File {
 	return predicate.File(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldGroup), v))
+	})
+}
+
+// GroupHasPrefixFold applies the HasPrefixFold predicate on the "group" field.
+func GroupHasPrefixFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldGroup), v))
+	})
+}
+
+// GroupHasSuffixFold applies the HasSuffixFold predicate on the "group" field.
+func GroupHasSuffixFold(v string) predicate.File {
+	return predicate.File(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldGroup), v))
 	})
 }
 

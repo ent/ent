@@ -240,6 +240,20 @@ func SourceContainsFold(v string) predicate.Media {
 	})
 }
 
+// SourceHasPrefixFold applies the HasPrefixFold predicate on the "source" field.
+func SourceHasPrefixFold(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldSource), v))
+	})
+}
+
+// SourceHasSuffixFold applies the HasSuffixFold predicate on the "source" field.
+func SourceHasSuffixFold(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldSource), v))
+	})
+}
+
 // SourceURIEQ applies the EQ predicate on the "source_uri" field.
 func SourceURIEQ(v string) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
@@ -365,6 +379,20 @@ func SourceURIContainsFold(v string) predicate.Media {
 	})
 }
 
+// SourceURIHasPrefixFold applies the HasPrefixFold predicate on the "source_uri" field.
+func SourceURIHasPrefixFold(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldSourceURI), v))
+	})
+}
+
+// SourceURIHasSuffixFold applies the HasSuffixFold predicate on the "source_uri" field.
+func SourceURIHasSuffixFold(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldSourceURI), v))
+	})
+}
+
 // TextEQ applies the EQ predicate on the "text" field.
 func TextEQ(v string) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
@@ -487,6 +515,20 @@ func TextEqualFold(v string) predicate.Media {
 func TextContainsFold(v string) predicate.Media {
 	return predicate.Media(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldText), v))
+	})
+}
+
+// TextHasPrefixFold applies the HasPrefixFold predicate on the "text" field.
+func TextHasPrefixFold(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldText), v))
+	})
+}
+
+// TextHasSuffixFold applies the HasSuffixFold predicate on the "text" field.
+func TextHasSuffixFold(v string) predicate.Media {
+	return predicate.Media(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldText), v))
 	})
 }
 

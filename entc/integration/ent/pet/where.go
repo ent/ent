@@ -311,6 +311,20 @@ func NameContainsFold(v string) predicate.Pet {
 	})
 }
 
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
+	})
+}
+
 // UUIDEQ applies the EQ predicate on the "uuid" field.
 func UUIDEQ(v uuid.UUID) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
@@ -523,6 +537,20 @@ func NicknameEqualFold(v string) predicate.Pet {
 func NicknameContainsFold(v string) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameHasPrefixFold applies the HasPrefixFold predicate on the "nickname" field.
+func NicknameHasPrefixFold(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameHasSuffixFold applies the HasSuffixFold predicate on the "nickname" field.
+func NicknameHasSuffixFold(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldNickname), v))
 	})
 }
 

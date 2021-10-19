@@ -228,6 +228,20 @@ func NumberContainsFold(v string) predicate.Car {
 	})
 }
 
+// NumberHasPrefixFold applies the HasPrefixFold predicate on the "number" field.
+func NumberHasPrefixFold(v string) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldNumber), v))
+	})
+}
+
+// NumberHasSuffixFold applies the HasSuffixFold predicate on the "number" field.
+func NumberHasSuffixFold(v string) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldNumber), v))
+	})
+}
+
 // HasRentals applies the HasEdge predicate on the "rentals" edge.
 func HasRentals() predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {

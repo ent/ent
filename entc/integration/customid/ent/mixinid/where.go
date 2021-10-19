@@ -220,6 +220,20 @@ func SomeFieldContainsFold(v string) predicate.MixinID {
 	})
 }
 
+// SomeFieldHasPrefixFold applies the HasPrefixFold predicate on the "some_field" field.
+func SomeFieldHasPrefixFold(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldSomeField), v))
+	})
+}
+
+// SomeFieldHasSuffixFold applies the HasSuffixFold predicate on the "some_field" field.
+func SomeFieldHasSuffixFold(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldSomeField), v))
+	})
+}
+
 // MixinFieldEQ applies the EQ predicate on the "mixin_field" field.
 func MixinFieldEQ(v string) predicate.MixinID {
 	return predicate.MixinID(func(s *sql.Selector) {
@@ -328,6 +342,20 @@ func MixinFieldEqualFold(v string) predicate.MixinID {
 func MixinFieldContainsFold(v string) predicate.MixinID {
 	return predicate.MixinID(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldMixinField), v))
+	})
+}
+
+// MixinFieldHasPrefixFold applies the HasPrefixFold predicate on the "mixin_field" field.
+func MixinFieldHasPrefixFold(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldMixinField), v))
+	})
+}
+
+// MixinFieldHasSuffixFold applies the HasSuffixFold predicate on the "mixin_field" field.
+func MixinFieldHasSuffixFold(v string) predicate.MixinID {
+	return predicate.MixinID(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldMixinField), v))
 	})
 }
 

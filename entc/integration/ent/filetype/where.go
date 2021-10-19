@@ -213,6 +213,20 @@ func NameContainsFold(v string) predicate.FileType {
 	})
 }
 
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.FileType {
+	return predicate.FileType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.FileType {
+	return predicate.FileType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
+	})
+}
+
 // TypeEQ applies the EQ predicate on the "type" field.
 func TypeEQ(v Type) predicate.FileType {
 	return predicate.FileType(func(s *sql.Selector) {

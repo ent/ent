@@ -228,6 +228,20 @@ func TextContainsFold(v string) predicate.Note {
 	})
 }
 
+// TextHasPrefixFold applies the HasPrefixFold predicate on the "text" field.
+func TextHasPrefixFold(v string) predicate.Note {
+	return predicate.Note(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldText), v))
+	})
+}
+
+// TextHasSuffixFold applies the HasSuffixFold predicate on the "text" field.
+func TextHasSuffixFold(v string) predicate.Note {
+	return predicate.Note(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldText), v))
+	})
+}
+
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Note {
 	return predicate.Note(func(s *sql.Selector) {

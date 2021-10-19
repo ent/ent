@@ -220,6 +220,20 @@ func DescContainsFold(v string) predicate.GroupInfo {
 	})
 }
 
+// DescHasPrefixFold applies the HasPrefixFold predicate on the "desc" field.
+func DescHasPrefixFold(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldDesc), v))
+	})
+}
+
+// DescHasSuffixFold applies the HasSuffixFold predicate on the "desc" field.
+func DescHasSuffixFold(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldDesc), v))
+	})
+}
+
 // MaxUsersEQ applies the EQ predicate on the "max_users" field.
 func MaxUsersEQ(v int) predicate.GroupInfo {
 	return predicate.GroupInfo(func(s *sql.Selector) {

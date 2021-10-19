@@ -226,6 +226,20 @@ func CustomContainsFold(v string) predicate.CustomType {
 	})
 }
 
+// CustomHasPrefixFold applies the HasPrefixFold predicate on the "custom" field.
+func CustomHasPrefixFold(v string) predicate.CustomType {
+	return predicate.CustomType(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldCustom), v))
+	})
+}
+
+// CustomHasSuffixFold applies the HasSuffixFold predicate on the "custom" field.
+func CustomHasSuffixFold(v string) predicate.CustomType {
+	return predicate.CustomType(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldCustom), v))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.CustomType) predicate.CustomType {
 	return predicate.CustomType(func(s *sql.Selector) {

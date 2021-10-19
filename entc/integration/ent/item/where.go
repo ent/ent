@@ -226,6 +226,20 @@ func TextContainsFold(v string) predicate.Item {
 	})
 }
 
+// TextHasPrefixFold applies the HasPrefixFold predicate on the "text" field.
+func TextHasPrefixFold(v string) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldText), v))
+	})
+}
+
+// TextHasSuffixFold applies the HasSuffixFold predicate on the "text" field.
+func TextHasSuffixFold(v string) predicate.Item {
+	return predicate.Item(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldText), v))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Item) predicate.Item {
 	return predicate.Item(func(s *sql.Selector) {

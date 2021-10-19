@@ -945,7 +945,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.NotNil(client.User.Query().Where(user.HasParentWith(user.NameIn("a8m", "neta"))).OnlyX(ctx))
 	require.Len(client.User.Query().Where(user.NameContains("a8")).AllX(ctx), 1)
 	require.Len(client.User.Query().Where(user.NameHasPrefix("a8")).AllX(ctx), 1)
+	require.Len(client.User.Query().Where(user.NameHasPrefixFold("A8")).AllX(ctx), 1)
 	require.Len(client.User.Query().Where(user.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).AllX(ctx), 2)
+	require.Len(client.User.Query().Where(user.Or(user.NameHasPrefixFold("A8"), user.NameHasSuffixFold("eTa"))).AllX(ctx), 2)
 
 	t.Log("group-by one field")
 	names, err := client.User.Query().GroupBy(user.FieldName).Strings(ctx)

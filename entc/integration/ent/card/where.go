@@ -471,6 +471,20 @@ func NumberContainsFold(v string) predicate.Card {
 	})
 }
 
+// NumberHasPrefixFold applies the HasPrefixFold predicate on the "number" field.
+func NumberHasPrefixFold(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldNumber), v))
+	})
+}
+
+// NumberHasSuffixFold applies the HasSuffixFold predicate on the "number" field.
+func NumberHasSuffixFold(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldNumber), v))
+	})
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
@@ -593,6 +607,20 @@ func NameEqualFold(v string) predicate.Card {
 func NameContainsFold(v string) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
 	})
 }
 

@@ -347,6 +347,20 @@ func TypeContainsFold(v string) predicate.Group {
 	})
 }
 
+// TypeHasPrefixFold applies the HasPrefixFold predicate on the "type" field.
+func TypeHasPrefixFold(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldType), v))
+	})
+}
+
+// TypeHasSuffixFold applies the HasSuffixFold predicate on the "type" field.
+func TypeHasSuffixFold(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldType), v))
+	})
+}
+
 // MaxUsersEQ applies the EQ predicate on the "max_users" field.
 func MaxUsersEQ(v int) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
@@ -545,6 +559,20 @@ func NameEqualFold(v string) predicate.Group {
 func NameContainsFold(v string) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.Group {
+	return predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
 	})
 }
 

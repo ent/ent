@@ -435,6 +435,20 @@ func NameContainsFold(v string) predicate.User {
 	})
 }
 
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
+	})
+}
+
 // LastEQ applies the EQ predicate on the "last" field.
 func LastEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -543,6 +557,20 @@ func LastEqualFold(v string) predicate.User {
 func LastContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldLast), v))
+	})
+}
+
+// LastHasPrefixFold applies the HasPrefixFold predicate on the "last" field.
+func LastHasPrefixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldLast), v))
+	})
+}
+
+// LastHasSuffixFold applies the HasSuffixFold predicate on the "last" field.
+func LastHasSuffixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldLast), v))
 	})
 }
 
@@ -671,6 +699,20 @@ func NicknameContainsFold(v string) predicate.User {
 	})
 }
 
+// NicknameHasPrefixFold applies the HasPrefixFold predicate on the "nickname" field.
+func NicknameHasPrefixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameHasSuffixFold applies the HasSuffixFold predicate on the "nickname" field.
+func NicknameHasSuffixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldNickname), v))
+	})
+}
+
 // AddressEQ applies the EQ predicate on the "address" field.
 func AddressEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -793,6 +835,20 @@ func AddressEqualFold(v string) predicate.User {
 func AddressContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldAddress), v))
+	})
+}
+
+// AddressHasPrefixFold applies the HasPrefixFold predicate on the "address" field.
+func AddressHasPrefixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldAddress), v))
+	})
+}
+
+// AddressHasSuffixFold applies the HasSuffixFold predicate on the "address" field.
+func AddressHasSuffixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldAddress), v))
 	})
 }
 
@@ -921,6 +977,20 @@ func PhoneContainsFold(v string) predicate.User {
 	})
 }
 
+// PhoneHasPrefixFold applies the HasPrefixFold predicate on the "phone" field.
+func PhoneHasPrefixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldPhone), v))
+	})
+}
+
+// PhoneHasSuffixFold applies the HasSuffixFold predicate on the "phone" field.
+func PhoneHasSuffixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldPhone), v))
+	})
+}
+
 // PasswordEQ applies the EQ predicate on the "password" field.
 func PasswordEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1043,6 +1113,20 @@ func PasswordEqualFold(v string) predicate.User {
 func PasswordContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordHasPrefixFold applies the HasPrefixFold predicate on the "password" field.
+func PasswordHasPrefixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldPassword), v))
+	})
+}
+
+// PasswordHasSuffixFold applies the HasSuffixFold predicate on the "password" field.
+func PasswordHasSuffixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldPassword), v))
 	})
 }
 
@@ -1264,6 +1348,20 @@ func SSOCertEqualFold(v string) predicate.User {
 func SSOCertContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertHasPrefixFold applies the HasPrefixFold predicate on the "SSOCert" field.
+func SSOCertHasPrefixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldSSOCert), v))
+	})
+}
+
+// SSOCertHasSuffixFold applies the HasSuffixFold predicate on the "SSOCert" field.
+func SSOCertHasSuffixFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldSSOCert), v))
 	})
 }
 
