@@ -7,31 +7,40 @@ authorTwitter: itsamitush
 ---
 
 Ent is a powerful Entity Framework that helps developers write neat code that is translated into (possibly complex) database queries. As the usage of your application grows, it doesn’t take long until you stumble upon performance issues with your database.
-Troubleshooting database performance issues is notoriously hard, especially when you’re not using the right tools/services.
+Troubleshooting database performance issues is notoriously hard, especially when you’re not equipped with the right tools/services.  
+
 The following example shows how ent query code is translated into an SQL query.
 
 <div style={{textAlign: 'center'}}>
-  <img alt="ent example 1" src="https://entgo.io/images/assets/entviz/datagrip_er_diagram.png" />
+  <img alt="ent example 1" src="https://entgo.io/images/assets/sqlcomment/pipeline.png" />
   <p style={{fontSize: 12}}>Example 1 - ent code is translated to SQL query</p>
 </div>
+
+Traditionally, it has been very difficult to correlate between poorly performing database queries and the application code that is generating them. Database performance analysis tools could help point out slow queries by analyzing database server logs, but how could they be traced back to the application?
 
 ### Sqlcommenter
 Earlier this year, [Google introduced](https://cloud.google.com/blog/topics/developers-practitioners/introducing-sqlcommenter-open-source-orm-auto-instrumentation-library) Sqlcommenter. Sqlcommenter is 
 
 > <em>an open source library that addresses the gap between the ORM libraries and understanding database performance. Sqlcommenter gives application developers visibility into which application code is generating slow queries and maps application traces to database query plans</em>
 
+In other words, sqlcommenter adds application context data to SQL queries. This information can then be used to provide meaningful insights. For example, the following query is commented with relevant data about which microservice issued it, and why:
+
+```SQL
+update users set username = ‘hedwigz’ where id = 88
+/*application='users-mgr',controller='users',route='user_rename',db_driver='ent:v0.9.1'*/
+```
+
 In the following example, we see Cloud SQL Insights Dashboard and we can see that the HTTP route “demo/charge” is causing many locks on the database. We can also see that this query got called ~500,000 times in the last hour.
 
 <div style={{textAlign: 'center'}}>
-  <img alt="Cloud SQL insights" src="https://entgo.io/images/assets/entviz/datagrip_er_diagram.png" />
-  <p style={{fontSize: 12}}>illustration for <a href="https://entgo.io/images/assets/entviz/datagrip_er_diagram.png">Google's announcement</a></p>
+  <img alt="Cloud SQL insights" src="https://storage.googleapis.com/gweb-cloudblog-publish/images/query_insights.max-1300x1300.png" />
+  <p style={{fontSize: 12}}>illustration from <a href="https://cloud.google.com/blog/topics/developers-practitioners/introducing-sqlcommenter-open-source-orm-auto-instrumentation-library">Google's announcement</a></p>
 </div>
 
 This is the power of SQL tags - they provide you correlation between your application-level information and your Database monitors.
 
 ### sqlcomm**ent**
-[sqlcomment](https://github.com/ariga/sqlcomment) is an ent driver that adds SQL tags following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/). It also supports OpenTelemetry and OpenCensus.  
-
+[sqlcomment](https://github.com/ariga/sqlcomment) is an ent driver that adds SQL tags following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/).
 Without further ado, let’s see sqlcomment in action.  
 First, to install sqlcomment run:
 ```bash
@@ -66,6 +75,10 @@ client := ent.NewClient(ent.Driver(drv))
 Now, whenever we execute a query, `sqlcomment` will suffix our SQL query with the tags we set up.
 
 ![sqlcomment pipeline](https://entgo.io/images/assets/entviz/entviz-tutorial-1.png)
+
+As you can see, ent outputted an SQL query with a comment at the end, containing all the relevant information associated with that query.  
+
+For more advanced examples, please visit the [github repo](https://github.com/ariga/sqlcomment).
 
 ### Wrapping-Up
 
