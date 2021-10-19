@@ -1595,6 +1595,26 @@ func (p *Predicate) Like(col, pattern string) *Predicate {
 	})
 }
 
+// likeFold is a generic helper for building LIKE predicate with case-folding.
+func (p *Predicate) likeFold(col, arg string) *Predicate {
+	return p.Append(func(b *Builder) {
+		f := &Func{}
+		f.SetDialect(b.dialect)
+		switch b.dialect {
+		case dialect.MySQL:
+			// We assume the CHARACTER SET is configured to utf8mb4,
+			// because this how it is defined in dialect/sql/schema.
+			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci LIKE ")
+		case dialect.Postgres:
+			b.Ident(col).WriteString(" ILIKE ")
+		default: // SQLite.
+			f.Lower(col)
+			b.WriteString(f.String()).WriteString(" LIKE ")
+		}
+		b.Arg(arg)
+	})
+}
+
 // HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
 func HasPrefix(col, prefix string) *Predicate {
 	return P().HasPrefix(col, prefix)
@@ -1605,6 +1625,14 @@ func (p *Predicate) HasPrefix(col, prefix string) *Predicate {
 	return p.Like(col, prefix+"%")
 }
 
+// HasPrefixFold is a helper predicate that checks prefix using the LIKE predicate with case-folding.
+func HasPrefixFold(col, suffix string) *Predicate { return P().HasPrefixFold(col, suffix) }
+
+// HasPrefixFold is a helper predicate that checks prefix using the LIKE predicate with case-folding.
+func (p *Predicate) HasPrefixFold(col, prefix string) *Predicate {
+	return p.likeFold(col, strings.ToLower(prefix)+"%")
+}
+
 // HasSuffix is a helper predicate that checks suffix using the LIKE predicate.
 func HasSuffix(col, suffix string) *Predicate { return P().HasSuffix(col, suffix) }
 
@@ -1613,28 +1641,20 @@ func (p *Predicate) HasSuffix(col, suffix string) *Predicate {
 	return p.Like(col, "%"+suffix)
 }
 
+// HasSuffixFold is a helper predicate that checks suffix using the LIKE predicate with case-folding.
+func HasSuffixFold(col, suffix string) *Predicate { return P().HasSuffixFold(col, suffix) }
+
+// HasSuffixFold is a helper predicate that checks suffix using the LIKE predicate with case-folding.
+func (p *Predicate) HasSuffixFold(col, prefix string) *Predicate {
+	return p.likeFold(col, "%"+strings.ToLower(prefix))
+}
+
 // EqualFold is a helper predicate that applies the "=" predicate with case-folding.
 func EqualFold(col, sub string) *Predicate { return P().EqualFold(col, sub) }
 
 // EqualFold is a helper predicate that applies the "=" predicate with case-folding.
 func (p *Predicate) EqualFold(col, sub string) *Predicate {
-	return p.Append(func(b *Builder) {
-		f := &Func{}
-		f.SetDialect(b.dialect)
-		switch b.dialect {
-		case dialect.MySQL:
-			// We assume the CHARACTER SET is configured to utf8mb4,
-			// because this how it is defined in dialect/sql/schema.
-			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci = ")
-		case dialect.Postgres:
-			b.Ident(col).WriteString(" ILIKE ")
-		default: // SQLite.
-			f.Lower(col)
-			b.WriteString(f.String())
-			b.WriteOp(OpEQ)
-		}
-		b.Arg(strings.ToLower(sub))
-	})
+	return p.likeFold(col, strings.ToLower(sub))
 }
 
 // Contains is a helper predicate that checks substring using the LIKE predicate.
@@ -1650,22 +1670,7 @@ func ContainsFold(col, sub string) *Predicate { return P().ContainsFold(col, sub
 
 // ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.
 func (p *Predicate) ContainsFold(col, sub string) *Predicate {
-	return p.Append(func(b *Builder) {
-		f := &Func{}
-		f.SetDialect(b.dialect)
-		switch b.dialect {
-		case dialect.MySQL:
-			// We assume the CHARACTER SET is configured to utf8mb4,
-			// because this how it is defined in dialect/sql/schema.
-			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci LIKE ")
-		case dialect.Postgres:
-			b.Ident(col).WriteString(" ILIKE ")
-		default: // SQLite.
-			f.Lower(col)
-			b.WriteString(f.String()).WriteString(" LIKE ")
-		}
-		b.Arg("%" + strings.ToLower(sub) + "%")
-	})
+	return p.likeFold(col, "%"+strings.ToLower(sub)+"%")
 }
 
 // CompositeGT returns a comiposite ">" predicate
