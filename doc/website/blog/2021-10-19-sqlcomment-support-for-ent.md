@@ -43,6 +43,7 @@ This is the power of SQL tags - they provide you correlation between your applic
 ### sqlcomm**ent**
 [sqlcomment](https://github.com/ariga/sqlcomment) is an Ent driver that adds metadata to SQL queries using comments following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/). By wrapping an existing Ent driver with `sqlcomment`,  users can leverage any tools that support the standard to triage query performance issues.
 Without further ado, let’s see sqlcomment in action.  
+  
 First, to install sqlcomment run:
 ```bash
 go get ariga.io/sqlcomment
@@ -51,11 +52,6 @@ go get ariga.io/sqlcomment
 `sqlcomment` is wrapping an underlying SQL driver, therefore, we need to open our SQL connection using ent’s `sql` module, instead of ents popular helper `ent.Open`
 
 ```go
-import (
-	"ariga.io/sqlcomment"
-	"entgo.io/ent/dialect/sql"
-)
-
 // Create db driver.
 db, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 if err != nil {
@@ -73,13 +69,42 @@ drv := sqlcomment.NewDriver(db),
 client := ent.NewClient(ent.Driver(drv))
 ```
 
-Now, whenever we execute a query, `sqlcomment` will suffix our SQL query with the tags we set up.
+Now, whenever we execute a query, `sqlcomment` will suffix our SQL query with the tags we set up. If we were to run the following query:
 
-![sqlcomment pipeline](https://entgo.io/images/assets/sqlcomment/pipeline2.png)
+```go
+client.User.
+	Update().
+	Where(
+		user.Or(
+			user.AgeGT(30),
+			user.Name("bar"),
+		),
+		user.HasFollowers(),
+	).
+	SetName("foo").
+	Save()
+```
+
+Ent would output the following commented SQL query:
+
+```sql
+UPDATE `users`
+SET `name` = ?
+WHERE (
+    `users`.`age` > ?
+    OR `users`.`name` = ?
+  )
+  AND `users`.`id` IN (
+    SELECT `user_following`.`follower_id`
+    FROM `user_following`
+  )
+  /*application='my-app',db_driver='ent:v0.9.1',framework='net%2Fhttp'*/
+```
 
 As you can see, ent outputted an SQL query with a comment at the end, containing all the relevant information associated with that query.  
 
-For more advanced examples, please visit the [github repo](https://github.com/ariga/sqlcomment).
+sqlcomm**ent** supports more tags, and has integrations with OpenTelemetry and OpenCensus.
+To see more examples and scenarios, please visit the [github repo](https://github.com/ariga/sqlcomment).
 
 ### Wrapping-Up
 
