@@ -41,7 +41,7 @@ In the following example, we see Cloud SQL Insights Dashboard and we can see tha
 This is the power of SQL tags - they provide you correlation between your application-level information and your Database monitors.
 
 ### sqlcomm**ent**
-[sqlcomment](https://github.com/ariga/sqlcomment) is an ent driver that adds SQL tags following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/).
+[sqlcomment](https://github.com/ariga/sqlcomment) is an Ent driver that adds metadata to SQL queries using comments following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/). By wrapping an existing Ent driver with `sqlcomment`,  users can leverage any tools that support the standard to triage query performance issues.
 Without further ado, let’s see sqlcomment in action.  
 First, to install sqlcomment run:
 ```bash
