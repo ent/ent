@@ -35,7 +35,7 @@ To get a taste of how the analysis of metadata collected from Sqlcommenter metad
 
 <div style={{textAlign: 'center'}}>
   <img alt="Cloud SQL insights" src="https://entgo.io/images/assets/sqlcomment/ginsights.png" />
-  <p style={{fontSize: 12}}>Screenshot from Cloud SQL Insights Dashboard</a></p>
+  <p style={{fontSize: 12}}>Screenshot from Cloud SQL Insights Dashboard</p>
 </div>
 
 This is the power of SQL tags - they provide you correlation between your application-level information and your Database monitors.
