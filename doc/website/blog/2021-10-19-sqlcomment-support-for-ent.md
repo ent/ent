@@ -26,7 +26,7 @@ Earlier this year, [Google introduced](https://cloud.google.com/blog/topics/deve
 In other words, sqlcommenter adds application context metadata to SQL queries. This information can then be used to provide meaningful insights. It does so by adding [SQL comments](https://en.wikipedia.org/wiki/SQL_syntax#Comments) to the query that carry metadata but are ignored by the database during query execution. 
 For example, the following query contains a comment that carries metadata about the application that issued it (`users-mgr`), which controller and route triggered it (`users` and `user_rename`, respectively), and the database driver that was used (`ent:v0.9.1`):
 
-```SQL
+```sql
 update users set username = ‘hedwigz’ where id = 88
 /*application='users-mgr',controller='users',route='user_rename',db_driver='ent:v0.9.1'*/
 ```
