@@ -31,7 +31,7 @@ update users set username = ‘hedwigz’ where id = 88
 /*application='users-mgr',controller='users',route='user_rename',db_driver='ent:v0.9.1'*/
 ```
 
-In the following example, we see Cloud SQL Insights Dashboard and we can see that the HTTP route “demo/charge” is causing many locks on the database. We can also see that this query got called ~500,000 times in the last hour.
+To get a taste of how the analysis of metadata collected from Sqlcommenter metadata can help us better understand performance issues of our application, consider the following example.  Google Cloud recently launched [https://cloud.google.com/blog/products/databases/get-ahead-of-database-performance-issues-with-cloud-sql-insights](Cloud SQL Insights), a cloud-based SQL performance analysis product.  In the image below, we see a screenshot from the Cloud SQL Insights Dashboard that shows that the HTTP route “demo/charge” is causing many locks on the database. We can also see that this query got called ~500,000 times in the last hour.
 
 <div style={{textAlign: 'center'}}>
   <img alt="Cloud SQL insights" src="https://storage.googleapis.com/gweb-cloudblog-publish/images/query_insights.max-1300x1300.png" />
@@ -41,7 +41,7 @@ In the following example, we see Cloud SQL Insights Dashboard and we can see tha
 This is the power of SQL tags - they provide you correlation between your application-level information and your Database monitors.
 
 ### sqlcomm**ent**
-[sqlcomment](https://github.com/ariga/sqlcomment) is an ent driver that adds SQL tags following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/).
+[sqlcomment](https://github.com/ariga/sqlcomment) is an Ent driver that adds metadata to SQL queries using comments following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/). By wrapping an existing Ent driver with `sqlcomment`,  users can leverage any tools that support the standard to triage query performance issues.
 Without further ado, let’s see sqlcomment in action.  
 First, to install sqlcomment run:
 ```bash
@@ -83,7 +83,7 @@ For more advanced examples, please visit the [github repo](https://github.com/ar
 
 ### Wrapping-Up
 
-In this post we introduced the concept of SQL tags and we saw how they help correlate between source code and database queries. Next, we introduced `sqlcomment` - an Ent driver that adds SQL tags to all of your queries. Finally, we got to see `sqlcomment` in action, by installing and configuring it with Ent. If you like the code and/or want to contribute - feel free to checkout the [project on github](https://github.com/ariga/sqlcomment).
+In this post we showed how adding metadata to queries using SQL comments can help correlate between source code and database queries. Next, we introduced `sqlcomment` - an Ent driver that adds SQL tags to all of your queries. Finally, we got to see `sqlcomment` in action, by installing and configuring it with Ent. If you like the code and/or want to contribute - feel free to checkout the [project on github](https://github.com/ariga/sqlcomment).
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
