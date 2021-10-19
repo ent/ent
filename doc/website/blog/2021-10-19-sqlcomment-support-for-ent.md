@@ -23,7 +23,7 @@ Earlier this year, [Google introduced](https://cloud.google.com/blog/topics/deve
 
 > <em>an open source library that addresses the gap between the ORM libraries and understanding database performance. Sqlcommenter gives application developers visibility into which application code is generating slow queries and maps application traces to database query plans</em>
 
-In other words, sqlcommenter adds application context metadata to SQL queries. This information can then be used to provide meaningful insights. It does so by adding [https://en.wikipedia.org/wiki/SQL_syntax#Comments](SQL comments) to the query that carry metadata but are ignored by the database during query execution. 
+In other words, sqlcommenter adds application context metadata to SQL queries. This information can then be used to provide meaningful insights. It does so by adding [SQL comments](https://en.wikipedia.org/wiki/SQL_syntax#Comments) to the query that carry metadata but are ignored by the database during query execution. 
 For example, the following query contains a comment that carries metadata about the application that issued it (`users-mgr`), which controller and route triggered it (`users` and `user_rename`, respectively), and the database driver that was used (`ent:v0.9.1`):
 
 ```SQL
