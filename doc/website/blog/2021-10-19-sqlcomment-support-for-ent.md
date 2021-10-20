@@ -101,7 +101,7 @@ WHERE (
   /*application='my-app',db_driver='ent:v0.9.1',framework='net%2Fhttp'*/
 ```
 
-As you can see, ent outputted an SQL query with a comment at the end, containing all the relevant information associated with that query.  
+As you can see, Ent outputted an SQL query with a comment at the end, containing all the relevant information associated with that query.  
 
 sqlcomm**ent** supports more tags, and has integrations with OpenTelemetry and OpenCensus.
 To see more examples and scenarios, please visit the [github repo](https://github.com/ariga/sqlcomment).
