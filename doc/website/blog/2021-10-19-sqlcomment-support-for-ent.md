@@ -1,5 +1,5 @@
 ---
-title: Introducing sqlcomm-ent: Database Performance Analysis with Ent and Sqlcommenter
+title: Introducing sqlcomm-ent: Database Performance Analysis with Ent and Google's Sqlcommenter
 author: Amit Shani
 authorURL: "https://github.com/hedwigz"
 authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
