@@ -49,7 +49,11 @@ First, to install sqlcomment run:
 go get ariga.io/sqlcomment
 ```
 
-`sqlcomment` is wrapping an underlying SQL driver, therefore, we need to open our SQL connection using ent’s `sql` module, instead of Ent's popular helper `ent.Open`
+`sqlcomment` is wrapping an underlying SQL driver, therefore, we need to open our SQL connection using ent’s `sql` module, instead of Ent's popular helper `ent.Open`.
+
+:::info
+Make sure to import `entgo.io/ent/dialect/sql` in the following snippet
+:::
 
 ```go
 // Create db driver.
@@ -58,11 +62,8 @@ if err != nil {
 	log.Fatalf("Failed to connect to database: %v", err)
 }
 
-// Create an ent.Driver from `db`.
-drv := entsql.OpenDB(dialect.SQLite, db)
-
 // Create sqlcomment driver which wraps sqlite driver.
-drv = sqlcomment.NewDriver(drv,
+drv := sqlcomment.NewDriver(db,
 	sqlcomment.WithDriverVerTag(),
 	sqlcomment.WithTags(sqlcomment.Tags{
 		sqlcomment.KeyApplication: "my-app",
