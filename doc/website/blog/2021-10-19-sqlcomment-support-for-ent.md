@@ -49,7 +49,7 @@ First, to install sqlcomment run:
 go get ariga.io/sqlcomment
 ```
 
-`sqlcomment` is wrapping an underlying SQL driver, therefore, we need to open our SQL connection using ent’s `sql` module, instead of ents popular helper `ent.Open`
+`sqlcomment` is wrapping an underlying SQL driver, therefore, we need to open our SQL connection using ent’s `sql` module, instead of Ent's popular helper `ent.Open`
 
 ```go
 // Create db driver.
