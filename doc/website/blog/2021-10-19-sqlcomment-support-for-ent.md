@@ -109,7 +109,7 @@ WHERE (
 
 As you can see, Ent outputted an SQL query with a comment at the end, containing all the relevant information associated with that query.  
 
-sqlcomm**ent** supports more tags, and has integrations with OpenTelemetry and OpenCensus.
+sqlcomm**ent** supports more tags, and has integrations with [OpenTelemetry](https://opentelemetry.io) and [OpenCensus](https://opencensus.io).
 To see more examples and scenarios, please visit the [github repo](https://github.com/ariga/sqlcomment).
 
 ### Wrapping-Up
