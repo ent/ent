@@ -71,7 +71,7 @@ drv := sqlcomment.NewDriver(db,
 	}),
 )
 
-// create and configure ent client
+// Create and configure ent client.
 client := ent.NewClient(ent.Driver(drv))
 ```
 
