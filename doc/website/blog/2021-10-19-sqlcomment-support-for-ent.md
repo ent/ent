@@ -57,14 +57,19 @@ db, err := sql.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 if err != nil {
 	log.Fatalf("Failed to connect to database: %v", err)
 }
-// create sqlcomment driver which wraps sqlite driver.
-drv := sqlcomment.NewDriver(db),
+
+// Create an ent.Driver from `db`.
+drv := entsql.OpenDB(dialect.SQLite, db)
+
+// Create sqlcomment driver which wraps sqlite driver.
+drv = sqlcomment.NewDriver(drv,
 	sqlcomment.WithDriverVerTag(),
 	sqlcomment.WithTags(sqlcomment.Tags{
 		sqlcomment.KeyApplication: "my-app",
-		sqlcomment.KeyFramework: "net/http",
+		sqlcomment.KeyFramework:   "net/http",
 	}),
 )
+
 // create and configure ent client
 client := ent.NewClient(ent.Driver(drv))
 ```
