@@ -1,5 +1,5 @@
 ---
-title: Introducing sqlcomm-ent: Database Performance Analysis with Ent and Google's Sqlcommenter
+title: Introducing sqlcomment - Database Performance Analysis with Ent and Google's Sqlcommenter
 author: Amit Shani
 authorURL: "https://github.com/hedwigz"
 authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
@@ -40,8 +40,9 @@ To get a taste of how the analysis of metadata collected from Sqlcommenter metad
 
 This is the power of SQL tags - they provide you correlation between your application-level information and your Database monitors.
 
-### sqlcomm**ent**
-[sqlcomment](https://github.com/ariga/sqlcomment) is an Ent driver that adds metadata to SQL queries using comments following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/). By wrapping an existing Ent driver with `sqlcomment`,  users can leverage any tool that supports the standard to triage query performance issues.
+### sqlcomment
+
+[sqlcomm**ent**](https://github.com/ariga/sqlcomment) is an Ent driver that adds metadata to SQL queries using comments following the [sqlcommenter specification](https://google.github.io/sqlcommenter/spec/). By wrapping an existing Ent driver with `sqlcomment`,  users can leverage any tool that supports the standard to triage query performance issues.
 Without further ado, let’s see `sqlcomment` in action.  
   
 First, to install sqlcomment run:
