@@ -4,6 +4,7 @@ author: Amit Shani
 authorURL: "https://github.com/hedwigz"
 authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
 authorTwitter: itsamitush
+image: https://entgo.io/images/assets/sqlcomment/share.png
 ---
 
 Ent is a powerful Entity framework that helps developers write neat code that is translated into (possibly complex) database queries. As the usage of your application grows, it doesn’t take long until you stumble upon performance issues with your database.
