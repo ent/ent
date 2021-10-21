@@ -274,6 +274,13 @@ func LinkOther(v *schema.Link) predicate.FieldType {
 	})
 }
 
+// LinkOtherFunc applies equality check predicate on the "link_other_func" field. It's identical to LinkOtherFuncEQ.
+func LinkOtherFunc(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.EQ(v))
+	})
+}
+
 // MAC applies equality check predicate on the "mac" field. It's identical to MACEQ.
 func MAC(v schema.MAC) predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
@@ -2521,6 +2528,84 @@ func LinkOtherIsNil() predicate.FieldType {
 func LinkOtherNotNil() predicate.FieldType {
 	return predicate.FieldType(func(t *dsl.Traversal) {
 		t.HasLabel(Label).Has(FieldLinkOther)
+	})
+}
+
+// LinkOtherFuncEQ applies the EQ predicate on the "link_other_func" field.
+func LinkOtherFuncEQ(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.EQ(v))
+	})
+}
+
+// LinkOtherFuncNEQ applies the NEQ predicate on the "link_other_func" field.
+func LinkOtherFuncNEQ(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.NEQ(v))
+	})
+}
+
+// LinkOtherFuncIn applies the In predicate on the "link_other_func" field.
+func LinkOtherFuncIn(vs ...*schema.Link) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.Within(v...))
+	})
+}
+
+// LinkOtherFuncNotIn applies the NotIn predicate on the "link_other_func" field.
+func LinkOtherFuncNotIn(vs ...*schema.Link) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.Without(v...))
+	})
+}
+
+// LinkOtherFuncGT applies the GT predicate on the "link_other_func" field.
+func LinkOtherFuncGT(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.GT(v))
+	})
+}
+
+// LinkOtherFuncGTE applies the GTE predicate on the "link_other_func" field.
+func LinkOtherFuncGTE(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.GTE(v))
+	})
+}
+
+// LinkOtherFuncLT applies the LT predicate on the "link_other_func" field.
+func LinkOtherFuncLT(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.LT(v))
+	})
+}
+
+// LinkOtherFuncLTE applies the LTE predicate on the "link_other_func" field.
+func LinkOtherFuncLTE(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLinkOtherFunc, p.LTE(v))
+	})
+}
+
+// LinkOtherFuncIsNil applies the IsNil predicate on the "link_other_func" field.
+func LinkOtherFuncIsNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldLinkOtherFunc)
+	})
+}
+
+// LinkOtherFuncNotNil applies the NotNil predicate on the "link_other_func" field.
+func LinkOtherFuncNotNil() predicate.FieldType {
+	return predicate.FieldType(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldLinkOtherFunc)
 	})
 }
 

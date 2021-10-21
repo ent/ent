@@ -143,6 +143,11 @@ func Ints(t *testing.T, client *ent.Client) {
 	usr = usr.Update().ClearInts().SaveX(ctx)
 	require.Empty(t, usr.Ints)
 	require.Empty(t, client.User.GetX(ctx, usr.ID).Ints)
+
+	usr = client.User.Create().SaveX(ctx)
+	require.Equal(t, []int{1, 2, 3}, usr.Ints)
+	usr = client.User.GetX(ctx, usr.ID)
+	require.Equal(t, []int{1, 2, 3}, usr.Ints)
 }
 
 func Floats(t *testing.T, client *ent.Client) {
@@ -189,6 +194,11 @@ func Dirs(t *testing.T, client *ent.Client) {
 	usr := client.User.Create().SetDirs(dirs).SaveX(ctx)
 	require.Equal(t, dirs, usr.Dirs)
 	require.Equal(t, dirs, client.User.GetX(ctx, usr.ID).Dirs)
+
+	usr = client.User.Create().SaveX(ctx)
+	require.Equal(t, []http.Dir{"/tmp"}, usr.Dirs)
+	usr = client.User.GetX(ctx, usr.ID)
+	require.Equal(t, []http.Dir{"/tmp"}, usr.Dirs)
 }
 
 func URL(t *testing.T, client *ent.Client) {

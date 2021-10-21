@@ -77,12 +77,6 @@ func (uu *UserUpdate) SetDirs(h []http.Dir) *UserUpdate {
 	return uu
 }
 
-// ClearDirs clears the value of the "dirs" field.
-func (uu *UserUpdate) ClearDirs() *UserUpdate {
-	uu.mutation.ClearDirs()
-	return uu
-}
-
 // SetInts sets the "ints" field.
 func (uu *UserUpdate) SetInts(i []int) *UserUpdate {
 	uu.mutation.SetInts(i)
@@ -242,12 +236,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldDirs,
 		})
 	}
-	if uu.mutation.DirsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldDirs,
-		})
-	}
 	if value, ok := uu.mutation.Ints(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -345,12 +333,6 @@ func (uuo *UserUpdateOne) ClearRaw() *UserUpdateOne {
 // SetDirs sets the "dirs" field.
 func (uuo *UserUpdateOne) SetDirs(h []http.Dir) *UserUpdateOne {
 	uuo.mutation.SetDirs(h)
-	return uuo
-}
-
-// ClearDirs clears the value of the "dirs" field.
-func (uuo *UserUpdateOne) ClearDirs() *UserUpdateOne {
-	uuo.mutation.ClearDirs()
 	return uuo
 }
 
@@ -534,12 +516,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
 			Value:  value,
-			Column: user.FieldDirs,
-		})
-	}
-	if uuo.mutation.DirsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
 			Column: user.FieldDirs,
 		})
 	}

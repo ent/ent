@@ -1361,6 +1361,7 @@ type FieldTypeMutation struct {
 	decimal                    *float64
 	adddecimal                 *float64
 	link_other                 **schema.Link
+	link_other_func            **schema.Link
 	mac                        *schema.MAC
 	string_array               *schema.Strings
 	password                   *string
@@ -3246,6 +3247,55 @@ func (m *FieldTypeMutation) ResetLinkOther() {
 	delete(m.clearedFields, fieldtype.FieldLinkOther)
 }
 
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (m *FieldTypeMutation) SetLinkOtherFunc(s *schema.Link) {
+	m.link_other_func = &s
+}
+
+// LinkOtherFunc returns the value of the "link_other_func" field in the mutation.
+func (m *FieldTypeMutation) LinkOtherFunc() (r *schema.Link, exists bool) {
+	v := m.link_other_func
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLinkOtherFunc returns the old "link_other_func" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldLinkOtherFunc(ctx context.Context) (v *schema.Link, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldLinkOtherFunc is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldLinkOtherFunc requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLinkOtherFunc: %w", err)
+	}
+	return oldValue.LinkOtherFunc, nil
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (m *FieldTypeMutation) ClearLinkOtherFunc() {
+	m.link_other_func = nil
+	m.clearedFields[fieldtype.FieldLinkOtherFunc] = struct{}{}
+}
+
+// LinkOtherFuncCleared returns if the "link_other_func" field was cleared in this mutation.
+func (m *FieldTypeMutation) LinkOtherFuncCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldLinkOtherFunc]
+	return ok
+}
+
+// ResetLinkOtherFunc resets all changes to the "link_other_func" field.
+func (m *FieldTypeMutation) ResetLinkOtherFunc() {
+	m.link_other_func = nil
+	delete(m.clearedFields, fieldtype.FieldLinkOtherFunc)
+}
+
 // SetMAC sets the "mac" field.
 func (m *FieldTypeMutation) SetMAC(s schema.MAC) {
 	m.mac = &s
@@ -5111,7 +5161,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 63)
+	fields := make([]string, 0, 64)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -5192,6 +5242,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	}
 	if m.link_other != nil {
 		fields = append(fields, fieldtype.FieldLinkOther)
+	}
+	if m.link_other_func != nil {
+		fields = append(fields, fieldtype.FieldLinkOtherFunc)
 	}
 	if m.mac != nil {
 		fields = append(fields, fieldtype.FieldMAC)
@@ -5363,6 +5416,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Decimal()
 	case fieldtype.FieldLinkOther:
 		return m.LinkOther()
+	case fieldtype.FieldLinkOtherFunc:
+		return m.LinkOtherFunc()
 	case fieldtype.FieldMAC:
 		return m.MAC()
 	case fieldtype.FieldStringArray:
@@ -5498,6 +5553,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldDecimal(ctx)
 	case fieldtype.FieldLinkOther:
 		return m.OldLinkOther(ctx)
+	case fieldtype.FieldLinkOtherFunc:
+		return m.OldLinkOtherFunc(ctx)
 	case fieldtype.FieldMAC:
 		return m.OldMAC(ctx)
 	case fieldtype.FieldStringArray:
@@ -5767,6 +5824,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLinkOther(v)
+		return nil
+	case fieldtype.FieldLinkOtherFunc:
+		v, ok := value.(*schema.Link)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLinkOtherFunc(v)
 		return nil
 	case fieldtype.FieldMAC:
 		v, ok := value.(schema.MAC)
@@ -6491,6 +6555,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldLinkOther) {
 		fields = append(fields, fieldtype.FieldLinkOther)
 	}
+	if m.FieldCleared(fieldtype.FieldLinkOtherFunc) {
+		fields = append(fields, fieldtype.FieldLinkOtherFunc)
+	}
 	if m.FieldCleared(fieldtype.FieldMAC) {
 		fields = append(fields, fieldtype.FieldMAC)
 	}
@@ -6663,6 +6730,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldLinkOther:
 		m.ClearLinkOther()
+		return nil
+	case fieldtype.FieldLinkOtherFunc:
+		m.ClearLinkOtherFunc()
 		return nil
 	case fieldtype.FieldMAC:
 		m.ClearMAC()
@@ -6845,6 +6915,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldLinkOther:
 		m.ResetLinkOther()
+		return nil
+	case fieldtype.FieldLinkOtherFunc:
+		m.ResetLinkOtherFunc()
 		return nil
 	case fieldtype.FieldMAC:
 		m.ResetMAC()

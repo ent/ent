@@ -732,6 +732,28 @@ func (b *jsonBuilder) Annotations(annotations ...schema.Annotation) *jsonBuilder
 	return b
 }
 
+// Default sets the default value of the field. For example:
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		// A static default value.
+//		Default([]http.Dir{"/tmp"})
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		// A function for generating the default value.
+//		Default(DefaultDirs)
+//
+func (b *jsonBuilder) Default(v interface{}) *jsonBuilder {
+	b.desc.Default = v
+	switch fieldT, defaultT := b.desc.Info.RType.rtype, reflect.TypeOf(v); {
+	case fieldT == defaultT:
+	case defaultT.Kind() == reflect.Func:
+		b.desc.checkDefaultFunc(b.desc.Info.RType.rtype)
+	default:
+		b.desc.Err = fmt.Errorf("expect type (func() %[1]s) or (%[1]s) for other default value", b.desc.Info)
+	}
+	return b
+}
+
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *jsonBuilder) Descriptor() *Descriptor {
 	return b.desc
