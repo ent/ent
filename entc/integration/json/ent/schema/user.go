@@ -28,9 +28,12 @@ func (User) Fields() []ent.Field {
 		field.JSON("raw", json.RawMessage{}).
 			Optional(),
 		field.JSON("dirs", []http.Dir{}).
-			Optional(),
+			Default(func() []http.Dir {
+				return []http.Dir{"/tmp"}
+			}),
 		field.Ints("ints").
-			Optional(),
+			Optional().
+			Default([]int{1, 2, 3}),
 		field.Floats("floats").
 			Optional(),
 		field.Strings("strings").

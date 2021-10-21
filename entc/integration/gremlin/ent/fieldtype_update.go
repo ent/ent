@@ -669,6 +669,18 @@ func (ftu *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftu *FieldTypeUpdate) SetLinkOtherFunc(s *schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetLinkOtherFunc(s)
+	return ftu
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (ftu *FieldTypeUpdate) ClearLinkOtherFunc() *FieldTypeUpdate {
+	ftu.mutation.ClearLinkOtherFunc()
+	return ftu
+}
+
 // SetMAC sets the "mac" field.
 func (ftu *FieldTypeUpdate) SetMAC(s schema.MAC) *FieldTypeUpdate {
 	ftu.mutation.SetMAC(s)
@@ -1589,6 +1601,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.LinkOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
 	}
+	if value, ok := ftu.mutation.LinkOtherFunc(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLinkOtherFunc, value)
+	}
 	if value, ok := ftu.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
 	}
@@ -1784,6 +1799,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.LinkOtherCleared() {
 		properties = append(properties, fieldtype.FieldLinkOther)
+	}
+	if ftu.mutation.LinkOtherFuncCleared() {
+		properties = append(properties, fieldtype.FieldLinkOtherFunc)
 	}
 	if ftu.mutation.MACCleared() {
 		properties = append(properties, fieldtype.FieldMAC)
@@ -2521,6 +2539,18 @@ func (ftuo *FieldTypeUpdateOne) SetLinkOther(s *schema.Link) *FieldTypeUpdateOne
 // ClearLinkOther clears the value of the "link_other" field.
 func (ftuo *FieldTypeUpdateOne) ClearLinkOther() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearLinkOther()
+	return ftuo
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftuo *FieldTypeUpdateOne) SetLinkOtherFunc(s *schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetLinkOtherFunc(s)
+	return ftuo
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (ftuo *FieldTypeUpdateOne) ClearLinkOtherFunc() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearLinkOtherFunc()
 	return ftuo
 }
 
@@ -3456,6 +3486,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.LinkOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
 	}
+	if value, ok := ftuo.mutation.LinkOtherFunc(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLinkOtherFunc, value)
+	}
 	if value, ok := ftuo.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
 	}
@@ -3651,6 +3684,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.LinkOtherCleared() {
 		properties = append(properties, fieldtype.FieldLinkOther)
+	}
+	if ftuo.mutation.LinkOtherFuncCleared() {
+		properties = append(properties, fieldtype.FieldLinkOtherFunc)
 	}
 	if ftuo.mutation.MACCleared() {
 		properties = append(properties, fieldtype.FieldMAC)

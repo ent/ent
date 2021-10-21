@@ -80,6 +80,8 @@ type FieldType struct {
 	Decimal float64 `json:"decimal,omitempty"`
 	// LinkOther holds the value of the "link_other" field.
 	LinkOther *schema.Link `json:"link_other,omitempty"`
+	// LinkOtherFunc holds the value of the "link_other_func" field.
+	LinkOtherFunc *schema.Link `json:"link_other_func,omitempty"`
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
 	// StringArray holds the value of the "string_array" field.
@@ -174,7 +176,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(role.Priority)
 		case fieldtype.FieldBigInt:
 			values[i] = new(schema.BigInt)
-		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
+		case fieldtype.FieldLinkOther, fieldtype.FieldLinkOtherFunc, fieldtype.FieldLink:
 			values[i] = new(schema.Link)
 		case fieldtype.FieldMAC:
 			values[i] = new(schema.MAC)
@@ -389,6 +391,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				return fmt.Errorf("unexpected type %T for field link_other", values[i])
 			} else if value != nil {
 				ft.LinkOther = value
+			}
+		case fieldtype.FieldLinkOtherFunc:
+			if value, ok := values[i].(*schema.Link); !ok {
+				return fmt.Errorf("unexpected type %T for field link_other_func", values[i])
+			} else if value != nil {
+				ft.LinkOtherFunc = value
 			}
 		case fieldtype.FieldMAC:
 			if value, ok := values[i].(*schema.MAC); !ok {
@@ -711,6 +719,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
 	builder.WriteString(", link_other=")
 	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
+	builder.WriteString(", link_other_func=")
+	builder.WriteString(fmt.Sprintf("%v", ft.LinkOtherFunc))
 	builder.WriteString(", mac=")
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", string_array=")

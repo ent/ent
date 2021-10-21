@@ -116,6 +116,7 @@ func Types(t *testing.T, client *ent.Client) {
 	exists, err = client.FieldType.Query().Where(fieldtype.DurationLT(time.Hour)).Exist(ctx)
 	require.NoError(err)
 	require.False(exists)
+	require.Equal("127.0.0.1", ft.LinkOtherFunc.String())
 
 	err = client.FieldType.Create().
 		SetInt(1).

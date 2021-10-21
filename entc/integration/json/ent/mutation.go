@@ -309,22 +309,9 @@ func (m *UserMutation) OldDirs(ctx context.Context) (v []http.Dir, err error) {
 	return oldValue.Dirs, nil
 }
 
-// ClearDirs clears the value of the "dirs" field.
-func (m *UserMutation) ClearDirs() {
-	m.dirs = nil
-	m.clearedFields[user.FieldDirs] = struct{}{}
-}
-
-// DirsCleared returns if the "dirs" field was cleared in this mutation.
-func (m *UserMutation) DirsCleared() bool {
-	_, ok := m.clearedFields[user.FieldDirs]
-	return ok
-}
-
 // ResetDirs resets all changes to the "dirs" field.
 func (m *UserMutation) ResetDirs() {
 	m.dirs = nil
-	delete(m.clearedFields, user.FieldDirs)
 }
 
 // SetInts sets the "ints" field.
@@ -657,9 +644,6 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldRaw) {
 		fields = append(fields, user.FieldRaw)
 	}
-	if m.FieldCleared(user.FieldDirs) {
-		fields = append(fields, user.FieldDirs)
-	}
 	if m.FieldCleared(user.FieldInts) {
 		fields = append(fields, user.FieldInts)
 	}
@@ -691,9 +675,6 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldRaw:
 		m.ClearRaw()
-		return nil
-	case user.FieldDirs:
-		m.ClearDirs()
 		return nil
 	case user.FieldInts:
 		m.ClearInts()
