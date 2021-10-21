@@ -323,6 +323,15 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10},
 		},
 		{
+			input: Dialect(dialect.Postgres).Update("users").
+				Set("active", false).
+				Where(P(func(b *Builder) {
+					b.Ident("name").WriteString(" SIMILAR TO ").Arg("(b|c)%")
+				})),
+			wantQuery: `UPDATE "users" SET "active" = $1 WHERE "name" SIMILAR TO $2`,
+			wantArgs:  []interface{}{false, "(b|c)%"},
+		},
+		{
 			input:     Update("users").Set("name", "foo").Where(EQ("name", "bar")),
 			wantQuery: "UPDATE `users` SET `name` = ? WHERE `name` = ?",
 			wantArgs:  []interface{}{"foo", "bar"},
