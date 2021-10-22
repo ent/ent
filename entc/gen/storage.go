@@ -59,7 +59,7 @@ var drivers = []*Storage{
 		SchemaMode: Unique | Indexes | Cascade | Migrate,
 		Ops: func(f *Field) []Op {
 			if f.IsString() && f.ConvertedToBasic() {
-				return []Op{EqualFold, ContainsFold}
+				return []Op{EqualFold, ContainsFold, HasPrefixFold, HasSuffixFold}
 			}
 			return nil
 		},

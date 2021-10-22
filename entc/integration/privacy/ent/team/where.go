@@ -213,6 +213,20 @@ func NameContainsFold(v string) predicate.Team {
 	})
 }
 
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
+	})
+}
+
 // HasTasks applies the HasEdge predicate on the "tasks" edge.
 func HasTasks() predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {

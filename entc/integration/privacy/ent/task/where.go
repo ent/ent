@@ -228,6 +228,20 @@ func TitleContainsFold(v string) predicate.Task {
 	})
 }
 
+// TitleHasPrefixFold applies the HasPrefixFold predicate on the "title" field.
+func TitleHasPrefixFold(v string) predicate.Task {
+	return predicate.Task(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldTitle), v))
+	})
+}
+
+// TitleHasSuffixFold applies the HasSuffixFold predicate on the "title" field.
+func TitleHasSuffixFold(v string) predicate.Task {
+	return predicate.Task(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldTitle), v))
+	})
+}
+
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.Task {
 	return predicate.Task(func(s *sql.Selector) {
@@ -350,6 +364,20 @@ func DescriptionEqualFold(v string) predicate.Task {
 func DescriptionContainsFold(v string) predicate.Task {
 	return predicate.Task(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionHasPrefixFold applies the HasPrefixFold predicate on the "description" field.
+func DescriptionHasPrefixFold(v string) predicate.Task {
+	return predicate.Task(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldDescription), v))
+	})
+}
+
+// DescriptionHasSuffixFold applies the HasSuffixFold predicate on the "description" field.
+func DescriptionHasSuffixFold(v string) predicate.Task {
+	return predicate.Task(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldDescription), v))
 	})
 }
 

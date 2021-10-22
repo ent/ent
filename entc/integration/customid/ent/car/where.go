@@ -407,6 +407,20 @@ func ModelContainsFold(v string) predicate.Car {
 	})
 }
 
+// ModelHasPrefixFold applies the HasPrefixFold predicate on the "model" field.
+func ModelHasPrefixFold(v string) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldModel), v))
+	})
+}
+
+// ModelHasSuffixFold applies the HasSuffixFold predicate on the "model" field.
+func ModelHasSuffixFold(v string) predicate.Car {
+	return predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldModel), v))
+	})
+}
+
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Car {
 	return predicate.Car(func(s *sql.Selector) {

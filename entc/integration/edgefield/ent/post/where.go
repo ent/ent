@@ -220,6 +220,20 @@ func TextContainsFold(v string) predicate.Post {
 	})
 }
 
+// TextHasPrefixFold applies the HasPrefixFold predicate on the "text" field.
+func TextHasPrefixFold(v string) predicate.Post {
+	return predicate.Post(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldText), v))
+	})
+}
+
+// TextHasSuffixFold applies the HasSuffixFold predicate on the "text" field.
+func TextHasSuffixFold(v string) predicate.Post {
+	return predicate.Post(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldText), v))
+	})
+}
+
 // AuthorIDEQ applies the EQ predicate on the "author_id" field.
 func AuthorIDEQ(v int) predicate.Post {
 	return predicate.Post(func(s *sql.Selector) {

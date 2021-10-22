@@ -234,6 +234,20 @@ func NumberContainsFold(v string) predicate.Card {
 	})
 }
 
+// NumberHasPrefixFold applies the HasPrefixFold predicate on the "number" field.
+func NumberHasPrefixFold(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldNumber), v))
+	})
+}
+
+// NumberHasSuffixFold applies the HasSuffixFold predicate on the "number" field.
+func NumberHasSuffixFold(v string) predicate.Card {
+	return predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldNumber), v))
+	})
+}
+
 // OwnerIDEQ applies the EQ predicate on the "owner_id" field.
 func OwnerIDEQ(v int) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {

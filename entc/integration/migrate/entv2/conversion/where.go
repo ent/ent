@@ -282,6 +282,20 @@ func NameContainsFold(v string) predicate.Conversion {
 	})
 }
 
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
+	})
+}
+
 // Int8ToStringEQ applies the EQ predicate on the "int8_to_string" field.
 func Int8ToStringEQ(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -404,6 +418,20 @@ func Int8ToStringEqualFold(v string) predicate.Conversion {
 func Int8ToStringContainsFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldInt8ToString), v))
+	})
+}
+
+// Int8ToStringHasPrefixFold applies the HasPrefixFold predicate on the "int8_to_string" field.
+func Int8ToStringHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldInt8ToString), v))
+	})
+}
+
+// Int8ToStringHasSuffixFold applies the HasSuffixFold predicate on the "int8_to_string" field.
+func Int8ToStringHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldInt8ToString), v))
 	})
 }
 
@@ -532,6 +560,20 @@ func Uint8ToStringContainsFold(v string) predicate.Conversion {
 	})
 }
 
+// Uint8ToStringHasPrefixFold applies the HasPrefixFold predicate on the "uint8_to_string" field.
+func Uint8ToStringHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldUint8ToString), v))
+	})
+}
+
+// Uint8ToStringHasSuffixFold applies the HasSuffixFold predicate on the "uint8_to_string" field.
+func Uint8ToStringHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldUint8ToString), v))
+	})
+}
+
 // Int16ToStringEQ applies the EQ predicate on the "int16_to_string" field.
 func Int16ToStringEQ(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -654,6 +696,20 @@ func Int16ToStringEqualFold(v string) predicate.Conversion {
 func Int16ToStringContainsFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldInt16ToString), v))
+	})
+}
+
+// Int16ToStringHasPrefixFold applies the HasPrefixFold predicate on the "int16_to_string" field.
+func Int16ToStringHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldInt16ToString), v))
+	})
+}
+
+// Int16ToStringHasSuffixFold applies the HasSuffixFold predicate on the "int16_to_string" field.
+func Int16ToStringHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldInt16ToString), v))
 	})
 }
 
@@ -782,6 +838,20 @@ func Uint16ToStringContainsFold(v string) predicate.Conversion {
 	})
 }
 
+// Uint16ToStringHasPrefixFold applies the HasPrefixFold predicate on the "uint16_to_string" field.
+func Uint16ToStringHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldUint16ToString), v))
+	})
+}
+
+// Uint16ToStringHasSuffixFold applies the HasSuffixFold predicate on the "uint16_to_string" field.
+func Uint16ToStringHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldUint16ToString), v))
+	})
+}
+
 // Int32ToStringEQ applies the EQ predicate on the "int32_to_string" field.
 func Int32ToStringEQ(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -904,6 +974,20 @@ func Int32ToStringEqualFold(v string) predicate.Conversion {
 func Int32ToStringContainsFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldInt32ToString), v))
+	})
+}
+
+// Int32ToStringHasPrefixFold applies the HasPrefixFold predicate on the "int32_to_string" field.
+func Int32ToStringHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldInt32ToString), v))
+	})
+}
+
+// Int32ToStringHasSuffixFold applies the HasSuffixFold predicate on the "int32_to_string" field.
+func Int32ToStringHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldInt32ToString), v))
 	})
 }
 
@@ -1032,6 +1116,20 @@ func Uint32ToStringContainsFold(v string) predicate.Conversion {
 	})
 }
 
+// Uint32ToStringHasPrefixFold applies the HasPrefixFold predicate on the "uint32_to_string" field.
+func Uint32ToStringHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldUint32ToString), v))
+	})
+}
+
+// Uint32ToStringHasSuffixFold applies the HasSuffixFold predicate on the "uint32_to_string" field.
+func Uint32ToStringHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldUint32ToString), v))
+	})
+}
+
 // Int64ToStringEQ applies the EQ predicate on the "int64_to_string" field.
 func Int64ToStringEQ(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -1157,6 +1255,20 @@ func Int64ToStringContainsFold(v string) predicate.Conversion {
 	})
 }
 
+// Int64ToStringHasPrefixFold applies the HasPrefixFold predicate on the "int64_to_string" field.
+func Int64ToStringHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldInt64ToString), v))
+	})
+}
+
+// Int64ToStringHasSuffixFold applies the HasSuffixFold predicate on the "int64_to_string" field.
+func Int64ToStringHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldInt64ToString), v))
+	})
+}
+
 // Uint64ToStringEQ applies the EQ predicate on the "uint64_to_string" field.
 func Uint64ToStringEQ(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
@@ -1279,6 +1391,20 @@ func Uint64ToStringEqualFold(v string) predicate.Conversion {
 func Uint64ToStringContainsFold(v string) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringHasPrefixFold applies the HasPrefixFold predicate on the "uint64_to_string" field.
+func Uint64ToStringHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldUint64ToString), v))
+	})
+}
+
+// Uint64ToStringHasSuffixFold applies the HasSuffixFold predicate on the "uint64_to_string" field.
+func Uint64ToStringHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldUint64ToString), v))
 	})
 }
 

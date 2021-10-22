@@ -282,6 +282,20 @@ func NameContainsFold(v string) predicate.Conversion {
 	})
 }
 
+// NameHasPrefixFold applies the HasPrefixFold predicate on the "name" field.
+func NameHasPrefixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasPrefixFold(s.C(FieldName), v))
+	})
+}
+
+// NameHasSuffixFold applies the HasSuffixFold predicate on the "name" field.
+func NameHasSuffixFold(v string) predicate.Conversion {
+	return predicate.Conversion(func(s *sql.Selector) {
+		s.Where(sql.HasSuffixFold(s.C(FieldName), v))
+	})
+}
+
 // Int8ToStringEQ applies the EQ predicate on the "int8_to_string" field.
 func Int8ToStringEQ(v int8) predicate.Conversion {
 	return predicate.Conversion(func(s *sql.Selector) {
