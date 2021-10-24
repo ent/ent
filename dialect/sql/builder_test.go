@@ -1842,3 +1842,35 @@ func TestInsert_OnConflict(t *testing.T) {
 		require.Equal(t, []interface{}{"Mashraki"}, args)
 	})
 }
+
+func TestEscapePatterns(t *testing.T) {
+	q, args := Dialect(dialect.MySQL).
+		Update("users").
+		SetNull("name").
+		Where(
+			Or(
+				HasPrefix("nickname", "%a8m%"),
+				HasSuffix("nickname", "_alexsn_"),
+				Contains("nickname", "\\pedro\\"),
+				ContainsFold("nickname", "%AbcD%efg"),
+			),
+		).
+		Query()
+	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? OR `nickname` LIKE ? OR `nickname` LIKE ? OR `nickname` COLLATE utf8mb4_general_ci LIKE ?", q)
+	require.Equal(t, []interface{}{"\\%a8m\\%%", "%\\_alexsn\\_", "%\\\\pedro\\\\%", "%\\%abcd\\%efg%"}, args)
+
+	q, args = Dialect(dialect.SQLite).
+		Update("users").
+		SetNull("name").
+		Where(
+			Or(
+				HasPrefix("nickname", "%a8m%"),
+				HasSuffix("nickname", "_alexsn_"),
+				Contains("nickname", "\\pedro\\"),
+				ContainsFold("nickname", "%AbcD%efg"),
+			),
+		).
+		Query()
+	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR LOWER(`nickname`) LIKE ? ESCAPE ?", q)
+	require.Equal(t, []interface{}{"\\%a8m\\%%", "\\", "%\\_alexsn\\_", "\\", "%\\\\pedro\\\\%", "\\", "%\\%abcd\\%efg%", "\\"}, args)
+}
