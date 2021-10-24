@@ -361,6 +361,12 @@ func (ftc *FieldTypeCreate) SetLinkOther(s *schema.Link) *FieldTypeCreate {
 	return ftc
 }
 
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftc *FieldTypeCreate) SetLinkOtherFunc(s *schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetLinkOtherFunc(s)
+	return ftc
+}
+
 // SetMAC sets the "mac" field.
 func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
 	ftc.mutation.SetMAC(s)
@@ -824,6 +830,14 @@ func (ftc *FieldTypeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ftc *FieldTypeCreate) defaults() {
+	if _, ok := ftc.mutation.LinkOther(); !ok {
+		v := fieldtype.DefaultLinkOther
+		ftc.mutation.SetLinkOther(v)
+	}
+	if _, ok := ftc.mutation.LinkOtherFunc(); !ok {
+		v := fieldtype.DefaultLinkOtherFunc()
+		ftc.mutation.SetLinkOtherFunc(v)
+	}
 	if _, ok := ftc.mutation.Dir(); !ok {
 		v := fieldtype.DefaultDir()
 		ftc.mutation.SetDir(v)
@@ -1178,6 +1192,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldLinkOther,
 		})
 		_node.LinkOther = value
+	}
+	if value, ok := ftc.mutation.LinkOtherFunc(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldLinkOtherFunc,
+		})
+		_node.LinkOtherFunc = value
 	}
 	if value, ok := ftc.mutation.MAC(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -2118,6 +2140,24 @@ func (u *FieldTypeUpsert) UpdateLinkOther() *FieldTypeUpsert {
 // ClearLinkOther clears the value of the "link_other" field.
 func (u *FieldTypeUpsert) ClearLinkOther() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldLinkOther)
+	return u
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (u *FieldTypeUpsert) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldLinkOtherFunc, v)
+	return u
+}
+
+// UpdateLinkOtherFunc sets the "link_other_func" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateLinkOtherFunc() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldLinkOtherFunc)
+	return u
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (u *FieldTypeUpsert) ClearLinkOtherFunc() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldLinkOtherFunc)
 	return u
 }
 
@@ -3520,6 +3560,27 @@ func (u *FieldTypeUpsertOne) UpdateLinkOther() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) ClearLinkOther() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearLinkOther()
+	})
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (u *FieldTypeUpsertOne) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetLinkOtherFunc(v)
+	})
+}
+
+// UpdateLinkOtherFunc sets the "link_other_func" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateLinkOtherFunc() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateLinkOtherFunc()
+	})
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (u *FieldTypeUpsertOne) ClearLinkOtherFunc() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearLinkOtherFunc()
 	})
 }
 
@@ -5194,6 +5255,27 @@ func (u *FieldTypeUpsertBulk) UpdateLinkOther() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) ClearLinkOther() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearLinkOther()
+	})
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (u *FieldTypeUpsertBulk) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetLinkOtherFunc(v)
+	})
+}
+
+// UpdateLinkOtherFunc sets the "link_other_func" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateLinkOtherFunc() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateLinkOtherFunc()
+	})
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (u *FieldTypeUpsertBulk) ClearLinkOtherFunc() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearLinkOtherFunc()
 	})
 }
 

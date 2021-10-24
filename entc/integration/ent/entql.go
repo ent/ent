@@ -104,6 +104,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldDatetime:              {Type: field.TypeTime, Column: fieldtype.FieldDatetime},
 			fieldtype.FieldDecimal:               {Type: field.TypeFloat64, Column: fieldtype.FieldDecimal},
 			fieldtype.FieldLinkOther:             {Type: field.TypeOther, Column: fieldtype.FieldLinkOther},
+			fieldtype.FieldLinkOtherFunc:         {Type: field.TypeOther, Column: fieldtype.FieldLinkOtherFunc},
 			fieldtype.FieldMAC:                   {Type: field.TypeString, Column: fieldtype.FieldMAC},
 			fieldtype.FieldStringArray:           {Type: field.TypeOther, Column: fieldtype.FieldStringArray},
 			fieldtype.FieldPassword:              {Type: field.TypeString, Column: fieldtype.FieldPassword},
@@ -967,6 +968,11 @@ func (f *FieldTypeFilter) WhereDecimal(p entql.Float64P) {
 // WhereLinkOther applies the entql other predicate on the link_other field.
 func (f *FieldTypeFilter) WhereLinkOther(p entql.OtherP) {
 	f.Where(p.Field(fieldtype.FieldLinkOther))
+}
+
+// WhereLinkOtherFunc applies the entql other predicate on the link_other_func field.
+func (f *FieldTypeFilter) WhereLinkOtherFunc(p entql.OtherP) {
+	f.Where(p.Field(fieldtype.FieldLinkOtherFunc))
 }
 
 // WhereMAC applies the entql string predicate on the mac field.

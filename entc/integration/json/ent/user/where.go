@@ -136,20 +136,6 @@ func RawNotNil() predicate.User {
 	})
 }
 
-// DirsIsNil applies the IsNil predicate on the "dirs" field.
-func DirsIsNil() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldDirs)))
-	})
-}
-
-// DirsNotNil applies the NotNil predicate on the "dirs" field.
-func DirsNotNil() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldDirs)))
-	})
-}
-
 // IntsIsNil applies the IsNil predicate on the "ints" field.
 func IntsIsNil() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

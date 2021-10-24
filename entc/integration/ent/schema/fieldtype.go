@@ -112,7 +112,16 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 				dialect.MySQL:    "varchar(255)",
 				dialect.SQLite:   "varchar(255)",
 			}).
-			Optional(),
+			Optional().
+			Default(DefaultLink()),
+		field.Other("link_other_func", &Link{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "varchar",
+				dialect.MySQL:    "varchar(255)",
+				dialect.SQLite:   "varchar(255)",
+			}).
+			Optional().
+			Default(DefaultLink),
 		field.String("mac").
 			Optional().
 			GoType(MAC{}).
@@ -412,6 +421,11 @@ type (
 
 type Link struct {
 	*url.URL
+}
+
+func DefaultLink() *Link {
+	u, _ := url.Parse("127.0.0.1")
+	return &Link{URL: u}
 }
 
 // Scan implements the Scanner interface.

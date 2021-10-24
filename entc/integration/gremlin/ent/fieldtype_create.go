@@ -361,6 +361,12 @@ func (ftc *FieldTypeCreate) SetLinkOther(s *schema.Link) *FieldTypeCreate {
 	return ftc
 }
 
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftc *FieldTypeCreate) SetLinkOtherFunc(s *schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetLinkOtherFunc(s)
+	return ftc
+}
+
 // SetMAC sets the "mac" field.
 func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
 	ftc.mutation.SetMAC(s)
@@ -824,6 +830,14 @@ func (ftc *FieldTypeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ftc *FieldTypeCreate) defaults() {
+	if _, ok := ftc.mutation.LinkOther(); !ok {
+		v := fieldtype.DefaultLinkOther
+		ftc.mutation.SetLinkOther(v)
+	}
+	if _, ok := ftc.mutation.LinkOtherFunc(); !ok {
+		v := fieldtype.DefaultLinkOtherFunc()
+		ftc.mutation.SetLinkOtherFunc(v)
+	}
 	if _, ok := ftc.mutation.Dir(); !ok {
 		v := fieldtype.DefaultDir()
 		ftc.mutation.SetDir(v)
@@ -1036,6 +1050,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.LinkOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
+	}
+	if value, ok := ftc.mutation.LinkOtherFunc(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLinkOtherFunc, value)
 	}
 	if value, ok := ftc.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)

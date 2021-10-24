@@ -323,6 +323,15 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10},
 		},
 		{
+			input: Dialect(dialect.Postgres).Update("users").
+				Set("active", false).
+				Where(P(func(b *Builder) {
+					b.Ident("name").WriteString(" SIMILAR TO ").Arg("(b|c)%")
+				})),
+			wantQuery: `UPDATE "users" SET "active" = $1 WHERE "name" SIMILAR TO $2`,
+			wantArgs:  []interface{}{false, "(b|c)%"},
+		},
+		{
 			input:     Update("users").Set("name", "foo").Where(EQ("name", "bar")),
 			wantQuery: "UPDATE `users` SET `name` = ? WHERE `name` = ?",
 			wantArgs:  []interface{}{"foo", "bar"},
@@ -1832,4 +1841,36 @@ func TestInsert_OnConflict(t *testing.T) {
 		require.Equal(t, "INSERT INTO `users` (`name`) VALUES (?) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `id` = LAST_INSERT_ID(`id`)", query)
 		require.Equal(t, []interface{}{"Mashraki"}, args)
 	})
+}
+
+func TestEscapePatterns(t *testing.T) {
+	q, args := Dialect(dialect.MySQL).
+		Update("users").
+		SetNull("name").
+		Where(
+			Or(
+				HasPrefix("nickname", "%a8m%"),
+				HasSuffix("nickname", "_alexsn_"),
+				Contains("nickname", "\\pedro\\"),
+				ContainsFold("nickname", "%AbcD%efg"),
+			),
+		).
+		Query()
+	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? OR `nickname` LIKE ? OR `nickname` LIKE ? OR `nickname` COLLATE utf8mb4_general_ci LIKE ?", q)
+	require.Equal(t, []interface{}{"\\%a8m\\%%", "%\\_alexsn\\_", "%\\\\pedro\\\\%", "%\\%abcd\\%efg%"}, args)
+
+	q, args = Dialect(dialect.SQLite).
+		Update("users").
+		SetNull("name").
+		Where(
+			Or(
+				HasPrefix("nickname", "%a8m%"),
+				HasSuffix("nickname", "_alexsn_"),
+				Contains("nickname", "\\pedro\\"),
+				ContainsFold("nickname", "%AbcD%efg"),
+			),
+		).
+		Query()
+	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR LOWER(`nickname`) LIKE ? ESCAPE ?", q)
+	require.Equal(t, []interface{}{"\\%a8m\\%%", "\\", "%\\_alexsn\\_", "\\", "%\\\\pedro\\\\%", "\\", "%\\%abcd\\%efg%", "\\"}, args)
 }

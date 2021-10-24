@@ -260,6 +260,34 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.True(ok)
 	require.Equal("-", fi.Tag.Get("json"))
 	client.User.Create().SetName("tarrence").SetAge(30).ExecX(ctx)
+
+	t.Run("StringPredicates", func(t *testing.T) {
+		client.Pet.Delete().ExecX(ctx)
+		a := client.Pet.Create().SetName("a%").SaveX(ctx)
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasPrefix("%a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.Or(pet.NameHasPrefix("%a%"), pet.NameHasPrefix("%a%"))).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasSuffix("%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("a%%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("%a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContainsFold("A%")).ExistX(ctx))
+
+		a.Update().SetName("a_\\").ExecX(ctx)
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasPrefix("%a")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a_")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasSuffix("a_\\")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("%a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("%a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContainsFold("A")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContainsFold("%A")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContainsFold("A%")).ExistX(ctx))
+	})
 }
 
 func Upsert(t *testing.T, client *ent.Client) {
@@ -944,8 +972,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Empty(client.User.Query().Where(user.NameIn("alex", "rocket")).AllX(ctx))
 	require.NotNil(client.User.Query().Where(user.HasParentWith(user.NameIn("a8m", "neta"))).OnlyX(ctx))
 	require.Len(client.User.Query().Where(user.NameContains("a8")).AllX(ctx), 1)
-	require.Len(client.User.Query().Where(user.NameHasPrefix("a8")).AllX(ctx), 1)
-	require.Len(client.User.Query().Where(user.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).AllX(ctx), 2)
+	require.Equal(1, client.User.Query().Where(user.NameHasPrefix("a8")).CountX(ctx))
+	require.Zero(client.User.Query().Where(user.NameHasPrefix("%a8%")).CountX(ctx))
+	require.Equal(2, client.User.Query().Where(user.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).CountX(ctx))
 
 	t.Log("group-by one field")
 	names, err := client.User.Query().GroupBy(user.FieldName).Strings(ctx)

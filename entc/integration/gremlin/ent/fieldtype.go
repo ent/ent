@@ -80,6 +80,8 @@ type FieldType struct {
 	Decimal float64 `json:"decimal,omitempty"`
 	// LinkOther holds the value of the "link_other" field.
 	LinkOther *schema.Link `json:"link_other,omitempty"`
+	// LinkOtherFunc holds the value of the "link_other_func" field.
+	LinkOtherFunc *schema.Link `json:"link_other_func,omitempty"`
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
 	// StringArray holds the value of the "string_array" field.
@@ -189,6 +191,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Datetime              int64                 `json:"datetime,omitempty"`
 		Decimal               float64               `json:"decimal,omitempty"`
 		LinkOther             *schema.Link          `json:"link_other,omitempty"`
+		LinkOtherFunc         *schema.Link          `json:"link_other_func,omitempty"`
 		MAC                   schema.MAC            `json:"mac,omitempty"`
 		StringArray           schema.Strings        `json:"string_array,omitempty"`
 		Password              string                `json:"password,omitempty"`
@@ -257,6 +260,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Datetime = time.Unix(0, scanft.Datetime)
 	ft.Decimal = scanft.Decimal
 	ft.LinkOther = scanft.LinkOther
+	ft.LinkOtherFunc = scanft.LinkOtherFunc
 	ft.MAC = scanft.MAC
 	ft.StringArray = scanft.StringArray
 	ft.Password = scanft.Password
@@ -383,6 +387,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
 	builder.WriteString(", link_other=")
 	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
+	builder.WriteString(", link_other_func=")
+	builder.WriteString(fmt.Sprintf("%v", ft.LinkOtherFunc))
 	builder.WriteString(", mac=")
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", string_array=")
@@ -510,6 +516,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Datetime              int64                 `json:"datetime,omitempty"`
 		Decimal               float64               `json:"decimal,omitempty"`
 		LinkOther             *schema.Link          `json:"link_other,omitempty"`
+		LinkOtherFunc         *schema.Link          `json:"link_other_func,omitempty"`
 		MAC                   schema.MAC            `json:"mac,omitempty"`
 		StringArray           schema.Strings        `json:"string_array,omitempty"`
 		Password              string                `json:"password,omitempty"`
@@ -580,6 +587,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Datetime:              time.Unix(0, v.Datetime),
 			Decimal:               v.Decimal,
 			LinkOther:             v.LinkOther,
+			LinkOtherFunc:         v.LinkOtherFunc,
 			MAC:                   v.MAC,
 			StringArray:           v.StringArray,
 			Password:              v.Password,

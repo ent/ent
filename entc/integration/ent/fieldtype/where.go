@@ -283,6 +283,13 @@ func LinkOther(v *schema.Link) predicate.FieldType {
 	})
 }
 
+// LinkOtherFunc applies equality check predicate on the "link_other_func" field. It's identical to LinkOtherFuncEQ.
+func LinkOtherFunc(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLinkOtherFunc), v))
+	})
+}
+
 // MAC applies equality check predicate on the "mac" field. It's identical to MACEQ.
 func MAC(v schema.MAC) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
@@ -2854,6 +2861,96 @@ func LinkOtherIsNil() predicate.FieldType {
 func LinkOtherNotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldLinkOther)))
+	})
+}
+
+// LinkOtherFuncEQ applies the EQ predicate on the "link_other_func" field.
+func LinkOtherFuncEQ(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLinkOtherFunc), v))
+	})
+}
+
+// LinkOtherFuncNEQ applies the NEQ predicate on the "link_other_func" field.
+func LinkOtherFuncNEQ(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLinkOtherFunc), v))
+	})
+}
+
+// LinkOtherFuncIn applies the In predicate on the "link_other_func" field.
+func LinkOtherFuncIn(vs ...*schema.Link) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldLinkOtherFunc), v...))
+	})
+}
+
+// LinkOtherFuncNotIn applies the NotIn predicate on the "link_other_func" field.
+func LinkOtherFuncNotIn(vs ...*schema.Link) predicate.FieldType {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.FieldType(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldLinkOtherFunc), v...))
+	})
+}
+
+// LinkOtherFuncGT applies the GT predicate on the "link_other_func" field.
+func LinkOtherFuncGT(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLinkOtherFunc), v))
+	})
+}
+
+// LinkOtherFuncGTE applies the GTE predicate on the "link_other_func" field.
+func LinkOtherFuncGTE(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLinkOtherFunc), v))
+	})
+}
+
+// LinkOtherFuncLT applies the LT predicate on the "link_other_func" field.
+func LinkOtherFuncLT(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLinkOtherFunc), v))
+	})
+}
+
+// LinkOtherFuncLTE applies the LTE predicate on the "link_other_func" field.
+func LinkOtherFuncLTE(v *schema.Link) predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLinkOtherFunc), v))
+	})
+}
+
+// LinkOtherFuncIsNil applies the IsNil predicate on the "link_other_func" field.
+func LinkOtherFuncIsNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldLinkOtherFunc)))
+	})
+}
+
+// LinkOtherFuncNotNil applies the NotNil predicate on the "link_other_func" field.
+func LinkOtherFuncNotNil() predicate.FieldType {
+	return predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldLinkOtherFunc)))
 	})
 }
 

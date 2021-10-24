@@ -1005,6 +1005,9 @@ func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.Type
 // IsJSON returns true if the field is a JSON field.
 func (f Field) IsJSON() bool { return f.Type != nil && f.Type.Type == field.TypeJSON }
 
+// IsOther returns true if the field is an Other field.
+func (f Field) IsOther() bool { return f.Type != nil && f.Type.Type == field.TypeOther }
+
 // IsString returns true if the field is a string field.
 func (f Field) IsString() bool { return f.Type != nil && f.Type.Type == field.TypeString }
 

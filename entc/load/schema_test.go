@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"math"
+	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -299,6 +300,8 @@ func (WithDefaults) Fields() []ent.Field {
 			}),
 		field.Float("balance").
 			Default(0),
+		field.JSON("dirs", []http.Dir{}).
+			Default([]http.Dir{"/tmp"}),
 	}
 }
 
@@ -329,6 +332,7 @@ func TestMarshalDefaults(t *testing.T) {
 	require.True(t, schema.Fields[5].Default)
 	require.Equal(t, schema.Fields[5].DefaultKind, reflect.Func)
 	require.True(t, schema.Fields[6].Default)
+	require.True(t, schema.Fields[7].Default)
 }
 
 type TimeMixin struct {
