@@ -85,8 +85,9 @@ func (t Type) ConstName() string {
 type TypeInfo struct {
 	Type     Type
 	Ident    string
-	PkgPath  string
-	Nillable bool // slices or pointers.
+	PkgPath  string // import path.
+	PkgName  string // local package name.
+	Nillable bool   // slices or pointers.
 	RType    *RType
 }
 

@@ -9,9 +9,20 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "config" }}
 
 {{ $pkg := base $.Config.Package }}
+{{/* Additional dependencies. */}}
+{{ $deps := list }}{{ with $.Config.Annotations }}{{ $deps = $.Config.Annotations.Dependencies }}{{ end }}
+
 {{ template "header" $ }}
 
 {{ template "import" $ }}
+
+{{ with $deps }}
+	import (
+		{{- range $dep := $deps }}
+			{{ $dep.Type.PkgName }} "{{ $dep.Type.PkgPath }}"
+		{{- end }}
+	)
+{{ end }}
 
 // Option function to configure the client.
 type Option func(*config)
@@ -26,6 +37,10 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	{{- /* Additional dependency fields. */}}
+	{{- range $dep := $deps }}
+		{{ $dep.Field }} {{ $dep.Type }}
+	{{- end }}
 	{{- /* Support adding config fields from both global or dialect-specific templates. */}}
 	{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
 		{{- with $tmpls := matchTemplate (print $prefix "config/fields/*") }}
@@ -73,6 +88,16 @@ func Driver(driver dialect.Driver) Option {
 		c.driver = driver
 	}
 }
+
+{{- /* Additional dependency options. */}}
+{{- range $dep := $deps }}
+	// {{ $dep.Option }} configures the {{ $dep.Field }}.
+	func {{ $dep.Option }}(v {{ $dep.Type }}) Option {
+		return func(c *config) {
+			c.{{ $dep.Field }} = v
+		}
+	}
+{{- end }}
 
 {{- /* Support adding config options from both global or dialect-specific templates. */}}
 {{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}

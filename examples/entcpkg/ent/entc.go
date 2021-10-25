@@ -10,12 +10,14 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 	"text/template"
 
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
 )
 
 func main() {
@@ -23,9 +25,20 @@ func main() {
 	if err != nil {
 		log.Fatalf("creating extension: %v", err)
 	}
-	// A usage for custom options to configure the
+	// A usage for custom options to configure the code generator to use
+	// an extension and inject external dependencies in the generated API.
 	opts := []entc.Option{
 		entc.Extensions(ex),
+		entc.Dependency(
+			entc.DependencyType(&http.Client{}),
+		),
+		entc.Dependency(
+			entc.DependencyName("Writer"),
+			entc.DependencyTypeInfo(&field.TypeInfo{
+				Ident:   "io.Writer",
+				PkgPath: "io",
+			}),
+		),
 	}
 	err = entc.Generate("./schema", &gen.Config{
 		Header: `
