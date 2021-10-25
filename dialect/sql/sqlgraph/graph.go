@@ -228,23 +228,20 @@ func HasNeighbors(q *sql.Selector, s *Step) {
 		if s.Edge.Inverse {
 			pk1 = s.Edge.Columns[1]
 		}
-		from := q.Table()
 		join := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		q.Where(
 			sql.In(
-				from.C(s.From.Column),
+				q.C(s.From.Column),
 				builder.Select(join.C(pk1)).From(join),
 			),
 		)
 	case r == M2O || (r == O2O && s.Edge.Inverse):
-		from := q.Table()
-		q.Where(sql.NotNull(from.C(s.Edge.Columns[0])))
+		q.Where(sql.NotNull(q.C(s.Edge.Columns[0])))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
-		from := q.Table()
 		to := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		q.Where(
 			sql.In(
-				from.C(s.From.Column),
+				q.C(s.From.Column),
 				builder.Select(to.C(s.Edge.Columns[0])).
 					From(to).
 					Where(sql.NotNull(to.C(s.Edge.Columns[0]))),
@@ -263,7 +260,6 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 		if s.Edge.Inverse {
 			pk1, pk2 = pk2, pk1
 		}
-		from := q.Table()
 		to := builder.Table(s.To.Table).Schema(s.To.Schema)
 		edge := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join := builder.Select(edge.C(pk2)).
@@ -274,23 +270,21 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 		matches.WithContext(q.Context())
 		pred(matches)
 		join.FromSelect(matches)
-		q.Where(sql.In(from.C(s.From.Column), join))
+		q.Where(sql.In(q.C(s.From.Column), join))
 	case r == M2O || (r == O2O && s.Edge.Inverse):
-		from := q.Table()
 		to := builder.Table(s.To.Table).Schema(s.To.Schema)
 		matches := builder.Select(to.C(s.To.Column)).
 			From(to)
 		matches.WithContext(q.Context())
 		pred(matches)
-		q.Where(sql.In(from.C(s.Edge.Columns[0]), matches))
+		q.Where(sql.In(q.C(s.Edge.Columns[0]), matches))
 	case r == O2M || (r == O2O && !s.Edge.Inverse):
-		from := q.Table()
 		to := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		matches := builder.Select(to.C(s.Edge.Columns[0])).
 			From(to)
 		matches.WithContext(q.Context())
 		pred(matches)
-		q.Where(sql.In(from.C(s.From.Column), matches))
+		q.Where(sql.In(q.C(s.From.Column), matches))
 	}
 }
 

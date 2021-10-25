@@ -592,6 +592,36 @@ func TestHasNeighbors(t *testing.T) {
 			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
 			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`group_users`.`user_id` FROM `s2`.`group_users`)",
 		},
+		{
+			name: "O2M/2type2/selector",
+			step: NewStep(
+				From("users", "id"),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
+			selector:  sql.Select("*").From(sql.Select("*").From(sql.Table("users")).As("users")).As("users"),
+			wantQuery: "SELECT * FROM (SELECT * FROM `users`) AS `users` WHERE `users`.`id` IN (SELECT `pets`.`owner_id` FROM `pets` WHERE `pets`.`owner_id` IS NOT NULL)",
+		},
+		{
+			name: "M2O/2type2/selector",
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			selector:  sql.Select("*").From(sql.Select("*").From(sql.Table("pets")).As("pets")).As("pets"),
+			wantQuery: "SELECT * FROM (SELECT * FROM `pets`) AS `pets` WHERE `pets`.`owner_id` IS NOT NULL",
+		},
+		{
+			name: "M2M/2types/selector",
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+			selector:  sql.Select("*").From(sql.Select("*").From(sql.Table("users")).As("users")).As("users"),
+			wantQuery: "SELECT * FROM (SELECT * FROM `users`) AS `users` WHERE `users`.`id` IN (SELECT `user_groups`.`user_id` FROM `user_groups`)",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -794,6 +824,52 @@ WHERE "s1"."users"."id" IN
   FROM "s2"."user_groups"
   JOIN "s3"."groups" AS "t1" ON "s2"."user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
 			wantArgs: []interface{}{"GitHub"},
+		},
+		{
+			name: "O2M/selector",
+			step: NewStep(
+				From("users", "id"),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
+			selector: sql.Dialect("postgres").Select("*").
+				From(sql.Select("*").From(sql.Table("users")).As("users")).
+				Where(sql.EQ("last_name", "mashraki")).As("users"),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("name", "pedro"))
+			},
+			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "last_name" = $1 AND "users"."id" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $2)`,
+			wantArgs:  []interface{}{"mashraki", "pedro"},
+		},
+		{
+			name: "M2O/selector",
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			selector: sql.Dialect("postgres").Select("*").
+				From(sql.Select("*").From(sql.Table("pets")).As("pets")).
+				Where(sql.EQ("name", "pedro")).As("pets"),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("last_name", "mashraki"))
+			},
+			wantQuery: `SELECT * FROM (SELECT * FROM "pets") AS "pets" WHERE "name" = $1 AND "pets"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "last_name" = $2)`,
+			wantArgs:  []interface{}{"pedro", "mashraki"},
+		},
+		{
+			name: "M2M/selector",
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+			selector: sql.Dialect("postgres").Select("*").From(sql.Select("*").From(sql.Table("users")).As("users")).As("users"),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("name", "GitHub"))
+			},
+			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "users"."id" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
+			wantArgs:  []interface{}{"GitHub"},
 		},
 	}
 	for _, tt := range tests {
