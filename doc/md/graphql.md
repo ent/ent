@@ -4,7 +4,7 @@ title: GraphQL Integration
 ---
 
 The `ent` framework provides an integration with GraphQL through the [99designs/gqlgen](https://github.com/99designs/gqlgen)
-library using the [external templates](templates.md) option (i.e. it can be extended to support other libraries).
+library using the [extension](extension.md) option (i.e. it can be extended to support other libraries).
 
 ## Quick Introduction
 
