@@ -14,7 +14,7 @@ Follow these 3 steps to enable it to your project:
 
 1\. Create a new Go file named `ent/entc.go`, and paste the following content:
 
-```go
+```go title="ent/entc.go"
 // +build ignore
 
 package main
@@ -40,7 +40,7 @@ func main() {
 
 2\. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
 
-```go
+```go title="ent/generate.go"
 package ent
 
 //go:generate go run -mod=mod entc.go

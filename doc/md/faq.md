@@ -553,52 +553,8 @@ If your custom fields/methods require additional imports, you can add those impo
 
 #### How to extend the generated builders?
 
-In case you want to extend the generated client and add dependencies to all different builders under the `ent` package,
-you can use the `"config/{fields,options}/*"` templates as follows:
-
-```gotemplate
-{{/* A template for adding additional config fields/options. */}}
-{{ define "config/fields/httpclient" -}}
-	// HTTPClient field added by a test template.
-	HTTPClient *http.Client
-{{ end }}
-
-{{ define "config/options/httpclient" }}
-	// HTTPClient option added by a test template.
-	func HTTPClient(hc *http.Client) Option {
-		return func(c *config) {
-			c.HTTPClient = hc
-		}
-	}
-{{ end }}
-```
-
-Then, you can inject this new dependency to your client, and access it in all builders:
-
-```go
-func main() {
-	client, err := ent.Open(
-		"sqlite3",
-		"file:ent?mode=memory&cache=shared&_fk=1",
-		// Custom config option.
-		ent.HTTPClient(http.DefaultClient),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-	ctx := context.Background()
-	client.User.Use(func(next ent.Mutator) ent.Mutator {
-		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
-			// Access the injected HTTP client here.
-			_ = m.HTTPClient
-			return next.Mutate(ctx, m)
-		})
-	})
-	// ...
-}
-```
-
+See the *[Injecting External Dependencies](code-gen.md#external-dependencies)* section, or follow the
+example on [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
 
 #### How to store Protobuf objects in a BLOB column?
 
