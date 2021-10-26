@@ -28,6 +28,7 @@ GraphQL mutations, and add additional methods on the different builders to accep
 
 ```gotemplate
 {{ range $n := $.Nodes }}
+    {{ $input := print "Create" $n.Name "Input" }}
     // {{ $input }} represents a mutation input for creating {{ plural $n.Name | lower }}.
     type {{ $input }} struct {
         {{- range $f := $n.Fields }}
