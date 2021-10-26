@@ -115,11 +115,14 @@ go run entgo.io/ent/cmd/ent generate --template <dir-path> --template glob="path
 
 More information and examples can be found in the [external templates doc](templates.md).
 
-## Use `entc` As A Package
+## Use `entc` as a Package
 
-Another option for running `ent` CLI is to use it as a package as follows:
+Another option for running `ent` code generation is to create a file named `ent/entc.go` with the following content,
+and then the `ent/generate.go` file to execute it:
 
-```go
+```go title="ent/entc.go"
+// +build ignore
+
 package main
 
 import (
@@ -141,8 +144,13 @@ func main() {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
+```go title="ent/generate.go"
+package ent
 
+//go:generate go run -mod=mod entc.go
+```
+
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
 
 ## Schema Description
 
@@ -231,6 +239,60 @@ func EnsureStructTag(name string) gen.Hook {
 	}
 }
 ```
+
+## External Dependencies
+
+In order to extend the generated client and builders under the `ent` package, and inject them external
+dependencies as struct fields, use the `entc.Dependency` option in your [`ent/entc.go`](#use-entc-as-a-package)
+file:
+
+```go title="ent/entc.go" {3-12}
+func main() {
+	opts := []entc.Option{
+		entc.Dependency(
+			entc.DependencyType(&http.Client{}),
+		),
+		entc.Dependency(
+			entc.DependencyName("Writer"),
+			entc.DependencyTypeInfo(&field.TypeInfo{
+				Ident:   "io.Writer",
+				PkgPath: "io",
+			}),
+		),
+	}
+	if err := entc.Generate("./schema", &gen.Config{}, opts...); err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
+}
+```
+
+Then, use it in your application:
+
+```go title="example_test.go" {5-6,15-16}
+func Example_Deps() {
+	client, err := ent.Open(
+		"sqlite3",
+		"file:ent?mode=memory&cache=shared&_fk=1",
+		ent.Writer(os.Stdout),
+		ent.HTTPClient(http.DefaultClient),
+	)
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+	// An example for using the injected dependencies in the generated builders.
+	client.User.Use(func(next ent.Mutator) ent.Mutator {
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			_ = m.HTTPClient
+			_ = m.Writer
+			return next.Mutate(ctx, m)
+		})
+	})
+	// ...
+}
+```
+
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
 
 ## Feature Flags
 
