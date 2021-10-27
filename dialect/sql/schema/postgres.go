@@ -494,11 +494,8 @@ func (d *Postgres) renameIndex(t *Table, old, new *Index) sql.Querier {
 }
 
 // matchSchema returns the predicate for matching table schema.
-func (d *Postgres) matchSchema(columns ...string) *sql.Predicate {
+func (d *Postgres) matchSchema() *sql.Predicate {
 	column := "table_schema"
-	if len(columns) > 0 {
-		column = columns[0]
-	}
 	if d.schema != "" {
 		return sql.EQ(column, d.schema)
 	}
