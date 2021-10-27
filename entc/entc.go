@@ -52,7 +52,7 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 //		IDType: &field.TypeInfo{Type: field.TypeInt},
 //	})
 //
-func Generate(schemaPath string, cfg *gen.Config, options ...Option) (err error) {
+func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
 	if cfg.Target == "" {
 		abs, err := filepath.Abs(schemaPath)
 		if err != nil {
