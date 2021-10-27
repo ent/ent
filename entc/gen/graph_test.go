@@ -434,7 +434,7 @@ func TestDependencyAnnotation_Build(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		d := &DependencyAnnotation{Type: tt.typ}
+		d := &Dependency{Type: tt.typ}
 		require.NoError(t, d.Build())
 		require.Equal(t, tt.field, d.Field)
 	}

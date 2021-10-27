@@ -142,10 +142,13 @@ func Annotations(annotations ...Annotation) Option {
 		}
 		for _, ant := range annotations {
 			name := ant.Name()
-			if _, ok := cfg.Annotations[name]; ok {
+			if curr, ok := cfg.Annotations[name]; !ok {
+				cfg.Annotations[name] = ant
+			} else if m, ok := curr.(schema.Merger); ok {
+				cfg.Annotations[name] = m.Merge(ant)
+			} else {
 				return fmt.Errorf("duplicate annotations with name %q", name)
 			}
-			cfg.Annotations[name] = ant
 		}
 		return nil
 	}
@@ -264,12 +267,12 @@ func (DefaultExtension) Options() []Option { return nil }
 var _ Extension = (*DefaultExtension)(nil)
 
 // DependencyOption allows configuring optional dependencies using functional options.
-type DependencyOption func(*gen.DependencyAnnotation) error
+type DependencyOption func(*gen.Dependency) error
 
 // DependencyType sets the type of the struct field in
 // the generated builders for the configured dependency.
 func DependencyType(v interface{}) DependencyOption {
-	return func(d *gen.DependencyAnnotation) error {
+	return func(d *gen.Dependency) error {
 		if v == nil {
 			return errors.New("nil dependency type")
 		}
@@ -292,7 +295,7 @@ func DependencyType(v interface{}) DependencyOption {
 // DependencyTypeInfo is similar to DependencyType, but
 // allows setting the field.TypeInfo explicitly.
 func DependencyTypeInfo(t *field.TypeInfo) DependencyOption {
-	return func(d *gen.DependencyAnnotation) error {
+	return func(d *gen.Dependency) error {
 		if t == nil {
 			return errors.New("nil dependency type info")
 		}
@@ -304,7 +307,7 @@ func DependencyTypeInfo(t *field.TypeInfo) DependencyOption {
 // DependencyField sets the struct field and the option name
 // of the dependency in the generated builders.
 func DependencyName(name string) DependencyOption {
-	return func(d *gen.DependencyAnnotation) error {
+	return func(d *gen.Dependency) error {
 		d.Field = name
 		d.Option = name
 		return nil
@@ -329,7 +332,7 @@ func DependencyName(name string) DependencyOption {
 //
 func Dependency(opts ...DependencyOption) Option {
 	return func(cfg *gen.Config) error {
-		d := &gen.DependencyAnnotation{}
+		d := &gen.Dependency{}
 		for _, opt := range opts {
 			if err := opt(d); err != nil {
 				return err
@@ -338,17 +341,7 @@ func Dependency(opts ...DependencyOption) Option {
 		if err := d.Build(); err != nil {
 			return err
 		}
-		if cfg.Annotations == nil {
-			cfg.Annotations = gen.Annotations{}
-		}
-		v, ok := cfg.Annotations[d.Name()]
-		if !ok {
-			v = []*gen.DependencyAnnotation{d}
-		} else {
-			v = append(v.([]*gen.DependencyAnnotation), d)
-		}
-		cfg.Annotations[d.Name()] = v
-		return nil
+		return Annotations(gen.Dependencies{d})(cfg)
 	}
 }
 
