@@ -8,13 +8,11 @@ package gen
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"go/parser"
 	"go/token"
 	"os"
 	"path/filepath"
-	"reflect"
 	"runtime/debug"
 	"strings"
 	"text/template/parse"
@@ -754,76 +752,6 @@ func (a assets) format() error {
 		}
 	}
 	return nil
-}
-
-// DependencyAnnotation allows configuring optional dependencies as struct fields on the
-// generated builders. For example:
-//
-//	DependencyAnnotation{
-//		Field:	"HTTPClient",
-//		Type:	"*http.Client",
-//		Option:	"WithClient",
-//	}
-//
-// Although the DependencyAnnotation is exported, used should use the entc.OptionalDependency
-// option in order to build this annotation.
-type DependencyAnnotation struct {
-	// Field defines the struct field name on the builders.
-	// It defaults to the full type name. For example:
-	//
-	//	http.Client	=> HTTPClient
-	//	net.Conn	=> NetConn
-	//	url.URL		=> URL
-	//
-	Field string
-	// Type defines the type identifier. For example, `*http.Client`.
-	Type *field.TypeInfo
-	// Option defines the name of the config option.
-	// It defaults to the field name.
-	Option string
-}
-
-// Name describes the annotation name.
-func (DependencyAnnotation) Name() string {
-	return "Dependencies"
-}
-
-// Build builds the annotation and fails if it is invalid.
-func (d *DependencyAnnotation) Build() error {
-	if d.Type == nil {
-		return errors.New("entc/gen: missing dependency type")
-	}
-	if d.Field == "" {
-		name, err := d.defaultName()
-		if err != nil {
-			return err
-		}
-		d.Field = name
-	}
-	if d.Option == "" {
-		d.Option = d.Field
-	}
-	return nil
-}
-
-func (d *DependencyAnnotation) defaultName() (string, error) {
-	var pkg, name string
-	switch parts := strings.Split(strings.TrimLeft(d.Type.Ident, "[]*"), "."); len(parts) {
-	case 1:
-		name = parts[0]
-	case 2:
-		name = parts[1]
-		// Avoid stuttering.
-		if !strings.EqualFold(parts[0], name) {
-			pkg = parts[0]
-		}
-	default:
-		return "", fmt.Errorf("entc/gen: unexpected number of parts: %q", parts)
-	}
-	if r := d.Type.RType; r != nil && (r.Kind == reflect.Array || r.Kind == reflect.Slice) {
-		name = plural(name)
-	}
-	return pascal(pkg) + pascal(name), nil
 }
 
 // expect panics if the condition is false.
