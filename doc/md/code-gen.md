@@ -134,11 +134,7 @@ import (
 )
 
 func main() {
-	err := entc.Generate("./schema", &gen.Config{
-		Header: "// Your Custom Header",
-		IDType: &field.TypeInfo{Type: field.TypeInt},
-	})
-	if err != nil {
+	if err := entc.Generate("./schema", &gen.Config{}); err != nil {
 		log.Fatal("running ent codegen:", err)
 	}
 }
