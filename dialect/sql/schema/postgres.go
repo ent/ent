@@ -470,29 +470,6 @@ func (d *Postgres) dropIndex(ctx context.Context, tx dialect.Tx, idx *Index, tab
 	return tx.Exec(ctx, query, args, nil)
 }
 
-// isImplicitIndex reports if the index was created implicitly for the unique column.
-func (d *Postgres) isImplicitIndex(idx *Index, col *Column) bool {
-	return strings.TrimSuffix(idx.Name, "_key") == col.Name && col.Unique
-}
-
-// renameColumn returns the statement for renaming a column.
-func (d *Postgres) renameColumn(t *Table, old, new *Column) sql.Querier {
-	return sql.Dialect(dialect.Postgres).
-		AlterTable(t.Name).
-		RenameColumn(old.Name, new.Name)
-}
-
-// renameIndex returns the statement for renaming an index.
-func (d *Postgres) renameIndex(t *Table, old, new *Index) sql.Querier {
-	if sfx := "_key"; strings.HasSuffix(old.Name, sfx) && !strings.HasSuffix(new.Name, sfx) {
-		new.Name += sfx
-	}
-	if pfx := t.Name + "_"; strings.HasPrefix(old.realname, pfx) && !strings.HasPrefix(new.Name, pfx) {
-		new.Name = pfx + new.Name
-	}
-	return sql.Dialect(dialect.Postgres).AlterIndex(old.realname).Rename(new.Name)
-}
-
 // matchSchema returns the predicate for matching table schema.
 func (d *Postgres) matchSchema() *sql.Predicate {
 	column := "table_schema"
