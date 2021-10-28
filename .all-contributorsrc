@@ -608,6 +608,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "JeremyV2014",
+      "name": "Jeremy Maxey-Vesperman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9276415?v=4",
+      "profile": "https://github.com/JeremyV2014",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
