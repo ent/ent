@@ -131,7 +131,7 @@ func TestUserProto(t *testing.T) {
 To run it:
 
 ```console
-go get -u./... # install deps of the generated package
+go get -u ./... # install deps of the generated package
 go test ./...
 ```
 
