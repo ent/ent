@@ -599,6 +599,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "heliumbrain",
+      "name": "heliumbrain",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1607668?v=4",
+      "profile": "http://www.entiros.se",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
