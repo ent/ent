@@ -304,7 +304,7 @@ func DependencyTypeInfo(t *field.TypeInfo) DependencyOption {
 	}
 }
 
-// DependencyField sets the struct field and the option name
+// DependencyName sets the struct field and the option name
 // of the dependency in the generated builders.
 func DependencyName(name string) DependencyOption {
 	return func(d *gen.Dependency) error {
