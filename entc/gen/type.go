@@ -1264,7 +1264,7 @@ func (f Field) ConvertedToBasic() bool {
 	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
-// SupportsAdd reports if the field supports the mutation "Add(T) T" interface.
+// SupportsMutationAdd reports if the field supports the mutation "Add(T) T" interface.
 func (f Field) SupportsMutationAdd() bool {
 	if !f.Type.Numeric() || f.IsEdgeField() {
 		return false

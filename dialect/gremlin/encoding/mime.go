@@ -11,7 +11,7 @@ import (
 // Mime defines a gremlin mime type.
 type Mime []byte
 
-// Graphson mime headers.
+// GraphSON3Mime mime headers.
 var (
 	GraphSON3Mime = NewMime("application/vnd.gremlin-v3.0+json")
 )

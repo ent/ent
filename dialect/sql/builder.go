@@ -2426,7 +2426,7 @@ func (s *Selector) ForShare(opts ...LockOption) *Selector {
 	return s.For(LockShare, opts...)
 }
 
-// LockUpdate sets the lock configuration for suffixing the
+// ForUpdate sets the lock configuration for suffixing the
 // `SELECT` statement with the `FOR UPDATE` clause.
 func (s *Selector) ForUpdate(opts ...LockOption) *Selector {
 	return s.For(LockUpdate, opts...)

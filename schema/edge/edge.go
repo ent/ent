@@ -67,7 +67,7 @@ func (b *assocBuilder) StructTag(s string) *assocBuilder {
 	return b
 }
 
-// Assoc creates an inverse-edge with the same type.
+// From creates an inverse-edge with the same type.
 func (b *assocBuilder) From(name string) *inverseBuilder {
 	return &inverseBuilder{desc: &Descriptor{Name: name, Type: b.desc.Type, Inverse: true, Ref: b.desc}}
 }
