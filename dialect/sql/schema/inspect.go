@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// MigrateOption allows for managing schema configuration using functional options.
+// InspectOption allows for managing schema configuration using functional options.
 type InspectOption func(inspect *Inspector)
 
 // WithSchema provides a schema (named-database) for reading the tables from.

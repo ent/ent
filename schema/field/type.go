@@ -123,7 +123,7 @@ func (t TypeInfo) ValueScanner() bool {
 	return t.RType.implements(valueScannerType)
 }
 
-// ValueScanner indicates if this type implements the driver.Valuer interface.
+// Valuer indicates if this type implements the driver.Valuer interface.
 func (t TypeInfo) Valuer() bool {
 	return t.RType.implements(valuerType)
 }
