@@ -625,10 +625,12 @@ func TestHasNeighbors(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			HasNeighbors(tt.selector, tt.step)
-			query, args := tt.selector.Query()
-			require.Equal(t, tt.wantQuery, query)
-			require.Empty(t, args)
+			for _, s := range []*sql.Selector{tt.selector, tt.selector.Clone()} {
+				HasNeighbors(s, tt.step)
+				query, args := s.Query()
+				require.Equal(t, tt.wantQuery, query)
+				require.Empty(t, args)
+			}
 		})
 	}
 }
@@ -874,11 +876,13 @@ WHERE "s1"."users"."id" IN
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			HasNeighborsWith(tt.selector, tt.step, tt.predicate)
-			query, args := tt.selector.Query()
-			tt.wantQuery = strings.Join(strings.Fields(tt.wantQuery), " ")
-			require.Equal(t, tt.wantQuery, query)
-			require.Equal(t, tt.wantArgs, args)
+			for _, s := range []*sql.Selector{tt.selector, tt.selector.Clone()} {
+				HasNeighborsWith(s, tt.step, tt.predicate)
+				query, args := s.Query()
+				tt.wantQuery = strings.Join(strings.Fields(tt.wantQuery), " ")
+				require.Equal(t, tt.wantQuery, query)
+				require.Equal(t, tt.wantArgs, args)
+			}
 		})
 	}
 }

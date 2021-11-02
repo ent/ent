@@ -1874,3 +1874,60 @@ func TestEscapePatterns(t *testing.T) {
 	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR LOWER(`nickname`) LIKE ? ESCAPE ?", q)
 	require.Equal(t, []interface{}{"\\%a8m\\%%", "\\", "%\\_alexsn\\_", "\\", "%\\\\pedro\\\\%", "\\", "%\\%abcd\\%efg%", "\\"}, args)
 }
+
+func TestReusePredicates(t *testing.T) {
+	tests := []struct {
+		p         *Predicate
+		wantQuery string
+		wantArgs  []interface{}
+	}{
+		{
+			p:         EQ("active", false),
+			wantQuery: "SELECT * FROM `users` WHERE `active` = ?",
+			wantArgs:  []interface{}{false},
+		},
+		{
+			p: Or(
+				EQ("a", "a"),
+				EQ("b", "b"),
+			),
+			wantQuery: "SELECT * FROM `users` WHERE `a` = ? OR `b` = ?",
+			wantArgs:  []interface{}{"a", "b"},
+		},
+		{
+			p: And(
+				EQ("active", true),
+				HasPrefix("name", "foo"),
+				HasSuffix("name", "bar"),
+				Or(
+					In("id", Select("oid").From(Table("audit"))),
+					In("id", Select("oid").From(Table("history"))),
+				),
+			),
+			wantQuery: "SELECT * FROM `users` WHERE `active` = ? AND `name` LIKE ? AND `name` LIKE ? AND (`id` IN (SELECT `oid` FROM `audit`) OR `id` IN (SELECT `oid` FROM `history`))",
+			wantArgs:  []interface{}{true, "foo%", "%bar"},
+		},
+		{
+			p: func() *Predicate {
+				t1 := Table("groups")
+				pivot := Table("user_groups")
+				matches := Select(pivot.C("user_id")).
+					From(pivot).
+					Join(t1).
+					On(pivot.C("group_id"), t1.C("id")).
+					Where(EQ(t1.C("name"), "ent"))
+				return In("id", matches)
+			}(),
+			wantQuery: "SELECT * FROM `users` WHERE `id` IN (SELECT `user_groups`.`user_id` FROM `user_groups` JOIN `groups` AS `t1` ON `user_groups`.`group_id` = `t1`.`id` WHERE `t1`.`name` = ?)",
+			wantArgs:  []interface{}{"ent"},
+		},
+	}
+	for _, tt := range tests {
+		query, args := Select().From(Table("users")).Where(tt.p).Query()
+		require.Equal(t, tt.wantQuery, query)
+		require.Equal(t, tt.wantArgs, args)
+		query, args = Select().From(Table("users")).Where(tt.p).Query()
+		require.Equal(t, tt.wantQuery, query)
+		require.Equal(t, tt.wantArgs, args)
+	}
+}
