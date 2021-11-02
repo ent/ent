@@ -11,7 +11,7 @@ One of the common questions we get from the Ent community is how to synchronize 
 database backing an Ent application (e.g. MySQL or PostgreSQL) with external services. For example, users would like
 to create or delete a record from within their CRM when a user is created or deleted in Ent, publish a message to a
 [Pub/Sub system](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) when an entity is updated, or verify
-references to blobs in object storages such as AWS S3 or Google Cloud Storage.
+references to blobs in object storage such as AWS S3 or Google Cloud Storage.
 
 Ensuring consistency between two separate data systems is not a simple task.  When we want to propagate, for example,
 the deletion of a record in one system to another, there is no obvious way to guarantee that the two systems will end in
