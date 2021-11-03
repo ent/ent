@@ -1631,7 +1631,7 @@ func Mutation(t *testing.T, client *ent.Client) {
 			m.SetAge(30)
 		}
 	}
-	uu := a8m.Update()
+	uu := a8m.Update().AddPets(pedro)
 	ub = client.User.Create()
 	setUsers(ub.Mutation(), uu.Mutation())
 	a8m = uu.SaveX(ctx)
@@ -1642,6 +1642,35 @@ func Mutation(t *testing.T, client *ent.Client) {
 	require.Equal(t, []int{usr.ID}, a8m.Update().AddFriends(usr).Mutation().FriendsIDs())
 	require.Empty(t, a8m.Update().AddFriends(usr).RemoveFriends(usr).Mutation().FriendsIDs())
 	require.Equal(t, []int{usr.ID}, a8m.Update().AddFriends(usr).RemoveFriends(a8m).Mutation().FriendsIDs())
+	a8m.Update().AddFriends(usr).ExecX(ctx)
+
+	t.Run("IDs", func(t *testing.T) {
+		ids := client.User.Query().IDsX(ctx)
+		u := client.User.Update().Where(user.IDIn(ids...)).AddAge(1)
+		mids, err := u.Mutation().IDs(ctx)
+		require.NoError(t, err)
+		// Order can change between the 2 queries.
+		sort.Ints(ids)
+		sort.Ints(mids)
+		require.Equal(t, ids, mids)
+		u.ExecX(ctx)
+
+		u = client.User.
+			Update().
+			AddAge(1).
+			Where(
+				user.Name(a8m.Name),
+				user.HasPets(),
+				user.HasPetsWith(
+					pet.Name(pedro.Name),
+				),
+			)
+		mids, err = u.Mutation().IDs(ctx)
+		require.NoError(t, err)
+		require.Len(t, mids, 1)
+		require.Equal(t, a8m.ID, mids[0])
+		u.ExecX(ctx)
+	})
 }
 
 // Test templates codegen.
