@@ -1883,7 +1883,7 @@ func TestReusePredicates(t *testing.T) {
 	}{
 		{
 			p:         EQ("active", false),
-			wantQuery: "SELECT * FROM `users` WHERE `active` = ?",
+			wantQuery: `SELECT * FROM "users" WHERE "active" = $1`,
 			wantArgs:  []interface{}{false},
 		},
 		{
@@ -1891,7 +1891,7 @@ func TestReusePredicates(t *testing.T) {
 				EQ("a", "a"),
 				EQ("b", "b"),
 			),
-			wantQuery: "SELECT * FROM `users` WHERE `a` = ? OR `b` = ?",
+			wantQuery: `SELECT * FROM "users" WHERE "a" = $1 OR "b" = $2`,
 			wantArgs:  []interface{}{"a", "b"},
 		},
 		{
@@ -1904,7 +1904,7 @@ func TestReusePredicates(t *testing.T) {
 					In("id", Select("oid").From(Table("history"))),
 				),
 			),
-			wantQuery: "SELECT * FROM `users` WHERE `active` = ? AND `name` LIKE ? AND `name` LIKE ? AND (`id` IN (SELECT `oid` FROM `audit`) OR `id` IN (SELECT `oid` FROM `history`))",
+			wantQuery: `SELECT * FROM "users" WHERE "active" = $1 AND "name" LIKE $2 AND "name" LIKE $3 AND ("id" IN (SELECT "oid" FROM "audit") OR "id" IN (SELECT "oid" FROM "history"))`,
 			wantArgs:  []interface{}{true, "foo%", "%bar"},
 		},
 		{
@@ -1916,17 +1916,21 @@ func TestReusePredicates(t *testing.T) {
 					Join(t1).
 					On(pivot.C("group_id"), t1.C("id")).
 					Where(EQ(t1.C("name"), "ent"))
-				return In("id", matches)
+				return And(
+					GT("balance", 0),
+					In("id", matches),
+					GT("balance", 100),
+				)
 			}(),
-			wantQuery: "SELECT * FROM `users` WHERE `id` IN (SELECT `user_groups`.`user_id` FROM `user_groups` JOIN `groups` AS `t1` ON `user_groups`.`group_id` = `t1`.`id` WHERE `t1`.`name` = ?)",
-			wantArgs:  []interface{}{"ent"},
+			wantQuery: `SELECT * FROM "users" WHERE "balance" > $1 AND "id" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "t1"."name" = $2) AND "balance" > $3`,
+			wantArgs:  []interface{}{0, "ent", 100},
 		},
 	}
 	for _, tt := range tests {
-		query, args := Select().From(Table("users")).Where(tt.p).Query()
+		query, args := Dialect(dialect.Postgres).Select().From(Table("users")).Where(tt.p).Query()
 		require.Equal(t, tt.wantQuery, query)
 		require.Equal(t, tt.wantArgs, args)
-		query, args = Select().From(Table("users")).Where(tt.p).Query()
+		query, args = Dialect(dialect.Postgres).Select().From(Table("users")).Where(tt.p).Query()
 		require.Equal(t, tt.wantQuery, query)
 		require.Equal(t, tt.wantArgs, args)
 	}
