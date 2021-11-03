@@ -75,7 +75,7 @@ func TestMySQL(t *testing.T) {
 }
 
 func TestMaria(t *testing.T) {
-	for version, port := range map[string]int{"10.5": 4306, "10.2": 4307, "10.3": 4308} {
+	for version, port := range map[string]int{"10.2": 4306, "10.3": 4307, "10.4": 4308, "10.5": 4309, "10.6": 4310} {
 		t.Run(version, func(t *testing.T) {
 			addr := net.JoinHostPort("localhost", strconv.Itoa(port))
 			client := enttest.Open(t, dialect.MySQL, fmt.Sprintf("root:pass@tcp(%s)/test?parseTime=True", addr), opts)
