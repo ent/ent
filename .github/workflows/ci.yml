@@ -156,6 +156,32 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
+      maria105:
+        image: mariadb:10.5.12
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4309:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+      maria106:
+        image: mariadb:10.6.4
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4310:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
       postgres10:
         image: postgres:10.18
         env:

@@ -72,6 +72,28 @@ services:
     ports:
       - 4308:3306
 
+  mariadb105:
+    platform: linux/amd64
+    image: mariadb:10.5.12
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4309:3306
+
+  mariadb106:
+    platform: linux/amd64
+    image: mariadb:10.6.4
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4310:3306
+
   postgres10:
     platform: linux/amd64
     image: postgres:10.18
