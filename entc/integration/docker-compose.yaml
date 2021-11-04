@@ -6,7 +6,7 @@ version: "3.7"
 
 services:
 
-  mysql:
+  mysql56:
     platform: linux/amd64
     image: mysql:5.6.51
     environment:
