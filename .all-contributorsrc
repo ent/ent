@@ -617,6 +617,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "tankbusta",
+      "name": "Christopher Schmitt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/592749?v=4",
+      "profile": "https://github.com/tankbusta",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
