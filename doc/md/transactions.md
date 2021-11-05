@@ -58,6 +58,8 @@ func rollback(tx *ent.Tx, err error) error {
 }
 ```
 
+You must call `Unwrap()` if you are querying edges off of a created entity after a successful transaction (example: `a8m.QueryGroups()`). Unwrap restores the state of the underlying client embedded within the entity to a non-transactable version. 
+
 The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/traversal).
 
 ## Transactional Client
