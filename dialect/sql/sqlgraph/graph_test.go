@@ -1241,6 +1241,260 @@ func TestCreateNode(t *testing.T) {
 	}
 }
 
+func TestCreateNodeExec(t *testing.T) {
+	tests := []struct {
+		name    string
+		dialect string
+		spec    *CreateSpec
+		expect  func(sqlmock.Sqlmock)
+	}{
+		{
+			name:    "mysql/fields_only",
+			dialect: dialect.MySQL,
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "age", Type: field.TypeInt, Value: 30},
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectExec(escape("INSERT INTO `users` (`age`, `name`) VALUES (?, ?)")).
+					WithArgs(30, "a8m").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+		},
+		{
+			name:    "postgres/fields_only",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "age", Type: field.TypeInt, Value: 30},
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectExec(escape(`INSERT INTO "users" ("age", "name") VALUES ($1, $2)`)).
+					WithArgs(30, "a8m").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+		},
+		{
+			name:    "postgres/onconflict",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "age", Type: field.TypeInt, Value: 30},
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				OnConflict: []sql.ConflictOption{
+					sql.ResolveWithNewValues(),
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectExec(escape(`INSERT INTO "users" ("age", "name") VALUES ($1, $2) ON CONFLICT DO UPDATE SET "age" = "excluded"."age", "name" = "excluded"."name"`)).
+					WithArgs(30, "a8m").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+		},
+		{
+			name:    "postgres/onconflict/id",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt, Value: 10},
+				Fields: []*FieldSpec{
+					{Column: "age", Type: field.TypeInt, Value: 30},
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				OnConflict: []sql.ConflictOption{
+					sql.DoNothing(),
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectExec(escape(`INSERT INTO "users" ("age", "name", "id") VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`)).
+					WithArgs(30, "a8m", 10).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+		},
+		{
+			name:    "postgres/edges/m2o",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "pets",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "pedro"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2O, Columns: []string{"owner_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectExec(escape(`INSERT INTO "pets" ("name", "owner_id") VALUES ($1, $2)`)).
+					WithArgs("pedro", 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+		},
+		{
+			name:    "postgres/edges/o2o/inverse",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "cards",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "number", Type: field.TypeString, Value: "0001"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2O, Columns: []string{"owner_id"}, Inverse: true, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectExec(escape(`INSERT INTO "cards" ("number", "owner_id") VALUES ($1, $2)`)).
+					WithArgs("0001", 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+		},
+		{
+			name:    "postgres/edges/o2m",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectQuery(escape(`INSERT INTO "users" ("name") VALUES ($1) RETURNING "id"`)).
+					WithArgs("a8m").
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(10))
+				m.ExpectExec(escape(`UPDATE "pets" SET "owner_id" = $1 WHERE "id" = $2 AND "owner_id" IS NULL`)).
+					WithArgs(10, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name:    "postgres/edges/o2o",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt, Value: 10},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2O, Table: "cards", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape(`INSERT INTO "users" ("name", "id") VALUES ($1, $2)`)).
+					WithArgs("a8m", 10).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape(`UPDATE "cards" SET "owner_id" = $1 WHERE "id" = $2 AND "owner_id" IS NULL`)).
+					WithArgs(10, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name:    "postgres/edges/o2o/onconflict",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt, Value: 10},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2O, Table: "cards", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+				OnConflict: []sql.ConflictOption{
+					sql.ResolveWithIgnore(),
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectQuery(escape(`INSERT INTO "users" ("name", "id") VALUES ($1, $2) ON CONFLICT DO UPDATE SET "name" = "users"."name", "id" = "users"."id" RETURNING "id"`)).
+					WithArgs("a8m", 10).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(10))
+				m.ExpectExec(escape(`UPDATE "cards" SET "owner_id" = $1 WHERE "id" = $2 AND "owner_id" IS NULL`)).
+					WithArgs(10, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name:    "postgres/edges/o2o/bidi",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "a8m"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: O2O, Bidi: true, Table: "users", Columns: []string{"spouse_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectQuery(escape(`INSERT INTO "users" ("name", "spouse_id") VALUES ($1, $2) RETURNING "id"`)).
+					WithArgs("a8m", 2).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(3))
+				m.ExpectExec(escape(`UPDATE "users" SET "spouse_id" = $1 WHERE "id" = $2 AND "spouse_id" IS NULL`)).
+					WithArgs(3, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name:    "postgres/edges/m2m",
+			dialect: dialect.Postgres,
+			spec: &CreateSpec{
+				Table: "groups",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "GitHub"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2M, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectQuery(escape(`INSERT INTO "groups" ("name") VALUES ($1) RETURNING "id"`)).
+					WithArgs("GitHub").
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
+				m.ExpectExec(escape(`INSERT INTO "group_users" ("group_id", "user_id") VALUES ($1, $2)`)).
+					WithArgs(1, 2).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			require.NoError(t, err)
+			tt.expect(mock)
+			err = CreateNodeExec(context.Background(), sql.OpenDB(tt.dialect, db), tt.spec)
+			require.NoError(t, err)
+		})
+	}
+}
+
 func TestBatchCreate(t *testing.T) {
 	tests := []struct {
 		name    string

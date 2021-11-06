@@ -369,11 +369,22 @@ type (
 	}
 )
 
-// CreateNode applies the CreateSpec on the graph.
+// CreateNode applies the CreateSpec on the graph. The operation creates a new
+// record in the database, and connects it to other nodes specified in spec.Edges.
 func CreateNode(ctx context.Context, drv dialect.Driver, spec *CreateSpec) error {
 	gr := graph{tx: drv, builder: sql.Dialect(drv.Dialect())}
 	cr := &creator{CreateSpec: spec, graph: gr}
-	return cr.node(ctx, drv)
+	return cr.node(ctx, drv, false)
+}
+
+// CreateNodeExec is a version of CreateNode that indicates that the create operation
+// was performed with Exec (and not Save), and scanning the ID field can be avoided if
+// it is not necessary for connecting the new node to other nodes with edges reside in
+// other tables (e.g. O2M or M2M).
+func CreateNodeExec(ctx context.Context, drv dialect.Driver, spec *CreateSpec) error {
+	gr := graph{tx: drv, builder: sql.Dialect(drv.Dialect())}
+	cr := &creator{CreateSpec: spec, graph: gr}
+	return cr.node(ctx, drv, true)
 }
 
 // BatchCreate applies the BatchCreateSpec on the graph.
@@ -674,9 +685,8 @@ func (u *updater) node(ctx context.Context, tx dialect.ExecQuerier) error {
 		return err
 	}
 	if !update.Empty() {
-		var res sql.Result
 		query, args := update.Query()
-		if err := tx.Exec(ctx, query, args, &res); err != nil {
+		if err := tx.Exec(ctx, query, args, nil); err != nil {
 			return err
 		}
 	}
@@ -867,7 +877,7 @@ type creator struct {
 	*CreateSpec
 }
 
-func (c *creator) node(ctx context.Context, drv dialect.Driver) error {
+func (c *creator) node(ctx context.Context, drv dialect.Driver, execOnly bool) error {
 	var (
 		edges  = EdgeSpecs(c.Edges).GroupRel()
 		insert = c.builder.Insert(c.Table).Schema(c.Schema).Default()
@@ -880,7 +890,11 @@ func (c *creator) node(ctx context.Context, drv dialect.Driver) error {
 		return err
 	}
 	if err := func() error {
-		if err := c.insert(ctx, insert); err != nil {
+		// Tell the INSERT command to scan the new created ID if it
+		// not an Exec call, or it is required for connecting edges
+		// in other tables (i.e. "external edges").
+		scanID := !execOnly || hasExternalEdges(edges, nil)
+		if err := c.insert(ctx, insert, scanID); err != nil {
 			return err
 		}
 		if err := c.graph.addM2MEdges(ctx, []driver.Value{c.ID.Value}, edges[M2M]); err != nil {
@@ -914,24 +928,26 @@ func (c *creator) setTableColumns(insert *sql.InsertBuilder, edges map[Rel][]*Ed
 	return err
 }
 
-// insert inserts the node to its table and sets its ID if it wasn't provided by the user.
-func (c *creator) insert(ctx context.Context, insert *sql.InsertBuilder) error {
+// insert inserts the node to its table and sets its ID if it was not provided by the user.
+func (c *creator) insert(ctx context.Context, insert *sql.InsertBuilder, scanID bool) error {
 	if opts := c.CreateSpec.OnConflict; len(opts) > 0 {
 		insert.OnConflict(opts...)
 		c.ensureLastInsertID(insert)
 	}
-	var res sql.Result
-	// If the id field was provided by the user.
 	if c.ID.Value != nil {
 		insert.Set(c.ID.Column, c.ID.Value)
-		// In case of "ON CONFLICT", the record may exists in the
-		// database, and we need to get back the database id field.
-		if len(c.CreateSpec.OnConflict) == 0 {
-			query, args := insert.Query()
-			return c.tx.Exec(ctx, query, args, &res)
+		if scanID {
+			// We can avoid scanning back the ID field if it was provided
+			// by the user. However, in case of "ON CONFLICT" we need to
+			// get back the ID value that exists in the database.
+			scanID = len(c.CreateSpec.OnConflict) > 0
 		}
 	}
-	return c.insertLastID(ctx, insert.Returning(c.ID.Column))
+	if scanID {
+		return c.insertLastID(ctx, insert.Returning(c.ID.Column))
+	}
+	query, args := insert.Query()
+	return c.tx.Exec(ctx, query, args, nil)
 }
 
 // ensureLastInsertID ensures the LAST_INSERT_ID was added to the
@@ -1069,12 +1085,9 @@ type graph struct {
 }
 
 func (g *graph) clearM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeSpecs) error {
-	var (
-		res sql.Result
-		// Remove all M2M edges from the same type at once.
-		// The EdgeSpec is the same for all members in a group.
-		tables = edges.GroupTable()
-	)
+	// Remove all M2M edges from the same type at once.
+	// The EdgeSpec is the same for all members in a group.
+	tables := edges.GroupTable()
 	for _, table := range edgeKeys(tables) {
 		edges := tables[table]
 		preds := make([]*sql.Predicate, 0, len(edges))
@@ -1105,7 +1118,7 @@ func (g *graph) clearM2MEdges(ctx context.Context, ids []driver.Value, edges Edg
 			deleter.Schema(edges[0].Schema)
 		}
 		query, args := deleter.Query()
-		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
+		if err := g.tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("remove m2m edge for table %s: %w", table, err)
 		}
 	}
@@ -1113,12 +1126,9 @@ func (g *graph) clearM2MEdges(ctx context.Context, ids []driver.Value, edges Edg
 }
 
 func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeSpecs) error {
-	var (
-		res sql.Result
-		// Insert all M2M edges from the same type at once.
-		// The EdgeSpec is the same for all members in a group.
-		tables = edges.GroupTable()
-	)
+	// Insert all M2M edges from the same type at once.
+	// The EdgeSpec is the same for all members in a group.
+	tables := edges.GroupTable()
 	for _, table := range edgeKeys(tables) {
 		edges := tables[table]
 		insert := g.builder.Insert(table).Columns(edges[0].Columns...)
@@ -1140,7 +1150,7 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 			}
 		}
 		query, args := insert.Query()
-		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
+		if err := g.tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("add m2m edge for table %s: %w", table, err)
 		}
 	}
@@ -1179,11 +1189,8 @@ func (g *graph) batchAddM2M(ctx context.Context, spec *BatchCreateSpec) error {
 		}
 	}
 	for _, table := range insertKeys(tables) {
-		var (
-			res         sql.Result
-			query, args = tables[table].Query()
-		)
-		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
+		query, args := tables[table].Query()
+		if err := g.tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("add m2m edge for table %s: %w", table, err)
 		}
 	}
@@ -1205,8 +1212,7 @@ func (g *graph) clearFKEdges(ctx context.Context, ids []driver.Value, edges []*E
 			SetNull(edge.Columns[0]).
 			Where(pred).
 			Query()
-		var res sql.Result
-		if err := g.tx.Exec(ctx, query, args, &res); err != nil {
+		if err := g.tx.Exec(ctx, query, args, nil); err != nil {
 			return fmt.Errorf("add %s edge for table %s: %w", edge.Rel, edge.Table, err)
 		}
 	}
@@ -1344,7 +1350,7 @@ func (c *creator) insertLastID(ctx context.Context, insert *sql.InsertBuilder) e
 }
 
 // insertLastIDs invokes the batch insert query on the transaction and returns the LastInsertID of all entities.
-func (c *BatchCreateSpec) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
+func (c *batchCreator) insertLastIDs(ctx context.Context, tx dialect.ExecQuerier, insert *sql.InsertBuilder) error {
 	query, args := insert.Query()
 	if err := insert.Err(); err != nil {
 		return err
