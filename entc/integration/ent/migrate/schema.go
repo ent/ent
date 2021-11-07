@@ -94,6 +94,7 @@ var (
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"on", "off"}},
 		{Name: "optional_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "optional_float32", Type: field.TypeFloat32, Nullable: true},
+		{Name: "text", Type: field.TypeString, Nullable: true, Size: 2147483647, SchemaType: map[string]string{"mysql": "mediumtext"}},
 		{Name: "datetime", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "datetime", "postgres": "date"}},
 		{Name: "decimal", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(6,2)", "postgres": "numeric"}},
 		{Name: "link_other", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)", "postgres": "varchar", "sqlite3": "varchar(255)"}},
@@ -144,7 +145,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "field_types_files_field",
-				Columns:    []*schema.Column{FieldTypesColumns[65]},
+				Columns:    []*schema.Column{FieldTypesColumns[66]},
 				RefColumns: []*schema.Column{FilesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

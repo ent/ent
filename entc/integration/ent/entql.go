@@ -101,6 +101,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldState:                 {Type: field.TypeEnum, Column: fieldtype.FieldState},
 			fieldtype.FieldOptionalFloat:         {Type: field.TypeFloat64, Column: fieldtype.FieldOptionalFloat},
 			fieldtype.FieldOptionalFloat32:       {Type: field.TypeFloat32, Column: fieldtype.FieldOptionalFloat32},
+			fieldtype.FieldText:                  {Type: field.TypeString, Column: fieldtype.FieldText},
 			fieldtype.FieldDatetime:              {Type: field.TypeTime, Column: fieldtype.FieldDatetime},
 			fieldtype.FieldDecimal:               {Type: field.TypeFloat64, Column: fieldtype.FieldDecimal},
 			fieldtype.FieldLinkOther:             {Type: field.TypeOther, Column: fieldtype.FieldLinkOther},
@@ -953,6 +954,11 @@ func (f *FieldTypeFilter) WhereOptionalFloat(p entql.Float64P) {
 // WhereOptionalFloat32 applies the entql float32 predicate on the optional_float32 field.
 func (f *FieldTypeFilter) WhereOptionalFloat32(p entql.Float32P) {
 	f.Where(p.Field(fieldtype.FieldOptionalFloat32))
+}
+
+// WhereText applies the entql string predicate on the text field.
+func (f *FieldTypeFilter) WhereText(p entql.StringP) {
+	f.Where(p.Field(fieldtype.FieldText))
 }
 
 // WhereDatetime applies the entql time.Time predicate on the datetime field.

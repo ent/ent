@@ -94,6 +94,11 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		// ----------------------------------------------------------------------------
 		// Dialect-specific types
 
+		field.Text("text").
+			Optional().
+			SchemaType(map[string]string{
+				dialect.MySQL: "mediumtext",
+			}),
 		field.Time("datetime").
 			Optional().
 			SchemaType(map[string]string{
