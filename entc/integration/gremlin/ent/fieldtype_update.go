@@ -610,6 +610,26 @@ func (ftu *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetText sets the "text" field.
+func (ftu *FieldTypeUpdate) SetText(s string) *FieldTypeUpdate {
+	ftu.mutation.SetText(s)
+	return ftu
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableText(s *string) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetText(*s)
+	}
+	return ftu
+}
+
+// ClearText clears the value of the "text" field.
+func (ftu *FieldTypeUpdate) ClearText() *FieldTypeUpdate {
+	ftu.mutation.ClearText()
+	return ftu
+}
+
 // SetDatetime sets the "datetime" field.
 func (ftu *FieldTypeUpdate) SetDatetime(t time.Time) *FieldTypeUpdate {
 	ftu.mutation.SetDatetime(t)
@@ -1589,6 +1609,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.AddedOptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, __.Union(__.Values(fieldtype.FieldOptionalFloat32), __.Constant(value)).Sum())
 	}
+	if value, ok := ftu.mutation.Text(); ok {
+		v.Property(dsl.Single, fieldtype.FieldText, value)
+	}
 	if value, ok := ftu.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
 	}
@@ -1790,6 +1813,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.OptionalFloat32Cleared() {
 		properties = append(properties, fieldtype.FieldOptionalFloat32)
+	}
+	if ftu.mutation.TextCleared() {
+		properties = append(properties, fieldtype.FieldText)
 	}
 	if ftu.mutation.DatetimeCleared() {
 		properties = append(properties, fieldtype.FieldDatetime)
@@ -2480,6 +2506,26 @@ func (ftuo *FieldTypeUpdateOne) AddOptionalFloat32(f float32) *FieldTypeUpdateOn
 // ClearOptionalFloat32 clears the value of the "optional_float32" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalFloat32()
+	return ftuo
+}
+
+// SetText sets the "text" field.
+func (ftuo *FieldTypeUpdateOne) SetText(s string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetText(s)
+	return ftuo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableText(s *string) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetText(*s)
+	}
+	return ftuo
+}
+
+// ClearText clears the value of the "text" field.
+func (ftuo *FieldTypeUpdateOne) ClearText() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearText()
 	return ftuo
 }
 
@@ -3474,6 +3520,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.AddedOptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, __.Union(__.Values(fieldtype.FieldOptionalFloat32), __.Constant(value)).Sum())
 	}
+	if value, ok := ftuo.mutation.Text(); ok {
+		v.Property(dsl.Single, fieldtype.FieldText, value)
+	}
 	if value, ok := ftuo.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
 	}
@@ -3675,6 +3724,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.OptionalFloat32Cleared() {
 		properties = append(properties, fieldtype.FieldOptionalFloat32)
+	}
+	if ftuo.mutation.TextCleared() {
+		properties = append(properties, fieldtype.FieldText)
 	}
 	if ftuo.mutation.DatetimeCleared() {
 		properties = append(properties, fieldtype.FieldDatetime)

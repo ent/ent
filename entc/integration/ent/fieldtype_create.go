@@ -327,6 +327,20 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCre
 	return ftc
 }
 
+// SetText sets the "text" field.
+func (ftc *FieldTypeCreate) SetText(s string) *FieldTypeCreate {
+	ftc.mutation.SetText(s)
+	return ftc
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableText(s *string) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetText(*s)
+	}
+	return ftc
+}
+
 // SetDatetime sets the "datetime" field.
 func (ftc *FieldTypeCreate) SetDatetime(t time.Time) *FieldTypeCreate {
 	ftc.mutation.SetDatetime(t)
@@ -1168,6 +1182,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldOptionalFloat32,
 		})
 		_node.OptionalFloat32 = value
+	}
+	if value, ok := ftc.mutation.Text(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldText,
+		})
+		_node.Text = value
 	}
 	if value, ok := ftc.mutation.Datetime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -2080,6 +2102,24 @@ func (u *FieldTypeUpsert) AddOptionalFloat32(v float32) *FieldTypeUpsert {
 // ClearOptionalFloat32 clears the value of the "optional_float32" field.
 func (u *FieldTypeUpsert) ClearOptionalFloat32() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldOptionalFloat32)
+	return u
+}
+
+// SetText sets the "text" field.
+func (u *FieldTypeUpsert) SetText(v string) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldText, v)
+	return u
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateText() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldText)
+	return u
+}
+
+// ClearText clears the value of the "text" field.
+func (u *FieldTypeUpsert) ClearText() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldText)
 	return u
 }
 
@@ -3490,6 +3530,27 @@ func (u *FieldTypeUpsertOne) UpdateOptionalFloat32() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) ClearOptionalFloat32() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearOptionalFloat32()
+	})
+}
+
+// SetText sets the "text" field.
+func (u *FieldTypeUpsertOne) SetText(v string) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateText() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateText()
+	})
+}
+
+// ClearText clears the value of the "text" field.
+func (u *FieldTypeUpsertOne) ClearText() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearText()
 	})
 }
 
@@ -5185,6 +5246,27 @@ func (u *FieldTypeUpsertBulk) UpdateOptionalFloat32() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) ClearOptionalFloat32() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearOptionalFloat32()
+	})
+}
+
+// SetText sets the "text" field.
+func (u *FieldTypeUpsertBulk) SetText(v string) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateText() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateText()
+	})
+}
+
+// ClearText clears the value of the "text" field.
+func (u *FieldTypeUpsertBulk) ClearText() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearText()
 	})
 }
 

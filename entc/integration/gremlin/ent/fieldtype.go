@@ -74,6 +74,8 @@ type FieldType struct {
 	OptionalFloat float64 `json:"optional_float,omitempty"`
 	// OptionalFloat32 holds the value of the "optional_float32" field.
 	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 	// Datetime holds the value of the "datetime" field.
 	Datetime time.Time `json:"datetime,omitempty"`
 	// Decimal holds the value of the "decimal" field.
@@ -188,6 +190,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		State                 fieldtype.State       `json:"state,omitempty"`
 		OptionalFloat         float64               `json:"optional_float,omitempty"`
 		OptionalFloat32       float32               `json:"optional_float32,omitempty"`
+		Text                  string                `json:"text,omitempty"`
 		Datetime              int64                 `json:"datetime,omitempty"`
 		Decimal               float64               `json:"decimal,omitempty"`
 		LinkOther             *schema.Link          `json:"link_other,omitempty"`
@@ -257,6 +260,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.State = scanft.State
 	ft.OptionalFloat = scanft.OptionalFloat
 	ft.OptionalFloat32 = scanft.OptionalFloat32
+	ft.Text = scanft.Text
 	ft.Datetime = time.Unix(0, scanft.Datetime)
 	ft.Decimal = scanft.Decimal
 	ft.LinkOther = scanft.LinkOther
@@ -381,6 +385,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
 	builder.WriteString(", optional_float32=")
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
+	builder.WriteString(", text=")
+	builder.WriteString(ft.Text)
 	builder.WriteString(", datetime=")
 	builder.WriteString(ft.Datetime.Format(time.ANSIC))
 	builder.WriteString(", decimal=")
@@ -513,6 +519,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		State                 fieldtype.State       `json:"state,omitempty"`
 		OptionalFloat         float64               `json:"optional_float,omitempty"`
 		OptionalFloat32       float32               `json:"optional_float32,omitempty"`
+		Text                  string                `json:"text,omitempty"`
 		Datetime              int64                 `json:"datetime,omitempty"`
 		Decimal               float64               `json:"decimal,omitempty"`
 		LinkOther             *schema.Link          `json:"link_other,omitempty"`
@@ -584,6 +591,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			State:                 v.State,
 			OptionalFloat:         v.OptionalFloat,
 			OptionalFloat32:       v.OptionalFloat32,
+			Text:                  v.Text,
 			Datetime:              time.Unix(0, v.Datetime),
 			Decimal:               v.Decimal,
 			LinkOther:             v.LinkOther,

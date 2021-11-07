@@ -250,9 +250,14 @@ func (d *MySQL) cType(c *Column) (t string) {
 		if size == 0 {
 			size = d.defaultSize(c)
 		}
-		if size <= math.MaxUint16 {
+		switch {
+		case c.typ == "tinytext", c.typ == "text":
+			t = c.typ
+		case size <= math.MaxUint16:
 			t = fmt.Sprintf("varchar(%d)", size)
-		} else {
+		case size == 1<<24-1:
+			t = "mediumtext"
+		default:
 			t = "longtext"
 		}
 	case field.TypeFloat32, field.TypeFloat64:

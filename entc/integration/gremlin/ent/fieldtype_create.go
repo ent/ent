@@ -327,6 +327,20 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCre
 	return ftc
 }
 
+// SetText sets the "text" field.
+func (ftc *FieldTypeCreate) SetText(s string) *FieldTypeCreate {
+	ftc.mutation.SetText(s)
+	return ftc
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableText(s *string) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetText(*s)
+	}
+	return ftc
+}
+
 // SetDatetime sets the "datetime" field.
 func (ftc *FieldTypeCreate) SetDatetime(t time.Time) *FieldTypeCreate {
 	ftc.mutation.SetDatetime(t)
@@ -1041,6 +1055,9 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftc.mutation.OptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, value)
+	}
+	if value, ok := ftc.mutation.Text(); ok {
+		v.Property(dsl.Single, fieldtype.FieldText, value)
 	}
 	if value, ok := ftc.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)

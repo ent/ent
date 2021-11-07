@@ -70,6 +70,8 @@ const (
 	FieldOptionalFloat = "optional_float"
 	// FieldOptionalFloat32 holds the string denoting the optional_float32 field in the database.
 	FieldOptionalFloat32 = "optional_float32"
+	// FieldText holds the string denoting the text field in the database.
+	FieldText = "text"
 	// FieldDatetime holds the string denoting the datetime field in the database.
 	FieldDatetime = "datetime"
 	// FieldDecimal holds the string denoting the decimal field in the database.

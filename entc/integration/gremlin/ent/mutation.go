@@ -1396,6 +1396,7 @@ type FieldTypeMutation struct {
 	addoptional_float          *float64
 	optional_float32           *float32
 	addoptional_float32        *float32
+	text                       *string
 	datetime                   *time.Time
 	decimal                    *float64
 	adddecimal                 *float64
@@ -3135,6 +3136,55 @@ func (m *FieldTypeMutation) ResetOptionalFloat32() {
 	m.optional_float32 = nil
 	m.addoptional_float32 = nil
 	delete(m.clearedFields, fieldtype.FieldOptionalFloat32)
+}
+
+// SetText sets the "text" field.
+func (m *FieldTypeMutation) SetText(s string) {
+	m.text = &s
+}
+
+// Text returns the value of the "text" field in the mutation.
+func (m *FieldTypeMutation) Text() (r string, exists bool) {
+	v := m.text
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldText returns the old "text" field's value of the FieldType entity.
+// If the FieldType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FieldTypeMutation) OldText(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldText is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldText requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldText: %w", err)
+	}
+	return oldValue.Text, nil
+}
+
+// ClearText clears the value of the "text" field.
+func (m *FieldTypeMutation) ClearText() {
+	m.text = nil
+	m.clearedFields[fieldtype.FieldText] = struct{}{}
+}
+
+// TextCleared returns if the "text" field was cleared in this mutation.
+func (m *FieldTypeMutation) TextCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldText]
+	return ok
+}
+
+// ResetText resets all changes to the "text" field.
+func (m *FieldTypeMutation) ResetText() {
+	m.text = nil
+	delete(m.clearedFields, fieldtype.FieldText)
 }
 
 // SetDatetime sets the "datetime" field.
@@ -5219,7 +5269,7 @@ func (m *FieldTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FieldTypeMutation) Fields() []string {
-	fields := make([]string, 0, 64)
+	fields := make([]string, 0, 65)
 	if m.int != nil {
 		fields = append(fields, fieldtype.FieldInt)
 	}
@@ -5291,6 +5341,9 @@ func (m *FieldTypeMutation) Fields() []string {
 	}
 	if m.optional_float32 != nil {
 		fields = append(fields, fieldtype.FieldOptionalFloat32)
+	}
+	if m.text != nil {
+		fields = append(fields, fieldtype.FieldText)
 	}
 	if m.datetime != nil {
 		fields = append(fields, fieldtype.FieldDatetime)
@@ -5468,6 +5521,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.OptionalFloat()
 	case fieldtype.FieldOptionalFloat32:
 		return m.OptionalFloat32()
+	case fieldtype.FieldText:
+		return m.Text()
 	case fieldtype.FieldDatetime:
 		return m.Datetime()
 	case fieldtype.FieldDecimal:
@@ -5605,6 +5660,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldOptionalFloat(ctx)
 	case fieldtype.FieldOptionalFloat32:
 		return m.OldOptionalFloat32(ctx)
+	case fieldtype.FieldText:
+		return m.OldText(ctx)
 	case fieldtype.FieldDatetime:
 		return m.OldDatetime(ctx)
 	case fieldtype.FieldDecimal:
@@ -5861,6 +5918,13 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetOptionalFloat32(v)
+		return nil
+	case fieldtype.FieldText:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetText(v)
 		return nil
 	case fieldtype.FieldDatetime:
 		v, ok := value.(time.Time)
@@ -6604,6 +6668,9 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldOptionalFloat32) {
 		fields = append(fields, fieldtype.FieldOptionalFloat32)
 	}
+	if m.FieldCleared(fieldtype.FieldText) {
+		fields = append(fields, fieldtype.FieldText)
+	}
 	if m.FieldCleared(fieldtype.FieldDatetime) {
 		fields = append(fields, fieldtype.FieldDatetime)
 	}
@@ -6779,6 +6846,9 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 		return nil
 	case fieldtype.FieldOptionalFloat32:
 		m.ClearOptionalFloat32()
+		return nil
+	case fieldtype.FieldText:
+		m.ClearText()
 		return nil
 	case fieldtype.FieldDatetime:
 		m.ClearDatetime()
@@ -6964,6 +7034,9 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 		return nil
 	case fieldtype.FieldOptionalFloat32:
 		m.ResetOptionalFloat32()
+		return nil
+	case fieldtype.FieldText:
+		m.ResetText()
 		return nil
 	case fieldtype.FieldDatetime:
 		m.ResetDatetime()
