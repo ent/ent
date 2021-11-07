@@ -142,7 +142,11 @@ func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = *_spec.ID.Value.(*uuid.UUID)
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
