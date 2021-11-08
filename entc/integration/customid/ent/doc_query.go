@@ -841,9 +841,7 @@ func (dgb *DocGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range dgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(dgb.fields...)...)
