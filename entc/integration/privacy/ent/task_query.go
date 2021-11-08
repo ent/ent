@@ -884,9 +884,7 @@ func (tgb *TaskGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range tgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(tgb.fields...)...)
