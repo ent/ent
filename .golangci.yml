@@ -52,12 +52,6 @@ issues:
     - linters:
         - unused
       source: ent.Schema
-    - path: entc/integration/ent/schema/card.go
-      text: "`internal` is unused"
-    - path: dialect/sql/builder.go
-      text: "SQL string concatenation"
-      linters:
-        - gosec
     - path: dialect/sql/schema
       linters:
         - dupl
@@ -71,3 +65,6 @@ issues:
     - path: entc/load/schema.go
       linters:
         - staticcheck
+    - path: entc/gen/graph.go
+      linters:
+        - gocritic
