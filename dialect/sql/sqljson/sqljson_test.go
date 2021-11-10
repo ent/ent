@@ -195,6 +195,48 @@ func TestWritePath(t *testing.T) {
 			wantQuery: "SELECT * FROM \"users\" WHERE (\"tags\"->'a')::jsonb @> $1",
 			wantArgs:  []interface{}{"1"},
 		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIsNull("c", sqljson.Path("a"))),
+			wantQuery: `SELECT * FROM "users" WHERE ("c"->'a')::jsonb = 'null'::jsonb`,
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueNotNull("c", sqljson.Path("a"))),
+			wantQuery: `SELECT * FROM "users" WHERE ("c"->'a')::jsonb <> 'null'::jsonb`,
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIsNull("c", sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`c`, \"$.a\") = CAST('null' AS JSON)",
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueNotNull("c", sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_EXTRACT(`c`, \"$.a\") <> CAST('null' AS JSON)",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIsNull("c", sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_TYPE(`c`, \"$.a\") = 'null'",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueNotNull("c", sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_TYPE(`c`, \"$.a\") <> 'null'",
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
