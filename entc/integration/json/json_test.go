@@ -12,13 +12,12 @@ import (
 	"net/url"
 	"testing"
 
-	"entgo.io/ent/entc/integration/json/ent/schema"
-
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/json/ent"
 	"entgo.io/ent/entc/integration/json/ent/migrate"
+	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -310,4 +309,22 @@ func Predicates(t *testing.T, client *ent.Client) {
 		s.Where(sqljson.ValueContains(user.FieldT, "a", sqljson.Path("ls")))
 	}).OnlyX(ctx)
 	require.Contains(t, r.T.Ls, "a")
+
+	t.Run("NullLiteral", func(t *testing.T) {
+		client.User.Delete().ExecX(ctx)
+		users := client.User.CreateBulk(
+			client.User.Create().SetURL(u1),
+			client.User.Create().SetURL(u2),
+		).SaveX(ctx)
+		require.Nil(t, users[0].URL.User)
+		require.NotNil(t, users[1].URL.User)
+		u1 := client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.ValueIsNull(user.FieldURL, sqljson.Path("User")))
+		}).OnlyX(ctx)
+		require.Equal(t, users[0].ID, u1.ID)
+		u2 := client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sql.Not(sqljson.ValueIsNull(user.FieldURL, sqljson.Path("User"))))
+		}).OnlyX(ctx)
+		require.Equal(t, users[1].ID, u2.ID)
+	})
 }
