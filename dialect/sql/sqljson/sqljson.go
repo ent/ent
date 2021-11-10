@@ -35,19 +35,24 @@ func HasKey(column string, opts ...Option) *sql.Predicate {
 //	sqljson.ValueIsNull("a", sqljson.Path("b"))
 //
 func ValueIsNull(column string, opts ...Option) *sql.Predicate {
-	return nullP(sql.OpEQ, column, opts...)
-}
-
-// ValueNotNull return a predicate for checking that a JSON value
-// (returned by the path) is not a null literal (JSON "null").
-//
-// In order to check if the column is not NULL (database NULL), or
-// if the JSON key exists, use sql.NotNull or sqljson.HasKey.
-//
-//	sqljson.ValueNotNull("a", sqljson.Path("b"))
-//
-func ValueNotNull(column string, opts ...Option) *sql.Predicate {
-	return nullP(sql.OpNEQ, column, opts...)
+	return sql.P(func(b *sql.Builder) {
+		switch b.Dialect() {
+		case dialect.MySQL:
+			path := identPath(column, opts...)
+			b.WriteString("JSON_CONTAINS").Nested(func(b *sql.Builder) {
+				b.Ident(column).Comma()
+				b.WriteString("'null'").Comma()
+				path.mysqlPath(b)
+			})
+		case dialect.Postgres:
+			ValuePath(b, column, append(opts, Cast("jsonb"))...)
+			b.WriteOp(sql.OpEQ).WriteString("'null'::jsonb")
+		case dialect.SQLite:
+			path := identPath(column, opts...)
+			path.mysqlFunc("JSON_TYPE", b)
+			b.WriteOp(sql.OpEQ).WriteString("'null'")
+		}
+	})
 }
 
 // ValueEQ return a predicate for checking that a JSON value
@@ -137,10 +142,7 @@ func ValueLTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 //
 func ValueContains(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		path := &PathOptions{Ident: column}
-		for i := range opts {
-			opts[i](path)
-		}
+		path := identPath(column, opts...)
 		switch b.Dialect() {
 		case dialect.MySQL:
 			b.WriteString("JSON_CONTAINS").Nested(func(b *sql.Builder) {
@@ -248,10 +250,7 @@ func LenLTE(column string, size int, opts ...Option) *sql.Predicate {
 //	sqljson.ValuePath(b, Path("a", "b", "[1]", "c"), Cast("int"))
 //
 func ValuePath(b *sql.Builder, column string, opts ...Option) {
-	path := &PathOptions{Ident: column}
-	for i := range opts {
-		opts[i](path)
-	}
+	path := identPath(column, opts...)
 	path.value(b)
 }
 
@@ -261,10 +260,7 @@ func ValuePath(b *sql.Builder, column string, opts ...Option) {
 //	sqljson.LenPath(b, Path("a", "b", "[1]", "c"))
 //
 func LenPath(b *sql.Builder, column string, opts ...Option) {
-	path := &PathOptions{Ident: column}
-	for i := range opts {
-		opts[i](path)
-	}
+	path := identPath(column, opts...)
 	path.length(b)
 }
 
@@ -320,6 +316,15 @@ type PathOptions struct {
 	Path    []string
 	Cast    string
 	Unquote bool
+}
+
+// identPath creates a PathOptions for the given identifier.
+func identPath(ident string, opts ...Option) *PathOptions {
+	path := &PathOptions{Ident: ident}
+	for i := range opts {
+		opts[i](path)
+	}
+	return path
 }
 
 // value writes the path for getting the JSON value.
@@ -446,28 +451,6 @@ func ParsePath(dotpath string) ([]string, error) {
 		path = append(path, dotpath[p:i])
 	}
 	return path, nil
-}
-
-// nullP creates a predicate that compares (using the given operator)
-// the JSON value to the JSON null literal.
-func nullP(op sql.Op, column string, opts ...Option) *sql.Predicate {
-	return sql.P(func(b *sql.Builder) {
-		switch b.Dialect() {
-		case dialect.MySQL:
-			ValuePath(b, column, opts...)
-			b.WriteOp(op).WriteString("CAST('null' AS JSON)")
-		case dialect.Postgres:
-			ValuePath(b, column, append(opts, Cast("jsonb"))...)
-			b.WriteOp(op).WriteString("'null'::jsonb")
-		case dialect.SQLite:
-			path := &PathOptions{Ident: column}
-			for i := range opts {
-				opts[i](path)
-			}
-			path.mysqlFunc("JSON_TYPE", b)
-			b.WriteOp(op).WriteString("'null'")
-		}
-	})
 }
 
 // normalizePG adds cast option to the JSON path is the argument type is
