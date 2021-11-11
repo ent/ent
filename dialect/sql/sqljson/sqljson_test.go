@@ -51,11 +51,38 @@ func TestWritePath(t *testing.T) {
 			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
 		},
 		{
-			input: sql.Dialect(dialect.Postgres).
+			input: sql.Select("*").
+				From(sql.Table("test")).
+				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
+			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
 				Select("*").
 				From(sql.Table("test")).
-				Where(sqljson.HasKey("j", sqljson.DotPath("a.b.c"))),
-			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
+				Where(sqljson.HasKey("j", sqljson.DotPath("attributes[1].body"))),
+			wantQuery: "SELECT * FROM `test` WHERE (JSON_EXTRACT(`j`, \"$.attributes[1].body\") IS NOT NULL OR JSON_TYPE(`j`, \"$.attributes[1].body\") = 'null')",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("test")).
+				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
+			wantQuery: "SELECT * FROM `test` WHERE (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null')",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("test")).
+				Where(
+					sql.And(
+						sql.GT("id", 100),
+						sqljson.HasKey("j", sqljson.DotPath("a.*.c")),
+						sql.EQ("active", true),
+					),
+				),
+			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null') AND `active` = ?",
+			wantArgs:  []interface{}{100, true},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).

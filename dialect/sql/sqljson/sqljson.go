@@ -21,8 +21,24 @@ import (
 //
 func HasKey(column string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		ValuePath(b, column, opts...)
-		b.WriteOp(sql.OpNotNull)
+		switch b.Dialect() {
+		case dialect.SQLite:
+			b.Nested(func(b *sql.Builder) {
+				b.Join(
+					sql.Or(
+						// The result is NULL for JSON null.
+						sql.P(func(b *sql.Builder) {
+							ValuePath(b, column, opts...)
+							b.WriteOp(sql.OpNotNull)
+						}),
+						ValueIsNull(column, opts...),
+					),
+				)
+			})
+		default:
+			ValuePath(b, column, opts...)
+			b.WriteOp(sql.OpNotNull)
+		}
 	})
 }
 
