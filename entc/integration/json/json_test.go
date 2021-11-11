@@ -318,13 +318,20 @@ func Predicates(t *testing.T, client *ent.Client) {
 		).SaveX(ctx)
 		require.Nil(t, users[0].URL.User)
 		require.NotNil(t, users[1].URL.User)
+
 		u1 := client.User.Query().Where(func(s *sql.Selector) {
 			s.Where(sqljson.ValueIsNull(user.FieldURL, sqljson.Path("User")))
 		}).OnlyX(ctx)
 		require.Equal(t, users[0].ID, u1.ID)
+
 		u2 := client.User.Query().Where(func(s *sql.Selector) {
 			s.Where(sql.Not(sqljson.ValueIsNull(user.FieldURL, sqljson.Path("User"))))
 		}).OnlyX(ctx)
 		require.Equal(t, users[1].ID, u2.ID)
+
+		n := client.User.Query().Where(func(s *sql.Selector) {
+			s.Where(sqljson.HasKey(user.FieldURL, sqljson.Path("User")))
+		}).CountX(ctx)
+		require.Equal(t, 2, n, "both u1 and u2 have a 'User' key")
 	})
 }
