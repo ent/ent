@@ -223,7 +223,7 @@ sqljson.ValueNEQ(user.FieldData, content, sqljson.DotPath("attributes[1].body.co
 sqljson.ValueGTE(user.FieldData, status.StatusBadRequest, sqljson.Path("response", "status"))
 ```
 
-#### Check a presence of a JSON key
+#### Check for JSON key presence
 
 ```go
 sqljson.HasKey(user.FieldData, sqljson.Path("attributes", "[1]", "body"))
