@@ -1735,7 +1735,7 @@ func TestInsert_OnConflict(t *testing.T) {
 				UpdateWhere(NEQ("updated_at", 0)),
 			).
 			Query()
-		require.Equal(t, `INSERT INTO "users" ("id", "email", "creation_time") VALUES ($1, $2, $3) ON CONFLICT ("email") WHERE "name" = $4 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email", "creation_time" = "users"."creation_time", "version" = COALESCE("users"."version", 0) + $5 WHERE "updated_at" <> $6`, query)
+		require.Equal(t, `INSERT INTO "users" ("id", "email", "creation_time") VALUES ($1, $2, $3) ON CONFLICT ("email") WHERE "name" = $4 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email", "creation_time" = "users"."creation_time", "version" = COALESCE("users"."version", 0) + $5 WHERE "users"."updated_at" <> $6`, query)
 		require.Equal(t, []interface{}{"1", "user@example.com", 1633279231, "Ariel", 1, 0}, args)
 
 		query, args = Dialect(dialect.Postgres).
