@@ -1037,6 +1037,7 @@ func (i *InsertBuilder) writeConflict() {
 	}
 	u.update.writeSetter(&i.Builder)
 	if p := i.conflict.action.where; p != nil {
+		p.qualifier = i.table
 		i.WriteString(" WHERE ").Join(p)
 	}
 }
@@ -2825,11 +2826,12 @@ func (n Queries) Query() (string, []interface{}) {
 
 // Builder is the base query builder for the sql dsl.
 type Builder struct {
-	sb      *strings.Builder // underlying builder.
-	dialect string           // configured dialect.
-	args    []interface{}    // query parameters.
-	total   int              // total number of parameters in query tree.
-	errs    []error          // errors that added during the query construction.
+	sb        *strings.Builder // underlying builder.
+	dialect   string           // configured dialect.
+	args      []interface{}    // query parameters.
+	total     int              // total number of parameters in query tree.
+	errs      []error          // errors that added during the query construction.
+	qualifier string           // qualifier to prefix identifiers (e.g. table name).
 }
 
 // Quote quotes the given identifier with the characters based
@@ -2856,6 +2858,9 @@ func (b *Builder) Ident(s string) *Builder {
 	switch {
 	case len(s) == 0:
 	case s != "*" && !b.isIdent(s) && !isFunc(s) && !isModifier(s):
+		if b.qualifier != "" {
+			b.WriteString(b.Quote(b.qualifier)).WriteByte('.')
+		}
 		b.WriteString(b.Quote(s))
 	case (isFunc(s) || isModifier(s)) && b.postgres():
 		// Modifiers and aggregation functions that

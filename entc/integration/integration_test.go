@@ -6,6 +6,7 @@ package integration
 
 import (
 	"context"
+	stdsql "database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -303,7 +304,9 @@ func Upsert(t *testing.T, client *ent.Client) {
 		SetName("Mashraki").
 		SetAge(30).
 		SetPhone("0000").
-		OnConflict(sql.ConflictColumns(user.FieldPhone)).
+		OnConflict(
+			sql.ConflictColumns(user.FieldPhone),
+		).
 		// Update "name" to the value that was set on create ("Mashraki").
 		UpdateName().
 		ExecX(ctx)
@@ -397,16 +400,43 @@ func Upsert(t *testing.T, client *ent.Client) {
 		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
 	}
 
+	ts := time.Unix(1623279251, 0)
 	c1 := client.Card.Create().
 		SetNumber("102030").
-		SetCreateTime(time.Unix(1623279251, 0)).
-		SetUpdateTime(time.Unix(1623279251, 0)).
+		SetCreateTime(ts).
+		SetUpdateTime(ts).
 		SaveX(ctx)
-	id = client.Card.Create().
-		SetNumber(c1.Number).
-		OnConflictColumns(card.FieldNumber).
-		UpdateNewValues().
-		IDX(ctx)
+
+	// "DO UPDATE SET ... WHERE ..." does not support by MySQL.
+	if strings.Contains(t.Name(), "Postgres") || strings.Contains(t.Name(), "SQLite") {
+		err = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflict(
+				sql.ConflictColumns(card.FieldNumber),
+				sql.UpdateWhere(sql.NEQ(card.FieldCreateTime, ts)),
+			).
+			UpdateNewValues().
+			Exec(ctx)
+		// Only rows for which the "UpdateWhere" expression
+		// returns true will be updated. That is, none.
+		require.True(t, errors.Is(err, stdsql.ErrNoRows))
+
+		id = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflict(
+				sql.ConflictColumns(card.FieldNumber),
+				sql.UpdateWhere(sql.EQ(card.FieldCreateTime, ts)),
+			).
+			UpdateNewValues().
+			IDX(ctx)
+	} else {
+		id = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflictColumns(card.FieldNumber).
+			UpdateNewValues().
+			IDX(ctx)
+	}
+
 	c2 := client.Card.GetX(ctx, id)
 	require.Equal(t, c1.CreateTime.Unix(), c2.CreateTime.Unix())
 	require.NotEqual(t, c1.UpdateTime.Unix(), c2.UpdateTime.Unix())
