@@ -73,8 +73,6 @@ over to the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/).
 The first step on our way to the OAS document is to create an Ent schema graph. For the sake of brevity here is an
 example schema to use:
 
-Let's create our schema:
-
 ```go title="ent/schema/schema.go"
 package schema
 
@@ -177,7 +175,8 @@ In addition to the files Ent normally generates, another file named `ent/openapi
     [...]
 ```
 
-If you feel like it, copy its contents and paste them into the [Swagger Editor](https://editor.swagger.io/). 
+If you feel like it, copy its contents and paste them into the [Swagger Editor](https://editor.swagger.io/). It should
+look like this:
 
 <div style={{textAlign: 'center'}}>
   <img alt="Swagger Editor" src="https://entgo.io/images/assets/elkopa/1.png" />
@@ -221,7 +220,7 @@ func main() {
 
 Rerunning the code generator will create an updated OAS document.
 
-```json {3-5} title="ent/openapi.json"
+```json {3-4,10} title="ent/openapi.json"
 {
   "info": {
     "title": "Fridge CMS",
@@ -242,18 +241,22 @@ Rerunning the code generator will create an updated OAS document.
 ### Operation configuration
 
 There are times when you do not want to generate endpoints for every operation for every node. Fortunately, `entoas`
-lets us configure what endpoints to generate and which to ignore. `entoas`s default policy is to expose all routes. You
+lets us configure what endpoints to generate and which to ignore. `entoas`' default policy is to expose all routes. You
 can either change this behaviour to not expose any route but those explicitly asked for, or you can just tell `entoas`
-to exclude a specific operation by using an `entoas.Annotation`. Policies are used to enabled / disable the generation
+to exclude a specific operation by using an `entoas.Annotation`. Policies are used to enable / disable the generation
 of sub-resource operations as well:
 
-```go {5-6,10-16} title="ent/schema/fridge.go"
+```go {5-10,14-20} title="ent/schema/fridge.go"
 // Edges of the Fridge.
 func (Fridge) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("compartments", Compartment.Type).
-		    // Do not generate an endpoint for POST /fridges/{id}/compartments
-		    Annotation(entoas.CreateOperation(entoas.OperationPolicy(entoas.PolicyExclude))), 
+			// Do not generate an endpoint for POST /fridges/{id}/compartments
+			Annotation(
+				entoas.CreateOperation(
+					entoas.OperationPolicy(entoas.PolicyExclude),
+				),
+			), 
 	}
 }
 
@@ -269,12 +272,12 @@ func (Fridge) Annotations() []schema.Annotation {
 And voilà! the operations are gone.
 
 For more information about how `entoas`'s policies work and what you can do with
-it, have a look at the [godoc](https://pkg.go.dev/entgo.io/contrib/entoas).
+it, have a look at the [godoc](https://pkg.go.dev/entgo.io/contrib/entoas#Config).
 
 ### Simple Models
 
 By default `entoas` generates one response-schema per endpoint. To learn about the naming strategy have a look at
-the [godoc](https://pkg.go.dev/entgo.io/contrib/entoas).
+the [godoc](https://pkg.go.dev/entgo.io/contrib/entoas#Config).
 
 <div style={{textAlign: 'center'}}>
   <img alt="One Schema per Endpoint" src="https://entgo.io/images/assets/elkopa/6.png" />
