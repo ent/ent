@@ -1,5 +1,5 @@
 ---
-title: Announcing "entoas": An Extension to Automatically Generate OpenAPI Specifications from Ent Schemas 
+title: Announcing "entoas" - An Extension to Automatically Generate OpenAPI Specification Documents from Ent Schemas 
 author: MasseElch 
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
@@ -15,9 +15,8 @@ feature of the Ent extension [`elk`](https://github.com/masseelch/elk): a fully
 compliant [OpenAPI Specification (OAS)](https://swagger.io/resources/open-api/) document generator.
 
 Today, we are very happy to announce, that the specification generator is now an official extension to the Ent project
-and has been moved to the [`ent/contrib`](https://github.com/ent/contrib/entoas) repository. In addition, we have
-listened to the feedback of the community and have made some changes to the generator, that we hope
-you will like.  
+and has been moved to the [`ent/contrib`](https://github.com/ent/contrib/tree/master/entoas) repository. In addition, we
+have listened to the feedback of the community and have made some changes to the generator, that we hope you will like.
 
 ### Getting Started
 
@@ -28,7 +27,7 @@ described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). First in
 go get entgo.io/contrib/entoas
 ```
 
-Now follow the next two steps to enable it and to configure Ent to work with the `elk` extension:
+Now follow the next two steps to enable it and to configure Ent to work with the `entoas` extension:
 
 1\. Create a new Go file named `ent/entc.go` and paste the following content:
 
@@ -149,22 +148,44 @@ func (Item) Edges() []ent.Edge {
 }
 ```
 
+The code above is the Ent-way to describe a schema-graph. In this particular case we created three Entities: Fridge,
+Compartment and Item. Additionally, we added some edges to the graph: A Fridge can have many Compartments and a
+Compartment can contain many Items.
+
 Now run the code generator:
 
 ```shell
 go generate ./...
 ```
 
-In addition to the files Ent normally generates, another file named `ent/openapi.json` has been created. Copy its contents
-and paste them into the [Swagger Editor](https://editor.swagger.io/). You should see three groups: **Compartment**, **
-Item** and **Fridge**.
+In addition to the files Ent normally generates, another file named `ent/openapi.json` has been created. Here is a sneak peek into the file:
+
+```json title="ent/openapi.json"
+{
+  "info": {
+    "title": "Ent Schema API",
+    "description": "This is an auto generated API description made out of an Ent schema definition",
+    "termsOfService": "",
+    "contact": {},
+    "license": {
+      "name": ""
+    },
+    "version": "0.0.0"
+  },
+  "paths": {
+    "/compartments": {
+      "get": {
+    [...]
+```
+
+If you feel like it, copy its contents and paste them into the [Swagger Editor](https://editor.swagger.io/). 
 
 ### Basic Configuration
 
 The description of our API does not yet reflect what it does, but `entoas` lets you change that! Open up `ent/entc.go`
 and pass in the updated title and description of our Fridge API:
 
-```go title="ent/entc.go"
+```go {16-18} title="ent/entc.go"
 //go:build ignore
 // +build ignore
 
@@ -194,7 +215,25 @@ func main() {
 }
 ```
 
-Rerunning the code generator will create an updated OAS document you can copy-paste into the Swagger Editor.
+Rerunning the code generator will create an updated OAS document.
+
+```json {3-5} title="ent/openapi.json"
+{
+  "info": {
+    "title": "Fridge CMS",
+    "description": "API to manage fridges and their cooled contents. **ICY!**",
+    "termsOfService": "",
+    "contact": {},
+    "license": {
+      "name": ""
+    },
+    "version": "0.0.1"
+  },
+  "paths": {
+    "/compartments": {
+      "get": {
+    [...]
+```
 
 ### Operation configuration
 
@@ -204,7 +243,7 @@ can either change this behaviour to not expose any route but those explicitly as
 to exclude a specific operation by using an `entoas.Annotation`. Policies are used to enabled / disable the generation
 of sub-resource operations as well:
 
-```go title="ent/schema/fridge.go"
+```go {5-6,10-16} title="ent/schema/fridge.go"
 // Edges of the Fridge.
 func (Fridge) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -241,12 +280,12 @@ the [godoc](https://pkg.go.dev/entgo.io/contrib/entoas).
 Many users have requested to change this behaviour to simply map the Ent schema to the OAS document. Therefore, you now
 can configure `entoas` to do that: 
 
-```diff
+```go {5}
 ex, err := entoas.NewExtension(
     entoas.SpecTitle("Fridge CMS"),
     entoas.SpecDescription("API to manage fridges and their cooled contents. **ICY!**"),
     entoas.SpecVersion("0.0.1"),
-+   entoas.SimpleModels(),
+    entoas.SimpleModels(),
 ) 
 ```
 
