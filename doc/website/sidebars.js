@@ -103,6 +103,7 @@ module.exports = {
           'grpc-server-and-client',
           'grpc-edges',
           'grpc-optional-fields',
+          'grpc-service-generation-options',
       ]
     }
   ]
