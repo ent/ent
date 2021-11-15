@@ -12,7 +12,7 @@ can generate both server and client boilerplate code for more than 20 languages,
 
 In a [previous blogpost](https://entgo.io/blog/2021/09/10/openapi-generator), we presented to you a new
 feature of the Ent extension [`elk`](https://github.com/masseelch/elk): a fully
-compliant [OpenAPI Specification (OAS)](https://swagger.io/resources/open-api/) document generator.
+compliant [OpenAPI Specification](https://swagger.io/resources/open-api/) document generator.
 
 Today, we are very happy to announce, that the specification generator is now an official extension to the Ent project
 and has been moved to the [`ent/contrib`](https://github.com/ent/contrib/tree/master/entoas) repository. In addition, we
@@ -54,7 +54,6 @@ func main() {
 		log.Fatalf("running ent codegen: %v", err)
 	}
 }
-
 ```
 
 2\. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
@@ -180,6 +179,11 @@ In addition to the files Ent normally generates, another file named `ent/openapi
 
 If you feel like it, copy its contents and paste them into the [Swagger Editor](https://editor.swagger.io/). 
 
+<div style={{textAlign: 'center'}}>
+  <img alt="Swagger Editor" src="https://entgo.io/images/assets/elkopa/1.png" />
+  <p style={{fontSize: 12}}>Swagger Editor</p>
+</div>
+
 ### Basic Configuration
 
 The description of our API does not yet reflect what it does, but `entoas` lets you change that! Open up `ent/entc.go`
@@ -256,7 +260,7 @@ func (Fridge) Edges() []ent.Edge {
 // Annotations of the Fridge.
 func (Fridge) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-	    // Do not generate an endpoint for DELETE /fridges/{id}
+		// Do not generate an endpoint for DELETE /fridges/{id}
 		entoas.DeleteOperation(entoas.OperationPolicy(entoas.PolicyExclude)),
 	}
 }
@@ -273,7 +277,7 @@ By default `entoas` generates one response-schema per endpoint. To learn about t
 the [godoc](https://pkg.go.dev/entgo.io/contrib/entoas).
 
 <div style={{textAlign: 'center'}}>
-  <img alt="One Schema per Endpoint" src="https://entgo.io/images/assets/elkopa/1.png" />
+  <img alt="One Schema per Endpoint" src="https://entgo.io/images/assets/entoas/1.png" />
   <p style={{fontSize: 12}}>One Schema per Endpoint</p>
 </div>
 
@@ -290,7 +294,7 @@ ex, err := entoas.NewExtension(
 ```
 
 <div style={{textAlign: 'center'}}>
-  <img alt="Simple Schemas" src="https://entgo.io/images/assets/elkopa/1.png" />
+  <img alt="Simple Schemas" src="https://entgo.io/images/assets/entoas/2.png" />
   <p style={{fontSize: 12}}>Simple Schemas</p>
 </div>
 
@@ -306,5 +310,6 @@ Have questions? Need help with getting started? Feel free to [join our Slack cha
 - Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
 
 :::
