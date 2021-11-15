@@ -277,7 +277,7 @@ By default `entoas` generates one response-schema per endpoint. To learn about t
 the [godoc](https://pkg.go.dev/entgo.io/contrib/entoas).
 
 <div style={{textAlign: 'center'}}>
-  <img alt="One Schema per Endpoint" src="https://entgo.io/images/assets/entoas/1.png" />
+  <img alt="One Schema per Endpoint" src="https://entgo.io/images/assets/elkopa/6.png" />
   <p style={{fontSize: 12}}>One Schema per Endpoint</p>
 </div>
 
@@ -294,7 +294,7 @@ ex, err := entoas.NewExtension(
 ```
 
 <div style={{textAlign: 'center'}}>
-  <img alt="Simple Schemas" src="https://entgo.io/images/assets/entoas/2.png" />
+  <img alt="Simple Schemas" src="https://entgo.io/images/assets/elkopa/5.png" />
   <p style={{fontSize: 12}}>Simple Schemas</p>
 </div>
 
