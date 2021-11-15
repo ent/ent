@@ -1,26 +1,27 @@
 ---
-title: Announcing entoas 
+title: Announcing "entoas": An Extension to Automatically Generate OpenAPI Specifications from Ent Schemas 
 author: MasseElch 
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
 ---
 
-OAS (formerly known as Swagger Specification) is a technical specification defining a standard, language-agnostic
+The OpenAPI Specification (OAS, formerly known as Swagger Specification) is a technical specification defining a standard, language-agnostic
 interface description for REST APIs. This allows both humans and automated tools to understand the described service
 without the actual source code or additional documentation. Combined with the [Swagger Tooling](https://swagger.io/) you
 can generate both server and client boilerplate code for more than 20 languages, just by passing in the OAS document.
 
-Sometime ago, in a [previous blogpost](https://entgo.io/blog/2021-09-10-openapi-generator.md), we presented to you a new
+In a [previous blogpost](https://entgo.io/blog/2021/09/10/openapi-generator), we presented to you a new
 feature of the Ent extension [`elk`](https://github.com/masseelch/elk): a fully
 compliant [OpenAPI Specification (OAS)](https://swagger.io/resources/open-api/) document generator.
 
 Today, we are very happy to announce, that the specification generator is now an official extension to the Ent project
 and has been moved to the [`ent/contrib`](https://github.com/ent/contrib/entoas) repository. In addition, we have
-listened to the feedback of the community and have made some changes to the generator, that you will love.  
+listened to the feedback of the community and have made some changes to the generator, that we hope
+you will like.  
 
 ### Getting Started
 
-To use the `entoas` extension you are required to use the `entc` (ent codegen) package as
+To use the `entoas` extension use the `entc` (ent codegen) package as
 described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). First install the extension to your Go module:
 
 ```shell
