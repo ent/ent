@@ -253,7 +253,7 @@ sqljson.LenEQ(user.FieldAttrs, 2)
 
 sql.Or(
 	sqljson.LenGT(user.FieldData, 10, sqljson.Path("attributes")),
-    sqljson.LenLT(user.FieldData, 20, sqljson.Path("attributes")),
+	sqljson.LenLT(user.FieldData, 20, sqljson.Path("attributes")),
 )
 ```
 
