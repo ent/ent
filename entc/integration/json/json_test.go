@@ -300,6 +300,7 @@ func Predicates(t *testing.T, client *ent.Client) {
 		s.Where(sqljson.ValueContains(user.FieldInts, 3))
 	}).OnlyX(ctx)
 	require.Contains(t, r.Ints, 3)
+
 	r = client.User.Query().Where(func(s *sql.Selector) {
 		s.Where(sqljson.ValueContains(user.FieldT, 3, sqljson.Path("li")))
 	}).OnlyX(ctx)
@@ -333,5 +334,59 @@ func Predicates(t *testing.T, client *ent.Client) {
 			s.Where(sqljson.HasKey(user.FieldURL, sqljson.Path("User")))
 		}).CountX(ctx)
 		require.Equal(t, 2, n, "both u1 and u2 have a 'User' key")
+	})
+
+	t.Run("Strings", func(t *testing.T) {
+		client.User.Delete().ExecX(ctx)
+		u, err := url.Parse("https://github.com/a8m")
+		require.NoError(t, err)
+		dirs := []http.Dir{"/dev/null"}
+		_, err = client.User.CreateBulk(
+			client.User.Create().SetURL(u),
+			client.User.Create().SetDirs(dirs),
+			client.User.Create().SetT(&schema.T{S: "foobar", Ls: []string{"foo", "bar"}}),
+		).Save(ctx)
+		require.NoError(t, err)
+
+		ps := []*sql.Predicate{
+			sqljson.StringContains(user.FieldDirs, "dev", sqljson.Path("[0]")),
+			sqljson.StringHasPrefix(user.FieldDirs, "/dev", sqljson.Path("[0]")),
+			sqljson.StringHasSuffix(user.FieldDirs, "/null", sqljson.Path("[0]")),
+		}
+		for _, p := range ps {
+			r = client.User.Query().Where(func(s *sql.Selector) { s.Where(p) }).OnlyX(ctx)
+			require.Equal(t, dirs, r.Dirs)
+		}
+		r = client.User.Query().Where(func(s *sql.Selector) { s.Where(sql.And(ps...)) }).OnlyX(ctx)
+		require.Equal(t, dirs, r.Dirs)
+
+		ps = []*sql.Predicate{
+			sqljson.StringContains(user.FieldURL, "hub", sqljson.Path("Host")),
+			sqljson.StringHasPrefix(user.FieldURL, "github", sqljson.Path("Host")),
+			sqljson.StringHasSuffix(user.FieldURL, "hub.com", sqljson.Path("Host")),
+		}
+		for _, p := range ps {
+			r = client.User.Query().Where(func(s *sql.Selector) { s.Where(p) }).OnlyX(ctx)
+			require.Equal(t, u, r.URL)
+		}
+
+		ps = []*sql.Predicate{
+			sqljson.StringHasPrefix(user.FieldT, "foo", sqljson.Path("ls", "[0]")),
+			sqljson.StringHasSuffix(user.FieldT, "bar", sqljson.DotPath("ls[1]")),
+			sql.And(
+				sql.Or(
+					sqljson.StringContains(user.FieldT, "foo", sqljson.DotPath("ls[0]")),
+					sqljson.StringContains(user.FieldT, "foo", sqljson.DotPath("ls[1]")),
+				),
+				sql.Or(
+					sqljson.StringContains(user.FieldT, "bar", sqljson.DotPath("ls[0]")),
+					sqljson.StringContains(user.FieldT, "bar", sqljson.DotPath("ls[1]")),
+				),
+			),
+		}
+		for _, p := range ps {
+			r = client.User.Query().Where(func(s *sql.Selector) { s.Where(p) }).OnlyX(ctx)
+			require.Equal(t, []string{"foo", "bar"}, r.T.Ls)
+		}
 	})
 }

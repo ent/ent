@@ -184,6 +184,36 @@ func ValueContains(column string, arg interface{}, opts ...Option) *sql.Predicat
 	})
 }
 
+// StringHasPrefix return a predicate for checking that a JSON string value
+// (returned by the path) has the given substring as prefix
+func StringHasPrefix(column string, prefix string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		ValuePath(b, column, opts...)
+		b.Join(sql.HasPrefix("", prefix))
+	})
+}
+
+// StringHasSuffix return a predicate for checking that a JSON string value
+// (returned by the path) has the given substring as suffix
+func StringHasSuffix(column string, suffix string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		ValuePath(b, column, opts...)
+		b.Join(sql.HasSuffix("", suffix))
+	})
+}
+
+// StringContains return a predicate for checking that a JSON string value
+// (returned by the path) contains the given substring
+func StringContains(column string, sub string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		ValuePath(b, column, opts...)
+		b.Join(sql.Contains("", sub))
+	})
+}
+
 // LenEQ return a predicate for checking that an array length
 // of a JSON (returned by the path) is equal to the given argument.
 //
