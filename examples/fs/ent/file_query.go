@@ -469,6 +469,10 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 
 func (fq *FileQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := fq.querySpec()
+	_spec.Node.Columns = fq.fields
+	if len(fq.fields) > 0 {
+		_spec.Unique = fq.unique != nil && *fq.unique
+	}
 	return sqlgraph.CountNodes(ctx, fq.driver, _spec)
 }
 
@@ -821,9 +825,7 @@ func (fgb *FileGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range fgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(fgb.fields...)...)

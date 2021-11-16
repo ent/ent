@@ -23,10 +23,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		if _spec.ID.Value != nil {
 			{{- /* If the ID type is not a pointer, but implements the ValueScanner interface (e.g. UUID fields). */}}
 			{{- if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}
-				_node.ID = *_spec.ID.Value.(*{{ $.ID.Type }})
+				if id, ok := _spec.ID.Value.(*{{ $.ID.Type }}); ok {
+					_node.ID = *id
 			{{- else }}
-				_node.ID = _spec.ID.Value.({{ $.ID.Type }})
+				if id, ok := _spec.ID.Value.({{ $.ID.Type }}); ok {
+					_node.ID = id
 			{{- end }}
+			{{- if $.ID.Type.ValueScanner }}
+				} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+					return nil, err
+			{{- else  }}
+				} else {
+					return nil, fmt.Errorf("unexpected {{ $.Name }}.ID type: %T", _spec.ID.Value)
+			{{- end }}
+				}
 		}
 	{{- else }}
 		{{- if $.ID.UserDefined }}

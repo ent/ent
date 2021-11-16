@@ -599,6 +599,43 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "heliumbrain",
+      "name": "heliumbrain",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1607668?v=4",
+      "profile": "http://www.entiros.se",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "JeremyV2014",
+      "name": "Jeremy Maxey-Vesperman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9276415?v=4",
+      "profile": "https://github.com/JeremyV2014",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "tankbusta",
+      "name": "Christopher Schmitt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/592749?v=4",
+      "profile": "https://github.com/tankbusta",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "grevych",
+      "name": "Gerardo Reyes",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3792003?v=4",
+      "profile": "https://github.com/grevych",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

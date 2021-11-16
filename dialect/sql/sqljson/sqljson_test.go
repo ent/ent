@@ -51,11 +51,38 @@ func TestWritePath(t *testing.T) {
 			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
 		},
 		{
-			input: sql.Dialect(dialect.Postgres).
+			input: sql.Select("*").
+				From(sql.Table("test")).
+				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
+			wantQuery: "SELECT * FROM `test` WHERE JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
 				Select("*").
 				From(sql.Table("test")).
-				Where(sqljson.HasKey("j", sqljson.DotPath("a.b.c"))),
-			wantQuery: `SELECT * FROM "test" WHERE "j"->'a'->'b'->'c' IS NOT NULL`,
+				Where(sqljson.HasKey("j", sqljson.DotPath("attributes[1].body"))),
+			wantQuery: "SELECT * FROM `test` WHERE (JSON_EXTRACT(`j`, \"$.attributes[1].body\") IS NOT NULL OR JSON_TYPE(`j`, \"$.attributes[1].body\") = 'null')",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("test")).
+				Where(sqljson.HasKey("j", sqljson.DotPath("a.*.c"))),
+			wantQuery: "SELECT * FROM `test` WHERE (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null')",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("test")).
+				Where(
+					sql.And(
+						sql.GT("id", 100),
+						sqljson.HasKey("j", sqljson.DotPath("a.*.c")),
+						sql.EQ("active", true),
+					),
+				),
+			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null') AND `active` = ?",
+			wantArgs:  []interface{}{100, true},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).
@@ -194,6 +221,101 @@ func TestWritePath(t *testing.T) {
 				Where(sqljson.ValueContains("tags", 1, sqljson.Path("a"))),
 			wantQuery: "SELECT * FROM \"users\" WHERE (\"tags\"->'a')::jsonb @> $1",
 			wantArgs:  []interface{}{"1"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIsNull("c", sqljson.Path("a"))),
+			wantQuery: `SELECT * FROM "users" WHERE ("c"->'a')::jsonb = 'null'::jsonb`,
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIsNull("c", sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_CONTAINS(`c`, 'null', \"$.a\")",
+		},
+		{
+			input: sql.Dialect(dialect.SQLite).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueIsNull("c", sqljson.Path("a"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_TYPE(`c`, \"$.a\") = 'null'",
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringContains("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' LIKE $1`,
+			wantArgs:  []interface{}{"%substr%"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(
+					sql.And(
+						sqljson.StringContains("a", "c", sqljson.Path("a")),
+						sqljson.StringContains("b", "d", sqljson.Path("b")),
+					),
+				),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->>'a' LIKE $1 AND "b"->>'b' LIKE $2`,
+			wantArgs:  []interface{}{"%c%", "%d%"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringContains("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
+			wantArgs:  []interface{}{"%substr%"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(
+					sql.And(
+						sqljson.StringContains("a", "c", sqljson.Path("a")),
+						sqljson.StringContains("b", "d", sqljson.Path("b")),
+					),
+				),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.a\")) LIKE ? AND JSON_UNQUOTE(JSON_EXTRACT(`b`, \"$.b\")) LIKE ?",
+			wantArgs:  []interface{}{"%c%", "%d%"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringHasPrefix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' LIKE $1`,
+			wantArgs:  []interface{}{"substr%"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringHasPrefix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
+			wantArgs:  []interface{}{"substr%"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringHasSuffix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->'b'->'c'->1->>'d' LIKE $1`,
+			wantArgs:  []interface{}{"%substr"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringHasSuffix("a", "substr", sqljson.Path("b", "c", "[1]", "d"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, \"$.b.c[1].d\")) LIKE ?",
+			wantArgs:  []interface{}{"%substr"},
 		},
 	}
 	for i, tt := range tests {

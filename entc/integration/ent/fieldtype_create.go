@@ -327,6 +327,20 @@ func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCre
 	return ftc
 }
 
+// SetText sets the "text" field.
+func (ftc *FieldTypeCreate) SetText(s string) *FieldTypeCreate {
+	ftc.mutation.SetText(s)
+	return ftc
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableText(s *string) *FieldTypeCreate {
+	if s != nil {
+		ftc.SetText(*s)
+	}
+	return ftc
+}
+
 // SetDatetime sets the "datetime" field.
 func (ftc *FieldTypeCreate) SetDatetime(t time.Time) *FieldTypeCreate {
 	ftc.mutation.SetDatetime(t)
@@ -358,6 +372,12 @@ func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
 // SetLinkOther sets the "link_other" field.
 func (ftc *FieldTypeCreate) SetLinkOther(s *schema.Link) *FieldTypeCreate {
 	ftc.mutation.SetLinkOther(s)
+	return ftc
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftc *FieldTypeCreate) SetLinkOtherFunc(s *schema.Link) *FieldTypeCreate {
+	ftc.mutation.SetLinkOtherFunc(s)
 	return ftc
 }
 
@@ -824,6 +844,14 @@ func (ftc *FieldTypeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ftc *FieldTypeCreate) defaults() {
+	if _, ok := ftc.mutation.LinkOther(); !ok {
+		v := fieldtype.DefaultLinkOther
+		ftc.mutation.SetLinkOther(v)
+	}
+	if _, ok := ftc.mutation.LinkOtherFunc(); !ok {
+		v := fieldtype.DefaultLinkOtherFunc()
+		ftc.mutation.SetLinkOtherFunc(v)
+	}
 	if _, ok := ftc.mutation.Dir(); !ok {
 		v := fieldtype.DefaultDir()
 		ftc.mutation.SetDir(v)
@@ -1155,6 +1183,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		})
 		_node.OptionalFloat32 = value
 	}
+	if value, ok := ftc.mutation.Text(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldText,
+		})
+		_node.Text = value
+	}
 	if value, ok := ftc.mutation.Datetime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -1178,6 +1214,14 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 			Column: fieldtype.FieldLinkOther,
 		})
 		_node.LinkOther = value
+	}
+	if value, ok := ftc.mutation.LinkOtherFunc(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldLinkOtherFunc,
+		})
+		_node.LinkOtherFunc = value
 	}
 	if value, ok := ftc.mutation.MAC(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -2061,6 +2105,24 @@ func (u *FieldTypeUpsert) ClearOptionalFloat32() *FieldTypeUpsert {
 	return u
 }
 
+// SetText sets the "text" field.
+func (u *FieldTypeUpsert) SetText(v string) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldText, v)
+	return u
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateText() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldText)
+	return u
+}
+
+// ClearText clears the value of the "text" field.
+func (u *FieldTypeUpsert) ClearText() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldText)
+	return u
+}
+
 // SetDatetime sets the "datetime" field.
 func (u *FieldTypeUpsert) SetDatetime(v time.Time) *FieldTypeUpsert {
 	u.Set(fieldtype.FieldDatetime, v)
@@ -2118,6 +2180,24 @@ func (u *FieldTypeUpsert) UpdateLinkOther() *FieldTypeUpsert {
 // ClearLinkOther clears the value of the "link_other" field.
 func (u *FieldTypeUpsert) ClearLinkOther() *FieldTypeUpsert {
 	u.SetNull(fieldtype.FieldLinkOther)
+	return u
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (u *FieldTypeUpsert) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldLinkOtherFunc, v)
+	return u
+}
+
+// UpdateLinkOtherFunc sets the "link_other_func" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateLinkOtherFunc() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldLinkOtherFunc)
+	return u
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (u *FieldTypeUpsert) ClearLinkOtherFunc() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldLinkOtherFunc)
 	return u
 }
 
@@ -3453,6 +3533,27 @@ func (u *FieldTypeUpsertOne) ClearOptionalFloat32() *FieldTypeUpsertOne {
 	})
 }
 
+// SetText sets the "text" field.
+func (u *FieldTypeUpsertOne) SetText(v string) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateText() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateText()
+	})
+}
+
+// ClearText clears the value of the "text" field.
+func (u *FieldTypeUpsertOne) ClearText() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearText()
+	})
+}
+
 // SetDatetime sets the "datetime" field.
 func (u *FieldTypeUpsertOne) SetDatetime(v time.Time) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -3520,6 +3621,27 @@ func (u *FieldTypeUpsertOne) UpdateLinkOther() *FieldTypeUpsertOne {
 func (u *FieldTypeUpsertOne) ClearLinkOther() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearLinkOther()
+	})
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (u *FieldTypeUpsertOne) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetLinkOtherFunc(v)
+	})
+}
+
+// UpdateLinkOtherFunc sets the "link_other_func" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateLinkOtherFunc() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateLinkOtherFunc()
+	})
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (u *FieldTypeUpsertOne) ClearLinkOtherFunc() *FieldTypeUpsertOne {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearLinkOtherFunc()
 	})
 }
 
@@ -5127,6 +5249,27 @@ func (u *FieldTypeUpsertBulk) ClearOptionalFloat32() *FieldTypeUpsertBulk {
 	})
 }
 
+// SetText sets the "text" field.
+func (u *FieldTypeUpsertBulk) SetText(v string) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateText() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateText()
+	})
+}
+
+// ClearText clears the value of the "text" field.
+func (u *FieldTypeUpsertBulk) ClearText() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearText()
+	})
+}
+
 // SetDatetime sets the "datetime" field.
 func (u *FieldTypeUpsertBulk) SetDatetime(v time.Time) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
@@ -5194,6 +5337,27 @@ func (u *FieldTypeUpsertBulk) UpdateLinkOther() *FieldTypeUpsertBulk {
 func (u *FieldTypeUpsertBulk) ClearLinkOther() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
 		s.ClearLinkOther()
+	})
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (u *FieldTypeUpsertBulk) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.SetLinkOtherFunc(v)
+	})
+}
+
+// UpdateLinkOtherFunc sets the "link_other_func" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateLinkOtherFunc() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.UpdateLinkOtherFunc()
+	})
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (u *FieldTypeUpsertBulk) ClearLinkOtherFunc() *FieldTypeUpsertBulk {
+	return u.Update(func(s *FieldTypeUpsert) {
+		s.ClearLinkOtherFunc()
 	})
 }
 

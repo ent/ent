@@ -32,7 +32,7 @@ type PetQuery struct {
 	predicates []predicate.Pet
 	// eager-loading edges.
 	withOwner *UserQuery
-	withFKs   bool
+	modifiers []func(s *sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -357,18 +357,11 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	var (
 		nodes       = []*Pet{}
-		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
 		loadedTypes = [1]bool{
 			pq.withOwner != nil,
 		}
 	)
-	if pq.withOwner != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Pet{config: pq.config}
 		nodes = append(nodes, node)
@@ -384,6 +377,9 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	}
 	_spec.Node.Schema = pq.schemaConfig.Pet
 	ctx = internal.NewSchemaConfigContext(ctx, pq.schemaConfig)
+	if len(pq.modifiers) > 0 {
+		_spec.Modifiers = pq.modifiers
+	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err
 	}
@@ -395,10 +391,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*Pet)
 		for i := range nodes {
-			if nodes[i].user_pets == nil {
-				continue
-			}
-			fk := *nodes[i].user_pets
+			fk := nodes[i].OwnerID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -412,7 +405,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
 				nodes[i].Edges.Owner = n
@@ -427,6 +420,13 @@ func (pq *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := pq.querySpec()
 	_spec.Node.Schema = pq.schemaConfig.Pet
 	ctx = internal.NewSchemaConfigContext(ctx, pq.schemaConfig)
+	if len(pq.modifiers) > 0 {
+		_spec.Modifiers = pq.modifiers
+	}
+	_spec.Node.Columns = pq.fields
+	if len(pq.fields) > 0 {
+		_spec.Unique = pq.unique != nil && *pq.unique
+	}
 	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
 }
 
@@ -504,6 +504,9 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	t1.Schema(pq.schemaConfig.Pet)
 	ctx = internal.NewSchemaConfigContext(ctx, pq.schemaConfig)
 	selector.WithContext(ctx)
+	for _, m := range pq.modifiers {
+		m(selector)
+	}
 	for _, p := range pq.predicates {
 		p(selector)
 	}
@@ -519,6 +522,12 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (pq *PetQuery) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
+	pq.modifiers = append(pq.modifiers, modifiers...)
+	return pq.Select()
 }
 
 // PetGroupBy is the group-by builder for Pet entities.
@@ -782,9 +791,7 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range pgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(pgb.fields...)...)
@@ -1009,4 +1016,10 @@ func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ps *PetSelect) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
+	ps.modifiers = append(ps.modifiers, modifiers...)
+	return ps
 }

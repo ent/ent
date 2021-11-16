@@ -6,6 +6,7 @@ package integration
 
 import (
 	"context"
+	stdsql "database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -260,6 +261,34 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.True(ok)
 	require.Equal("-", fi.Tag.Get("json"))
 	client.User.Create().SetName("tarrence").SetAge(30).ExecX(ctx)
+
+	t.Run("StringPredicates", func(t *testing.T) {
+		client.Pet.Delete().ExecX(ctx)
+		a := client.Pet.Create().SetName("a%").SaveX(ctx)
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasPrefix("%a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.Or(pet.NameHasPrefix("%a%"), pet.NameHasPrefix("%a%"))).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasSuffix("%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("a%%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("%a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContainsFold("A%")).ExistX(ctx))
+
+		a.Update().SetName("a_\\").ExecX(ctx)
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasPrefix("%a")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a_")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasSuffix("a_\\")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("%a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("%a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContainsFold("A")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContainsFold("%A")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContainsFold("A%")).ExistX(ctx))
+	})
 }
 
 func Upsert(t *testing.T, client *ent.Client) {
@@ -275,7 +304,9 @@ func Upsert(t *testing.T, client *ent.Client) {
 		SetName("Mashraki").
 		SetAge(30).
 		SetPhone("0000").
-		OnConflict(sql.ConflictColumns(user.FieldPhone)).
+		OnConflict(
+			sql.ConflictColumns(user.FieldPhone),
+		).
 		// Update "name" to the value that was set on create ("Mashraki").
 		UpdateName().
 		ExecX(ctx)
@@ -369,16 +400,43 @@ func Upsert(t *testing.T, client *ent.Client) {
 		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
 	}
 
+	ts := time.Unix(1623279251, 0)
 	c1 := client.Card.Create().
 		SetNumber("102030").
-		SetCreateTime(time.Unix(1623279251, 0)).
-		SetUpdateTime(time.Unix(1623279251, 0)).
+		SetCreateTime(ts).
+		SetUpdateTime(ts).
 		SaveX(ctx)
-	id = client.Card.Create().
-		SetNumber(c1.Number).
-		OnConflictColumns(card.FieldNumber).
-		UpdateNewValues().
-		IDX(ctx)
+
+	// "DO UPDATE SET ... WHERE ..." does not support by MySQL.
+	if strings.Contains(t.Name(), "Postgres") || strings.Contains(t.Name(), "SQLite") {
+		err = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflict(
+				sql.ConflictColumns(card.FieldNumber),
+				sql.UpdateWhere(sql.NEQ(card.FieldCreateTime, ts)),
+			).
+			UpdateNewValues().
+			Exec(ctx)
+		// Only rows for which the "UpdateWhere" expression
+		// returns true will be updated. That is, none.
+		require.True(t, errors.Is(err, stdsql.ErrNoRows))
+
+		id = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflict(
+				sql.ConflictColumns(card.FieldNumber),
+				sql.UpdateWhere(sql.EQ(card.FieldCreateTime, ts)),
+			).
+			UpdateNewValues().
+			IDX(ctx)
+	} else {
+		id = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflictColumns(card.FieldNumber).
+			UpdateNewValues().
+			IDX(ctx)
+	}
+
 	c2 := client.Card.GetX(ctx, id)
 	require.Equal(t, c1.CreateTime.Unix(), c2.CreateTime.Unix())
 	require.NotEqual(t, c1.UpdateTime.Unix(), c2.UpdateTime.Unix())
@@ -572,6 +630,14 @@ func Select(t *testing.T, client *ent.Client) {
 		require.Equal(p2[i].Name, p1[i].Name)
 		require.Equal(len(p1[i].Name), p1[1].NameLength)
 	}
+
+	// Select count.
+	names = client.Pet.Query().Order(ent.Asc(pet.FieldName)).Select(pet.FieldName).StringsX(ctx)
+	require.Equal([]string{"aa", "bb", "bb", "cc"}, names)
+	count := client.Pet.Query().Select(pet.FieldName).CountX(ctx)
+	require.Equal(4, count)
+	count = client.Pet.Query().Unique(true).Select(pet.FieldName).CountX(ctx)
+	require.Equal(3, count)
 
 	var (
 		gs []struct {
@@ -936,8 +1002,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Empty(client.User.Query().Where(user.NameIn("alex", "rocket")).AllX(ctx))
 	require.NotNil(client.User.Query().Where(user.HasParentWith(user.NameIn("a8m", "neta"))).OnlyX(ctx))
 	require.Len(client.User.Query().Where(user.NameContains("a8")).AllX(ctx), 1)
-	require.Len(client.User.Query().Where(user.NameHasPrefix("a8")).AllX(ctx), 1)
-	require.Len(client.User.Query().Where(user.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).AllX(ctx), 2)
+	require.Equal(1, client.User.Query().Where(user.NameHasPrefix("a8")).CountX(ctx))
+	require.Zero(client.User.Query().Where(user.NameHasPrefix("%a8%")).CountX(ctx))
+	require.Equal(2, client.User.Query().Where(user.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).CountX(ctx))
 
 	t.Log("group-by one field")
 	names, err := client.User.Query().GroupBy(user.FieldName).Strings(ctx)
@@ -1594,7 +1661,7 @@ func Mutation(t *testing.T, client *ent.Client) {
 			m.SetAge(30)
 		}
 	}
-	uu := a8m.Update()
+	uu := a8m.Update().AddPets(pedro)
 	ub = client.User.Create()
 	setUsers(ub.Mutation(), uu.Mutation())
 	a8m = uu.SaveX(ctx)
@@ -1605,6 +1672,35 @@ func Mutation(t *testing.T, client *ent.Client) {
 	require.Equal(t, []int{usr.ID}, a8m.Update().AddFriends(usr).Mutation().FriendsIDs())
 	require.Empty(t, a8m.Update().AddFriends(usr).RemoveFriends(usr).Mutation().FriendsIDs())
 	require.Equal(t, []int{usr.ID}, a8m.Update().AddFriends(usr).RemoveFriends(a8m).Mutation().FriendsIDs())
+	a8m.Update().AddFriends(usr).ExecX(ctx)
+
+	t.Run("IDs", func(t *testing.T) {
+		ids := client.User.Query().IDsX(ctx)
+		u := client.User.Update().Where(user.IDIn(ids...)).AddAge(1)
+		mids, err := u.Mutation().IDs(ctx)
+		require.NoError(t, err)
+		// Order can change between the 2 queries.
+		sort.Ints(ids)
+		sort.Ints(mids)
+		require.Equal(t, ids, mids)
+		u.ExecX(ctx)
+
+		u = client.User.
+			Update().
+			AddAge(1).
+			Where(
+				user.Name(a8m.Name),
+				user.HasPets(),
+				user.HasPetsWith(
+					pet.Name(pedro.Name),
+				),
+			)
+		mids, err = u.Mutation().IDs(ctx)
+		require.NoError(t, err)
+		require.Len(t, mids, 1)
+		require.Equal(t, a8m.ID, mids[0])
+		u.ExecX(ctx)
+	})
 }
 
 // Test templates codegen.

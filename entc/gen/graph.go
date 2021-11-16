@@ -650,11 +650,22 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 	return templates, external
 }
 
-// ModuleInfo returns the entc binary module version.
+// ModuleInfo returns the entgo.io/ent version.
 func (Config) ModuleInfo() (m debug.Module) {
+	const pkg = "entgo.io/ent"
 	info, ok := debug.ReadBuildInfo()
-	if ok {
-		m = info.Main
+	if !ok {
+		return
+	}
+	// Was running as a CLI (ent/cmd/ent).
+	if info.Main.Path == pkg {
+		return info.Main
+	}
+	// Or, as a main package (ent/entc).
+	for _, dep := range info.Deps {
+		if dep.Path == pkg {
+			return *dep
+		}
 	}
 	return
 }

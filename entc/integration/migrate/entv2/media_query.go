@@ -340,6 +340,10 @@ func (mq *MediaQuery) sqlAll(ctx context.Context) ([]*Media, error) {
 
 func (mq *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := mq.querySpec()
+	_spec.Node.Columns = mq.fields
+	if len(mq.fields) > 0 {
+		_spec.Unique = mq.unique != nil && *mq.unique
+	}
 	return sqlgraph.CountNodes(ctx, mq.driver, _spec)
 }
 
@@ -692,9 +696,7 @@ func (mgb *MediaGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range mgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(mgb.fields...)...)

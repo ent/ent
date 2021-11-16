@@ -396,3 +396,46 @@ func TestGraph_Hooks(t *testing.T) {
 	require.NotNil(graph)
 	require.EqualError(graph.Gen(), `struct tag "yaml" is missing for field T1.age`)
 }
+
+func TestDependencyAnnotation_Build(t *testing.T) {
+	tests := []struct {
+		typ   *field.TypeInfo
+		field string
+	}{
+		{
+			typ: &field.TypeInfo{
+				Ident: "*http.Client",
+			},
+			field: "HTTPClient",
+		},
+		{
+			typ: &field.TypeInfo{
+				Ident: "[]*http.Client",
+				RType: &field.RType{
+					Kind: reflect.Slice,
+				},
+			},
+			field: "HTTPClients",
+		},
+		{
+			typ: &field.TypeInfo{
+				Ident: "[]*url.URL",
+				RType: &field.RType{
+					Kind: reflect.Slice,
+				},
+			},
+			field: "URLs",
+		},
+		{
+			typ: &field.TypeInfo{
+				Ident: "*net.Conn",
+			},
+			field: "NetConn",
+		},
+	}
+	for _, tt := range tests {
+		d := &Dependency{Type: tt.typ}
+		require.NoError(t, d.Build())
+		require.Equal(t, tt.field, d.Field)
+	}
+}

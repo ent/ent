@@ -4,7 +4,7 @@ title: GraphQL Integration
 ---
 
 The `ent` framework provides an integration with GraphQL through the [99designs/gqlgen](https://github.com/99designs/gqlgen)
-library using the [external templates](templates.md) option (i.e. it can be extended to support other libraries).
+library using the [extension](extension.md) option (i.e. it can be extended to support other libraries).
 
 ## Quick Introduction
 
@@ -14,7 +14,7 @@ Follow these 3 steps to enable it to your project:
 
 1\. Create a new Go file named `ent/entc.go`, and paste the following content:
 
-```go
+```go title="ent/entc.go"
 // +build ignore
 
 package main
@@ -40,7 +40,7 @@ func main() {
 
 2\. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
 
-```go
+```go title="ent/generate.go"
 package ent
 
 //go:generate go run -mod=mod entc.go

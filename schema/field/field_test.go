@@ -467,12 +467,30 @@ func TestJSON(t *testing.T) {
 
 	fd = field.Strings("strings").
 		Optional().
+		Default([]string{"a", "b"}).
 		Descriptor()
+	assert.NoError(t, fd.Err)
 	assert.True(t, fd.Optional)
 	assert.Empty(t, fd.Info.PkgPath)
 	assert.Equal(t, "strings", fd.Name)
+	assert.Equal(t, []string{"a", "b"}, fd.Default)
 	assert.Equal(t, field.TypeJSON, fd.Info.Type)
 	assert.Equal(t, "[]string", fd.Info.String())
+
+	fd = field.JSON("dirs", []http.Dir{}).
+		Default([]http.Dir{"a", "b"}).
+		Descriptor()
+	assert.NoError(t, fd.Err)
+	fd = field.JSON("dirs", []http.Dir{}).
+		Default(func() []http.Dir {
+			return []http.Dir{"/tmp"}
+		}).
+		Descriptor()
+	assert.NoError(t, fd.Err)
+	fd = field.JSON("dirs", []http.Dir{}).
+		Default([]string{"a", "b"}).
+		Descriptor()
+	assert.Error(t, fd.Err)
 
 	fd = field.JSON("values", &url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)

@@ -69,22 +69,22 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- end }}
 {{- end }}
 
-{{- define "dialect/sql/delete/spec/schemaconfig" }}
-	{{- template "dialect/sql/spec/schemaconfig" $ }}
+{{- define "dialect/sql/delete/spec/ctxschemaconfig" }}
+	{{- template "dialect/sql/spec/ctxschemaconfig" $ }}
 {{- end }}
 
-{{- define "dialect/sql/update/spec/schemaconfig" }}
-	{{- template "dialect/sql/spec/schemaconfig" $ }}
+{{- define "dialect/sql/update/spec/ctxschemaconfig" }}
+	{{- template "dialect/sql/spec/ctxschemaconfig" $ }}
 {{- end }}
 
-{{- define "dialect/sql/create/spec/schemaconfig" }}
+{{- define "dialect/sql/create/spec/ctxschemaconfig" }}
 	{{- with extend $ "Ident" "_spec" "SkipContext" true }}
-		{{- template "dialect/sql/spec/schemaconfig" . }}
+		{{- template "dialect/sql/spec/ctxschemaconfig" . }}
 	{{- end }}
 {{- end }}
 
-{{- define "dialect/sql/query/spec/schemaconfig" }}
-	{{- template "dialect/sql/spec/schemaconfig" . }}
+{{- define "dialect/sql/query/spec/ctxschemaconfig" }}
+	{{- template "dialect/sql/spec/ctxschemaconfig" . }}
 {{- end }}
 
 {{- define "dialect/sql/query/eagerloading/spec/schemaconfig" }}
@@ -113,7 +113,8 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- end }}
 {{- end }}
 
-{{- define "dialect/sql/spec/schemaconfig" -}}
+{{/* A template for injecting the SchemaConfig to the context. Should be executed before other templates. */}}
+{{- define "dialect/sql/spec/ctxschemaconfig" -}}
 	{{- $builder := pascal $.Scope.Builder }}
 	{{- $receiver := receiver $builder }}
 	{{- $ident := "_spec.Node" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
@@ -125,7 +126,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- end }}
 {{- end -}}
 
-{{- define "dialect/sql/query/selector/schemaconfig" -}}
+{{- define "dialect/sql/query/selector/ctxschemaconfig" -}}
 	{{- $builder := pascal $.Scope.Builder }}
 	{{- $receiver := receiver $builder }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
@@ -135,36 +136,36 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- end }}
 {{- end -}}
 
-{{- define "dialect/sql/query/path/schemaconfig" }}
+{{- define "dialect/sql/query/path/ctxschemaconfig" }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		schemaConfig := {{ $.Scope.Receiver }}.schemaConfig
-		{{- template "dialect/sql/query/step/schemaconfig" . }}
+		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
 	{{- end -}}
 {{- end -}}
 
-{{- define "dialect/sql/query/from/schemaconfig" }}
+{{- define "dialect/sql/query/from/ctxschemaconfig" }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		schemaConfig := {{ $.Scope.Receiver }}.schemaConfig
-		{{- template "dialect/sql/query/step/schemaconfig" . }}
+		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
 	{{- end -}}
 {{- end -}}
 
-{{- define "dialect/sql/predicate/edge/has/schemaconfig" -}}
-	{{- template "dialect/sql/predicate/edge/schemaconfig" . }}
+{{- define "dialect/sql/predicate/edge/has/ctxschemaconfig" -}}
+	{{- template "dialect/sql/predicate/edge/ctxschemaconfig" . }}
 {{- end -}}
 
-{{- define "dialect/sql/predicate/edge/haswith/schemaconfig" -}}
-	{{- template "dialect/sql/predicate/edge/schemaconfig" . }}
+{{- define "dialect/sql/predicate/edge/haswith/ctxschemaconfig" -}}
+	{{- template "dialect/sql/predicate/edge/ctxschemaconfig" . }}
 {{- end -}}
 
-{{- define "dialect/sql/predicate/edge/schemaconfig" -}}
+{{- define "dialect/sql/predicate/edge/ctxschemaconfig" -}}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		{{- template "dialect/sql/query/step/schemaconfig" . }}
+		{{- template "dialect/sql/query/step/ctxschemaconfig" . }}
 	{{- end -}}
 {{- end -}}
 
-{{- define "dialect/sql/query/step/schemaconfig" -}}
+{{- define "dialect/sql/query/step/ctxschemaconfig" -}}
 	{{- $e := $.Scope.Edge }}
 	step.To.Schema = schemaConfig.{{ $e.Type.Name }}
 	{{- $schema := $e.Type.Name }}

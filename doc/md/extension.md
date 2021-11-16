@@ -47,7 +47,7 @@ to create extensions  without implementing all methods:
 package hello
 
 // GreetExtension implements entc.Extension.
-type GreetExtension {
+type GreetExtension struct {
 	entc.DefaultExtension
 }
 ```

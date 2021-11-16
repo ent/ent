@@ -47,17 +47,23 @@ func (pu *PetUpdate) SetNillableName(s *string) *PetUpdate {
 	return pu
 }
 
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	pu.mutation.SetOwnerID(id)
+// SetOwnerID sets the "owner_id" field.
+func (pu *PetUpdate) SetOwnerID(i int) *PetUpdate {
+	pu.mutation.SetOwnerID(i)
 	return pu
 }
 
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
-	if id != nil {
-		pu = pu.SetOwnerID(*id)
+// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableOwnerID(i *int) *PetUpdate {
+	if i != nil {
+		pu.SetOwnerID(*i)
 	}
+	return pu
+}
+
+// ClearOwnerID clears the value of the "owner_id" field.
+func (pu *PetUpdate) ClearOwnerID() *PetUpdate {
+	pu.mutation.ClearOwnerID()
 	return pu
 }
 
@@ -228,17 +234,23 @@ func (puo *PetUpdateOne) SetNillableName(s *string) *PetUpdateOne {
 	return puo
 }
 
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	puo.mutation.SetOwnerID(id)
+// SetOwnerID sets the "owner_id" field.
+func (puo *PetUpdateOne) SetOwnerID(i int) *PetUpdateOne {
+	puo.mutation.SetOwnerID(i)
 	return puo
 }
 
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
-	if id != nil {
-		puo = puo.SetOwnerID(*id)
+// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableOwnerID(i *int) *PetUpdateOne {
+	if i != nil {
+		puo.SetOwnerID(*i)
 	}
+	return puo
+}
+
+// ClearOwnerID clears the value of the "owner_id" field.
+func (puo *PetUpdateOne) ClearOwnerID() *PetUpdateOne {
+	puo.mutation.ClearOwnerID()
 	return puo
 }
 

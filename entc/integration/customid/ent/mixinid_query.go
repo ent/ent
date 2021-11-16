@@ -341,6 +341,10 @@ func (miq *MixinIDQuery) sqlAll(ctx context.Context) ([]*MixinID, error) {
 
 func (miq *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := miq.querySpec()
+	_spec.Node.Columns = miq.fields
+	if len(miq.fields) > 0 {
+		_spec.Unique = miq.unique != nil && *miq.unique
+	}
 	return sqlgraph.CountNodes(ctx, miq.driver, _spec)
 }
 
@@ -693,9 +697,7 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range migb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(migb.fields...)...)

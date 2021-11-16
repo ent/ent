@@ -28,7 +28,7 @@ func RegisterTypeDecoder(typ string, dec jsoniter.ValDecoder) {
 
 type registeredEncoder struct{ jsoniter.ValEncoder }
 
-// EncoderOfNative returns a value encoder of a registered type.
+// EncoderOfRegistered returns a value encoder of a registered type.
 func (encodeExtension) EncoderOfRegistered(typ reflect2.Type) jsoniter.ValEncoder {
 	enc := typeEncoders[typ.String()]
 	if enc != nil {
@@ -58,7 +58,7 @@ func (encodeExtension) DecoratorOfRegistered(enc jsoniter.ValEncoder) jsoniter.V
 
 type registeredDecoder struct{ jsoniter.ValDecoder }
 
-// DecoratorOfRegistered returns a value decoder of a registered type.
+// DecoderOfRegistered returns a value decoder of a registered type.
 func (decodeExtension) DecoderOfRegistered(typ reflect2.Type) jsoniter.ValDecoder {
 	dec := typeDecoders[typ.String()]
 	if dec != nil {
@@ -79,7 +79,7 @@ func (decodeExtension) DecoderOfRegistered(typ reflect2.Type) jsoniter.ValDecode
 	return nil
 }
 
-// DecoratorOfNative decorates a value decoder of a registered type.
+// DecoratorOfRegistered decorates a value decoder of a registered type.
 func (decodeExtension) DecoratorOfRegistered(dec jsoniter.ValDecoder) jsoniter.ValDecoder {
 	if _, ok := dec.(registeredDecoder); ok {
 		return dec

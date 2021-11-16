@@ -250,6 +250,7 @@ func TestMySQL_Create(t *testing.T) {
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "name", Type: field.TypeString, Nullable: true},
 						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
+						{Name: "mediumtext", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.MySQL: "mediumtext"}},
 						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 						{Name: "date", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{dialect.MySQL: "date"}},
 						{Name: "age", Type: field.TypeInt},
@@ -278,6 +279,7 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "", nil, nil).
 						AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "", nil, nil).
 						AddRow("text", "longtext", "YES", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("mediumtext", "mediumtext", "YES", "YES", "NULL", "", "", "", nil, nil).
 						AddRow("uuid", "char(36)", "YES", "YES", "NULL", "", "", "utf8mb4_bin", nil, nil).
 						AddRow("date", "date", "YES", "YES", "NULL", "", "", "", nil, nil).
 						// 8.0.19: new int column type formats

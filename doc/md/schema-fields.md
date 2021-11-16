@@ -295,6 +295,8 @@ func (User) Fields() []ent.Field {
 			Default("unknown"),
 		field.String("cuid").
 			DefaultFunc(cuid.New),
+		field.JSON("dirs", []http.Dir{}).
+			Default([]http.Dir{"/tmp"}),
 	}
 }
 ```

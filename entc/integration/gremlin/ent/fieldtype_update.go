@@ -610,6 +610,26 @@ func (ftu *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetText sets the "text" field.
+func (ftu *FieldTypeUpdate) SetText(s string) *FieldTypeUpdate {
+	ftu.mutation.SetText(s)
+	return ftu
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableText(s *string) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetText(*s)
+	}
+	return ftu
+}
+
+// ClearText clears the value of the "text" field.
+func (ftu *FieldTypeUpdate) ClearText() *FieldTypeUpdate {
+	ftu.mutation.ClearText()
+	return ftu
+}
+
 // SetDatetime sets the "datetime" field.
 func (ftu *FieldTypeUpdate) SetDatetime(t time.Time) *FieldTypeUpdate {
 	ftu.mutation.SetDatetime(t)
@@ -666,6 +686,18 @@ func (ftu *FieldTypeUpdate) SetLinkOther(s *schema.Link) *FieldTypeUpdate {
 // ClearLinkOther clears the value of the "link_other" field.
 func (ftu *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate {
 	ftu.mutation.ClearLinkOther()
+	return ftu
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftu *FieldTypeUpdate) SetLinkOtherFunc(s *schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetLinkOtherFunc(s)
+	return ftu
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (ftu *FieldTypeUpdate) ClearLinkOtherFunc() *FieldTypeUpdate {
+	ftu.mutation.ClearLinkOtherFunc()
 	return ftu
 }
 
@@ -1577,6 +1609,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.AddedOptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, __.Union(__.Values(fieldtype.FieldOptionalFloat32), __.Constant(value)).Sum())
 	}
+	if value, ok := ftu.mutation.Text(); ok {
+		v.Property(dsl.Single, fieldtype.FieldText, value)
+	}
 	if value, ok := ftu.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
 	}
@@ -1588,6 +1623,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := ftu.mutation.LinkOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
+	}
+	if value, ok := ftu.mutation.LinkOtherFunc(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLinkOtherFunc, value)
 	}
 	if value, ok := ftu.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
@@ -1776,6 +1814,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if ftu.mutation.OptionalFloat32Cleared() {
 		properties = append(properties, fieldtype.FieldOptionalFloat32)
 	}
+	if ftu.mutation.TextCleared() {
+		properties = append(properties, fieldtype.FieldText)
+	}
 	if ftu.mutation.DatetimeCleared() {
 		properties = append(properties, fieldtype.FieldDatetime)
 	}
@@ -1784,6 +1825,9 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	}
 	if ftu.mutation.LinkOtherCleared() {
 		properties = append(properties, fieldtype.FieldLinkOther)
+	}
+	if ftu.mutation.LinkOtherFuncCleared() {
+		properties = append(properties, fieldtype.FieldLinkOtherFunc)
 	}
 	if ftu.mutation.MACCleared() {
 		properties = append(properties, fieldtype.FieldMAC)
@@ -2465,6 +2509,26 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetText sets the "text" field.
+func (ftuo *FieldTypeUpdateOne) SetText(s string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetText(s)
+	return ftuo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableText(s *string) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetText(*s)
+	}
+	return ftuo
+}
+
+// ClearText clears the value of the "text" field.
+func (ftuo *FieldTypeUpdateOne) ClearText() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearText()
+	return ftuo
+}
+
 // SetDatetime sets the "datetime" field.
 func (ftuo *FieldTypeUpdateOne) SetDatetime(t time.Time) *FieldTypeUpdateOne {
 	ftuo.mutation.SetDatetime(t)
@@ -2521,6 +2585,18 @@ func (ftuo *FieldTypeUpdateOne) SetLinkOther(s *schema.Link) *FieldTypeUpdateOne
 // ClearLinkOther clears the value of the "link_other" field.
 func (ftuo *FieldTypeUpdateOne) ClearLinkOther() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearLinkOther()
+	return ftuo
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftuo *FieldTypeUpdateOne) SetLinkOtherFunc(s *schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetLinkOtherFunc(s)
+	return ftuo
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (ftuo *FieldTypeUpdateOne) ClearLinkOtherFunc() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearLinkOtherFunc()
 	return ftuo
 }
 
@@ -3444,6 +3520,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.AddedOptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, __.Union(__.Values(fieldtype.FieldOptionalFloat32), __.Constant(value)).Sum())
 	}
+	if value, ok := ftuo.mutation.Text(); ok {
+		v.Property(dsl.Single, fieldtype.FieldText, value)
+	}
 	if value, ok := ftuo.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
 	}
@@ -3455,6 +3534,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if value, ok := ftuo.mutation.LinkOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
+	}
+	if value, ok := ftuo.mutation.LinkOtherFunc(); ok {
+		v.Property(dsl.Single, fieldtype.FieldLinkOtherFunc, value)
 	}
 	if value, ok := ftuo.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
@@ -3643,6 +3725,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if ftuo.mutation.OptionalFloat32Cleared() {
 		properties = append(properties, fieldtype.FieldOptionalFloat32)
 	}
+	if ftuo.mutation.TextCleared() {
+		properties = append(properties, fieldtype.FieldText)
+	}
 	if ftuo.mutation.DatetimeCleared() {
 		properties = append(properties, fieldtype.FieldDatetime)
 	}
@@ -3651,6 +3736,9 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	}
 	if ftuo.mutation.LinkOtherCleared() {
 		properties = append(properties, fieldtype.FieldLinkOther)
+	}
+	if ftuo.mutation.LinkOtherFuncCleared() {
+		properties = append(properties, fieldtype.FieldLinkOtherFunc)
 	}
 	if ftuo.mutation.MACCleared() {
 		properties = append(properties, fieldtype.FieldMAC)

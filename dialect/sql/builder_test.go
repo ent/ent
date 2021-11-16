@@ -323,6 +323,15 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"foo", 10},
 		},
 		{
+			input: Dialect(dialect.Postgres).Update("users").
+				Set("active", false).
+				Where(P(func(b *Builder) {
+					b.Ident("name").WriteString(" SIMILAR TO ").Arg("(b|c)%")
+				})),
+			wantQuery: `UPDATE "users" SET "active" = $1 WHERE "name" SIMILAR TO $2`,
+			wantArgs:  []interface{}{false, "(b|c)%"},
+		},
+		{
 			input:     Update("users").Set("name", "foo").Where(EQ("name", "bar")),
 			wantQuery: "UPDATE `users` SET `name` = ? WHERE `name` = ?",
 			wantArgs:  []interface{}{"foo", "bar"},
@@ -1726,7 +1735,7 @@ func TestInsert_OnConflict(t *testing.T) {
 				UpdateWhere(NEQ("updated_at", 0)),
 			).
 			Query()
-		require.Equal(t, `INSERT INTO "users" ("id", "email", "creation_time") VALUES ($1, $2, $3) ON CONFLICT ("email") WHERE "name" = $4 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email", "creation_time" = "users"."creation_time", "version" = COALESCE("users"."version", 0) + $5 WHERE "updated_at" <> $6`, query)
+		require.Equal(t, `INSERT INTO "users" ("id", "email", "creation_time") VALUES ($1, $2, $3) ON CONFLICT ("email") WHERE "name" = $4 DO UPDATE SET "id" = "users"."id", "email" = "excluded"."email", "creation_time" = "users"."creation_time", "version" = COALESCE("users"."version", 0) + $5 WHERE "users"."updated_at" <> $6`, query)
 		require.Equal(t, []interface{}{"1", "user@example.com", 1633279231, "Ariel", 1, 0}, args)
 
 		query, args = Dialect(dialect.Postgres).
@@ -1832,4 +1841,97 @@ func TestInsert_OnConflict(t *testing.T) {
 		require.Equal(t, "INSERT INTO `users` (`name`) VALUES (?) ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `id` = LAST_INSERT_ID(`id`)", query)
 		require.Equal(t, []interface{}{"Mashraki"}, args)
 	})
+}
+
+func TestEscapePatterns(t *testing.T) {
+	q, args := Dialect(dialect.MySQL).
+		Update("users").
+		SetNull("name").
+		Where(
+			Or(
+				HasPrefix("nickname", "%a8m%"),
+				HasSuffix("nickname", "_alexsn_"),
+				Contains("nickname", "\\pedro\\"),
+				ContainsFold("nickname", "%AbcD%efg"),
+			),
+		).
+		Query()
+	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? OR `nickname` LIKE ? OR `nickname` LIKE ? OR `nickname` COLLATE utf8mb4_general_ci LIKE ?", q)
+	require.Equal(t, []interface{}{"\\%a8m\\%%", "%\\_alexsn\\_", "%\\\\pedro\\\\%", "%\\%abcd\\%efg%"}, args)
+
+	q, args = Dialect(dialect.SQLite).
+		Update("users").
+		SetNull("name").
+		Where(
+			Or(
+				HasPrefix("nickname", "%a8m%"),
+				HasSuffix("nickname", "_alexsn_"),
+				Contains("nickname", "\\pedro\\"),
+				ContainsFold("nickname", "%AbcD%efg"),
+			),
+		).
+		Query()
+	require.Equal(t, "UPDATE `users` SET `name` = NULL WHERE `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR `nickname` LIKE ? ESCAPE ? OR LOWER(`nickname`) LIKE ? ESCAPE ?", q)
+	require.Equal(t, []interface{}{"\\%a8m\\%%", "\\", "%\\_alexsn\\_", "\\", "%\\\\pedro\\\\%", "\\", "%\\%abcd\\%efg%", "\\"}, args)
+}
+
+func TestReusePredicates(t *testing.T) {
+	tests := []struct {
+		p         *Predicate
+		wantQuery string
+		wantArgs  []interface{}
+	}{
+		{
+			p:         EQ("active", false),
+			wantQuery: `SELECT * FROM "users" WHERE "active" = $1`,
+			wantArgs:  []interface{}{false},
+		},
+		{
+			p: Or(
+				EQ("a", "a"),
+				EQ("b", "b"),
+			),
+			wantQuery: `SELECT * FROM "users" WHERE "a" = $1 OR "b" = $2`,
+			wantArgs:  []interface{}{"a", "b"},
+		},
+		{
+			p: And(
+				EQ("active", true),
+				HasPrefix("name", "foo"),
+				HasSuffix("name", "bar"),
+				Or(
+					In("id", Select("oid").From(Table("audit"))),
+					In("id", Select("oid").From(Table("history"))),
+				),
+			),
+			wantQuery: `SELECT * FROM "users" WHERE "active" = $1 AND "name" LIKE $2 AND "name" LIKE $3 AND ("id" IN (SELECT "oid" FROM "audit") OR "id" IN (SELECT "oid" FROM "history"))`,
+			wantArgs:  []interface{}{true, "foo%", "%bar"},
+		},
+		{
+			p: func() *Predicate {
+				t1 := Table("groups")
+				pivot := Table("user_groups")
+				matches := Select(pivot.C("user_id")).
+					From(pivot).
+					Join(t1).
+					On(pivot.C("group_id"), t1.C("id")).
+					Where(EQ(t1.C("name"), "ent"))
+				return And(
+					GT("balance", 0),
+					In("id", matches),
+					GT("balance", 100),
+				)
+			}(),
+			wantQuery: `SELECT * FROM "users" WHERE "balance" > $1 AND "id" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "t1"."name" = $2) AND "balance" > $3`,
+			wantArgs:  []interface{}{0, "ent", 100},
+		},
+	}
+	for _, tt := range tests {
+		query, args := Dialect(dialect.Postgres).Select().From(Table("users")).Where(tt.p).Query()
+		require.Equal(t, tt.wantQuery, query)
+		require.Equal(t, tt.wantArgs, args)
+		query, args = Dialect(dialect.Postgres).Select().From(Table("users")).Where(tt.p).Query()
+		require.Equal(t, tt.wantQuery, query)
+		require.Equal(t, tt.wantArgs, args)
+	}
 }

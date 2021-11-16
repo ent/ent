@@ -20,6 +20,8 @@ func (Pet) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
 			Default("unknown"),
+		field.Int("owner_id").
+			Optional(),
 	}
 }
 
@@ -28,6 +30,7 @@ func (Pet) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
 			Ref("pets").
+			Field("owner_id").
 			Unique(),
 	}
 }

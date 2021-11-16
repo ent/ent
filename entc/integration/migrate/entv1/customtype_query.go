@@ -340,6 +340,10 @@ func (ctq *CustomTypeQuery) sqlAll(ctx context.Context) ([]*CustomType, error) {
 
 func (ctq *CustomTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ctq.querySpec()
+	_spec.Node.Columns = ctq.fields
+	if len(ctq.fields) > 0 {
+		_spec.Unique = ctq.unique != nil && *ctq.unique
+	}
 	return sqlgraph.CountNodes(ctx, ctq.driver, _spec)
 }
 
@@ -692,9 +696,7 @@ func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range ctgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(ctgb.fields...)...)

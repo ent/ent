@@ -20,7 +20,8 @@ sidebar_label: FAQ
 [How to extend the generated builders?](#how-to-extend-the-generated-builders)   
 [How to store Protobuf objects in a BLOB column?](#how-to-store-protobuf-objects-in-a-blob-column)  
 [How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)  
-[How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)
+[How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)  
+[How to configure two or more `DB` to separate read and write?](#how-to-configure-two-or-more-db-to-separate-read-and-write)
 
 ## Answers
 
@@ -552,52 +553,8 @@ If your custom fields/methods require additional imports, you can add those impo
 
 #### How to extend the generated builders?
 
-In case you want to extend the generated client and add dependencies to all different builders under the `ent` package,
-you can use the `"config/{fields,options}/*"` templates as follows:
-
-```gotemplate
-{{/* A template for adding additional config fields/options. */}}
-{{ define "config/fields/httpclient" -}}
-	// HTTPClient field added by a test template.
-	HTTPClient *http.Client
-{{ end }}
-
-{{ define "config/options/httpclient" }}
-	// HTTPClient option added by a test template.
-	func HTTPClient(hc *http.Client) Option {
-		return func(c *config) {
-			c.HTTPClient = hc
-		}
-	}
-{{ end }}
-```
-
-Then, you can inject this new dependency to your client, and access it in all builders:
-
-```go
-func main() {
-	client, err := ent.Open(
-		"sqlite3",
-		"file:ent?mode=memory&cache=shared&_fk=1",
-		// Custom config option.
-		ent.HTTPClient(http.DefaultClient),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
-	ctx := context.Background()
-	client.User.Use(func(next ent.Mutator) ent.Mutator {
-		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
-			// Access the injected HTTP client here.
-			_ = m.HTTPClient
-			return next.Mutate(ctx, m)
-		})
-	})
-	// ...
-}
-```
-
+See the *[Injecting External Dependencies](code-gen.md#external-dependencies)* section, or follow the
+example on [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
 
 #### How to store Protobuf objects in a BLOB column?
 
@@ -741,3 +698,64 @@ func (b *BigInt) Value() (driver.Value, error) {
 	return b.String(), nil
 }
 ```
+
+#### How to configure two or more `DB` to separate read and write?
+
+You can wrap the `dialect.Driver` with your own driver and implement this logic. For example.
+
+You can extend it, add support for multiple read replicas and add some load-balancing magic.
+
+```go
+func main() {
+	// ...
+	wd, err := sql.Open(dialect.MySQL, "root:pass@tcp(<addr>)/<database>?parseTime=True")
+	if err != nil {
+		log.Fatal(err)
+	}
+	rd, err := sql.Open(dialect.MySQL, "readonly:pass@tcp(<addr>)/<database>?parseTime=True")
+	if err != nil {
+		log.Fatal(err)
+	}
+	client := ent.NewClient(ent.Driver(&multiDriver{w: wd, r: rd}))
+	defer client.Close()
+	// Use the client here.
+}
+
+
+type multiDriver struct {
+	r, w dialect.Driver
+}
+
+var _ dialect.Driver = (*multiDriver)(nil)
+
+func (d *multiDriver) Query(ctx context.Context, query string, args, v interface{}) error {
+	return d.r.Query(ctx, query, args, v)
+}
+
+func (d *multiDriver) Exec(ctx context.Context, query string, args, v interface{}) error {
+	return d.w.Exec(ctx, query, args, v)
+}
+
+func (d *multiDriver) Tx(ctx context.Context) (dialect.Tx, error) {
+	return d.w.Tx(ctx)
+}
+
+func (d *multiDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (dialect.Tx, error) {
+	return d.w.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
+	}).BeginTx(ctx, opts)
+}
+
+func (d *multiDriver) Close() error {
+	rerr := d.r.Close()
+	werr := d.w.Close()
+	if rerr != nil {
+		return rerr
+	}
+	if werr != nil {
+		return werr
+	}
+	return nil
+}
+```
+

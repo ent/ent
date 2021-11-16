@@ -1005,6 +1005,9 @@ func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.Type
 // IsJSON returns true if the field is a JSON field.
 func (f Field) IsJSON() bool { return f.Type != nil && f.Type.Type == field.TypeJSON }
 
+// IsOther returns true if the field is an Other field.
+func (f Field) IsOther() bool { return f.Type != nil && f.Type.Type == field.TypeOther }
+
 // IsString returns true if the field is a string field.
 func (f Field) IsString() bool { return f.Type != nil && f.Type.Type == field.TypeString }
 
@@ -1261,7 +1264,7 @@ func (f Field) ConvertedToBasic() bool {
 	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
-// SupportsAdd reports if the field supports the mutation "Add(T) T" interface.
+// SupportsMutationAdd reports if the field supports the mutation "Add(T) T" interface.
 func (f Field) SupportsMutationAdd() bool {
 	if !f.Type.Numeric() || f.IsEdgeField() {
 		return false

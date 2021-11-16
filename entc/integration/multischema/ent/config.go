@@ -7,6 +7,8 @@
 package ent
 
 import (
+	"context"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
@@ -65,6 +67,12 @@ func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
 	}
+}
+
+// SchemaConfigFromContext exports the internal.SchemaConfigFromContext
+// for external usage (inside custom predicates or modifiers).
+func SchemaConfigFromContext(ctx context.Context) SchemaConfig {
+	return internal.SchemaConfigFromContext(ctx)
 }
 
 // SchemaConfig represents alternative schema names for all tables

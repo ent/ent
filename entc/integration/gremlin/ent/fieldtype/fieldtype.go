@@ -70,12 +70,16 @@ const (
 	FieldOptionalFloat = "optional_float"
 	// FieldOptionalFloat32 holds the string denoting the optional_float32 field in the database.
 	FieldOptionalFloat32 = "optional_float32"
+	// FieldText holds the string denoting the text field in the database.
+	FieldText = "text"
 	// FieldDatetime holds the string denoting the datetime field in the database.
 	FieldDatetime = "datetime"
 	// FieldDecimal holds the string denoting the decimal field in the database.
 	FieldDecimal = "decimal"
 	// FieldLinkOther holds the string denoting the link_other field in the database.
 	FieldLinkOther = "link_other"
+	// FieldLinkOtherFunc holds the string denoting the link_other_func field in the database.
+	FieldLinkOtherFunc = "link_other_func"
 	// FieldMAC holds the string denoting the mac field in the database.
 	FieldMAC = "mac"
 	// FieldStringArray holds the string denoting the string_array field in the database.
@@ -155,6 +159,10 @@ var (
 	UpdateDefaultInt64 func() int64
 	// ValidateOptionalInt32Validator is a validator for the "validate_optional_int32" field. It is called by the builders before save.
 	ValidateOptionalInt32Validator func(int32) error
+	// DefaultLinkOther holds the default value on creation for the "link_other" field.
+	DefaultLinkOther *schema.Link
+	// DefaultLinkOtherFunc holds the default value on creation for the "link_other_func" field.
+	DefaultLinkOtherFunc func() *schema.Link
 	// MACValidator is a validator for the "mac" field. It is called by the builders before save.
 	MACValidator func(string) error
 	// UpdateDefaultDuration holds the default value on update for the "duration" field.

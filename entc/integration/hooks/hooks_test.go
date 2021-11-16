@@ -152,6 +152,37 @@ func TestDeletion(t *testing.T) {
 	require.Zero(t, client.Card.Query().CountX(ctx))
 }
 
+func TestMutationIDs(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	count := make(map[ent.Op]int)
+	client.User.Use(
+		hook.Unless(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+					count[m.Op()]++
+					ids, err := m.IDs(ctx)
+					require.NoError(t, err)
+					require.Len(t, ids, 1)
+					require.Equal(t, count[m.Op()], ids[0])
+					return next.Mutate(ctx, m)
+				})
+			},
+			ent.OpCreate,
+		),
+	)
+	for i := 0; i < 5; i++ {
+		owner := client.User.Create().SetName(fmt.Sprintf("owner-%d", i)).SaveX(ctx)
+		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwner(owner).ExecX(ctx)
+	}
+	for i := 0; i < 5; i++ {
+		p := user.And(user.Name(fmt.Sprintf("owner-%d", i)), user.HasCardsWith(card.Number(fmt.Sprintf("card-%d", i))))
+		client.User.Update().AddVersion(1).Where(p).ExecX(ctx)
+		client.User.Delete().Where(p).ExecX(ctx)
+	}
+}
+
 func TestPostCreation(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
