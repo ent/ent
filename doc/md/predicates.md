@@ -266,3 +266,13 @@ sqljson.ValueContains(user.FieldData, attrs, sqljson.Path("attributes"))
 
 sqljson.ValueContains(user.FieldData, code, sqljson.DotPath("attributes[0].status_code"))
 ```
+
+#### Check if a JSON string value contains a given substring or has a given suffix or prefix
+
+```go
+sqljson.StringContains(user.FieldURL, "github", sqljson.Path("host"))
+
+sqljson.StringHasSuffix(user.FieldURL, ".com", sqljson.Path("host"))
+
+sqljson.StringHasPrefix(user.FieldData, "20", sqljson.DotPath("attributes[0].status_code"))
+```
