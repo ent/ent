@@ -627,6 +627,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "grevych",
+      "name": "Gerardo Reyes",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3792003?v=4",
+      "profile": "https://github.com/grevych",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
