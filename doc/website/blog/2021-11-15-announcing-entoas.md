@@ -3,6 +3,7 @@ title: Announcing "entoas" - An Extension to Automatically Generate OpenAPI Spec
 author: MasseElch 
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
+image: https://entgo.io/images/assets/elkopa/entoas-code.png
 ---
 
 The OpenAPI Specification (OAS, formerly known as Swagger Specification) is a technical specification defining a standard, language-agnostic
