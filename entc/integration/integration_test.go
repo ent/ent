@@ -154,7 +154,6 @@ func Sanity(t *testing.T, client *ent.Client) {
 	usr := client.User.Create().SetName("foo").SetAge(20).SaveX(ctx)
 	client.User.Update().ExecX(ctx)
 	client.User.UpdateOne(usr).ExecX(ctx)
-	client.Node.Update().Where(node.ID(usr.ID)).ExecX(ctx)
 	require.Equal("foo", usr.Name)
 	require.Equal(20, usr.Age)
 	require.NotEmpty(usr.ID)
@@ -762,7 +761,7 @@ func Delete(t *testing.T, client *ent.Client) {
 	require.True(ent.IsNotFound(err))
 
 	for i := 0; i < 5; i++ {
-		client.Node.Create().SetValue(i).SaveX(ctx)
+		client.Node.Create().SetValue(i).ExecX(ctx)
 	}
 	affected, err := client.Node.Delete().Where(node.ValueGT(2)).Exec(ctx)
 	require.NoError(err)
@@ -885,7 +884,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	client.User.DeleteOne(brat).ExecX(ctx)
 	require.Equal(1, usr.QueryChildren().CountX(ctx))
 
-	client.Group.UpdateOne(grp).AddBlocked(neta).SaveX(ctx)
+	client.Group.UpdateOne(grp).AddBlocked(neta).ExecX(ctx)
 	blocked := usr.QueryGroups().OnlyX(ctx).QueryBlocked().OnlyX(ctx)
 	t.Log("blocked:", blocked)
 
@@ -989,8 +988,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Zero(age)
 
 	t.Log("group-by two fields with aggregation")
-	client.User.Create().SetName(usr.Name).SetAge(usr.Age).SaveX(ctx)
-	client.User.Create().SetName(neta.Name).SetAge(neta.Age).SaveX(ctx)
+	client.User.Create().SetName(usr.Name).SetAge(usr.Age).ExecX(ctx)
+	client.User.Create().SetName(neta.Name).SetAge(neta.Age).ExecX(ctx)
 	child2 := client.User.Create().SetName(child.Name).SetAge(child.Age + 1).SaveX(ctx)
 	var v []struct {
 		Name  string `json:"name"`
@@ -1136,7 +1135,7 @@ func ClearEdges(t *testing.T, client *ent.Client) {
 	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfo(inf).AddUsers(a8m, nat).SaveX(ctx)
 	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf).AddUsers(a8m, nat).SaveX(ctx)
 	require.Equal(t, 2, a8m.QueryGroups().CountX(ctx))
-	a8m.Update().ClearGroups().SaveX(ctx)
+	a8m.Update().ClearGroups().ExecX(ctx)
 	require.Zero(t, a8m.QueryGroups().CountX(ctx))
 	err := client.Group.Update().AddUsers(a8m).Exec(ctx)
 	require.NoError(t, err, "return the user-edge back to groups")
@@ -1322,7 +1321,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
 		tx.OnRollback(m.rHook())
-		tx.Node.Create().SaveX(ctx)
+		tx.Node.Create().ExecX(ctx)
 		require.NoError(t, tx.Rollback())
 		require.Zero(t, client.Node.Query().CountX(ctx), "rollback should discard all changes")
 	})
@@ -1439,9 +1438,9 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
 	nati := client.User.Create().SetName("nati").SetAge(28).SetSpouse(a8m).SaveX(ctx)
 	alex := client.User.Create().SetName("alexsn").SetAge(35).AddFriends(a8m).SaveX(ctx)
-	client.Pet.Create().SetName("xabi").SaveX(ctx)
-	client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(nati).SaveX(ctx)
-	client.Card.Create().SetNumber("102030").SetOwner(a8m).SaveX(ctx)
+	client.Pet.Create().SetName("xabi").ExecX(ctx)
+	client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(nati).ExecX(ctx)
+	client.Card.Create().SetNumber("102030").SetOwner(a8m).ExecX(ctx)
 
 	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
 	files := ent.Files{
@@ -1789,7 +1788,7 @@ func Lock(t *testing.T, client *ent.Client) {
 			require.EqualValues(t, "Lock wait timeout exceeded; try restarting transaction", err.Message)
 		}
 		require.NoError(t, tx2.Rollback())
-		p1.Update().SetName("updated").SaveX(ctx)
+		p1.Update().SetName("updated").ExecX(ctx)
 		require.NoError(t, tx1.Commit())
 		tx3.Pet.Query().Where(pet.ID(xabi.ID)).ForUpdate().OnlyX(ctx)
 		require.NoError(t, tx3.Rollback())
