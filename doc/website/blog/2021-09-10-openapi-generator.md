@@ -21,7 +21,7 @@ can generate both server and client boilerplate code for more than 20 languages,
 The first step is to add the `elk` package to your project:
 
 ```shell
-go install github.com/masseelch/elk
+go get github.com/masseelch/elk@latest
 ```
 
 `elk` uses the Ent [Extension API](https://entgo.io/docs/extensions) to integrate with Ent’s code-generation. This
