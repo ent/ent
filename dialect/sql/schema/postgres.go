@@ -267,8 +267,10 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Size = maxCharSize + 1
 	case "character", "character varying":
 		c.Type = field.TypeString
+		// If character maximum length is specified then we should take that into account.
 		if numericCharacterMaximumLength.Valid {
-			c.Size = numericCharacterMaximumLength.Int64
+			schemaType := fmt.Sprintf("%s(%d)", c.typ, numericCharacterMaximumLength.Int64)
+			c.SchemaType = map[string]string{dialect.Postgres: schemaType}
 		}
 	case "date", "time", "timestamp", "timestamp with time zone", "timestamp without time zone":
 		c.Type = field.TypeTime
