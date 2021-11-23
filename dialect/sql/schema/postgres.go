@@ -353,9 +353,9 @@ func (d *Postgres) cType(c *Column) (t string) {
 	case field.TypeUUID:
 		t = "uuid"
 	case field.TypeString:
-		t = "varchar"
+		t = c.scanTypeOr("varchar")
 		if c.Size > maxCharSize {
-			t = "text"
+			t = c.scanTypeOr("text")
 		}
 	case field.TypeTime:
 		t = c.scanTypeOr("timestamp with time zone")
