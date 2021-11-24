@@ -184,7 +184,10 @@ func (Card) Hooks() []ent.Hook {
 				if s, ok := m.(interface{ SetName(string) }); ok {
 					s.SetName("Boring")
 				}
-				return next.Mutate(ctx, m)
+				value, err := next.Mutate(ctx, m)
+				// Post mutation action.
+				fmt.Printf("new value: %s", value)
+				return value, err
 			})
 		},
 	}
