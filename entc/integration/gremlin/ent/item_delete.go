@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/item"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/item"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the ItemDelete builder.
 func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	id.predicates = append(id.predicates, ps...)
+	id.mutation.Where(ps...)
 	return id
 }
 
@@ -52,6 +51,9 @@ func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(id.hooks) - 1; i >= 0; i-- {
+			if id.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = id.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, id.mutation); err != nil {
@@ -81,7 +83,7 @@ func (id *ItemDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (id *ItemDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(item.Label)
-	for _, p := range id.predicates {
+	for _, p := range id.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

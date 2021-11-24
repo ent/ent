@@ -8,38 +8,66 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/card"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/entc/integration/ent/spec"
-	"github.com/facebook/ent/entc/integration/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/card"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/entc/integration/ent/spec"
+	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // CardUpdate is the builder for updating Card entities.
 type CardUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CardMutation
-	predicates []predicate.Card
+	hooks    []Hook
+	mutation *CardMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the CardUpdate builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 
-// SetName sets the name field.
+// SetUpdateTime sets the "update_time" field.
+func (cu *CardUpdate) SetUpdateTime(t time.Time) *CardUpdate {
+	cu.mutation.SetUpdateTime(t)
+	return cu
+}
+
+// SetBalance sets the "balance" field.
+func (cu *CardUpdate) SetBalance(f float64) *CardUpdate {
+	cu.mutation.ResetBalance()
+	cu.mutation.SetBalance(f)
+	return cu
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableBalance(f *float64) *CardUpdate {
+	if f != nil {
+		cu.SetBalance(*f)
+	}
+	return cu
+}
+
+// AddBalance adds f to the "balance" field.
+func (cu *CardUpdate) AddBalance(f float64) *CardUpdate {
+	cu.mutation.AddBalance(f)
+	return cu
+}
+
+// SetName sets the "name" field.
 func (cu *CardUpdate) SetName(s string) *CardUpdate {
 	cu.mutation.SetName(s)
 	return cu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
 	if s != nil {
 		cu.SetName(*s)
@@ -47,19 +75,19 @@ func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
 	return cu
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cu *CardUpdate) ClearName() *CardUpdate {
 	cu.mutation.ClearName()
 	return cu
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CardUpdate) SetOwnerID(id int) *CardUpdate {
 	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cu *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 	if id != nil {
 		cu = cu.SetOwnerID(*id)
@@ -67,18 +95,18 @@ func (cu *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 	return cu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cu *CardUpdate) SetOwner(u *User) *CardUpdate {
 	return cu.SetOwnerID(u.ID)
 }
 
-// AddSpecIDs adds the spec edge to Spec by ids.
+// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (cu *CardUpdate) AddSpecIDs(ids ...int) *CardUpdate {
 	cu.mutation.AddSpecIDs(ids...)
 	return cu
 }
 
-// AddSpec adds the spec edges to Spec.
+// AddSpec adds the "spec" edges to the Spec entity.
 func (cu *CardUpdate) AddSpec(s ...*Spec) *CardUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -92,25 +120,25 @@ func (cu *CardUpdate) Mutation() *CardMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.mutation.ClearOwner()
 	return cu
 }
 
-// ClearSpec clears all "spec" edges to type Spec.
+// ClearSpec clears all "spec" edges to the Spec entity.
 func (cu *CardUpdate) ClearSpec() *CardUpdate {
 	cu.mutation.ClearSpec()
 	return cu
 }
 
-// RemoveSpecIDs removes the spec edge to Spec by ids.
+// RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (cu *CardUpdate) RemoveSpecIDs(ids ...int) *CardUpdate {
 	cu.mutation.RemoveSpecIDs(ids...)
 	return cu
 }
 
-// RemoveSpec removes spec edges to Spec.
+// RemoveSpec removes "spec" edges to Spec entities.
 func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -119,7 +147,7 @@ func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
 	return cu.RemoveSpecIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -146,6 +174,9 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			if cu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
@@ -189,7 +220,7 @@ func (cu *CardUpdate) defaults() {
 func (cu *CardUpdate) check() error {
 	if v, ok := cu.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -206,7 +237,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := cu.predicates; len(ps) > 0 {
+	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -218,6 +249,20 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: card.FieldUpdateTime,
+		})
+	}
+	if value, ok := cu.mutation.Balance(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
+		})
+	}
+	if value, ok := cu.mutation.AddedBalance(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
 		})
 	}
 	if value, ok := cu.mutation.Name(); ok {
@@ -325,8 +370,8 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -336,17 +381,45 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CardUpdateOne is the builder for updating a single Card entity.
 type CardUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CardMutation
 }
 
-// SetName sets the name field.
+// SetUpdateTime sets the "update_time" field.
+func (cuo *CardUpdateOne) SetUpdateTime(t time.Time) *CardUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
+	return cuo
+}
+
+// SetBalance sets the "balance" field.
+func (cuo *CardUpdateOne) SetBalance(f float64) *CardUpdateOne {
+	cuo.mutation.ResetBalance()
+	cuo.mutation.SetBalance(f)
+	return cuo
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableBalance(f *float64) *CardUpdateOne {
+	if f != nil {
+		cuo.SetBalance(*f)
+	}
+	return cuo
+}
+
+// AddBalance adds f to the "balance" field.
+func (cuo *CardUpdateOne) AddBalance(f float64) *CardUpdateOne {
+	cuo.mutation.AddBalance(f)
+	return cuo
+}
+
+// SetName sets the "name" field.
 func (cuo *CardUpdateOne) SetName(s string) *CardUpdateOne {
 	cuo.mutation.SetName(s)
 	return cuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
 	if s != nil {
 		cuo.SetName(*s)
@@ -354,19 +427,19 @@ func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
 	return cuo
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cuo *CardUpdateOne) ClearName() *CardUpdateOne {
 	cuo.mutation.ClearName()
 	return cuo
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cuo *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
 	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 	if id != nil {
 		cuo = cuo.SetOwnerID(*id)
@@ -374,18 +447,18 @@ func (cuo *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 	return cuo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cuo *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
 	return cuo.SetOwnerID(u.ID)
 }
 
-// AddSpecIDs adds the spec edge to Spec by ids.
+// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (cuo *CardUpdateOne) AddSpecIDs(ids ...int) *CardUpdateOne {
 	cuo.mutation.AddSpecIDs(ids...)
 	return cuo
 }
 
-// AddSpec adds the spec edges to Spec.
+// AddSpec adds the "spec" edges to the Spec entity.
 func (cuo *CardUpdateOne) AddSpec(s ...*Spec) *CardUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -399,25 +472,25 @@ func (cuo *CardUpdateOne) Mutation() *CardMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo
 }
 
-// ClearSpec clears all "spec" edges to type Spec.
+// ClearSpec clears all "spec" edges to the Spec entity.
 func (cuo *CardUpdateOne) ClearSpec() *CardUpdateOne {
 	cuo.mutation.ClearSpec()
 	return cuo
 }
 
-// RemoveSpecIDs removes the spec edge to Spec by ids.
+// RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (cuo *CardUpdateOne) RemoveSpecIDs(ids ...int) *CardUpdateOne {
 	cuo.mutation.RemoveSpecIDs(ids...)
 	return cuo
 }
 
-// RemoveSpec removes spec edges to Spec.
+// RemoveSpec removes "spec" edges to Spec entities.
 func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -426,7 +499,14 @@ func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 	return cuo.RemoveSpecIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
+}
+
+// Save executes the query and returns the updated Card entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	var (
 		err  error
@@ -453,6 +533,9 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 			return node, err
 		})
 		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			if cuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
@@ -496,7 +579,7 @@ func (cuo *CardUpdateOne) defaults() {
 func (cuo *CardUpdateOne) check() error {
 	if v, ok := cuo.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -515,14 +598,47 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Card.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Card.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := cuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, card.FieldID)
+		for _, f := range fields {
+			if !card.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != card.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := cuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := cuo.mutation.UpdateTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: card.FieldUpdateTime,
+		})
+	}
+	if value, ok := cuo.mutation.Balance(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
+		})
+	}
+	if value, ok := cuo.mutation.AddedBalance(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Value:  value,
+			Column: card.FieldBalance,
 		})
 	}
 	if value, ok := cuo.mutation.Name(); ok {
@@ -629,12 +745,12 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 	}
 	_node = &Card{config: cuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

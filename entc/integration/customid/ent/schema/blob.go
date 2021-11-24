@@ -5,9 +5,10 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
 
 	"github.com/google/uuid"
 )
@@ -21,10 +22,16 @@ type Blob struct {
 func (Blob) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
-			Default(uuid.New),
+			Default(uuid.New).
+			Annotations(entsql.Annotation{
+				Default: "uuid_generate_v4()",
+			}).
+			Unique(),
 		field.UUID("uuid", uuid.UUID{}).
 			Default(uuid.New).
 			Unique(),
+		field.Int("count").
+			Default(0),
 	}
 }
 

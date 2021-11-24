@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.
@@ -25,8 +25,9 @@ type UserQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
-	unique     []string
+	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
 	withCard      *CardQuery
@@ -45,7 +46,7 @@ type UserQuery struct {
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the UserQuery builder.
 func (uq *UserQuery) Where(ps ...predicate.User) *UserQuery {
 	uq.predicates = append(uq.predicates, ps...)
 	return uq
@@ -63,167 +64,175 @@ func (uq *UserQuery) Offset(offset int) *UserQuery {
 	return uq
 }
 
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (uq *UserQuery) Unique(unique bool) *UserQuery {
+	uq.unique = &unique
+	return uq
+}
+
 // Order adds an order step to the query.
 func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
 }
 
-// QueryCard chains the current query on the card edge.
+// QueryCard chains the current query on the "card" edge.
 func (uq *UserQuery) QueryCard() *CardQuery {
 	query := &CardQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.CardLabel).InV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryPets chains the current query on the pets edge.
+// QueryPets chains the current query on the "pets" edge.
 func (uq *UserQuery) QueryPets() *PetQuery {
 	query := &PetQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.PetsLabel).InV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryFiles chains the current query on the files edge.
+// QueryFiles chains the current query on the "files" edge.
 func (uq *UserQuery) QueryFiles() *FileQuery {
 	query := &FileQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.FilesLabel).InV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryGroups chains the current query on the groups edge.
+// QueryGroups chains the current query on the "groups" edge.
 func (uq *UserQuery) QueryGroups() *GroupQuery {
 	query := &GroupQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.GroupsLabel).InV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryFriends chains the current query on the friends edge.
+// QueryFriends chains the current query on the "friends" edge.
 func (uq *UserQuery) QueryFriends() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.Both(user.FriendsLabel)
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryFollowers chains the current query on the followers edge.
+// QueryFollowers chains the current query on the "followers" edge.
 func (uq *UserQuery) QueryFollowers() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.FollowingLabel).OutV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryFollowing chains the current query on the following edge.
+// QueryFollowing chains the current query on the "following" edge.
 func (uq *UserQuery) QueryFollowing() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.FollowingLabel).InV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryTeam chains the current query on the team edge.
+// QueryTeam chains the current query on the "team" edge.
 func (uq *UserQuery) QueryTeam() *PetQuery {
 	query := &PetQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.TeamLabel).InV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QuerySpouse chains the current query on the spouse edge.
+// QuerySpouse chains the current query on the "spouse" edge.
 func (uq *UserQuery) QuerySpouse() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.Both(user.SpouseLabel)
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryChildren chains the current query on the children edge.
+// QueryChildren chains the current query on the "children" edge.
 func (uq *UserQuery) QueryChildren() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.ParentLabel).OutV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryParent chains the current query on the parent edge.
+// QueryParent chains the current query on the "parent" edge.
 func (uq *UserQuery) QueryParent() *UserQuery {
 	query := &UserQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := uq.gremlinQuery()
+		gremlin := uq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(user.ParentLabel).InV()
 		return fromU, nil
 	}
 	return query
 }
 
-// First returns the first User entity in the query. Returns *NotFoundError when no user was found.
+// First returns the first User entity from the query.
+// Returns a *NotFoundError when no User was found.
 func (uq *UserQuery) First(ctx context.Context) (*User, error) {
 	nodes, err := uq.Limit(1).All(ctx)
 	if err != nil {
@@ -244,7 +253,8 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 	return node
 }
 
-// FirstID returns the first User id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first User ID from the query.
+// Returns a *NotFoundError when no User ID was found.
 func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = uq.Limit(1).IDs(ctx); err != nil {
@@ -257,8 +267,8 @@ func (uq *UserQuery) FirstID(ctx context.Context) (id string, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (uq *UserQuery) FirstXID(ctx context.Context) string {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (uq *UserQuery) FirstIDX(ctx context.Context) string {
 	id, err := uq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -266,7 +276,9 @@ func (uq *UserQuery) FirstXID(ctx context.Context) string {
 	return id
 }
 
-// Only returns the only User entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single User entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one User entity is not found.
+// Returns a *NotFoundError when no User entities are found.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 	nodes, err := uq.Limit(2).All(ctx)
 	if err != nil {
@@ -291,7 +303,9 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 	return node
 }
 
-// OnlyID returns the only User id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only User ID in the query.
+// Returns a *NotSingularError when exactly one User ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (uq *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = uq.Limit(2).IDs(ctx); err != nil {
@@ -334,7 +348,7 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 	return nodes
 }
 
-// IDs executes the query and returns a list of User ids.
+// IDs executes the query and returns a list of User IDs.
 func (uq *UserQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
 	if err := uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
@@ -386,24 +400,37 @@ func (uq *UserQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the UserQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (uq *UserQuery) Clone() *UserQuery {
+	if uq == nil {
+		return nil
+	}
 	return &UserQuery{
-		config:     uq.config,
-		limit:      uq.limit,
-		offset:     uq.offset,
-		order:      append([]OrderFunc{}, uq.order...),
-		unique:     append([]string{}, uq.unique...),
-		predicates: append([]predicate.User{}, uq.predicates...),
+		config:        uq.config,
+		limit:         uq.limit,
+		offset:        uq.offset,
+		order:         append([]OrderFunc{}, uq.order...),
+		predicates:    append([]predicate.User{}, uq.predicates...),
+		withCard:      uq.withCard.Clone(),
+		withPets:      uq.withPets.Clone(),
+		withFiles:     uq.withFiles.Clone(),
+		withGroups:    uq.withGroups.Clone(),
+		withFriends:   uq.withFriends.Clone(),
+		withFollowers: uq.withFollowers.Clone(),
+		withFollowing: uq.withFollowing.Clone(),
+		withTeam:      uq.withTeam.Clone(),
+		withSpouse:    uq.withSpouse.Clone(),
+		withChildren:  uq.withChildren.Clone(),
+		withParent:    uq.withParent.Clone(),
 		// clone intermediate query.
 		gremlin: uq.gremlin.Clone(),
 		path:    uq.path,
 	}
 }
 
-//  WithCard tells the query-builder to eager-loads the nodes that are connected to
-// the "card" edge. The optional arguments used to configure the query builder of the edge.
+// WithCard tells the query-builder to eager-load the nodes that are connected to
+// the "card" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
 	query := &CardQuery{config: uq.config}
 	for _, opt := range opts {
@@ -413,8 +440,8 @@ func (uq *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
 	return uq
 }
 
-//  WithPets tells the query-builder to eager-loads the nodes that are connected to
-// the "pets" edge. The optional arguments used to configure the query builder of the edge.
+// WithPets tells the query-builder to eager-load the nodes that are connected to
+// the "pets" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
 	query := &PetQuery{config: uq.config}
 	for _, opt := range opts {
@@ -424,8 +451,8 @@ func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
 	return uq
 }
 
-//  WithFiles tells the query-builder to eager-loads the nodes that are connected to
-// the "files" edge. The optional arguments used to configure the query builder of the edge.
+// WithFiles tells the query-builder to eager-load the nodes that are connected to
+// the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
 	query := &FileQuery{config: uq.config}
 	for _, opt := range opts {
@@ -435,8 +462,8 @@ func (uq *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
 	return uq
 }
 
-//  WithGroups tells the query-builder to eager-loads the nodes that are connected to
-// the "groups" edge. The optional arguments used to configure the query builder of the edge.
+// WithGroups tells the query-builder to eager-load the nodes that are connected to
+// the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
 	query := &GroupQuery{config: uq.config}
 	for _, opt := range opts {
@@ -446,8 +473,8 @@ func (uq *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
 	return uq
 }
 
-//  WithFriends tells the query-builder to eager-loads the nodes that are connected to
-// the "friends" edge. The optional arguments used to configure the query builder of the edge.
+// WithFriends tells the query-builder to eager-load the nodes that are connected to
+// the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
 	query := &UserQuery{config: uq.config}
 	for _, opt := range opts {
@@ -457,8 +484,8 @@ func (uq *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
 	return uq
 }
 
-//  WithFollowers tells the query-builder to eager-loads the nodes that are connected to
-// the "followers" edge. The optional arguments used to configure the query builder of the edge.
+// WithFollowers tells the query-builder to eager-load the nodes that are connected to
+// the "followers" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
 	query := &UserQuery{config: uq.config}
 	for _, opt := range opts {
@@ -468,8 +495,8 @@ func (uq *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
 	return uq
 }
 
-//  WithFollowing tells the query-builder to eager-loads the nodes that are connected to
-// the "following" edge. The optional arguments used to configure the query builder of the edge.
+// WithFollowing tells the query-builder to eager-load the nodes that are connected to
+// the "following" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
 	query := &UserQuery{config: uq.config}
 	for _, opt := range opts {
@@ -479,8 +506,8 @@ func (uq *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
 	return uq
 }
 
-//  WithTeam tells the query-builder to eager-loads the nodes that are connected to
-// the "team" edge. The optional arguments used to configure the query builder of the edge.
+// WithTeam tells the query-builder to eager-load the nodes that are connected to
+// the "team" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
 	query := &PetQuery{config: uq.config}
 	for _, opt := range opts {
@@ -490,8 +517,8 @@ func (uq *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
 	return uq
 }
 
-//  WithSpouse tells the query-builder to eager-loads the nodes that are connected to
-// the "spouse" edge. The optional arguments used to configure the query builder of the edge.
+// WithSpouse tells the query-builder to eager-load the nodes that are connected to
+// the "spouse" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
 	query := &UserQuery{config: uq.config}
 	for _, opt := range opts {
@@ -501,8 +528,8 @@ func (uq *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
 	return uq
 }
 
-//  WithChildren tells the query-builder to eager-loads the nodes that are connected to
-// the "children" edge. The optional arguments used to configure the query builder of the edge.
+// WithChildren tells the query-builder to eager-load the nodes that are connected to
+// the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
 	query := &UserQuery{config: uq.config}
 	for _, opt := range opts {
@@ -512,8 +539,8 @@ func (uq *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
 	return uq
 }
 
-//  WithParent tells the query-builder to eager-loads the nodes that are connected to
-// the "parent" edge. The optional arguments used to configure the query builder of the edge.
+// WithParent tells the query-builder to eager-load the nodes that are connected to
+// the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 	query := &UserQuery{config: uq.config}
 	for _, opt := range opts {
@@ -523,7 +550,7 @@ func (uq *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 	return uq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -545,12 +572,13 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return uq.gremlinQuery(), nil
+		return uq.gremlinQuery(ctx), nil
 	}
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -562,16 +590,9 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //		Select(user.FieldOptionalInt).
 //		Scan(ctx, &v)
 //
-func (uq *UserQuery) Select(field string, fields ...string) *UserSelect {
-	selector := &UserSelect{config: uq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return uq.gremlinQuery(), nil
-	}
-	return selector
+func (uq *UserQuery) Select(fields ...string) *UserSelect {
+	uq.fields = append(uq.fields, fields...)
+	return &UserSelect{UserQuery: uq}
 }
 
 func (uq *UserQuery) prepareQuery(ctx context.Context) error {
@@ -587,7 +608,17 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 
 func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
 	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().ValueMap(true).Query()
+	traversal := uq.gremlinQuery(ctx)
+	if len(uq.fields) > 0 {
+		fields := make([]interface{}, len(uq.fields))
+		for i, f := range uq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -601,7 +632,7 @@ func (uq *UserQuery) gremlinAll(ctx context.Context) ([]*User, error) {
 
 func (uq *UserQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().Count().Query()
+	query, bindings := uq.gremlinQuery(ctx).Count().Query()
 	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -610,14 +641,14 @@ func (uq *UserQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (uq *UserQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := uq.gremlinQuery().HasNext().Query()
+	query, bindings := uq.gremlinQuery(ctx).HasNext().Query()
 	if err := uq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
+func (uq *UserQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(user.Label)
 	if uq.gremlin != nil {
 		v = uq.gremlin.Clone()
@@ -639,13 +670,13 @@ func (uq *UserQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := uq.unique; len(unique) == 0 {
+	if unique := uq.unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
 }
 
-// UserGroupBy is the builder for group-by User entities.
+// UserGroupBy is the group-by builder for User entities.
 type UserGroupBy struct {
 	config
 	fields []string
@@ -661,7 +692,7 @@ func (ugb *UserGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupBy {
 	return ugb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (ugb *UserGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := ugb.path(ctx)
 	if err != nil {
@@ -678,7 +709,8 @@ func (ugb *UserGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ugb *UserGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(ugb.fields) > 1 {
 		return nil, errors.New("ent: UserGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -699,7 +731,8 @@ func (ugb *UserGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ugb *UserGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ugb.Strings(ctx); err != nil {
@@ -725,7 +758,8 @@ func (ugb *UserGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ugb *UserGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ugb.fields) > 1 {
 		return nil, errors.New("ent: UserGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -746,7 +780,8 @@ func (ugb *UserGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ugb *UserGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ugb.Ints(ctx); err != nil {
@@ -772,7 +807,8 @@ func (ugb *UserGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ugb *UserGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ugb.fields) > 1 {
 		return nil, errors.New("ent: UserGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -793,7 +829,8 @@ func (ugb *UserGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ugb *UserGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ugb.Float64s(ctx); err != nil {
@@ -819,7 +856,8 @@ func (ugb *UserGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ugb *UserGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ugb.fields) > 1 {
 		return nil, errors.New("ent: UserGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -840,7 +878,8 @@ func (ugb *UserGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ugb *UserGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ugb.Bools(ctx); err != nil {
@@ -903,22 +942,19 @@ func (ugb *UserGroupBy) gremlinQuery() *dsl.Traversal {
 		Next()
 }
 
-// UserSelect is the builder for select fields of User entities.
+// UserSelect is the builder for selecting fields of User entities.
 type UserSelect struct {
-	config
-	fields []string
+	*UserQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (us *UserSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := us.path(ctx)
-	if err != nil {
+	if err := us.prepareQuery(ctx); err != nil {
 		return err
 	}
-	us.gremlin = query
+	us.gremlin = us.UserQuery.gremlinQuery(ctx)
 	return us.gremlinScan(ctx, v)
 }
 
@@ -929,7 +965,7 @@ func (us *UserSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (us *UserSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(us.fields) > 1 {
 		return nil, errors.New("ent: UserSelect.Strings is not achievable when selecting more than 1 field")
@@ -950,7 +986,7 @@ func (us *UserSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (us *UserSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = us.Strings(ctx); err != nil {
@@ -976,7 +1012,7 @@ func (us *UserSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (us *UserSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(us.fields) > 1 {
 		return nil, errors.New("ent: UserSelect.Ints is not achievable when selecting more than 1 field")
@@ -997,7 +1033,7 @@ func (us *UserSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (us *UserSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = us.Ints(ctx); err != nil {
@@ -1023,7 +1059,7 @@ func (us *UserSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (us *UserSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(us.fields) > 1 {
 		return nil, errors.New("ent: UserSelect.Float64s is not achievable when selecting more than 1 field")
@@ -1044,7 +1080,7 @@ func (us *UserSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (us *UserSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = us.Float64s(ctx); err != nil {
@@ -1070,7 +1106,7 @@ func (us *UserSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (us *UserSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(us.fields) > 1 {
 		return nil, errors.New("ent: UserSelect.Bools is not achievable when selecting more than 1 field")
@@ -1091,7 +1127,7 @@ func (us *UserSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (us *UserSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = us.Bools(ctx); err != nil {

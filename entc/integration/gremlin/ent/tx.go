@@ -10,7 +10,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -74,7 +74,7 @@ type (
 	// and returns a Committer. For example:
 	//
 	//	hook := func(next ent.Committer) ent.Committer {
-	//		return ent.CommitFunc(func(context.Context, tx *ent.Tx) error {
+	//		return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
 	//			// Do some stuff before.
 	//			if err := next.Commit(ctx, tx); err != nil {
 	//				return err
@@ -129,7 +129,7 @@ type (
 	// and returns a Rollbacker. For example:
 	//
 	//	hook := func(next ent.Rollbacker) ent.Rollbacker {
-	//		return ent.RollbackFunc(func(context.Context, tx *ent.Tx) error {
+	//		return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
 	//			// Do some stuff before.
 	//			if err := next.Rollback(ctx, tx); err != nil {
 	//				return err

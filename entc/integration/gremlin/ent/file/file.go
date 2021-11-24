@@ -21,14 +21,12 @@ const (
 	FieldGroup = "group"
 	// FieldOp holds the string denoting the op field in the database.
 	FieldOp = "op"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeType holds the string denoting the type edge name in mutations.
 	EdgeType = "type"
 	// EdgeField holds the string denoting the field edge name in mutations.
 	EdgeField = "field"
-
 	// OwnerInverseLabel holds the string label denoting the owner inverse edge type in the database.
 	OwnerInverseLabel = "user_files"
 	// TypeInverseLabel holds the string label denoting the type inverse edge type in the database.
@@ -38,7 +36,7 @@ const (
 )
 
 var (
-	// DefaultSize holds the default value on creation for the size field.
+	// DefaultSize holds the default value on creation for the "size" field.
 	DefaultSize int
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	SizeValidator func(int) error

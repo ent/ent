@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/edgeindex/ent/city"
-	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/edgeindex/ent/city"
+	"entgo.io/ent/examples/edgeindex/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // CityDelete is the builder for deleting a City entity.
 type CityDelete struct {
 	config
-	hooks      []Hook
-	mutation   *CityMutation
-	predicates []predicate.City
+	hooks    []Hook
+	mutation *CityMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the CityDelete builder.
 func (cd *CityDelete) Where(ps ...predicate.City) *CityDelete {
-	cd.predicates = append(cd.predicates, ps...)
+	cd.mutation.Where(ps...)
 	return cd
 }
 
@@ -51,6 +50,9 @@ func (cd *CityDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(cd.hooks) - 1; i >= 0; i-- {
+			if cd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cd.mutation); err != nil {
@@ -79,7 +81,7 @@ func (cd *CityDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := cd.predicates; len(ps) > 0 {
+	if ps := cd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

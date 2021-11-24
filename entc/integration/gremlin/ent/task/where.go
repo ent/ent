@@ -7,14 +7,14 @@
 package task
 
 import (
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/ent/schema"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -163,7 +163,7 @@ func PriorityLTE(v schema.Priority) predicate.Task {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Task) predicate.Task {
 	return predicate.Task(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))
@@ -176,7 +176,7 @@ func And(predicates ...predicate.Task) predicate.Task {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Task) predicate.Task {
 	return predicate.Task(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))

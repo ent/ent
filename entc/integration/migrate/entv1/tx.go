@@ -10,7 +10,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
@@ -18,6 +18,10 @@ type Tx struct {
 	config
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
+	// Conversion is the client for interacting with the Conversion builders.
+	Conversion *ConversionClient
+	// CustomType is the client for interacting with the CustomType builders.
+	CustomType *CustomTypeClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -50,7 +54,7 @@ type (
 	// and returns a Committer. For example:
 	//
 	//	hook := func(next ent.Committer) ent.Committer {
-	//		return ent.CommitFunc(func(context.Context, tx *ent.Tx) error {
+	//		return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
 	//			// Do some stuff before.
 	//			if err := next.Commit(ctx, tx); err != nil {
 	//				return err
@@ -105,7 +109,7 @@ type (
 	// and returns a Rollbacker. For example:
 	//
 	//	hook := func(next ent.Rollbacker) ent.Rollbacker {
-	//		return ent.RollbackFunc(func(context.Context, tx *ent.Tx) error {
+	//		return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
 	//			// Do some stuff before.
 	//			if err := next.Rollback(ctx, tx); err != nil {
 	//				return err
@@ -156,6 +160,8 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Car = NewCarClient(tx.config)
+	tx.Conversion = NewConversionClient(tx.config)
+	tx.CustomType = NewCustomTypeClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

@@ -7,14 +7,23 @@
 package predicate
 
 import (
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 )
 
 // Car is the predicate function for car builders.
 type Car func(*sql.Selector)
 
+// Conversion is the predicate function for conversion builders.
+type Conversion func(*sql.Selector)
+
+// CustomType is the predicate function for customtype builders.
+type CustomType func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
+
+// Media is the predicate function for media builders.
+type Media func(*sql.Selector)
 
 // Pet is the predicate function for pet builders.
 type Pet func(*sql.Selector)

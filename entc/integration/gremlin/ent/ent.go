@@ -12,14 +12,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/encoding/graphson"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/encoding/graphson"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 )
 
-// ent aliases to avoid import conflict in user's code.
+// ent aliases to avoid import conflicts in user's code.
 type (
 	Op         = ent.Op
 	Hook       = ent.Hook
@@ -149,7 +149,7 @@ func Sum(field string) AggregateFunc {
 	}
 }
 
-// ValidationError returns when validating a field fails.
+// ValidationError returns when validating a field or edge fails.
 type ValidationError struct {
 	Name string // Field or edge name.
 	err  error
@@ -165,7 +165,7 @@ func (e *ValidationError) Unwrap() error {
 	return e.err
 }
 
-// IsValidationError returns a boolean indicating whether the error is a validaton error.
+// IsValidationError returns a boolean indicating whether the error is a validation error.
 func IsValidationError(err error) bool {
 	if err == nil {
 		return false
@@ -193,7 +193,7 @@ func IsNotFound(err error) bool {
 	return errors.As(err, &e)
 }
 
-// MaskNotFound masks nor found error.
+// MaskNotFound masks not found error.
 func MaskNotFound(err error) error {
 	if IsNotFound(err) {
 		return nil

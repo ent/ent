@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/node"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *NodeMutation
-	predicates []predicate.Node
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the NodeDelete builder.
 func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
-	nd.predicates = append(nd.predicates, ps...)
+	nd.mutation.Where(ps...)
 	return nd
 }
 
@@ -52,6 +51,9 @@ func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(nd.hooks) - 1; i >= 0; i-- {
+			if nd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nd.mutation); err != nil {
@@ -81,7 +83,7 @@ func (nd *NodeDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (nd *NodeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(node.Label)
-	for _, p := range nd.predicates {
+	for _, p := range nd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

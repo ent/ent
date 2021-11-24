@@ -8,43 +8,43 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/traversal/ent/pet"
-	"github.com/facebook/ent/examples/traversal/ent/predicate"
-	"github.com/facebook/ent/examples/traversal/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/traversal/ent/pet"
+	"entgo.io/ent/examples/traversal/ent/predicate"
+	"entgo.io/ent/examples/traversal/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *PetMutation
-	predicates []predicate.Pet
+	hooks    []Hook
+	mutation *PetMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the PetUpdate builder.
 func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	pu.predicates = append(pu.predicates, ps...)
+	pu.mutation.Where(ps...)
 	return pu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (pu *PetUpdate) SetName(s string) *PetUpdate {
 	pu.mutation.SetName(s)
 	return pu
 }
 
-// AddFriendIDs adds the friends edge to Pet by ids.
+// AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (pu *PetUpdate) AddFriendIDs(ids ...int) *PetUpdate {
 	pu.mutation.AddFriendIDs(ids...)
 	return pu
 }
 
-// AddFriends adds the friends edges to Pet.
+// AddFriends adds the "friends" edges to the Pet entity.
 func (pu *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -53,13 +53,13 @@ func (pu *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
 	return pu.AddFriendIDs(ids...)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
 	pu.mutation.SetOwnerID(id)
 	return pu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	if id != nil {
 		pu = pu.SetOwnerID(*id)
@@ -67,7 +67,7 @@ func (pu *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 	return pu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
 	return pu.SetOwnerID(u.ID)
 }
@@ -77,19 +77,19 @@ func (pu *PetUpdate) Mutation() *PetMutation {
 	return pu.mutation
 }
 
-// ClearFriends clears all "friends" edges to type Pet.
+// ClearFriends clears all "friends" edges to the Pet entity.
 func (pu *PetUpdate) ClearFriends() *PetUpdate {
 	pu.mutation.ClearFriends()
 	return pu
 }
 
-// RemoveFriendIDs removes the friends edge to Pet by ids.
+// RemoveFriendIDs removes the "friends" edge to Pet entities by IDs.
 func (pu *PetUpdate) RemoveFriendIDs(ids ...int) *PetUpdate {
 	pu.mutation.RemoveFriendIDs(ids...)
 	return pu
 }
 
-// RemoveFriends removes friends edges to Pet.
+// RemoveFriends removes "friends" edges to Pet entities.
 func (pu *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -98,13 +98,13 @@ func (pu *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
 	return pu.RemoveFriendIDs(ids...)
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (pu *PetUpdate) ClearOwner() *PetUpdate {
 	pu.mutation.ClearOwner()
 	return pu
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -124,6 +124,9 @@ func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(pu.hooks) - 1; i >= 0; i-- {
+			if pu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
@@ -166,7 +169,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := pu.predicates; len(ps) > 0 {
+	if ps := pu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -272,8 +275,8 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -283,23 +286,24 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PetUpdateOne is the builder for updating a single Pet entity.
 type PetUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *PetMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
 	puo.mutation.SetName(s)
 	return puo
 }
 
-// AddFriendIDs adds the friends edge to Pet by ids.
+// AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (puo *PetUpdateOne) AddFriendIDs(ids ...int) *PetUpdateOne {
 	puo.mutation.AddFriendIDs(ids...)
 	return puo
 }
 
-// AddFriends adds the friends edges to Pet.
+// AddFriends adds the "friends" edges to the Pet entity.
 func (puo *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -308,13 +312,13 @@ func (puo *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
 	return puo.AddFriendIDs(ids...)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (puo *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
 	puo.mutation.SetOwnerID(id)
 	return puo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	if id != nil {
 		puo = puo.SetOwnerID(*id)
@@ -322,7 +326,7 @@ func (puo *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 	return puo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
 	return puo.SetOwnerID(u.ID)
 }
@@ -332,19 +336,19 @@ func (puo *PetUpdateOne) Mutation() *PetMutation {
 	return puo.mutation
 }
 
-// ClearFriends clears all "friends" edges to type Pet.
+// ClearFriends clears all "friends" edges to the Pet entity.
 func (puo *PetUpdateOne) ClearFriends() *PetUpdateOne {
 	puo.mutation.ClearFriends()
 	return puo
 }
 
-// RemoveFriendIDs removes the friends edge to Pet by ids.
+// RemoveFriendIDs removes the "friends" edge to Pet entities by IDs.
 func (puo *PetUpdateOne) RemoveFriendIDs(ids ...int) *PetUpdateOne {
 	puo.mutation.RemoveFriendIDs(ids...)
 	return puo
 }
 
-// RemoveFriends removes friends edges to Pet.
+// RemoveFriends removes "friends" edges to Pet entities.
 func (puo *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -353,13 +357,20 @@ func (puo *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
 	return puo.RemoveFriendIDs(ids...)
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
 	puo.mutation.ClearOwner()
 	return puo
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (puo *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
+	puo.fields = append([]string{field}, fields...)
+	return puo
+}
+
+// Save executes the query and returns the updated Pet entity.
 func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 	var (
 		err  error
@@ -379,6 +390,9 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 			return node, err
 		})
 		for i := len(puo.hooks) - 1; i >= 0; i-- {
+			if puo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = puo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
@@ -423,9 +437,28 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	}
 	id, ok := puo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Pet.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Pet.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := puo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, pet.FieldID)
+		for _, f := range fields {
+			if !pet.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != pet.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := puo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -524,12 +557,12 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	}
 	_node = &Pet{config: puo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, puo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

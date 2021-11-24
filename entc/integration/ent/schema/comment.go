@@ -5,8 +5,8 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 // Comment holds the schema definition for the Comment entity.
@@ -25,9 +25,4 @@ func (Comment) Fields() []ent.Field {
 			Optional().
 			Nillable(),
 	}
-}
-
-// Edges of the Comment.
-func (Comment) Edges() []ent.Edge {
-	return nil
 }

@@ -8,37 +8,37 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/customid/ent/group"
-	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
-	"github.com/facebook/ent/entc/integration/customid/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/customid/ent/group"
+	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *GroupMutation
-	predicates []predicate.Group
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the GroupUpdate builder.
 func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	gu.predicates = append(gu.predicates, ps...)
+	gu.mutation.Where(ps...)
 	return gu
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (gu *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddUserIDs(ids...)
 	return gu
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -52,19 +52,19 @@ func (gu *GroupUpdate) Mutation() *GroupMutation {
 	return gu.mutation
 }
 
-// ClearUsers clears all "users" edges to type User.
+// ClearUsers clears all "users" edges to the User entity.
 func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
 	gu.mutation.ClearUsers()
 	return gu
 }
 
-// RemoveUserIDs removes the users edge to User by ids.
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.RemoveUserIDs(ids...)
 	return gu
 }
 
-// RemoveUsers removes users edges to User.
+// RemoveUsers removes "users" edges to User entities.
 func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -73,7 +73,7 @@ func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
 	return gu.RemoveUserIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -93,6 +93,9 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gu.hooks) - 1; i >= 0; i-- {
+			if gu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
@@ -135,7 +138,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := gu.predicates; len(ps) > 0 {
+	if ps := gu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -199,8 +202,8 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -210,17 +213,18 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GroupUpdateOne is the builder for updating a single Group entity.
 type GroupUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *GroupMutation
 }
 
-// AddUserIDs adds the users edge to User by ids.
+// AddUserIDs adds the "users" edge to the User entity by IDs.
 func (guo *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.AddUserIDs(ids...)
 	return guo
 }
 
-// AddUsers adds the users edges to User.
+// AddUsers adds the "users" edges to the User entity.
 func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -234,19 +238,19 @@ func (guo *GroupUpdateOne) Mutation() *GroupMutation {
 	return guo.mutation
 }
 
-// ClearUsers clears all "users" edges to type User.
+// ClearUsers clears all "users" edges to the User entity.
 func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
 	guo.mutation.ClearUsers()
 	return guo
 }
 
-// RemoveUserIDs removes the users edge to User by ids.
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 	guo.mutation.RemoveUserIDs(ids...)
 	return guo
 }
 
-// RemoveUsers removes users edges to User.
+// RemoveUsers removes "users" edges to User entities.
 func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -255,7 +259,14 @@ func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
 	return guo.RemoveUserIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (guo *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOne {
+	guo.fields = append([]string{field}, fields...)
+	return guo
+}
+
+// Save executes the query and returns the updated Group entity.
 func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 	var (
 		err  error
@@ -275,6 +286,9 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 			return node, err
 		})
 		for i := len(guo.hooks) - 1; i >= 0; i-- {
+			if guo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = guo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
@@ -319,9 +333,28 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	id, ok := guo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Group.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := guo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, group.FieldID)
+		for _, f := range fields {
+			if !group.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != group.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := guo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if guo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -378,12 +411,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	_node = &Group{config: guo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

@@ -10,14 +10,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin"
 )
 
 // Item is the model entity for the Item schema.
 type Item struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Item.
@@ -27,24 +29,26 @@ func (i *Item) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scani struct {
-		ID string `json:"id,omitempty"`
+		ID   string `json:"id,omitempty"`
+		Text string `json:"text,omitempty"`
 	}
 	if err := vmap.Decode(&scani); err != nil {
 		return err
 	}
 	i.ID = scani.ID
+	i.Text = scani.Text
 	return nil
 }
 
 // Update returns a builder for updating this Item.
-// Note that, you need to call Item.Unwrap() before calling this method, if this Item
+// Note that you need to call Item.Unwrap() before calling this method if this Item
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (i *Item) Update() *ItemUpdateOne {
 	return (&ItemClient{config: i.config}).UpdateOne(i)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Item entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (i *Item) Unwrap() *Item {
 	tx, ok := i.config.driver.(*txDriver)
 	if !ok {
@@ -59,6 +63,8 @@ func (i *Item) String() string {
 	var builder strings.Builder
 	builder.WriteString("Item(")
 	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
+	builder.WriteString(", text=")
+	builder.WriteString(i.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -73,14 +79,16 @@ func (i *Items) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scani []struct {
-		ID string `json:"id,omitempty"`
+		ID   string `json:"id,omitempty"`
+		Text string `json:"text,omitempty"`
 	}
 	if err := vmap.Decode(&scani); err != nil {
 		return err
 	}
 	for _, v := range scani {
 		*i = append(*i, &Item{
-			ID: v.ID,
+			ID:   v.ID,
+			Text: v.Text,
 		})
 	}
 	return nil

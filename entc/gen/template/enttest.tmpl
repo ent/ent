@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "enttest" }}
 
 {{ $pkg := base $.Config.Package }}
@@ -20,7 +22,7 @@ import (
 	_ "{{ $.Config.Package }}/runtime"
 
 	{{ if $.SupportMigrate }}
-		"github.com/facebook/ent/dialect/sql/schema"
+		"entgo.io/ent/dialect/sql/schema"
 	{{ end }}
 )
 

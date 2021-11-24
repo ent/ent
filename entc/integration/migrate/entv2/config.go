@@ -7,8 +7,8 @@
 package entv2
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 )
 
 // Option function to configure the client.
@@ -28,10 +28,13 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	Car   []ent.Hook
-	Group []ent.Hook
-	Pet   []ent.Hook
-	User  []ent.Hook
+	Car        []ent.Hook
+	Conversion []ent.Hook
+	CustomType []ent.Hook
+	Group      []ent.Hook
+	Media      []ent.Hook
+	Pet        []ent.Hook
+	User       []ent.Hook
 }
 
 // Options applies the options on the config object.

@@ -9,12 +9,12 @@ package pet
 import (
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/template/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -305,7 +305,7 @@ func HasOwnerWith(preds ...predicate.User) predicate.Pet {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -316,7 +316,7 @@ func And(predicates ...predicate.Pet) predicate.Pet {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

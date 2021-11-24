@@ -7,7 +7,7 @@
 package predicate
 
 import (
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
 )
 
 // Card is the predicate function for card builders.

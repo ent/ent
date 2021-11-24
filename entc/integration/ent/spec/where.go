@@ -7,12 +7,12 @@
 package spec
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -123,7 +123,7 @@ func HasCardWith(preds ...predicate.Card) predicate.Spec {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Spec) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -134,7 +134,7 @@ func And(predicates ...predicate.Spec) predicate.Spec {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Spec) predicate.Spec {
 	return predicate.Spec(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

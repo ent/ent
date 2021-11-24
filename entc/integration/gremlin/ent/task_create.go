@@ -11,11 +11,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/ent/schema"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/task"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -25,13 +25,13 @@ type TaskCreate struct {
 	hooks    []Hook
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tc *TaskCreate) SetPriority(s schema.Priority) *TaskCreate {
 	tc.mutation.SetPriority(s)
 	return tc
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tc *TaskCreate) SetNillablePriority(s *schema.Priority) *TaskCreate {
 	if s != nil {
 		tc.SetPriority(*s)
@@ -66,11 +66,17 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 				return nil, err
 			}
 			tc.mutation = mutation
-			node, err = tc.gremlinSave(ctx)
+			if node, err = tc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(tc.hooks) - 1; i >= 0; i-- {
+			if tc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
@@ -89,6 +95,19 @@ func (tc *TaskCreate) SaveX(ctx context.Context) *Task {
 	return v
 }
 
+// Exec executes the query.
+func (tc *TaskCreate) Exec(ctx context.Context) error {
+	_, err := tc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (tc *TaskCreate) ExecX(ctx context.Context) {
+	if err := tc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (tc *TaskCreate) defaults() {
 	if _, ok := tc.mutation.Priority(); !ok {
@@ -100,11 +119,11 @@ func (tc *TaskCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (tc *TaskCreate) check() error {
 	if _, ok := tc.mutation.Priority(); !ok {
-		return &ValidationError{Name: "priority", err: errors.New("ent: missing required field \"priority\"")}
+		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
 	}
 	if v, ok := tc.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -134,7 +153,7 @@ func (tc *TaskCreate) gremlin() *dsl.Traversal {
 	return v.ValueMap(true)
 }
 
-// TaskCreateBulk is the builder for creating a bulk of Task entities.
+// TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
 	config
 	builders []*TaskCreate

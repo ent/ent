@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/customid/ent/car"
-	"github.com/facebook/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/pet"
 )
 
 // Car is the model entity for the Car schema.
@@ -35,7 +35,7 @@ type Car struct {
 // CarEdges holds the relations/edges for other nodes in the graph.
 type CarEdges struct {
 	// Owner holds the value of the owner edge.
-	Owner *Pet
+	Owner *Pet `json:"owner,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -56,75 +56,83 @@ func (e CarEdges) OwnerOrErr() (*Pet, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Car) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},   // id
-		&sql.NullFloat64{}, // before_id
-		&sql.NullFloat64{}, // after_id
-		&sql.NullString{},  // model
+func (*Car) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case car.FieldBeforeID, car.FieldAfterID:
+			values[i] = new(sql.NullFloat64)
+		case car.FieldID:
+			values[i] = new(sql.NullInt64)
+		case car.FieldModel:
+			values[i] = new(sql.NullString)
+		case car.ForeignKeys[0]: // pet_cars
+			values[i] = new(sql.NullString)
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Car", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Car) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullString{}, // pet_cars
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Car fields.
-func (c *Car) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(car.Columns); m < n {
+func (c *Car) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	c.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field before_id", values[0])
-	} else if value.Valid {
-		c.BeforeID = value.Float64
-	}
-	if value, ok := values[1].(*sql.NullFloat64); !ok {
-		return fmt.Errorf("unexpected type %T for field after_id", values[1])
-	} else if value.Valid {
-		c.AfterID = value.Float64
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field model", values[2])
-	} else if value.Valid {
-		c.Model = value.String
-	}
-	values = values[3:]
-	if len(values) == len(car.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullString); !ok {
-			return fmt.Errorf("unexpected type %T for field pet_cars", values[0])
-		} else if value.Valid {
-			c.pet_cars = new(string)
-			*c.pet_cars = value.String
+	for i := range columns {
+		switch columns[i] {
+		case car.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			c.ID = int(value.Int64)
+		case car.FieldBeforeID:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field before_id", values[i])
+			} else if value.Valid {
+				c.BeforeID = value.Float64
+			}
+		case car.FieldAfterID:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field after_id", values[i])
+			} else if value.Valid {
+				c.AfterID = value.Float64
+			}
+		case car.FieldModel:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field model", values[i])
+			} else if value.Valid {
+				c.Model = value.String
+			}
+		case car.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field pet_cars", values[i])
+			} else if value.Valid {
+				c.pet_cars = new(string)
+				*c.pet_cars = value.String
+			}
 		}
 	}
 	return nil
 }
 
-// QueryOwner queries the owner edge of the Car.
+// QueryOwner queries the "owner" edge of the Car entity.
 func (c *Car) QueryOwner() *PetQuery {
 	return (&CarClient{config: c.config}).QueryOwner(c)
 }
 
 // Update returns a builder for updating this Car.
-// Note that, you need to call Car.Unwrap() before calling this method, if this Car
+// Note that you need to call Car.Unwrap() before calling this method if this Car
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Car) Update() *CarUpdateOne {
 	return (&CarClient{config: c.config}).UpdateOne(c)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Car entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (c *Car) Unwrap() *Car {
 	tx, ok := c.config.driver.(*txDriver)
 	if !ok {

@@ -17,7 +17,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/schema/field"
 
 	"github.com/go-openapi/inflect"
 )
@@ -26,7 +26,7 @@ var (
 	// Funcs are the predefined template
 	// functions used by the codegen.
 	Funcs = template.FuncMap{
-		"ops":           ops,
+		"ops":           fieldOps,
 		"add":           add,
 		"append":        reflect.Append,
 		"appends":       reflect.AppendSlice,
@@ -45,6 +45,7 @@ var (
 		"base":          filepath.Base,
 		"keys":          keys,
 		"join":          join,
+		"isNil":         isNil,
 		"lower":         strings.ToLower,
 		"upper":         strings.ToUpper,
 		"hasField":      hasField,
@@ -72,24 +73,27 @@ var (
 	acronyms = make(map[string]struct{})
 )
 
-// ops returns all operations for given field.
-func ops(f *Field) (op []Op) {
+// fieldOps returns all predicate operations for a given field.
+func fieldOps(f *Field) (ops []Op) {
 	switch t := f.Type.Type; {
-	case f.HasGoType() && !f.ConvertedToBasic():
+	case f.HasGoType() && !f.ConvertedToBasic() && !f.Type.Valuer():
 	case t == field.TypeJSON:
 	case t == field.TypeBool:
-		op = boolOps
+		ops = boolOps
 	case t == field.TypeString && strings.ToLower(f.Name) != "id":
-		op = stringOps
-	case t == field.TypeEnum:
-		op = enumOps
+		ops = stringOps
+		if f.HasGoType() && !f.ConvertedToBasic() && f.Type.Valuer() {
+			ops = numericOps
+		}
+	case t == field.TypeEnum || f.IsEdgeField():
+		ops = enumOps
 	default:
-		op = numericOps
+		ops = numericOps
 	}
 	if f.Optional {
-		op = append(op, nillableOps...)
+		ops = append(ops, nillableOps...)
 	}
-	return op
+	return ops
 }
 
 // xrange generates a slice of len n.
@@ -110,7 +114,7 @@ func plural(name string) string {
 }
 
 func isSeparator(r rune) bool {
-	return r == '_' || r == '-'
+	return r == '_' || r == '-' || unicode.IsSpace(r)
 }
 
 func pascalWords(words []string) string {
@@ -347,12 +351,22 @@ func hasTemplate(name string) bool {
 	return false
 }
 
-// matchTemplate returns all template names that match the given pattern.
-func matchTemplate(pattern string) []string {
-	var names []string
-	for _, t := range templates.Templates() {
-		if match, _ := filepath.Match(pattern, t.Name()); match {
-			names = append(names, t.Name())
+// matchTemplate returns all template names that match the given patterns.
+func matchTemplate(patterns ...string) []string {
+	var (
+		names  []string
+		exists = make(map[string]struct{})
+	)
+	for _, pattern := range patterns {
+		for _, t := range templates.Templates() {
+			name := t.Name()
+			if _, ok := exists[name]; ok {
+				continue
+			}
+			if match, _ := filepath.Match(pattern, name); match {
+				names = append(names, name)
+				exists[name] = struct{}{}
+			}
 		}
 	}
 	sort.Strings(names)
@@ -374,6 +388,22 @@ func hasImport(name string) bool {
 // trimPackage trims the package name from the given identifier.
 func trimPackage(ident, pkg string) string {
 	return strings.TrimPrefix(ident, pkg+".")
+}
+
+// isNil reports whether its argument v is nil.
+func isNil(v interface{}) bool {
+	rv := indirect(reflect.ValueOf(v))
+	if !rv.IsValid() {
+		return true
+	}
+	switch rv.Kind() {
+	case reflect.Invalid:
+		return true
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.UnsafePointer, reflect.Interface, reflect.Slice:
+		return rv.IsNil()
+	default:
+		return false
+	}
 }
 
 // indirect returns the item at the end of indirection.

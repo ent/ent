@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/o2obidi/ent"
-	"github.com/facebook/ent/examples/o2obidi/ent/user"
+	"entgo.io/ent/examples/o2obidi/ent"
+	"entgo.io/ent/examples/o2obidi/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -43,7 +43,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetName("a8m").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating user: %v", err)
+		return fmt.Errorf("creating user: %w", err)
 	}
 	nati, err := client.User.
 		Create().
@@ -52,7 +52,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetSpouse(a8m).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating user: %v", err)
+		return fmt.Errorf("creating user: %w", err)
 	}
 
 	// Query the spouse edge.

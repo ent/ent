@@ -11,14 +11,14 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/edgeindex/ent/migrate"
+	"entgo.io/ent/examples/edgeindex/ent/migrate"
 
-	"github.com/facebook/ent/examples/edgeindex/ent/city"
-	"github.com/facebook/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/examples/edgeindex/ent/city"
+	"entgo.io/ent/examples/edgeindex/ent/street"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -71,9 +71,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = tx
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
@@ -82,16 +83,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}, nil
 }
 
-// BeginTx returns a transactional client with options.
+// BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
 	}
-	tx, err := c.driver.(*sql.Driver).BeginTx(ctx, opts)
+	tx, err := c.driver.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
+	}).BeginTx(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		config: cfg,
 		City:   NewCityClient(cfg),
@@ -110,7 +114,8 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = dialect.Debug(c.driver, c.log)
 	client := &Client{config: cfg}
 	client.init()
 	return client
@@ -150,7 +155,7 @@ func (c *CityClient) Create() *CityCreate {
 	return &CityCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of City entities.
+// CreateBulk returns a builder for creating a bulk of City entities.
 func (c *CityClient) CreateBulk(builders ...*CityCreate) *CityCreateBulk {
 	return &CityCreateBulk{config: c.config, builders: builders}
 }
@@ -194,7 +199,9 @@ func (c *CityClient) DeleteOneID(id int) *CityDeleteOne {
 
 // Query returns a query builder for City.
 func (c *CityClient) Query() *CityQuery {
-	return &CityQuery{config: c.config}
+	return &CityQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a City entity by its id.
@@ -254,7 +261,7 @@ func (c *StreetClient) Create() *StreetCreate {
 	return &StreetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Street entities.
+// CreateBulk returns a builder for creating a bulk of Street entities.
 func (c *StreetClient) CreateBulk(builders ...*StreetCreate) *StreetCreateBulk {
 	return &StreetCreateBulk{config: c.config, builders: builders}
 }
@@ -298,7 +305,9 @@ func (c *StreetClient) DeleteOneID(id int) *StreetDeleteOne {
 
 // Query returns a query builder for Street.
 func (c *StreetClient) Query() *StreetQuery {
-	return &StreetQuery{config: c.config}
+	return &StreetQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Street entity by its id.

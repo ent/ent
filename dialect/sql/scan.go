@@ -6,25 +6,17 @@ package sql
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"reflect"
 	"strings"
 )
 
-// ColumnScanner is the interface that wraps the
-// four sql.Rows methods used for scanning.
-type ColumnScanner interface {
-	Next() bool
-	Scan(...interface{}) error
-	Columns() ([]string, error)
-	Err() error
-}
-
 // ScanOne scans one row to the given value. It fails if the rows holds more than 1 row.
 func ScanOne(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
 	if err != nil {
-		return fmt.Errorf("sql/scan: failed getting column names: %v", err)
+		return fmt.Errorf("sql/scan: failed getting column names: %w", err)
 	}
 	if n := len(columns); n != 1 {
 		return fmt.Errorf("sql/scan: unexpected number of columns: %d", n)
@@ -71,13 +63,32 @@ func ScanString(rows ColumnScanner) (string, error) {
 	return s, nil
 }
 
+// ScanValue scans and returns a driver.Value from the rows columns.
+func ScanValue(rows ColumnScanner) (driver.Value, error) {
+	var v driver.Value
+	if err := ScanOne(rows, &v); err != nil {
+		return "", err
+	}
+	return v, nil
+}
+
 // ScanSlice scans the given ColumnScanner (basically, sql.Row or sql.Rows) into the given slice.
 func ScanSlice(rows ColumnScanner, v interface{}) error {
 	columns, err := rows.Columns()
 	if err != nil {
-		return fmt.Errorf("sql/scan: failed getting column names: %v", err)
+		return fmt.Errorf("sql/scan: failed getting column names: %w", err)
 	}
-	rv := reflect.Indirect(reflect.ValueOf(v))
+	rv := reflect.ValueOf(v)
+	switch {
+	case rv.Kind() != reflect.Ptr:
+		if t := reflect.TypeOf(v); t != nil {
+			return fmt.Errorf("sql/scan: ScanSlice(non-pointer %s)", t)
+		}
+		fallthrough
+	case rv.IsNil():
+		return fmt.Errorf("sql/scan: ScanSlice(nil)")
+	}
+	rv = reflect.Indirect(rv)
 	if k := rv.Kind(); k != reflect.Slice {
 		return fmt.Errorf("sql/scan: invalid type %s. expected slice as an argument", k)
 	}
@@ -91,7 +102,7 @@ func ScanSlice(rows ColumnScanner, v interface{}) error {
 	for rows.Next() {
 		values := scan.values()
 		if err := rows.Scan(values...); err != nil {
-			return fmt.Errorf("sql/scan: failed scanning rows: %v", err)
+			return fmt.Errorf("sql/scan: failed scanning rows: %w", err)
 		}
 		vv := reflect.Append(rv, scan.value(values...))
 		rv.Set(vv)
@@ -154,37 +165,83 @@ func assignable(typ reflect.Type) bool {
 func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 	var (
 		scan  = &rowScan{}
-		names = make(map[string]int)
-		idx   = make([]int, 0, typ.NumField())
+		idxs  = make([][]int, 0, typ.NumField())
+		names = make(map[string][]int, typ.NumField())
 	)
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
-		name := strings.ToLower(f.Name)
-		if tag, ok := f.Tag.Lookup("sql"); ok {
-			name = tag
-		} else if tag, ok := f.Tag.Lookup("json"); ok {
-			name = strings.Split(tag, ",")[0]
+		// Skip unexported fields.
+		if f.PkgPath != "" {
+			continue
 		}
-		names[name] = i
+		// Support 1-level embedding to accepts types as `type T struct {ent.T; V int}`.
+		if typ := f.Type; f.Anonymous && typ.Kind() == reflect.Struct {
+			for j := 0; j < typ.NumField(); j++ {
+				names[columnName(typ.Field(j))] = []int{i, j}
+			}
+			continue
+		}
+		names[columnName(f)] = []int{i}
 	}
 	for _, c := range columns {
-		// normalize columns if necessary, for example: COUNT(*) => count.
+		// Normalize columns if necessary, for example: COUNT(*) => count.
 		name := strings.ToLower(strings.Split(c, "(")[0])
-		i, ok := names[name]
+		idx, ok := names[name]
 		if !ok {
 			return nil, fmt.Errorf("sql/scan: missing struct field for column: %s (%s)", c, name)
 		}
-		idx = append(idx, i)
-		scan.columns = append(scan.columns, typ.Field(i).Type)
+		idxs = append(idxs, idx)
+		rtype := typ.Field(idx[0]).Type
+		if len(idx) > 1 {
+			rtype = rtype.Field(idx[1]).Type
+		}
+		if !nillable(rtype) {
+			// Create a pointer to the actual reflect
+			// types to accept optional struct fields.
+			rtype = reflect.PtrTo(rtype)
+		}
+		scan.columns = append(scan.columns, rtype)
 	}
 	scan.value = func(vs ...interface{}) reflect.Value {
 		st := reflect.New(typ).Elem()
 		for i, v := range vs {
-			st.Field(idx[i]).Set(reflect.Indirect(reflect.ValueOf(v)))
+			rv := reflect.Indirect(reflect.ValueOf(v))
+			if rv.IsNil() {
+				continue
+			}
+			idx := idxs[i]
+			rvalue := st.Field(idx[0])
+			if len(idx) > 1 {
+				rvalue = rvalue.Field(idx[1])
+			}
+			if !nillable(rvalue.Type()) {
+				rv = reflect.Indirect(rv)
+			}
+			rvalue.Set(rv)
 		}
 		return st
 	}
 	return scan, nil
+}
+
+// columnName returns the column name of a struct-field.
+func columnName(f reflect.StructField) string {
+	name := strings.ToLower(f.Name)
+	if tag, ok := f.Tag.Lookup("sql"); ok {
+		name = tag
+	} else if tag, ok := f.Tag.Lookup("json"); ok {
+		name = strings.Split(tag, ",")[0]
+	}
+	return name
+}
+
+// nillable reports if the reflect-type can have nil value.
+func nillable(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Interface, reflect.Slice, reflect.Map, reflect.Ptr, reflect.UnsafePointer:
+		return true
+	}
+	return false
 }
 
 // scanPtr wraps the underlying type with rowScan.

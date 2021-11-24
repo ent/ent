@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/ent/spec"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/ent/spec"
 )
 
 // Spec is the model entity for the Spec schema.
@@ -27,7 +27,7 @@ type Spec struct {
 // SpecEdges holds the relations/edges for other nodes in the graph.
 type SpecEdges struct {
 	// Card holds the value of the card edge.
-	Card []*Card
+	Card []*Card `json:"card,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -43,41 +43,52 @@ func (e SpecEdges) CardOrErr() ([]*Card, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Spec) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
+func (*Spec) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case spec.FieldID:
+			values[i] = new(sql.NullInt64)
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Spec", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Spec fields.
-func (s *Spec) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(spec.Columns); m < n {
+func (s *Spec) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
+	for i := range columns {
+		switch columns[i] {
+		case spec.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			s.ID = int(value.Int64)
+		}
 	}
-	s.ID = int(value.Int64)
-	values = values[1:]
 	return nil
 }
 
-// QueryCard queries the card edge of the Spec.
+// QueryCard queries the "card" edge of the Spec entity.
 func (s *Spec) QueryCard() *CardQuery {
 	return (&SpecClient{config: s.config}).QueryCard(s)
 }
 
 // Update returns a builder for updating this Spec.
-// Note that, you need to call Spec.Unwrap() before calling this method, if this Spec
+// Note that you need to call Spec.Unwrap() before calling this method if this Spec
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *Spec) Update() *SpecUpdateOne {
 	return (&SpecClient{config: s.config}).UpdateOne(s)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Spec entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (s *Spec) Unwrap() *Spec {
 	tx, ok := s.config.driver.(*txDriver)
 	if !ok {

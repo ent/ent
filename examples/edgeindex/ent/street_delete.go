@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
-	"github.com/facebook/ent/examples/edgeindex/ent/street"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/edgeindex/ent/predicate"
+	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/schema/field"
 )
 
 // StreetDelete is the builder for deleting a Street entity.
 type StreetDelete struct {
 	config
-	hooks      []Hook
-	mutation   *StreetMutation
-	predicates []predicate.Street
+	hooks    []Hook
+	mutation *StreetMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the StreetDelete builder.
 func (sd *StreetDelete) Where(ps ...predicate.Street) *StreetDelete {
-	sd.predicates = append(sd.predicates, ps...)
+	sd.mutation.Where(ps...)
 	return sd
 }
 
@@ -51,6 +50,9 @@ func (sd *StreetDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(sd.hooks) - 1; i >= 0; i-- {
+			if sd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = sd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sd.mutation); err != nil {
@@ -79,7 +81,7 @@ func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := sd.predicates; len(ps) > 0 {
+	if ps := sd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

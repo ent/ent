@@ -8,46 +8,46 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/group"
+	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
 type GroupInfoUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *GroupInfoMutation
-	predicates []predicate.GroupInfo
+	hooks    []Hook
+	mutation *GroupInfoMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the GroupInfoUpdate builder.
 func (giu *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
-	giu.predicates = append(giu.predicates, ps...)
+	giu.mutation.Where(ps...)
 	return giu
 }
 
-// SetDesc sets the desc field.
+// SetDesc sets the "desc" field.
 func (giu *GroupInfoUpdate) SetDesc(s string) *GroupInfoUpdate {
 	giu.mutation.SetDesc(s)
 	return giu
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (giu *GroupInfoUpdate) SetMaxUsers(i int) *GroupInfoUpdate {
 	giu.mutation.ResetMaxUsers()
 	giu.mutation.SetMaxUsers(i)
 	return giu
 }
 
-// SetNillableMaxUsers sets the max_users field if the given value is not nil.
+// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
 func (giu *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
 	if i != nil {
 		giu.SetMaxUsers(*i)
@@ -55,19 +55,19 @@ func (giu *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
 	return giu
 }
 
-// AddMaxUsers adds i to max_users.
+// AddMaxUsers adds i to the "max_users" field.
 func (giu *GroupInfoUpdate) AddMaxUsers(i int) *GroupInfoUpdate {
 	giu.mutation.AddMaxUsers(i)
 	return giu
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (giu *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
 	giu.mutation.AddGroupIDs(ids...)
 	return giu
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (giu *GroupInfoUpdate) AddGroups(g ...*Group) *GroupInfoUpdate {
 	ids := make([]string, len(g))
 	for i := range g {
@@ -81,19 +81,19 @@ func (giu *GroupInfoUpdate) Mutation() *GroupInfoMutation {
 	return giu.mutation
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (giu *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
 	giu.mutation.ClearGroups()
 	return giu
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (giu *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
 	giu.mutation.RemoveGroupIDs(ids...)
 	return giu
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 	ids := make([]string, len(g))
 	for i := range g {
@@ -102,7 +102,7 @@ func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
 	return giu.RemoveGroupIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -122,6 +122,9 @@ func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(giu.hooks) - 1; i >= 0; i-- {
+			if giu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = giu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, giu.mutation); err != nil {
@@ -172,7 +175,7 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(groupinfo.Label)
-	for _, p := range giu.predicates {
+	for _, p := range giu.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -219,24 +222,25 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 // GroupInfoUpdateOne is the builder for updating a single GroupInfo entity.
 type GroupInfoUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *GroupInfoMutation
 }
 
-// SetDesc sets the desc field.
+// SetDesc sets the "desc" field.
 func (giuo *GroupInfoUpdateOne) SetDesc(s string) *GroupInfoUpdateOne {
 	giuo.mutation.SetDesc(s)
 	return giuo
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (giuo *GroupInfoUpdateOne) SetMaxUsers(i int) *GroupInfoUpdateOne {
 	giuo.mutation.ResetMaxUsers()
 	giuo.mutation.SetMaxUsers(i)
 	return giuo
 }
 
-// SetNillableMaxUsers sets the max_users field if the given value is not nil.
+// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
 func (giuo *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne {
 	if i != nil {
 		giuo.SetMaxUsers(*i)
@@ -244,19 +248,19 @@ func (giuo *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne 
 	return giuo
 }
 
-// AddMaxUsers adds i to max_users.
+// AddMaxUsers adds i to the "max_users" field.
 func (giuo *GroupInfoUpdateOne) AddMaxUsers(i int) *GroupInfoUpdateOne {
 	giuo.mutation.AddMaxUsers(i)
 	return giuo
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (giuo *GroupInfoUpdateOne) AddGroupIDs(ids ...string) *GroupInfoUpdateOne {
 	giuo.mutation.AddGroupIDs(ids...)
 	return giuo
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (giuo *GroupInfoUpdateOne) AddGroups(g ...*Group) *GroupInfoUpdateOne {
 	ids := make([]string, len(g))
 	for i := range g {
@@ -270,19 +274,19 @@ func (giuo *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
 	return giuo.mutation
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (giuo *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
 	giuo.mutation.ClearGroups()
 	return giuo
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (giuo *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
 	giuo.mutation.RemoveGroupIDs(ids...)
 	return giuo
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 	ids := make([]string, len(g))
 	for i := range g {
@@ -291,7 +295,14 @@ func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
 	return giuo.RemoveGroupIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (giuo *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInfoUpdateOne {
+	giuo.fields = append([]string{field}, fields...)
+	return giuo
+}
+
+// Save executes the query and returns the updated GroupInfo entity.
 func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 	var (
 		err  error
@@ -311,6 +322,9 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 			return node, err
 		})
 		for i := len(giuo.hooks) - 1; i >= 0; i-- {
+			if giuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = giuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, giuo.mutation); err != nil {
@@ -346,7 +360,7 @@ func (giuo *GroupInfoUpdateOne) gremlinSave(ctx context.Context) (*GroupInfo, er
 	res := &gremlin.Response{}
 	id, ok := giuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing GroupInfo.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GroupInfo.id" for update`)}
 	}
 	query, bindings := giuo.gremlin(id).Query()
 	if err := giuo.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -395,7 +409,16 @@ func (giuo *GroupInfoUpdateOne) gremlin(id string) *dsl.Traversal {
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(groupinfo.Label, group.InfoLabel, id)),
 		})
 	}
-	v.ValueMap(true)
+	if len(giuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(giuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range giuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

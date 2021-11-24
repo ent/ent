@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/pet"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	config
-	hooks      []Hook
-	mutation   *PetMutation
-	predicates []predicate.Pet
+	hooks    []Hook
+	mutation *PetMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the PetDelete builder.
 func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
-	pd.predicates = append(pd.predicates, ps...)
+	pd.mutation.Where(ps...)
 	return pd
 }
 
@@ -52,6 +51,9 @@ func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(pd.hooks) - 1; i >= 0; i-- {
+			if pd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pd.mutation); err != nil {
@@ -81,7 +83,7 @@ func (pd *PetDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (pd *PetDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(pet.Label)
-	for _, p := range pd.predicates {
+	for _, p := range pd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

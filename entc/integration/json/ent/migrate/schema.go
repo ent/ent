@@ -7,8 +7,8 @@
 package migrate
 
 import (
-	"github.com/facebook/ent/dialect/sql/schema"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/schema/field"
 )
 
 var (
@@ -18,17 +18,16 @@ var (
 		{Name: "t", Type: field.TypeJSON, Nullable: true},
 		{Name: "url", Type: field.TypeJSON, Nullable: true},
 		{Name: "raw", Type: field.TypeJSON, Nullable: true},
-		{Name: "dirs", Type: field.TypeJSON, Nullable: true},
+		{Name: "dirs", Type: field.TypeJSON},
 		{Name: "ints", Type: field.TypeJSON, Nullable: true},
 		{Name: "floats", Type: field.TypeJSON, Nullable: true},
 		{Name: "strings", Type: field.TypeJSON, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{

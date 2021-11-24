@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
-	"text/template"
 
-	"github.com/facebook/ent/entc/load"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -47,7 +47,8 @@ var (
 		},
 	}
 	T2 = &load.Schema{
-		Name: "T2",
+		Name:        "T2",
+		Annotations: dict("GQL", map[string]string{"Name": "T2"}),
 		Fields: []*load.Field{
 			{Name: "active", Info: &field.TypeInfo{Type: field.TypeBool}},
 		},
@@ -112,6 +113,7 @@ func TestNewGraph(t *testing.T) {
 	}
 
 	t2 := graph.Nodes[1]
+	require.Equal(map[string]string{"Name": "T2"}, t2.Annotations["GQL"])
 	f1, e1 := t2.Fields[0], t2.Edges[0]
 	require.Equal("bool", f1.Type.String())
 	require.Equal("active", f1.Name)
@@ -176,6 +178,39 @@ func TestNewGraphBadInverse(t *testing.T) {
 	require.Errorf(t, err, "mismatch type for back-reference")
 }
 
+func TestNewGraphDuplicateEdges(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]},
+		&load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "groups", Type: "Group"},
+				{Name: "groups", Type: "Group", RefName: "owner", Inverse: true},
+			},
+		},
+		&load.Schema{
+			Name: "Group",
+			Edges: []*load.Edge{
+				{Name: "users", Type: "User", RefName: "groups", Inverse: true},
+				{Name: "owner", Type: "User", Unique: true},
+			},
+		})
+	require.EqualError(t, err, `entc/gen: User schema contains multiple "groups" edges`)
+}
+
+func TestNewGraphDuplicateEdgeField(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]},
+		&load.Schema{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "parent", Info: &field.TypeInfo{Type: field.TypeInt}},
+			},
+			Edges: []*load.Edge{
+				{Name: "parent", Type: "User"},
+			},
+		})
+	require.EqualError(t, err, `entc/gen: User schema can't contain field and edge with the same name "parent"`)
+}
+
 func TestRelation(t *testing.T) {
 	require := require.New(t)
 	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, T1)
@@ -222,9 +257,15 @@ func TestFKColumns(t *testing.T) {
 	graph, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, &load.Schema{Name: "Pet"})
 	require.NoError(err)
 	t1 := graph.Nodes[0]
-	require.Equal(Relation{Type: O2M, Table: "pets", Columns: []string{"user_pets"}}, t1.Edges[0].Rel)
-	require.Equal(Relation{Type: M2O, Table: "users", Columns: []string{"user_pet"}}, t1.Edges[1].Rel)
-	require.Equal(Relation{Type: O2O, Table: "users", Columns: []string{"user_parent"}}, t1.Edges[2].Rel)
+	for i, r := range []Relation{
+		{Type: O2M, Table: "pets", Columns: []string{"user_pets"}},
+		{Type: M2O, Table: "users", Columns: []string{"user_pet"}},
+		{Type: O2O, Table: "users", Columns: []string{"user_parent"}},
+	} {
+		require.Equal(r.Type, t1.Edges[i].Rel.Type)
+		require.Equal(r.Table, t1.Edges[i].Rel.Table)
+		require.Equal(r.Columns, t1.Edges[i].Rel.Columns)
+	}
 
 	// Adding inverse edges.
 	graph, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user,
@@ -238,10 +279,22 @@ func TestFKColumns(t *testing.T) {
 	)
 	require.NoError(err)
 	t1, t2 := graph.Nodes[0], graph.Nodes[1]
-	require.Equal(Relation{Type: O2M, Table: "pets", Columns: []string{"user_pets"}}, t1.Edges[0].Rel)
-	require.Equal(Relation{Type: M2O, Table: "users", Columns: []string{"user_pet"}}, t1.Edges[1].Rel)
-	require.Equal(Relation{Type: M2O, Table: "pets", Columns: []string{"user_pets"}}, t2.Edges[0].Rel)
-	require.Equal(Relation{Type: O2M, Table: "users", Columns: []string{"user_pet"}}, t2.Edges[1].Rel)
+	for i, r := range []Relation{
+		{Type: O2M, Table: "pets", Columns: []string{"user_pets"}},
+		{Type: M2O, Table: "users", Columns: []string{"user_pet"}},
+	} {
+		require.Equal(r.Type, t1.Edges[i].Rel.Type)
+		require.Equal(r.Table, t1.Edges[i].Rel.Table)
+		require.Equal(r.Columns, t1.Edges[i].Rel.Columns)
+	}
+	for i, r := range []Relation{
+		{Type: M2O, Table: "pets", Columns: []string{"user_pets"}},
+		{Type: O2M, Table: "users", Columns: []string{"user_pet"}},
+	} {
+		require.Equal(r.Type, t2.Edges[i].Rel.Type)
+		require.Equal(r.Table, t2.Edges[i].Rel.Table)
+		require.Equal(r.Columns, t2.Edges[i].Rel.Columns)
+	}
 }
 
 func TestGraph_Gen(t *testing.T) {
@@ -249,13 +302,14 @@ func TestGraph_Gen(t *testing.T) {
 	target := filepath.Join(os.TempDir(), "ent")
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.RemoveAll(target)
-	external := template.Must(template.New("external").Parse("package external"))
+	external := MustParse(NewTemplate("external").Parse("package external"))
 	graph, err := NewGraph(&Config{
-		Package:  "entc/gen",
-		Target:   target,
-		Storage:  drivers[0],
-		Template: external,
-		IDType:   &field.TypeInfo{Type: field.TypeInt},
+		Package:   "entc/gen",
+		Target:    target,
+		Storage:   drivers[0],
+		Templates: []*Template{external},
+		IDType:    &field.TypeInfo{Type: field.TypeInt},
+		Features:  AllFeatures,
 	}, &load.Schema{
 		Name: "T1",
 		Fields: []*load.Field{
@@ -280,6 +334,108 @@ func TestGraph_Gen(t *testing.T) {
 		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
 		require.NoError(err)
 	}
-	_, err = os.Stat(target + "/external.go")
+	_, err = os.Stat(filepath.Join(target, "external.go"))
 	require.NoError(err)
+
+	// Generated feature templates.
+	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "internal", "schemaconfig.go"))
+	require.NoError(err)
+	// Rerun codegen with only one feature-flag.
+	graph.Features = []Feature{FeatureSnapshot}
+	require.NoError(graph.Gen())
+	// Generated feature templates.
+	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "internal", "schemaconfig.go"))
+	require.True(os.IsNotExist(err))
+	// Rerun codegen without any feature-flags.
+	graph.Features = nil
+	require.NoError(graph.Gen())
+	_, err = os.Stat(filepath.Join(target, "internal"))
+	require.True(os.IsNotExist(err))
+}
+
+func ensureStructTag(name string) Hook {
+	return func(next Generator) Generator {
+		return GenerateFunc(func(g *Graph) error {
+			// Ensure all fields have a specific tag.
+			for _, node := range g.Nodes {
+				for _, f := range node.Fields {
+					tag := reflect.StructTag(f.StructTag)
+					if _, ok := tag.Lookup(name); !ok {
+						return fmt.Errorf("struct tag %q is missing for field %s.%s", name, node.Name, f.Name)
+					}
+				}
+			}
+			return next.Generate(g)
+		})
+	}
+}
+
+func TestGraph_Hooks(t *testing.T) {
+	require := require.New(t)
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+		Hooks:   []Hook{ensureStructTag("yaml")},
+	}, &load.Schema{
+		Name: "T1",
+		Fields: []*load.Field{
+			{Name: "age", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+			{Name: "expired_at", Info: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Optional: true},
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Edges: []*load.Edge{
+			{Name: "t1", Type: "T1", Unique: true},
+		},
+	})
+	require.NoError(err)
+	require.NotNil(graph)
+	require.EqualError(graph.Gen(), `struct tag "yaml" is missing for field T1.age`)
+}
+
+func TestDependencyAnnotation_Build(t *testing.T) {
+	tests := []struct {
+		typ   *field.TypeInfo
+		field string
+	}{
+		{
+			typ: &field.TypeInfo{
+				Ident: "*http.Client",
+			},
+			field: "HTTPClient",
+		},
+		{
+			typ: &field.TypeInfo{
+				Ident: "[]*http.Client",
+				RType: &field.RType{
+					Kind: reflect.Slice,
+				},
+			},
+			field: "HTTPClients",
+		},
+		{
+			typ: &field.TypeInfo{
+				Ident: "[]*url.URL",
+				RType: &field.RType{
+					Kind: reflect.Slice,
+				},
+			},
+			field: "URLs",
+		},
+		{
+			typ: &field.TypeInfo{
+				Ident: "*net.Conn",
+			},
+			field: "NetConn",
+		},
+	}
+	for _, tt := range tests {
+		d := &Dependency{Type: tt.typ}
+		require.NoError(t, d.Build())
+		require.Equal(t, tt.field, d.Field)
+	}
 }

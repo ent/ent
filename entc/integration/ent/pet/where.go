@@ -7,12 +7,13 @@
 package pet
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"github.com/google/uuid"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -95,10 +96,107 @@ func IDLTE(id int) predicate.Pet {
 	})
 }
 
+// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
+func Age(v float64) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAge), v))
+	})
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldName), v))
+	})
+}
+
+// UUID applies equality check predicate on the "uuid" field. It's identical to UUIDEQ.
+func UUID(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUUID), v))
+	})
+}
+
+// Nickname applies equality check predicate on the "nickname" field. It's identical to NicknameEQ.
+func Nickname(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNickname), v))
+	})
+}
+
+// AgeEQ applies the EQ predicate on the "age" field.
+func AgeEQ(v float64) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAge), v))
+	})
+}
+
+// AgeNEQ applies the NEQ predicate on the "age" field.
+func AgeNEQ(v float64) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAge), v))
+	})
+}
+
+// AgeIn applies the In predicate on the "age" field.
+func AgeIn(vs ...float64) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAge), v...))
+	})
+}
+
+// AgeNotIn applies the NotIn predicate on the "age" field.
+func AgeNotIn(vs ...float64) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAge), v...))
+	})
+}
+
+// AgeGT applies the GT predicate on the "age" field.
+func AgeGT(v float64) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAge), v))
+	})
+}
+
+// AgeGTE applies the GTE predicate on the "age" field.
+func AgeGTE(v float64) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAge), v))
+	})
+}
+
+// AgeLT applies the LT predicate on the "age" field.
+func AgeLT(v float64) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAge), v))
+	})
+}
+
+// AgeLTE applies the LTE predicate on the "age" field.
+func AgeLTE(v float64) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAge), v))
 	})
 }
 
@@ -213,6 +311,221 @@ func NameContainsFold(v string) predicate.Pet {
 	})
 }
 
+// UUIDEQ applies the EQ predicate on the "uuid" field.
+func UUIDEQ(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldUUID), v))
+	})
+}
+
+// UUIDNEQ applies the NEQ predicate on the "uuid" field.
+func UUIDNEQ(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldUUID), v))
+	})
+}
+
+// UUIDIn applies the In predicate on the "uuid" field.
+func UUIDIn(vs ...uuid.UUID) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldUUID), v...))
+	})
+}
+
+// UUIDNotIn applies the NotIn predicate on the "uuid" field.
+func UUIDNotIn(vs ...uuid.UUID) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldUUID), v...))
+	})
+}
+
+// UUIDGT applies the GT predicate on the "uuid" field.
+func UUIDGT(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldUUID), v))
+	})
+}
+
+// UUIDGTE applies the GTE predicate on the "uuid" field.
+func UUIDGTE(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldUUID), v))
+	})
+}
+
+// UUIDLT applies the LT predicate on the "uuid" field.
+func UUIDLT(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldUUID), v))
+	})
+}
+
+// UUIDLTE applies the LTE predicate on the "uuid" field.
+func UUIDLTE(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldUUID), v))
+	})
+}
+
+// UUIDIsNil applies the IsNil predicate on the "uuid" field.
+func UUIDIsNil() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldUUID)))
+	})
+}
+
+// UUIDNotNil applies the NotNil predicate on the "uuid" field.
+func UUIDNotNil() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldUUID)))
+	})
+}
+
+// NicknameEQ applies the EQ predicate on the "nickname" field.
+func NicknameEQ(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameNEQ applies the NEQ predicate on the "nickname" field.
+func NicknameNEQ(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameIn applies the In predicate on the "nickname" field.
+func NicknameIn(vs ...string) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNickname), v...))
+	})
+}
+
+// NicknameNotIn applies the NotIn predicate on the "nickname" field.
+func NicknameNotIn(vs ...string) predicate.Pet {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Pet(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNickname), v...))
+	})
+}
+
+// NicknameGT applies the GT predicate on the "nickname" field.
+func NicknameGT(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameGTE applies the GTE predicate on the "nickname" field.
+func NicknameGTE(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameLT applies the LT predicate on the "nickname" field.
+func NicknameLT(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameLTE applies the LTE predicate on the "nickname" field.
+func NicknameLTE(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameContains applies the Contains predicate on the "nickname" field.
+func NicknameContains(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameHasPrefix applies the HasPrefix predicate on the "nickname" field.
+func NicknameHasPrefix(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameHasSuffix applies the HasSuffix predicate on the "nickname" field.
+func NicknameHasSuffix(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameIsNil applies the IsNil predicate on the "nickname" field.
+func NicknameIsNil() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNickname)))
+	})
+}
+
+// NicknameNotNil applies the NotNil predicate on the "nickname" field.
+func NicknameNotNil() predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNickname)))
+	})
+}
+
+// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
+func NicknameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNickname), v))
+	})
+}
+
+// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
+func NicknameContainsFold(v string) predicate.Pet {
+	return predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNickname), v))
+	})
+}
+
 // HasTeam applies the HasEdge predicate on the "team" edge.
 func HasTeam() predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
@@ -269,7 +582,7 @@ func HasOwnerWith(preds ...predicate.User) predicate.Pet {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -280,7 +593,7 @@ func And(predicates ...predicate.Pet) predicate.Pet {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Pet) predicate.Pet {
 	return predicate.Pet(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

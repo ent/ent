@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/comment"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/comment"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // CommentDelete is the builder for deleting a Comment entity.
 type CommentDelete struct {
 	config
-	hooks      []Hook
-	mutation   *CommentMutation
-	predicates []predicate.Comment
+	hooks    []Hook
+	mutation *CommentMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the CommentDelete builder.
 func (cd *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
-	cd.predicates = append(cd.predicates, ps...)
+	cd.mutation.Where(ps...)
 	return cd
 }
 
@@ -51,6 +50,9 @@ func (cd *CommentDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(cd.hooks) - 1; i >= 0; i-- {
+			if cd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cd.mutation); err != nil {
@@ -79,7 +81,7 @@ func (cd *CommentDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := cd.predicates; len(ps) > 0 {
+	if ps := cd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

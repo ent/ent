@@ -8,37 +8,37 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/card"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/entc/integration/ent/spec"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/card"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/entc/integration/ent/spec"
+	"entgo.io/ent/schema/field"
 )
 
 // SpecUpdate is the builder for updating Spec entities.
 type SpecUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *SpecMutation
-	predicates []predicate.Spec
+	hooks    []Hook
+	mutation *SpecMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the SpecUpdate builder.
 func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	su.predicates = append(su.predicates, ps...)
+	su.mutation.Where(ps...)
 	return su
 }
 
-// AddCardIDs adds the card edge to Card by ids.
+// AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (su *SpecUpdate) AddCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.AddCardIDs(ids...)
 	return su
 }
 
-// AddCard adds the card edges to Card.
+// AddCard adds the "card" edges to the Card entity.
 func (su *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -52,19 +52,19 @@ func (su *SpecUpdate) Mutation() *SpecMutation {
 	return su.mutation
 }
 
-// ClearCard clears all "card" edges to type Card.
+// ClearCard clears all "card" edges to the Card entity.
 func (su *SpecUpdate) ClearCard() *SpecUpdate {
 	su.mutation.ClearCard()
 	return su
 }
 
-// RemoveCardIDs removes the card edge to Card by ids.
+// RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (su *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 	su.mutation.RemoveCardIDs(ids...)
 	return su
 }
 
-// RemoveCard removes card edges to Card.
+// RemoveCard removes "card" edges to Card entities.
 func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -73,7 +73,7 @@ func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 	return su.RemoveCardIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -93,6 +93,9 @@ func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(su.hooks) - 1; i >= 0; i-- {
+			if su.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = su.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, su.mutation); err != nil {
@@ -135,7 +138,7 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := su.predicates; len(ps) > 0 {
+	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -199,8 +202,8 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{spec.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -210,17 +213,18 @@ func (su *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // SpecUpdateOne is the builder for updating a single Spec entity.
 type SpecUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *SpecMutation
 }
 
-// AddCardIDs adds the card edge to Card by ids.
+// AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (suo *SpecUpdateOne) AddCardIDs(ids ...int) *SpecUpdateOne {
 	suo.mutation.AddCardIDs(ids...)
 	return suo
 }
 
-// AddCard adds the card edges to Card.
+// AddCard adds the "card" edges to the Card entity.
 func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -234,19 +238,19 @@ func (suo *SpecUpdateOne) Mutation() *SpecMutation {
 	return suo.mutation
 }
 
-// ClearCard clears all "card" edges to type Card.
+// ClearCard clears all "card" edges to the Card entity.
 func (suo *SpecUpdateOne) ClearCard() *SpecUpdateOne {
 	suo.mutation.ClearCard()
 	return suo
 }
 
-// RemoveCardIDs removes the card edge to Card by ids.
+// RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (suo *SpecUpdateOne) RemoveCardIDs(ids ...int) *SpecUpdateOne {
 	suo.mutation.RemoveCardIDs(ids...)
 	return suo
 }
 
-// RemoveCard removes card edges to Card.
+// RemoveCard removes "card" edges to Card entities.
 func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -255,7 +259,14 @@ func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 	return suo.RemoveCardIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (suo *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
+	suo.fields = append([]string{field}, fields...)
+	return suo
+}
+
+// Save executes the query and returns the updated Spec entity.
 func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 	var (
 		err  error
@@ -275,6 +286,9 @@ func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 			return node, err
 		})
 		for i := len(suo.hooks) - 1; i >= 0; i-- {
+			if suo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = suo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, suo.mutation); err != nil {
@@ -319,9 +333,28 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) 
 	}
 	id, ok := suo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Spec.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Spec.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := suo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, spec.FieldID)
+		for _, f := range fields {
+			if !spec.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != spec.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := suo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if suo.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -378,12 +411,12 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) 
 	}
 	_node = &Spec{config: suo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, suo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{spec.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

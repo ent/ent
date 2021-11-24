@@ -17,19 +17,19 @@ const (
 	FieldID = "id"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
-
+	// FieldCount holds the string denoting the count field in the database.
+	FieldCount = "count"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeLinks holds the string denoting the links edge name in mutations.
 	EdgeLinks = "links"
-
 	// Table holds the table name of the blob in the database.
 	Table = "blobs"
-	// ParentTable is the table the holds the parent relation/edge.
+	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "blobs"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "blob_parent"
-	// LinksTable is the table the holds the links relation/edge. The primary key declared below.
+	// LinksTable is the table that holds the links relation/edge. The primary key declared below.
 	LinksTable = "blob_links"
 )
 
@@ -37,9 +37,11 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldUUID,
+	FieldCount,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Blob type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "blobs"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"blob_parent",
 }
@@ -66,8 +68,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultUUID holds the default value on creation for the uuid field.
+	// DefaultUUID holds the default value on creation for the "uuid" field.
 	DefaultUUID func() uuid.UUID
-	// DefaultID holds the default value on creation for the id field.
+	// DefaultCount holds the default value on creation for the "count" field.
+	DefaultCount int
+	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

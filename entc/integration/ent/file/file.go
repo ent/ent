@@ -21,31 +21,29 @@ const (
 	FieldGroup = "group"
 	// FieldOp holds the string denoting the op field in the database.
 	FieldOp = "op"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// EdgeType holds the string denoting the type edge name in mutations.
 	EdgeType = "type"
 	// EdgeField holds the string denoting the field edge name in mutations.
 	EdgeField = "field"
-
 	// Table holds the table name of the file in the database.
 	Table = "files"
-	// OwnerTable is the table the holds the owner relation/edge.
+	// OwnerTable is the table that holds the owner relation/edge.
 	OwnerTable = "files"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "user_files"
-	// TypeTable is the table the holds the type relation/edge.
+	// TypeTable is the table that holds the type relation/edge.
 	TypeTable = "files"
 	// TypeInverseTable is the table name for the FileType entity.
 	// It exists in this package in order to avoid circular dependency with the "filetype" package.
 	TypeInverseTable = "file_types"
 	// TypeColumn is the table column denoting the type relation/edge.
 	TypeColumn = "file_type_files"
-	// FieldTable is the table the holds the field relation/edge.
+	// FieldTable is the table that holds the field relation/edge.
 	FieldTable = "field_types"
 	// FieldInverseTable is the table name for the FieldType entity.
 	// It exists in this package in order to avoid circular dependency with the "fieldtype" package.
@@ -64,7 +62,8 @@ var Columns = []string{
 	FieldOp,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the File type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "files"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"file_type_files",
 	"group_files",
@@ -87,7 +86,7 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultSize holds the default value on creation for the size field.
+	// DefaultSize holds the default value on creation for the "size" field.
 	DefaultSize int
 	// SizeValidator is a validator for the "size" field. It is called by the builders before save.
 	SizeValidator func(int) error

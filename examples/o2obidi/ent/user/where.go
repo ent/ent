@@ -7,12 +7,12 @@
 package user
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2obidi/ent/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2obidi/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -324,7 +324,7 @@ func HasSpouseWith(preds ...predicate.User) predicate.User {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -335,7 +335,7 @@ func And(predicates ...predicate.User) predicate.User {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

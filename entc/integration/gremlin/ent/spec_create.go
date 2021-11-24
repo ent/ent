@@ -10,10 +10,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 )
 
 // SpecCreate is the builder for creating a Spec entity.
@@ -23,13 +23,13 @@ type SpecCreate struct {
 	hooks    []Hook
 }
 
-// AddCardIDs adds the card edge to Card by ids.
+// AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (sc *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
 	sc.mutation.AddCardIDs(ids...)
 	return sc
 }
 
-// AddCard adds the card edges to Card.
+// AddCard adds the "card" edges to the Card entity.
 func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
 	ids := make([]string, len(c))
 	for i := range c {
@@ -64,11 +64,17 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 				return nil, err
 			}
 			sc.mutation = mutation
-			node, err = sc.gremlinSave(ctx)
+			if node, err = sc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(sc.hooks) - 1; i >= 0; i-- {
+			if sc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = sc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
@@ -85,6 +91,19 @@ func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (sc *SpecCreate) Exec(ctx context.Context) error {
+	_, err := sc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (sc *SpecCreate) ExecX(ctx context.Context) {
+	if err := sc.Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -116,7 +135,7 @@ func (sc *SpecCreate) gremlin() *dsl.Traversal {
 	return v.ValueMap(true)
 }
 
-// SpecCreateBulk is the builder for creating a bulk of Spec entities.
+// SpecCreateBulk is the builder for creating many Spec entities in bulk.
 type SpecCreateBulk struct {
 	config
 	builders []*SpecCreate

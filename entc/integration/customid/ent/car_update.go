@@ -8,38 +8,38 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/customid/ent/car"
-	"github.com/facebook/ent/entc/integration/customid/ent/pet"
-	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // CarUpdate is the builder for updating Car entities.
 type CarUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CarMutation
-	predicates []predicate.Car
+	hooks    []Hook
+	mutation *CarMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the CarUpdate builder.
 func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 
-// SetBeforeID sets the before_id field.
+// SetBeforeID sets the "before_id" field.
 func (cu *CarUpdate) SetBeforeID(f float64) *CarUpdate {
 	cu.mutation.ResetBeforeID()
 	cu.mutation.SetBeforeID(f)
 	return cu
 }
 
-// SetNillableBeforeID sets the before_id field if the given value is not nil.
+// SetNillableBeforeID sets the "before_id" field if the given value is not nil.
 func (cu *CarUpdate) SetNillableBeforeID(f *float64) *CarUpdate {
 	if f != nil {
 		cu.SetBeforeID(*f)
@@ -47,26 +47,26 @@ func (cu *CarUpdate) SetNillableBeforeID(f *float64) *CarUpdate {
 	return cu
 }
 
-// AddBeforeID adds f to before_id.
+// AddBeforeID adds f to the "before_id" field.
 func (cu *CarUpdate) AddBeforeID(f float64) *CarUpdate {
 	cu.mutation.AddBeforeID(f)
 	return cu
 }
 
-// ClearBeforeID clears the value of before_id.
+// ClearBeforeID clears the value of the "before_id" field.
 func (cu *CarUpdate) ClearBeforeID() *CarUpdate {
 	cu.mutation.ClearBeforeID()
 	return cu
 }
 
-// SetAfterID sets the after_id field.
+// SetAfterID sets the "after_id" field.
 func (cu *CarUpdate) SetAfterID(f float64) *CarUpdate {
 	cu.mutation.ResetAfterID()
 	cu.mutation.SetAfterID(f)
 	return cu
 }
 
-// SetNillableAfterID sets the after_id field if the given value is not nil.
+// SetNillableAfterID sets the "after_id" field if the given value is not nil.
 func (cu *CarUpdate) SetNillableAfterID(f *float64) *CarUpdate {
 	if f != nil {
 		cu.SetAfterID(*f)
@@ -74,31 +74,31 @@ func (cu *CarUpdate) SetNillableAfterID(f *float64) *CarUpdate {
 	return cu
 }
 
-// AddAfterID adds f to after_id.
+// AddAfterID adds f to the "after_id" field.
 func (cu *CarUpdate) AddAfterID(f float64) *CarUpdate {
 	cu.mutation.AddAfterID(f)
 	return cu
 }
 
-// ClearAfterID clears the value of after_id.
+// ClearAfterID clears the value of the "after_id" field.
 func (cu *CarUpdate) ClearAfterID() *CarUpdate {
 	cu.mutation.ClearAfterID()
 	return cu
 }
 
-// SetModel sets the model field.
+// SetModel sets the "model" field.
 func (cu *CarUpdate) SetModel(s string) *CarUpdate {
 	cu.mutation.SetModel(s)
 	return cu
 }
 
-// SetOwnerID sets the owner edge to Pet by id.
+// SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (cu *CarUpdate) SetOwnerID(id string) *CarUpdate {
 	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
-// SetNillableOwnerID sets the owner edge to Pet by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
 func (cu *CarUpdate) SetNillableOwnerID(id *string) *CarUpdate {
 	if id != nil {
 		cu = cu.SetOwnerID(*id)
@@ -106,7 +106,7 @@ func (cu *CarUpdate) SetNillableOwnerID(id *string) *CarUpdate {
 	return cu
 }
 
-// SetOwner sets the owner edge to Pet.
+// SetOwner sets the "owner" edge to the Pet entity.
 func (cu *CarUpdate) SetOwner(p *Pet) *CarUpdate {
 	return cu.SetOwnerID(p.ID)
 }
@@ -116,13 +116,13 @@ func (cu *CarUpdate) Mutation() *CarMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type Pet.
+// ClearOwner clears the "owner" edge to the Pet entity.
 func (cu *CarUpdate) ClearOwner() *CarUpdate {
 	cu.mutation.ClearOwner()
 	return cu
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -148,6 +148,9 @@ func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			if cu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
@@ -183,12 +186,12 @@ func (cu *CarUpdate) ExecX(ctx context.Context) {
 func (cu *CarUpdate) check() error {
 	if v, ok := cu.mutation.BeforeID(); ok {
 		if err := car.BeforeIDValidator(v); err != nil {
-			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+			return &ValidationError{Name: "before_id", err: fmt.Errorf(`ent: validator failed for field "Car.before_id": %w`, err)}
 		}
 	}
 	if v, ok := cu.mutation.AfterID(); ok {
 		if err := car.AfterIDValidator(v); err != nil {
-			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+			return &ValidationError{Name: "after_id", err: fmt.Errorf(`ent: validator failed for field "Car.after_id": %w`, err)}
 		}
 	}
 	return nil
@@ -205,7 +208,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := cu.predicates; len(ps) > 0 {
+	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -297,8 +300,8 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -308,18 +311,19 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CarUpdateOne is the builder for updating a single Car entity.
 type CarUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CarMutation
 }
 
-// SetBeforeID sets the before_id field.
+// SetBeforeID sets the "before_id" field.
 func (cuo *CarUpdateOne) SetBeforeID(f float64) *CarUpdateOne {
 	cuo.mutation.ResetBeforeID()
 	cuo.mutation.SetBeforeID(f)
 	return cuo
 }
 
-// SetNillableBeforeID sets the before_id field if the given value is not nil.
+// SetNillableBeforeID sets the "before_id" field if the given value is not nil.
 func (cuo *CarUpdateOne) SetNillableBeforeID(f *float64) *CarUpdateOne {
 	if f != nil {
 		cuo.SetBeforeID(*f)
@@ -327,26 +331,26 @@ func (cuo *CarUpdateOne) SetNillableBeforeID(f *float64) *CarUpdateOne {
 	return cuo
 }
 
-// AddBeforeID adds f to before_id.
+// AddBeforeID adds f to the "before_id" field.
 func (cuo *CarUpdateOne) AddBeforeID(f float64) *CarUpdateOne {
 	cuo.mutation.AddBeforeID(f)
 	return cuo
 }
 
-// ClearBeforeID clears the value of before_id.
+// ClearBeforeID clears the value of the "before_id" field.
 func (cuo *CarUpdateOne) ClearBeforeID() *CarUpdateOne {
 	cuo.mutation.ClearBeforeID()
 	return cuo
 }
 
-// SetAfterID sets the after_id field.
+// SetAfterID sets the "after_id" field.
 func (cuo *CarUpdateOne) SetAfterID(f float64) *CarUpdateOne {
 	cuo.mutation.ResetAfterID()
 	cuo.mutation.SetAfterID(f)
 	return cuo
 }
 
-// SetNillableAfterID sets the after_id field if the given value is not nil.
+// SetNillableAfterID sets the "after_id" field if the given value is not nil.
 func (cuo *CarUpdateOne) SetNillableAfterID(f *float64) *CarUpdateOne {
 	if f != nil {
 		cuo.SetAfterID(*f)
@@ -354,31 +358,31 @@ func (cuo *CarUpdateOne) SetNillableAfterID(f *float64) *CarUpdateOne {
 	return cuo
 }
 
-// AddAfterID adds f to after_id.
+// AddAfterID adds f to the "after_id" field.
 func (cuo *CarUpdateOne) AddAfterID(f float64) *CarUpdateOne {
 	cuo.mutation.AddAfterID(f)
 	return cuo
 }
 
-// ClearAfterID clears the value of after_id.
+// ClearAfterID clears the value of the "after_id" field.
 func (cuo *CarUpdateOne) ClearAfterID() *CarUpdateOne {
 	cuo.mutation.ClearAfterID()
 	return cuo
 }
 
-// SetModel sets the model field.
+// SetModel sets the "model" field.
 func (cuo *CarUpdateOne) SetModel(s string) *CarUpdateOne {
 	cuo.mutation.SetModel(s)
 	return cuo
 }
 
-// SetOwnerID sets the owner edge to Pet by id.
+// SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (cuo *CarUpdateOne) SetOwnerID(id string) *CarUpdateOne {
 	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
-// SetNillableOwnerID sets the owner edge to Pet by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
 func (cuo *CarUpdateOne) SetNillableOwnerID(id *string) *CarUpdateOne {
 	if id != nil {
 		cuo = cuo.SetOwnerID(*id)
@@ -386,7 +390,7 @@ func (cuo *CarUpdateOne) SetNillableOwnerID(id *string) *CarUpdateOne {
 	return cuo
 }
 
-// SetOwner sets the owner edge to Pet.
+// SetOwner sets the "owner" edge to the Pet entity.
 func (cuo *CarUpdateOne) SetOwner(p *Pet) *CarUpdateOne {
 	return cuo.SetOwnerID(p.ID)
 }
@@ -396,13 +400,20 @@ func (cuo *CarUpdateOne) Mutation() *CarMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type Pet.
+// ClearOwner clears the "owner" edge to the Pet entity.
 func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
+}
+
+// Save executes the query and returns the updated Car entity.
 func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
 	var (
 		err  error
@@ -428,6 +439,9 @@ func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
 			return node, err
 		})
 		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			if cuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
@@ -463,12 +477,12 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 func (cuo *CarUpdateOne) check() error {
 	if v, ok := cuo.mutation.BeforeID(); ok {
 		if err := car.BeforeIDValidator(v); err != nil {
-			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+			return &ValidationError{Name: "before_id", err: fmt.Errorf(`ent: validator failed for field "Car.before_id": %w`, err)}
 		}
 	}
 	if v, ok := cuo.mutation.AfterID(); ok {
 		if err := car.AfterIDValidator(v); err != nil {
-			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+			return &ValidationError{Name: "after_id", err: fmt.Errorf(`ent: validator failed for field "Car.after_id": %w`, err)}
 		}
 	}
 	return nil
@@ -487,9 +501,28 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Car.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Car.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := cuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, car.FieldID)
+		for _, f := range fields {
+			if !car.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != car.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := cuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := cuo.mutation.BeforeID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
@@ -574,12 +607,12 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	}
 	_node = &Car{config: cuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

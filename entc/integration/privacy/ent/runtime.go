@@ -6,4 +6,4 @@
 
 package ent
 
-// The schema-stitching logic is generated in github.com/facebook/ent/entc/integration/privacy/ent/runtime/runtime.go
+// The schema-stitching logic is generated in entgo.io/ent/entc/integration/privacy/ent/runtime/runtime.go

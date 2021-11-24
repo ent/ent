@@ -7,7 +7,7 @@
 package predicate
 
 import (
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql"
 )
 
 // Blob is the predicate function for blob builders.
@@ -16,11 +16,26 @@ type Blob func(*sql.Selector)
 // Car is the predicate function for car builders.
 type Car func(*sql.Selector)
 
+// Device is the predicate function for device builders.
+type Device func(*sql.Selector)
+
+// Doc is the predicate function for doc builders.
+type Doc func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 
+// MixinID is the predicate function for mixinid builders.
+type MixinID func(*sql.Selector)
+
+// Note is the predicate function for note builders.
+type Note func(*sql.Selector)
+
 // Pet is the predicate function for pet builders.
 type Pet func(*sql.Selector)
+
+// Session is the predicate function for session builders.
+type Session func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

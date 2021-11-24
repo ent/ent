@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/filetype"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 )
 
 // FileType is the model entity for the FileType schema.
@@ -33,7 +33,7 @@ type FileType struct {
 // FileTypeEdges holds the relations/edges for other nodes in the graph.
 type FileTypeEdges struct {
 	// Files holds the value of the files edge.
-	Files []*File
+	Files []*File `json:"files,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -70,20 +70,20 @@ func (ft *FileType) FromResponse(res *gremlin.Response) error {
 	return nil
 }
 
-// QueryFiles queries the files edge of the FileType.
+// QueryFiles queries the "files" edge of the FileType entity.
 func (ft *FileType) QueryFiles() *FileQuery {
 	return (&FileTypeClient{config: ft.config}).QueryFiles(ft)
 }
 
 // Update returns a builder for updating this FileType.
-// Note that, you need to call FileType.Unwrap() before calling this method, if this FileType
+// Note that you need to call FileType.Unwrap() before calling this method if this FileType
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ft *FileType) Update() *FileTypeUpdateOne {
 	return (&FileTypeClient{config: ft.config}).UpdateOne(ft)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the FileType entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (ft *FileType) Unwrap() *FileType {
 	tx, ok := ft.config.driver.(*txDriver)
 	if !ok {

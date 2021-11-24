@@ -7,19 +7,19 @@ package gen
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime/debug"
-	"text/template"
+	"strings"
 	"text/template/parse"
 
-	"github.com/facebook/ent/dialect/sql/schema"
-	"github.com/facebook/ent/entc/load"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema/field"
 
 	"golang.org/x/tools/imports"
 )
@@ -42,27 +42,39 @@ type (
 		// The supported types are string and int, which also the default.
 		IDType *field.TypeInfo
 
-		// Template specifies an alternative template to execute or
-		// to override the default. If nil, the default template is used.
-		//
-		// Deprecated: the Template option predates the Templates option and it
-		// is planned be removed in v0.5.0. New code should use Templates instead.
-		Template *template.Template
-
 		// Templates specifies a list of alternative templates to execute or
 		// to override the default. If nil, the default template is used.
 		//
 		// Note that, additional templates are executed on the Graph object and
 		// the execution output is stored in a file derived by the template name.
-		Templates []*template.Template
+		Templates []*Template
 
-		// Funcs specifies external functions to add to the template execution.
+		// Features defines a list of additional features to add to the codegen phase.
+		// For example, the PrivacyFeature.
+		Features []Feature
+
+		// Hooks holds an optional list of Hooks to apply on the graph before/after the code-generation.
+		Hooks []Hook
+
+		// Annotations that are injected to the Config object can be accessed
+		// globally in all templates. In order to access an annotation from a
+		// graph template, do the following:
 		//
-		// Templates that use custom functions and override (or extend) the default
-		// templates will need to provide the same FuncMap that was used for parsing
-		// the template.
-		Funcs template.FuncMap
+		//	{{- with $.Annotations.GQL }}
+		//		{{/* Annotation usage goes here. */}}
+		//	{{- end }}
+		//
+		// For type templates, we access the Config field to access the global
+		// annotations, and not the type-specific annotation.
+		//
+		//	{{- with $.Config.Annotations.GQL }}
+		//		{{/* Annotation usage goes here. */}}
+		//	{{- end }}
+		//
+		// Note that the mapping is from the annotation-name (e.g. "GQL") to a JSON decoded object.
+		Annotations Annotations
 	}
+
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
 	// hold the edges of the graph. Instead, each Type holds the edges for other Types.
 	Graph struct {
@@ -72,7 +84,42 @@ type (
 		// Schemas holds the raw interfaces for the loaded schemas.
 		Schemas []*load.Schema
 	}
+
+	// Generator is the interface that wraps the Generate method.
+	Generator interface {
+		// Generate generates the ent artifacts for the given graph.
+		Generate(*Graph) error
+	}
+
+	// The GenerateFunc type is an adapter to allow the use of ordinary
+	// function as Generator. If f is a function with the appropriate signature,
+	// GenerateFunc(f) is a Generator that calls f.
+	GenerateFunc func(*Graph) error
+
+	// Hook defines the "generate middleware". A function that gets a Generator
+	// and returns a Generator. For example:
+	//
+	//	hook := func(next gen.Generator) gen.Generator {
+	//		return gen.GenerateFunc(func(g *Graph) error {
+	//			fmt.Println("Graph:", g)
+	//			return next.Generate(g)
+	//		})
+	//	}
+	//
+	Hook func(Generator) Generator
+
+	// Annotations defines code generation annotations to be passed to the templates.
+	// It can be defined on most elements in the schema (node, field, edge), or globally
+	// on the Config object.
+	// The mapping is from the annotation name (e.g. "EntGQL") to the annotation itself.
+	// Note that, annotations that are defined in the schema must be JSON encoded/decoded.
+	Annotations map[string]interface{}
 )
+
+// Generate calls f(g).
+func (f GenerateFunc) Generate(g *Graph) error {
+	return f(g)
+}
 
 // NewGraph creates a new Graph for the code generation from the given schema definitions.
 // It fails if one of the schemas is invalid.
@@ -89,31 +136,67 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 		check(resolve(t), "resolve %q relations", t.Name)
 	}
 	for _, t := range g.Nodes {
-		check(t.resolveFKs(), "set %q foreign-keys", t.Name)
+		check(t.setupFKs(), "set %q foreign-keys", t.Name)
 	}
 	for i := range schemas {
 		g.addIndexes(schemas[i])
 	}
+	g.defaults()
 	return
 }
 
+// defaultIDType holds the default value for IDType.
+var defaultIDType = &field.TypeInfo{Type: field.TypeInt}
+
+// defaults sets the default value of the IDType. The IDType field is used
+// by multiple templates. If the IDType wasn't provided, it will fallback to
+// int, or the one used in the schema (if all schemas share the same IDType).
+func (g *Graph) defaults() {
+	if g.IDType != nil {
+		return
+	}
+	if len(g.Nodes) == 0 {
+		g.IDType = defaultIDType
+		return
+	}
+	// Check that all nodes have the same type for the ID field.
+	for i := 0; i < len(g.Nodes)-1; i++ {
+		cid, nid := g.Nodes[i].ID.Type, g.Nodes[i+1].ID.Type
+		if cid.Type != nid.Type {
+			g.IDType = defaultIDType
+			return
+		}
+	}
+	g.IDType = g.Nodes[0].ID.Type
+}
+
 // Gen generates the artifacts for the graph.
-func (g *Graph) Gen() (err error) {
-	defer catch(&err)
+func (g *Graph) Gen() error {
+	var gen Generator = GenerateFunc(generate)
+	for i := len(g.Hooks) - 1; i >= 0; i-- {
+		gen = g.Hooks[i](gen)
+	}
+	return gen.Generate(g)
+}
+
+// generate is the default Generator implementation.
+func generate(g *Graph) error {
 	var (
-		written  []string
+		assets   assets
 		external []GraphTemplate
 	)
 	templates, external = g.templates()
 	for _, n := range g.Nodes {
-		path := filepath.Join(g.Config.Target, n.Package())
-		check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
+		assets.dirs = append(assets.dirs, filepath.Join(g.Config.Target, n.Package()))
 		for _, tmpl := range Templates {
 			b := bytes.NewBuffer(nil)
-			check(templates.ExecuteTemplate(b, tmpl.Name, n), "execute template %q", tmpl.Name)
-			target := filepath.Join(g.Config.Target, tmpl.Format(n))
-			check(ioutil.WriteFile(target, b.Bytes(), 0644), "write file %s", target)
-			written = append(written, target)
+			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
+				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+			}
+			assets.files = append(assets.files, file{
+				path:    filepath.Join(g.Config.Target, tmpl.Format(n)),
+				content: b.Bytes(),
+			})
 		}
 	}
 	for _, tmpl := range append(GraphTemplates, external...) {
@@ -121,19 +204,34 @@ func (g *Graph) Gen() (err error) {
 			continue
 		}
 		if dir := filepath.Dir(tmpl.Format); dir != "." {
-			path := filepath.Join(g.Config.Target, dir)
-			check(os.MkdirAll(path, os.ModePerm), "create dir %q", path)
+			assets.dirs = append(assets.dirs, filepath.Join(g.Config.Target, dir))
 		}
 		b := bytes.NewBuffer(nil)
-		check(templates.ExecuteTemplate(b, tmpl.Name, g), "execute template %q", tmpl.Name)
-		target := filepath.Join(g.Config.Target, tmpl.Format)
-		check(ioutil.WriteFile(target, b.Bytes(), 0644), "write file %s", target)
-		written = append(written, target)
+		if err := templates.ExecuteTemplate(b, tmpl.Name, g); err != nil {
+			return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+		}
+		assets.files = append(assets.files, file{
+			path:    filepath.Join(g.Config.Target, tmpl.Format),
+			content: b.Bytes(),
+		})
+	}
+	for _, f := range AllFeatures {
+		if f.cleanup == nil || g.featureEnabled(f) {
+			continue
+		}
+		if err := f.cleanup(g.Config); err != nil {
+			return fmt.Errorf("cleanup %q feature assets: %w", f.Name, err)
+		}
+	}
+	// Write and format assets only if template execution
+	// finished successfully.
+	if err := assets.write(); err != nil {
+		return err
 	}
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it's
 	// suspended to the end of the writing.
-	return formatFiles(written)
+	return assets.format()
 }
 
 // addNode creates a new Type/Node/Ent to the graph.
@@ -154,9 +252,15 @@ func (g *Graph) addIndexes(schema *load.Schema) {
 // addEdges adds the node edges to the graph.
 func (g *Graph) addEdges(schema *load.Schema) {
 	t, _ := g.typ(schema.Name)
+	seen := make(map[string]struct{}, len(schema.Edges))
 	for _, e := range schema.Edges {
 		typ, ok := g.typ(e.Type)
 		expect(ok, "type %q does not exist for edge", e.Type)
+		_, ok = t.fields[e.Name]
+		expect(!ok, "%s schema can't contain field and edge with the same name %q", schema.Name, e.Name)
+		_, ok = seen[e.Name]
+		expect(!ok, "%s schema contains multiple %q edges", schema.Name, e.Name)
+		seen[e.Name] = struct{}{}
 		switch {
 		// Assoc only.
 		case !e.Inverse:
@@ -167,7 +271,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Owner:       t,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
 		// Inverse only.
@@ -181,7 +285,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     e.RefName,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			})
 		// Inverse and assoc.
@@ -197,16 +301,16 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Inverse:     ref.Name,
 				Unique:      e.Unique,
 				Optional:    !e.Required,
-				StructTag:   e.Tag,
+				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
 			}, &Edge{
-				def:         e,
+				def:         ref,
 				Type:        typ,
 				Owner:       t,
 				Name:        ref.Name,
 				Unique:      ref.Unique,
 				Optional:    !ref.Required,
-				StructTag:   ref.Tag,
+				StructTag:   structTag(ref.Name, ref.Tag),
 				Annotations: ref.Annotations,
 			})
 		default:
@@ -243,7 +347,7 @@ func resolve(t *Type) error {
 		case e.IsInverse():
 			ref, ok := e.Type.HasAssoc(e.Inverse)
 			if !ok {
-				return fmt.Errorf("edge %q is missing for inverse edge: %s.%s", e.Inverse, e.Type.Name, e.Name)
+				return fmt.Errorf("edge %q is missing for inverse edge: %s.%s(%s)", e.Inverse, t.Name, e.Name, e.Type.Name)
 			}
 			if !e.Optional && !ref.Optional {
 				return fmt.Errorf("edges cannot be required in both directions: %s.%s <-> %s.%s", t.Name, e.Name, e.Type.Name, ref.Name)
@@ -251,6 +355,7 @@ func resolve(t *Type) error {
 			if ref.Type != t {
 				return fmt.Errorf("mismatch type for back-ref %q of %s.%s <-> %s.%s", e.Inverse, t.Name, e.Name, e.Type.Name, ref.Name)
 			}
+			e.Ref, ref.Ref = ref, e
 			table := t.Table()
 			// Name the foreign-key column in a format that wouldn't change even if an inverse
 			// edge is dropped (or added). The format is: "<Edge-Owner>_<Edge-Name>".
@@ -313,48 +418,52 @@ func resolve(t *Type) error {
 }
 
 // Tables returns the schema definitions of SQL tables for the graph.
-func (g *Graph) Tables() (all []*schema.Table) {
+func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
-		table := schema.NewTable(n.Table()).AddPrimary(n.ID.PK())
+		table := schema.NewTable(n.Table()).
+			AddPrimary(n.ID.PK()).
+			SetAnnotation(n.EntSQL())
 		for _, f := range n.Fields {
-			table.AddColumn(f.Column())
+			if !f.IsEdgeField() {
+				table.AddColumn(f.Column())
+			}
 		}
 		tables[table.Name] = table
 		all = append(all, table)
 	}
 	for _, n := range g.Nodes {
-		// Foreign key + reference OR join table.
+		// Foreign key and a reference, or a join table.
 		for _, e := range n.Edges {
 			if e.IsInverse() {
 				continue
 			}
 			switch e.Rel.Type {
 			case O2O, O2M:
-				// "owner" is the table that owns the relations (we set the foreign-key on)
+				// The "owner" is the table that owns the relation (we set the foreign-key on)
 				// and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, Nullable: true}
-				owner.AddColumn(column)
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
+				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
-					OnDelete:   schema.SetNull,
+					OnDelete:   deleteAction(e),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
-					Symbol:     fmt.Sprintf("%s_%s_%s", owner.Name, ref.Name, e.Name),
+					Symbol:     fkSymbol(e, owner, ref),
 				})
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
 				pk := ref.PrimaryKey[0]
-				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Nullable: true}
-				owner.AddColumn(column)
+				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
+				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
-					OnDelete:   schema.SetNull,
+					OnDelete:   deleteAction(e),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
-					Symbol:     fmt.Sprintf("%s_%s_%s", owner.Name, ref.Name, e.Name),
+					Symbol:     fkSymbol(e, owner, ref),
 				})
 			case M2M:
 				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
@@ -368,6 +477,7 @@ func (g *Graph) Tables() (all []*schema.Table) {
 					c2.Type = ref.Type.Type
 					c2.Size = ref.size()
 				}
+				s1, s2 := fkSymbols(e, c1, c2)
 				all = append(all, &schema.Table{
 					Name:       e.Rel.Table,
 					Columns:    []*schema.Column{c1, c2},
@@ -378,14 +488,14 @@ func (g *Graph) Tables() (all []*schema.Table) {
 							OnDelete:   schema.Cascade,
 							Columns:    []*schema.Column{c1},
 							RefColumns: []*schema.Column{t1.PrimaryKey[0]},
-							Symbol:     fmt.Sprintf("%s_%s", e.Rel.Table, c1.Name),
+							Symbol:     s1,
 						},
 						{
 							RefTable:   t2,
 							OnDelete:   schema.Cascade,
 							Columns:    []*schema.Column{c2},
 							RefColumns: []*schema.Column{t2.PrimaryKey[0]},
-							Symbol:     fmt.Sprintf("%s_%s", e.Rel.Table, c2.Name),
+							Symbol:     s2,
 						},
 					},
 				})
@@ -397,14 +507,86 @@ func (g *Graph) Tables() (all []*schema.Table) {
 		table := tables[n.Table()]
 		for _, idx := range n.Indexes {
 			table.AddIndex(idx.Name, idx.Unique, idx.Columns)
+			// Set the entsql.IndexAnnotation from the schema if exists.
+			index, _ := table.Index(idx.Name)
+			index.Annotation = entsqlIndexAnnotate(idx.Annotations)
 		}
 	}
 	return
 }
 
+// mayAddColumn adds the given column if it doesn't already exist in the table.
+func mayAddColumn(t *schema.Table, c *schema.Column) {
+	if !t.HasColumn(c.Name) {
+		t.AddColumn(c)
+	}
+}
+
+// fkSymbol returns the symbol of the foreign-key constraint for edges of type O2M, M2O and O2O.
+// It returns the symbol of the storage-key if it was provided, and generate custom one otherwise.
+func fkSymbol(e *Edge, ownerT, refT *schema.Table) string {
+	if k, _ := e.StorageKey(); k != nil && len(k.Symbols) == 1 {
+		return k.Symbols[0]
+	}
+	return fmt.Sprintf("%s_%s_%s", ownerT.Name, refT.Name, e.Name)
+}
+
+// fkSymbols is like fkSymbol but for M2M edges.
+func fkSymbols(e *Edge, c1, c2 *schema.Column) (string, string) {
+	s1 := fmt.Sprintf("%s_%s", e.Rel.Table, c1.Name)
+	s2 := fmt.Sprintf("%s_%s", e.Rel.Table, c2.Name)
+	if k, _ := e.StorageKey(); k != nil {
+		if len(k.Symbols) > 0 {
+			s1 = k.Symbols[0]
+		}
+		if len(k.Symbols) > 1 {
+			s2 = k.Symbols[1]
+		}
+	}
+	return s1, s2
+}
+
+// deleteAction returns the referential action for DELETE operations of the given edge.
+func deleteAction(e *Edge) schema.ReferenceOption {
+	action := schema.SetNull
+	if ant := e.EntSQL(); ant != nil && ant.OnDelete != "" {
+		action = schema.ReferenceOption(ant.OnDelete)
+	}
+	return action
+}
+
 // SupportMigrate reports if the codegen supports schema migration.
 func (g *Graph) SupportMigrate() bool {
 	return g.Storage.SchemaMode.Support(Migrate)
+}
+
+// Snapshot holds the information for storing the schema snapshot.
+type Snapshot struct {
+	Schema   string
+	Package  string
+	Schemas  []*load.Schema
+	Features []string
+}
+
+// SchemaSnapshot returns a JSON string represents the graph schema in loadable format.
+func (g *Graph) SchemaSnapshot() (string, error) {
+	schemas := make([]*load.Schema, len(g.Nodes))
+	for i := range g.Nodes {
+		schemas[i] = g.Nodes[i].schema
+	}
+	snap := Snapshot{
+		Schema:  g.Schema,
+		Package: g.Package,
+		Schemas: schemas,
+	}
+	for _, feat := range g.Features {
+		snap.Features = append(snap.Features, feat.Name)
+	}
+	out, err := json.Marshal(snap)
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
 }
 
 func (g *Graph) typ(name string) (*Type, bool) {
@@ -416,43 +598,102 @@ func (g *Graph) typ(name string) (*Type, bool) {
 	return nil, false
 }
 
-// templates returns the template.Template for the code and external templates
-// to execute on the Graph object if provided.
-func (g *Graph) templates() (*template.Template, []GraphTemplate) {
-	if g.Template != nil {
-		g.Templates = append(g.Templates, g.Template)
-	}
-	templates.Funcs(g.Funcs)
-	external := make([]GraphTemplate, 0, len(g.Templates))
+// templates returns the Template to execute on the Graph,
+// and a list of optional external templates if provided.
+func (g *Graph) templates() (*Template, []GraphTemplate) {
+	initTemplates()
+	var (
+		roots    = make(map[string]struct{})
+		helpers  = make(map[string]struct{})
+		external = make([]GraphTemplate, 0, len(g.Templates))
+	)
 	for _, rootT := range g.Templates {
-		rootT.Funcs(Funcs)
-		rootT.Funcs(g.Funcs)
+		templates.Funcs(rootT.FuncMap)
 		for _, tmpl := range rootT.Templates() {
 			if parse.IsEmptyTree(tmpl.Root) {
 				continue
 			}
 			name := tmpl.Name()
-			// If this template doesn't override or extend one of the
-			// default templates, generate it in a new file.
-			if templates.Lookup(name) == nil && !extendExisting(name) {
+			switch {
+			// Helper templates can be either global (prefixed with "helper/"),
+			// or local, where their names follow the format: "<root-tmpl>/helper/.+").
+			case strings.HasPrefix(name, "helper/"):
+			case strings.Contains(name, "/helper/"):
+				helpers[name] = struct{}{}
+			case templates.Lookup(name) == nil && !extendExisting(name):
+				// If the template does not override or extend one of
+				// the builtin templates, generate it in a new file.
 				external = append(external, GraphTemplate{
 					Name:   name,
 					Format: snake(name) + ".go",
 				})
+				roots[name] = struct{}{}
 			}
-			templates = template.Must(templates.AddParseTree(name, tmpl.Tree))
+			templates = MustParse(templates.AddParseTree(name, tmpl.Tree))
 		}
+	}
+	for name := range helpers {
+		root := name[:strings.Index(name, "/helper/")]
+		// If the name is prefixed with a name of a root
+		// template, we treat it as a local helper template.
+		if _, ok := roots[root]; ok {
+			continue
+		}
+		external = append(external, GraphTemplate{
+			Name:   name,
+			Format: snake(name) + ".go",
+		})
+	}
+	for _, f := range g.Features {
+		external = append(external, f.GraphTemplates...)
 	}
 	return templates, external
 }
 
-// ModuleInfo returns the entc binary module version.
+// ModuleInfo returns the entgo.io/ent version.
 func (Config) ModuleInfo() (m debug.Module) {
+	const pkg = "entgo.io/ent"
 	info, ok := debug.ReadBuildInfo()
-	if ok {
-		m = info.Main
+	if !ok {
+		return
+	}
+	// Was running as a CLI (ent/cmd/ent).
+	if info.Main.Path == pkg {
+		return info.Main
+	}
+	// Or, as a main package (ent/entc).
+	for _, dep := range info.Deps {
+		if dep.Path == pkg {
+			return *dep
+		}
 	}
 	return
+}
+
+// FeatureEnabled reports if the given feature name is enabled.
+// It's exported to be used by the template engine as follows:
+//
+//	{{ with $.FeatureEnabled "privacy" }}
+//		...
+//	{{ end }}
+//
+func (c Config) FeatureEnabled(name string) (bool, error) {
+	for _, f := range AllFeatures {
+		if name == f.Name {
+			return c.featureEnabled(f), nil
+		}
+	}
+	return false, fmt.Errorf("unexpected feature name %q", name)
+}
+
+// featureEnabled reports if the given feature-flag is enabled.
+func (c Config) featureEnabled(f Feature) bool {
+	for i := range c.Features {
+		if f.Name == c.Features[i].Name {
+			return true
+		}
+	}
+	return false
 }
 
 // PrepareEnv makes sure the generated directory (environment)
@@ -462,7 +703,7 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 		nop  = func() error { return nil }
 		path = filepath.Join(c.Target, "runtime.go")
 	)
-	out, err := ioutil.ReadFile(path)
+	out, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nop, nil
@@ -477,31 +718,54 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 	if len(fi.Imports) == 0 {
 		return nop, nil
 	}
-	if err := ioutil.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
+	if err := os.WriteFile(path, append([]byte("// +build tools\n"), out...), 0644); err != nil {
 		return nil, err
 	}
-	return func() error { return ioutil.WriteFile(path, out, 0644) }, nil
+	return func() error { return os.WriteFile(path, out, 0644) }, nil
 }
 
-// formatFiles runs "goimports" on given paths.
-func formatFiles(paths []string) error {
-	for _, path := range paths {
-		buf, err := ioutil.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("read file %s: %v", path, err)
+type (
+	file struct {
+		path    string
+		content []byte
+	}
+	assets struct {
+		dirs  []string
+		files []file
+	}
+)
+
+// write files and dirs in the assets.
+func (a assets) write() error {
+	for _, dir := range a.dirs {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			return fmt.Errorf("create dir %q: %w", dir, err)
 		}
-		src, err := imports.Process(path, buf, nil)
-		if err != nil {
-			return fmt.Errorf("format file %s: %v", path, err)
-		}
-		if err := ioutil.WriteFile(path, src, 0644); err != nil {
-			return fmt.Errorf("write file %s: %v", path, err)
+	}
+	for _, file := range a.files {
+		if err := os.WriteFile(file.path, file.content, 0644); err != nil {
+			return fmt.Errorf("write file %q: %w", file.path, err)
 		}
 	}
 	return nil
 }
 
-// expect panic if the condition is false.
+// format runs "goimports" on all assets.
+func (a assets) format() error {
+	for _, file := range a.files {
+		path := file.path
+		src, err := imports.Process(path, file.content, nil)
+		if err != nil {
+			return fmt.Errorf("format file %s: %w", path, err)
+		}
+		if err := os.WriteFile(path, src, 0644); err != nil {
+			return fmt.Errorf("write file %s: %w", path, err)
+		}
+	}
+	return nil
+}
+
+// expect panics if the condition is false.
 func expect(cond bool, msg string, args ...interface{}) {
 	if !cond {
 		panic(graphError{fmt.Sprintf(msg, args...)})
@@ -533,8 +797,16 @@ func catch(err *error) {
 }
 
 func extendExisting(name string) bool {
+	if match(partialPatterns[:], name) {
+		return true
+	}
 	for _, t := range Templates {
-		if t.Match(name) {
+		if match(t.ExtendPatterns, name) {
+			return true
+		}
+	}
+	for _, t := range GraphTemplates {
+		if match(t.ExtendPatterns, name) {
 			return true
 		}
 	}

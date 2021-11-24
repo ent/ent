@@ -8,7 +8,7 @@ title: Fields
 Fields (or properties) in the schema are the attributes of the node. For example, a `User`
 with 4 fields: `age`, `name`, `username` and `created_at`:
 
-![re-fields-properties](https://entgo.io/assets/er_fields_properties.png)
+![re-fields-properties](https://entgo.io/images/assets/er_fields_properties.png)
 
 Fields are returned from the schema using the `Fields` method. For example:
 
@@ -18,8 +18,8 @@ package schema
 import (
 	"time"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 // User schema.
@@ -50,12 +50,11 @@ The following types are currently supported by the framework:
 - `bool`
 - `string`
 - `time.Time`
+- `UUID`
 - `[]byte` (SQL only).
 - `JSON` (SQL only).
 - `Enum` (SQL only).
-- `UUID` (SQL only).
-
-<br/>
+- `Other` (SQL only).
 
 ```go
 package schema
@@ -65,8 +64,8 @@ import (
 	"net/url"
 
 	"github.com/google/uuid"
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 // User schema.
@@ -127,7 +126,9 @@ func (Group) Fields() []ent.Field {
 // Fields of the Blob.
 func (Blob) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}),
+		field.UUID("id", uuid.UUID{}).
+			Default(uuid.New).
+			StorageKey("oid"),
 	}
 }
 
@@ -143,6 +144,23 @@ func (Pet) Fields() []ent.Field {
 }
 ```
 
+If you need to set a custom function to generate IDs, you can use `DefaultFunc`
+to specify a function which will always be ran when the resource is created.
+See the [related FAQ](faq.md#how-do-i-use-a-custom-generator-of-ids) for more information.
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int64("id").
+			DefaultFunc(func() int64 {
+				// An example of a dumb ID generator - use a production-ready alternative instead.
+				return time.Now().Unix() << 8 | atomic.AddInt64(&counter, 1) % 256
+			}),
+	}
+}
+```
+
 ## Database Type
 
 Each database dialect has its own mapping from Go type to database type. For example,
@@ -153,9 +171,9 @@ there is an option to override the default behavior using the `SchemaType` metho
 package schema
 
 import (
-    "github.com/facebook/ent"
-    "github.com/facebook/ent/dialect"
-    "github.com/facebook/ent/schema/field"
+    "entgo.io/ent"
+    "entgo.io/ent/dialect"
+    "entgo.io/ent/schema/field"
 )
 
 // Card schema.
@@ -168,7 +186,7 @@ func (Card) Fields() []ent.Field {
 	return []ent.Field{
 		field.Float("amount").
 			SchemaType(map[string]string{
-				dialect.MySQL:    "decimal(6,2)",   // Override MySQL. 
+				dialect.MySQL:    "decimal(6,2)",   // Override MySQL.
 				dialect.Postgres: "numeric",        // Override Postgres.
 			}),
 	}
@@ -181,7 +199,7 @@ and for time fields, the type is `time.Time`. The `GoType` method provides an op
 default ent type with a custom one.
 
 The custom type must be either a type that is convertible to the Go basic type, or a type that implements the
-[ValueScanner](https://pkg.go.dev/github.com/facebook/ent/schema/field?tab=doc#ValueScanner) interface.
+[ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface.
 
 
 ```go
@@ -190,9 +208,10 @@ package schema
 import (
     "database/sql"
 
-    "github.com/facebook/ent"
-    "github.com/facebook/ent/dialect"
-    "github.com/facebook/ent/schema/field"
+    "entgo.io/ent"
+    "entgo.io/ent/dialect"
+    "entgo.io/ent/schema/field"
+    "github.com/shopspring/decimal"
 )
 
 // Amount is a custom Go type that's convertible to the basic float64 type.
@@ -212,6 +231,48 @@ func (Card) Fields() []ent.Field {
 			Optional().
 			// A ValueScanner type.
 			GoType(&sql.NullString{}),
+		field.Enum("role").
+			// A convertible type to string.
+			GoType(role.Role("")),
+		field.Float("decimal").
+			// A ValueScanner type mixed with SchemaType.
+			GoType(decimal.Decimal{}).
+			SchemaType(map[string]string{
+			    dialect.MySQL:    "decimal(6,2)",
+			    dialect.Postgres: "numeric",
+			}),
+	}
+}
+```
+
+## Other Field
+
+Other represents a field that is not a good fit for any of the standard field types.
+Examples are a Postgres Range type or Geospatial type
+
+```go
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/schema/field"
+	
+	"github.com/jackc/pgtype"
+)
+
+// User schema.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Other("duration", &pgtype.Tstzrange{}).
+			SchemaType(map[string]string{
+				dialect.Postgres: "tstzrange",
+			}),
 	}
 }
 ```
@@ -219,6 +280,7 @@ func (Card) Fields() []ent.Field {
 ## Default Values
 
 **Non-unique** fields support default values using the `Default` and `UpdateDefault` methods.
+You can also specify `DefaultFunc` instead to have a custom generator.
 
 ```go
 // Fields of the User.
@@ -229,9 +291,36 @@ func (User) Fields() []ent.Field {
 		field.Time("updated_at").
 			Default(time.Now).
 			UpdateDefault(time.Now),
+		field.String("name").
+			Default("unknown"),
+		field.String("cuid").
+			DefaultFunc(cuid.New),
+		field.JSON("dirs", []http.Dir{}).
+			Default([]http.Dir{"/tmp"}),
 	}
 }
 ```
+
+SQL-specific expressions like function calls can be added to default value configuration using the
+[`entsql.Annotation`](https://pkg.go.dev/entgo.io/ent@master/dialect/entsql#Annotation):
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		// Add a new field with CURRENT_TIMESTAMP
+		// as a default value to all previous rows.
+		field.Time("created_at").
+			Default(time.Now).
+			Annotations(&entsql.Annotation{
+				Default: "CURRENT_TIMESTAMP",
+			}),
+	}
+}
+```
+
+In case your `DefaultFunc` is also returning an error, it is better to handle it properly using [schema-hooks](hooks.md#schema-hooks).
+See [this FAQ](faq.md#how-to-use-a-custom-generator-of-ids) for more information. 
 
 ## Validators
 
@@ -250,8 +339,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 
@@ -275,6 +364,38 @@ func (Group) Fields() []ent.Field {
 }
 ```
 
+Here is another example for writing a reusable validator:
+
+```go
+import (
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/field"
+)
+
+// MaxRuneCount validates the rune length of a string by using the unicode/utf8 package.
+func MaxRuneCount(maxLen int) func(s string) error {
+	return func(s string) error {
+		if utf8.RuneCountInString(s) > maxLen {
+			return errors.New("value is more than the max length")
+		}
+		return nil
+	}
+}
+
+field.String("name").
+	// If using a SQL-database: change the underlying data type to varchar(10).
+	Annotations(entsql.Annotation{
+		Size: 10,
+	}).
+	Validate(MaxRuneCount(10))
+field.String("nickname").
+	//  If using a SQL-database: change the underlying data type to varchar(20).
+	Annotations(entsql.Annotation{
+		Size: 20,
+	}).
+	Validate(MaxRuneCount(20))
+```
+
 ## Built-in Validators
 
 The framework provides a few built-in validators for each type:
@@ -291,6 +412,11 @@ The framework provides a few built-in validators for each type:
   - `MinLen(i)`
   - `MaxLen(i)`
   - `Match(regexp.Regexp)`
+  - `NotEmpty`
+
+- `[]byte`
+  - `MaxLen(i)`
+  - `MinLen(i)`
   - `NotEmpty`
 
 ## Optional
@@ -314,12 +440,12 @@ func (User) Fields() []ent.Field {
 
 ## Nillable
 Sometimes you want to be able to distinguish between the zero value of fields
-and `nil`; for example if the database column contains `0` or `NULL`.
+and `nil`; for example, if the database column contains `0` or `NULL`.
 The `Nillable` option exists exactly for this.
 
 If you have an `Optional` field of type `T`, setting it to `Nillable` will generate
 a struct field with type `*T`. Hence, if the database returns `NULL` for this field,
-the struct field will be `nil`. Otherwise, it will contains a pointer to the actual data.
+the struct field will be `nil`. Otherwise, it will contain a pointer to the actual data.
 
 For example, given this schema:
 ```go
@@ -392,7 +518,7 @@ It's mapped to a column name in SQL dialects and to property name in Gremlin.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
-			StorageKey(`old_name"`),
+			StorageKey("old_name"),
 	}
 }
 ```
@@ -421,7 +547,7 @@ func (User) Fields() []ent.Field {
 
 ## Additional Struct Fields
 
-By default, `entc` generates the entity model with fields that are configured in the `schema.Fields` method.
+By default, `ent` generates the entity model with fields that are configured in the `schema.Fields` method.
 For example, given this schema configuration:
 
 ```go
@@ -502,6 +628,168 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+## Enum Fields
+
+The `Enum` builder allows creating enum fields with a list of permitted values. 
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		field.Enum("size").
+			Values("big", "small"),
+	}
+}
+```
+
+When a custom [`GoType`](#go-type) is being used, it is must be convertible to the basic `string` type or it needs to implement the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner) interface. 
+
+The [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface is also required by the custom Go type to tell Ent what are the permitted values of the enum. 
+
+The following example shows how to define an `Enum` field with a custom Go type that is convertible to `string`: 
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		// A convertible type to string.
+		field.Enum("shape").
+			GoType(property.Shape("")),
+	}
+}
+```
+
+Implement the [EnumValues](https://pkg.go.dev/entgo.io/ent/schema/field#EnumValues) interface.
+```go
+package property
+
+type Shape string
+
+const (
+	Triangle Shape = "TRIANGLE"
+	Circle   Shape = "CIRCLE"
+)
+
+// Values provides list valid values for Enum.
+func (Shape) Values() (kinds []string) {
+	for _, s := range []Shape{Triangle, Circle} {
+		kinds = append(kinds, string(s))
+	}
+	return
+}
+
+```
+The following example shows how to define an `Enum` field with a custom Go type that is not convertible to `string`, but it implements the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field#ValueScanner) interface: 
+
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		// Add conversion to and from string
+		field.Enum("level").
+			GoType(property.Level(0)),
+	}
+}
+```
+Implement also the [ValueScanner](https://pkg.go.dev/entgo.io/ent/schema/field?tab=doc#ValueScanner) interface.
+
+```go
+package property
+
+import "database/sql/driver"
+
+type Level int
+
+const (
+	Unknown Level = iota
+	Low
+	High
+)
+
+func (p Level) String() string {
+	switch p {
+	case Low:
+		return "LOW"
+	case High:
+		return "HIGH"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+// Values provides list valid values for Enum.
+func (Level) Values() []string {
+	return []string{Unknown.String(), Low.String(), High.String()}
+}
+
+// Value provides the DB a string from int.
+func (p Level) Value() (driver.Value, error) {
+	return p.String(), nil
+}
+
+// Scan tells our code how to read the enum into our type.
+func (p *Level) Scan(val interface{}) error {
+	var s string
+	switch v := val.(type) {
+	case nil:
+		return nil
+	case string:
+		s = v
+	case []uint8:
+		s = string(v)
+	}
+	switch s {
+	case "LOW":
+		*p = Low
+	case "HIGH":
+		*p = High
+	default:
+		*p = Unknown
+	}
+	return nil
+}
+```
+
+Combining it all together:
+```go
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("first_name"),
+		field.String("last_name"),
+		field.Enum("size").
+			Values("big", "small"),
+		// A convertible type to string.
+		field.Enum("shape").
+			GoType(property.Shape("")),
+		// Add conversion to and from string.
+		field.Enum("level").
+			GoType(property.Level(0)),
+	}
+}
+```
+
+After code generation usage is trivial:
+```go 
+client.User.Create().
+	SetFirstName("John").
+	SetLastName("Dow").
+	SetSize(user.SizeSmall).
+	SetShape(property.Triangle).
+	SetLevel(property.Low).
+	SaveX(context.Background())
+	
+john := client.User.Query().FirstX(context.Background())
+fmt.Println(john)
+// User(id=1, first_name=John, last_name=Dow, size=small, shape=TRIANGLE, level=LOW)
+```
+
 ## Annotations
 
 `Annotations` is used to attach arbitrary metadata to the field object in code generation.
@@ -527,3 +815,8 @@ func (User) Fields() []ent.Field {
 ```
 
 Read more about annotations and their usage in templates in the [template doc](templates.md#annotations).
+
+## Naming Convention
+
+By convention field names should use `snake_case`. The corresponding struct fields generated by `ent` will follow the Go convention
+of using `PascalCase`. In cases where `PascalCase` is desired, you can do so with the `StorageKey` or `StructTag` methods.

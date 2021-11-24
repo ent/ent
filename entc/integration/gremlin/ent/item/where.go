@@ -7,13 +7,13 @@
 package item
 
 import (
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id string) predicate.Item {
 	return predicate.Item(func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -84,7 +84,113 @@ func IDLTE(id string) predicate.Item {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
+func Text(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.EQ(v))
+	})
+}
+
+// TextEQ applies the EQ predicate on the "text" field.
+func TextEQ(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.EQ(v))
+	})
+}
+
+// TextNEQ applies the NEQ predicate on the "text" field.
+func TextNEQ(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.NEQ(v))
+	})
+}
+
+// TextIn applies the In predicate on the "text" field.
+func TextIn(vs ...string) predicate.Item {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.Within(v...))
+	})
+}
+
+// TextNotIn applies the NotIn predicate on the "text" field.
+func TextNotIn(vs ...string) predicate.Item {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.Without(v...))
+	})
+}
+
+// TextGT applies the GT predicate on the "text" field.
+func TextGT(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.GT(v))
+	})
+}
+
+// TextGTE applies the GTE predicate on the "text" field.
+func TextGTE(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.GTE(v))
+	})
+}
+
+// TextLT applies the LT predicate on the "text" field.
+func TextLT(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.LT(v))
+	})
+}
+
+// TextLTE applies the LTE predicate on the "text" field.
+func TextLTE(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.LTE(v))
+	})
+}
+
+// TextContains applies the Contains predicate on the "text" field.
+func TextContains(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.Containing(v))
+	})
+}
+
+// TextHasPrefix applies the HasPrefix predicate on the "text" field.
+func TextHasPrefix(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.StartingWith(v))
+	})
+}
+
+// TextHasSuffix applies the HasSuffix predicate on the "text" field.
+func TextHasSuffix(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.EndingWith(v))
+	})
+}
+
+// TextIsNil applies the IsNil predicate on the "text" field.
+func TextIsNil() predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldText)
+	})
+}
+
+// TextNotNil applies the NotNil predicate on the "text" field.
+func TextNotNil() predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldText)
+	})
+}
+
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Item) predicate.Item {
 	return predicate.Item(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))
@@ -97,7 +203,7 @@ func And(predicates ...predicate.Item) predicate.Item {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Item) predicate.Item {
 	return predicate.Item(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))

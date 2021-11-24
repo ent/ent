@@ -9,13 +9,13 @@ package card
 import (
 	"time"
 
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id string) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -97,6 +97,13 @@ func CreateTime(v time.Time) predicate.Card {
 func UpdateTime(v time.Time) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUpdateTime, p.EQ(v))
+	})
+}
+
+// Balance applies equality check predicate on the "balance" field. It's identical to BalanceEQ.
+func Balance(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.EQ(v))
 	})
 }
 
@@ -239,6 +246,70 @@ func UpdateTimeLT(v time.Time) predicate.Card {
 func UpdateTimeLTE(v time.Time) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUpdateTime, p.LTE(v))
+	})
+}
+
+// BalanceEQ applies the EQ predicate on the "balance" field.
+func BalanceEQ(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.EQ(v))
+	})
+}
+
+// BalanceNEQ applies the NEQ predicate on the "balance" field.
+func BalanceNEQ(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.NEQ(v))
+	})
+}
+
+// BalanceIn applies the In predicate on the "balance" field.
+func BalanceIn(vs ...float64) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.Within(v...))
+	})
+}
+
+// BalanceNotIn applies the NotIn predicate on the "balance" field.
+func BalanceNotIn(vs ...float64) predicate.Card {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.Without(v...))
+	})
+}
+
+// BalanceGT applies the GT predicate on the "balance" field.
+func BalanceGT(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.GT(v))
+	})
+}
+
+// BalanceGTE applies the GTE predicate on the "balance" field.
+func BalanceGTE(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.GTE(v))
+	})
+}
+
+// BalanceLT applies the LT predicate on the "balance" field.
+func BalanceLT(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.LT(v))
+	})
+}
+
+// BalanceLTE applies the LTE predicate on the "balance" field.
+func BalanceLTE(v float64) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldBalance, p.LTE(v))
 	})
 }
 
@@ -462,7 +533,7 @@ func HasSpecWith(preds ...predicate.Spec) predicate.Card {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Card) predicate.Card {
 	return predicate.Card(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))
@@ -475,7 +546,7 @@ func And(predicates ...predicate.Card) predicate.Card {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Card) predicate.Card {
 	return predicate.Card(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))

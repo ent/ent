@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/fieldtype"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/fieldtype"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // FieldTypeDelete is the builder for deleting a FieldType entity.
 type FieldTypeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *FieldTypeMutation
-	predicates []predicate.FieldType
+	hooks    []Hook
+	mutation *FieldTypeMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the FieldTypeDelete builder.
 func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
-	ftd.predicates = append(ftd.predicates, ps...)
+	ftd.mutation.Where(ps...)
 	return ftd
 }
 
@@ -51,6 +50,9 @@ func (ftd *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ftd.hooks) - 1; i >= 0; i-- {
+			if ftd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ftd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftd.mutation); err != nil {
@@ -79,7 +81,7 @@ func (ftd *FieldTypeDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := ftd.predicates; len(ps) > 0 {
+	if ps := ftd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

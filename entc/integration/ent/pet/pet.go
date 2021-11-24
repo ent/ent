@@ -11,25 +11,29 @@ const (
 	Label = "pet"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldAge holds the string denoting the age field in the database.
+	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
+	// FieldUUID holds the string denoting the uuid field in the database.
+	FieldUUID = "uuid"
+	// FieldNickname holds the string denoting the nickname field in the database.
+	FieldNickname = "nickname"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-
 	// Table holds the table name of the pet in the database.
-	Table = "pets"
-	// TeamTable is the table the holds the team relation/edge.
-	TeamTable = "pets"
+	Table = "pet"
+	// TeamTable is the table that holds the team relation/edge.
+	TeamTable = "pet"
 	// TeamInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	TeamInverseTable = "users"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "user_team"
-	// OwnerTable is the table the holds the owner relation/edge.
-	OwnerTable = "pets"
+	// OwnerTable is the table that holds the owner relation/edge.
+	OwnerTable = "pet"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
@@ -40,10 +44,14 @@ const (
 // Columns holds all SQL columns for pet fields.
 var Columns = []string{
 	FieldID,
+	FieldAge,
 	FieldName,
+	FieldUUID,
+	FieldNickname,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "pet"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_pets",
 	"user_team",
@@ -63,5 +71,10 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultAge holds the default value on creation for the "age" field.
+	DefaultAge float64
+)
 
 // comment from another template.

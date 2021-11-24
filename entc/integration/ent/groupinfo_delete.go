@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/groupinfo"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/groupinfo"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupInfoMutation
-	predicates []predicate.GroupInfo
+	hooks    []Hook
+	mutation *GroupInfoMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the GroupInfoDelete builder.
 func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
-	gid.predicates = append(gid.predicates, ps...)
+	gid.mutation.Where(ps...)
 	return gid
 }
 
@@ -51,6 +50,9 @@ func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gid.hooks) - 1; i >= 0; i-- {
+			if gid.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gid.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gid.mutation); err != nil {
@@ -79,7 +81,7 @@ func (gid *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := gid.predicates; len(ps) > 0 {
+	if ps := gid.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

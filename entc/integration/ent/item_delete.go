@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/item"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/item"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the ItemDelete builder.
 func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	id.predicates = append(id.predicates, ps...)
+	id.mutation.Where(ps...)
 	return id
 }
 
@@ -51,6 +50,9 @@ func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(id.hooks) - 1; i >= 0; i-- {
+			if id.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = id.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, id.mutation); err != nil {
@@ -74,12 +76,12 @@ func (id *ItemDelete) sqlExec(ctx context.Context) (int, error) {
 		Node: &sqlgraph.NodeSpec{
 			Table: item.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: item.FieldID,
 			},
 		},
 	}
-	if ps := id.predicates; len(ps) > 0 {
+	if ps := id.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

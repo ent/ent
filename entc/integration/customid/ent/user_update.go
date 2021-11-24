@@ -8,38 +8,38 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/customid/ent/group"
-	"github.com/facebook/ent/entc/integration/customid/ent/pet"
-	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
-	"github.com/facebook/ent/entc/integration/customid/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/customid/ent/group"
+	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *UserMutation
-	predicates []predicate.User
+	hooks    []Hook
+	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.predicates = append(uu.predicates, ps...)
+	uu.mutation.Where(ps...)
 	return uu
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uu *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddGroupIDs(ids...)
 	return uu
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -48,13 +48,13 @@ func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	return uu.AddGroupIDs(ids...)
 }
 
-// SetParentID sets the parent edge to User by id.
+// SetParentID sets the "parent" edge to the User entity by ID.
 func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
 	uu.mutation.SetParentID(id)
 	return uu
 }
 
-// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetParentID(*id)
@@ -62,18 +62,18 @@ func (uu *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 	return uu
 }
 
-// SetParent sets the parent edge to User.
+// SetParent sets the "parent" edge to the User entity.
 func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
 	return uu.SetParentID(u.ID)
 }
 
-// AddChildIDs adds the children edge to User by ids.
+// AddChildIDs adds the "children" edge to the User entity by IDs.
 func (uu *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddChildIDs(ids...)
 	return uu
 }
 
-// AddChildren adds the children edges to User.
+// AddChildren adds the "children" edges to the User entity.
 func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -82,13 +82,13 @@ func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 	return uu.AddChildIDs(ids...)
 }
 
-// AddPetIDs adds the pets edge to Pet by ids.
+// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uu *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
 	uu.mutation.AddPetIDs(ids...)
 	return uu
 }
 
-// AddPets adds the pets edges to Pet.
+// AddPets adds the "pets" edges to the Pet entity.
 func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -102,19 +102,19 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (uu *UserUpdate) ClearGroups() *UserUpdate {
 	uu.mutation.ClearGroups()
 	return uu
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveGroupIDs(ids...)
 	return uu
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -123,25 +123,25 @@ func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	return uu.RemoveGroupIDs(ids...)
 }
 
-// ClearParent clears the "parent" edge to type User.
+// ClearParent clears the "parent" edge to the User entity.
 func (uu *UserUpdate) ClearParent() *UserUpdate {
 	uu.mutation.ClearParent()
 	return uu
 }
 
-// ClearChildren clears all "children" edges to type User.
+// ClearChildren clears all "children" edges to the User entity.
 func (uu *UserUpdate) ClearChildren() *UserUpdate {
 	uu.mutation.ClearChildren()
 	return uu
 }
 
-// RemoveChildIDs removes the children edge to User by ids.
+// RemoveChildIDs removes the "children" edge to User entities by IDs.
 func (uu *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveChildIDs(ids...)
 	return uu
 }
 
-// RemoveChildren removes children edges to User.
+// RemoveChildren removes "children" edges to User entities.
 func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -150,19 +150,19 @@ func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 	return uu.RemoveChildIDs(ids...)
 }
 
-// ClearPets clears all "pets" edges to type Pet.
+// ClearPets clears all "pets" edges to the Pet entity.
 func (uu *UserUpdate) ClearPets() *UserUpdate {
 	uu.mutation.ClearPets()
 	return uu
 }
 
-// RemovePetIDs removes the pets edge to Pet by ids.
+// RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (uu *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
 	uu.mutation.RemovePetIDs(ids...)
 	return uu
 }
 
-// RemovePets removes pets edges to Pet.
+// RemovePets removes "pets" edges to Pet entities.
 func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -171,7 +171,7 @@ func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 	return uu.RemovePetIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -191,6 +191,9 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(uu.hooks) - 1; i >= 0; i-- {
+			if uu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
@@ -233,7 +236,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := uu.predicates; len(ps) > 0 {
+	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -440,8 +443,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -451,17 +454,18 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uuo *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddGroupIDs(ids...)
 	return uuo
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -470,13 +474,13 @@ func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	return uuo.AddGroupIDs(ids...)
 }
 
-// SetParentID sets the parent edge to User by id.
+// SetParentID sets the "parent" edge to the User entity by ID.
 func (uuo *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
 	uuo.mutation.SetParentID(id)
 	return uuo
 }
 
-// SetNillableParentID sets the parent edge to User by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetParentID(*id)
@@ -484,18 +488,18 @@ func (uuo *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
 	return uuo
 }
 
-// SetParent sets the parent edge to User.
+// SetParent sets the "parent" edge to the User entity.
 func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
 	return uuo.SetParentID(u.ID)
 }
 
-// AddChildIDs adds the children edge to User by ids.
+// AddChildIDs adds the "children" edge to the User entity by IDs.
 func (uuo *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddChildIDs(ids...)
 	return uuo
 }
 
-// AddChildren adds the children edges to User.
+// AddChildren adds the "children" edges to the User entity.
 func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -504,13 +508,13 @@ func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 	return uuo.AddChildIDs(ids...)
 }
 
-// AddPetIDs adds the pets edge to Pet by ids.
+// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uuo *UserUpdateOne) AddPetIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.AddPetIDs(ids...)
 	return uuo
 }
 
-// AddPets adds the pets edges to Pet.
+// AddPets adds the "pets" edges to the Pet entity.
 func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -524,19 +528,19 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearGroups clears all "groups" edges to type Group.
+// ClearGroups clears all "groups" edges to the Group entity.
 func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
 	uuo.mutation.ClearGroups()
 	return uuo
 }
 
-// RemoveGroupIDs removes the groups edge to Group by ids.
+// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveGroupIDs(ids...)
 	return uuo
 }
 
-// RemoveGroups removes groups edges to Group.
+// RemoveGroups removes "groups" edges to Group entities.
 func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -545,25 +549,25 @@ func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	return uuo.RemoveGroupIDs(ids...)
 }
 
-// ClearParent clears the "parent" edge to type User.
+// ClearParent clears the "parent" edge to the User entity.
 func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
 	uuo.mutation.ClearParent()
 	return uuo
 }
 
-// ClearChildren clears all "children" edges to type User.
+// ClearChildren clears all "children" edges to the User entity.
 func (uuo *UserUpdateOne) ClearChildren() *UserUpdateOne {
 	uuo.mutation.ClearChildren()
 	return uuo
 }
 
-// RemoveChildIDs removes the children edge to User by ids.
+// RemoveChildIDs removes the "children" edge to User entities by IDs.
 func (uuo *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveChildIDs(ids...)
 	return uuo
 }
 
-// RemoveChildren removes children edges to User.
+// RemoveChildren removes "children" edges to User entities.
 func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -572,19 +576,19 @@ func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 	return uuo.RemoveChildIDs(ids...)
 }
 
-// ClearPets clears all "pets" edges to type Pet.
+// ClearPets clears all "pets" edges to the Pet entity.
 func (uuo *UserUpdateOne) ClearPets() *UserUpdateOne {
 	uuo.mutation.ClearPets()
 	return uuo
 }
 
-// RemovePetIDs removes the pets edge to Pet by ids.
+// RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (uuo *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.RemovePetIDs(ids...)
 	return uuo
 }
 
-// RemovePets removes pets edges to Pet.
+// RemovePets removes "pets" edges to Pet entities.
 func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 	ids := make([]string, len(p))
 	for i := range p {
@@ -593,7 +597,14 @@ func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 	return uuo.RemovePetIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	uuo.fields = append([]string{field}, fields...)
+	return uuo
+}
+
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -613,6 +624,9 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uuo.hooks) - 1; i >= 0; i-- {
+			if uuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
@@ -657,9 +671,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := uuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
+		for _, f := range fields {
+			if !user.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != user.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := uuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if uuo.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -859,12 +892,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

@@ -7,8 +7,10 @@
 package ent
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/dialect"
+	"net/http"
+
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 )
 
 // Option function to configure the client.
@@ -24,6 +26,8 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+	// HTTPClient field added by a test template.
+	HTTPClient *http.Client
 }
 
 // hooks per client, for fast access.
@@ -61,5 +65,12 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// HTTPClient option added by a test template.
+func HTTPClient(hc *http.Client) Option {
+	return func(c *config) {
+		c.HTTPClient = hc
 	}
 }

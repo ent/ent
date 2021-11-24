@@ -15,13 +15,11 @@ const (
 	FieldExpired = "expired"
 	// FieldNumber holds the string denoting the number field in the database.
 	FieldNumber = "number"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-
 	// Table holds the table name of the card in the database.
 	Table = "cards"
-	// OwnerTable is the table the holds the owner relation/edge.
+	// OwnerTable is the table that holds the owner relation/edge.
 	OwnerTable = "cards"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
@@ -37,7 +35,8 @@ var Columns = []string{
 	FieldNumber,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Card type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "cards"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_card",
 }

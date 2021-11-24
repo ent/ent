@@ -11,14 +11,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/entc/integration/migrate/entv1/migrate"
+	"entgo.io/ent/entc/integration/migrate/entv1/migrate"
 
-	"github.com/facebook/ent/entc/integration/migrate/entv1/car"
-	"github.com/facebook/ent/entc/integration/migrate/entv1/user"
+	"entgo.io/ent/entc/integration/migrate/entv1/car"
+	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
+	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
+	"entgo.io/ent/entc/integration/migrate/entv1/user"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -28,6 +30,10 @@ type Client struct {
 	Schema *migrate.Schema
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
+	// Conversion is the client for interacting with the Conversion builders.
+	Conversion *ConversionClient
+	// CustomType is the client for interacting with the CustomType builders.
+	CustomType *CustomTypeClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -44,6 +50,8 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Car = NewCarClient(c.config)
+	c.Conversion = NewConversionClient(c.config)
+	c.CustomType = NewCustomTypeClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -71,31 +79,39 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
-		return nil, fmt.Errorf("entv1: starting a transaction: %v", err)
+		return nil, fmt.Errorf("entv1: starting a transaction: %w", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Car:    NewCarClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:        ctx,
+		config:     cfg,
+		Car:        NewCarClient(cfg),
+		Conversion: NewConversionClient(cfg),
+		CustomType: NewCustomTypeClient(cfg),
+		User:       NewUserClient(cfg),
 	}, nil
 }
 
-// BeginTx returns a transactional client with options.
+// BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
 	}
-	tx, err := c.driver.(*sql.Driver).BeginTx(ctx, opts)
+	tx, err := c.driver.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
+	}).BeginTx(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config: cfg,
-		Car:    NewCarClient(cfg),
-		User:   NewUserClient(cfg),
+		config:     cfg,
+		Car:        NewCarClient(cfg),
+		Conversion: NewConversionClient(cfg),
+		CustomType: NewCustomTypeClient(cfg),
+		User:       NewUserClient(cfg),
 	}, nil
 }
 
@@ -110,7 +126,8 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = dialect.Debug(c.driver, c.log)
 	client := &Client{config: cfg}
 	client.init()
 	return client
@@ -125,6 +142,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Car.Use(hooks...)
+	c.Conversion.Use(hooks...)
+	c.CustomType.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -150,7 +169,7 @@ func (c *CarClient) Create() *CarCreate {
 	return &CarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Car entities.
+// CreateBulk returns a builder for creating a bulk of Car entities.
 func (c *CarClient) CreateBulk(builders ...*CarCreate) *CarCreateBulk {
 	return &CarCreateBulk{config: c.config, builders: builders}
 }
@@ -194,7 +213,9 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 
 // Query returns a query builder for Car.
 func (c *CarClient) Query() *CarQuery {
-	return &CarQuery{config: c.config}
+	return &CarQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Car entity by its id.
@@ -232,6 +253,186 @@ func (c *CarClient) Hooks() []Hook {
 	return c.hooks.Car
 }
 
+// ConversionClient is a client for the Conversion schema.
+type ConversionClient struct {
+	config
+}
+
+// NewConversionClient returns a client for the Conversion from the given config.
+func NewConversionClient(c config) *ConversionClient {
+	return &ConversionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `conversion.Hooks(f(g(h())))`.
+func (c *ConversionClient) Use(hooks ...Hook) {
+	c.hooks.Conversion = append(c.hooks.Conversion, hooks...)
+}
+
+// Create returns a create builder for Conversion.
+func (c *ConversionClient) Create() *ConversionCreate {
+	mutation := newConversionMutation(c.config, OpCreate)
+	return &ConversionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Conversion entities.
+func (c *ConversionClient) CreateBulk(builders ...*ConversionCreate) *ConversionCreateBulk {
+	return &ConversionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Conversion.
+func (c *ConversionClient) Update() *ConversionUpdate {
+	mutation := newConversionMutation(c.config, OpUpdate)
+	return &ConversionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ConversionClient) UpdateOne(co *Conversion) *ConversionUpdateOne {
+	mutation := newConversionMutation(c.config, OpUpdateOne, withConversion(co))
+	return &ConversionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ConversionClient) UpdateOneID(id int) *ConversionUpdateOne {
+	mutation := newConversionMutation(c.config, OpUpdateOne, withConversionID(id))
+	return &ConversionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Conversion.
+func (c *ConversionClient) Delete() *ConversionDelete {
+	mutation := newConversionMutation(c.config, OpDelete)
+	return &ConversionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *ConversionClient) DeleteOne(co *Conversion) *ConversionDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *ConversionClient) DeleteOneID(id int) *ConversionDeleteOne {
+	builder := c.Delete().Where(conversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ConversionDeleteOne{builder}
+}
+
+// Query returns a query builder for Conversion.
+func (c *ConversionClient) Query() *ConversionQuery {
+	return &ConversionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Conversion entity by its id.
+func (c *ConversionClient) Get(ctx context.Context, id int) (*Conversion, error) {
+	return c.Query().Where(conversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ConversionClient) GetX(ctx context.Context, id int) *Conversion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ConversionClient) Hooks() []Hook {
+	return c.hooks.Conversion
+}
+
+// CustomTypeClient is a client for the CustomType schema.
+type CustomTypeClient struct {
+	config
+}
+
+// NewCustomTypeClient returns a client for the CustomType from the given config.
+func NewCustomTypeClient(c config) *CustomTypeClient {
+	return &CustomTypeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `customtype.Hooks(f(g(h())))`.
+func (c *CustomTypeClient) Use(hooks ...Hook) {
+	c.hooks.CustomType = append(c.hooks.CustomType, hooks...)
+}
+
+// Create returns a create builder for CustomType.
+func (c *CustomTypeClient) Create() *CustomTypeCreate {
+	mutation := newCustomTypeMutation(c.config, OpCreate)
+	return &CustomTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CustomType entities.
+func (c *CustomTypeClient) CreateBulk(builders ...*CustomTypeCreate) *CustomTypeCreateBulk {
+	return &CustomTypeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CustomType.
+func (c *CustomTypeClient) Update() *CustomTypeUpdate {
+	mutation := newCustomTypeMutation(c.config, OpUpdate)
+	return &CustomTypeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CustomTypeClient) UpdateOne(ct *CustomType) *CustomTypeUpdateOne {
+	mutation := newCustomTypeMutation(c.config, OpUpdateOne, withCustomType(ct))
+	return &CustomTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CustomTypeClient) UpdateOneID(id int) *CustomTypeUpdateOne {
+	mutation := newCustomTypeMutation(c.config, OpUpdateOne, withCustomTypeID(id))
+	return &CustomTypeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CustomType.
+func (c *CustomTypeClient) Delete() *CustomTypeDelete {
+	mutation := newCustomTypeMutation(c.config, OpDelete)
+	return &CustomTypeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *CustomTypeClient) DeleteOne(ct *CustomType) *CustomTypeDeleteOne {
+	return c.DeleteOneID(ct.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *CustomTypeClient) DeleteOneID(id int) *CustomTypeDeleteOne {
+	builder := c.Delete().Where(customtype.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CustomTypeDeleteOne{builder}
+}
+
+// Query returns a query builder for CustomType.
+func (c *CustomTypeClient) Query() *CustomTypeQuery {
+	return &CustomTypeQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a CustomType entity by its id.
+func (c *CustomTypeClient) Get(ctx context.Context, id int) (*CustomType, error) {
+	return c.Query().Where(customtype.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CustomTypeClient) GetX(ctx context.Context, id int) *CustomType {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CustomTypeClient) Hooks() []Hook {
+	return c.hooks.CustomType
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -254,7 +455,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }
@@ -298,7 +499,9 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.

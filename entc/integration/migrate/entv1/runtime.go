@@ -7,12 +7,12 @@
 package entv1
 
 import (
-	"github.com/facebook/ent/entc/integration/migrate/entv1/schema"
-	"github.com/facebook/ent/entc/integration/migrate/entv1/user"
+	"entgo.io/ent/entc/integration/migrate/entv1/schema"
+	"entgo.io/ent/entc/integration/migrate/entv1/user"
 )
 
-// The init function reads all schema descriptors with runtime
-// code (default values, validators or hooks) and stitches it
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
 	userFields := schema.User{}.Fields()
@@ -21,4 +21,12 @@ func init() {
 	userDescName := userFields[2].Descriptor()
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
+	// userDescBlob is the schema descriptor for blob field.
+	userDescBlob := userFields[7].Descriptor()
+	// user.BlobValidator is a validator for the "blob" field. It is called by the builders before save.
+	user.BlobValidator = userDescBlob.Validators[0].(func([]byte) error)
+	// userDescWorkplace is the schema descriptor for workplace field.
+	userDescWorkplace := userFields[10].Descriptor()
+	// user.WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.
+	user.WorkplaceValidator = userDescWorkplace.Validators[0].(func(string) error)
 }

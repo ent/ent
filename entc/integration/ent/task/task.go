@@ -7,7 +7,7 @@
 package task
 
 import (
-	"github.com/facebook/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema"
 )
 
 const (
@@ -17,7 +17,6 @@ const (
 	FieldID = "id"
 	// FieldPriority holds the string denoting the priority field in the database.
 	FieldPriority = "priority"
-
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 )
@@ -39,7 +38,7 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultPriority holds the default value on creation for the priority field.
+	// DefaultPriority holds the default value on creation for the "priority" field.
 	DefaultPriority schema.Priority
 	// PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
 	PriorityValidator func(int) error

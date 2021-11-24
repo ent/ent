@@ -8,26 +8,26 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/goods"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/goods"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GoodsUpdate is the builder for updating Goods entities.
 type GoodsUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *GoodsMutation
-	predicates []predicate.Goods
+	hooks    []Hook
+	mutation *GoodsMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the GoodsUpdate builder.
 func (gu *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	gu.predicates = append(gu.predicates, ps...)
+	gu.mutation.Where(ps...)
 	return gu
 }
 
@@ -36,7 +36,7 @@ func (gu *GoodsUpdate) Mutation() *GoodsMutation {
 	return gu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (gu *GoodsUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -56,6 +56,9 @@ func (gu *GoodsUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gu.hooks) - 1; i >= 0; i-- {
+			if gu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
@@ -101,7 +104,7 @@ func (gu *GoodsUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (gu *GoodsUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(goods.Label)
-	for _, p := range gu.predicates {
+	for _, p := range gu.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -115,6 +118,7 @@ func (gu *GoodsUpdate) gremlin() *dsl.Traversal {
 // GoodsUpdateOne is the builder for updating a single Goods entity.
 type GoodsUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *GoodsMutation
 }
@@ -124,7 +128,14 @@ func (guo *GoodsUpdateOne) Mutation() *GoodsMutation {
 	return guo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (guo *GoodsUpdateOne) Select(field string, fields ...string) *GoodsUpdateOne {
+	guo.fields = append([]string{field}, fields...)
+	return guo
+}
+
+// Save executes the query and returns the updated Goods entity.
 func (guo *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
 	var (
 		err  error
@@ -144,6 +155,9 @@ func (guo *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
 			return node, err
 		})
 		for i := len(guo.hooks) - 1; i >= 0; i-- {
+			if guo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = guo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
@@ -179,7 +193,7 @@ func (guo *GoodsUpdateOne) gremlinSave(ctx context.Context) (*Goods, error) {
 	res := &gremlin.Response{}
 	id, ok := guo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Goods.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Goods.id" for update`)}
 	}
 	query, bindings := guo.gremlin(id).Query()
 	if err := guo.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -200,7 +214,16 @@ func (guo *GoodsUpdateOne) gremlin(id string) *dsl.Traversal {
 	var (
 		trs []*dsl.Traversal
 	)
-	v.ValueMap(true)
+	if len(guo.fields) > 0 {
+		fields := make([]interface{}, 0, len(guo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range guo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

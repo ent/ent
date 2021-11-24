@@ -8,55 +8,55 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2obidi/ent/predicate"
-	"github.com/facebook/ent/examples/o2obidi/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2obidi/ent/predicate"
+	"entgo.io/ent/examples/o2obidi/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *UserMutation
-	predicates []predicate.User
+	hooks    []Hook
+	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.predicates = append(uu.predicates, ps...)
+	uu.mutation.Where(ps...)
 	return uu
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.mutation.ResetAge()
 	uu.mutation.SetAge(i)
 	return uu
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
 	uu.mutation.AddAge(i)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetSpouseID sets the spouse edge to User by id.
+// SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (uu *UserUpdate) SetSpouseID(id int) *UserUpdate {
 	uu.mutation.SetSpouseID(id)
 	return uu
 }
 
-// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetSpouseID(*id)
@@ -64,7 +64,7 @@ func (uu *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
 	return uu
 }
 
-// SetSpouse sets the spouse edge to User.
+// SetSpouse sets the "spouse" edge to the User entity.
 func (uu *UserUpdate) SetSpouse(u *User) *UserUpdate {
 	return uu.SetSpouseID(u.ID)
 }
@@ -74,13 +74,13 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearSpouse clears the "spouse" edge to type User.
+// ClearSpouse clears the "spouse" edge to the User entity.
 func (uu *UserUpdate) ClearSpouse() *UserUpdate {
 	uu.mutation.ClearSpouse()
 	return uu
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -100,6 +100,9 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(uu.hooks) - 1; i >= 0; i-- {
+			if uu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
@@ -142,7 +145,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := uu.predicates; len(ps) > 0 {
+	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -208,8 +211,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -219,36 +222,37 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.mutation.ResetAge()
 	uuo.mutation.SetAge(i)
 	return uuo
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
 	uuo.mutation.AddAge(i)
 	return uuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetSpouseID sets the spouse edge to User by id.
+// SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (uuo *UserUpdateOne) SetSpouseID(id int) *UserUpdateOne {
 	uuo.mutation.SetSpouseID(id)
 	return uuo
 }
 
-// SetNillableSpouseID sets the spouse edge to User by id if the given value is not nil.
+// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetSpouseID(*id)
@@ -256,7 +260,7 @@ func (uuo *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
 	return uuo
 }
 
-// SetSpouse sets the spouse edge to User.
+// SetSpouse sets the "spouse" edge to the User entity.
 func (uuo *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
 	return uuo.SetSpouseID(u.ID)
 }
@@ -266,13 +270,20 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearSpouse clears the "spouse" edge to type User.
+// ClearSpouse clears the "spouse" edge to the User entity.
 func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
 	uuo.mutation.ClearSpouse()
 	return uuo
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	uuo.fields = append([]string{field}, fields...)
+	return uuo
+}
+
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -292,6 +303,9 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uuo.hooks) - 1; i >= 0; i-- {
+			if uuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
@@ -336,9 +350,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := uuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
+		for _, f := range fields {
+			if !user.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != user.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := uuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := uuo.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -397,12 +430,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

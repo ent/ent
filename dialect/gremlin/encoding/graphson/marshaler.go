@@ -11,7 +11,6 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/modern-go/reflect2"
-	"github.com/pkg/errors"
 )
 
 // DecoratorOfMarshaler decorates a value encoder of a Marshaler interface.
@@ -69,11 +68,11 @@ func (enc marshalerEncoder) Encode(ptr unsafe.Pointer, stream *jsoniter.Stream) 
 func (enc marshalerEncoder) encode(marshaler Marshaler, stream *jsoniter.Stream) {
 	data, err := marshaler.MarshalGraphson()
 	if err != nil {
-		stream.Error = errors.Wrapf(err, "graphson: error calling MarshalGraphson for type %s", enc.Type)
+		stream.Error = fmt.Errorf("graphson: error calling MarshalGraphson for type %s: %w", enc.Type, err)
 		return
 	}
 	if !config.Valid(data) {
-		stream.Error = errors.Errorf("graphson: syntax error when marshaling type %s", enc.Type)
+		stream.Error = fmt.Errorf("graphson: syntax error when marshaling type %s", enc.Type)
 		return
 	}
 	_, stream.Error = stream.Write(data)

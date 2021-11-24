@@ -7,13 +7,13 @@
 package comment
 
 import (
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id string) predicate.Comment {
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -311,7 +311,7 @@ func NillableIntNotNil() predicate.Comment {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Comment) predicate.Comment {
 	return predicate.Comment(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))
@@ -324,7 +324,7 @@ func And(predicates ...predicate.Comment) predicate.Comment {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Comment) predicate.Comment {
 	return predicate.Comment(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))

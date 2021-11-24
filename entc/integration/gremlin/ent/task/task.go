@@ -7,7 +7,7 @@
 package task
 
 import (
-	"github.com/facebook/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	// DefaultPriority holds the default value on creation for the priority field.
+	// DefaultPriority holds the default value on creation for the "priority" field.
 	DefaultPriority schema.Priority
 	// PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
 	PriorityValidator func(int) error

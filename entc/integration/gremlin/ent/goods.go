@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin"
 )
 
 // Goods is the model entity for the Goods schema.
@@ -37,14 +37,14 @@ func (_go *Goods) FromResponse(res *gremlin.Response) error {
 }
 
 // Update returns a builder for updating this Goods.
-// Note that, you need to call Goods.Unwrap() before calling this method, if this Goods
+// Note that you need to call Goods.Unwrap() before calling this method if this Goods
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (_go *Goods) Update() *GoodsUpdateOne {
 	return (&GoodsClient{config: _go.config}).UpdateOne(_go)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Goods entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (_go *Goods) Unwrap() *Goods {
 	tx, ok := _go.config.driver.(*txDriver)
 	if !ok {

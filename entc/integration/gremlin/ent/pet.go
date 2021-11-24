@@ -10,8 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"github.com/google/uuid"
 )
 
 // Pet is the model entity for the Pet schema.
@@ -19,8 +20,14 @@ type Pet struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
+	// Age holds the value of the "age" field.
+	Age float64 `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// UUID holds the value of the "uuid" field.
+	UUID uuid.UUID `json:"uuid,omitempty"`
+	// Nickname holds the value of the "nickname" field.
+	Nickname string `json:"nickname,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges PetEdges `json:"edges"`
@@ -29,9 +36,9 @@ type Pet struct {
 // PetEdges holds the relations/edges for other nodes in the graph.
 type PetEdges struct {
 	// Team holds the value of the team edge.
-	Team *User
+	Team *User `json:"team,omitempty"`
 	// Owner holds the value of the owner edge.
-	Owner *User
+	Owner *User `json:"owner,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -72,36 +79,42 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanpe struct {
-		ID   string `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
+		ID       string    `json:"id,omitempty"`
+		Age      float64   `json:"age,omitempty"`
+		Name     string    `json:"name,omitempty"`
+		UUID     uuid.UUID `json:"uuid,omitempty"`
+		Nickname string    `json:"nickname,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
 	}
 	pe.ID = scanpe.ID
+	pe.Age = scanpe.Age
 	pe.Name = scanpe.Name
+	pe.UUID = scanpe.UUID
+	pe.Nickname = scanpe.Nickname
 	return nil
 }
 
-// QueryTeam queries the team edge of the Pet.
+// QueryTeam queries the "team" edge of the Pet entity.
 func (pe *Pet) QueryTeam() *UserQuery {
 	return (&PetClient{config: pe.config}).QueryTeam(pe)
 }
 
-// QueryOwner queries the owner edge of the Pet.
+// QueryOwner queries the "owner" edge of the Pet entity.
 func (pe *Pet) QueryOwner() *UserQuery {
 	return (&PetClient{config: pe.config}).QueryOwner(pe)
 }
 
 // Update returns a builder for updating this Pet.
-// Note that, you need to call Pet.Unwrap() before calling this method, if this Pet
+// Note that you need to call Pet.Unwrap() before calling this method if this Pet
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (pe *Pet) Update() *PetUpdateOne {
 	return (&PetClient{config: pe.config}).UpdateOne(pe)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Pet entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (pe *Pet) Unwrap() *Pet {
 	tx, ok := pe.config.driver.(*txDriver)
 	if !ok {
@@ -116,8 +129,14 @@ func (pe *Pet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Pet(")
 	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
+	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("%v", pe.Age))
 	builder.WriteString(", name=")
 	builder.WriteString(pe.Name)
+	builder.WriteString(", uuid=")
+	builder.WriteString(fmt.Sprintf("%v", pe.UUID))
+	builder.WriteString(", nickname=")
+	builder.WriteString(pe.Nickname)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -132,16 +151,22 @@ func (pe *Pets) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanpe []struct {
-		ID   string `json:"id,omitempty"`
-		Name string `json:"name,omitempty"`
+		ID       string    `json:"id,omitempty"`
+		Age      float64   `json:"age,omitempty"`
+		Name     string    `json:"name,omitempty"`
+		UUID     uuid.UUID `json:"uuid,omitempty"`
+		Nickname string    `json:"nickname,omitempty"`
 	}
 	if err := vmap.Decode(&scanpe); err != nil {
 		return err
 	}
 	for _, v := range scanpe {
 		*pe = append(*pe, &Pet{
-			ID:   v.ID,
-			Name: v.Name,
+			ID:       v.ID,
+			Age:      v.Age,
+			Name:     v.Name,
+			UUID:     v.UUID,
+			Nickname: v.Nickname,
 		})
 	}
 	return nil

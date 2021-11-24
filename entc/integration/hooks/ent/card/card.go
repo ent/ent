@@ -9,7 +9,7 @@ package card
 import (
 	"time"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 const (
@@ -25,13 +25,11 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldInHook holds the string denoting the in_hook field in the database.
 	FieldInHook = "in_hook"
-
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-
 	// Table holds the table name of the card in the database.
 	Table = "cards"
-	// OwnerTable is the table the holds the owner relation/edge.
+	// OwnerTable is the table that holds the owner relation/edge.
 	OwnerTable = "cards"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
@@ -49,7 +47,8 @@ var Columns = []string{
 	FieldInHook,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Card type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "cards"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_cards",
 }
@@ -73,14 +72,14 @@ func ValidColumn(column string) bool {
 // package on the initialization of the application. Therefore,
 // it should be imported in the main as follows:
 //
-//	import _ "github.com/facebook/ent/entc/integration/hooks/ent/runtime"
+//	import _ "entgo.io/ent/entc/integration/hooks/ent/runtime"
 //
 var (
 	Hooks [3]ent.Hook
-	// DefaultNumber holds the default value on creation for the number field.
+	// DefaultNumber holds the default value on creation for the "number" field.
 	DefaultNumber string
 	// NumberValidator is a validator for the "number" field. It is called by the builders before save.
 	NumberValidator func(string) error
-	// DefaultCreatedAt holds the default value on creation for the created_at field.
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 )

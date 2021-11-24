@@ -8,49 +8,49 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2mrecur/ent/node"
-	"github.com/facebook/ent/examples/o2mrecur/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2mrecur/ent/node"
+	"entgo.io/ent/examples/o2mrecur/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // NodeUpdate is the builder for updating Node entities.
 type NodeUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *NodeMutation
-	predicates []predicate.Node
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the NodeUpdate builder.
 func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
-	nu.predicates = append(nu.predicates, ps...)
+	nu.mutation.Where(ps...)
 	return nu
 }
 
-// SetValue sets the value field.
+// SetValue sets the "value" field.
 func (nu *NodeUpdate) SetValue(i int) *NodeUpdate {
 	nu.mutation.ResetValue()
 	nu.mutation.SetValue(i)
 	return nu
 }
 
-// AddValue adds i to value.
+// AddValue adds i to the "value" field.
 func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
 	nu.mutation.AddValue(i)
 	return nu
 }
 
-// SetParentID sets the parent edge to Node by id.
+// SetParentID sets the "parent" edge to the Node entity by ID.
 func (nu *NodeUpdate) SetParentID(id int) *NodeUpdate {
 	nu.mutation.SetParentID(id)
 	return nu
 }
 
-// SetNillableParentID sets the parent edge to Node by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the Node entity by ID if the given value is not nil.
 func (nu *NodeUpdate) SetNillableParentID(id *int) *NodeUpdate {
 	if id != nil {
 		nu = nu.SetParentID(*id)
@@ -58,18 +58,18 @@ func (nu *NodeUpdate) SetNillableParentID(id *int) *NodeUpdate {
 	return nu
 }
 
-// SetParent sets the parent edge to Node.
+// SetParent sets the "parent" edge to the Node entity.
 func (nu *NodeUpdate) SetParent(n *Node) *NodeUpdate {
 	return nu.SetParentID(n.ID)
 }
 
-// AddChildIDs adds the children edge to Node by ids.
+// AddChildIDs adds the "children" edge to the Node entity by IDs.
 func (nu *NodeUpdate) AddChildIDs(ids ...int) *NodeUpdate {
 	nu.mutation.AddChildIDs(ids...)
 	return nu
 }
 
-// AddChildren adds the children edges to Node.
+// AddChildren adds the "children" edges to the Node entity.
 func (nu *NodeUpdate) AddChildren(n ...*Node) *NodeUpdate {
 	ids := make([]int, len(n))
 	for i := range n {
@@ -83,25 +83,25 @@ func (nu *NodeUpdate) Mutation() *NodeMutation {
 	return nu.mutation
 }
 
-// ClearParent clears the "parent" edge to type Node.
+// ClearParent clears the "parent" edge to the Node entity.
 func (nu *NodeUpdate) ClearParent() *NodeUpdate {
 	nu.mutation.ClearParent()
 	return nu
 }
 
-// ClearChildren clears all "children" edges to type Node.
+// ClearChildren clears all "children" edges to the Node entity.
 func (nu *NodeUpdate) ClearChildren() *NodeUpdate {
 	nu.mutation.ClearChildren()
 	return nu
 }
 
-// RemoveChildIDs removes the children edge to Node by ids.
+// RemoveChildIDs removes the "children" edge to Node entities by IDs.
 func (nu *NodeUpdate) RemoveChildIDs(ids ...int) *NodeUpdate {
 	nu.mutation.RemoveChildIDs(ids...)
 	return nu
 }
 
-// RemoveChildren removes children edges to Node.
+// RemoveChildren removes "children" edges to Node entities.
 func (nu *NodeUpdate) RemoveChildren(n ...*Node) *NodeUpdate {
 	ids := make([]int, len(n))
 	for i := range n {
@@ -110,7 +110,7 @@ func (nu *NodeUpdate) RemoveChildren(n ...*Node) *NodeUpdate {
 	return nu.RemoveChildIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -130,6 +130,9 @@ func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(nu.hooks) - 1; i >= 0; i-- {
+			if nu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nu.mutation); err != nil {
@@ -172,7 +175,7 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := nu.predicates; len(ps) > 0 {
+	if ps := nu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -285,8 +288,8 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, nu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{node.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -296,30 +299,31 @@ func (nu *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // NodeUpdateOne is the builder for updating a single Node entity.
 type NodeUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *NodeMutation
 }
 
-// SetValue sets the value field.
+// SetValue sets the "value" field.
 func (nuo *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
 	nuo.mutation.ResetValue()
 	nuo.mutation.SetValue(i)
 	return nuo
 }
 
-// AddValue adds i to value.
+// AddValue adds i to the "value" field.
 func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
 	nuo.mutation.AddValue(i)
 	return nuo
 }
 
-// SetParentID sets the parent edge to Node by id.
+// SetParentID sets the "parent" edge to the Node entity by ID.
 func (nuo *NodeUpdateOne) SetParentID(id int) *NodeUpdateOne {
 	nuo.mutation.SetParentID(id)
 	return nuo
 }
 
-// SetNillableParentID sets the parent edge to Node by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the Node entity by ID if the given value is not nil.
 func (nuo *NodeUpdateOne) SetNillableParentID(id *int) *NodeUpdateOne {
 	if id != nil {
 		nuo = nuo.SetParentID(*id)
@@ -327,18 +331,18 @@ func (nuo *NodeUpdateOne) SetNillableParentID(id *int) *NodeUpdateOne {
 	return nuo
 }
 
-// SetParent sets the parent edge to Node.
+// SetParent sets the "parent" edge to the Node entity.
 func (nuo *NodeUpdateOne) SetParent(n *Node) *NodeUpdateOne {
 	return nuo.SetParentID(n.ID)
 }
 
-// AddChildIDs adds the children edge to Node by ids.
+// AddChildIDs adds the "children" edge to the Node entity by IDs.
 func (nuo *NodeUpdateOne) AddChildIDs(ids ...int) *NodeUpdateOne {
 	nuo.mutation.AddChildIDs(ids...)
 	return nuo
 }
 
-// AddChildren adds the children edges to Node.
+// AddChildren adds the "children" edges to the Node entity.
 func (nuo *NodeUpdateOne) AddChildren(n ...*Node) *NodeUpdateOne {
 	ids := make([]int, len(n))
 	for i := range n {
@@ -352,25 +356,25 @@ func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
 	return nuo.mutation
 }
 
-// ClearParent clears the "parent" edge to type Node.
+// ClearParent clears the "parent" edge to the Node entity.
 func (nuo *NodeUpdateOne) ClearParent() *NodeUpdateOne {
 	nuo.mutation.ClearParent()
 	return nuo
 }
 
-// ClearChildren clears all "children" edges to type Node.
+// ClearChildren clears all "children" edges to the Node entity.
 func (nuo *NodeUpdateOne) ClearChildren() *NodeUpdateOne {
 	nuo.mutation.ClearChildren()
 	return nuo
 }
 
-// RemoveChildIDs removes the children edge to Node by ids.
+// RemoveChildIDs removes the "children" edge to Node entities by IDs.
 func (nuo *NodeUpdateOne) RemoveChildIDs(ids ...int) *NodeUpdateOne {
 	nuo.mutation.RemoveChildIDs(ids...)
 	return nuo
 }
 
-// RemoveChildren removes children edges to Node.
+// RemoveChildren removes "children" edges to Node entities.
 func (nuo *NodeUpdateOne) RemoveChildren(n ...*Node) *NodeUpdateOne {
 	ids := make([]int, len(n))
 	for i := range n {
@@ -379,7 +383,14 @@ func (nuo *NodeUpdateOne) RemoveChildren(n ...*Node) *NodeUpdateOne {
 	return nuo.RemoveChildIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {
+	nuo.fields = append([]string{field}, fields...)
+	return nuo
+}
+
+// Save executes the query and returns the updated Node entity.
 func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 	var (
 		err  error
@@ -399,6 +410,9 @@ func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 			return node, err
 		})
 		for i := len(nuo.hooks) - 1; i >= 0; i-- {
+			if nuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nuo.mutation); err != nil {
@@ -443,9 +457,28 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 	}
 	id, ok := nuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Node.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Node.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := nuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, node.FieldID)
+		for _, f := range fields {
+			if !node.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != node.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := nuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := nuo.mutation.Value(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -551,12 +584,12 @@ func (nuo *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) 
 	}
 	_node = &Node{config: nuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, nuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{node.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

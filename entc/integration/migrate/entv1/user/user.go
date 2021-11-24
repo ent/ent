@@ -19,6 +19,8 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
 	// FieldAddress holds the string denoting the address field in the database.
@@ -31,7 +33,8 @@ const (
 	FieldState = "state"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-
+	// FieldWorkplace holds the string denoting the workplace field in the database.
+	FieldWorkplace = "workplace"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -40,24 +43,23 @@ const (
 	EdgeSpouse = "spouse"
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
-
-	// CarFieldID holds the string denoting the id field of the Car.
+	// CarFieldID holds the string denoting the ID field of the Car.
 	CarFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// ParentTable is the table the holds the parent relation/edge.
+	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "users"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "user_children"
-	// ChildrenTable is the table the holds the children relation/edge.
+	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "users"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "user_children"
-	// SpouseTable is the table the holds the spouse relation/edge.
+	// SpouseTable is the table that holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
 	SpouseColumn = "user_spouse"
-	// CarTable is the table the holds the car relation/edge.
+	// CarTable is the table that holds the car relation/edge.
 	CarTable = "cars"
 	// CarInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.
@@ -71,15 +73,18 @@ var Columns = []string{
 	FieldID,
 	FieldAge,
 	FieldName,
+	FieldDescription,
 	FieldNickname,
 	FieldAddress,
 	FieldRenamed,
 	FieldBlob,
 	FieldState,
 	FieldStatus,
+	FieldWorkplace,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_children",
 	"user_spouse",
@@ -103,9 +108,13 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// BlobValidator is a validator for the "blob" field. It is called by the builders before save.
+	BlobValidator func([]byte) error
+	// WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.
+	WorkplaceValidator func(string) error
 )
 
-// State defines the type for the state enum field.
+// State defines the type for the "state" enum field.
 type State string
 
 // State values.

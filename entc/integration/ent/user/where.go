@@ -7,12 +7,12 @@
 package user
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id int) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -127,6 +127,13 @@ func Last(v string) predicate.User {
 func Nickname(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldNickname), v))
+	})
+}
+
+// Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
+func Address(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAddress), v))
 	})
 }
 
@@ -664,6 +671,131 @@ func NicknameContainsFold(v string) predicate.User {
 	})
 }
 
+// AddressEQ applies the EQ predicate on the "address" field.
+func AddressEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAddress), v))
+	})
+}
+
+// AddressNEQ applies the NEQ predicate on the "address" field.
+func AddressNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAddress), v))
+	})
+}
+
+// AddressIn applies the In predicate on the "address" field.
+func AddressIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAddress), v...))
+	})
+}
+
+// AddressNotIn applies the NotIn predicate on the "address" field.
+func AddressNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAddress), v...))
+	})
+}
+
+// AddressGT applies the GT predicate on the "address" field.
+func AddressGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAddress), v))
+	})
+}
+
+// AddressGTE applies the GTE predicate on the "address" field.
+func AddressGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAddress), v))
+	})
+}
+
+// AddressLT applies the LT predicate on the "address" field.
+func AddressLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAddress), v))
+	})
+}
+
+// AddressLTE applies the LTE predicate on the "address" field.
+func AddressLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAddress), v))
+	})
+}
+
+// AddressContains applies the Contains predicate on the "address" field.
+func AddressContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldAddress), v))
+	})
+}
+
+// AddressHasPrefix applies the HasPrefix predicate on the "address" field.
+func AddressHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldAddress), v))
+	})
+}
+
+// AddressHasSuffix applies the HasSuffix predicate on the "address" field.
+func AddressHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldAddress), v))
+	})
+}
+
+// AddressIsNil applies the IsNil predicate on the "address" field.
+func AddressIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAddress)))
+	})
+}
+
+// AddressNotNil applies the NotNil predicate on the "address" field.
+func AddressNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAddress)))
+	})
+}
+
+// AddressEqualFold applies the EqualFold predicate on the "address" field.
+func AddressEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldAddress), v))
+	})
+}
+
+// AddressContainsFold applies the ContainsFold predicate on the "address" field.
+func AddressContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldAddress), v))
+	})
+}
+
 // PhoneEQ applies the EQ predicate on the "phone" field.
 func PhoneEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -959,6 +1091,54 @@ func RoleNotIn(vs ...Role) predicate.User {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldRole), v...))
+	})
+}
+
+// EmploymentEQ applies the EQ predicate on the "employment" field.
+func EmploymentEQ(v Employment) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEmployment), v))
+	})
+}
+
+// EmploymentNEQ applies the NEQ predicate on the "employment" field.
+func EmploymentNEQ(v Employment) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldEmployment), v))
+	})
+}
+
+// EmploymentIn applies the In predicate on the "employment" field.
+func EmploymentIn(vs ...Employment) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldEmployment), v...))
+	})
+}
+
+// EmploymentNotIn applies the NotIn predicate on the "employment" field.
+func EmploymentNotIn(vs ...Employment) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldEmployment), v...))
 	})
 }
 
@@ -1395,7 +1575,7 @@ func HasParentWith(preds ...predicate.User) predicate.User {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -1406,7 +1586,7 @@ func And(predicates ...predicate.User) predicate.User {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

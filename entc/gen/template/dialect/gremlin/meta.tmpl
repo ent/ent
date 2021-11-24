@@ -4,9 +4,11 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Type*/}}
+
 {{/* constants needed for gremlin dialects. */}}
 {{ define "dialect/gremlin/meta/constants" }}
-	{{ range $_, $e := $.Edges }}{{ $label := $e.LabelConstant -}}
+	{{ range $e := $.Edges }}{{ $label := $e.LabelConstant -}}
 		{{ if $e.IsInverse }}{{- $label = $e.InverseLabelConstant -}}
 			// {{ $label }} holds the string label denoting the {{ lower $e.Name }} inverse edge type in the database.
 		{{ else -}}

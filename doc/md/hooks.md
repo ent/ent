@@ -17,15 +17,14 @@ There are 5 types of mutations:
 - `DeleteOne` - Delete a node from the graph.
 - `Delete` - Delete all nodes that match a predicate.
 
-<br>
 Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
 the same generated `UserMutation` object.
 
-However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent?tab=doc#Mutation">`ent.Mutation`<a> interface.
+However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`</a> interface.
  
 ## Hooks
 
-Hooks are functions that get an <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent?tab=doc#Mutator">`ent.Mutator`<a> and return a mutator back.
+Hooks are functions that get an <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutator">`ent.Mutator`</a> and return a mutator back.
 They function as middleware between mutators. It's similar to the popular HTTP middleware pattern.
 
 ```go
@@ -115,22 +114,26 @@ There are ~2 ways to do this:
 ```go
 // Option 1: use type assertion.
 client.Use(func(next ent.Mutator) ent.Mutator {
-	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-		if ns, ok := m.(interface{ SetName(string) }); ok {
-		    ns.SetName("Ariel Mashraki")
-		}
-		return next.Mutate(ctx, m)
+    type NameSetter interface {
+        SetName(value string)
+    }
+    return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+        // A schema with a "name" field must implement the NameSetter interface. 
+        if ns, ok := m.(NameSetter); ok {
+            ns.SetName("Ariel Mashraki")
+        }
+        return next.Mutate(ctx, m)
     })
 })
 
 // Option 2: use the generic ent.Mutation interface.
 client.Use(func(next ent.Mutator) ent.Mutator {
 	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-		if err := m.SetField("name", "Ariel Mashraki"); err != nil {
+        if err := m.SetField("name", "Ariel Mashraki"); err != nil {
             // An error is returned, if the field is not defined in
 			// the schema, or if the type mismatch the field type.
         }
-		return next.Mutate(ctx, m)
+        return next.Mutate(ctx, m)
     })
 })
 ```
@@ -151,7 +154,7 @@ import (
     gen "<project>/ent"
     "<project>/ent/hook"
 
-	"github.com/facebook/ent"
+	"entgo.io/ent"
 )
 
 // Card holds the schema definition for the CreditCard entity.
@@ -172,7 +175,7 @@ func (Card) Hooks() []ent.Hook {
 					return next.Mutate(ctx, m)
 				})
 			},
-            // Limit the hook only for these operations.
+			// Limit the hook only for these operations.
 			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
 		),
 		// Second hook.
@@ -181,18 +184,31 @@ func (Card) Hooks() []ent.Hook {
 				if s, ok := m.(interface{ SetName(string) }); ok {
 					s.SetName("Boring")
 				}
-				return next.Mutate(ctx, m)
+				v, err := next.Mutate(ctx, m)
+				// Post mutation action.
+				fmt.Println("new value:", v)
+				return v, err
 			})
 		},
 	}
 }
 ```
-> **Note that** if you use **schema hooks**, you **MUST** add the following import in the
-> main package, because a circular import is possible.
->
-> ```go
-> import _ "<project>/ent/runtime"
-> ```
+
+## Hooks Registration
+
+When using [**schema hooks**](#schema-hooks), there's a chance of a cyclic import between the schema package,
+and the generated ent package. To avoid this scenario, ent generates an `ent/runtime` package which is responsible
+for registering the schema-hooks at runtime.
+
+:::important
+Users **MUST** import the `ent/runtime` in order to register the schema hooks.
+The package can be imported in the `main` package (close to where the database driver is imported),
+or in the package that creates the `ent.Client`.
+
+```go
+import _ "<project>/ent/runtime"
+```
+:::
 
 ## Evaluation order
 
@@ -217,8 +233,8 @@ import (
 
 	"<project>/ent/hook"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/mixin"
 )
 
 
@@ -238,3 +254,13 @@ func (SomeMixin) Hooks() []ent.Hook {
     }
 }
 ```
+
+## Transaction Hooks
+
+Hooks can also be registered on active transactions, and will be executed on `Tx.Commit` or `Tx.Rollback`.
+For more information, read about it in the [transactions page](transactions.md#hooks). 
+
+## Codegen Hooks
+
+The `entc` package provides an option to add a list of hooks (middlewares) to the code-generation phase.
+For more information, read about it in the [codegen page](code-gen.md#code-generation-hooks). 

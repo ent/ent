@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/group"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/group"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupMutation
-	predicates []predicate.Group
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the GroupDelete builder.
 func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.predicates = append(gd.predicates, ps...)
+	gd.mutation.Where(ps...)
 	return gd
 }
 
@@ -52,6 +51,9 @@ func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gd.hooks) - 1; i >= 0; i-- {
+			if gd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gd.mutation); err != nil {
@@ -81,7 +83,7 @@ func (gd *GroupDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (gd *GroupDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(group.Label)
-	for _, p := range gd.predicates {
+	for _, p := range gd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

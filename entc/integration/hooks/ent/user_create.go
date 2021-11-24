@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/hooks/ent/card"
-	"github.com/facebook/ent/entc/integration/hooks/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -24,13 +24,13 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetVersion sets the version field.
+// SetVersion sets the "version" field.
 func (uc *UserCreate) SetVersion(i int) *UserCreate {
 	uc.mutation.SetVersion(i)
 	return uc
 }
 
-// SetNillableVersion sets the version field if the given value is not nil.
+// SetNillableVersion sets the "version" field if the given value is not nil.
 func (uc *UserCreate) SetNillableVersion(i *int) *UserCreate {
 	if i != nil {
 		uc.SetVersion(*i)
@@ -38,19 +38,19 @@ func (uc *UserCreate) SetNillableVersion(i *int) *UserCreate {
 	return uc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetWorth sets the worth field.
+// SetWorth sets the "worth" field.
 func (uc *UserCreate) SetWorth(u uint) *UserCreate {
 	uc.mutation.SetWorth(u)
 	return uc
 }
 
-// SetNillableWorth sets the worth field if the given value is not nil.
+// SetNillableWorth sets the "worth" field if the given value is not nil.
 func (uc *UserCreate) SetNillableWorth(u *uint) *UserCreate {
 	if u != nil {
 		uc.SetWorth(*u)
@@ -58,13 +58,13 @@ func (uc *UserCreate) SetNillableWorth(u *uint) *UserCreate {
 	return uc
 }
 
-// AddCardIDs adds the cards edge to Card by ids.
+// AddCardIDs adds the "cards" edge to the Card entity by IDs.
 func (uc *UserCreate) AddCardIDs(ids ...int) *UserCreate {
 	uc.mutation.AddCardIDs(ids...)
 	return uc
 }
 
-// AddCards adds the cards edges to Card.
+// AddCards adds the "cards" edges to the Card entity.
 func (uc *UserCreate) AddCards(c ...*Card) *UserCreate {
 	ids := make([]int, len(c))
 	for i := range c {
@@ -73,13 +73,13 @@ func (uc *UserCreate) AddCards(c ...*Card) *UserCreate {
 	return uc.AddCardIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uc *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFriendIDs(ids...)
 	return uc
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -88,13 +88,13 @@ func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
 	return uc.AddFriendIDs(ids...)
 }
 
-// SetBestFriendID sets the best_friend edge to User by id.
+// SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (uc *UserCreate) SetBestFriendID(id int) *UserCreate {
 	uc.mutation.SetBestFriendID(id)
 	return uc
 }
 
-// SetNillableBestFriendID sets the best_friend edge to User by id if the given value is not nil.
+// SetNillableBestFriendID sets the "best_friend" edge to the User entity by ID if the given value is not nil.
 func (uc *UserCreate) SetNillableBestFriendID(id *int) *UserCreate {
 	if id != nil {
 		uc = uc.SetBestFriendID(*id)
@@ -102,7 +102,7 @@ func (uc *UserCreate) SetNillableBestFriendID(id *int) *UserCreate {
 	return uc
 }
 
-// SetBestFriend sets the best_friend edge to User.
+// SetBestFriend sets the "best_friend" edge to the User entity.
 func (uc *UserCreate) SetBestFriend(u *User) *UserCreate {
 	return uc.SetBestFriendID(u.ID)
 }
@@ -118,7 +118,9 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
-	uc.defaults()
+	if err := uc.defaults(); err != nil {
+		return nil, err
+	}
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
 			return nil, err
@@ -134,11 +136,17 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 				return nil, err
 			}
 			uc.mutation = mutation
-			node, err = uc.sqlSave(ctx)
+			if node, err = uc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			if uc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
@@ -157,21 +165,35 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 	return v
 }
 
+// Exec executes the query.
+func (uc *UserCreate) Exec(ctx context.Context) error {
+	_, err := uc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (uc *UserCreate) ExecX(ctx context.Context) {
+	if err := uc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
-func (uc *UserCreate) defaults() {
+func (uc *UserCreate) defaults() error {
 	if _, ok := uc.mutation.Version(); !ok {
 		v := user.DefaultVersion
 		uc.mutation.SetVersion(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Version(); !ok {
-		return &ValidationError{Name: "version", err: errors.New("ent: missing required field \"version\"")}
+		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "User.version"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
 	return nil
 }
@@ -179,8 +201,8 @@ func (uc *UserCreate) check() error {
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -279,12 +301,13 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.user_best_friend = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -313,19 +336,23 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ucb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, ucb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -342,11 +369,24 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (ucb *UserCreateBulk) Exec(ctx context.Context) error {
+	_, err := ucb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ucb *UserCreateBulk) ExecX(ctx context.Context) {
+	if err := ucb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

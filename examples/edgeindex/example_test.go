@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/examples/edgeindex/ent"
+	"entgo.io/ent/examples/edgeindex/ent"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -47,14 +47,13 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetName("ST").
 		SetCity(tlv).
 		SaveX(ctx)
-	// This operation will fail because "ST"
-	// is already created under "TLV".
-	_, err := client.Street.
+	// This operation fails because "ST"
+	// was already created under "TLV".
+	if err := client.Street.
 		Create().
 		SetName("ST").
 		SetCity(tlv).
-		Save(ctx)
-	if err == nil {
+		Exec(ctx); err == nil {
 		return fmt.Errorf("expecting creation to fail")
 	}
 	// Add a street "ST" to "NYC".

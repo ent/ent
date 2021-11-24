@@ -8,9 +8,10 @@ package ent
 import (
 	"context"
 
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/index"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 type (
@@ -45,6 +46,16 @@ type (
 		// Indexes returns the indexes of the schema.
 		Indexes() []Index
 		// Config returns an optional config for the schema.
+		//
+		// Deprecated: the Config method predates the Annotations method and it
+		// is planned be removed in v0.5.0. New code should use Annotations instead.
+		//
+		//	func (T) Annotations() []schema.Annotation {
+		//		return []schema.Annotation{
+		//			entsql.Annotation{Table: "Name"},
+		//		}
+		//	}
+		//
 		Config() Config
 		// Mixin returns an optional list of Mixin to extends
 		// the schema.
@@ -54,6 +65,9 @@ type (
 		Hooks() []Hook
 		// Policy returns the privacy policy of the schema.
 		Policy() Policy
+		// Annotations returns a list of schema annotations to be used by
+		// codegen extensions.
+		Annotations() []schema.Annotation
 	}
 
 	// A Field interface returns a field descriptor for vertex fields/properties.
@@ -105,6 +119,15 @@ type (
 	//		}
 	//	}
 	//
+	// Deprecated: the Config object predates the schema.Annotation method and it
+	// is planned be removed in v0.5.0. New code should use Annotations instead.
+	//
+	//	func (T) Annotations() []schema.Annotation {
+	//		return []schema.Annotation{
+	//			entsql.Annotation{Table: "Name"},
+	//		}
+	//	}
+	//
 	Config struct {
 		// A Table is an optional table name defined for the schema.
 		Table string
@@ -146,19 +169,24 @@ type (
 		// Hooks returns a slice of hooks to add to the schema.
 		// Note that mixin hooks are executed before schema hooks.
 		Hooks() []Hook
+		// Policy returns a privacy policy to add to the schema.
+		// Note that mixin policy are executed before schema policy.
+		Policy() Policy
+		// Annotations returns a list of schema annotations to add
+		// to the schema annotations.
+		Annotations() []schema.Annotation
 	}
 
 	// The Policy type defines the write privacy policy of an entity.
 	// The usage for the interface is as follows:
 	//
-	// type T struct {
-	//   ent.Schema
-	// }
+	//	type T struct {
+	//		ent.Schema
+	//	}
 	//
-	// func(T) Policy() ent.Policy {
-	//     return privacy.AlwaysAllowReadWrite()
-	// }
-	//
+	//	func(T) Policy() ent.Policy {
+	//		return privacy.AlwaysAllowReadWrite()
+	//	}
 	//
 	Policy interface {
 		EvalMutation(context.Context, Mutation) error
@@ -197,6 +225,9 @@ func (Schema) Hooks() []Hook { return nil }
 
 // Policy of the schema.
 func (Schema) Policy() Policy { return nil }
+
+// Annotations of the schema.
+func (Schema) Annotations() []schema.Annotation { return nil }
 
 type (
 	// Value represents a value returned by ent.

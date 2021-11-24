@@ -9,19 +9,17 @@ package runtime
 import (
 	"time"
 
-	"github.com/facebook/ent/entc/integration/hooks/ent/card"
-	"github.com/facebook/ent/entc/integration/hooks/ent/schema"
-	"github.com/facebook/ent/entc/integration/hooks/ent/user"
-
-	"github.com/facebook/ent"
+	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/schema"
+	"entgo.io/ent/entc/integration/hooks/ent/user"
 )
 
-// The init function reads all schema descriptors with runtime
-// code (default values, validators or hooks) and stitches it
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
 	cardMixin := schema.Card{}.Mixin()
-	cardMixinHooks0 := cardMixin[0].(interface{ Hooks() []ent.Hook }).Hooks()
+	cardMixinHooks0 := cardMixin[0].Hooks()
 	cardHooks := schema.Card{}.Hooks()
 	card.Hooks[0] = cardMixinHooks0[0]
 	card.Hooks[1] = cardHooks[0]
@@ -39,9 +37,10 @@ func init() {
 	// card.DefaultCreatedAt holds the default value on creation for the created_at field.
 	card.DefaultCreatedAt = cardDescCreatedAt.Default.(func() time.Time)
 	userMixin := schema.User{}.Mixin()
-	userMixinHooks0 := userMixin[0].(interface{ Hooks() []ent.Hook }).Hooks()
+	userMixinHooks0 := userMixin[0].Hooks()
 	user.Hooks[0] = userMixinHooks0[0]
 	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescVersion is the schema descriptor for version field.

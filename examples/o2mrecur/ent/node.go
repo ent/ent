@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/examples/o2mrecur/ent/node"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/examples/o2mrecur/ent/node"
 )
 
 // Node is the model entity for the Node schema.
@@ -30,9 +30,9 @@ type Node struct {
 // NodeEdges holds the relations/edges for other nodes in the graph.
 type NodeEdges struct {
 	// Parent holds the value of the parent edge.
-	Parent *Node
+	Parent *Node `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
-	Children []*Node
+	Children []*Node `json:"children,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -62,68 +62,72 @@ func (e NodeEdges) ChildrenOrErr() ([]*Node, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Node) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
-		&sql.NullInt64{}, // value
+func (*Node) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case node.FieldID, node.FieldValue:
+			values[i] = new(sql.NullInt64)
+		case node.ForeignKeys[0]: // node_children
+			values[i] = new(sql.NullInt64)
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Node", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Node) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // node_children
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Node fields.
-func (n *Node) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(node.Columns); m < n {
+func (n *Node) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	n.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field value", values[0])
-	} else if value.Valid {
-		n.Value = int(value.Int64)
-	}
-	values = values[1:]
-	if len(values) == len(node.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field node_children", value)
-		} else if value.Valid {
-			n.node_children = new(int)
-			*n.node_children = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case node.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			n.ID = int(value.Int64)
+		case node.FieldValue:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field value", values[i])
+			} else if value.Valid {
+				n.Value = int(value.Int64)
+			}
+		case node.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field node_children", value)
+			} else if value.Valid {
+				n.node_children = new(int)
+				*n.node_children = int(value.Int64)
+			}
 		}
 	}
 	return nil
 }
 
-// QueryParent queries the parent edge of the Node.
+// QueryParent queries the "parent" edge of the Node entity.
 func (n *Node) QueryParent() *NodeQuery {
 	return (&NodeClient{config: n.config}).QueryParent(n)
 }
 
-// QueryChildren queries the children edge of the Node.
+// QueryChildren queries the "children" edge of the Node entity.
 func (n *Node) QueryChildren() *NodeQuery {
 	return (&NodeClient{config: n.config}).QueryChildren(n)
 }
 
 // Update returns a builder for updating this Node.
-// Note that, you need to call Node.Unwrap() before calling this method, if this Node
+// Note that you need to call Node.Unwrap() before calling this method if this Node
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (n *Node) Update() *NodeUpdateOne {
 	return (&NodeClient{config: n.config}).UpdateOne(n)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Node entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (n *Node) Unwrap() *Node {
 	tx, ok := n.config.driver.(*txDriver)
 	if !ok {

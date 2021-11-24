@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/task"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
 // TaskDelete is the builder for deleting a Task entity.
 type TaskDelete struct {
 	config
-	hooks      []Hook
-	mutation   *TaskMutation
-	predicates []predicate.Task
+	hooks    []Hook
+	mutation *TaskMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the TaskDelete builder.
 func (td *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
-	td.predicates = append(td.predicates, ps...)
+	td.mutation.Where(ps...)
 	return td
 }
 
@@ -52,6 +51,9 @@ func (td *TaskDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(td.hooks) - 1; i >= 0; i-- {
+			if td.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = td.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, td.mutation); err != nil {
@@ -81,7 +83,7 @@ func (td *TaskDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (td *TaskDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(task.Label)
-	for _, p := range td.predicates {
+	for _, p := range td.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

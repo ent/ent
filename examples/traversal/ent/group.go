@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/examples/traversal/ent/group"
-	"github.com/facebook/ent/examples/traversal/ent/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/examples/traversal/ent/group"
+	"entgo.io/ent/examples/traversal/ent/user"
 )
 
 // Group is the model entity for the Group schema.
@@ -31,9 +31,9 @@ type Group struct {
 // GroupEdges holds the relations/edges for other nodes in the graph.
 type GroupEdges struct {
 	// Users holds the value of the users edge.
-	Users []*User
+	Users []*User `json:"users,omitempty"`
 	// Admin holds the value of the admin edge.
-	Admin *User
+	Admin *User `json:"admin,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -63,68 +63,74 @@ func (e GroupEdges) AdminOrErr() (*User, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Group) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullString{}, // name
+func (*Group) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case group.FieldID:
+			values[i] = new(sql.NullInt64)
+		case group.FieldName:
+			values[i] = new(sql.NullString)
+		case group.ForeignKeys[0]: // group_admin
+			values[i] = new(sql.NullInt64)
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Group", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Group) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // group_admin
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
-func (gr *Group) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(group.Columns); m < n {
+func (gr *Group) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	gr.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[0])
-	} else if value.Valid {
-		gr.Name = value.String
-	}
-	values = values[1:]
-	if len(values) == len(group.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field group_admin", value)
-		} else if value.Valid {
-			gr.group_admin = new(int)
-			*gr.group_admin = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case group.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			gr.ID = int(value.Int64)
+		case group.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				gr.Name = value.String
+			}
+		case group.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field group_admin", value)
+			} else if value.Valid {
+				gr.group_admin = new(int)
+				*gr.group_admin = int(value.Int64)
+			}
 		}
 	}
 	return nil
 }
 
-// QueryUsers queries the users edge of the Group.
+// QueryUsers queries the "users" edge of the Group entity.
 func (gr *Group) QueryUsers() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryUsers(gr)
 }
 
-// QueryAdmin queries the admin edge of the Group.
+// QueryAdmin queries the "admin" edge of the Group entity.
 func (gr *Group) QueryAdmin() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryAdmin(gr)
 }
 
 // Update returns a builder for updating this Group.
-// Note that, you need to call Group.Unwrap() before calling this method, if this Group
+// Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gr *Group) Update() *GroupUpdateOne {
 	return (&GroupClient{config: gr.config}).UpdateOne(gr)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (gr *Group) Unwrap() *Group {
 	tx, ok := gr.config.driver.(*txDriver)
 	if !ok {

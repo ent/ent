@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupInfoMutation
-	predicates []predicate.GroupInfo
+	hooks    []Hook
+	mutation *GroupInfoMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the GroupInfoDelete builder.
 func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
-	gid.predicates = append(gid.predicates, ps...)
+	gid.mutation.Where(ps...)
 	return gid
 }
 
@@ -52,6 +51,9 @@ func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gid.hooks) - 1; i >= 0; i-- {
+			if gid.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gid.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gid.mutation); err != nil {
@@ -81,7 +83,7 @@ func (gid *GroupInfoDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (gid *GroupInfoDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(groupinfo.Label)
-	for _, p := range gid.predicates {
+	for _, p := range gid.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

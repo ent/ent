@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "context" }}
 
 {{ $pkg := base $.Config.Package }}
@@ -15,7 +17,7 @@ import (
 
 type clientCtxKey struct{}
 
-// FromContext returns the Client stored in a context, or nil if there isn't one.
+// FromContext returns a Client stored inside a context, or nil if there isn't one.
 func FromContext(ctx context.Context) *Client {
 	c, _ := ctx.Value(clientCtxKey{}).(*Client)
 	return c
@@ -28,13 +30,13 @@ func NewContext(parent context.Context, c *Client) context.Context {
 
 type txCtxKey struct {}
 
-// TxFromContext returns the Tx stored in a context, or nil if there isn't one.
+// TxFromContext returns a Tx stored inside a context, or nil if there isn't one.
 func TxFromContext(ctx context.Context) *Tx {
 	tx, _ := ctx.Value(txCtxKey{}).(*Tx)
 	return tx
 }
 
-// NewTxContext returns a new context with the given Client attached.
+// NewTxContext returns a new context with the given Tx attached.
 func NewTxContext(parent context.Context, tx *Tx) context.Context {
 	return context.WithValue(parent, txCtxKey{}, tx)
 }

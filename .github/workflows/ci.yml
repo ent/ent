@@ -13,23 +13,23 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.4.0
       - name: Run linters
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v2.5.2
         with:
-          version: v1.28
+          version: v1.43.0
 
   unit:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ['1.14', '1.13']
+        go: ['1.17', '1.16']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v2.1.6
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -54,9 +54,11 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-go@v2
-      - uses: actions/cache@v2
+        with:
+          go-version: '1.17'
+      - uses: actions/cache@v2.1.6
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -115,6 +117,45 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
+      maria:
+        image: mariadb
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+      maria102:
+        image: mariadb:10.2.32
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4307:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+      maria103:
+        image: mariadb:10.3.13
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4308:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
       postgres10:
         image: postgres:10
         env:
@@ -145,7 +186,31 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres13:
+        image: postgres:13.1
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
           - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres14:
+        image: postgres:14
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5434:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -161,9 +226,11 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-go@v2
-      - uses: actions/cache@v2
+        with:
+          go-version: '1.17'
+      - uses: actions/cache@v2.1.6
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -216,6 +283,45 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
+      maria:
+        image: mariadb
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+      maria102:
+        image: mariadb:10.2.32
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4307:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+      maria103:
+        image: mariadb:10.3.13
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4308:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
       postgres10:
         image: postgres:10
         env:
@@ -246,7 +352,31 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres13:
+        image: postgres:13.1
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
           - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres14:
+        image: postgres:14
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5434:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -262,11 +392,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.4.0
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v2
-      - uses: actions/cache@v2
+        with:
+          go-version: '1.17'
+      - uses: actions/cache@v2.1.6
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}

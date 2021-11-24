@@ -10,14 +10,14 @@ title: Transactions
 func GenTx(ctx context.Context, client *ent.Client) error {
 	tx, err := client.Tx(ctx)
 	if err != nil {
-		return fmt.Errorf("starting a transaction: %v", err)
+		return fmt.Errorf("starting a transaction: %w", err)
 	}
 	hub, err := tx.Group.
 		Create().
 		SetName("Github").
 		Save(ctx)
 	if err != nil {
-		return rollback(tx, fmt.Errorf("failed creating the group: %v", err))
+		return rollback(tx, fmt.Errorf("failed creating the group: %w", err))
 	}
 	// Create the admin of the group.
 	dan, err := tx.User.
@@ -52,13 +52,15 @@ func GenTx(ctx context.Context, client *ent.Client) error {
 // with the rollback error if occurred.
 func rollback(tx *ent.Tx, err error) error {
 	if rerr := tx.Rollback(); rerr != nil {
-		err = fmt.Errorf("%v: %v", err, rerr)
+		err = fmt.Errorf("%w: %v", err, rerr)
 	}
 	return err
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).
+You must call `Unwrap()` if you are querying edges off of a created entity after a successful transaction (example: `a8m.QueryGroups()`). Unwrap restores the state of the underlying client embedded within the entity to a non-transactable version. 
+
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/traversal).
 
 ## Transactional Client
 
@@ -88,7 +90,7 @@ func Gen(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/traversal).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/traversal).
 
 ## Best Practices
 

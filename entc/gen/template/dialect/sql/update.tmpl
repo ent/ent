@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/sql/update" }}
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
@@ -27,19 +29,30 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
 		if !ok {
-			return {{ $zero }}, &ValidationError{Name: "ID", err: fmt.Errorf("missing {{ $.Name }}.ID for update")}
+			return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
 		}
 		_spec.Node.ID.Value = id
-	{{- else }}
-		if ps := {{ $receiver }}.predicates; len(ps) > 0 {
-			_spec.Predicate = func(selector *sql.Selector) {
-				for i := range ps {
-					ps[i](selector)
+		if fields := {{ $receiver }}.fields; len(fields) > 0 {
+			_spec.Node.Columns = make([]string, 0, len(fields))
+			_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
+			for _, f := range fields {
+				if !{{ $.Package }}.ValidColumn(f) {
+					return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+				}
+				if f != {{ $.Package }}.{{ $.ID.Constant }} {
+					_spec.Node.Columns = append(_spec.Node.Columns, f)
 				}
 			}
 		}
 	{{- end }}
-	{{- range $f := $.Fields }}
+	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	{{- range $f := $.MutationFields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -48,7 +61,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 						Column: {{ $.Package }}.{{ $f.Constant }},
 					})
 				}
-				{{- if and $f.Type.Numeric $f.ConvertedToBasic }}
+				{{- if $f.SupportsMutationAdd }}
 					if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
 						_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 							Type: field.{{ $f.Type.ConstName }},
@@ -67,7 +80,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 				}
 			{{- end }}
 	{{- end }}
-	{{- range $_, $e := $.Edges }}
+	{{- range $e := $.Edges }}
 		if {{ $mutation }}.{{ $e.MutationCleared }}() {
 			{{- with extend $ "Edge" $e }}
 				{{ template "dialect/sql/defedge" . }}
@@ -89,10 +102,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			_spec.Edges.Add = append(_spec.Edges.Add, edge)
 		}
 	{{- end }}
+	{{- /* Allow mutating the sqlgraph.UpdateSpec by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/update/spec/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{- if $one }}
 		{{ $ret }} = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec.Assign = {{ $ret }}.assignValues
-		_spec.ScanValues = {{ $ret }}.scanValues()
+		_spec.ScanValues = {{ $ret }}.scanValues
 	{{- end }}
 	{{- if $one }}
 		if err = sqlgraph.UpdateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
@@ -101,8 +120,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 	{{- end }}
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{ {{ $.Package }}.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return {{ $zero }}, err
 	}
@@ -125,6 +144,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) ({{ $ret }} 
 			},
 		},
 	}
+	{{- /* Allow mutating the sqlgraph.EdgeSpec by ent extensions or user templates.*/}}
+	{{- with $tmpls := matchTemplate "dialect/sql/defedge/spec/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	{{- with $.Scope.Nodes }}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)

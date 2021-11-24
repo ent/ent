@@ -7,13 +7,13 @@
 package blob
 
 import (
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"github.com/google/uuid"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
@@ -103,6 +103,13 @@ func UUID(v uuid.UUID) predicate.Blob {
 	})
 }
 
+// Count applies equality check predicate on the "count" field. It's identical to CountEQ.
+func Count(v int) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCount), v))
+	})
+}
+
 // UUIDEQ applies the EQ predicate on the "uuid" field.
 func UUIDEQ(v uuid.UUID) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
@@ -179,6 +186,82 @@ func UUIDLTE(v uuid.UUID) predicate.Blob {
 	})
 }
 
+// CountEQ applies the EQ predicate on the "count" field.
+func CountEQ(v int) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldCount), v))
+	})
+}
+
+// CountNEQ applies the NEQ predicate on the "count" field.
+func CountNEQ(v int) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldCount), v))
+	})
+}
+
+// CountIn applies the In predicate on the "count" field.
+func CountIn(vs ...int) predicate.Blob {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Blob(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldCount), v...))
+	})
+}
+
+// CountNotIn applies the NotIn predicate on the "count" field.
+func CountNotIn(vs ...int) predicate.Blob {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Blob(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldCount), v...))
+	})
+}
+
+// CountGT applies the GT predicate on the "count" field.
+func CountGT(v int) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldCount), v))
+	})
+}
+
+// CountGTE applies the GTE predicate on the "count" field.
+func CountGTE(v int) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldCount), v))
+	})
+}
+
+// CountLT applies the LT predicate on the "count" field.
+func CountLT(v int) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldCount), v))
+	})
+}
+
+// CountLTE applies the LTE predicate on the "count" field.
+func CountLTE(v int) predicate.Blob {
+	return predicate.Blob(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldCount), v))
+	})
+}
+
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
@@ -235,7 +318,7 @@ func HasLinksWith(preds ...predicate.Blob) predicate.Blob {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Blob) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)
@@ -246,7 +329,7 @@ func And(predicates ...predicate.Blob) predicate.Blob {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Blob) predicate.Blob {
 	return predicate.Blob(func(s *sql.Selector) {
 		s1 := s.Clone().SetP(nil)

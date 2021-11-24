@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "client" }}
 
 {{ $pkg := base $.Config.Package }}
@@ -13,12 +15,12 @@ import (
 	"log"
 
 	"{{ $.Config.Package }}/migrate"
-	{{ range $_, $n := $.Nodes }}
+	{{ range $n := $.Nodes }}
 		"{{ $n.Config.Package }}/{{ $n.Package }}"
 	{{- end }}
 
-	"github.com/facebook/ent/dialect"
-	{{ range $_, $import := $.Storage.Imports -}}
+	"entgo.io/ent/dialect"
+	{{ range $import := $.Storage.Imports -}}
 		"{{ $import }}"
 	{{ end -}}
 )
@@ -34,7 +36,12 @@ type Client struct {
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
 	{{- end }}
-	{{ template "client/fields/additional" $ }}
+	{{- template "client/fields/additional" $ }}
+	{{- with $tmpls := matchTemplate "client/fields/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 }
 
 // NewClient creates a new client configured with the given options.
@@ -76,15 +83,16 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
-		return nil, fmt.Errorf("{{ $pkg }}: starting a transaction: %v", err)
+		return nil, fmt.Errorf("{{ $pkg }}: starting a transaction: %w", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = tx
 	return &Tx{
 		ctx: ctx,
 		config: cfg,
-		{{ range $_, $n := $.Nodes -}}
+		{{- range $n := $.Nodes }}
 			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
-		{{ end -}}
+		{{- end }}
 	}, nil
 }
 
@@ -105,7 +113,8 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = dialect.Debug(c.driver, c.log)
 	client := &Client{config: cfg}
 	client.init()
 	return client
@@ -119,11 +128,16 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	{{- range $_, $n := $.Nodes }}
+	{{- range $n := $.Nodes }}
 		c.{{ $n.Name }}.Use(hooks...)
 	{{- end }}
 }
 
+{{- with $tmpls := matchTemplate "client/additional/*" "client/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 {{ range $n := $.Nodes }}
 {{ $client := print $n.Name "Client" }}
@@ -151,7 +165,7 @@ func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
 	return &{{ $n.CreateName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of {{ $n.Name }} entities.
+// CreateBulk returns a builder for creating a bulk of {{ $n.Name }} entities.
 func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.CreateName }}) *{{ $n.CreateBulkName }} {
 	return &{{ $n.CreateBulkName }}{config: c.config, builders: builders}
 }
@@ -195,7 +209,14 @@ func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }}
 
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
-	return &{{ $n.QueryName }}{config: c.config}
+	return &{{ $n.QueryName }}{
+		config: c.config,
+		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $n }}
+			{{- end }}
+		{{- end }}
+	}
 }
 
 // Get returns a {{ $n.Name }} entity by its id.
@@ -212,13 +233,14 @@ func (c *{{ $client }}) GetX(ctx context.Context, id {{ $n.ID.Type }}) *{{ $n.Na
 	return obj
 }
 
-{{ range $_, $e := $n.Edges }}
+{{ range $e := $n.Edges }}
 {{ $builder := $e.Type.QueryName }}
+{{ $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
-func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{ $builder }} {
+func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 	query := &{{ $builder }}{config: c.config}
 	query.path = func(ctx context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
-		{{- with extend $n "Receiver" $rec "Edge" $e "Ident" "fromV" }}
+		{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
 			{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
 			{{- xtemplate $tmpl . -}}
 		{{- end -}}
@@ -230,7 +252,7 @@ func (c *{{ $client }}) Query{{ pascal $e.Name }}({{ $rec }} *{{ $n.Name }}) *{{
 
 // Hooks returns the client hooks.
 func (c *{{ $client }}) Hooks() []Hook {
-	{{- if or $n.NumHooks $n.HasPolicy }}
+	{{- if or $n.NumHooks $n.NumPolicy }}
 		hooks := c.hooks.{{ $n.Name }}
 		return append(hooks[:len(hooks):len(hooks)], {{ $n.Package }}.Hooks[:]...)
 	{{- else }}
@@ -241,6 +263,5 @@ func (c *{{ $client }}) Hooks() []Hook {
 {{ end }}
 {{ end }}
 
-{{/* A template that can be overrided in order to add additional fields to the client.*/}}
+{{/* A template that can be overridden in order to add additional fields to the client.*/}}
 {{ define "client/fields/additional" }}{{ end }}
-

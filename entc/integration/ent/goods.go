@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/ent/goods"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/ent/goods"
 )
 
 // Goods is the model entity for the Goods schema.
@@ -22,36 +22,47 @@ type Goods struct {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Goods) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // id
+func (*Goods) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case goods.FieldID:
+			values[i] = new(sql.NullInt64)
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type Goods", columns[i])
+		}
 	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Goods fields.
-func (_go *Goods) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(goods.Columns); m < n {
+func (_go *Goods) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
+	for i := range columns {
+		switch columns[i] {
+		case goods.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			_go.ID = int(value.Int64)
+		}
 	}
-	_go.ID = int(value.Int64)
-	values = values[1:]
 	return nil
 }
 
 // Update returns a builder for updating this Goods.
-// Note that, you need to call Goods.Unwrap() before calling this method, if this Goods
+// Note that you need to call Goods.Unwrap() before calling this method if this Goods
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (_go *Goods) Update() *GoodsUpdateOne {
 	return (&GoodsClient{config: _go.config}).UpdateOne(_go)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Goods entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (_go *Goods) Unwrap() *Goods {
 	tx, ok := _go.config.driver.(*txDriver)
 	if !ok {

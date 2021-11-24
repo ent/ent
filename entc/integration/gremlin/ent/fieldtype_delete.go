@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/fieldtype"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // FieldTypeDelete is the builder for deleting a FieldType entity.
 type FieldTypeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *FieldTypeMutation
-	predicates []predicate.FieldType
+	hooks    []Hook
+	mutation *FieldTypeMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the FieldTypeDelete builder.
 func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
-	ftd.predicates = append(ftd.predicates, ps...)
+	ftd.mutation.Where(ps...)
 	return ftd
 }
 
@@ -52,6 +51,9 @@ func (ftd *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ftd.hooks) - 1; i >= 0; i-- {
+			if ftd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ftd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ftd.mutation); err != nil {
@@ -81,7 +83,7 @@ func (ftd *FieldTypeDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (ftd *FieldTypeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(fieldtype.Label)
-	for _, p := range ftd.predicates {
+	for _, p := range ftd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

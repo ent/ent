@@ -7,8 +7,8 @@
 package migrate
 
 import (
-	"github.com/facebook/ent/dialect/sql/schema"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/schema/field"
 )
 
 var (
@@ -25,9 +25,8 @@ var (
 		PrimaryKey: []*schema.Column{NodesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "nodes_nodes_children",
-				Columns: []*schema.Column{NodesColumns[2]},
-
+				Symbol:     "nodes_nodes_children",
+				Columns:    []*schema.Column{NodesColumns[2]},
 				RefColumns: []*schema.Column{NodesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

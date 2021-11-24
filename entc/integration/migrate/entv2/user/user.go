@@ -8,6 +8,7 @@ package user
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
@@ -23,6 +24,8 @@ const (
 	FieldAge = "age"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// FieldNickname holds the string denoting the nickname field in the database.
 	FieldNickname = "nickname"
 	// FieldPhone holds the string denoting the phone field in the database.
@@ -39,35 +42,37 @@ const (
 	FieldState = "state"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
-
+	// FieldWorkplace holds the string denoting the workplace field in the database.
+	FieldWorkplace = "workplace"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
 	// EdgePets holds the string denoting the pets edge name in mutations.
 	EdgePets = "pets"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
-
-	// CarFieldID holds the string denoting the id field of the Car.
+	// CarFieldID holds the string denoting the ID field of the Car.
 	CarFieldID = "id"
-	// PetFieldID holds the string denoting the id field of the Pet.
+	// PetFieldID holds the string denoting the ID field of the Pet.
 	PetFieldID = "id"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// CarTable is the table the holds the car relation/edge.
+	// CarTable is the table that holds the car relation/edge.
 	CarTable = "cars"
 	// CarInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.
 	CarInverseTable = "cars"
 	// CarColumn is the table column denoting the car relation/edge.
 	CarColumn = "user_car"
-	// PetsTable is the table the holds the pets relation/edge.
+	// PetsTable is the table that holds the pets relation/edge.
 	PetsTable = "pets"
 	// PetsInverseTable is the table name for the Pet entity.
 	// It exists in this package in order to avoid circular dependency with the "pet" package.
 	PetsInverseTable = "pets"
 	// PetsColumn is the table column denoting the pets relation/edge.
 	PetsColumn = "owner_id"
-	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
+	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "friends"
 )
 
@@ -78,6 +83,7 @@ var Columns = []string{
 	FieldMixedEnum,
 	FieldAge,
 	FieldName,
+	FieldDescription,
 	FieldNickname,
 	FieldPhone,
 	FieldBuffer,
@@ -86,6 +92,8 @@ var Columns = []string{
 	FieldBlob,
 	FieldState,
 	FieldStatus,
+	FieldWorkplace,
+	FieldCreatedAt,
 }
 
 var (
@@ -105,18 +113,26 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultMixedString holds the default value on creation for the mixed_string field.
+	// DefaultMixedString holds the default value on creation for the "mixed_string" field.
 	DefaultMixedString string
-	// DefaultPhone holds the default value on creation for the phone field.
+	// NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
+	NicknameValidator func(string) error
+	// DefaultPhone holds the default value on creation for the "phone" field.
 	DefaultPhone string
-	// DefaultTitle holds the default value on creation for the title field.
+	// DefaultBuffer holds the default value on creation for the "buffer" field.
+	DefaultBuffer func() []byte
+	// DefaultTitle holds the default value on creation for the "title" field.
 	DefaultTitle string
+	// BlobValidator is a validator for the "blob" field. It is called by the builders before save.
+	BlobValidator func([]byte) error
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
 )
 
-// MixedEnum defines the type for the mixed_enum enum field.
+// MixedEnum defines the type for the "mixed_enum" enum field.
 type MixedEnum string
 
-// MixedEnumOn is the default MixedEnum.
+// MixedEnumOn is the default value of the MixedEnum enum.
 const DefaultMixedEnum = MixedEnumOn
 
 // MixedEnum values.
@@ -139,7 +155,7 @@ func MixedEnumValidator(me MixedEnum) error {
 	}
 }
 
-// State defines the type for the state enum field.
+// State defines the type for the "state" enum field.
 type State string
 
 // State values.
@@ -163,7 +179,7 @@ func StateValidator(s State) error {
 	}
 }
 
-// Status defines the type for the status enum field.
+// Status defines the type for the "status" enum field.
 type Status string
 
 // Status values.

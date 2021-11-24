@@ -7,13 +7,13 @@
 package groupinfo
 
 import (
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id string) predicate.GroupInfo {
 	return predicate.GroupInfo(func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -265,7 +265,7 @@ func HasGroupsWith(preds ...predicate.Group) predicate.GroupInfo {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.GroupInfo) predicate.GroupInfo {
 	return predicate.GroupInfo(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))
@@ -278,7 +278,7 @@ func And(predicates ...predicate.GroupInfo) predicate.GroupInfo {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.GroupInfo) predicate.GroupInfo {
 	return predicate.GroupInfo(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))

@@ -8,56 +8,56 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2o2types/ent/card"
-	"github.com/facebook/ent/examples/o2o2types/ent/predicate"
-	"github.com/facebook/ent/examples/o2o2types/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2o2types/ent/card"
+	"entgo.io/ent/examples/o2o2types/ent/predicate"
+	"entgo.io/ent/examples/o2o2types/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *UserMutation
-	predicates []predicate.User
+	hooks    []Hook
+	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.predicates = append(uu.predicates, ps...)
+	uu.mutation.Where(ps...)
 	return uu
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uu *UserUpdate) SetAge(i int) *UserUpdate {
 	uu.mutation.ResetAge()
 	uu.mutation.SetAge(i)
 	return uu
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uu *UserUpdate) AddAge(i int) *UserUpdate {
 	uu.mutation.AddAge(i)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// SetCardID sets the card edge to Card by id.
+// SetCardID sets the "card" edge to the Card entity by ID.
 func (uu *UserUpdate) SetCardID(id int) *UserUpdate {
 	uu.mutation.SetCardID(id)
 	return uu
 }
 
-// SetNillableCardID sets the card edge to Card by id if the given value is not nil.
+// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
 func (uu *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 	if id != nil {
 		uu = uu.SetCardID(*id)
@@ -65,7 +65,7 @@ func (uu *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 	return uu
 }
 
-// SetCard sets the card edge to Card.
+// SetCard sets the "card" edge to the Card entity.
 func (uu *UserUpdate) SetCard(c *Card) *UserUpdate {
 	return uu.SetCardID(c.ID)
 }
@@ -75,13 +75,13 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearCard clears the "card" edge to type Card.
+// ClearCard clears the "card" edge to the Card entity.
 func (uu *UserUpdate) ClearCard() *UserUpdate {
 	uu.mutation.ClearCard()
 	return uu
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -101,6 +101,9 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(uu.hooks) - 1; i >= 0; i-- {
+			if uu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
@@ -143,7 +146,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := uu.predicates; len(ps) > 0 {
+	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -209,8 +212,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -220,36 +223,37 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
 	uuo.mutation.ResetAge()
 	uuo.mutation.SetAge(i)
 	return uuo
 }
 
-// AddAge adds i to age.
+// AddAge adds i to the "age" field.
 func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
 	uuo.mutation.AddAge(i)
 	return uuo
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// SetCardID sets the card edge to Card by id.
+// SetCardID sets the "card" edge to the Card entity by ID.
 func (uuo *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
 	uuo.mutation.SetCardID(id)
 	return uuo
 }
 
-// SetNillableCardID sets the card edge to Card by id if the given value is not nil.
+// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
 func (uuo *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 	if id != nil {
 		uuo = uuo.SetCardID(*id)
@@ -257,7 +261,7 @@ func (uuo *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 	return uuo
 }
 
-// SetCard sets the card edge to Card.
+// SetCard sets the "card" edge to the Card entity.
 func (uuo *UserUpdateOne) SetCard(c *Card) *UserUpdateOne {
 	return uuo.SetCardID(c.ID)
 }
@@ -267,13 +271,20 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearCard clears the "card" edge to type Card.
+// ClearCard clears the "card" edge to the Card entity.
 func (uuo *UserUpdateOne) ClearCard() *UserUpdateOne {
 	uuo.mutation.ClearCard()
 	return uuo
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	uuo.fields = append([]string{field}, fields...)
+	return uuo
+}
+
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -293,6 +304,9 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uuo.hooks) - 1; i >= 0; i-- {
+			if uuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
@@ -337,9 +351,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := uuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
+		for _, f := range fields {
+			if !user.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != user.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := uuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := uuo.mutation.Age(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -398,12 +431,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

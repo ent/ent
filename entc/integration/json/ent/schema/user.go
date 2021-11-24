@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
 )
 
 // User holds the schema definition for the User entity.
@@ -28,9 +28,12 @@ func (User) Fields() []ent.Field {
 		field.JSON("raw", json.RawMessage{}).
 			Optional(),
 		field.JSON("dirs", []http.Dir{}).
-			Optional(),
+			Default(func() []http.Dir {
+				return []http.Dir{"/tmp"}
+			}),
 		field.Ints("ints").
-			Optional(),
+			Optional().
+			Default([]int{1, 2, 3}),
 		field.Floats("floats").
 			Optional(),
 		field.Strings("strings").
@@ -39,9 +42,11 @@ func (User) Fields() []ent.Field {
 }
 
 type T struct {
-	I int     `json:"i,omitempty"`
-	F float64 `json:"f,omitempty"`
-	B bool    `json:"b,omitempty"`
-	S string  `json:"s,omitempty"`
-	T *T      `json:"t,omitempty"`
+	I  int      `json:"i,omitempty"`
+	F  float64  `json:"f,omitempty"`
+	B  bool     `json:"b,omitempty"`
+	S  string   `json:"s,omitempty"`
+	T  *T       `json:"t,omitempty"`
+	Li []int    `json:"li,omitempty"`
+	Ls []string `json:"ls,omitempty"`
 }

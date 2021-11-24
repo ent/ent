@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2m2types/ent/pet"
-	"github.com/facebook/ent/examples/o2m2types/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2m2types/ent/pet"
+	"entgo.io/ent/examples/o2m2types/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -24,19 +24,19 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
 	pc.mutation.SetName(s)
 	return pc
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
 	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	if id != nil {
 		pc = pc.SetOwnerID(*id)
@@ -44,7 +44,7 @@ func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 	return pc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
 }
@@ -75,11 +75,17 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 				return nil, err
 			}
 			pc.mutation = mutation
-			node, err = pc.sqlSave(ctx)
+			if node, err = pc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(pc.hooks) - 1; i >= 0; i-- {
+			if pc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
@@ -98,10 +104,23 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 	return v
 }
 
+// Exec executes the query.
+func (pc *PetCreate) Exec(ctx context.Context) error {
+	_, err := pc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (pc *PetCreate) ExecX(ctx context.Context) {
+	if err := pc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pc *PetCreate) check() error {
 	if _, ok := pc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
 	return nil
 }
@@ -109,8 +128,8 @@ func (pc *PetCreate) check() error {
 func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	_node, _spec := pc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -155,12 +174,13 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.user_pets = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
 
-// PetCreateBulk is the builder for creating a bulk of Pet entities.
+// PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
 	builders []*PetCreate
@@ -188,19 +208,23 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, pcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -217,11 +241,24 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 	v, err := pcb.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (pcb *PetCreateBulk) Exec(ctx context.Context) error {
+	_, err := pcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (pcb *PetCreateBulk) ExecX(ctx context.Context) {
+	if err := pcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

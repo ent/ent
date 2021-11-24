@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/m2m2types/ent/group"
-	"github.com/facebook/ent/examples/m2m2types/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/m2m2types/ent/group"
+	"entgo.io/ent/examples/m2m2types/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -24,25 +24,25 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetAge sets the age field.
+// SetAge sets the "age" field.
 func (uc *UserCreate) SetAge(i int) *UserCreate {
 	uc.mutation.SetAge(i)
 	return uc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// AddGroupIDs adds the groups edge to Group by ids.
+// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
 	uc.mutation.AddGroupIDs(ids...)
 	return uc
 }
 
-// AddGroups adds the groups edges to Group.
+// AddGroups adds the "groups" edges to the Group entity.
 func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
 	ids := make([]int, len(g))
 	for i := range g {
@@ -77,11 +77,17 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 				return nil, err
 			}
 			uc.mutation = mutation
-			node, err = uc.sqlSave(ctx)
+			if node, err = uc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(uc.hooks) - 1; i >= 0; i-- {
+			if uc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
@@ -100,13 +106,26 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 	return v
 }
 
+// Exec executes the query.
+func (uc *UserCreate) Exec(ctx context.Context) error {
+	_, err := uc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (uc *UserCreate) ExecX(ctx context.Context) {
+	if err := uc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New("ent: missing required field \"age\"")}
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
 	return nil
 }
@@ -114,8 +133,8 @@ func (uc *UserCreate) check() error {
 func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	_node, _spec := uc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -173,7 +192,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// UserCreateBulk is the builder for creating a bulk of User entities.
+// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -201,19 +220,23 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ucb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, ucb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -230,11 +253,24 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (ucb *UserCreateBulk) Exec(ctx context.Context) error {
+	_, err := ucb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ucb *UserCreateBulk) ExecX(ctx context.Context) {
+	if err := ucb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

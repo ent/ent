@@ -11,9 +11,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/o2mrecur/ent/node"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/o2mrecur/ent/node"
+	"entgo.io/ent/schema/field"
 )
 
 // NodeCreate is the builder for creating a Node entity.
@@ -23,19 +23,19 @@ type NodeCreate struct {
 	hooks    []Hook
 }
 
-// SetValue sets the value field.
+// SetValue sets the "value" field.
 func (nc *NodeCreate) SetValue(i int) *NodeCreate {
 	nc.mutation.SetValue(i)
 	return nc
 }
 
-// SetParentID sets the parent edge to Node by id.
+// SetParentID sets the "parent" edge to the Node entity by ID.
 func (nc *NodeCreate) SetParentID(id int) *NodeCreate {
 	nc.mutation.SetParentID(id)
 	return nc
 }
 
-// SetNillableParentID sets the parent edge to Node by id if the given value is not nil.
+// SetNillableParentID sets the "parent" edge to the Node entity by ID if the given value is not nil.
 func (nc *NodeCreate) SetNillableParentID(id *int) *NodeCreate {
 	if id != nil {
 		nc = nc.SetParentID(*id)
@@ -43,18 +43,18 @@ func (nc *NodeCreate) SetNillableParentID(id *int) *NodeCreate {
 	return nc
 }
 
-// SetParent sets the parent edge to Node.
+// SetParent sets the "parent" edge to the Node entity.
 func (nc *NodeCreate) SetParent(n *Node) *NodeCreate {
 	return nc.SetParentID(n.ID)
 }
 
-// AddChildIDs adds the children edge to Node by ids.
+// AddChildIDs adds the "children" edge to the Node entity by IDs.
 func (nc *NodeCreate) AddChildIDs(ids ...int) *NodeCreate {
 	nc.mutation.AddChildIDs(ids...)
 	return nc
 }
 
-// AddChildren adds the children edges to Node.
+// AddChildren adds the "children" edges to the Node entity.
 func (nc *NodeCreate) AddChildren(n ...*Node) *NodeCreate {
 	ids := make([]int, len(n))
 	for i := range n {
@@ -89,11 +89,17 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 				return nil, err
 			}
 			nc.mutation = mutation
-			node, err = nc.sqlSave(ctx)
+			if node, err = nc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(nc.hooks) - 1; i >= 0; i-- {
+			if nc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
@@ -112,10 +118,23 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 	return v
 }
 
+// Exec executes the query.
+func (nc *NodeCreate) Exec(ctx context.Context) error {
+	_, err := nc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (nc *NodeCreate) ExecX(ctx context.Context) {
+	if err := nc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (nc *NodeCreate) check() error {
 	if _, ok := nc.mutation.Value(); !ok {
-		return &ValidationError{Name: "value", err: errors.New("ent: missing required field \"value\"")}
+		return &ValidationError{Name: "value", err: errors.New(`ent: missing required field "Node.value"`)}
 	}
 	return nil
 }
@@ -123,8 +142,8 @@ func (nc *NodeCreate) check() error {
 func (nc *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	_node, _spec := nc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -169,6 +188,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.node_children = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := nc.mutation.ChildrenIDs(); len(nodes) > 0 {
@@ -193,7 +213,7 @@ func (nc *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// NodeCreateBulk is the builder for creating a bulk of Node entities.
+// NodeCreateBulk is the builder for creating many Node entities in bulk.
 type NodeCreateBulk struct {
 	config
 	builders []*NodeCreate
@@ -221,19 +241,23 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ncb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ncb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, ncb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -250,11 +274,24 @@ func (ncb *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (ncb *NodeCreateBulk) SaveX(ctx context.Context) []*Node {
 	v, err := ncb.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (ncb *NodeCreateBulk) Exec(ctx context.Context) error {
+	_, err := ncb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (ncb *NodeCreateBulk) ExecX(ctx context.Context) {
+	if err := ncb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

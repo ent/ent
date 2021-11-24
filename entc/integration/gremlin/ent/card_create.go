@@ -12,14 +12,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/spec"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -29,13 +29,13 @@ type CardCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the create_time field.
+// SetCreateTime sets the "create_time" field.
 func (cc *CardCreate) SetCreateTime(t time.Time) *CardCreate {
 	cc.mutation.SetCreateTime(t)
 	return cc
 }
 
-// SetNillableCreateTime sets the create_time field if the given value is not nil.
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
 func (cc *CardCreate) SetNillableCreateTime(t *time.Time) *CardCreate {
 	if t != nil {
 		cc.SetCreateTime(*t)
@@ -43,13 +43,13 @@ func (cc *CardCreate) SetNillableCreateTime(t *time.Time) *CardCreate {
 	return cc
 }
 
-// SetUpdateTime sets the update_time field.
+// SetUpdateTime sets the "update_time" field.
 func (cc *CardCreate) SetUpdateTime(t time.Time) *CardCreate {
 	cc.mutation.SetUpdateTime(t)
 	return cc
 }
 
-// SetNillableUpdateTime sets the update_time field if the given value is not nil.
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
 func (cc *CardCreate) SetNillableUpdateTime(t *time.Time) *CardCreate {
 	if t != nil {
 		cc.SetUpdateTime(*t)
@@ -57,19 +57,33 @@ func (cc *CardCreate) SetNillableUpdateTime(t *time.Time) *CardCreate {
 	return cc
 }
 
-// SetNumber sets the number field.
+// SetBalance sets the "balance" field.
+func (cc *CardCreate) SetBalance(f float64) *CardCreate {
+	cc.mutation.SetBalance(f)
+	return cc
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cc *CardCreate) SetNillableBalance(f *float64) *CardCreate {
+	if f != nil {
+		cc.SetBalance(*f)
+	}
+	return cc
+}
+
+// SetNumber sets the "number" field.
 func (cc *CardCreate) SetNumber(s string) *CardCreate {
 	cc.mutation.SetNumber(s)
 	return cc
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cc *CardCreate) SetName(s string) *CardCreate {
 	cc.mutation.SetName(s)
 	return cc
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cc *CardCreate) SetNillableName(s *string) *CardCreate {
 	if s != nil {
 		cc.SetName(*s)
@@ -77,13 +91,13 @@ func (cc *CardCreate) SetNillableName(s *string) *CardCreate {
 	return cc
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cc *CardCreate) SetOwnerID(id string) *CardCreate {
 	cc.mutation.SetOwnerID(id)
 	return cc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cc *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
 	if id != nil {
 		cc = cc.SetOwnerID(*id)
@@ -91,18 +105,18 @@ func (cc *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
 	return cc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cc *CardCreate) SetOwner(u *User) *CardCreate {
 	return cc.SetOwnerID(u.ID)
 }
 
-// AddSpecIDs adds the spec edge to Spec by ids.
+// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (cc *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
 	cc.mutation.AddSpecIDs(ids...)
 	return cc
 }
 
-// AddSpec adds the spec edges to Spec.
+// AddSpec adds the "spec" edges to the Spec entity.
 func (cc *CardCreate) AddSpec(s ...*Spec) *CardCreate {
 	ids := make([]string, len(s))
 	for i := range s {
@@ -138,11 +152,17 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 				return nil, err
 			}
 			cc.mutation = mutation
-			node, err = cc.gremlinSave(ctx)
+			if node, err = cc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(cc.hooks) - 1; i >= 0; i-- {
+			if cc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
@@ -161,6 +181,19 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 	return v
 }
 
+// Exec executes the query.
+func (cc *CardCreate) Exec(ctx context.Context) error {
+	_, err := cc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (cc *CardCreate) ExecX(ctx context.Context) {
+	if err := cc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // defaults sets the default values of the builder before save.
 func (cc *CardCreate) defaults() {
 	if _, ok := cc.mutation.CreateTime(); !ok {
@@ -171,27 +204,34 @@ func (cc *CardCreate) defaults() {
 		v := card.DefaultUpdateTime()
 		cc.mutation.SetUpdateTime(v)
 	}
+	if _, ok := cc.mutation.Balance(); !ok {
+		v := card.DefaultBalance
+		cc.mutation.SetBalance(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
 	if _, ok := cc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New("ent: missing required field \"create_time\"")}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Card.create_time"`)}
 	}
 	if _, ok := cc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New("ent: missing required field \"update_time\"")}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Card.update_time"`)}
+	}
+	if _, ok := cc.mutation.Balance(); !ok {
+		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "Card.balance"`)}
 	}
 	if _, ok := cc.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New("ent: missing required field \"number\"")}
+		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
 	}
 	if v, ok := cc.mutation.Number(); ok {
 		if err := card.NumberValidator(v); err != nil {
-			return &ValidationError{Name: "number", err: fmt.Errorf("ent: validator failed for field \"number\": %w", err)}
+			return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
 		}
 	}
 	if v, ok := cc.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -226,6 +266,9 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 	if value, ok := cc.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, card.FieldUpdateTime, value)
 	}
+	if value, ok := cc.mutation.Balance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, value)
+	}
 	if value, ok := cc.mutation.Number(); ok {
 		v.Property(dsl.Single, card.FieldNumber, value)
 	}
@@ -252,7 +295,7 @@ func (cc *CardCreate) gremlin() *dsl.Traversal {
 	return tr
 }
 
-// CardCreateBulk is the builder for creating a bulk of Card entities.
+// CardCreateBulk is the builder for creating many Card entities in bulk.
 type CardCreateBulk struct {
 	config
 	builders []*CardCreate

@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/entc/integration/gremlin/ent/node"
 )
 
 // Node is the model entity for the Node schema.
@@ -29,9 +29,9 @@ type Node struct {
 // NodeEdges holds the relations/edges for other nodes in the graph.
 type NodeEdges struct {
 	// Prev holds the value of the prev edge.
-	Prev *Node `gqlgen:prev`
+	Prev *Node `json:"prev,omitempty" gqlgen:"prev"`
 	// Next holds the value of the next edge.
-	Next *Node `gqlgen:next`
+	Next *Node `json:"next,omitempty" gqlgen:"next"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -83,25 +83,25 @@ func (n *Node) FromResponse(res *gremlin.Response) error {
 	return nil
 }
 
-// QueryPrev queries the prev edge of the Node.
+// QueryPrev queries the "prev" edge of the Node entity.
 func (n *Node) QueryPrev() *NodeQuery {
 	return (&NodeClient{config: n.config}).QueryPrev(n)
 }
 
-// QueryNext queries the next edge of the Node.
+// QueryNext queries the "next" edge of the Node entity.
 func (n *Node) QueryNext() *NodeQuery {
 	return (&NodeClient{config: n.config}).QueryNext(n)
 }
 
 // Update returns a builder for updating this Node.
-// Note that, you need to call Node.Unwrap() before calling this method, if this Node
+// Note that you need to call Node.Unwrap() before calling this method if this Node
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (n *Node) Update() *NodeUpdateOne {
 	return (&NodeClient{config: n.config}).UpdateOne(n)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Node entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (n *Node) Unwrap() *Node {
 	tx, ok := n.config.driver.(*txDriver)
 	if !ok {

@@ -11,18 +11,24 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/entc/integration/customid/ent/migrate"
+	"entgo.io/ent/entc/integration/customid/ent/migrate"
+	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"github.com/google/uuid"
 
-	"github.com/facebook/ent/entc/integration/customid/ent/blob"
-	"github.com/facebook/ent/entc/integration/customid/ent/car"
-	"github.com/facebook/ent/entc/integration/customid/ent/group"
-	"github.com/facebook/ent/entc/integration/customid/ent/pet"
-	"github.com/facebook/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/device"
+	"entgo.io/ent/entc/integration/customid/ent/doc"
+	"entgo.io/ent/entc/integration/customid/ent/group"
+	"entgo.io/ent/entc/integration/customid/ent/mixinid"
+	"entgo.io/ent/entc/integration/customid/ent/note"
+	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/entc/integration/customid/ent/user"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -34,10 +40,20 @@ type Client struct {
 	Blob *BlobClient
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
+	// Device is the client for interacting with the Device builders.
+	Device *DeviceClient
+	// Doc is the client for interacting with the Doc builders.
+	Doc *DocClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// MixinID is the client for interacting with the MixinID builders.
+	MixinID *MixinIDClient
+	// Note is the client for interacting with the Note builders.
+	Note *NoteClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -55,8 +71,13 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Blob = NewBlobClient(c.config)
 	c.Car = NewCarClient(c.config)
+	c.Device = NewDeviceClient(c.config)
+	c.Doc = NewDocClient(c.config)
 	c.Group = NewGroupClient(c.config)
+	c.MixinID = NewMixinIDClient(c.config)
+	c.Note = NewNoteClient(c.config)
 	c.Pet = NewPetClient(c.config)
+	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -84,37 +105,51 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Blob:   NewBlobClient(cfg),
-		Car:    NewCarClient(cfg),
-		Group:  NewGroupClient(cfg),
-		Pet:    NewPetClient(cfg),
-		User:   NewUserClient(cfg),
+		ctx:     ctx,
+		config:  cfg,
+		Blob:    NewBlobClient(cfg),
+		Car:     NewCarClient(cfg),
+		Device:  NewDeviceClient(cfg),
+		Doc:     NewDocClient(cfg),
+		Group:   NewGroupClient(cfg),
+		MixinID: NewMixinIDClient(cfg),
+		Note:    NewNoteClient(cfg),
+		Pet:     NewPetClient(cfg),
+		Session: NewSessionClient(cfg),
+		User:    NewUserClient(cfg),
 	}, nil
 }
 
-// BeginTx returns a transactional client with options.
+// BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
 	}
-	tx, err := c.driver.(*sql.Driver).BeginTx(ctx, opts)
+	tx, err := c.driver.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
+	}).BeginTx(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		config: cfg,
-		Blob:   NewBlobClient(cfg),
-		Car:    NewCarClient(cfg),
-		Group:  NewGroupClient(cfg),
-		Pet:    NewPetClient(cfg),
-		User:   NewUserClient(cfg),
+		config:  cfg,
+		Blob:    NewBlobClient(cfg),
+		Car:     NewCarClient(cfg),
+		Device:  NewDeviceClient(cfg),
+		Doc:     NewDocClient(cfg),
+		Group:   NewGroupClient(cfg),
+		MixinID: NewMixinIDClient(cfg),
+		Note:    NewNoteClient(cfg),
+		Pet:     NewPetClient(cfg),
+		Session: NewSessionClient(cfg),
+		User:    NewUserClient(cfg),
 	}, nil
 }
 
@@ -129,7 +164,8 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = dialect.Debug(c.driver, c.log)
 	client := &Client{config: cfg}
 	client.init()
 	return client
@@ -145,8 +181,13 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Blob.Use(hooks...)
 	c.Car.Use(hooks...)
+	c.Device.Use(hooks...)
+	c.Doc.Use(hooks...)
 	c.Group.Use(hooks...)
+	c.MixinID.Use(hooks...)
+	c.Note.Use(hooks...)
 	c.Pet.Use(hooks...)
+	c.Session.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -172,7 +213,7 @@ func (c *BlobClient) Create() *BlobCreate {
 	return &BlobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Blob entities.
+// CreateBulk returns a builder for creating a bulk of Blob entities.
 func (c *BlobClient) CreateBulk(builders ...*BlobCreate) *BlobCreateBulk {
 	return &BlobCreateBulk{config: c.config, builders: builders}
 }
@@ -216,7 +257,9 @@ func (c *BlobClient) DeleteOneID(id uuid.UUID) *BlobDeleteOne {
 
 // Query returns a query builder for Blob.
 func (c *BlobClient) Query() *BlobQuery {
-	return &BlobQuery{config: c.config}
+	return &BlobQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Blob entity by its id.
@@ -292,7 +335,7 @@ func (c *CarClient) Create() *CarCreate {
 	return &CarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Car entities.
+// CreateBulk returns a builder for creating a bulk of Car entities.
 func (c *CarClient) CreateBulk(builders ...*CarCreate) *CarCreateBulk {
 	return &CarCreateBulk{config: c.config, builders: builders}
 }
@@ -336,7 +379,9 @@ func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 
 // Query returns a query builder for Car.
 func (c *CarClient) Query() *CarQuery {
-	return &CarQuery{config: c.config}
+	return &CarQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Car entity by its id.
@@ -374,6 +419,250 @@ func (c *CarClient) Hooks() []Hook {
 	return c.hooks.Car
 }
 
+// DeviceClient is a client for the Device schema.
+type DeviceClient struct {
+	config
+}
+
+// NewDeviceClient returns a client for the Device from the given config.
+func NewDeviceClient(c config) *DeviceClient {
+	return &DeviceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `device.Hooks(f(g(h())))`.
+func (c *DeviceClient) Use(hooks ...Hook) {
+	c.hooks.Device = append(c.hooks.Device, hooks...)
+}
+
+// Create returns a create builder for Device.
+func (c *DeviceClient) Create() *DeviceCreate {
+	mutation := newDeviceMutation(c.config, OpCreate)
+	return &DeviceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Device entities.
+func (c *DeviceClient) CreateBulk(builders ...*DeviceCreate) *DeviceCreateBulk {
+	return &DeviceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Device.
+func (c *DeviceClient) Update() *DeviceUpdate {
+	mutation := newDeviceMutation(c.config, OpUpdate)
+	return &DeviceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DeviceClient) UpdateOne(d *Device) *DeviceUpdateOne {
+	mutation := newDeviceMutation(c.config, OpUpdateOne, withDevice(d))
+	return &DeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DeviceClient) UpdateOneID(id schema.ID) *DeviceUpdateOne {
+	mutation := newDeviceMutation(c.config, OpUpdateOne, withDeviceID(id))
+	return &DeviceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Device.
+func (c *DeviceClient) Delete() *DeviceDelete {
+	mutation := newDeviceMutation(c.config, OpDelete)
+	return &DeviceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DeviceClient) DeleteOne(d *Device) *DeviceDeleteOne {
+	return c.DeleteOneID(d.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DeviceClient) DeleteOneID(id schema.ID) *DeviceDeleteOne {
+	builder := c.Delete().Where(device.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DeviceDeleteOne{builder}
+}
+
+// Query returns a query builder for Device.
+func (c *DeviceClient) Query() *DeviceQuery {
+	return &DeviceQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Device entity by its id.
+func (c *DeviceClient) Get(ctx context.Context, id schema.ID) (*Device, error) {
+	return c.Query().Where(device.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DeviceClient) GetX(ctx context.Context, id schema.ID) *Device {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryActiveSession queries the active_session edge of a Device.
+func (c *DeviceClient) QueryActiveSession(d *Device) *SessionQuery {
+	query := &SessionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(device.Table, device.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, device.ActiveSessionTable, device.ActiveSessionColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySessions queries the sessions edge of a Device.
+func (c *DeviceClient) QuerySessions(d *Device) *SessionQuery {
+	query := &SessionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(device.Table, device.FieldID, id),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, device.SessionsTable, device.SessionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DeviceClient) Hooks() []Hook {
+	return c.hooks.Device
+}
+
+// DocClient is a client for the Doc schema.
+type DocClient struct {
+	config
+}
+
+// NewDocClient returns a client for the Doc from the given config.
+func NewDocClient(c config) *DocClient {
+	return &DocClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `doc.Hooks(f(g(h())))`.
+func (c *DocClient) Use(hooks ...Hook) {
+	c.hooks.Doc = append(c.hooks.Doc, hooks...)
+}
+
+// Create returns a create builder for Doc.
+func (c *DocClient) Create() *DocCreate {
+	mutation := newDocMutation(c.config, OpCreate)
+	return &DocCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Doc entities.
+func (c *DocClient) CreateBulk(builders ...*DocCreate) *DocCreateBulk {
+	return &DocCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Doc.
+func (c *DocClient) Update() *DocUpdate {
+	mutation := newDocMutation(c.config, OpUpdate)
+	return &DocUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *DocClient) UpdateOne(d *Doc) *DocUpdateOne {
+	mutation := newDocMutation(c.config, OpUpdateOne, withDoc(d))
+	return &DocUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *DocClient) UpdateOneID(id schema.DocID) *DocUpdateOne {
+	mutation := newDocMutation(c.config, OpUpdateOne, withDocID(id))
+	return &DocUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Doc.
+func (c *DocClient) Delete() *DocDelete {
+	mutation := newDocMutation(c.config, OpDelete)
+	return &DocDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *DocClient) DeleteOne(d *Doc) *DocDeleteOne {
+	return c.DeleteOneID(d.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *DocClient) DeleteOneID(id schema.DocID) *DocDeleteOne {
+	builder := c.Delete().Where(doc.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &DocDeleteOne{builder}
+}
+
+// Query returns a query builder for Doc.
+func (c *DocClient) Query() *DocQuery {
+	return &DocQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Doc entity by its id.
+func (c *DocClient) Get(ctx context.Context, id schema.DocID) (*Doc, error) {
+	return c.Query().Where(doc.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *DocClient) GetX(ctx context.Context, id schema.DocID) *Doc {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryParent queries the parent edge of a Doc.
+func (c *DocClient) QueryParent(d *Doc) *DocQuery {
+	query := &DocQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, id),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, doc.ParentTable, doc.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Doc.
+func (c *DocClient) QueryChildren(d *Doc) *DocQuery {
+	query := &DocQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, id),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, doc.ChildrenTable, doc.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *DocClient) Hooks() []Hook {
+	return c.hooks.Doc
+}
+
 // GroupClient is a client for the Group schema.
 type GroupClient struct {
 	config
@@ -396,7 +685,7 @@ func (c *GroupClient) Create() *GroupCreate {
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Group entities.
+// CreateBulk returns a builder for creating a bulk of Group entities.
 func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
 	return &GroupCreateBulk{config: c.config, builders: builders}
 }
@@ -440,7 +729,9 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 
 // Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
-	return &GroupQuery{config: c.config}
+	return &GroupQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Group entity by its id.
@@ -478,6 +769,218 @@ func (c *GroupClient) Hooks() []Hook {
 	return c.hooks.Group
 }
 
+// MixinIDClient is a client for the MixinID schema.
+type MixinIDClient struct {
+	config
+}
+
+// NewMixinIDClient returns a client for the MixinID from the given config.
+func NewMixinIDClient(c config) *MixinIDClient {
+	return &MixinIDClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `mixinid.Hooks(f(g(h())))`.
+func (c *MixinIDClient) Use(hooks ...Hook) {
+	c.hooks.MixinID = append(c.hooks.MixinID, hooks...)
+}
+
+// Create returns a create builder for MixinID.
+func (c *MixinIDClient) Create() *MixinIDCreate {
+	mutation := newMixinIDMutation(c.config, OpCreate)
+	return &MixinIDCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MixinID entities.
+func (c *MixinIDClient) CreateBulk(builders ...*MixinIDCreate) *MixinIDCreateBulk {
+	return &MixinIDCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MixinID.
+func (c *MixinIDClient) Update() *MixinIDUpdate {
+	mutation := newMixinIDMutation(c.config, OpUpdate)
+	return &MixinIDUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MixinIDClient) UpdateOne(mi *MixinID) *MixinIDUpdateOne {
+	mutation := newMixinIDMutation(c.config, OpUpdateOne, withMixinID(mi))
+	return &MixinIDUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MixinIDClient) UpdateOneID(id uuid.UUID) *MixinIDUpdateOne {
+	mutation := newMixinIDMutation(c.config, OpUpdateOne, withMixinIDID(id))
+	return &MixinIDUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MixinID.
+func (c *MixinIDClient) Delete() *MixinIDDelete {
+	mutation := newMixinIDMutation(c.config, OpDelete)
+	return &MixinIDDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *MixinIDClient) DeleteOne(mi *MixinID) *MixinIDDeleteOne {
+	return c.DeleteOneID(mi.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *MixinIDClient) DeleteOneID(id uuid.UUID) *MixinIDDeleteOne {
+	builder := c.Delete().Where(mixinid.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MixinIDDeleteOne{builder}
+}
+
+// Query returns a query builder for MixinID.
+func (c *MixinIDClient) Query() *MixinIDQuery {
+	return &MixinIDQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a MixinID entity by its id.
+func (c *MixinIDClient) Get(ctx context.Context, id uuid.UUID) (*MixinID, error) {
+	return c.Query().Where(mixinid.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MixinIDClient) GetX(ctx context.Context, id uuid.UUID) *MixinID {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MixinIDClient) Hooks() []Hook {
+	return c.hooks.MixinID
+}
+
+// NoteClient is a client for the Note schema.
+type NoteClient struct {
+	config
+}
+
+// NewNoteClient returns a client for the Note from the given config.
+func NewNoteClient(c config) *NoteClient {
+	return &NoteClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `note.Hooks(f(g(h())))`.
+func (c *NoteClient) Use(hooks ...Hook) {
+	c.hooks.Note = append(c.hooks.Note, hooks...)
+}
+
+// Create returns a create builder for Note.
+func (c *NoteClient) Create() *NoteCreate {
+	mutation := newNoteMutation(c.config, OpCreate)
+	return &NoteCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Note entities.
+func (c *NoteClient) CreateBulk(builders ...*NoteCreate) *NoteCreateBulk {
+	return &NoteCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Note.
+func (c *NoteClient) Update() *NoteUpdate {
+	mutation := newNoteMutation(c.config, OpUpdate)
+	return &NoteUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NoteClient) UpdateOne(n *Note) *NoteUpdateOne {
+	mutation := newNoteMutation(c.config, OpUpdateOne, withNote(n))
+	return &NoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NoteClient) UpdateOneID(id schema.NoteID) *NoteUpdateOne {
+	mutation := newNoteMutation(c.config, OpUpdateOne, withNoteID(id))
+	return &NoteUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Note.
+func (c *NoteClient) Delete() *NoteDelete {
+	mutation := newNoteMutation(c.config, OpDelete)
+	return &NoteDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *NoteClient) DeleteOne(n *Note) *NoteDeleteOne {
+	return c.DeleteOneID(n.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *NoteClient) DeleteOneID(id schema.NoteID) *NoteDeleteOne {
+	builder := c.Delete().Where(note.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NoteDeleteOne{builder}
+}
+
+// Query returns a query builder for Note.
+func (c *NoteClient) Query() *NoteQuery {
+	return &NoteQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Note entity by its id.
+func (c *NoteClient) Get(ctx context.Context, id schema.NoteID) (*Note, error) {
+	return c.Query().Where(note.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NoteClient) GetX(ctx context.Context, id schema.NoteID) *Note {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryParent queries the parent edge of a Note.
+func (c *NoteClient) QueryParent(n *Note) *NoteQuery {
+	query := &NoteQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := n.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(note.Table, note.FieldID, id),
+			sqlgraph.To(note.Table, note.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, note.ParentTable, note.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a Note.
+func (c *NoteClient) QueryChildren(n *Note) *NoteQuery {
+	query := &NoteQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := n.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(note.Table, note.FieldID, id),
+			sqlgraph.To(note.Table, note.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, note.ChildrenTable, note.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NoteClient) Hooks() []Hook {
+	return c.hooks.Note
+}
+
 // PetClient is a client for the Pet schema.
 type PetClient struct {
 	config
@@ -500,7 +1003,7 @@ func (c *PetClient) Create() *PetCreate {
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Pet entities.
+// CreateBulk returns a builder for creating a bulk of Pet entities.
 func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
 	return &PetCreateBulk{config: c.config, builders: builders}
 }
@@ -544,7 +1047,9 @@ func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
 
 // Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
-	return &PetQuery{config: c.config}
+	return &PetQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Pet entity by its id.
@@ -630,6 +1135,112 @@ func (c *PetClient) Hooks() []Hook {
 	return c.hooks.Pet
 }
 
+// SessionClient is a client for the Session schema.
+type SessionClient struct {
+	config
+}
+
+// NewSessionClient returns a client for the Session from the given config.
+func NewSessionClient(c config) *SessionClient {
+	return &SessionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `session.Hooks(f(g(h())))`.
+func (c *SessionClient) Use(hooks ...Hook) {
+	c.hooks.Session = append(c.hooks.Session, hooks...)
+}
+
+// Create returns a create builder for Session.
+func (c *SessionClient) Create() *SessionCreate {
+	mutation := newSessionMutation(c.config, OpCreate)
+	return &SessionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Session entities.
+func (c *SessionClient) CreateBulk(builders ...*SessionCreate) *SessionCreateBulk {
+	return &SessionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Session.
+func (c *SessionClient) Update() *SessionUpdate {
+	mutation := newSessionMutation(c.config, OpUpdate)
+	return &SessionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SessionClient) UpdateOne(s *Session) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(s))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SessionClient) UpdateOneID(id schema.ID) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
+	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Session.
+func (c *SessionClient) Delete() *SessionDelete {
+	mutation := newSessionMutation(c.config, OpDelete)
+	return &SessionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *SessionClient) DeleteOne(s *Session) *SessionDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *SessionClient) DeleteOneID(id schema.ID) *SessionDeleteOne {
+	builder := c.Delete().Where(session.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SessionDeleteOne{builder}
+}
+
+// Query returns a query builder for Session.
+func (c *SessionClient) Query() *SessionQuery {
+	return &SessionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Session entity by its id.
+func (c *SessionClient) Get(ctx context.Context, id schema.ID) (*Session, error) {
+	return c.Query().Where(session.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SessionClient) GetX(ctx context.Context, id schema.ID) *Session {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryDevice queries the device edge of a Session.
+func (c *SessionClient) QueryDevice(s *Session) *DeviceQuery {
+	query := &DeviceQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(session.Table, session.FieldID, id),
+			sqlgraph.To(device.Table, device.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, session.DeviceTable, session.DeviceColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SessionClient) Hooks() []Hook {
+	return c.hooks.Session
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -652,7 +1263,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }
@@ -696,7 +1307,9 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.

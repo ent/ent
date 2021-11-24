@@ -7,8 +7,8 @@
 package migrate
 
 import (
-	"github.com/facebook/ent/dialect/sql/schema"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/schema/field"
 )
 
 var (
@@ -26,9 +26,8 @@ var (
 		PrimaryKey: []*schema.Column{CardsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "cards_users_card",
-				Columns: []*schema.Column{CardsColumns[3]},
-
+				Symbol:     "cards_users_card",
+				Columns:    []*schema.Column{CardsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -42,10 +41,9 @@ var (
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{

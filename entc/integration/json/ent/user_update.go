@@ -9,111 +9,105 @@ package ent
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/json/ent/predicate"
-	"github.com/facebook/ent/entc/integration/json/ent/schema"
-	"github.com/facebook/ent/entc/integration/json/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/json/ent/predicate"
+	"entgo.io/ent/entc/integration/json/ent/schema"
+	"entgo.io/ent/entc/integration/json/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *UserMutation
-	predicates []predicate.User
+	hooks    []Hook
+	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.predicates = append(uu.predicates, ps...)
+	uu.mutation.Where(ps...)
 	return uu
 }
 
-// SetT sets the t field.
+// SetT sets the "t" field.
 func (uu *UserUpdate) SetT(s *schema.T) *UserUpdate {
 	uu.mutation.SetT(s)
 	return uu
 }
 
-// ClearT clears the value of t.
+// ClearT clears the value of the "t" field.
 func (uu *UserUpdate) ClearT() *UserUpdate {
 	uu.mutation.ClearT()
 	return uu
 }
 
-// SetURL sets the url field.
+// SetURL sets the "url" field.
 func (uu *UserUpdate) SetURL(u *url.URL) *UserUpdate {
 	uu.mutation.SetURL(u)
 	return uu
 }
 
-// ClearURL clears the value of url.
+// ClearURL clears the value of the "url" field.
 func (uu *UserUpdate) ClearURL() *UserUpdate {
 	uu.mutation.ClearURL()
 	return uu
 }
 
-// SetRaw sets the raw field.
+// SetRaw sets the "raw" field.
 func (uu *UserUpdate) SetRaw(jm json.RawMessage) *UserUpdate {
 	uu.mutation.SetRaw(jm)
 	return uu
 }
 
-// ClearRaw clears the value of raw.
+// ClearRaw clears the value of the "raw" field.
 func (uu *UserUpdate) ClearRaw() *UserUpdate {
 	uu.mutation.ClearRaw()
 	return uu
 }
 
-// SetDirs sets the dirs field.
+// SetDirs sets the "dirs" field.
 func (uu *UserUpdate) SetDirs(h []http.Dir) *UserUpdate {
 	uu.mutation.SetDirs(h)
 	return uu
 }
 
-// ClearDirs clears the value of dirs.
-func (uu *UserUpdate) ClearDirs() *UserUpdate {
-	uu.mutation.ClearDirs()
-	return uu
-}
-
-// SetInts sets the ints field.
+// SetInts sets the "ints" field.
 func (uu *UserUpdate) SetInts(i []int) *UserUpdate {
 	uu.mutation.SetInts(i)
 	return uu
 }
 
-// ClearInts clears the value of ints.
+// ClearInts clears the value of the "ints" field.
 func (uu *UserUpdate) ClearInts() *UserUpdate {
 	uu.mutation.ClearInts()
 	return uu
 }
 
-// SetFloats sets the floats field.
+// SetFloats sets the "floats" field.
 func (uu *UserUpdate) SetFloats(f []float64) *UserUpdate {
 	uu.mutation.SetFloats(f)
 	return uu
 }
 
-// ClearFloats clears the value of floats.
+// ClearFloats clears the value of the "floats" field.
 func (uu *UserUpdate) ClearFloats() *UserUpdate {
 	uu.mutation.ClearFloats()
 	return uu
 }
 
-// SetStrings sets the strings field.
+// SetStrings sets the "strings" field.
 func (uu *UserUpdate) SetStrings(s []string) *UserUpdate {
 	uu.mutation.SetStrings(s)
 	return uu
 }
 
-// ClearStrings clears the value of strings.
+// ClearStrings clears the value of the "strings" field.
 func (uu *UserUpdate) ClearStrings() *UserUpdate {
 	uu.mutation.ClearStrings()
 	return uu
@@ -124,7 +118,7 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -144,6 +138,9 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(uu.hooks) - 1; i >= 0; i-- {
+			if uu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
@@ -186,7 +183,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := uu.predicates; len(ps) > 0 {
+	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -239,12 +236,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldDirs,
 		})
 	}
-	if uu.mutation.DirsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldDirs,
-		})
-	}
 	if value, ok := uu.mutation.Ints(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -287,8 +278,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -298,89 +289,84 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
 }
 
-// SetT sets the t field.
+// SetT sets the "t" field.
 func (uuo *UserUpdateOne) SetT(s *schema.T) *UserUpdateOne {
 	uuo.mutation.SetT(s)
 	return uuo
 }
 
-// ClearT clears the value of t.
+// ClearT clears the value of the "t" field.
 func (uuo *UserUpdateOne) ClearT() *UserUpdateOne {
 	uuo.mutation.ClearT()
 	return uuo
 }
 
-// SetURL sets the url field.
+// SetURL sets the "url" field.
 func (uuo *UserUpdateOne) SetURL(u *url.URL) *UserUpdateOne {
 	uuo.mutation.SetURL(u)
 	return uuo
 }
 
-// ClearURL clears the value of url.
+// ClearURL clears the value of the "url" field.
 func (uuo *UserUpdateOne) ClearURL() *UserUpdateOne {
 	uuo.mutation.ClearURL()
 	return uuo
 }
 
-// SetRaw sets the raw field.
+// SetRaw sets the "raw" field.
 func (uuo *UserUpdateOne) SetRaw(jm json.RawMessage) *UserUpdateOne {
 	uuo.mutation.SetRaw(jm)
 	return uuo
 }
 
-// ClearRaw clears the value of raw.
+// ClearRaw clears the value of the "raw" field.
 func (uuo *UserUpdateOne) ClearRaw() *UserUpdateOne {
 	uuo.mutation.ClearRaw()
 	return uuo
 }
 
-// SetDirs sets the dirs field.
+// SetDirs sets the "dirs" field.
 func (uuo *UserUpdateOne) SetDirs(h []http.Dir) *UserUpdateOne {
 	uuo.mutation.SetDirs(h)
 	return uuo
 }
 
-// ClearDirs clears the value of dirs.
-func (uuo *UserUpdateOne) ClearDirs() *UserUpdateOne {
-	uuo.mutation.ClearDirs()
-	return uuo
-}
-
-// SetInts sets the ints field.
+// SetInts sets the "ints" field.
 func (uuo *UserUpdateOne) SetInts(i []int) *UserUpdateOne {
 	uuo.mutation.SetInts(i)
 	return uuo
 }
 
-// ClearInts clears the value of ints.
+// ClearInts clears the value of the "ints" field.
 func (uuo *UserUpdateOne) ClearInts() *UserUpdateOne {
 	uuo.mutation.ClearInts()
 	return uuo
 }
 
-// SetFloats sets the floats field.
+// SetFloats sets the "floats" field.
 func (uuo *UserUpdateOne) SetFloats(f []float64) *UserUpdateOne {
 	uuo.mutation.SetFloats(f)
 	return uuo
 }
 
-// ClearFloats clears the value of floats.
+// ClearFloats clears the value of the "floats" field.
 func (uuo *UserUpdateOne) ClearFloats() *UserUpdateOne {
 	uuo.mutation.ClearFloats()
 	return uuo
 }
 
-// SetStrings sets the strings field.
+// SetStrings sets the "strings" field.
 func (uuo *UserUpdateOne) SetStrings(s []string) *UserUpdateOne {
 	uuo.mutation.SetStrings(s)
 	return uuo
 }
 
-// ClearStrings clears the value of strings.
+// ClearStrings clears the value of the "strings" field.
 func (uuo *UserUpdateOne) ClearStrings() *UserUpdateOne {
 	uuo.mutation.ClearStrings()
 	return uuo
@@ -391,7 +377,14 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	uuo.fields = append([]string{field}, fields...)
+	return uuo
+}
+
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -411,6 +404,9 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uuo.hooks) - 1; i >= 0; i-- {
+			if uuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
@@ -455,9 +451,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := uuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
+		for _, f := range fields {
+			if !user.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != user.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := uuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := uuo.mutation.T(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -504,12 +519,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldDirs,
 		})
 	}
-	if uuo.mutation.DirsCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Column: user.FieldDirs,
-		})
-	}
 	if value, ok := uuo.mutation.Ints(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeJSON,
@@ -551,12 +560,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

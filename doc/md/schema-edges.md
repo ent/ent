@@ -8,7 +8,7 @@ title: Edges
 Edges are the relations (or associations) of entities. For example, user's pets, or group's users.
 
 
-![er-group-users](https://entgo.io/assets/er_user_pets_groups.png)
+![er-group-users](https://entgo.io/images/assets/er_user_pets_groups.png)
 
 In the example above, you can see 2 relations declared using edges. Let's go over them.
 
@@ -19,8 +19,8 @@ In the example above, you can see 2 relations declared using edges. Let's go ove
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 )
 
 // User schema.
@@ -49,8 +49,8 @@ func (User) Edges() []ent.Edge {
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 )
 
 // Pet holds the schema definition for the Pet entity.
@@ -95,8 +95,8 @@ more widely below.
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 )
 
 // Group schema.
@@ -124,8 +124,8 @@ func (Group) Edges() []ent.Edge {
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 )
 
 // User schema.
@@ -177,7 +177,7 @@ Let's go over a few examples that show how to define different relation types us
 
 ## O2O Two Types
 
-![er-user-card](https://entgo.io/assets/er_user_card.png)
+![er-user-card](https://entgo.io/images/assets/er_user_card.png)
 
 In this example, a user **has only one** credit-card, and a card **has only one** owner.
 
@@ -221,7 +221,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetName("Mashraki").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating user: %v", err)
+		return fmt.Errorf("creating user: %w", err)
 	}
 	log.Println("user:", a8m)
 	card1, err := client.Card.
@@ -231,32 +231,32 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetExpired(time.Now().Add(time.Minute)).
 		Save(ctx)
 	if err != nil {
-    	return fmt.Errorf("creating card: %v", err)
+    	return fmt.Errorf("creating card: %w", err)
     }
 	log.Println("card:", card1)
 	// Only returns the card of the user,
 	// and expects that there's only one.
 	card2, err := a8m.QueryCard().Only(ctx)
 	if err != nil {
-		return fmt.Errorf("querying card: %v", err)
+		return fmt.Errorf("querying card: %w", err)
     }
 	log.Println("card:", card2)
 	// The Card entity is able to query its owner using
 	// its back-reference.
 	owner, err := card2.QueryOwner().Only(ctx)
 	if err != nil {
-		return fmt.Errorf("querying owner: %v", err)
+		return fmt.Errorf("querying owner: %w", err)
     }
 	log.Println("owner:", owner)
 	return nil
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2o2types).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2o2types).
 
 ## O2O Same Type
 
-![er-linked-list](https://entgo.io/assets/er_linked_list.png)
+![er-linked-list](https://entgo.io/images/assets/er_linked_list.png)
 
 In this linked-list example, we have a **recursive relation** named `next`/`prev`. Each node in the list can
 **have only one** `next` node. If a node A points (using `next`) to node B, B can get its pointer using `prev` (the back-reference edge).   
@@ -303,7 +303,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetValue(1).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating the head: %v", err)
+		return fmt.Errorf("creating the head: %w", err)
 	}
 	curr := head
 	// Generate the following linked-list: 1<->2<->3<->4<->5.
@@ -340,7 +340,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	// Check that the change actually applied:
 	prev, err := head.QueryPrev().Only(ctx)
 	if err != nil {
-		return fmt.Errorf("getting head's prev: %v", err)
+		return fmt.Errorf("getting head's prev: %w", err)
 	}
 	fmt.Printf("\n%v", prev.Value == tail.Value)
 	// Output: true
@@ -348,11 +348,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2orecur).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2orecur).
 
 ## O2O Bidirectional
 
-![er-user-spouse](https://entgo.io/assets/er_user_spouse.png)
+![er-user-spouse](https://entgo.io/images/assets/er_user_spouse.png)
 
 In this user-spouse example, we have a **symmetric O2O relation** named `spouse`. Each user can **have only one** spouse.
 If user A sets its spouse (using `spouse`) to B, B can get its spouse using the `spouse` edge.
@@ -380,7 +380,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetName("a8m").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating user: %v", err)
+		return fmt.Errorf("creating user: %w", err)
 	}
 	nati, err := client.User.
 		Create().
@@ -389,7 +389,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetSpouse(a8m).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating user: %v", err)
+		return fmt.Errorf("creating user: %w", err)
 	}
 
 	// Query the spouse edge.
@@ -422,11 +422,33 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2obidi).
+Note that, the foreign-key column can be configured and exposed as an entity field using the
+[Edge Field](#edge-field) option as follows:
+
+```go {4,14}
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("spouse_id").
+			Optional(),
+    }
+}
+
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("spouse", User.Type).
+			Unique().
+			Field("spouse_id"),
+	}
+}
+```
+
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2obidi).
 
 ## O2M Two Types
 
-![er-user-pets](https://entgo.io/assets/er_user_pets.png)
+![er-user-pets](https://entgo.io/images/assets/er_user_pets.png)
 
 In this user-pets example, we have a O2M relation between user and its pets.
 Each user **has many** pets, and a pet **has one** owner.
@@ -466,14 +488,14 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetName("pedro").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating pet: %v", err)
+		return fmt.Errorf("creating pet: %w", err)
 	}
 	lola, err := client.Pet.
 		Create().
 		SetName("lola").
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating pet: %v", err)
+		return fmt.Errorf("creating pet: %w", err)
 	}
 	// Create the user, and add its pets on the creation.
 	a8m, err := client.User.
@@ -483,7 +505,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		AddPets(pedro, lola).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating user: %v", err)
+		return fmt.Errorf("creating user: %w", err)
 	}
 	fmt.Println("User created:", a8m)
 	// Output: User(id=1, age=30, name=a8m)
@@ -503,11 +525,35 @@ func Do(ctx context.Context, client *ent.Client) error {
 	return nil
 }
 ```
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2m2types).
+
+Note that, the foreign-key column can be configured and exposed as an entity field using the 
+[Edge Field](#edge-field) option as follows:
+
+```go {4,15}
+// Fields of the Pet.
+func (Pet) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("owner_id").
+			Optional(),
+    }
+}
+
+// Edges of the Pet.
+func (Pet) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("owner", User.Type).
+			Ref("pets").
+			Unique().
+			Field("owner_id"),
+	}
+}
+```
+
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2m2types).
 
 ## O2M Same Type
 
-![er-tree](https://entgo.io/assets/er_tree.png)
+![er-tree](https://entgo.io/images/assets/er_tree.png)
 
 In this example, we have a recursive O2M relation between tree's nodes and their children (or their parent).  
 Each node in the tree **has many** children, and **has one** parent. If node A adds B to its children,
@@ -553,7 +599,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		SetValue(2).
 		Save(ctx)
 	if err != nil {
-		return fmt.Errorf("creating the root: %v", err)
+		return fmt.Errorf("creating the root: %w", err)
 	}
 	// Add additional nodes to the tree:
 	//
@@ -563,7 +609,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 	//        /   \
 	//       3     5
 	//
-	// Unlike `Create`, `CreateX` panics if an error occurs.
+	// Unlike `Save`, `SaveX` panics if an error occurs.
 	n1 := client.Node.
 		Create().
 		SetValue(1).
@@ -612,11 +658,34 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/o2mrecur).
+Note that, the foreign-key column can be configured and exposed as an entity field using the
+[Edge Field](#edge-field) option as follows:
+
+```go {4,15}
+// Fields of the Node.
+func (Node) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("parent_id").
+			Optional(),
+    }
+}
+
+// Edges of the Node.
+func (Node) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("children", Node.Type).
+			From("parent").
+			Unique().
+			Field("parent_id"),
+	}
+}
+```
+
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/o2mrecur).
 
 ## M2M Two Types
 
-![er-user-groups](https://entgo.io/assets/er_user_groups.png)
+![er-user-groups](https://entgo.io/images/assets/er_user_groups.png)
 
 In this groups-users example, we have a M2M relation between groups and their users.
 Each group **has many** users, and each user can be joined to **many** groups.
@@ -673,7 +742,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		QueryGroups().
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("querying a8m groups: %v", err)
+		return fmt.Errorf("querying a8m groups: %w", err)
 	}
 	fmt.Println(groups)
 	// Output: [Group(id=1, name=GitHub) Group(id=2, name=GitLab)]
@@ -682,7 +751,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		QueryGroups().
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("querying nati groups: %v", err)
+		return fmt.Errorf("querying nati groups: %w", err)
 	}
 	fmt.Println(groups)
 	// Output: [Group(id=1, name=GitHub)]
@@ -696,7 +765,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 		QueryUsers().                                            // [a8m, nati]
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("traversing the graph: %v", err)
+		return fmt.Errorf("traversing the graph: %w", err)
 	}
 	fmt.Println(users)
 	// Output: [User(id=1, age=30, name=a8m) User(id=2, age=28, name=nati)]
@@ -704,11 +773,11 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2m2types).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2m2types).
 
 ## M2M Same Type
 
-![er-following-followers](https://entgo.io/assets/er_following_followers.png)
+![er-following-followers](https://entgo.io/images/assets/er_following_followers.png)
 
 In this following-followers example, we have a M2M relation between users to their followers. Each user 
 can follow **many** users, and can have **many** followers.
@@ -797,12 +866,12 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2mrecur).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2mrecur).
 
 
 ## M2M Bidirectional
 
-![er-user-friends](https://entgo.io/assets/er_user_friends.png)
+![er-user-friends](https://entgo.io/images/assets/er_user_friends.png)
 
 In this user-friends example, we have a **symmetric M2M relation** named `friends`.
 Each user can **have many** friends. If user A becomes a friend of B, B is also a friend of A.
@@ -860,7 +929,92 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/facebook/ent/tree/master/examples/m2mbidi).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/m2mbidi).
+
+## Edge Field
+
+The `Field` option for edges allows users to expose foreign-keys as regular fields on the schema.
+Note that only relations that hold foreign-keys (edge-ids) are allowed to use this option. Support
+for non-foreign-key fields in join tables is in progress (as of September 2021) and can be tracked with
+this [GitHub Issue](https://github.com/ent/ent/issues/1061).
+
+```go
+// Fields of the Post.
+func (Post) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("author_id").
+			Optional(),
+	}
+}
+
+// Edges of the Post.
+func (Post) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("author", User.Type).
+			// Bind the "author_id" field to this edge.
+			Field("author_id").
+			Unique(),
+	}
+}
+```
+
+The API for interacting with edge-fields is as follows:
+
+```go
+func Do(ctx context.Context, client *ent.Client) error {
+    p, err := c.Post.Query().
+    	Where(post.AuthorID(id)).
+    	OnlyX(ctx)
+    if err != nil {
+        log.Fatal(err)	
+    }
+    fmt.Println(p.AuthorID) // Access the "author" foreign-key.
+}
+```
+
+Multiple examples exists in [GitHub](https://github.com/ent/ent/tree/master/entc/integration/edgefield).
+
+#### Migration To Edge Fields
+
+As mentioned in the [StorageKey](#storagekey) section, Ent configures edge storage-keys (e.g. foreign-keys) by the
+`edge.To`. Therefore, if you want to add a field to an existing edge (already exists in the database as a column),
+you need to set it up with the `StorageKey` option as follows:
+
+```diff
+// Fields of the Post.
+func (Post) Fields() []ent.Field {
+	return []ent.Field{
++		field.Int("author_id").
++			Optional(),
+	}
+}
+
+// Edges of the Post.
+func (Post) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("author", User.Type).
++			Field("author_id").
++			StorageKey(edge.Column("post_author")).
+			Unique(),
+	}
+}
+```
+
+Alternatively, this option can be configured on the edge-field instead:
+
+```diff
+// Fields of the Post.
+func (Post) Fields() []ent.Field {
+	return []ent.Field{
++		field.Int("author_id").
++			StorageKey("post_author").
++			Optional(),
+	}
+}
+```
+
+If you're not sure how the foreign-key was named before using the edge-field option,
+check out the generated schema description in your project: `<project>/ent/migrate/schema.go`.
 
 ## Required
 
@@ -882,7 +1036,10 @@ If the example above, a card entity cannot be created without its owner.
 
 ## StorageKey
 
-Custom storage configuration can be provided for edges using the `StorageKey` method.
+By default, Ent configures edge storage-keys by the edge-owner (the schema that holds the `edge.To`), and not the by
+back-reference (`edge.From`). This is because back-references are optional and can be removed.
+
+In order to use custom storage configuration for edges, use the `StorageKey` method as follows:
 
 ```go
 // Edges of the User.
@@ -891,9 +1048,37 @@ func (User) Edges() []ent.Edge {
 		edge.To("pets", Pet.Type).
 			// Set the column name in the "pets" table for O2M relationship.
 			StorageKey(edge.Column("owner_id")),
+		edge.To("cars", Car.Type).
+			// Set the symbol of the foreign-key constraint for O2M relationship.
+			StorageKey(edge.Symbol("cars_owner_id")),
 		edge.To("friends", User.Type).
-			// Set the join-table and the column names for M2M relationship.
+			// Set the join-table, and the column names for a M2M relationship.
 			StorageKey(edge.Table("friends"), edge.Columns("user_id", "friend_id")),
+		edge.To("groups", Group.Type).
+			// Set the join-table, its column names and the symbols
+			// of the foreign-key constraints for M2M relationship.
+			StorageKey(
+				edge.Table("groups"),
+				edge.Columns("user_id", "group_id"),
+				edge.Symbols("groups_id1", "groups_id2")
+			),
+	}
+}
+```
+
+## Struct Tags
+
+Custom struct tags can be added to the generated entities using the `StructTag`
+method. Note that if this option was not provided, or provided and did not
+contain the `json` tag, the default `json` tag will be added with the field name.
+
+```go
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("pets", Pet.Type).
+			// Override the default json tag "pets" with "owner" for O2M relationship.
+			StructTag(`json:"owner"`),
 	}
 }
 ```
@@ -932,3 +1117,8 @@ func (Pet) Edges() []ent.Edge {
 ```
 
 Read more about annotations and their usage in templates in the [template doc](templates.md#annotations).
+
+## Naming Convention
+
+By convention edge names should use `snake_case`. The corresponding struct fields generated by `ent` will follow the Go convention
+of using `PascalCase`. In cases where `PascalCase` is desired, you can do so with the `StorageKey` or `StructTag` methods.

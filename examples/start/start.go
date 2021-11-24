@@ -10,10 +10,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/facebook/ent/examples/start/ent"
-	"github.com/facebook/ent/examples/start/ent/car"
-	"github.com/facebook/ent/examples/start/ent/group"
-	"github.com/facebook/ent/examples/start/ent/user"
+	"entgo.io/ent/examples/start/ent"
+	"entgo.io/ent/examples/start/ent/car"
+	"entgo.io/ent/examples/start/ent/group"
+	"entgo.io/ent/examples/start/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -66,7 +66,7 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		SetName("a8m").
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed creating user: %v", err)
+		return nil, fmt.Errorf("failed creating user: %w", err)
 	}
 	log.Println("user was created: ", u)
 	return u, nil
@@ -80,7 +80,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		// or more than 1 user returned.
 		Only(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed querying user: %v", err)
+		return nil, fmt.Errorf("failed querying user: %w", err)
 	}
 	log.Println("user returned: ", u)
 	return u, nil
@@ -94,7 +94,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		SetRegisteredAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed creating car: %v", err)
+		return nil, fmt.Errorf("failed creating car: %w", err)
 	}
 
 	// creating new car with model "Ford".
@@ -104,7 +104,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		SetRegisteredAt(time.Now()).
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed creating car: %v", err)
+		return nil, fmt.Errorf("failed creating car: %w", err)
 	}
 	log.Println("car was created: ", ford)
 
@@ -116,7 +116,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		AddCars(tesla, ford).
 		Save(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed creating user: %v", err)
+		return nil, fmt.Errorf("failed creating user: %w", err)
 	}
 	log.Println("user was created: ", a8m)
 	return a8m, nil
@@ -125,7 +125,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 func QueryCars(ctx context.Context, a8m *ent.User) error {
 	cars, err := a8m.QueryCars().All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying user cars: %v", err)
+		return fmt.Errorf("failed querying user cars: %w", err)
 	}
 	log.Println("returned cars:", cars)
 
@@ -134,7 +134,7 @@ func QueryCars(ctx context.Context, a8m *ent.User) error {
 		Where(car.ModelEQ("Ford")).
 		Only(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying user cars: %v", err)
+		return fmt.Errorf("failed querying user cars: %w", err)
 	}
 	log.Println(ford)
 	return nil
@@ -143,14 +143,14 @@ func QueryCars(ctx context.Context, a8m *ent.User) error {
 func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 	cars, err := a8m.QueryCars().All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed querying user cars: %v", err)
+		return fmt.Errorf("failed querying user cars: %w", err)
 	}
 
 	// query the inverse edge.
 	for _, ca := range cars {
 		owner, err := ca.QueryOwner().Only(ctx)
 		if err != nil {
-			return fmt.Errorf("failed querying car %q owner: %v", ca.Model, err)
+			return fmt.Errorf("failed querying car %q owner: %w", ca.Model, err)
 		}
 		log.Printf("car %q owner: %q\n", ca.Model, owner.Name)
 	}
@@ -158,7 +158,7 @@ func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 }
 
 func CreateGraph(ctx context.Context, client *ent.Client) error {
-	// first, create the users.
+	// First, create the users.
 	a8m, err := client.User.
 		Create().
 		SetAge(30).
@@ -175,48 +175,48 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	// then, create the cars, and attach them to the users in the creation.
-	_, err = client.Car.
+	// Then, create the cars, and attach them to the users in the creation.
+	err = client.Car.
 		Create().
 		SetModel("Tesla").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(a8m).               // attach this graph to Ariel.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Car.
+	err = client.Car.
 		Create().
 		SetModel("Mazda").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(a8m).               // attach this graph to Ariel.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Car.
+	err = client.Car.
 		Create().
 		SetModel("Ford").
 		SetRegisteredAt(time.Now()). // ignore the time in the graph.
 		SetOwner(neta).              // attach this graph to Neta.
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	// create the groups, and add their users in the creation.
-	_, err = client.Group.
+	// Create the groups, and add their users in the creation.
+	err = client.Group.
 		Create().
 		SetName("GitLab").
 		AddUsers(neta, a8m).
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
-	_, err = client.Group.
+	err = client.Group.
 		Create().
 		SetName("GitHub").
 		AddUsers(a8m).
-		Save(ctx)
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func QueryGithub(ctx context.Context, client *ent.Client) error {
 		QueryCars().                 // (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed getting cars: %v", err)
+		return fmt.Errorf("failed getting cars: %w", err)
 	}
 	log.Println("cars returned:", cars)
 	// Output: (Car(Model=Tesla, RegisteredAt=<Time>), Car(Model=Mazda, RegisteredAt=<Time>),)
@@ -259,7 +259,7 @@ func QueryArielCars(ctx context.Context, client *ent.Client) error {
 		). //
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed getting cars: %v", err)
+		return fmt.Errorf("failed getting cars: %w", err)
 	}
 	log.Println("cars returned:", cars)
 	return nil
@@ -271,7 +271,7 @@ func QueryGroupWithUsers(ctx context.Context, client *ent.Client) error {
 		Where(group.HasUsers()).
 		All(ctx)
 	if err != nil {
-		return fmt.Errorf("failed getting groups: %v", err)
+		return fmt.Errorf("failed getting groups: %w", err)
 	}
 	log.Println("groups returned:", groups)
 	// Output: (Group(Name=GitHub), Group(Name=GitLab),)

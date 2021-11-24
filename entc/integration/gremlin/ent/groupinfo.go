@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin"
 )
 
 // GroupInfo is the model entity for the GroupInfo schema.
@@ -30,7 +30,7 @@ type GroupInfo struct {
 // GroupInfoEdges holds the relations/edges for other nodes in the graph.
 type GroupInfoEdges struct {
 	// Groups holds the value of the groups edge.
-	Groups []*Group
+	Groups []*Group `json:"groups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -65,20 +65,20 @@ func (gi *GroupInfo) FromResponse(res *gremlin.Response) error {
 	return nil
 }
 
-// QueryGroups queries the groups edge of the GroupInfo.
+// QueryGroups queries the "groups" edge of the GroupInfo entity.
 func (gi *GroupInfo) QueryGroups() *GroupQuery {
 	return (&GroupInfoClient{config: gi.config}).QueryGroups(gi)
 }
 
 // Update returns a builder for updating this GroupInfo.
-// Note that, you need to call GroupInfo.Unwrap() before calling this method, if this GroupInfo
+// Note that you need to call GroupInfo.Unwrap() before calling this method if this GroupInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gi *GroupInfo) Update() *GroupInfoUpdateOne {
 	return (&GroupInfoClient{config: gi.config}).UpdateOne(gi)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the GroupInfo entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (gi *GroupInfo) Unwrap() *GroupInfo {
 	tx, ok := gi.config.driver.(*txDriver)
 	if !ok {

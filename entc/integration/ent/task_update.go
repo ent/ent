@@ -8,38 +8,38 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/entc/integration/ent/schema"
-	"github.com/facebook/ent/entc/integration/ent/task"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/schema/field"
 )
 
 // TaskUpdate is the builder for updating Task entities.
 type TaskUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *TaskMutation
-	predicates []predicate.Task
+	hooks    []Hook
+	mutation *TaskMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the TaskUpdate builder.
 func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	tu.predicates = append(tu.predicates, ps...)
+	tu.mutation.Where(ps...)
 	return tu
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tu *TaskUpdate) SetPriority(s schema.Priority) *TaskUpdate {
 	tu.mutation.ResetPriority()
 	tu.mutation.SetPriority(s)
 	return tu
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tu *TaskUpdate) SetNillablePriority(s *schema.Priority) *TaskUpdate {
 	if s != nil {
 		tu.SetPriority(*s)
@@ -47,7 +47,7 @@ func (tu *TaskUpdate) SetNillablePriority(s *schema.Priority) *TaskUpdate {
 	return tu
 }
 
-// AddPriority adds s to priority.
+// AddPriority adds s to the "priority" field.
 func (tu *TaskUpdate) AddPriority(s schema.Priority) *TaskUpdate {
 	tu.mutation.AddPriority(s)
 	return tu
@@ -58,7 +58,7 @@ func (tu *TaskUpdate) Mutation() *TaskMutation {
 	return tu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -84,6 +84,9 @@ func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(tu.hooks) - 1; i >= 0; i-- {
+			if tu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tu.mutation); err != nil {
@@ -119,7 +122,7 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 func (tu *TaskUpdate) check() error {
 	if v, ok := tu.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -136,7 +139,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := tu.predicates; len(ps) > 0 {
+	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -160,8 +163,8 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{task.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -171,18 +174,19 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // TaskUpdateOne is the builder for updating a single Task entity.
 type TaskUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *TaskMutation
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tuo *TaskUpdateOne) SetPriority(s schema.Priority) *TaskUpdateOne {
 	tuo.mutation.ResetPriority()
 	tuo.mutation.SetPriority(s)
 	return tuo
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tuo *TaskUpdateOne) SetNillablePriority(s *schema.Priority) *TaskUpdateOne {
 	if s != nil {
 		tuo.SetPriority(*s)
@@ -190,7 +194,7 @@ func (tuo *TaskUpdateOne) SetNillablePriority(s *schema.Priority) *TaskUpdateOne
 	return tuo
 }
 
-// AddPriority adds s to priority.
+// AddPriority adds s to the "priority" field.
 func (tuo *TaskUpdateOne) AddPriority(s schema.Priority) *TaskUpdateOne {
 	tuo.mutation.AddPriority(s)
 	return tuo
@@ -201,7 +205,14 @@ func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
 	return tuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (tuo *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
+	tuo.fields = append([]string{field}, fields...)
+	return tuo
+}
+
+// Save executes the query and returns the updated Task entity.
 func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 	var (
 		err  error
@@ -227,6 +238,9 @@ func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 			return node, err
 		})
 		for i := len(tuo.hooks) - 1; i >= 0; i-- {
+			if tuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tuo.mutation); err != nil {
@@ -262,7 +276,7 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 func (tuo *TaskUpdateOne) check() error {
 	if v, ok := tuo.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -281,9 +295,28 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 	}
 	id, ok := tuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Task.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Task.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := tuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, task.FieldID)
+		for _, f := range fields {
+			if !task.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != task.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := tuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := tuo.mutation.Priority(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -300,12 +333,12 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 	}
 	_node = &Task{config: tuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, tuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{task.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

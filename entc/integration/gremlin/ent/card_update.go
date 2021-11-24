@@ -8,40 +8,68 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/entc/integration/gremlin/ent/spec"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // CardUpdate is the builder for updating Card entities.
 type CardUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CardMutation
-	predicates []predicate.Card
+	hooks    []Hook
+	mutation *CardMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the CardUpdate builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 
-// SetName sets the name field.
+// SetUpdateTime sets the "update_time" field.
+func (cu *CardUpdate) SetUpdateTime(t time.Time) *CardUpdate {
+	cu.mutation.SetUpdateTime(t)
+	return cu
+}
+
+// SetBalance sets the "balance" field.
+func (cu *CardUpdate) SetBalance(f float64) *CardUpdate {
+	cu.mutation.ResetBalance()
+	cu.mutation.SetBalance(f)
+	return cu
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cu *CardUpdate) SetNillableBalance(f *float64) *CardUpdate {
+	if f != nil {
+		cu.SetBalance(*f)
+	}
+	return cu
+}
+
+// AddBalance adds f to the "balance" field.
+func (cu *CardUpdate) AddBalance(f float64) *CardUpdate {
+	cu.mutation.AddBalance(f)
+	return cu
+}
+
+// SetName sets the "name" field.
 func (cu *CardUpdate) SetName(s string) *CardUpdate {
 	cu.mutation.SetName(s)
 	return cu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
 	if s != nil {
 		cu.SetName(*s)
@@ -49,19 +77,19 @@ func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
 	return cu
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cu *CardUpdate) ClearName() *CardUpdate {
 	cu.mutation.ClearName()
 	return cu
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CardUpdate) SetOwnerID(id string) *CardUpdate {
 	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cu *CardUpdate) SetNillableOwnerID(id *string) *CardUpdate {
 	if id != nil {
 		cu = cu.SetOwnerID(*id)
@@ -69,18 +97,18 @@ func (cu *CardUpdate) SetNillableOwnerID(id *string) *CardUpdate {
 	return cu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cu *CardUpdate) SetOwner(u *User) *CardUpdate {
 	return cu.SetOwnerID(u.ID)
 }
 
-// AddSpecIDs adds the spec edge to Spec by ids.
+// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (cu *CardUpdate) AddSpecIDs(ids ...string) *CardUpdate {
 	cu.mutation.AddSpecIDs(ids...)
 	return cu
 }
 
-// AddSpec adds the spec edges to Spec.
+// AddSpec adds the "spec" edges to the Spec entity.
 func (cu *CardUpdate) AddSpec(s ...*Spec) *CardUpdate {
 	ids := make([]string, len(s))
 	for i := range s {
@@ -94,25 +122,25 @@ func (cu *CardUpdate) Mutation() *CardMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.mutation.ClearOwner()
 	return cu
 }
 
-// ClearSpec clears all "spec" edges to type Spec.
+// ClearSpec clears all "spec" edges to the Spec entity.
 func (cu *CardUpdate) ClearSpec() *CardUpdate {
 	cu.mutation.ClearSpec()
 	return cu
 }
 
-// RemoveSpecIDs removes the spec edge to Spec by ids.
+// RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (cu *CardUpdate) RemoveSpecIDs(ids ...string) *CardUpdate {
 	cu.mutation.RemoveSpecIDs(ids...)
 	return cu
 }
 
-// RemoveSpec removes spec edges to Spec.
+// RemoveSpec removes "spec" edges to Spec entities.
 func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
 	ids := make([]string, len(s))
 	for i := range s {
@@ -121,7 +149,7 @@ func (cu *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
 	return cu.RemoveSpecIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -148,6 +176,9 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			if cu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
@@ -191,7 +222,7 @@ func (cu *CardUpdate) defaults() {
 func (cu *CardUpdate) check() error {
 	if v, ok := cu.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -216,7 +247,7 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(card.Label)
-	for _, p := range cu.predicates {
+	for _, p := range cu.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -227,6 +258,12 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 	)
 	if value, ok := cu.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, card.FieldUpdateTime, value)
+	}
+	if value, ok := cu.mutation.Balance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, value)
+	}
+	if value, ok := cu.mutation.AddedBalance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, __.Union(__.Values(card.FieldBalance), __.Constant(value)).Sum())
 	}
 	if value, ok := cu.mutation.Name(); ok {
 		v.Property(dsl.Single, card.FieldName, value)
@@ -274,17 +311,45 @@ func (cu *CardUpdate) gremlin() *dsl.Traversal {
 // CardUpdateOne is the builder for updating a single Card entity.
 type CardUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CardMutation
 }
 
-// SetName sets the name field.
+// SetUpdateTime sets the "update_time" field.
+func (cuo *CardUpdateOne) SetUpdateTime(t time.Time) *CardUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
+	return cuo
+}
+
+// SetBalance sets the "balance" field.
+func (cuo *CardUpdateOne) SetBalance(f float64) *CardUpdateOne {
+	cuo.mutation.ResetBalance()
+	cuo.mutation.SetBalance(f)
+	return cuo
+}
+
+// SetNillableBalance sets the "balance" field if the given value is not nil.
+func (cuo *CardUpdateOne) SetNillableBalance(f *float64) *CardUpdateOne {
+	if f != nil {
+		cuo.SetBalance(*f)
+	}
+	return cuo
+}
+
+// AddBalance adds f to the "balance" field.
+func (cuo *CardUpdateOne) AddBalance(f float64) *CardUpdateOne {
+	cuo.mutation.AddBalance(f)
+	return cuo
+}
+
+// SetName sets the "name" field.
 func (cuo *CardUpdateOne) SetName(s string) *CardUpdateOne {
 	cuo.mutation.SetName(s)
 	return cuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
 	if s != nil {
 		cuo.SetName(*s)
@@ -292,19 +357,19 @@ func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
 	return cuo
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cuo *CardUpdateOne) ClearName() *CardUpdateOne {
 	cuo.mutation.ClearName()
 	return cuo
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cuo *CardUpdateOne) SetOwnerID(id string) *CardUpdateOne {
 	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableOwnerID(id *string) *CardUpdateOne {
 	if id != nil {
 		cuo = cuo.SetOwnerID(*id)
@@ -312,18 +377,18 @@ func (cuo *CardUpdateOne) SetNillableOwnerID(id *string) *CardUpdateOne {
 	return cuo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cuo *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
 	return cuo.SetOwnerID(u.ID)
 }
 
-// AddSpecIDs adds the spec edge to Spec by ids.
+// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (cuo *CardUpdateOne) AddSpecIDs(ids ...string) *CardUpdateOne {
 	cuo.mutation.AddSpecIDs(ids...)
 	return cuo
 }
 
-// AddSpec adds the spec edges to Spec.
+// AddSpec adds the "spec" edges to the Spec entity.
 func (cuo *CardUpdateOne) AddSpec(s ...*Spec) *CardUpdateOne {
 	ids := make([]string, len(s))
 	for i := range s {
@@ -337,25 +402,25 @@ func (cuo *CardUpdateOne) Mutation() *CardMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo
 }
 
-// ClearSpec clears all "spec" edges to type Spec.
+// ClearSpec clears all "spec" edges to the Spec entity.
 func (cuo *CardUpdateOne) ClearSpec() *CardUpdateOne {
 	cuo.mutation.ClearSpec()
 	return cuo
 }
 
-// RemoveSpecIDs removes the spec edge to Spec by ids.
+// RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (cuo *CardUpdateOne) RemoveSpecIDs(ids ...string) *CardUpdateOne {
 	cuo.mutation.RemoveSpecIDs(ids...)
 	return cuo
 }
 
-// RemoveSpec removes spec edges to Spec.
+// RemoveSpec removes "spec" edges to Spec entities.
 func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 	ids := make([]string, len(s))
 	for i := range s {
@@ -364,7 +429,14 @@ func (cuo *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
 	return cuo.RemoveSpecIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
+}
+
+// Save executes the query and returns the updated Card entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	var (
 		err  error
@@ -391,6 +463,9 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 			return node, err
 		})
 		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			if cuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
@@ -434,7 +509,7 @@ func (cuo *CardUpdateOne) defaults() {
 func (cuo *CardUpdateOne) check() error {
 	if v, ok := cuo.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -444,7 +519,7 @@ func (cuo *CardUpdateOne) gremlinSave(ctx context.Context) (*Card, error) {
 	res := &gremlin.Response{}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Card.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Card.id" for update`)}
 	}
 	query, bindings := cuo.gremlin(id).Query()
 	if err := cuo.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -476,6 +551,12 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := cuo.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, card.FieldUpdateTime, value)
 	}
+	if value, ok := cuo.mutation.Balance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, value)
+	}
+	if value, ok := cuo.mutation.AddedBalance(); ok {
+		v.Property(dsl.Single, card.FieldBalance, __.Union(__.Values(card.FieldBalance), __.Constant(value)).Sum())
+	}
 	if value, ok := cuo.mutation.Name(); ok {
 		v.Property(dsl.Single, card.FieldName, value)
 	}
@@ -504,7 +585,16 @@ func (cuo *CardUpdateOne) gremlin(id string) *dsl.Traversal {
 	for _, id := range cuo.mutation.SpecIDs() {
 		v.AddE(spec.CardLabel).From(g.V(id)).InV()
 	}
-	v.ValueMap(true)
+	if len(cuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(cuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range cuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	if len(constraints) > 0 {
 		v = constraints[0].pred.Coalesce(constraints[0].test, v)
 		for _, cr := range constraints[1:] {

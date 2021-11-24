@@ -11,13 +11,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/pet"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"github.com/google/uuid"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -27,19 +28,53 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetAge sets the "age" field.
+func (pc *PetCreate) SetAge(f float64) *PetCreate {
+	pc.mutation.SetAge(f)
+	return pc
+}
+
+// SetNillableAge sets the "age" field if the given value is not nil.
+func (pc *PetCreate) SetNillableAge(f *float64) *PetCreate {
+	if f != nil {
+		pc.SetAge(*f)
+	}
+	return pc
+}
+
+// SetName sets the "name" field.
 func (pc *PetCreate) SetName(s string) *PetCreate {
 	pc.mutation.SetName(s)
 	return pc
 }
 
-// SetTeamID sets the team edge to User by id.
+// SetUUID sets the "uuid" field.
+func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
+	pc.mutation.SetUUID(u)
+	return pc
+}
+
+// SetNickname sets the "nickname" field.
+func (pc *PetCreate) SetNickname(s string) *PetCreate {
+	pc.mutation.SetNickname(s)
+	return pc
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (pc *PetCreate) SetNillableNickname(s *string) *PetCreate {
+	if s != nil {
+		pc.SetNickname(*s)
+	}
+	return pc
+}
+
+// SetTeamID sets the "team" edge to the User entity by ID.
 func (pc *PetCreate) SetTeamID(id string) *PetCreate {
 	pc.mutation.SetTeamID(id)
 	return pc
 }
 
-// SetNillableTeamID sets the team edge to User by id if the given value is not nil.
+// SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
 func (pc *PetCreate) SetNillableTeamID(id *string) *PetCreate {
 	if id != nil {
 		pc = pc.SetTeamID(*id)
@@ -47,18 +82,18 @@ func (pc *PetCreate) SetNillableTeamID(id *string) *PetCreate {
 	return pc
 }
 
-// SetTeam sets the team edge to User.
+// SetTeam sets the "team" edge to the User entity.
 func (pc *PetCreate) SetTeam(u *User) *PetCreate {
 	return pc.SetTeamID(u.ID)
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pc *PetCreate) SetOwnerID(id string) *PetCreate {
 	pc.mutation.SetOwnerID(id)
 	return pc
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (pc *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
 	if id != nil {
 		pc = pc.SetOwnerID(*id)
@@ -66,7 +101,7 @@ func (pc *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
 	return pc
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (pc *PetCreate) SetOwner(u *User) *PetCreate {
 	return pc.SetOwnerID(u.ID)
 }
@@ -82,6 +117,7 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 		err  error
 		node *Pet
 	)
+	pc.defaults()
 	if len(pc.hooks) == 0 {
 		if err = pc.check(); err != nil {
 			return nil, err
@@ -97,11 +133,17 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 				return nil, err
 			}
 			pc.mutation = mutation
-			node, err = pc.gremlinSave(ctx)
+			if node, err = pc.gremlinSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(pc.hooks) - 1; i >= 0; i-- {
+			if pc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = pc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
@@ -120,10 +162,34 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 	return v
 }
 
+// Exec executes the query.
+func (pc *PetCreate) Exec(ctx context.Context) error {
+	_, err := pc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (pc *PetCreate) ExecX(ctx context.Context) {
+	if err := pc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pc *PetCreate) defaults() {
+	if _, ok := pc.mutation.Age(); !ok {
+		v := pet.DefaultAge
+		pc.mutation.SetAge(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pc *PetCreate) check() error {
+	if _, ok := pc.mutation.Age(); !ok {
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
+	}
 	if _, ok := pc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
 	return nil
 }
@@ -151,8 +217,17 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(pet.Label)
+	if value, ok := pc.mutation.Age(); ok {
+		v.Property(dsl.Single, pet.FieldAge, value)
+	}
 	if value, ok := pc.mutation.Name(); ok {
 		v.Property(dsl.Single, pet.FieldName, value)
+	}
+	if value, ok := pc.mutation.UUID(); ok {
+		v.Property(dsl.Single, pet.FieldUUID, value)
+	}
+	if value, ok := pc.mutation.Nickname(); ok {
+		v.Property(dsl.Single, pet.FieldNickname, value)
 	}
 	for _, id := range pc.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()
@@ -174,7 +249,7 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 	return tr
 }
 
-// PetCreateBulk is the builder for creating a bulk of Pet entities.
+// PetCreateBulk is the builder for creating many Pet entities in bulk.
 type PetCreateBulk struct {
 	config
 	builders []*PetCreate

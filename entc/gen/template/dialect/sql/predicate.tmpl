@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/sql/predicate/id" -}}
 	func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C({{ $.ID.Constant }}), id))
@@ -27,7 +29,7 @@ in the LICENSE file in the root directory of this source tree.
 				v[i] = {{ $arg }}[i]
 			}
 		{{- end }}
-		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}), {{ if $op.Variadic }}v...{{ else }}id{{ end }}))
+		s.Where(sql.{{ call $storage.OpCode $op }}(s.C({{ $.ID.Constant }}){{ if not $op.Niladic }},{{ if $op.Variadic }}v...{{ else }}id{{ end }}{{ end }}))
 	}
 {{- end }}
 
@@ -72,6 +74,12 @@ in the LICENSE file in the root directory of this source tree.
 				{{- end -}}
 			),
 		)
+		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+		{{- with $tmpls := matchTemplate "dialect/sql/predicate/edge/has/*" }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $ }}
+			{{- end }}
+		{{- end }}
 		sqlgraph.HasNeighbors(s, step)
 	}
 {{- end }}
@@ -91,6 +99,12 @@ in the LICENSE file in the root directory of this source tree.
 				{{- end -}}
 			),
 		)
+		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+		{{- with $tmpls := matchTemplate "dialect/sql/predicate/edge/haswith/*" }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $ }}
+			{{- end }}
+		{{- end }}
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

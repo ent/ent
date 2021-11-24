@@ -5,9 +5,9 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
 )
 
 // Node holds the schema definition for the linked-list Node entity.
@@ -27,10 +27,10 @@ func (Node) Fields() []ent.Field {
 func (Node) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("next", Node.Type).
-			StructTag("gqlgen:next").
+			StructTag(`gqlgen:"next"`).
 			Unique().
 			From("prev").
-			StructTag("gqlgen:prev").
+			StructTag(`gqlgen:"prev"`).
 			Unique(),
 	}
 }

@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/node"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/node"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	config
-	hooks      []Hook
-	mutation   *NodeMutation
-	predicates []predicate.Node
+	hooks    []Hook
+	mutation *NodeMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the NodeDelete builder.
 func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
-	nd.predicates = append(nd.predicates, ps...)
+	nd.mutation.Where(ps...)
 	return nd
 }
 
@@ -51,6 +50,9 @@ func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(nd.hooks) - 1; i >= 0; i-- {
+			if nd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = nd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, nd.mutation); err != nil {
@@ -79,7 +81,7 @@ func (nd *NodeDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := nd.predicates; len(ps) > 0 {
+	if ps := nd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

@@ -15,13 +15,11 @@ const (
 	FieldDesc = "desc"
 	// FieldMaxUsers holds the string denoting the max_users field in the database.
 	FieldMaxUsers = "max_users"
-
 	// EdgeGroups holds the string denoting the groups edge name in mutations.
 	EdgeGroups = "groups"
-
 	// Table holds the table name of the groupinfo in the database.
 	Table = "group_infos"
-	// GroupsTable is the table the holds the groups relation/edge.
+	// GroupsTable is the table that holds the groups relation/edge.
 	GroupsTable = "groups"
 	// GroupsInverseTable is the table name for the Group entity.
 	// It exists in this package in order to avoid circular dependency with the "group" package.
@@ -48,7 +46,7 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultMaxUsers holds the default value on creation for the max_users field.
+	// DefaultMaxUsers holds the default value on creation for the "max_users" field.
 	DefaultMaxUsers int
 )
 

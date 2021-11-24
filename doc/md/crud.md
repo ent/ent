@@ -3,7 +3,7 @@ id: crud
 title: CRUD API
 ---
 
-As mentioned in the [introduction](code-gen.md) section, running `entc` on the schemas,
+As mentioned in the [introduction](code-gen.md) section, running `ent` on the schemas,
 will generate the following assets:
 
 - `Client` and `Tx` objects used for interacting with the graph.
@@ -169,7 +169,7 @@ n, err := client.User.			// UserClient.
 	Update().					// Pet update builder.
 	Where(						//
 		user.Or(				// (age >= 30 OR name = "bar") 
-			user.AgeEQ(30), 	//
+			user.AgeGT(30), 	//
 			user.Name("bar"),	// AND
 		),						//  
 		user.HasFollowers(),	// UserHasFollowers()  
@@ -193,6 +193,115 @@ n, err := client.User.			// UserClient.
 	).							//
 	SetName("a8m").				// Set field name.
 	Save(ctx)					// exec and return.
+```
+
+## Upsert One
+
+Ent supports [upsert](https://en.wikipedia.org/wiki/Merge_(SQL)) records using the [`sql/upsert`](features.md#upsert)
+feature-flag.
+
+```go
+err := client.User.
+	Create().
+	SetAge(30).
+	SetName("Ariel").
+	OnConflict().
+	// Use the new values that were set on create.
+	UpdateNewValues().
+	Exec(ctx)
+
+id, err := client.User.
+	Create().
+	SetAge(30).
+	SetName("Ariel").
+	OnConflict().
+	// Use the "age" that was set on create.
+	UpdateAge().
+	// Set a different "name" in case of conflict.
+	SetName("Mashraki").
+	ID(ctx)
+
+// Customize the UPDATE clause.
+err := client.User.
+	Create().
+	SetAge(30).
+	SetName("Ariel").
+	OnConflict().
+	UpdateNewValues().
+	// Override some of the fields with a custom update.
+	Update(func(u *ent.UserUpsert) {
+		u.SetAddress("localhost")
+		u.AddCount(1)
+		u.ClearPhone()
+	}).
+	Exec(ctx)
+```
+
+In PostgreSQL, the [conflict target](https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT) is required:
+
+```go
+// Setting the column names using the fluent API.
+err := client.User.
+	Create().
+	SetName("Ariel").
+	OnConflictColumns(user.FieldName).
+	UpdateNewValues().
+	Exec(ctx)
+
+// Setting the column names using the SQL API.
+err := client.User.
+	Create().
+	SetName("Ariel").
+	OnConflict(
+	    sql.ConflictColumns(user.FieldName),	
+	).
+	UpdateNewValues().
+	Exec(ctx)
+
+// Setting the constraint name using the SQL API.
+err := client.User.
+	Create().
+	SetName("Ariel").
+	OnConflict(
+	    sql.ConflictConstraint(constraint),	
+	).
+	UpdateNewValues().
+	Exec(ctx)
+```
+
+In order to customize the executed statement, use the SQL API:
+
+```go
+id, err := client.User.
+	Create().
+	OnConflict(
+		sql.ConflictColumns(...),
+		sql.ConflictWhere(...),
+		sql.UpdateWhere(...),
+	).
+	Update(func(u *ent.UserUpsert) {
+		u.SetAge(30)
+		u.UpadteName()
+	}).
+	ID(ctx)
+
+// INSERT INTO "users" (...) VALUES (...) ON CONFLICT WHERE ... DO UPDATE SET ... WHERE ...
+```
+
+:::info
+Since the upsert API is implemented using the `ON CONFLICT` clause (and `ON DUPLICATE KEY` in MySQL),
+Ent executes only one statement to the database, and therefore, only create [hooks](hooks.md) are applied
+for such operations.
+:::
+
+## Upsert Many
+
+```go
+err := client.User.             // UserClient
+	CreateBulk(builders...).    // User bulk create.
+	OnConflict().               // User bulk upsert.
+	UpdateNewValues().          // Use the values that were set on create in case of conflict.
+	Exec(ctx)                   // Execute the statement.
 ```
 
 ## Query The Graph
@@ -220,6 +329,22 @@ users, err := a8m.
 	All(ctx)
 ```
 
+Count the number of posts without comments.
+```go
+n, err := client.Post.
+	Query().
+	Where(
+		post.Not(
+		    post.HasComments(),	
+		)
+	).
+	Count(ctx)
+```
+
+More advance traversals can be found in the [next section](traversals.md). 
+
+## Field Selection
+
 Get all pet names.
 
 ```go
@@ -229,7 +354,40 @@ names, err := client.Pet.
 	Strings(ctx)
 ```
 
-Get all pet names and ages.
+Get all unique pet names.
+
+```go
+names, err := client.Pet.
+	Query().
+	Unique(true).
+	Select(pet.FieldName).
+	Strings(ctx)
+```
+
+Count the number of unique pet names.
+
+```go
+n, err := client.Pet.
+	Query().
+	Unique(true).
+	Select(pet.FieldName).
+	Count(ctx)
+```
+
+Select partial objects and partial associations.gs
+Get all pets and their owners, but select and fill only the `ID` and `Name` fields.
+
+```go
+pets, err := client.Pet.
+    Query().
+    Select(pet.FieldName).
+    WithOwner(func (q *ent.UserQuery) {
+        q.Select(user.FieldName)
+    }).
+    All(ctx)
+```
+
+Scan all pet names and ages to custom struct.
 
 ```go
 var v []struct {
@@ -245,7 +403,18 @@ if err != nil {
 }
 ```
 
-More advance traversals can be found in the [next section](traversals.md). 
+Update an entity and return a partial of it.
+
+```go
+pedro, err := client.Pet.
+	UpdateOneID(id).
+	SetAge(9).
+	SetName("pedro").
+	// Select allows selecting one or more fields (columns) of the returned entity.
+	// The default is selecting all fields defined in the entity schema.
+	Select(pet.FieldName).
+	Save(ctx)
+```
 
 ## Delete One 
 
@@ -270,9 +439,9 @@ err := client.User.
 Delete using predicates.
 
 ```go
-err := client.File.
+_, err := client.File.
 	Delete().
-	Where(file.UpdatedAtLT(date))
+	Where(file.UpdatedAtLT(date)).
 	Exec(ctx)
 ```
 
@@ -280,7 +449,7 @@ err := client.File.
 
 Each generated node type has its own type of mutation. For example, all [`User` builders](crud.md#create-an-entity), share
 the same generated `UserMutation` object.
-However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/github.com/facebook/ent?tab=doc#Mutation">`ent.Mutation`<a> interface.
+However, all builder types implement the generic <a target="_blank" href="https://pkg.go.dev/entgo.io/ent?tab=doc#Mutation">`ent.Mutation`</a> interface.
 
 For example, in order to write a generic code that apply a set of methods on both `ent.UserCreate`
 and `ent.UserUpdate`, use the `UserMutation` object:

@@ -10,9 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/entc/integration/migrate/entv1/car"
-	"github.com/facebook/ent/entc/integration/migrate/entv1/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/migrate/entv1/car"
+	"entgo.io/ent/entc/integration/migrate/entv1/user"
 )
 
 // User is the model entity for the User schema.
@@ -24,6 +24,8 @@ type User struct {
 	Age int32 `json:"age,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
 	// Nickname holds the value of the "nickname" field.
 	Nickname string `json:"nickname,omitempty"`
 	// Address holds the value of the "address" field.
@@ -36,6 +38,8 @@ type User struct {
 	State user.State `json:"state,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
+	// Workplace holds the value of the "workplace" field.
+	Workplace string `json:"workplace,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges         UserEdges `json:"edges"`
@@ -46,13 +50,13 @@ type User struct {
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Parent holds the value of the parent edge.
-	Parent *User
+	Parent *User `json:"parent,omitempty"`
 	// Children holds the value of the children edge.
-	Children []*User
+	Children []*User `json:"children,omitempty"`
 	// Spouse holds the value of the spouse edge.
-	Spouse *User
+	Spouse *User `json:"spouse,omitempty"`
 	// Car holds the value of the car edge.
-	Car *Car
+	Car *Car `json:"car,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -110,127 +114,149 @@ func (e UserEdges) CarOrErr() (*Car, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*User) scanValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{},  // id
-		&sql.NullInt64{},  // age
-		&sql.NullString{}, // name
-		&sql.NullString{}, // nickname
-		&sql.NullString{}, // address
-		&sql.NullString{}, // renamed
-		&[]byte{},         // blob
-		&sql.NullString{}, // state
-		&sql.NullString{}, // status
+func (*User) scanValues(columns []string) ([]interface{}, error) {
+	values := make([]interface{}, len(columns))
+	for i := range columns {
+		switch columns[i] {
+		case user.FieldBlob:
+			values[i] = new([]byte)
+		case user.FieldID, user.FieldAge:
+			values[i] = new(sql.NullInt64)
+		case user.FieldName, user.FieldDescription, user.FieldNickname, user.FieldAddress, user.FieldRenamed, user.FieldState, user.FieldStatus, user.FieldWorkplace:
+			values[i] = new(sql.NullString)
+		case user.ForeignKeys[0]: // user_children
+			values[i] = new(sql.NullInt64)
+		case user.ForeignKeys[1]: // user_spouse
+			values[i] = new(sql.NullInt64)
+		default:
+			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+		}
 	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*User) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // user_children
-		&sql.NullInt64{}, // user_spouse
-	}
+	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(user.Columns); m < n {
+func (u *User) assignValues(columns []string, values []interface{}) error {
+	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	value, ok := values[0].(*sql.NullInt64)
-	if !ok {
-		return fmt.Errorf("unexpected type %T for field id", value)
-	}
-	u.ID = int(value.Int64)
-	values = values[1:]
-	if value, ok := values[0].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field age", values[0])
-	} else if value.Valid {
-		u.Age = int32(value.Int64)
-	}
-	if value, ok := values[1].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field name", values[1])
-	} else if value.Valid {
-		u.Name = value.String
-	}
-	if value, ok := values[2].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field nickname", values[2])
-	} else if value.Valid {
-		u.Nickname = value.String
-	}
-	if value, ok := values[3].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field address", values[3])
-	} else if value.Valid {
-		u.Address = value.String
-	}
-	if value, ok := values[4].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field renamed", values[4])
-	} else if value.Valid {
-		u.Renamed = value.String
-	}
-	if value, ok := values[5].(*[]byte); !ok {
-		return fmt.Errorf("unexpected type %T for field blob", values[5])
-	} else if value != nil {
-		u.Blob = *value
-	}
-	if value, ok := values[6].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field state", values[6])
-	} else if value.Valid {
-		u.State = user.State(value.String)
-	}
-	if value, ok := values[7].(*sql.NullString); !ok {
-		return fmt.Errorf("unexpected type %T for field status", values[7])
-	} else if value.Valid {
-		u.Status = value.String
-	}
-	values = values[8:]
-	if len(values) == len(user.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_children", value)
-		} else if value.Valid {
-			u.user_children = new(int)
-			*u.user_children = int(value.Int64)
-		}
-		if value, ok := values[1].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
-		} else if value.Valid {
-			u.user_spouse = new(int)
-			*u.user_spouse = int(value.Int64)
+	for i := range columns {
+		switch columns[i] {
+		case user.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			u.ID = int(value.Int64)
+		case user.FieldAge:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field age", values[i])
+			} else if value.Valid {
+				u.Age = int32(value.Int64)
+			}
+		case user.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				u.Name = value.String
+			}
+		case user.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				u.Description = value.String
+			}
+		case user.FieldNickname:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field nickname", values[i])
+			} else if value.Valid {
+				u.Nickname = value.String
+			}
+		case user.FieldAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field address", values[i])
+			} else if value.Valid {
+				u.Address = value.String
+			}
+		case user.FieldRenamed:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field renamed", values[i])
+			} else if value.Valid {
+				u.Renamed = value.String
+			}
+		case user.FieldBlob:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field blob", values[i])
+			} else if value != nil {
+				u.Blob = *value
+			}
+		case user.FieldState:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field state", values[i])
+			} else if value.Valid {
+				u.State = user.State(value.String)
+			}
+		case user.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				u.Status = value.String
+			}
+		case user.FieldWorkplace:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field workplace", values[i])
+			} else if value.Valid {
+				u.Workplace = value.String
+			}
+		case user.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_children", value)
+			} else if value.Valid {
+				u.user_children = new(int)
+				*u.user_children = int(value.Int64)
+			}
+		case user.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
+			} else if value.Valid {
+				u.user_spouse = new(int)
+				*u.user_spouse = int(value.Int64)
+			}
 		}
 	}
 	return nil
 }
 
-// QueryParent queries the parent edge of the User.
+// QueryParent queries the "parent" edge of the User entity.
 func (u *User) QueryParent() *UserQuery {
 	return (&UserClient{config: u.config}).QueryParent(u)
 }
 
-// QueryChildren queries the children edge of the User.
+// QueryChildren queries the "children" edge of the User entity.
 func (u *User) QueryChildren() *UserQuery {
 	return (&UserClient{config: u.config}).QueryChildren(u)
 }
 
-// QuerySpouse queries the spouse edge of the User.
+// QuerySpouse queries the "spouse" edge of the User entity.
 func (u *User) QuerySpouse() *UserQuery {
 	return (&UserClient{config: u.config}).QuerySpouse(u)
 }
 
-// QueryCar queries the car edge of the User.
+// QueryCar queries the "car" edge of the User entity.
 func (u *User) QueryCar() *CarQuery {
 	return (&UserClient{config: u.config}).QueryCar(u)
 }
 
 // Update returns a builder for updating this User.
-// Note that, you need to call User.Unwrap() before calling this method, if this User
+// Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
 	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the User entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (u *User) Unwrap() *User {
 	tx, ok := u.config.driver.(*txDriver)
 	if !ok {
@@ -249,6 +275,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Age))
 	builder.WriteString(", name=")
 	builder.WriteString(u.Name)
+	builder.WriteString(", description=")
+	builder.WriteString(u.Description)
 	builder.WriteString(", nickname=")
 	builder.WriteString(u.Nickname)
 	builder.WriteString(", address=")
@@ -261,6 +289,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.State))
 	builder.WriteString(", status=")
 	builder.WriteString(u.Status)
+	builder.WriteString(", workplace=")
+	builder.WriteString(u.Workplace)
 	builder.WriteByte(')')
 	return builder.String()
 }

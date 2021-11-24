@@ -13,17 +13,15 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-
 	// Table holds the table name of the pet in the database.
 	Table = "pets"
-	// FriendsTable is the table the holds the friends relation/edge. The primary key declared below.
+	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "pet_friends"
-	// OwnerTable is the table the holds the owner relation/edge.
+	// OwnerTable is the table that holds the owner relation/edge.
 	OwnerTable = "pets"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
@@ -38,7 +36,8 @@ var Columns = []string{
 	FieldName,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Pet type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "pets"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_pets",
 }

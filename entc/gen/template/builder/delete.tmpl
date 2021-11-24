@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
 {{ define "delete" }}
 {{ $pkg := base $.Config.Package }}
 
@@ -15,23 +17,20 @@ import (
 	"{{ $.Config.Package }}/{{ $.Package }}"
 )
 
-
 {{ $builder := $.DeleteName }}
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
 
-// {{ $builder }} is the builder for deleting a {{ pascal $.Name }} entity.
+// {{ $builder }} is the builder for deleting a {{ $.Name }} entity.
 type {{ $builder }} struct {
 	config
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
-	predicates []predicate.{{ $.Name }}
 }
 
-
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $receiver}}.predicates = append({{ $receiver}}.predicates, ps...)
+	{{ $mutation }}.Where(ps...)
 	return {{ $receiver }}
 }
 
@@ -55,6 +54,9 @@ func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
+			if {{ $receiver }}.hooks[i] == nil {
+				return 0, fmt.Errorf("{{ $pkg }}: uninitialized hook (forgotten import {{ $pkg }}/runtime?)")
+			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
@@ -77,6 +79,13 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
 	{{ $tmpl := printf "dialect/%s/delete" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
+
+{{- /* Support adding delete methods by global templates. */}}
+{{- with $tmpls := matchTemplate "delete/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{ xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 {{ $onebuilder := $.DeleteOneName }}
 {{ $oneReceiver := receiver $onebuilder }}

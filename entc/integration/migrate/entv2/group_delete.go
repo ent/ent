@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/group"
-	"github.com/facebook/ent/entc/integration/migrate/entv2/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/migrate/entv2/group"
+	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
-	hooks      []Hook
-	mutation   *GroupMutation
-	predicates []predicate.Group
+	hooks    []Hook
+	mutation *GroupMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the GroupDelete builder.
 func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.predicates = append(gd.predicates, ps...)
+	gd.mutation.Where(ps...)
 	return gd
 }
 
@@ -51,6 +50,9 @@ func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(gd.hooks) - 1; i >= 0; i-- {
+			if gd.hooks[i] == nil {
+				return 0, fmt.Errorf("entv2: uninitialized hook (forgotten import entv2/runtime?)")
+			}
 			mut = gd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gd.mutation); err != nil {
@@ -79,7 +81,7 @@ func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := gd.predicates; len(ps) > 0 {
+	if ps := gd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

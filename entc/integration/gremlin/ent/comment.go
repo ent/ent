@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin"
 )
 
 // Comment is the model entity for the Comment schema.
@@ -49,14 +49,14 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 }
 
 // Update returns a builder for updating this Comment.
-// Note that, you need to call Comment.Unwrap() before calling this method, if this Comment
+// Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Comment) Update() *CommentUpdateOne {
 	return (&CommentClient{config: c.config}).UpdateOne(c)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Comment entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (c *Comment) Unwrap() *Comment {
 	tx, ok := c.config.driver.(*txDriver)
 	if !ok {

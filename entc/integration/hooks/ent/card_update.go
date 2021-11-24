@@ -8,38 +8,38 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/hooks/ent/card"
-	"github.com/facebook/ent/entc/integration/hooks/ent/predicate"
-	"github.com/facebook/ent/entc/integration/hooks/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/predicate"
+	"entgo.io/ent/entc/integration/hooks/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // CardUpdate is the builder for updating Card entities.
 type CardUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CardMutation
-	predicates []predicate.Card
+	hooks    []Hook
+	mutation *CardMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the CardUpdate builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cu *CardUpdate) SetName(s string) *CardUpdate {
 	cu.mutation.SetName(s)
 	return cu
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
 	if s != nil {
 		cu.SetName(*s)
@@ -47,19 +47,19 @@ func (cu *CardUpdate) SetNillableName(s *string) *CardUpdate {
 	return cu
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cu *CardUpdate) ClearName() *CardUpdate {
 	cu.mutation.ClearName()
 	return cu
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (cu *CardUpdate) SetCreatedAt(t time.Time) *CardUpdate {
 	cu.mutation.SetCreatedAt(t)
 	return cu
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (cu *CardUpdate) SetNillableCreatedAt(t *time.Time) *CardUpdate {
 	if t != nil {
 		cu.SetCreatedAt(*t)
@@ -67,19 +67,19 @@ func (cu *CardUpdate) SetNillableCreatedAt(t *time.Time) *CardUpdate {
 	return cu
 }
 
-// SetInHook sets the in_hook field.
+// SetInHook sets the "in_hook" field.
 func (cu *CardUpdate) SetInHook(s string) *CardUpdate {
 	cu.mutation.SetInHook(s)
 	return cu
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CardUpdate) SetOwnerID(id int) *CardUpdate {
 	cu.mutation.SetOwnerID(id)
 	return cu
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cu *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 	if id != nil {
 		cu = cu.SetOwnerID(*id)
@@ -87,7 +87,7 @@ func (cu *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 	return cu
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cu *CardUpdate) SetOwner(u *User) *CardUpdate {
 	return cu.SetOwnerID(u.ID)
 }
@@ -97,13 +97,13 @@ func (cu *CardUpdate) Mutation() *CardMutation {
 	return cu.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cu *CardUpdate) ClearOwner() *CardUpdate {
 	cu.mutation.ClearOwner()
 	return cu
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -123,6 +123,9 @@ func (cu *CardUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			if cu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
@@ -165,7 +168,7 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := cu.predicates; len(ps) > 0 {
+	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -237,8 +240,8 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -248,17 +251,18 @@ func (cu *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CardUpdateOne is the builder for updating a single Card entity.
 type CardUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CardMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cuo *CardUpdateOne) SetName(s string) *CardUpdateOne {
 	cuo.mutation.SetName(s)
 	return cuo
 }
 
-// SetNillableName sets the name field if the given value is not nil.
+// SetNillableName sets the "name" field if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
 	if s != nil {
 		cuo.SetName(*s)
@@ -266,19 +270,19 @@ func (cuo *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
 	return cuo
 }
 
-// ClearName clears the value of name.
+// ClearName clears the value of the "name" field.
 func (cuo *CardUpdateOne) ClearName() *CardUpdateOne {
 	cuo.mutation.ClearName()
 	return cuo
 }
 
-// SetCreatedAt sets the created_at field.
+// SetCreatedAt sets the "created_at" field.
 func (cuo *CardUpdateOne) SetCreatedAt(t time.Time) *CardUpdateOne {
 	cuo.mutation.SetCreatedAt(t)
 	return cuo
 }
 
-// SetNillableCreatedAt sets the created_at field if the given value is not nil.
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
 	if t != nil {
 		cuo.SetCreatedAt(*t)
@@ -286,19 +290,19 @@ func (cuo *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
 	return cuo
 }
 
-// SetInHook sets the in_hook field.
+// SetInHook sets the "in_hook" field.
 func (cuo *CardUpdateOne) SetInHook(s string) *CardUpdateOne {
 	cuo.mutation.SetInHook(s)
 	return cuo
 }
 
-// SetOwnerID sets the owner edge to User by id.
+// SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cuo *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
 	cuo.mutation.SetOwnerID(id)
 	return cuo
 }
 
-// SetNillableOwnerID sets the owner edge to User by id if the given value is not nil.
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (cuo *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 	if id != nil {
 		cuo = cuo.SetOwnerID(*id)
@@ -306,7 +310,7 @@ func (cuo *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 	return cuo
 }
 
-// SetOwner sets the owner edge to User.
+// SetOwner sets the "owner" edge to the User entity.
 func (cuo *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
 	return cuo.SetOwnerID(u.ID)
 }
@@ -316,13 +320,20 @@ func (cuo *CardUpdateOne) Mutation() *CardMutation {
 	return cuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to type User.
+// ClearOwner clears the "owner" edge to the User entity.
 func (cuo *CardUpdateOne) ClearOwner() *CardUpdateOne {
 	cuo.mutation.ClearOwner()
 	return cuo
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
+}
+
+// Save executes the query and returns the updated Card entity.
 func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 	var (
 		err  error
@@ -342,6 +353,9 @@ func (cuo *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 			return node, err
 		})
 		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			if cuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
@@ -386,9 +400,28 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Card.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Card.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := cuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, card.FieldID)
+		for _, f := range fields {
+			if !card.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != card.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := cuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := cuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -453,12 +486,12 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 	}
 	_node = &Card{config: cuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

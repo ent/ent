@@ -8,26 +8,46 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/ent/item"
-	"github.com/facebook/ent/entc/integration/ent/predicate"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/item"
+	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/schema/field"
 )
 
 // ItemUpdate is the builder for updating Item entities.
 type ItemUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *ItemMutation
-	predicates []predicate.Item
+	hooks    []Hook
+	mutation *ItemMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the ItemUpdate builder.
 func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	iu.predicates = append(iu.predicates, ps...)
+	iu.mutation.Where(ps...)
+	return iu
+}
+
+// SetText sets the "text" field.
+func (iu *ItemUpdate) SetText(s string) *ItemUpdate {
+	iu.mutation.SetText(s)
+	return iu
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (iu *ItemUpdate) SetNillableText(s *string) *ItemUpdate {
+	if s != nil {
+		iu.SetText(*s)
+	}
+	return iu
+}
+
+// ClearText clears the value of the "text" field.
+func (iu *ItemUpdate) ClearText() *ItemUpdate {
+	iu.mutation.ClearText()
 	return iu
 }
 
@@ -36,13 +56,16 @@ func (iu *ItemUpdate) Mutation() *ItemMutation {
 	return iu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
 		affected int
 	)
 	if len(iu.hooks) == 0 {
+		if err = iu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = iu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
@@ -50,12 +73,18 @@ func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
+			if err = iu.check(); err != nil {
+				return 0, err
+			}
 			iu.mutation = mutation
 			affected, err = iu.sqlSave(ctx)
 			mutation.done = true
 			return affected, err
 		})
 		for i := len(iu.hooks) - 1; i >= 0; i-- {
+			if iu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = iu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, iu.mutation); err != nil {
@@ -87,29 +116,52 @@ func (iu *ItemUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (iu *ItemUpdate) check() error {
+	if v, ok := iu.mutation.Text(); ok {
+		if err := item.TextValidator(v); err != nil {
+			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   item.Table,
 			Columns: item.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: item.FieldID,
 			},
 		},
 	}
-	if ps := iu.predicates; len(ps) > 0 {
+	if ps := iu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
+	if value, ok := iu.mutation.Text(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: item.FieldText,
+		})
+	}
+	if iu.mutation.TextCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: item.FieldText,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{item.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -119,8 +171,29 @@ func (iu *ItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // ItemUpdateOne is the builder for updating a single Item entity.
 type ItemUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *ItemMutation
+}
+
+// SetText sets the "text" field.
+func (iuo *ItemUpdateOne) SetText(s string) *ItemUpdateOne {
+	iuo.mutation.SetText(s)
+	return iuo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (iuo *ItemUpdateOne) SetNillableText(s *string) *ItemUpdateOne {
+	if s != nil {
+		iuo.SetText(*s)
+	}
+	return iuo
+}
+
+// ClearText clears the value of the "text" field.
+func (iuo *ItemUpdateOne) ClearText() *ItemUpdateOne {
+	iuo.mutation.ClearText()
+	return iuo
 }
 
 // Mutation returns the ItemMutation object of the builder.
@@ -128,13 +201,23 @@ func (iuo *ItemUpdateOne) Mutation() *ItemMutation {
 	return iuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (iuo *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne {
+	iuo.fields = append([]string{field}, fields...)
+	return iuo
+}
+
+// Save executes the query and returns the updated Item entity.
 func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 	var (
 		err  error
 		node *Item
 	)
 	if len(iuo.hooks) == 0 {
+		if err = iuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = iuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
@@ -142,12 +225,18 @@ func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
+			if err = iuo.check(); err != nil {
+				return nil, err
+			}
 			iuo.mutation = mutation
 			node, err = iuo.sqlSave(ctx)
 			mutation.done = true
 			return node, err
 		})
 		for i := len(iuo.hooks) - 1; i >= 0; i-- {
+			if iuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = iuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, iuo.mutation); err != nil {
@@ -179,30 +268,72 @@ func (iuo *ItemUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (iuo *ItemUpdateOne) check() error {
+	if v, ok := iuo.mutation.Text(); ok {
+		if err := item.TextValidator(v); err != nil {
+			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (iuo *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
 			Table:   item.Table,
 			Columns: item.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeString,
 				Column: item.FieldID,
 			},
 		},
 	}
 	id, ok := iuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Item.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Item.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := iuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, item.FieldID)
+		for _, f := range fields {
+			if !item.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != item.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := iuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
+	if value, ok := iuo.mutation.Text(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: item.FieldText,
+		})
+	}
+	if iuo.mutation.TextCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: item.FieldText,
+		})
+	}
 	_node = &Item{config: iuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, iuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{item.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

@@ -12,8 +12,9 @@ import (
 	"math"
 	"reflect"
 	"regexp"
-	"sort"
 	"time"
+
+	"entgo.io/ent/schema"
 )
 
 // String returns a new Field with type string.
@@ -71,20 +72,21 @@ func Time(name string) *timeBuilder {
 //
 func JSON(name string, typ interface{}) *jsonBuilder {
 	t := reflect.TypeOf(typ)
-	info := &TypeInfo{
-		Type:    TypeJSON,
-		Ident:   t.String(),
-		PkgPath: t.PkgPath(),
-	}
+	b := &jsonBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{
+			Type:    TypeJSON,
+			Ident:   t.String(),
+			PkgPath: t.PkgPath(),
+		},
+	}}
+	b.desc.goType(typ, t)
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
-		info.Nillable = true
-		info.PkgPath = pkgPath(t)
+		b.desc.Info.Nillable = true
+		b.desc.Info.PkgPath = pkgPath(t)
 	}
-	return &jsonBuilder{&Descriptor{
-		Name: name,
-		Info: info,
-	}}
+	return b
 }
 
 // Strings returns a new JSON Field with type []string.
@@ -124,15 +126,38 @@ func Enum(name string) *enumBuilder {
 //
 func UUID(name string, typ driver.Valuer) *uuidBuilder {
 	rt := reflect.TypeOf(typ)
-	return &uuidBuilder{&Descriptor{
+	b := &uuidBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{
 			Type:     TypeUUID,
 			Nillable: true,
 			Ident:    rt.String(),
-			PkgPath:  rt.PkgPath(),
+			PkgPath:  indirect(rt).PkgPath(),
 		},
 	}}
+	b.desc.goType(typ, valueScannerType)
+	return b
+}
+
+// Other represents a field that is not a good fit for any of the standard field types.
+//
+// The second argument defines the GoType and must implement the ValueScanner interface.
+// The SchemaType option must be set because the field type cannot be inferred.
+// An example for defining Other field is as follows:
+//
+//	field.Other("link", &Link{}).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		})
+//
+func Other(name string, typ driver.Valuer) *otherBuilder {
+	ob := &otherBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeOther},
+	}}
+	ob.desc.goType(typ, valueScannerType)
+	return ob
 }
 
 // stringBuilder is the builder for string fields.
@@ -206,8 +231,19 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation. For example:
+//
+//	field.String("cuid").
+//		DefaultFunc(cuid.New)
+//
+func (b *stringBuilder) DefaultFunc(fn interface{}) *stringBuilder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *stringBuilder) Nillable() *stringBuilder {
 	b.desc.Nillable = true
 	return b
@@ -227,7 +263,8 @@ func (b *stringBuilder) Immutable() *stringBuilder {
 }
 
 // Comment sets the comment of the field.
-func (b *stringBuilder) Comment(string) *stringBuilder {
+func (b *stringBuilder) Comment(c string) *stringBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -272,17 +309,20 @@ func (b *stringBuilder) GoType(typ interface{}) *stringBuilder {
 // codegen extensions.
 //
 //	field.String("dir").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("DIR"),
+//		)
 //
-func (b *stringBuilder) Annotations(annotations ...Annotation) *stringBuilder {
+func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *stringBuilder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(stringType)
+	}
 	return b.desc
 }
 
@@ -292,7 +332,7 @@ type timeBuilder struct {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *timeBuilder) Nillable() *timeBuilder {
 	b.desc.Nillable = true
 	return b
@@ -305,7 +345,8 @@ func (b *timeBuilder) Optional() *timeBuilder {
 	return b
 }
 
-// Immutable indicates that this field cannot be updated.
+// Immutable fields are fields that can be set only in the creation of the entity.
+// i.e., no setters will be generated for the entity updaters (one and many).
 func (b *timeBuilder) Immutable() *timeBuilder {
 	b.desc.Immutable = true
 	return b
@@ -313,6 +354,7 @@ func (b *timeBuilder) Immutable() *timeBuilder {
 
 // Comment sets the comment of the field.
 func (b *timeBuilder) Comment(c string) *timeBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -366,11 +408,11 @@ func (b *timeBuilder) GoType(typ interface{}) *timeBuilder {
 // codegen extensions.
 //
 //	field.Time("deleted_at").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("DELETED_AT"),
+//		)
 //
-func (b *timeBuilder) Annotations(annotations ...Annotation) *timeBuilder {
+func (b *timeBuilder) Annotations(annotations ...schema.Annotation) *timeBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -406,7 +448,7 @@ func (b *boolBuilder) Default(v bool) *boolBuilder {
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *boolBuilder) Nillable() *boolBuilder {
 	b.desc.Nillable = true
 	return b
@@ -427,6 +469,7 @@ func (b *boolBuilder) Immutable() *boolBuilder {
 
 // Comment sets the comment of the field.
 func (b *boolBuilder) Comment(c string) *boolBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -457,11 +500,11 @@ func (b *boolBuilder) GoType(typ interface{}) *boolBuilder {
 // codegen extensions.
 //
 //	field.Bool("deleted").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("DELETED"),
+//		)
 //
-func (b *boolBuilder) Annotations(annotations ...Annotation) *boolBuilder {
+func (b *boolBuilder) Annotations(annotations ...schema.Annotation) *boolBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -482,8 +525,19 @@ func (b *bytesBuilder) Default(v []byte) *bytesBuilder {
 	return b
 }
 
+// DefaultFunc sets the function that is applied to set the default value
+// of the field on creation. For example:
+//
+//	field.Bytes("cuid").
+//		DefaultFunc(cuid.New)
+//
+func (b *bytesBuilder) DefaultFunc(fn interface{}) *bytesBuilder {
+	b.desc.Default = fn
+	return b
+}
+
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *bytesBuilder) Nillable() *bytesBuilder {
 	b.desc.Nillable = true
 	return b
@@ -496,6 +550,19 @@ func (b *bytesBuilder) Optional() *bytesBuilder {
 	return b
 }
 
+// Sensitive fields not printable and not serializable.
+func (b *bytesBuilder) Sensitive() *bytesBuilder {
+	b.desc.Sensitive = true
+	return b
+}
+
+// Unique makes the field unique within all vertices of this type.
+// Only supported in PostgreSQL.
+func (b *bytesBuilder) Unique() *bytesBuilder {
+	b.desc.Unique = true
+	return b
+}
+
 // Immutable indicates that this field cannot be updated.
 func (b *bytesBuilder) Immutable() *bytesBuilder {
 	b.desc.Immutable = true
@@ -503,7 +570,8 @@ func (b *bytesBuilder) Immutable() *bytesBuilder {
 }
 
 // Comment sets the comment of the field.
-func (b *bytesBuilder) Comment(string) *bytesBuilder {
+func (b *bytesBuilder) Comment(c string) *bytesBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -518,6 +586,45 @@ func (b *bytesBuilder) StructTag(s string) *bytesBuilder {
 // In SQLite, it does not have any effect on the type size, which is default to 1B bytes.
 func (b *bytesBuilder) MaxLen(i int) *bytesBuilder {
 	b.desc.Size = i
+	b.desc.Validators = append(b.desc.Validators, func(buf []byte) error {
+		if len(buf) > i {
+			return errors.New("value is greater than the required length")
+		}
+		return nil
+	})
+	return b
+}
+
+// MinLen adds a length validator for this field.
+// Operation fails if the length of the buffer is less than the given value.
+func (b *bytesBuilder) MinLen(i int) *bytesBuilder {
+	b.desc.Validators = append(b.desc.Validators, func(b []byte) error {
+		if len(b) < i {
+			return errors.New("value is less than the required length")
+		}
+		return nil
+	})
+	return b
+}
+
+// NotEmpty adds a length validator for this field.
+// Operation fails if the length of the buffer is zero.
+func (b *bytesBuilder) NotEmpty() *bytesBuilder {
+	return b.MinLen(1)
+}
+
+// Validate adds a validator for this field. Operation fails if the validation fails.
+//
+//	field.Bytes("blob").
+//		Validate(func(b []byte) error {
+//			if len(b) % 2 == 0 {
+//				return fmt.Errorf("ent/schema: blob length is even: %d", len(b))
+//			}
+//			return nil
+//		})
+//
+func (b *bytesBuilder) Validate(fn func([]byte) error) *bytesBuilder {
+	b.desc.Validators = append(b.desc.Validators, fn)
 	return b
 }
 
@@ -540,13 +647,7 @@ func (b *bytesBuilder) GoType(typ interface{}) *bytesBuilder {
 
 // Annotations adds a list of annotations to the field object to be used by
 // codegen extensions.
-//
-//	field.Bytes("ip").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
-//
-func (b *bytesBuilder) Annotations(annotations ...Annotation) *bytesBuilder {
+func (b *bytesBuilder) Annotations(annotations ...schema.Annotation) *bytesBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -567,6 +668,9 @@ func (b *bytesBuilder) SchemaType(types map[string]string) *bytesBuilder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *bytesBuilder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(bytesType)
+	}
 	return b.desc
 }
 
@@ -597,6 +701,7 @@ func (b *jsonBuilder) Immutable() *jsonBuilder {
 
 // Comment sets the comment of the field.
 func (b *jsonBuilder) Comment(c string) *jsonBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -622,14 +727,30 @@ func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
 
 // Annotations adds a list of annotations to the field object to be used by
 // codegen extensions.
-//
-//	field.JSON("json").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
-//
-func (b *jsonBuilder) Annotations(annotations ...Annotation) *jsonBuilder {
+func (b *jsonBuilder) Annotations(annotations ...schema.Annotation) *jsonBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Default sets the default value of the field. For example:
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		// A static default value.
+//		Default([]http.Dir{"/tmp"})
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		// A function for generating the default value.
+//		Default(DefaultDirs)
+//
+func (b *jsonBuilder) Default(v interface{}) *jsonBuilder {
+	b.desc.Default = v
+	switch fieldT, defaultT := b.desc.Info.RType.rtype, reflect.TypeOf(v); {
+	case fieldT == defaultT:
+	case defaultT.Kind() == reflect.Func:
+		b.desc.checkDefaultFunc(b.desc.Info.RType.rtype)
+	default:
+		b.desc.Err = fmt.Errorf("expect type (func() %[1]s) or (%[1]s) for other default value", b.desc.Info)
+	}
 	return b
 }
 
@@ -663,39 +784,19 @@ func (b *enumBuilder) Values(values ...string) *enumBuilder {
 //
 //	field.Enum("priority").
 //		NamedValues(
-//			"LOW", "low",
-//			"MID", "mid",
-//			"HIGH", "high",
+//			"Low", "LOW",
+//			"Mid", "MID",
+//			"High", "HIGH",
 //		)
 //
 func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
 	if len(namevalue)%2 == 1 {
-		b.desc.err = fmt.Errorf("Enum.NamedValues: odd argument count")
+		b.desc.Err = fmt.Errorf("Enum.NamedValues: odd argument count")
 		return b
 	}
 	for i := 0; i < len(namevalue); i += 2 {
 		b.desc.Enums = append(b.desc.Enums, struct{ N, V string }{N: namevalue[i], V: namevalue[i+1]})
 	}
-	return b
-}
-
-// ValueMap adds the given values in the map to the enum value.
-// The key in the map is the Go identifier and the value in the
-// map is the actual enum value.
-//
-// If keys in not titled, ent codegen will change it to be exported.
-//
-// Deprecated: the ValueMap method predates the NamedValues method and it
-// is planned be removed in v0.5.0. New code should use NamedValues instead.
-func (b *enumBuilder) ValueMap(values map[string]string) *enumBuilder {
-	enums := make([]struct{ N, V string }, 0, len(values))
-	for k, v := range values {
-		enums = append(enums, struct{ N, V string }{N: k, V: v})
-	}
-	sort.Slice(enums, func(i, j int) bool {
-		return enums[i].V < enums[j].V
-	})
-	b.desc.Enums = append(b.desc.Enums, enums...)
 	return b
 }
 
@@ -727,11 +828,12 @@ func (b *enumBuilder) Immutable() *enumBuilder {
 
 // Comment sets the comment of the field.
 func (b *enumBuilder) Comment(c string) *enumBuilder {
+	b.desc.Comment = c
 	return b
 }
 
 // Nillable indicates that this field is a nillable.
-// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
 func (b *enumBuilder) Nillable() *enumBuilder {
 	b.desc.Nillable = true
 	return b
@@ -760,11 +862,11 @@ func (b *enumBuilder) SchemaType(types map[string]string) *enumBuilder {
 // codegen extensions.
 //
 //	field.Enum("enum").
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("ENUM"),
+//		)
 //
-func (b *enumBuilder) Annotations(annotations ...Annotation) *enumBuilder {
+func (b *enumBuilder) Annotations(annotations ...schema.Annotation) *enumBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -782,6 +884,12 @@ type EnumValues interface {
 func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
 	b.Values(ev.Values()...)
 	b.desc.goType(ev, stringType)
+	// If an error already exists, let that be returned instead.
+	// Otherwise check that the underlying type is either a string
+	// or implements Stringer.
+	if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.Stringer() {
+		b.desc.Err = errors.New("enum values which implement ValueScanner must also implement Stringer")
+	}
 	return b
 }
 
@@ -799,6 +907,13 @@ type uuidBuilder struct {
 // In SQL dialects is the column name and Gremlin is the property.
 func (b *uuidBuilder) StorageKey(key string) *uuidBuilder {
 	b.desc.StorageKey = key
+	return b
+}
+
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
+func (b *uuidBuilder) Nillable() *uuidBuilder {
+	b.desc.Nillable = true
 	return b
 }
 
@@ -823,6 +938,7 @@ func (b *uuidBuilder) Immutable() *uuidBuilder {
 
 // Comment sets the comment of the field.
 func (b *uuidBuilder) Comment(c string) *uuidBuilder {
+	b.desc.Comment = c
 	return b
 }
 
@@ -842,7 +958,7 @@ func (b *uuidBuilder) StructTag(s string) *uuidBuilder {
 func (b *uuidBuilder) Default(fn interface{}) *uuidBuilder {
 	typ := reflect.TypeOf(fn)
 	if typ.Kind() != reflect.Func || typ.NumIn() != 0 || typ.NumOut() != 1 || typ.Out(0).String() != b.desc.Info.String() {
-		b.desc.err = fmt.Errorf("expect type (func() %s) for uuid default value", b.desc.Info)
+		b.desc.Err = fmt.Errorf("expect type (func() %s) for uuid default value", b.desc.Info)
 	}
 	b.desc.Default = fn
 	return b
@@ -865,11 +981,11 @@ func (b *uuidBuilder) SchemaType(types map[string]string) *uuidBuilder {
 // codegen extensions.
 //
 //	field.UUID("id", uuid.New()).
-//		Annotations(entgql.Config{
-//			Ordered: true,
-//		})
+//		Annotations(
+//			entgql.OrderField("ID"),
+//		)
 //
-func (b *uuidBuilder) Annotations(annotations ...Annotation) *uuidBuilder {
+func (b *uuidBuilder) Annotations(annotations ...schema.Annotation) *uuidBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -879,12 +995,129 @@ func (b *uuidBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 
-// Annotation is used to attach arbitrary metadata to the field object in codegen.
-// The object must be serializable to JSON raw value (e.g. struct, map or slice).
-// Template extensions can retrieve this metadata and use it inside their templates.
-type Annotation interface {
-	// Name defines the name of the annotation to be retrieved by the codegen.
-	Name() string
+// otherBuilder is the builder for other fields.
+type otherBuilder struct {
+	desc *Descriptor
+}
+
+// Unique makes the field unique within all vertices of this type.
+func (b *otherBuilder) Unique() *otherBuilder {
+	b.desc.Unique = true
+	return b
+}
+
+// Sensitive fields not printable and not serializable.
+func (b *otherBuilder) Sensitive() *otherBuilder {
+	b.desc.Sensitive = true
+	return b
+}
+
+// Default sets the default value of the field. For example:
+//
+//	field.Other("link", &Link{}).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		}).
+//		// A static default value.
+//		Default(&Link{Addr: "0.0.0.0"})
+//
+//	field.Other("link", &Link{}).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		}).
+//		// A function for generating the default value.
+//		Default(NewLink)
+//
+func (b *otherBuilder) Default(v interface{}) *otherBuilder {
+	b.desc.Default = v
+	switch fieldT, defaultT := b.desc.Info.RType.rtype, reflect.TypeOf(v); {
+	case fieldT == defaultT:
+	case defaultT.Kind() == reflect.Func:
+		b.desc.checkDefaultFunc(b.desc.Info.RType.rtype)
+	default:
+		b.desc.Err = fmt.Errorf("expect type (func() %[1]s) or (%[1]s) for other default value", b.desc.Info)
+	}
+	return b
+}
+
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated field.
+func (b *otherBuilder) Nillable() *otherBuilder {
+	b.desc.Nillable = true
+	return b
+}
+
+// Optional indicates that this field is optional on create.
+// Unlike edges, fields are required by default.
+func (b *otherBuilder) Optional() *otherBuilder {
+	b.desc.Optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *otherBuilder) Immutable() *otherBuilder {
+	b.desc.Immutable = true
+	return b
+}
+
+// Comment sets the comment of the field.
+func (b *otherBuilder) Comment(c string) *otherBuilder {
+	b.desc.Comment = c
+	return b
+}
+
+// StructTag sets the struct tag of the field.
+func (b *otherBuilder) StructTag(s string) *otherBuilder {
+	b.desc.Tag = s
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+// In SQL dialects is the column name and Gremlin is the property.
+func (b *otherBuilder) StorageKey(key string) *otherBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
+// SchemaType overrides the default database type with a custom
+// schema type (per dialect) for string.
+//
+//	field.Other("link", Link{}).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		})
+//
+func (b *otherBuilder) SchemaType(types map[string]string) *otherBuilder {
+	b.desc.SchemaType = types
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+//
+//	field.Other("link", &Link{}).
+//		SchemaType(map[string]string{
+//			dialect.MySQL:    "text",
+//			dialect.Postgres: "varchar",
+//		}).
+//		Annotations(
+//			entgql.OrderField("LINK"),
+//		)
+//
+func (b *otherBuilder) Annotations(annotations ...schema.Annotation) *otherBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *otherBuilder) Descriptor() *Descriptor {
+	if len(b.desc.SchemaType) == 0 {
+		b.desc.Err = fmt.Errorf("expect SchemaType to be set for other field")
+	}
+	return b.desc
 }
 
 // A Descriptor for field configuration.
@@ -904,13 +1137,9 @@ type Descriptor struct {
 	Enums         []struct{ N, V string } // enum values.
 	Sensitive     bool                    // sensitive info string field.
 	SchemaType    map[string]string       // override the schema type.
-	Annotations   []Annotation            // field annotations.
-	err           error
-}
-
-// Err returns the error, if any, that was added by the field builder.
-func (d *Descriptor) Err() error {
-	return d.err
+	Annotations   []schema.Annotation     // field annotations.
+	Comment       string                  // field comment.
+	Err           error
 }
 
 func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
@@ -918,11 +1147,13 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 	tv := indirect(t)
 	info := &TypeInfo{
 		Type:    d.Info.Type,
-		Ident:   tv.String(),
+		Ident:   t.String(),
 		PkgPath: tv.PkgPath(),
 		RType: &RType{
+			rtype:   t,
+			Kind:    t.Kind(),
 			Name:    tv.Name(),
-			Kind:    tv.Kind(),
+			Ident:   tv.String(),
 			PkgPath: tv.PkgPath(),
 			Methods: make(map[string]struct{ In, Out []*RType }, t.NumMethod()),
 		},
@@ -931,8 +1162,10 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
-	switch {
-	case t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
+	switch pt := reflect.PtrTo(t); {
+	case pt.Implements(valueScannerType):
+		t = pt
+		fallthrough
 	case t.Implements(valueScannerType):
 		n := t.NumMethod()
 		for i := 0; i < n; i++ {
@@ -940,19 +1173,39 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 			in := make([]*RType, m.Type.NumIn()-1)
 			for j := range in {
 				arg := m.Type.In(j + 1)
-				in[j] = &RType{Name: arg.Name(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
+				in[j] = &RType{Name: arg.Name(), Ident: arg.String(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
 			}
 			out := make([]*RType, m.Type.NumOut())
 			for j := range out {
 				ret := m.Type.Out(j)
-				out[j] = &RType{Name: ret.Name(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
+				out[j] = &RType{Name: ret.Name(), Ident: ret.String(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
 			}
 			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
 		}
+	case t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
 	default:
-		d.err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
+		d.Err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
 	}
 	d.Info = info
+}
+
+func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {
+	for _, typ := range []reflect.Type{reflect.TypeOf(d.Default), reflect.TypeOf(d.UpdateDefault)} {
+		if typ == nil || typ.Kind() != reflect.Func || d.Err != nil {
+			continue
+		}
+		err := fmt.Errorf("expect type (func() %s) for default value", d.Info)
+		if typ.NumIn() != 0 || typ.NumOut() != 1 {
+			d.Err = err
+		}
+		rtype := expectType
+		if d.Info.RType != nil {
+			rtype = d.Info.RType.rtype
+		}
+		if !typ.Out(0).AssignableTo(rtype) {
+			d.Err = err
+		}
+	}
 }
 
 var (
@@ -960,6 +1213,7 @@ var (
 	bytesType        = reflect.TypeOf([]byte(nil))
 	timeType         = reflect.TypeOf(time.Time{})
 	stringType       = reflect.TypeOf("")
+	valuerType       = reflect.TypeOf((*driver.Valuer)(nil)).Elem()
 	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
 )
 

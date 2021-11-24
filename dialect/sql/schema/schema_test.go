@@ -7,7 +7,7 @@ package schema
 import (
 	"testing"
 
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -40,7 +40,8 @@ func TestColumn_ConvertibleTo(t *testing.T) {
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint8}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint16}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint32}))
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
+	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
+	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 1}))
 
 	c1 = &Column{Type: field.TypeInt}
 	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeInt}))
@@ -51,7 +52,8 @@ func TestColumn_ConvertibleTo(t *testing.T) {
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint8}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint16}))
 	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeUint32}))
-	require.False(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
+	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString}))
+	require.True(t, c1.ConvertibleTo(&Column{Type: field.TypeString, Size: 1}))
 }
 
 func TestColumn_ScanDefault(t *testing.T) {
@@ -92,4 +94,10 @@ func TestColumn_ScanDefault(t *testing.T) {
 	require.NoError(t, c1.ScanDefault("false"))
 	require.Equal(t, false, c1.Default)
 	require.Error(t, c1.ScanDefault("foo"))
+
+	c1 = &Column{Type: field.TypeUUID}
+	require.NoError(t, c1.ScanDefault("gen_random_uuid()"))
+	require.Equal(t, nil, c1.Default)
+	require.NoError(t, c1.ScanDefault("00000000-0000-0000-0000-000000000000"))
+	require.Equal(t, "00000000-0000-0000-0000-000000000000", c1.Default)
 }

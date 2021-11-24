@@ -5,7 +5,10 @@
 package schema
 
 import (
-	"github.com/facebook/ent"
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+
+	"github.com/google/uuid"
 )
 
 // Item holds the schema definition for the Item entity.
@@ -15,10 +18,13 @@ type Item struct {
 
 // Fields of the Item.
 func (Item) Fields() []ent.Field {
-	return nil
-}
-
-// Edges of the Item.
-func (Item) Edges() []ent.Edge {
-	return nil
+	return []ent.Field{
+		field.String("id").
+			DefaultFunc(uuid.NewString).
+			MaxLen(64),
+		field.String("text").
+			MaxLen(128).
+			Unique().
+			Optional(),
+	}
 }

@@ -10,25 +10,24 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/spec"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 )
 
 // SpecDelete is the builder for deleting a Spec entity.
 type SpecDelete struct {
 	config
-	hooks      []Hook
-	mutation   *SpecMutation
-	predicates []predicate.Spec
+	hooks    []Hook
+	mutation *SpecMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the SpecDelete builder.
 func (sd *SpecDelete) Where(ps ...predicate.Spec) *SpecDelete {
-	sd.predicates = append(sd.predicates, ps...)
+	sd.mutation.Where(ps...)
 	return sd
 }
 
@@ -52,6 +51,9 @@ func (sd *SpecDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(sd.hooks) - 1; i >= 0; i-- {
+			if sd.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = sd.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sd.mutation); err != nil {
@@ -81,7 +83,7 @@ func (sd *SpecDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (sd *SpecDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(spec.Label)
-	for _, p := range sd.predicates {
+	for _, p := range sd.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

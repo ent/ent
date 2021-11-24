@@ -11,26 +11,29 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // Card is the model entity for the Card schema.
 type Card struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID string `json:"-"`
 	// CreateTime holds the value of the "create_time" field.
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// Balance holds the value of the "balance" field.
+	Balance float64 `json:"balance,omitempty"`
 	// Number holds the value of the "number" field.
-	Number string `json:"number,omitempty"`
+	Number string `json:"-"`
 	// Name holds the value of the "name" field.
+	// Exact name written on card
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CardQuery when eager-loading is set.
-	Edges CardEdges `json:"edges"`
+	Edges CardEdges `json:"edges" mashraki:"edges"`
 
 	// StaticField defined by templates.
 	StaticField string `json:"boring,omitempty"`
@@ -39,9 +42,9 @@ type Card struct {
 // CardEdges holds the relations/edges for other nodes in the graph.
 type CardEdges struct {
 	// Owner holds the value of the owner edge.
-	Owner *User
+	Owner *User `json:"owner,omitempty"`
 	// Spec holds the value of the spec edge.
-	Spec []*Spec
+	Spec []*Spec `json:"spec,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -77,11 +80,12 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanc struct {
-		ID         string `json:"id,omitempty"`
-		CreateTime int64  `json:"create_time,omitempty"`
-		UpdateTime int64  `json:"update_time,omitempty"`
-		Number     string `json:"number,omitempty"`
-		Name       string `json:"name,omitempty"`
+		ID         string  `json:"id,omitempty"`
+		CreateTime int64   `json:"create_time,omitempty"`
+		UpdateTime int64   `json:"update_time,omitempty"`
+		Balance    float64 `json:"balance,omitempty"`
+		Number     string  `json:"number,omitempty"`
+		Name       string  `json:"name,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -89,30 +93,31 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 	c.ID = scanc.ID
 	c.CreateTime = time.Unix(0, scanc.CreateTime)
 	c.UpdateTime = time.Unix(0, scanc.UpdateTime)
+	c.Balance = scanc.Balance
 	c.Number = scanc.Number
 	c.Name = scanc.Name
 	return nil
 }
 
-// QueryOwner queries the owner edge of the Card.
+// QueryOwner queries the "owner" edge of the Card entity.
 func (c *Card) QueryOwner() *UserQuery {
 	return (&CardClient{config: c.config}).QueryOwner(c)
 }
 
-// QuerySpec queries the spec edge of the Card.
+// QuerySpec queries the "spec" edge of the Card entity.
 func (c *Card) QuerySpec() *SpecQuery {
 	return (&CardClient{config: c.config}).QuerySpec(c)
 }
 
 // Update returns a builder for updating this Card.
-// Note that, you need to call Card.Unwrap() before calling this method, if this Card
+// Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Card) Update() *CardUpdateOne {
 	return (&CardClient{config: c.config}).UpdateOne(c)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (c *Card) Unwrap() *Card {
 	tx, ok := c.config.driver.(*txDriver)
 	if !ok {
@@ -131,6 +136,8 @@ func (c *Card) String() string {
 	builder.WriteString(c.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", update_time=")
 	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", balance=")
+	builder.WriteString(fmt.Sprintf("%v", c.Balance))
 	builder.WriteString(", number=")
 	builder.WriteString(c.Number)
 	builder.WriteString(", name=")
@@ -149,11 +156,12 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanc []struct {
-		ID         string `json:"id,omitempty"`
-		CreateTime int64  `json:"create_time,omitempty"`
-		UpdateTime int64  `json:"update_time,omitempty"`
-		Number     string `json:"number,omitempty"`
-		Name       string `json:"name,omitempty"`
+		ID         string  `json:"id,omitempty"`
+		CreateTime int64   `json:"create_time,omitempty"`
+		UpdateTime int64   `json:"update_time,omitempty"`
+		Balance    float64 `json:"balance,omitempty"`
+		Number     string  `json:"number,omitempty"`
+		Name       string  `json:"name,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -163,6 +171,7 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 			ID:         v.ID,
 			CreateTime: time.Unix(0, v.CreateTime),
 			UpdateTime: time.Unix(0, v.UpdateTime),
+			Balance:    v.Balance,
 			Number:     v.Number,
 			Name:       v.Name,
 		})

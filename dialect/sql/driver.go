@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent/dialect"
 )
 
 // Driver is a dialect.Driver implementation for SQL based databases.
@@ -132,7 +132,7 @@ var _ dialect.Driver = (*Driver)(nil)
 
 type (
 	// Rows wraps the sql.Rows to avoid locks copy.
-	Rows struct{ *sql.Rows }
+	Rows struct{ ColumnScanner }
 	// Result is an alias to sql.Result.
 	Result = sql.Result
 	// NullBool is an alias to sql.NullBool.
@@ -148,3 +148,32 @@ type (
 	// TxOptions holds the transaction options to be used in DB.BeginTx.
 	TxOptions = sql.TxOptions
 )
+
+// NullScanner represents an sql.Scanner that may be null.
+// NullScanner implements the sql.Scanner interface so it can
+// be used as a scan destination, similar to the types above.
+type NullScanner struct {
+	S     sql.Scanner
+	Valid bool // Valid is true if the Scan value is not NULL.
+}
+
+// Scan implements the Scanner interface.
+func (n *NullScanner) Scan(value interface{}) error {
+	n.Valid = value != nil
+	if n.Valid {
+		return n.S.Scan(value)
+	}
+	return nil
+}
+
+// ColumnScanner is the interface that wraps the standard
+// sql.Rows methods used for scanning database rows.
+type ColumnScanner interface {
+	Close() error
+	ColumnTypes() ([]*sql.ColumnType, error)
+	Columns() ([]string, error)
+	Err() error
+	Next() bool
+	NextResultSet() bool
+	Scan(dest ...interface{}) error
+}

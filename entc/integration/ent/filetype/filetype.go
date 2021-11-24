@@ -21,13 +21,11 @@ const (
 	FieldType = "type"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
-
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
-
 	// Table holds the table name of the filetype in the database.
 	Table = "file_types"
-	// FilesTable is the table the holds the files relation/edge.
+	// FilesTable is the table that holds the files relation/edge.
 	FilesTable = "files"
 	// FilesInverseTable is the table name for the File entity.
 	// It exists in this package in order to avoid circular dependency with the "file" package.
@@ -54,10 +52,10 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Type defines the type for the type enum field.
+// Type defines the type for the "type" enum field.
 type Type string
 
-// TypePNG is the default Type.
+// TypePNG is the default value of the Type enum.
 const DefaultType = TypePNG
 
 // Type values.
@@ -81,10 +79,10 @@ func TypeValidator(_type Type) error {
 	}
 }
 
-// State defines the type for the state enum field.
+// State defines the type for the "state" enum field.
 type State string
 
-// StateOn is the default State.
+// StateOn is the default value of the State enum.
 const DefaultState = StateOn
 
 // State values.

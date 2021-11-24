@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/entc/integration/json/ent/migrate"
+	"entgo.io/ent/entc/integration/json/ent/migrate"
 
-	"github.com/facebook/ent/entc/integration/json/ent/user"
+	"entgo.io/ent/entc/integration/json/ent/user"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 )
 
 // Client is the client that holds all ent builders.
@@ -66,9 +66,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = tx
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
@@ -76,16 +77,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}, nil
 }
 
-// BeginTx returns a transactional client with options.
+// BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
 	}
-	tx, err := c.driver.(*sql.Driver).BeginTx(ctx, opts)
+	tx, err := c.driver.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
+	}).BeginTx(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		config: cfg,
 		User:   NewUserClient(cfg),
@@ -103,7 +107,8 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = dialect.Debug(c.driver, c.log)
 	client := &Client{config: cfg}
 	client.init()
 	return client
@@ -142,7 +147,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }
@@ -186,7 +191,9 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.

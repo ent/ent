@@ -13,11 +13,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/schema"
-	"github.com/facebook/ent/entc/integration/template/ent/group"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
-	"github.com/facebook/ent/entc/integration/template/ent/user"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
+	"entgo.io/ent/entc/integration/template/ent/group"
+	"entgo.io/ent/entc/integration/template/ent/pet"
+	"entgo.io/ent/entc/integration/template/ent/user"
 
 	"golang.org/x/sync/semaphore"
 )
@@ -225,7 +225,7 @@ func (t *tables) Load(ctx context.Context, querier querier) ([]string, error) {
 	return tables, err
 }
 
-func (tables) load(ctx context.Context, querier querier) ([]string, error) {
+func (*tables) load(ctx context.Context, querier querier) ([]string, error) {
 	rows := &sql.Rows{}
 	query, args := sql.Select("type").
 		From(sql.Table(schema.TypeTable)).

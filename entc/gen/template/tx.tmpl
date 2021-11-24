@@ -4,6 +4,8 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
 {{ define "tx" }}
 
 {{ template "header" $ }}
@@ -12,16 +14,16 @@ import (
 	"context"
 	"sync"
 
-	"github.com/facebook/ent/dialect"
+	"entgo.io/ent/dialect"
 )
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	{{ range $_, $n := $.Nodes -}}
+	{{- range $n := $.Nodes }}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.Name }}Client
-	{{ end }}
+	{{- end }}
 
 	// lazily loaded.
 	client     *Client
@@ -55,7 +57,7 @@ type Tx struct {
 		// and returns a {{ $iface }}. For example:
 		//
 		//	hook := func(next ent.{{ $iface }}) ent.{{ $iface }} {
-		//		return ent.{{ $func }}Func(func(context.Context, tx *ent.Tx) error {
+		//		return ent.{{ $func }}Func(func(ctx context.Context, tx *ent.Tx) error {
 		//			// Do some stuff before.
 		//			if err := next.{{ $func }}(ctx, tx); err != nil {
 		//				return err
@@ -107,9 +109,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	{{ range $_, $n := $.Nodes -}}
-    	tx.{{ $n.Name }} = New{{ $n.Name }}Client(tx.config)
-	{{ end -}}
+	{{- range $n := $.Nodes }}
+		tx.{{ $n.Name }} = New{{ $n.Name }}Client(tx.config)
+	{{- end }}
 }
 
 {{/* first node for doc example */}}

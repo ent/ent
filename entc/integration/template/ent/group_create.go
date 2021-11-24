@@ -11,9 +11,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/template/ent/group"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/template/ent/group"
+	"entgo.io/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -23,7 +23,7 @@ type GroupCreate struct {
 	hooks    []Hook
 }
 
-// SetMaxUsers sets the max_users field.
+// SetMaxUsers sets the "max_users" field.
 func (gc *GroupCreate) SetMaxUsers(i int) *GroupCreate {
 	gc.mutation.SetMaxUsers(i)
 	return gc
@@ -55,11 +55,17 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 				return nil, err
 			}
 			gc.mutation = mutation
-			node, err = gc.sqlSave(ctx)
+			if node, err = gc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(gc.hooks) - 1; i >= 0; i-- {
+			if gc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = gc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
@@ -78,10 +84,23 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 	return v
 }
 
+// Exec executes the query.
+func (gc *GroupCreate) Exec(ctx context.Context) error {
+	_, err := gc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gc *GroupCreate) ExecX(ctx context.Context) {
+	if err := gc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.MaxUsers(); !ok {
-		return &ValidationError{Name: "max_users", err: errors.New("ent: missing required field \"max_users\"")}
+		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "Group.max_users"`)}
 	}
 	return nil
 }
@@ -89,8 +108,8 @@ func (gc *GroupCreate) check() error {
 func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	_node, _spec := gc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -121,7 +140,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// GroupCreateBulk is the builder for creating a bulk of Group entities.
+// GroupCreateBulk is the builder for creating many Group entities in bulk.
 type GroupCreateBulk struct {
 	config
 	builders []*GroupCreate
@@ -149,19 +168,23 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, gcb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gcb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, gcb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -178,11 +201,24 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
 	v, err := gcb.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (gcb *GroupCreateBulk) Exec(ctx context.Context) error {
+	_, err := gcb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (gcb *GroupCreateBulk) ExecX(ctx context.Context) {
+	if err := gcb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

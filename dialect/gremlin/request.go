@@ -7,10 +7,10 @@ package gremlin
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 )
 
 type (

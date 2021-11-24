@@ -8,39 +8,39 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/ent/schema"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/task"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
 // TaskUpdate is the builder for updating Task entities.
 type TaskUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *TaskMutation
-	predicates []predicate.Task
+	hooks    []Hook
+	mutation *TaskMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the TaskUpdate builder.
 func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	tu.predicates = append(tu.predicates, ps...)
+	tu.mutation.Where(ps...)
 	return tu
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tu *TaskUpdate) SetPriority(s schema.Priority) *TaskUpdate {
 	tu.mutation.ResetPriority()
 	tu.mutation.SetPriority(s)
 	return tu
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tu *TaskUpdate) SetNillablePriority(s *schema.Priority) *TaskUpdate {
 	if s != nil {
 		tu.SetPriority(*s)
@@ -48,7 +48,7 @@ func (tu *TaskUpdate) SetNillablePriority(s *schema.Priority) *TaskUpdate {
 	return tu
 }
 
-// AddPriority adds s to priority.
+// AddPriority adds s to the "priority" field.
 func (tu *TaskUpdate) AddPriority(s schema.Priority) *TaskUpdate {
 	tu.mutation.AddPriority(s)
 	return tu
@@ -59,7 +59,7 @@ func (tu *TaskUpdate) Mutation() *TaskMutation {
 	return tu.mutation
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -85,6 +85,9 @@ func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(tu.hooks) - 1; i >= 0; i-- {
+			if tu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tu.mutation); err != nil {
@@ -120,7 +123,7 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 func (tu *TaskUpdate) check() error {
 	if v, ok := tu.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -140,7 +143,7 @@ func (tu *TaskUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (tu *TaskUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(task.Label)
-	for _, p := range tu.predicates {
+	for _, p := range tu.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -160,18 +163,19 @@ func (tu *TaskUpdate) gremlin() *dsl.Traversal {
 // TaskUpdateOne is the builder for updating a single Task entity.
 type TaskUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *TaskMutation
 }
 
-// SetPriority sets the priority field.
+// SetPriority sets the "priority" field.
 func (tuo *TaskUpdateOne) SetPriority(s schema.Priority) *TaskUpdateOne {
 	tuo.mutation.ResetPriority()
 	tuo.mutation.SetPriority(s)
 	return tuo
 }
 
-// SetNillablePriority sets the priority field if the given value is not nil.
+// SetNillablePriority sets the "priority" field if the given value is not nil.
 func (tuo *TaskUpdateOne) SetNillablePriority(s *schema.Priority) *TaskUpdateOne {
 	if s != nil {
 		tuo.SetPriority(*s)
@@ -179,7 +183,7 @@ func (tuo *TaskUpdateOne) SetNillablePriority(s *schema.Priority) *TaskUpdateOne
 	return tuo
 }
 
-// AddPriority adds s to priority.
+// AddPriority adds s to the "priority" field.
 func (tuo *TaskUpdateOne) AddPriority(s schema.Priority) *TaskUpdateOne {
 	tuo.mutation.AddPriority(s)
 	return tuo
@@ -190,7 +194,14 @@ func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
 	return tuo.mutation
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (tuo *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
+	tuo.fields = append([]string{field}, fields...)
+	return tuo
+}
+
+// Save executes the query and returns the updated Task entity.
 func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 	var (
 		err  error
@@ -216,6 +227,9 @@ func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 			return node, err
 		})
 		for i := len(tuo.hooks) - 1; i >= 0; i-- {
+			if tuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = tuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, tuo.mutation); err != nil {
@@ -251,7 +265,7 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 func (tuo *TaskUpdateOne) check() error {
 	if v, ok := tuo.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -261,7 +275,7 @@ func (tuo *TaskUpdateOne) gremlinSave(ctx context.Context) (*Task, error) {
 	res := &gremlin.Response{}
 	id, ok := tuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Task.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Task.id" for update`)}
 	}
 	query, bindings := tuo.gremlin(id).Query()
 	if err := tuo.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -288,7 +302,16 @@ func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := tuo.mutation.AddedPriority(); ok {
 		v.Property(dsl.Single, task.FieldPriority, __.Union(__.Values(task.FieldPriority), __.Constant(value)).Sum())
 	}
-	v.ValueMap(true)
+	if len(tuo.fields) > 0 {
+		fields := make([]interface{}, 0, len(tuo.fields)+1)
+		fields = append(fields, true)
+		for _, f := range tuo.fields {
+			fields = append(fields, f)
+		}
+		v.ValueMap(fields...)
+	} else {
+		v.ValueMap(true)
+	}
 	trs = append(trs, v)
 	return dsl.Join(trs...)
 }

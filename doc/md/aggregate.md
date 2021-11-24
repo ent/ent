@@ -50,3 +50,38 @@ func Do(ctx context.Context, client *ent.Client) {
 		Strings(ctx)
 }
 ```
+
+## Group By Edge
+
+Custom aggregation functions can be useful if you want to write your own storage-specific logic.
+
+The following shows how to group by the `id` and the `name` of all users and calculate the average `age` of their pets.
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	"<project>/ent"
+	"<project>/ent/pet"
+	"<project>/ent/user"
+)
+
+func Do(ctx context.Context, client *ent.Client) {
+	var users []struct {
+		ID      int
+		Name    string
+		Average float64
+	}
+	err := client.User.Query().
+		GroupBy(user.FieldID, user.FieldName).
+		Aggregate(func(s *sql.Selector) string {
+			t := sql.Table(pet.Table)
+			s.Join(t).On(s.C(user.FieldID), t.C(pet.OwnerColumn))
+			return sql.As(sql.Avg(t.C(pet.FieldAge)), "average")
+		}).
+		Scan(ctx, &users)
+}
+```

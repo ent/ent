@@ -111,6 +111,65 @@ func TestScanSlice(t *testing.T) {
 	require.NoError(t, ScanSlice(toRows(mock), &pids))
 	require.Equal(t, u1, pids[0].String())
 	require.Equal(t, u2, pids[1].String())
+
+	mock = sqlmock.NewRows([]string{"id", "first", "last"}).
+		AddRow(10, "Ariel", "Mashraki")
+	err := ScanSlice(toRows(mock), nil)
+	require.EqualError(t, err, "sql/scan: ScanSlice(nil)")
+	type P struct {
+		_     int
+		ID    int
+		First string
+		Last  string
+	}
+	var p []P
+	err = ScanSlice(toRows(mock), p)
+	require.EqualError(t, err, "sql/scan: ScanSlice(non-pointer []sql.P)")
+
+	require.NoError(t, ScanSlice(toRows(mock), &p))
+	require.Equal(t, 10, p[0].ID)
+	require.Equal(t, "Ariel", p[0].First)
+	require.Equal(t, "Mashraki", p[0].Last)
+
+	var pp []struct{ _, id int }
+	mock = sqlmock.NewRows([]string{"id"}).
+		AddRow(10)
+	err = ScanSlice(toRows(mock), &pp)
+	require.EqualError(t, err, "sql/scan: missing struct field for column: id (id)")
+	require.Empty(t, pp)
+}
+
+func TestScanNestedStruct(t *testing.T) {
+	mock := sqlmock.NewRows([]string{"name", "age"}).
+		AddRow("foo", 1).
+		AddRow("bar", 2).
+		AddRow("baz", nil)
+	type T struct{ Name string }
+	var v []struct {
+		T
+		Age int
+	}
+	require.NoError(t, ScanSlice(toRows(mock), &v))
+	require.Equal(t, "foo", v[0].Name)
+	require.Equal(t, 1, v[0].Age)
+	require.Equal(t, "bar", v[1].Name)
+	require.Equal(t, 2, v[1].Age)
+	require.Equal(t, "baz", v[2].Name)
+	require.Equal(t, 0, v[2].Age)
+
+	mock = sqlmock.NewRows([]string{"name", "age"}).
+		AddRow("foo", 1).
+		AddRow("bar", nil)
+	type T1 struct{ Name **string }
+	var v1 []struct {
+		T1
+		Age *int
+	}
+	require.NoError(t, ScanSlice(toRows(mock), &v1))
+	require.Equal(t, "foo", **v1[0].Name)
+	require.Equal(t, "bar", **v1[1].Name)
+	require.Equal(t, 1, *v1[0].Age)
+	require.Nil(t, v1[1].Age)
 }
 
 func TestScanSlicePtr(t *testing.T) {
@@ -167,6 +226,14 @@ func TestScanInt64(t *testing.T) {
 	mock = sqlmock.NewRows([]string{"count"}).
 		AddRow("10")
 	n, err = ScanInt64(toRows(mock))
+	require.NoError(t, err)
+	require.EqualValues(t, 10, n)
+}
+
+func TestScanValue(t *testing.T) {
+	mock := sqlmock.NewRows([]string{"count"}).
+		AddRow(10)
+	n, err := ScanValue(toRows(mock))
 	require.NoError(t, err)
 	require.EqualValues(t, 10, n)
 }

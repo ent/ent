@@ -7,11 +7,13 @@ package schema
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/schema/field"
 )
 
 const (
@@ -33,6 +35,7 @@ type Table struct {
 	Indexes     []*Index
 	PrimaryKey  []*Column
 	ForeignKeys []*ForeignKey
+	Annotation  *entsql.Annotation
 }
 
 // NewTable returns a new table with the given name.
@@ -45,7 +48,8 @@ func NewTable(name string) *Table {
 
 // AddPrimary adds a new primary key to the table.
 func (t *Table) AddPrimary(c *Column) *Table {
-	t.Columns = append(t.Columns, c)
+	c.Key = PrimaryKey
+	t.AddColumn(c)
 	t.PrimaryKey = append(t.PrimaryKey, c)
 	return t
 }
@@ -60,6 +64,18 @@ func (t *Table) AddForeignKey(fk *ForeignKey) *Table {
 func (t *Table) AddColumn(c *Column) *Table {
 	t.columns[c.Name] = c
 	t.Columns = append(t.Columns, c)
+	return t
+}
+
+// HasColumn reports if the table contains a column with the given name.
+func (t *Table) HasColumn(name string) bool {
+	_, ok := t.columns[name]
+	return ok
+}
+
+// SetAnnotation the entsql.Annotation on the table.
+func (t *Table) SetAnnotation(ant *entsql.Annotation) *Table {
+	t.Annotation = ant
 	return t
 }
 
@@ -97,10 +113,19 @@ func (t *Table) column(name string) (*Column, bool) {
 	return nil, false
 }
 
+// Index returns a table index by its exact name.
+func (t *Table) Index(name string) (*Index, bool) {
+	idx, ok := t.index(name)
+	if ok && idx.Name == name {
+		return idx, ok
+	}
+	return nil, false
+}
+
 // index returns a table index by its name.
 func (t *Table) index(name string) (*Index, bool) {
 	for _, idx := range t.Indexes {
-		if idx.Name == name {
+		if name == idx.Name || name == idx.realname {
 			return idx, true
 		}
 		// Same as below, there are cases where the index name
@@ -122,6 +147,19 @@ func (t *Table) index(name string) (*Index, bool) {
 		return &Index{Name: name, Unique: c.Unique, Columns: []*Column{c}, columns: []string{c.Name}}, true
 	}
 	return nil, false
+}
+
+// hasIndex reports if the table has at least one index that matches the given names.
+func (t *Table) hasIndex(names ...string) bool {
+	for i := range names {
+		if names[i] == "" {
+			continue
+		}
+		if _, ok := t.index(names[i]); ok {
+			return true
+		}
+	}
+	return false
 }
 
 // fk returns a table foreign-key by its symbol.
@@ -148,6 +186,7 @@ type Column struct {
 	Nullable   bool              // null or not null attribute.
 	Default    interface{}       // default value.
 	Enums      []string          // enum values.
+	Collation  string            // collation type (utf8mb4_unicode_ci, utf8mb4_general_ci)
 	typ        string            // row column type (used for Rows.Scan).
 	indexes    Indexes           // linked indexes.
 	foreign    *ForeignKey       // linked foreign-key.
@@ -165,7 +204,11 @@ func (c *Column) PrimaryKey() bool { return c.Key == PrimaryKey }
 func (c *Column) ConvertibleTo(d *Column) bool {
 	switch {
 	case c.Type == d.Type:
-		return c.Size <= d.Size
+		if c.Size != 0 && d.Size != 0 {
+			// Types match and have a size constraint.
+			return c.Size <= d.Size
+		}
+		return true
 	case c.IntType() && d.IntType() || c.UintType() && d.UintType():
 		return c.Type <= d.Type
 	case c.UintType() && d.IntType():
@@ -173,6 +216,8 @@ func (c *Column) ConvertibleTo(d *Column) bool {
 		return c.Type-field.TypeUint8 <= d.Type-field.TypeInt8
 	case c.Type == field.TypeString && d.Type == field.TypeEnum ||
 		c.Type == field.TypeEnum && d.Type == field.TypeString:
+		return true
+	case c.Type.Integer() && d.Type == field.TypeString:
 		return true
 	}
 	return c.FloatType() && d.FloatType()
@@ -194,74 +239,82 @@ func (c *Column) ScanDefault(value string) error {
 	case c.IntType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning int value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning int value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.Int64
 	case c.UintType():
 		v := &sql.NullInt64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning uint value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning uint value for column %q: %w", c.Name, err)
 		}
 		c.Default = uint64(v.Int64)
 	case c.FloatType():
 		v := &sql.NullFloat64{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning float value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning float value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.Float64
 	case c.Type == field.TypeBool:
 		v := &sql.NullBool{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning bool value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning bool value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.Bool
 	case c.Type == field.TypeString || c.Type == field.TypeEnum:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning string value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning string value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.String
 	case c.Type == field.TypeJSON:
 		v := &sql.NullString{}
 		if err := v.Scan(value); err != nil {
-			return fmt.Errorf("scanning json value for column %q: %v", c.Name, err)
+			return fmt.Errorf("scanning json value for column %q: %w", c.Name, err)
 		}
 		c.Default = v.String
+	case c.Type == field.TypeBytes:
+		c.Default = []byte(value)
+	case c.Type == field.TypeUUID:
+		// skip function
+		if !strings.Contains(value, "()") {
+			c.Default = value
+		}
 	default:
-		return fmt.Errorf("unsupported default type: %v", c.Type)
+		return fmt.Errorf("unsupported default type: %v default to %q", c.Type, value)
 	}
 	return nil
 }
 
-// defaultValue adds tge `DEFAULT` attribute the the column.
+// defaultValue adds the `DEFAULT` attribute to the column.
 // Note that, in SQLite if a NOT NULL constraint is specified,
 // then the column must have a default value which not NULL.
 func (c *Column) defaultValue(b *sql.ColumnBuilder) {
-	// has default, and it's supported in the database level.
-	if c.Default != nil && c.supportDefault() {
-		attr := "DEFAULT "
-		switch v := c.Default.(type) {
-		case bool:
-			attr += strconv.FormatBool(v)
-		case string:
-			// Escape single quote by replacing each with 2.
-			attr += fmt.Sprintf("'%s'", strings.Replace(v, "'", "''", -1))
-		default:
-			attr += fmt.Sprint(v)
-		}
-		b.Attr(attr)
+	if c.Default == nil || !c.supportDefault() {
+		return
 	}
+	// Has default and the database supports adding this default.
+	attr := fmt.Sprint(c.Default)
+	switch v := c.Default.(type) {
+	case bool:
+		attr = strconv.FormatBool(v)
+	case string:
+		if t := c.Type; t != field.TypeUUID && t != field.TypeTime {
+			// Escape single quote by replacing each with 2.
+			attr = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
+		}
+	}
+	b.Attr("DEFAULT " + attr)
 }
 
 // supportDefault reports if the column type supports default value.
 func (c Column) supportDefault() bool {
-	switch {
-	case c.Type == field.TypeString || c.Type == field.TypeEnum:
+	switch t := c.Type; t {
+	case field.TypeString, field.TypeEnum:
 		return c.Size < 1<<16 // not a text.
-	case c.Type.Numeric(), c.Type == field.TypeBool:
+	case field.TypeBool, field.TypeTime, field.TypeUUID:
 		return true
 	default:
-		return false
+		return t.Numeric()
 	}
 }
 
@@ -274,7 +327,7 @@ func (c *Column) unique(b *sql.ColumnBuilder) {
 	}
 }
 
-// nullable adds the `NULL`/`NOT NULL` attribute to the column. it is exist in
+// nullable adds the `NULL`/`NOT NULL` attribute to the column if it exists in
 // a different function to share the common declaration between the two dialects.
 func (c *Column) nullable(b *sql.ColumnBuilder) {
 	attr := Null
@@ -282,22 +335,6 @@ func (c *Column) nullable(b *sql.ColumnBuilder) {
 		attr = "NOT " + attr
 	}
 	b.Attr(attr)
-}
-
-// defaultSize returns the default size for MySQL varchar type based
-// on column size, charset and table indexes, in order to avoid index
-// prefix key limit (767).
-func (c *Column) defaultSize(version string) int64 {
-	size := DefaultStringLen
-	switch {
-	// version is >= 5.7.
-	case compareVersions(version, "5.7.0") != -1:
-	// non-unique, or not part of any index (reaching the error 1071).
-	case !c.Unique && len(c.indexes) == 0:
-	default:
-		size = 191
-	}
-	return size
 }
 
 // scanTypeOr returns the scanning type or the given value.
@@ -316,6 +353,24 @@ type ForeignKey struct {
 	RefColumns []*Column       // referenced columns.
 	OnUpdate   ReferenceOption // action on update.
 	OnDelete   ReferenceOption // action on delete.
+}
+
+func (fk ForeignKey) column(name string) (*Column, bool) {
+	for _, c := range fk.Columns {
+		if c.Name == name {
+			return c, true
+		}
+	}
+	return nil, false
+}
+
+func (fk ForeignKey) refColumn(name string) (*Column, bool) {
+	for _, c := range fk.RefColumns {
+		if c.Name == name {
+			return c, true
+		}
+	}
+	return nil, false
 }
 
 // DSL returns a default DSL query for a foreign-key.
@@ -357,17 +412,18 @@ func (r ReferenceOption) ConstName() string {
 	if r == NoAction {
 		return ""
 	}
-	return strings.Replace(strings.Title(strings.ToLower(string(r))), " ", "", -1)
+	return strings.ReplaceAll(strings.Title(strings.ToLower(string(r))), " ", "")
 }
 
 // Index definition for table index.
 type Index struct {
-	Name     string    // index name.
-	Unique   bool      // uniqueness.
-	Columns  []*Column // actual table columns.
-	columns  []string  // columns loaded from query scan.
-	primary  bool      // primary key index.
-	realname string    // real name in the database (Postgres only).
+	Name       string                  // index name.
+	Unique     bool                    // uniqueness.
+	Columns    []*Column               // actual table columns.
+	Annotation *entsql.IndexAnnotation // index annotation.
+	columns    []string                // columns loaded from query scan.
+	primary    bool                    // primary key index.
+	realname   string                  // real name in the database (Postgres only).
 }
 
 // Builder returns the query builder for index creation. The DSL is identical in all dialects.
@@ -486,4 +542,34 @@ func compare(v1, v2 int) int {
 		return -1
 	}
 	return 1
+}
+
+// addChecks appends the CHECK clauses from the entsql.Annotation.
+func addChecks(t *sql.TableBuilder, ant *entsql.Annotation) {
+	if check := ant.Check; check != "" {
+		t.Checks(func(b *sql.Builder) {
+			b.WriteString("CHECK " + checkExpr(check))
+		})
+	}
+	if checks := ant.Checks; len(ant.Checks) > 0 {
+		names := make([]string, 0, len(checks))
+		for name := range checks {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		for _, name := range names {
+			t.Checks(func(b *sql.Builder) {
+				b.WriteString("CONSTRAINT ").Ident(name).WriteString(" CHECK " + checkExpr(checks[name]))
+			})
+		}
+	}
+}
+
+// checkExpr formats the CHECK expression.
+func checkExpr(expr string) string {
+	expr = strings.TrimSpace(expr)
+	if !strings.HasPrefix(expr, "(") && !strings.HasSuffix(expr, ")") {
+		expr = "(" + expr + ")"
+	}
+	return expr
 }

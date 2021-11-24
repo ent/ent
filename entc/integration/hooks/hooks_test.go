@@ -10,12 +10,12 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/facebook/ent/entc/integration/hooks/ent"
-	"github.com/facebook/ent/entc/integration/hooks/ent/card"
-	"github.com/facebook/ent/entc/integration/hooks/ent/enttest"
-	"github.com/facebook/ent/entc/integration/hooks/ent/hook"
-	"github.com/facebook/ent/entc/integration/hooks/ent/migrate"
-	"github.com/facebook/ent/entc/integration/hooks/ent/user"
+	"entgo.io/ent/entc/integration/hooks/ent"
+	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/enttest"
+	"entgo.io/ent/entc/integration/hooks/ent/hook"
+	"entgo.io/ent/entc/integration/hooks/ent/migrate"
+	"entgo.io/ent/entc/integration/hooks/ent/user"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
@@ -25,7 +25,7 @@ func TestSchemaHooks(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
-	_, err := client.Card.Create().SetNumber("123").Save(ctx)
+	err := client.Card.Create().SetNumber("123").Exec(ctx)
 	require.EqualError(t, err, "card number is too short", "error is returned from hook")
 	crd := client.Card.Create().SetNumber("1234").SaveX(ctx)
 	require.Equal(t, "unknown", crd.Name, "name was set by hook")
@@ -37,7 +37,7 @@ func TestSchemaHooks(t *testing.T) {
 		})
 	})
 	client.Card.Create().SetNumber("1234").SaveX(ctx)
-	_, err = client.Card.Update().Save(ctx)
+	err = client.Card.Update().Exec(ctx)
 	require.EqualError(t, err, "OpUpdate operation is not allowed")
 }
 
@@ -152,6 +152,61 @@ func TestDeletion(t *testing.T) {
 	require.Zero(t, client.Card.Query().CountX(ctx))
 }
 
+func TestMutationIDs(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	count := make(map[ent.Op]int)
+	client.User.Use(
+		hook.Unless(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+					count[m.Op()]++
+					ids, err := m.IDs(ctx)
+					require.NoError(t, err)
+					require.Len(t, ids, 1)
+					require.Equal(t, count[m.Op()], ids[0])
+					return next.Mutate(ctx, m)
+				})
+			},
+			ent.OpCreate,
+		),
+	)
+	for i := 0; i < 5; i++ {
+		owner := client.User.Create().SetName(fmt.Sprintf("owner-%d", i)).SaveX(ctx)
+		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwner(owner).ExecX(ctx)
+	}
+	for i := 0; i < 5; i++ {
+		p := user.And(user.Name(fmt.Sprintf("owner-%d", i)), user.HasCardsWith(card.Number(fmt.Sprintf("card-%d", i))))
+		client.User.Update().AddVersion(1).Where(p).ExecX(ctx)
+		client.User.Delete().Where(p).ExecX(ctx)
+	}
+}
+
+func TestPostCreation(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	client.Card.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
+			id, exists := m.ID()
+			require.False(t, exists, "id should not exist pre mutation")
+			require.Zero(t, id)
+			value, err := next.Mutate(ctx, m)
+			if err != nil {
+				return nil, err
+			}
+			id, exists = m.ID()
+			require.True(t, exists, "id should exist post mutation")
+			require.NotZero(t, id)
+			require.True(t, id == value.(*ent.Card).ID)
+			return value, nil
+		})
+	}, ent.OpCreate))
+	client.Card.Create().SetNumber("12345").SetName("a8m").SaveX(ctx)
+	client.Card.CreateBulk(client.Card.Create().SetNumber("12345")).SaveX(ctx)
+}
+
 func TestOldValues(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
@@ -233,7 +288,7 @@ func TestOldValues(t *testing.T) {
 	}, ^ent.OpUpdateOne))
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	require.Equal(t, "a8m", a8m.Name)
-	_, err := client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version).Save(ctx)
+	err := client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version).Exec(ctx)
 	require.EqualError(t, err, "version field must be incremented by 1")
 	a8m = client.User.UpdateOne(a8m).SetName("Ariel").SetVersion(a8m.Version + 1).SaveX(ctx)
 	require.Equal(t, "Ariel", a8m.Name)

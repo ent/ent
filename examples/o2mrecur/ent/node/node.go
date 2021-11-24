@@ -13,19 +13,17 @@ const (
 	FieldID = "id"
 	// FieldValue holds the string denoting the value field in the database.
 	FieldValue = "value"
-
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
 	EdgeChildren = "children"
-
 	// Table holds the table name of the node in the database.
 	Table = "nodes"
-	// ParentTable is the table the holds the parent relation/edge.
+	// ParentTable is the table that holds the parent relation/edge.
 	ParentTable = "nodes"
 	// ParentColumn is the table column denoting the parent relation/edge.
 	ParentColumn = "node_children"
-	// ChildrenTable is the table the holds the children relation/edge.
+	// ChildrenTable is the table that holds the children relation/edge.
 	ChildrenTable = "nodes"
 	// ChildrenColumn is the table column denoting the children relation/edge.
 	ChildrenColumn = "node_children"
@@ -37,7 +35,8 @@ var Columns = []string{
 	FieldValue,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the Node type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "nodes"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"node_children",
 }

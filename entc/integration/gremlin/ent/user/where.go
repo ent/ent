@@ -7,13 +7,13 @@
 package user
 
 import (
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/p"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
-// ID filters vertices based on their identifier.
+// ID filters vertices based on their ID field.
 func ID(id string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.HasID(id)
@@ -116,6 +116,13 @@ func Last(v string) predicate.User {
 func Nickname(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNickname, p.EQ(v))
+	})
+}
+
+// Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
+func Address(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.EQ(v))
 	})
 }
 
@@ -551,6 +558,105 @@ func NicknameNotNil() predicate.User {
 	})
 }
 
+// AddressEQ applies the EQ predicate on the "address" field.
+func AddressEQ(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.EQ(v))
+	})
+}
+
+// AddressNEQ applies the NEQ predicate on the "address" field.
+func AddressNEQ(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.NEQ(v))
+	})
+}
+
+// AddressIn applies the In predicate on the "address" field.
+func AddressIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.Within(v...))
+	})
+}
+
+// AddressNotIn applies the NotIn predicate on the "address" field.
+func AddressNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.Without(v...))
+	})
+}
+
+// AddressGT applies the GT predicate on the "address" field.
+func AddressGT(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.GT(v))
+	})
+}
+
+// AddressGTE applies the GTE predicate on the "address" field.
+func AddressGTE(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.GTE(v))
+	})
+}
+
+// AddressLT applies the LT predicate on the "address" field.
+func AddressLT(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.LT(v))
+	})
+}
+
+// AddressLTE applies the LTE predicate on the "address" field.
+func AddressLTE(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.LTE(v))
+	})
+}
+
+// AddressContains applies the Contains predicate on the "address" field.
+func AddressContains(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.Containing(v))
+	})
+}
+
+// AddressHasPrefix applies the HasPrefix predicate on the "address" field.
+func AddressHasPrefix(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.StartingWith(v))
+	})
+}
+
+// AddressHasSuffix applies the HasSuffix predicate on the "address" field.
+func AddressHasSuffix(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.EndingWith(v))
+	})
+}
+
+// AddressIsNil applies the IsNil predicate on the "address" field.
+func AddressIsNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldAddress)
+	})
+}
+
+// AddressNotNil applies the NotNil predicate on the "address" field.
+func AddressNotNil() predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldAddress)
+	})
+}
+
 // PhoneEQ applies the EQ predicate on the "phone" field.
 func PhoneEQ(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -782,6 +888,42 @@ func RoleNotIn(vs ...Role) predicate.User {
 	}
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldRole, p.Without(v...))
+	})
+}
+
+// EmploymentEQ applies the EQ predicate on the "employment" field.
+func EmploymentEQ(v Employment) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldEmployment, p.EQ(v))
+	})
+}
+
+// EmploymentNEQ applies the NEQ predicate on the "employment" field.
+func EmploymentNEQ(v Employment) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldEmployment, p.NEQ(v))
+	})
+}
+
+// EmploymentIn applies the In predicate on the "employment" field.
+func EmploymentIn(vs ...Employment) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldEmployment, p.Within(v...))
+	})
+}
+
+// EmploymentNotIn applies the NotIn predicate on the "employment" field.
+func EmploymentNotIn(vs ...Employment) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldEmployment, p.Without(v...))
 	})
 }
 
@@ -1094,7 +1236,7 @@ func HasParentWith(preds ...predicate.User) predicate.User {
 	})
 }
 
-// And groups list of predicates with the AND operator between them.
+// And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))
@@ -1107,7 +1249,7 @@ func And(predicates ...predicate.User) predicate.User {
 	})
 }
 
-// Or groups list of predicates with the OR operator between them.
+// Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(tr *dsl.Traversal) {
 		trs := make([]interface{}, 0, len(predicates))

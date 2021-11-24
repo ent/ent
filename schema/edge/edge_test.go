@@ -7,12 +7,12 @@ package edge_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
+	"entgo.io/ent"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEdge(t *testing.T) {
@@ -35,6 +35,14 @@ func TestEdge(t *testing.T) {
 	assert.Equal("Node", e.Type)
 	assert.Equal("parent", e.Name)
 	assert.False(e.Required)
+
+	e = edge.To("children", Node.Type).
+		From("parent").
+		Unique().
+		Field("parent_id").
+		Descriptor()
+	assert.Equal("parent_id", e.Field)
+	assert.Empty(e.Ref.Field)
 
 	t.Log("m2m relation of the same type")
 	from := edge.To("following", User.Type).
@@ -78,13 +86,13 @@ func TestEdge(t *testing.T) {
 
 	from = edge.To("following", User.Type).
 		StructTag("following").
-		StorageKey(edge.Table("user_followers"), edge.Columns("following_id", "followers_id")).
+		StorageKey(edge.Table("user_followers"), edge.Columns("following_id", "followers_id"), edge.Symbol("users_followers")).
 		From("followers").
 		StructTag("followers").
 		Descriptor()
 	assert.Equal("followers", from.Tag)
 	assert.Equal("following", from.Ref.Tag)
-	assert.Equal(edge.StorageKey{Table: "user_followers", Columns: []string{"following_id", "followers_id"}}, *from.Ref.StorageKey)
+	assert.Equal(edge.StorageKey{Table: "user_followers", Symbols: []string{"users_followers"}, Columns: []string{"following_id", "followers_id"}}, *from.Ref.StorageKey)
 }
 
 type GQL struct {
@@ -100,16 +108,16 @@ func TestAnnotations(t *testing.T) {
 	to := edge.To("user", User.Type).
 		Annotations(GQL{Field: "to"}).
 		Descriptor()
-	require.Equal(t, []edge.Annotation{GQL{Field: "to"}}, to.Annotations)
+	require.Equal(t, []schema.Annotation{GQL{Field: "to"}}, to.Annotations)
 	from := edge.From("user", User.Type).
 		Annotations(GQL{Field: "from"}).
 		Descriptor()
-	require.Equal(t, []edge.Annotation{GQL{Field: "from"}}, from.Annotations)
+	require.Equal(t, []schema.Annotation{GQL{Field: "from"}}, from.Annotations)
 	bidi := edge.To("following", User.Type).
 		Annotations(GQL{Field: "to"}).
 		From("followers").
 		Annotations(GQL{Field: "from"}).
 		Descriptor()
-	require.Equal(t, []edge.Annotation{GQL{Field: "from"}}, bidi.Annotations)
-	require.Equal(t, []edge.Annotation{GQL{Field: "to"}}, bidi.Ref.Annotations)
+	require.Equal(t, []schema.Annotation{GQL{Field: "from"}}, bidi.Annotations)
+	require.Equal(t, []schema.Annotation{GQL{Field: "to"}}, bidi.Ref.Annotations)
 }

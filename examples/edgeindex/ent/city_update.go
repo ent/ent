@@ -8,43 +8,43 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/edgeindex/ent/city"
-	"github.com/facebook/ent/examples/edgeindex/ent/predicate"
-	"github.com/facebook/ent/examples/edgeindex/ent/street"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/edgeindex/ent/city"
+	"entgo.io/ent/examples/edgeindex/ent/predicate"
+	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/schema/field"
 )
 
 // CityUpdate is the builder for updating City entities.
 type CityUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *CityMutation
-	predicates []predicate.City
+	hooks    []Hook
+	mutation *CityMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the CityUpdate builder.
 func (cu *CityUpdate) Where(ps ...predicate.City) *CityUpdate {
-	cu.predicates = append(cu.predicates, ps...)
+	cu.mutation.Where(ps...)
 	return cu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cu *CityUpdate) SetName(s string) *CityUpdate {
 	cu.mutation.SetName(s)
 	return cu
 }
 
-// AddStreetIDs adds the streets edge to Street by ids.
+// AddStreetIDs adds the "streets" edge to the Street entity by IDs.
 func (cu *CityUpdate) AddStreetIDs(ids ...int) *CityUpdate {
 	cu.mutation.AddStreetIDs(ids...)
 	return cu
 }
 
-// AddStreets adds the streets edges to Street.
+// AddStreets adds the "streets" edges to the Street entity.
 func (cu *CityUpdate) AddStreets(s ...*Street) *CityUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -58,19 +58,19 @@ func (cu *CityUpdate) Mutation() *CityMutation {
 	return cu.mutation
 }
 
-// ClearStreets clears all "streets" edges to type Street.
+// ClearStreets clears all "streets" edges to the Street entity.
 func (cu *CityUpdate) ClearStreets() *CityUpdate {
 	cu.mutation.ClearStreets()
 	return cu
 }
 
-// RemoveStreetIDs removes the streets edge to Street by ids.
+// RemoveStreetIDs removes the "streets" edge to Street entities by IDs.
 func (cu *CityUpdate) RemoveStreetIDs(ids ...int) *CityUpdate {
 	cu.mutation.RemoveStreetIDs(ids...)
 	return cu
 }
 
-// RemoveStreets removes streets edges to Street.
+// RemoveStreets removes "streets" edges to Street entities.
 func (cu *CityUpdate) RemoveStreets(s ...*Street) *CityUpdate {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -79,7 +79,7 @@ func (cu *CityUpdate) RemoveStreets(s ...*Street) *CityUpdate {
 	return cu.RemoveStreetIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CityUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -99,6 +99,9 @@ func (cu *CityUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(cu.hooks) - 1; i >= 0; i-- {
+			if cu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
@@ -141,7 +144,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := cu.predicates; len(ps) > 0 {
+	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -212,8 +215,8 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{city.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -223,23 +226,24 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // CityUpdateOne is the builder for updating a single City entity.
 type CityUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *CityMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (cuo *CityUpdateOne) SetName(s string) *CityUpdateOne {
 	cuo.mutation.SetName(s)
 	return cuo
 }
 
-// AddStreetIDs adds the streets edge to Street by ids.
+// AddStreetIDs adds the "streets" edge to the Street entity by IDs.
 func (cuo *CityUpdateOne) AddStreetIDs(ids ...int) *CityUpdateOne {
 	cuo.mutation.AddStreetIDs(ids...)
 	return cuo
 }
 
-// AddStreets adds the streets edges to Street.
+// AddStreets adds the "streets" edges to the Street entity.
 func (cuo *CityUpdateOne) AddStreets(s ...*Street) *CityUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -253,19 +257,19 @@ func (cuo *CityUpdateOne) Mutation() *CityMutation {
 	return cuo.mutation
 }
 
-// ClearStreets clears all "streets" edges to type Street.
+// ClearStreets clears all "streets" edges to the Street entity.
 func (cuo *CityUpdateOne) ClearStreets() *CityUpdateOne {
 	cuo.mutation.ClearStreets()
 	return cuo
 }
 
-// RemoveStreetIDs removes the streets edge to Street by ids.
+// RemoveStreetIDs removes the "streets" edge to Street entities by IDs.
 func (cuo *CityUpdateOne) RemoveStreetIDs(ids ...int) *CityUpdateOne {
 	cuo.mutation.RemoveStreetIDs(ids...)
 	return cuo
 }
 
-// RemoveStreets removes streets edges to Street.
+// RemoveStreets removes "streets" edges to Street entities.
 func (cuo *CityUpdateOne) RemoveStreets(s ...*Street) *CityUpdateOne {
 	ids := make([]int, len(s))
 	for i := range s {
@@ -274,7 +278,14 @@ func (cuo *CityUpdateOne) RemoveStreets(s ...*Street) *CityUpdateOne {
 	return cuo.RemoveStreetIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (cuo *CityUpdateOne) Select(field string, fields ...string) *CityUpdateOne {
+	cuo.fields = append([]string{field}, fields...)
+	return cuo
+}
+
+// Save executes the query and returns the updated City entity.
 func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
 	var (
 		err  error
@@ -294,6 +305,9 @@ func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
 			return node, err
 		})
 		for i := len(cuo.hooks) - 1; i >= 0; i-- {
+			if cuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = cuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
@@ -338,9 +352,28 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing City.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "City.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := cuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, city.FieldID)
+		for _, f := range fields {
+			if !city.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != city.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := cuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := cuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -404,12 +437,12 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 	}
 	_node = &City{config: cuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{city.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

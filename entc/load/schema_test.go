@@ -5,16 +5,20 @@
 package load
 
 import (
+	"context"
 	"encoding/json"
 	"math"
+	"net/http"
+	"reflect"
 	"testing"
 	"time"
 
-	"github.com/facebook/ent"
-	"github.com/facebook/ent/schema/edge"
-	"github.com/facebook/ent/schema/field"
-	"github.com/facebook/ent/schema/index"
-	"github.com/facebook/ent/schema/mixin"
+	"entgo.io/ent"
+	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+	"entgo.io/ent/schema/mixin"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -28,17 +32,63 @@ func (OrderConfig) Name() string {
 	return "order_config"
 }
 
-func (o *OrderConfig) MarshalJSON() ([]byte, error) {
-	return json.Marshal(*o)
+func (o OrderConfig) Merge(ant schema.Annotation) schema.Annotation {
+	o.FieldName = ant.(OrderConfig).FieldName
+	return o
+}
+
+type IDConfig struct {
+	TagName string
+}
+
+func (IDConfig) Name() string {
+	return "id_config"
+}
+
+type PartialIndex struct {
+	WhereClause string
+}
+
+func (PartialIndex) Name() string {
+	return "partial_index"
+}
+
+func (p PartialIndex) Merge(ant schema.Annotation) schema.Annotation {
+	p.WhereClause = ant.(PartialIndex).WhereClause
+	return p
+}
+
+type AnnotationMixin struct {
+	mixin.Schema
+}
+
+func (AnnotationMixin) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		IDConfig{TagName: "id tag"},
+		OrderConfig{FieldName: "mixin annotations"},
+	}
 }
 
 type User struct {
 	ent.Schema
 }
 
+func (User) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		AnnotationMixin{},
+	}
+}
+
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		OrderConfig{FieldName: "type annotations"},
+	}
+}
+
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("age"),
+		field.Int("age").
+			Comment("some comment"),
 		field.String("name").
 			Default("unknown").
 			Annotations(&OrderConfig{FieldName: "name"}),
@@ -55,6 +105,8 @@ func (User) Fields() []ent.Field {
 			Default(time.Now),
 		field.UUID("uuid", uuid.UUID{}).
 			Default(uuid.New),
+		field.Int("parent_id").
+			Optional(),
 	}
 }
 
@@ -64,7 +116,8 @@ func (User) Edges() []ent.Edge {
 			Annotations(&OrderConfig{FieldName: "name"}),
 		edge.To("parent", User.Type).
 			Unique().
-			StorageKey(edge.Column("user_parent_id")).
+			Field("parent_id").
+			StorageKey(edge.Column("parent_id")).
 			From("children"),
 		edge.To("following", User.Type).
 			Annotations(&OrderConfig{FieldName: "following"}).
@@ -80,6 +133,9 @@ func (User) Indexes() []ent.Index {
 		index.Fields("name").
 			Edges("parent").
 			StorageKey("user_parent_name").
+			Annotations(&PartialIndex{
+				WhereClause: "age > 20",
+			}).
 			Unique(),
 	}
 }
@@ -102,7 +158,11 @@ func TestMarshalSchema(t *testing.T) {
 		schema, err := UnmarshalSchema(buf)
 		require.NoError(t, err)
 		require.Equal(t, "User", schema.Name)
-		require.Len(t, schema.Fields, 8)
+		require.Len(t, schema.Annotations, 2)
+		ant := schema.Annotations["order_config"].(map[string]interface{})
+		require.Equal(t, ant["FieldName"], "type annotations")
+
+		require.Len(t, schema.Fields, 9)
 		require.Equal(t, "age", schema.Fields[0].Name)
 		require.Equal(t, field.TypeInt, schema.Fields[0].Info.Type)
 
@@ -110,7 +170,7 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, field.TypeString, schema.Fields[1].Info.Type)
 		require.Equal(t, "unknown", schema.Fields[1].DefaultValue)
 		require.NotEmpty(t, schema.Fields[1].Annotations)
-		ant := schema.Fields[1].Annotations["order_config"].(map[string]interface{})
+		ant = schema.Fields[1].Annotations["order_config"].(map[string]interface{})
 		require.Equal(t, ant["FieldName"], "name")
 
 		require.Equal(t, "nillable", schema.Fields[2].Name)
@@ -132,15 +192,21 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, "sensitive", schema.Fields[5].Name)
 		require.Equal(t, field.TypeString, schema.Fields[5].Info.Type)
 		require.True(t, schema.Fields[5].Sensitive)
+		require.Equal(t, reflect.Invalid, schema.Fields[5].DefaultKind)
 
 		require.Equal(t, "creation_time", schema.Fields[6].Name)
 		require.Equal(t, field.TypeTime, schema.Fields[6].Info.Type)
 		require.Nil(t, schema.Fields[6].DefaultValue)
+		require.Equal(t, reflect.Func, schema.Fields[6].DefaultKind)
 
 		require.Equal(t, "uuid", schema.Fields[7].Name)
 		require.Equal(t, field.TypeUUID, schema.Fields[7].Info.Type)
 		require.True(t, schema.Fields[7].Default)
 		require.Equal(t, "github.com/google/uuid", schema.Fields[7].Info.PkgPath)
+
+		require.Equal(t, "parent_id", schema.Fields[8].Name)
+		require.Equal(t, field.TypeInt, schema.Fields[8].Info.Type)
+		require.True(t, schema.Fields[8].Optional)
 
 		require.Len(t, schema.Edges, 3)
 		require.Equal(t, "groups", schema.Edges[0].Name)
@@ -151,12 +217,12 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, ant["FieldName"], "name")
 
 		require.Equal(t, "children", schema.Edges[1].Name)
-		require.Equal(t, "user_parent_id", schema.Edges[1].StorageKey.Columns[0])
+		require.Equal(t, "parent_id", schema.Edges[1].StorageKey.Columns[0])
 		require.Equal(t, "User", schema.Edges[1].Type)
 		require.True(t, schema.Edges[1].Inverse)
 		require.Equal(t, "parent", schema.Edges[1].Ref.Name)
 		require.True(t, schema.Edges[1].Ref.Unique)
-		require.Equal(t, "user_parent_id", schema.Edges[1].Ref.StorageKey.Columns[0])
+		require.Equal(t, "parent_id", schema.Edges[1].Ref.StorageKey.Columns[0])
 
 		ant = schema.Edges[2].Annotations["order_config"].(map[string]interface{})
 		require.Equal(t, ant["FieldName"], "followers")
@@ -169,6 +235,11 @@ func TestMarshalSchema(t *testing.T) {
 		require.Equal(t, []string{"parent"}, schema.Indexes[1].Edges)
 		require.Equal(t, "user_parent_name", schema.Indexes[1].StorageKey)
 		require.True(t, schema.Indexes[1].Unique)
+		ant = schema.Indexes[1].Annotations["partial_index"].(map[string]interface{})
+		require.Equal(t, "age > 20", ant["WhereClause"])
+
+		require.Equal(t, "some comment", schema.Fields[0].Comment)
+		require.Empty(t, schema.Fields[1].Comment)
 	}
 }
 
@@ -222,6 +293,15 @@ func (WithDefaults) Fields() []ent.Field {
 			Default(true),
 		field.Time("updated_at").
 			UpdateDefault(time.Now),
+		// see issue #1146
+		field.Int("int_default_func").
+			DefaultFunc(func() int {
+				return 1e9
+			}),
+		field.Float("balance").
+			Default(0),
+		field.JSON("dirs", []http.Dir{}).
+			Default([]http.Dir{"/tmp"}),
 	}
 }
 
@@ -249,6 +329,10 @@ func TestMarshalDefaults(t *testing.T) {
 	require.True(t, schema.Fields[3].Default)
 	require.False(t, schema.Fields[4].Default)
 	require.True(t, schema.Fields[4].UpdateDefault)
+	require.True(t, schema.Fields[5].Default)
+	require.Equal(t, schema.Fields[5].DefaultKind, reflect.Func)
+	require.True(t, schema.Fields[6].Default)
+	require.True(t, schema.Fields[7].Default)
 }
 
 type TimeMixin struct {
@@ -297,6 +381,19 @@ func (HooksMixin) Hooks() []ent.Hook {
 	}
 }
 
+type BoringPolicy struct{}
+
+func (BoringPolicy) EvalMutation(context.Context, ent.Mutation) error { return nil }
+func (BoringPolicy) EvalQuery(context.Context, ent.Query) error       { return nil }
+
+type PrivacyMixin struct {
+	mixin.Schema
+}
+
+func (PrivacyMixin) Policy() ent.Policy {
+	return BoringPolicy{}
+}
+
 type WithMixin struct {
 	ent.Schema
 }
@@ -305,6 +402,7 @@ func (WithMixin) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		TimeMixin{},
 		HooksMixin{},
+		PrivacyMixin{},
 	}
 }
 
@@ -332,6 +430,10 @@ func (WithMixin) Hooks() []ent.Hook {
 	return []ent.Hook{
 		func(ent.Mutator) ent.Mutator { return nil },
 	}
+}
+
+func (WithMixin) Policy() ent.Policy {
+	return BoringPolicy{}
 }
 
 func TestMarshalMixin(t *testing.T) {
@@ -405,5 +507,11 @@ func TestMarshalMixin(t *testing.T) {
 		require.Equal(t, []string{"field"}, schema.Indexes[1].Fields)
 		require.Equal(t, []string{"owner"}, schema.Indexes[1].Edges)
 		require.True(t, schema.Indexes[1].Unique)
+	})
+
+	t.Run("Policy", func(t *testing.T) {
+		require.Len(t, schema.Policy, 2)
+		require.True(t, schema.Policy[0].MixedIn)
+		require.False(t, schema.Policy[1].MixedIn)
 	})
 }

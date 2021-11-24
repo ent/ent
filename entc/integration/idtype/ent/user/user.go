@@ -13,23 +13,21 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-
 	// EdgeSpouse holds the string denoting the spouse edge name in mutations.
 	EdgeSpouse = "spouse"
 	// EdgeFollowers holds the string denoting the followers edge name in mutations.
 	EdgeFollowers = "followers"
 	// EdgeFollowing holds the string denoting the following edge name in mutations.
 	EdgeFollowing = "following"
-
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// SpouseTable is the table the holds the spouse relation/edge.
+	// SpouseTable is the table that holds the spouse relation/edge.
 	SpouseTable = "users"
 	// SpouseColumn is the table column denoting the spouse relation/edge.
 	SpouseColumn = "user_spouse"
-	// FollowersTable is the table the holds the followers relation/edge. The primary key declared below.
+	// FollowersTable is the table that holds the followers relation/edge. The primary key declared below.
 	FollowersTable = "user_following"
-	// FollowingTable is the table the holds the following relation/edge. The primary key declared below.
+	// FollowingTable is the table that holds the following relation/edge. The primary key declared below.
 	FollowingTable = "user_following"
 )
 
@@ -39,7 +37,8 @@ var Columns = []string{
 	FieldName,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_spouse",
 }

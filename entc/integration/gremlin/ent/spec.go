@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin"
 )
 
 // Spec is the model entity for the Spec schema.
@@ -26,7 +26,7 @@ type Spec struct {
 // SpecEdges holds the relations/edges for other nodes in the graph.
 type SpecEdges struct {
 	// Card holds the value of the card edge.
-	Card []*Card
+	Card []*Card `json:"card,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -57,20 +57,20 @@ func (s *Spec) FromResponse(res *gremlin.Response) error {
 	return nil
 }
 
-// QueryCard queries the card edge of the Spec.
+// QueryCard queries the "card" edge of the Spec entity.
 func (s *Spec) QueryCard() *CardQuery {
 	return (&SpecClient{config: s.config}).QueryCard(s)
 }
 
 // Update returns a builder for updating this Spec.
-// Note that, you need to call Spec.Unwrap() before calling this method, if this Spec
+// Note that you need to call Spec.Unwrap() before calling this method if this Spec
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (s *Spec) Update() *SpecUpdateOne {
 	return (&SpecClient{config: s.config}).UpdateOne(s)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Spec entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (s *Spec) Unwrap() *Spec {
 	tx, ok := s.config.driver.(*txDriver)
 	if !ok {

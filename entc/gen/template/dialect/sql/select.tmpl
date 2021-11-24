@@ -4,18 +4,15 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
+{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+
 {{ define "dialect/sql/select" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := receiver $builder }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v interface{}) error {
-	for _, f := range {{ $receiver }}.fields {
-		if !{{ $.Package }}.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for selection", f)}
-		}
-	}
 	rows := &sql.Rows{}
-	query, args := {{ $receiver }}.sqlQuery().Query()
+	query, args := {{ $receiver }}.sql.Query()
 	if err := {{ $receiver }}.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
@@ -23,10 +20,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, v interface{
 	return sql.ScanSlice(rows, v)
 }
 
+{{/* Allow adding methods to the select-builder by ent extensions or user templates.*/}}
+{{ with $tmpls := matchTemplate "dialect/sql/select/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{ end }}
 
-func ({{ $receiver }} *{{ $builder }}) sqlQuery() sql.Querier {
-	selector := {{ $receiver }}.sql
-	selector.Select(selector.Columns({{ $receiver }}.fields...)...)
-	return selector
-}
 {{ end }}

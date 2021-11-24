@@ -11,26 +11,26 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/facebook/ent/entc/integration/ent/migrate"
+	"entgo.io/ent/entc/integration/ent/migrate"
 
-	"github.com/facebook/ent/entc/integration/ent/card"
-	"github.com/facebook/ent/entc/integration/ent/comment"
-	"github.com/facebook/ent/entc/integration/ent/fieldtype"
-	"github.com/facebook/ent/entc/integration/ent/file"
-	"github.com/facebook/ent/entc/integration/ent/filetype"
-	"github.com/facebook/ent/entc/integration/ent/goods"
-	"github.com/facebook/ent/entc/integration/ent/group"
-	"github.com/facebook/ent/entc/integration/ent/groupinfo"
-	"github.com/facebook/ent/entc/integration/ent/item"
-	"github.com/facebook/ent/entc/integration/ent/node"
-	"github.com/facebook/ent/entc/integration/ent/pet"
-	"github.com/facebook/ent/entc/integration/ent/spec"
-	"github.com/facebook/ent/entc/integration/ent/task"
-	"github.com/facebook/ent/entc/integration/ent/user"
+	"entgo.io/ent/entc/integration/ent/card"
+	"entgo.io/ent/entc/integration/ent/comment"
+	"entgo.io/ent/entc/integration/ent/fieldtype"
+	"entgo.io/ent/entc/integration/ent/file"
+	"entgo.io/ent/entc/integration/ent/filetype"
+	"entgo.io/ent/entc/integration/ent/goods"
+	"entgo.io/ent/entc/integration/ent/group"
+	"entgo.io/ent/entc/integration/ent/groupinfo"
+	"entgo.io/ent/entc/integration/ent/item"
+	"entgo.io/ent/entc/integration/ent/node"
+	"entgo.io/ent/entc/integration/ent/pet"
+	"entgo.io/ent/entc/integration/ent/spec"
+	"entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/entc/integration/ent/user"
 
-	"github.com/facebook/ent/dialect"
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -65,7 +65,8 @@ type Client struct {
 	// Task is the client for interacting with the Task builders.
 	Task *TaskClient
 	// User is the client for interacting with the User builders.
-	User *UserClient
+	User          *UserClient
+	TemplateField struct{}
 }
 
 // NewClient creates a new client configured with the given options.
@@ -119,9 +120,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = tx
 	return &Tx{
 		ctx:       ctx,
 		config:    cfg,
@@ -142,16 +144,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}, nil
 }
 
-// BeginTx returns a transactional client with options.
+// BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
 		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
 	}
-	tx, err := c.driver.(*sql.Driver).BeginTx(ctx, opts)
+	tx, err := c.driver.(interface {
+		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
+	}).BeginTx(ctx, opts)
 	if err != nil {
-		return nil, fmt.Errorf("ent: starting a transaction: %v", err)
+		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		config:    cfg,
 		Card:      NewCardClient(cfg),
@@ -182,7 +187,8 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := config{driver: dialect.Debug(c.driver, c.log), log: c.log, debug: true, hooks: c.hooks}
+	cfg := c.config
+	cfg.driver = dialect.Debug(c.driver, c.log)
 	client := &Client{config: cfg}
 	client.init()
 	return client
@@ -212,6 +218,11 @@ func (c *Client) Use(hooks ...Hook) {
 	c.User.Use(hooks...)
 }
 
+// Dialect returns the driver dialect.
+func (c *Client) Dialect() string {
+	return c.driver.Dialect()
+}
+
 // CardClient is a client for the Card schema.
 type CardClient struct {
 	config
@@ -234,7 +245,7 @@ func (c *CardClient) Create() *CardCreate {
 	return &CardCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Card entities.
+// CreateBulk returns a builder for creating a bulk of Card entities.
 func (c *CardClient) CreateBulk(builders ...*CardCreate) *CardCreateBulk {
 	return &CardCreateBulk{config: c.config, builders: builders}
 }
@@ -278,7 +289,9 @@ func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 
 // Query returns a query builder for Card.
 func (c *CardClient) Query() *CardQuery {
-	return &CardQuery{config: c.config}
+	return &CardQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Card entity by its id.
@@ -354,7 +367,7 @@ func (c *CommentClient) Create() *CommentCreate {
 	return &CommentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Comment entities.
+// CreateBulk returns a builder for creating a bulk of Comment entities.
 func (c *CommentClient) CreateBulk(builders ...*CommentCreate) *CommentCreateBulk {
 	return &CommentCreateBulk{config: c.config, builders: builders}
 }
@@ -398,7 +411,9 @@ func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 
 // Query returns a query builder for Comment.
 func (c *CommentClient) Query() *CommentQuery {
-	return &CommentQuery{config: c.config}
+	return &CommentQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Comment entity by its id.
@@ -442,7 +457,7 @@ func (c *FieldTypeClient) Create() *FieldTypeCreate {
 	return &FieldTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of FieldType entities.
+// CreateBulk returns a builder for creating a bulk of FieldType entities.
 func (c *FieldTypeClient) CreateBulk(builders ...*FieldTypeCreate) *FieldTypeCreateBulk {
 	return &FieldTypeCreateBulk{config: c.config, builders: builders}
 }
@@ -486,7 +501,9 @@ func (c *FieldTypeClient) DeleteOneID(id int) *FieldTypeDeleteOne {
 
 // Query returns a query builder for FieldType.
 func (c *FieldTypeClient) Query() *FieldTypeQuery {
-	return &FieldTypeQuery{config: c.config}
+	return &FieldTypeQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a FieldType entity by its id.
@@ -530,7 +547,7 @@ func (c *FileClient) Create() *FileCreate {
 	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of File entities.
+// CreateBulk returns a builder for creating a bulk of File entities.
 func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
 	return &FileCreateBulk{config: c.config, builders: builders}
 }
@@ -574,7 +591,9 @@ func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 
 // Query returns a query builder for File.
 func (c *FileClient) Query() *FileQuery {
-	return &FileQuery{config: c.config}
+	return &FileQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a File entity by its id.
@@ -666,7 +685,7 @@ func (c *FileTypeClient) Create() *FileTypeCreate {
 	return &FileTypeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of FileType entities.
+// CreateBulk returns a builder for creating a bulk of FileType entities.
 func (c *FileTypeClient) CreateBulk(builders ...*FileTypeCreate) *FileTypeCreateBulk {
 	return &FileTypeCreateBulk{config: c.config, builders: builders}
 }
@@ -710,7 +729,9 @@ func (c *FileTypeClient) DeleteOneID(id int) *FileTypeDeleteOne {
 
 // Query returns a query builder for FileType.
 func (c *FileTypeClient) Query() *FileTypeQuery {
-	return &FileTypeQuery{config: c.config}
+	return &FileTypeQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a FileType entity by its id.
@@ -770,7 +791,7 @@ func (c *GoodsClient) Create() *GoodsCreate {
 	return &GoodsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Goods entities.
+// CreateBulk returns a builder for creating a bulk of Goods entities.
 func (c *GoodsClient) CreateBulk(builders ...*GoodsCreate) *GoodsCreateBulk {
 	return &GoodsCreateBulk{config: c.config, builders: builders}
 }
@@ -814,7 +835,9 @@ func (c *GoodsClient) DeleteOneID(id int) *GoodsDeleteOne {
 
 // Query returns a query builder for Goods.
 func (c *GoodsClient) Query() *GoodsQuery {
-	return &GoodsQuery{config: c.config}
+	return &GoodsQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Goods entity by its id.
@@ -858,7 +881,7 @@ func (c *GroupClient) Create() *GroupCreate {
 	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Group entities.
+// CreateBulk returns a builder for creating a bulk of Group entities.
 func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
 	return &GroupCreateBulk{config: c.config, builders: builders}
 }
@@ -902,7 +925,9 @@ func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 
 // Query returns a query builder for Group.
 func (c *GroupClient) Query() *GroupQuery {
-	return &GroupQuery{config: c.config}
+	return &GroupQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Group entity by its id.
@@ -1010,7 +1035,7 @@ func (c *GroupInfoClient) Create() *GroupInfoCreate {
 	return &GroupInfoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of GroupInfo entities.
+// CreateBulk returns a builder for creating a bulk of GroupInfo entities.
 func (c *GroupInfoClient) CreateBulk(builders ...*GroupInfoCreate) *GroupInfoCreateBulk {
 	return &GroupInfoCreateBulk{config: c.config, builders: builders}
 }
@@ -1054,7 +1079,9 @@ func (c *GroupInfoClient) DeleteOneID(id int) *GroupInfoDeleteOne {
 
 // Query returns a query builder for GroupInfo.
 func (c *GroupInfoClient) Query() *GroupInfoQuery {
-	return &GroupInfoQuery{config: c.config}
+	return &GroupInfoQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a GroupInfo entity by its id.
@@ -1114,7 +1141,7 @@ func (c *ItemClient) Create() *ItemCreate {
 	return &ItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Item entities.
+// CreateBulk returns a builder for creating a bulk of Item entities.
 func (c *ItemClient) CreateBulk(builders ...*ItemCreate) *ItemCreateBulk {
 	return &ItemCreateBulk{config: c.config, builders: builders}
 }
@@ -1132,7 +1159,7 @@ func (c *ItemClient) UpdateOne(i *Item) *ItemUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ItemClient) UpdateOneID(id int) *ItemUpdateOne {
+func (c *ItemClient) UpdateOneID(id string) *ItemUpdateOne {
 	mutation := newItemMutation(c.config, OpUpdateOne, withItemID(id))
 	return &ItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1149,7 +1176,7 @@ func (c *ItemClient) DeleteOne(i *Item) *ItemDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *ItemClient) DeleteOneID(id int) *ItemDeleteOne {
+func (c *ItemClient) DeleteOneID(id string) *ItemDeleteOne {
 	builder := c.Delete().Where(item.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1158,16 +1185,18 @@ func (c *ItemClient) DeleteOneID(id int) *ItemDeleteOne {
 
 // Query returns a query builder for Item.
 func (c *ItemClient) Query() *ItemQuery {
-	return &ItemQuery{config: c.config}
+	return &ItemQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Item entity by its id.
-func (c *ItemClient) Get(ctx context.Context, id int) (*Item, error) {
+func (c *ItemClient) Get(ctx context.Context, id string) (*Item, error) {
 	return c.Query().Where(item.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ItemClient) GetX(ctx context.Context, id int) *Item {
+func (c *ItemClient) GetX(ctx context.Context, id string) *Item {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1202,7 +1231,7 @@ func (c *NodeClient) Create() *NodeCreate {
 	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Node entities.
+// CreateBulk returns a builder for creating a bulk of Node entities.
 func (c *NodeClient) CreateBulk(builders ...*NodeCreate) *NodeCreateBulk {
 	return &NodeCreateBulk{config: c.config, builders: builders}
 }
@@ -1246,7 +1275,9 @@ func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 
 // Query returns a query builder for Node.
 func (c *NodeClient) Query() *NodeQuery {
-	return &NodeQuery{config: c.config}
+	return &NodeQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Node entity by its id.
@@ -1322,7 +1353,7 @@ func (c *PetClient) Create() *PetCreate {
 	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Pet entities.
+// CreateBulk returns a builder for creating a bulk of Pet entities.
 func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
 	return &PetCreateBulk{config: c.config, builders: builders}
 }
@@ -1366,7 +1397,9 @@ func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 
 // Query returns a query builder for Pet.
 func (c *PetClient) Query() *PetQuery {
-	return &PetQuery{config: c.config}
+	return &PetQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Pet entity by its id.
@@ -1442,7 +1475,7 @@ func (c *SpecClient) Create() *SpecCreate {
 	return &SpecCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Spec entities.
+// CreateBulk returns a builder for creating a bulk of Spec entities.
 func (c *SpecClient) CreateBulk(builders ...*SpecCreate) *SpecCreateBulk {
 	return &SpecCreateBulk{config: c.config, builders: builders}
 }
@@ -1486,7 +1519,9 @@ func (c *SpecClient) DeleteOneID(id int) *SpecDeleteOne {
 
 // Query returns a query builder for Spec.
 func (c *SpecClient) Query() *SpecQuery {
-	return &SpecQuery{config: c.config}
+	return &SpecQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Spec entity by its id.
@@ -1546,7 +1581,7 @@ func (c *TaskClient) Create() *TaskCreate {
 	return &TaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Task entities.
+// CreateBulk returns a builder for creating a bulk of Task entities.
 func (c *TaskClient) CreateBulk(builders ...*TaskCreate) *TaskCreateBulk {
 	return &TaskCreateBulk{config: c.config, builders: builders}
 }
@@ -1590,7 +1625,9 @@ func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 
 // Query returns a query builder for Task.
 func (c *TaskClient) Query() *TaskQuery {
-	return &TaskQuery{config: c.config}
+	return &TaskQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a Task entity by its id.
@@ -1634,7 +1671,7 @@ func (c *UserClient) Create() *UserCreate {
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of User entities.
+// CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
 	return &UserCreateBulk{config: c.config, builders: builders}
 }
@@ -1678,7 +1715,9 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{config: c.config}
+	return &UserQuery{
+		config: c.config,
+	}
 }
 
 // Get returns a User entity by its id.

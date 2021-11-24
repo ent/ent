@@ -11,15 +11,13 @@ const (
 	Label = "group"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
-
-	// UserFieldID holds the string denoting the id field of the User.
+	// UserFieldID holds the string denoting the ID field of the User.
 	UserFieldID = "oid"
 	// Table holds the table name of the group in the database.
 	Table = "groups"
-	// UsersTable is the table the holds the users relation/edge. The primary key declared below.
+	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
 	UsersTable = "group_users"
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.

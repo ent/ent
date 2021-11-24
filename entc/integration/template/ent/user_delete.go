@@ -10,24 +10,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/template/ent/predicate"
-	"github.com/facebook/ent/entc/integration/template/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/entc/integration/template/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserDelete is the builder for deleting a User entity.
 type UserDelete struct {
 	config
-	hooks      []Hook
-	mutation   *UserMutation
-	predicates []predicate.User
+	hooks    []Hook
+	mutation *UserMutation
 }
 
-// Where adds a new predicate to the delete builder.
+// Where appends a list predicates to the UserDelete builder.
 func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
-	ud.predicates = append(ud.predicates, ps...)
+	ud.mutation.Where(ps...)
 	return ud
 }
 
@@ -51,6 +50,9 @@ func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(ud.hooks) - 1; i >= 0; i-- {
+			if ud.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = ud.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, ud.mutation); err != nil {
@@ -79,7 +81,7 @@ func (ud *UserDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := ud.predicates; len(ps) > 0 {
+	if ps := ud.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

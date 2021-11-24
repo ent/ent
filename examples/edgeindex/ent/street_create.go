@@ -11,10 +11,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/examples/edgeindex/ent/city"
-	"github.com/facebook/ent/examples/edgeindex/ent/street"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/examples/edgeindex/ent/city"
+	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/schema/field"
 )
 
 // StreetCreate is the builder for creating a Street entity.
@@ -24,19 +24,19 @@ type StreetCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (sc *StreetCreate) SetName(s string) *StreetCreate {
 	sc.mutation.SetName(s)
 	return sc
 }
 
-// SetCityID sets the city edge to City by id.
+// SetCityID sets the "city" edge to the City entity by ID.
 func (sc *StreetCreate) SetCityID(id int) *StreetCreate {
 	sc.mutation.SetCityID(id)
 	return sc
 }
 
-// SetNillableCityID sets the city edge to City by id if the given value is not nil.
+// SetNillableCityID sets the "city" edge to the City entity by ID if the given value is not nil.
 func (sc *StreetCreate) SetNillableCityID(id *int) *StreetCreate {
 	if id != nil {
 		sc = sc.SetCityID(*id)
@@ -44,7 +44,7 @@ func (sc *StreetCreate) SetNillableCityID(id *int) *StreetCreate {
 	return sc
 }
 
-// SetCity sets the city edge to City.
+// SetCity sets the "city" edge to the City entity.
 func (sc *StreetCreate) SetCity(c *City) *StreetCreate {
 	return sc.SetCityID(c.ID)
 }
@@ -75,11 +75,17 @@ func (sc *StreetCreate) Save(ctx context.Context) (*Street, error) {
 				return nil, err
 			}
 			sc.mutation = mutation
-			node, err = sc.sqlSave(ctx)
+			if node, err = sc.sqlSave(ctx); err != nil {
+				return nil, err
+			}
+			mutation.id = &node.ID
 			mutation.done = true
 			return node, err
 		})
 		for i := len(sc.hooks) - 1; i >= 0; i-- {
+			if sc.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = sc.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
@@ -98,10 +104,23 @@ func (sc *StreetCreate) SaveX(ctx context.Context) *Street {
 	return v
 }
 
+// Exec executes the query.
+func (sc *StreetCreate) Exec(ctx context.Context) error {
+	_, err := sc.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (sc *StreetCreate) ExecX(ctx context.Context) {
+	if err := sc.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (sc *StreetCreate) check() error {
 	if _, ok := sc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New("ent: missing required field \"name\"")}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Street.name"`)}
 	}
 	return nil
 }
@@ -109,8 +128,8 @@ func (sc *StreetCreate) check() error {
 func (sc *StreetCreate) sqlSave(ctx context.Context) (*Street, error) {
 	_node, _spec := sc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
-		if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}
@@ -155,12 +174,13 @@ func (sc *StreetCreate) createSpec() (*Street, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.city_streets = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
 
-// StreetCreateBulk is the builder for creating a bulk of Street entities.
+// StreetCreateBulk is the builder for creating many Street entities in bulk.
 type StreetCreateBulk struct {
 	config
 	builders []*StreetCreate
@@ -188,19 +208,23 @@ func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
 				} else {
+					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, scb.driver, &sqlgraph.BatchCreateSpec{Nodes: specs}); err != nil {
-						if cerr, ok := isSQLConstraintError(err); ok {
-							err = cerr
+					if err = sqlgraph.BatchCreate(ctx, scb.driver, spec); err != nil {
+						if sqlgraph.IsConstraintError(err) {
+							err = &ConstraintError{err.Error(), err}
 						}
 					}
 				}
-				mutation.done = true
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				mutation.id = &nodes[i].ID
+				mutation.done = true
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {
@@ -217,11 +241,24 @@ func (scb *StreetCreateBulk) Save(ctx context.Context) ([]*Street, error) {
 	return nodes, nil
 }
 
-// SaveX calls Save and panics if Save returns an error.
+// SaveX is like Save, but panics if an error occurs.
 func (scb *StreetCreateBulk) SaveX(ctx context.Context) []*Street {
 	v, err := scb.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return v
+}
+
+// Exec executes the query.
+func (scb *StreetCreateBulk) Exec(ctx context.Context) error {
+	_, err := scb.Save(ctx)
+	return err
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (scb *StreetCreateBulk) ExecX(ctx context.Context) {
+	if err := scb.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

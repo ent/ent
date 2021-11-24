@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/__"
-	"github.com/facebook/ent/dialect/gremlin/graph/dsl/g"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/node"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/dialect/gremlin/graph/dsl"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/entc/integration/gremlin/ent/node"
+	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 
 // NodeQuery is the builder for querying Node entities.
@@ -25,8 +25,9 @@ type NodeQuery struct {
 	config
 	limit      *int
 	offset     *int
+	unique     *bool
 	order      []OrderFunc
-	unique     []string
+	fields     []string
 	predicates []predicate.Node
 	// eager-loading edges.
 	withPrev *NodeQuery
@@ -36,7 +37,7 @@ type NodeQuery struct {
 	path    func(context.Context) (*dsl.Traversal, error)
 }
 
-// Where adds a new predicate for the builder.
+// Where adds a new predicate for the NodeQuery builder.
 func (nq *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
 	nq.predicates = append(nq.predicates, ps...)
 	return nq
@@ -54,41 +55,49 @@ func (nq *NodeQuery) Offset(offset int) *NodeQuery {
 	return nq
 }
 
+// Unique configures the query builder to filter duplicate records on query.
+// By default, unique is set to true, and can be disabled using this method.
+func (nq *NodeQuery) Unique(unique bool) *NodeQuery {
+	nq.unique = &unique
+	return nq
+}
+
 // Order adds an order step to the query.
 func (nq *NodeQuery) Order(o ...OrderFunc) *NodeQuery {
 	nq.order = append(nq.order, o...)
 	return nq
 }
 
-// QueryPrev chains the current query on the prev edge.
+// QueryPrev chains the current query on the "prev" edge.
 func (nq *NodeQuery) QueryPrev() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := nq.gremlinQuery()
+		gremlin := nq.gremlinQuery(ctx)
 		fromU = gremlin.InE(node.NextLabel).OutV()
 		return fromU, nil
 	}
 	return query
 }
 
-// QueryNext chains the current query on the next edge.
+// QueryNext chains the current query on the "next" edge.
 func (nq *NodeQuery) QueryNext() *NodeQuery {
 	query := &NodeQuery{config: nq.config}
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := nq.gremlinQuery()
+		gremlin := nq.gremlinQuery(ctx)
 		fromU = gremlin.OutE(node.NextLabel).InV()
 		return fromU, nil
 	}
 	return query
 }
 
-// First returns the first Node entity in the query. Returns *NotFoundError when no node was found.
+// First returns the first Node entity from the query.
+// Returns a *NotFoundError when no Node was found.
 func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
 	nodes, err := nq.Limit(1).All(ctx)
 	if err != nil {
@@ -109,7 +118,8 @@ func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
 	return node
 }
 
-// FirstID returns the first Node id in the query. Returns *NotFoundError when no id was found.
+// FirstID returns the first Node ID from the query.
+// Returns a *NotFoundError when no Node ID was found.
 func (nq *NodeQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = nq.Limit(1).IDs(ctx); err != nil {
@@ -122,8 +132,8 @@ func (nq *NodeQuery) FirstID(ctx context.Context) (id string, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (nq *NodeQuery) FirstXID(ctx context.Context) string {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (nq *NodeQuery) FirstIDX(ctx context.Context) string {
 	id, err := nq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -131,7 +141,9 @@ func (nq *NodeQuery) FirstXID(ctx context.Context) string {
 	return id
 }
 
-// Only returns the only Node entity in the query, returns an error if not exactly one entity was returned.
+// Only returns a single Node entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when exactly one Node entity is not found.
+// Returns a *NotFoundError when no Node entities are found.
 func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
 	nodes, err := nq.Limit(2).All(ctx)
 	if err != nil {
@@ -156,7 +168,9 @@ func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
 	return node
 }
 
-// OnlyID returns the only Node id in the query, returns an error if not exactly one id was returned.
+// OnlyID is like Only, but returns the only Node ID in the query.
+// Returns a *NotSingularError when exactly one Node ID is not found.
+// Returns a *NotFoundError when no entities are found.
 func (nq *NodeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
 	if ids, err = nq.Limit(2).IDs(ctx); err != nil {
@@ -199,7 +213,7 @@ func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Node ids.
+// IDs executes the query and returns a list of Node IDs.
 func (nq *NodeQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
 	if err := nq.Select(node.FieldID).Scan(ctx, &ids); err != nil {
@@ -251,24 +265,28 @@ func (nq *NodeQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the query builder, including all associated steps. It can be
+// Clone returns a duplicate of the NodeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (nq *NodeQuery) Clone() *NodeQuery {
+	if nq == nil {
+		return nil
+	}
 	return &NodeQuery{
 		config:     nq.config,
 		limit:      nq.limit,
 		offset:     nq.offset,
 		order:      append([]OrderFunc{}, nq.order...),
-		unique:     append([]string{}, nq.unique...),
 		predicates: append([]predicate.Node{}, nq.predicates...),
+		withPrev:   nq.withPrev.Clone(),
+		withNext:   nq.withNext.Clone(),
 		// clone intermediate query.
 		gremlin: nq.gremlin.Clone(),
 		path:    nq.path,
 	}
 }
 
-//  WithPrev tells the query-builder to eager-loads the nodes that are connected to
-// the "prev" edge. The optional arguments used to configure the query builder of the edge.
+// WithPrev tells the query-builder to eager-load the nodes that are connected to
+// the "prev" edge. The optional arguments are used to configure the query builder of the edge.
 func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
 	query := &NodeQuery{config: nq.config}
 	for _, opt := range opts {
@@ -278,8 +296,8 @@ func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
 	return nq
 }
 
-//  WithNext tells the query-builder to eager-loads the nodes that are connected to
-// the "next" edge. The optional arguments used to configure the query builder of the edge.
+// WithNext tells the query-builder to eager-load the nodes that are connected to
+// the "next" edge. The optional arguments are used to configure the query builder of the edge.
 func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 	query := &NodeQuery{config: nq.config}
 	for _, opt := range opts {
@@ -289,7 +307,7 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 	return nq
 }
 
-// GroupBy used to group vertices by one or more fields/columns.
+// GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
@@ -311,12 +329,13 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		return nq.gremlinQuery(), nil
+		return nq.gremlinQuery(ctx), nil
 	}
 	return group
 }
 
-// Select one or more fields from the given query.
+// Select allows the selection one or more fields/columns for the given query,
+// instead of selecting all fields in the entity.
 //
 // Example:
 //
@@ -328,16 +347,9 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Select(node.FieldValue).
 //		Scan(ctx, &v)
 //
-func (nq *NodeQuery) Select(field string, fields ...string) *NodeSelect {
-	selector := &NodeSelect{config: nq.config}
-	selector.fields = append([]string{field}, fields...)
-	selector.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
-		if err := nq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return nq.gremlinQuery(), nil
-	}
-	return selector
+func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
+	nq.fields = append(nq.fields, fields...)
+	return &NodeSelect{NodeQuery: nq}
 }
 
 func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
@@ -353,7 +365,17 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 
 func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
 	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().ValueMap(true).Query()
+	traversal := nq.gremlinQuery(ctx)
+	if len(nq.fields) > 0 {
+		fields := make([]interface{}, len(nq.fields))
+		for i, f := range nq.fields {
+			fields[i] = f
+		}
+		traversal.ValueMap(fields...)
+	} else {
+		traversal.ValueMap(true)
+	}
+	query, bindings := traversal.Query()
 	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
@@ -367,7 +389,7 @@ func (nq *NodeQuery) gremlinAll(ctx context.Context) ([]*Node, error) {
 
 func (nq *NodeQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().Count().Query()
+	query, bindings := nq.gremlinQuery(ctx).Count().Query()
 	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
@@ -376,14 +398,14 @@ func (nq *NodeQuery) gremlinCount(ctx context.Context) (int, error) {
 
 func (nq *NodeQuery) gremlinExist(ctx context.Context) (bool, error) {
 	res := &gremlin.Response{}
-	query, bindings := nq.gremlinQuery().HasNext().Query()
+	query, bindings := nq.gremlinQuery(ctx).HasNext().Query()
 	if err := nq.driver.Exec(ctx, query, bindings, res); err != nil {
 		return false, err
 	}
 	return res.ReadBool()
 }
 
-func (nq *NodeQuery) gremlinQuery() *dsl.Traversal {
+func (nq *NodeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(node.Label)
 	if nq.gremlin != nil {
 		v = nq.gremlin.Clone()
@@ -405,13 +427,13 @@ func (nq *NodeQuery) gremlinQuery() *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := nq.unique; len(unique) == 0 {
+	if unique := nq.unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v
 }
 
-// NodeGroupBy is the builder for group-by Node entities.
+// NodeGroupBy is the group-by builder for Node entities.
 type NodeGroupBy struct {
 	config
 	fields []string
@@ -427,7 +449,7 @@ func (ngb *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
 	return ngb
 }
 
-// Scan applies the group-by query and scan the result into the given value.
+// Scan applies the group-by query and scans the result into the given value.
 func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := ngb.path(ctx)
 	if err != nil {
@@ -444,7 +466,8 @@ func (ngb *NodeGroupBy) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from group-by. It is only allowed when querying group-by with one field.
+// Strings returns list of strings from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NodeGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(ngb.fields) > 1 {
 		return nil, errors.New("ent: NodeGroupBy.Strings is not achievable when grouping more than 1 field")
@@ -465,7 +488,8 @@ func (ngb *NodeGroupBy) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from group-by. It is only allowed when querying group-by with one field.
+// String returns a single string from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NodeGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ngb.Strings(ctx); err != nil {
@@ -491,7 +515,8 @@ func (ngb *NodeGroupBy) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from group-by. It is only allowed when querying group-by with one field.
+// Ints returns list of ints from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NodeGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(ngb.fields) > 1 {
 		return nil, errors.New("ent: NodeGroupBy.Ints is not achievable when grouping more than 1 field")
@@ -512,7 +537,8 @@ func (ngb *NodeGroupBy) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from group-by. It is only allowed when querying group-by with one field.
+// Int returns a single int from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NodeGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ngb.Ints(ctx); err != nil {
@@ -538,7 +564,8 @@ func (ngb *NodeGroupBy) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from group-by. It is only allowed when querying group-by with one field.
+// Float64s returns list of float64s from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NodeGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ngb.fields) > 1 {
 		return nil, errors.New("ent: NodeGroupBy.Float64s is not achievable when grouping more than 1 field")
@@ -559,7 +586,8 @@ func (ngb *NodeGroupBy) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from group-by. It is only allowed when querying group-by with one field.
+// Float64 returns a single float64 from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NodeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ngb.Float64s(ctx); err != nil {
@@ -585,7 +613,8 @@ func (ngb *NodeGroupBy) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from group-by. It is only allowed when querying group-by with one field.
+// Bools returns list of bools from group-by.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NodeGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(ngb.fields) > 1 {
 		return nil, errors.New("ent: NodeGroupBy.Bools is not achievable when grouping more than 1 field")
@@ -606,7 +635,8 @@ func (ngb *NodeGroupBy) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from group-by. It is only allowed when querying group-by with one field.
+// Bool returns a single bool from a group-by query.
+// It is only allowed when executing a group-by query with one field.
 func (ngb *NodeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ngb.Bools(ctx); err != nil {
@@ -669,22 +699,19 @@ func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
 		Next()
 }
 
-// NodeSelect is the builder for select fields of Node entities.
+// NodeSelect is the builder for selecting fields of Node entities.
 type NodeSelect struct {
-	config
-	fields []string
+	*NodeQuery
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
-	path    func(context.Context) (*dsl.Traversal, error)
 }
 
-// Scan applies the selector query and scan the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
-	query, err := ns.path(ctx)
-	if err != nil {
+	if err := ns.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ns.gremlin = query
+	ns.gremlin = ns.NodeQuery.gremlinQuery(ctx)
 	return ns.gremlinScan(ctx, v)
 }
 
@@ -695,7 +722,7 @@ func (ns *NodeSelect) ScanX(ctx context.Context, v interface{}) {
 	}
 }
 
-// Strings returns list of strings from selector. It is only allowed when selecting one field.
+// Strings returns list of strings from a selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(ns.fields) > 1 {
 		return nil, errors.New("ent: NodeSelect.Strings is not achievable when selecting more than 1 field")
@@ -716,7 +743,7 @@ func (ns *NodeSelect) StringsX(ctx context.Context) []string {
 	return v
 }
 
-// String returns a single string from selector. It is only allowed when selecting one field.
+// String returns a single string from a selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = ns.Strings(ctx); err != nil {
@@ -742,7 +769,7 @@ func (ns *NodeSelect) StringX(ctx context.Context) string {
 	return v
 }
 
-// Ints returns list of ints from selector. It is only allowed when selecting one field.
+// Ints returns list of ints from a selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(ns.fields) > 1 {
 		return nil, errors.New("ent: NodeSelect.Ints is not achievable when selecting more than 1 field")
@@ -763,7 +790,7 @@ func (ns *NodeSelect) IntsX(ctx context.Context) []int {
 	return v
 }
 
-// Int returns a single int from selector. It is only allowed when selecting one field.
+// Int returns a single int from a selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = ns.Ints(ctx); err != nil {
@@ -789,7 +816,7 @@ func (ns *NodeSelect) IntX(ctx context.Context) int {
 	return v
 }
 
-// Float64s returns list of float64s from selector. It is only allowed when selecting one field.
+// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(ns.fields) > 1 {
 		return nil, errors.New("ent: NodeSelect.Float64s is not achievable when selecting more than 1 field")
@@ -810,7 +837,7 @@ func (ns *NodeSelect) Float64sX(ctx context.Context) []float64 {
 	return v
 }
 
-// Float64 returns a single float64 from selector. It is only allowed when selecting one field.
+// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = ns.Float64s(ctx); err != nil {
@@ -836,7 +863,7 @@ func (ns *NodeSelect) Float64X(ctx context.Context) float64 {
 	return v
 }
 
-// Bools returns list of bools from selector. It is only allowed when selecting one field.
+// Bools returns list of bools from a selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(ns.fields) > 1 {
 		return nil, errors.New("ent: NodeSelect.Bools is not achievable when selecting more than 1 field")
@@ -857,7 +884,7 @@ func (ns *NodeSelect) BoolsX(ctx context.Context) []bool {
 	return v
 }
 
-// Bool returns a single bool from selector. It is only allowed when selecting one field.
+// Bool returns a single bool from a selector. It is only allowed when selecting one field.
 func (ns *NodeSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = ns.Bools(ctx); err != nil {

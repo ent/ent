@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/groupinfo"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 )
 
 // Group is the model entity for the Group schema.
@@ -29,6 +29,7 @@ type Group struct {
 	// MaxUsers holds the value of the "max_users" field.
 	MaxUsers int `json:"max_users,omitempty"`
 	// Name holds the value of the "name" field.
+	// field with multiple validators
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the GroupQuery when eager-loading is set.
@@ -38,13 +39,13 @@ type Group struct {
 // GroupEdges holds the relations/edges for other nodes in the graph.
 type GroupEdges struct {
 	// Files holds the value of the files edge.
-	Files []*File
+	Files []*File `json:"files,omitempty"`
 	// Blocked holds the value of the blocked edge.
-	Blocked []*User
+	Blocked []*User `json:"blocked,omitempty"`
 	// Users holds the value of the users edge.
-	Users []*User
+	Users []*User `json:"users,omitempty"`
 	// Info holds the value of the info edge.
-	Info *GroupInfo
+	Info *GroupInfo `json:"info,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -117,35 +118,35 @@ func (gr *Group) FromResponse(res *gremlin.Response) error {
 	return nil
 }
 
-// QueryFiles queries the files edge of the Group.
+// QueryFiles queries the "files" edge of the Group entity.
 func (gr *Group) QueryFiles() *FileQuery {
 	return (&GroupClient{config: gr.config}).QueryFiles(gr)
 }
 
-// QueryBlocked queries the blocked edge of the Group.
+// QueryBlocked queries the "blocked" edge of the Group entity.
 func (gr *Group) QueryBlocked() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryBlocked(gr)
 }
 
-// QueryUsers queries the users edge of the Group.
+// QueryUsers queries the "users" edge of the Group entity.
 func (gr *Group) QueryUsers() *UserQuery {
 	return (&GroupClient{config: gr.config}).QueryUsers(gr)
 }
 
-// QueryInfo queries the info edge of the Group.
+// QueryInfo queries the "info" edge of the Group entity.
 func (gr *Group) QueryInfo() *GroupInfoQuery {
 	return (&GroupClient{config: gr.config}).QueryInfo(gr)
 }
 
 // Update returns a builder for updating this Group.
-// Note that, you need to call Group.Unwrap() before calling this method, if this Group
+// Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (gr *Group) Update() *GroupUpdateOne {
 	return (&GroupClient{config: gr.config}).UpdateOne(gr)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (gr *Group) Unwrap() *Group {
 	tx, ok := gr.config.driver.(*txDriver)
 	if !ok {

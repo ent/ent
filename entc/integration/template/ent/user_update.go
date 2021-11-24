@@ -8,43 +8,43 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/facebook/ent/dialect/sql"
-	"github.com/facebook/ent/dialect/sql/sqlgraph"
-	"github.com/facebook/ent/entc/integration/template/ent/pet"
-	"github.com/facebook/ent/entc/integration/template/ent/predicate"
-	"github.com/facebook/ent/entc/integration/template/ent/user"
-	"github.com/facebook/ent/schema/field"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/template/ent/pet"
+	"entgo.io/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/entc/integration/template/ent/user"
+	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *UserMutation
-	predicates []predicate.User
+	hooks    []Hook
+	mutation *UserMutation
 }
 
-// Where adds a new predicate for the builder.
+// Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.predicates = append(uu.predicates, ps...)
+	uu.mutation.Where(ps...)
 	return uu
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
 	return uu
 }
 
-// AddPetIDs adds the pets edge to Pet by ids.
+// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uu *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddPetIDs(ids...)
 	return uu
 }
 
-// AddPets adds the pets edges to Pet.
+// AddPets adds the "pets" edges to the Pet entity.
 func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -53,13 +53,13 @@ func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
 	return uu.AddPetIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uu *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFriendIDs(ids...)
 	return uu
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -73,19 +73,19 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearPets clears all "pets" edges to type Pet.
+// ClearPets clears all "pets" edges to the Pet entity.
 func (uu *UserUpdate) ClearPets() *UserUpdate {
 	uu.mutation.ClearPets()
 	return uu
 }
 
-// RemovePetIDs removes the pets edge to Pet by ids.
+// RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (uu *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemovePetIDs(ids...)
 	return uu
 }
 
-// RemovePets removes pets edges to Pet.
+// RemovePets removes "pets" edges to Pet entities.
 func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -94,19 +94,19 @@ func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 	return uu.RemovePetIDs(ids...)
 }
 
-// ClearFriends clears all "friends" edges to type User.
+// ClearFriends clears all "friends" edges to the User entity.
 func (uu *UserUpdate) ClearFriends() *UserUpdate {
 	uu.mutation.ClearFriends()
 	return uu
 }
 
-// RemoveFriendIDs removes the friends edge to User by ids.
+// RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (uu *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFriendIDs(ids...)
 	return uu
 }
 
-// RemoveFriends removes friends edges to User.
+// RemoveFriends removes "friends" edges to User entities.
 func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -115,7 +115,7 @@ func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 	return uu.RemoveFriendIDs(ids...)
 }
 
-// Save executes the query and returns the number of rows/vertices matched by this operation.
+// Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
@@ -135,6 +135,9 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 			return affected, err
 		})
 		for i := len(uu.hooks) - 1; i >= 0; i-- {
+			if uu.hooks[i] == nil {
+				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uu.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uu.mutation); err != nil {
@@ -177,7 +180,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := uu.predicates; len(ps) > 0 {
+	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -302,8 +305,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return 0, err
 	}
@@ -313,23 +316,24 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
 	config
+	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
 }
 
-// SetName sets the name field.
+// SetName sets the "name" field.
 func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
 	uuo.mutation.SetName(s)
 	return uuo
 }
 
-// AddPetIDs adds the pets edge to Pet by ids.
+// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uuo *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddPetIDs(ids...)
 	return uuo
 }
 
-// AddPets adds the pets edges to Pet.
+// AddPets adds the "pets" edges to the Pet entity.
 func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -338,13 +342,13 @@ func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
 	return uuo.AddPetIDs(ids...)
 }
 
-// AddFriendIDs adds the friends edge to User by ids.
+// AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (uuo *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddFriendIDs(ids...)
 	return uuo
 }
 
-// AddFriends adds the friends edges to User.
+// AddFriends adds the "friends" edges to the User entity.
 func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -358,19 +362,19 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearPets clears all "pets" edges to type Pet.
+// ClearPets clears all "pets" edges to the Pet entity.
 func (uuo *UserUpdateOne) ClearPets() *UserUpdateOne {
 	uuo.mutation.ClearPets()
 	return uuo
 }
 
-// RemovePetIDs removes the pets edge to Pet by ids.
+// RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (uuo *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemovePetIDs(ids...)
 	return uuo
 }
 
-// RemovePets removes pets edges to Pet.
+// RemovePets removes "pets" edges to Pet entities.
 func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -379,19 +383,19 @@ func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 	return uuo.RemovePetIDs(ids...)
 }
 
-// ClearFriends clears all "friends" edges to type User.
+// ClearFriends clears all "friends" edges to the User entity.
 func (uuo *UserUpdateOne) ClearFriends() *UserUpdateOne {
 	uuo.mutation.ClearFriends()
 	return uuo
 }
 
-// RemoveFriendIDs removes the friends edge to User by ids.
+// RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (uuo *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveFriendIDs(ids...)
 	return uuo
 }
 
-// RemoveFriends removes friends edges to User.
+// RemoveFriends removes "friends" edges to User entities.
 func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
@@ -400,7 +404,14 @@ func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 	return uuo.RemoveFriendIDs(ids...)
 }
 
-// Save executes the query and returns the updated entity.
+// Select allows selecting one or more fields (columns) of the returned entity.
+// The default is selecting all fields defined in the entity schema.
+func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	uuo.fields = append([]string{field}, fields...)
+	return uuo
+}
+
+// Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -420,6 +431,9 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 			return node, err
 		})
 		for i := len(uuo.hooks) - 1; i >= 0; i-- {
+			if uuo.hooks[i] == nil {
+				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
+			}
 			mut = uuo.hooks[i](mut)
 		}
 		if _, err := mut.Mutate(ctx, uuo.mutation); err != nil {
@@ -464,9 +478,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
+	if fields := uuo.fields; len(fields) > 0 {
+		_spec.Node.Columns = make([]string, 0, len(fields))
+		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
+		for _, f := range fields {
+			if !user.ValidColumn(f) {
+				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			}
+			if f != user.FieldID {
+				_spec.Node.Columns = append(_spec.Node.Columns, f)
+			}
+		}
+	}
+	if ps := uuo.mutation.predicates; len(ps) > 0 {
+		_spec.Predicate = func(selector *sql.Selector) {
+			for i := range ps {
+				ps[i](selector)
+			}
+		}
+	}
 	if value, ok := uuo.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -584,12 +617,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues()
+	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
-		} else if cerr, ok := isSQLConstraintError(err); ok {
-			err = cerr
+		} else if sqlgraph.IsConstraintError(err) {
+			err = &ConstraintError{err.Error(), err}
 		}
 		return nil, err
 	}

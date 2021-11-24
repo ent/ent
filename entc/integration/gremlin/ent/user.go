@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/facebook/ent/dialect/gremlin"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/card"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/pet"
-	"github.com/facebook/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/pet"
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // User is the model entity for the User schema.
@@ -31,12 +31,16 @@ type User struct {
 	Last string `json:"last,omitempty" graphql:"last_name"`
 	// Nickname holds the value of the "nickname" field.
 	Nickname string `json:"nickname,omitempty"`
+	// Address holds the value of the "address" field.
+	Address string `json:"address,omitempty"`
 	// Phone holds the value of the "phone" field.
 	Phone string `json:"phone,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `graphql:"-" json:"-"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
+	// Employment holds the value of the "employment" field.
+	Employment user.Employment `json:"employment,omitempty"`
 	// SSOCert holds the value of the "SSOCert" field.
 	SSOCert string `json:"SSOCert,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -47,27 +51,27 @@ type User struct {
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Card holds the value of the card edge.
-	Card *Card
+	Card *Card `json:"card,omitempty"`
 	// Pets holds the value of the pets edge.
-	Pets []*Pet
+	Pets []*Pet `json:"pets,omitempty"`
 	// Files holds the value of the files edge.
-	Files []*File
+	Files []*File `json:"files,omitempty"`
 	// Groups holds the value of the groups edge.
-	Groups []*Group
+	Groups []*Group `json:"groups,omitempty"`
 	// Friends holds the value of the friends edge.
-	Friends []*User
+	Friends []*User `json:"friends,omitempty"`
 	// Followers holds the value of the followers edge.
-	Followers []*User
+	Followers []*User `json:"followers,omitempty"`
 	// Following holds the value of the following edge.
-	Following []*User
+	Following []*User `json:"following,omitempty"`
 	// Team holds the value of the team edge.
-	Team *Pet
+	Team *Pet `json:"team,omitempty"`
 	// Spouse holds the value of the spouse edge.
-	Spouse *User
+	Spouse *User `json:"spouse,omitempty"`
 	// Children holds the value of the children edge.
-	Children []*User
+	Children []*User `json:"children,omitempty"`
 	// Parent holds the value of the parent edge.
-	Parent *User
+	Parent *User `json:"parent,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [11]bool
@@ -199,16 +203,18 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanu struct {
-		ID          string    `json:"id,omitempty"`
-		OptionalInt int       `json:"optional_int,omitempty"`
-		Age         int       `json:"age,omitempty"`
-		Name        string    `json:"name,omitempty"`
-		Last        string    `json:"last,omitempty"`
-		Nickname    string    `json:"nickname,omitempty"`
-		Phone       string    `json:"phone,omitempty"`
-		Password    string    `json:"password,omitempty"`
-		Role        user.Role `json:"role,omitempty"`
-		SSOCert     string    `json:"sso_cert,omitempty"`
+		ID          string          `json:"id,omitempty"`
+		OptionalInt int             `json:"optional_int,omitempty"`
+		Age         int             `json:"age,omitempty"`
+		Name        string          `json:"name,omitempty"`
+		Last        string          `json:"last,omitempty"`
+		Nickname    string          `json:"nickname,omitempty"`
+		Address     string          `json:"address,omitempty"`
+		Phone       string          `json:"phone,omitempty"`
+		Password    string          `json:"password,omitempty"`
+		Role        user.Role       `json:"role,omitempty"`
+		Employment  user.Employment `json:"employment,omitempty"`
+		SSOCert     string          `json:"sso_cert,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -219,77 +225,79 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 	u.Name = scanu.Name
 	u.Last = scanu.Last
 	u.Nickname = scanu.Nickname
+	u.Address = scanu.Address
 	u.Phone = scanu.Phone
 	u.Password = scanu.Password
 	u.Role = scanu.Role
+	u.Employment = scanu.Employment
 	u.SSOCert = scanu.SSOCert
 	return nil
 }
 
-// QueryCard queries the card edge of the User.
+// QueryCard queries the "card" edge of the User entity.
 func (u *User) QueryCard() *CardQuery {
 	return (&UserClient{config: u.config}).QueryCard(u)
 }
 
-// QueryPets queries the pets edge of the User.
+// QueryPets queries the "pets" edge of the User entity.
 func (u *User) QueryPets() *PetQuery {
 	return (&UserClient{config: u.config}).QueryPets(u)
 }
 
-// QueryFiles queries the files edge of the User.
+// QueryFiles queries the "files" edge of the User entity.
 func (u *User) QueryFiles() *FileQuery {
 	return (&UserClient{config: u.config}).QueryFiles(u)
 }
 
-// QueryGroups queries the groups edge of the User.
+// QueryGroups queries the "groups" edge of the User entity.
 func (u *User) QueryGroups() *GroupQuery {
 	return (&UserClient{config: u.config}).QueryGroups(u)
 }
 
-// QueryFriends queries the friends edge of the User.
+// QueryFriends queries the "friends" edge of the User entity.
 func (u *User) QueryFriends() *UserQuery {
 	return (&UserClient{config: u.config}).QueryFriends(u)
 }
 
-// QueryFollowers queries the followers edge of the User.
+// QueryFollowers queries the "followers" edge of the User entity.
 func (u *User) QueryFollowers() *UserQuery {
 	return (&UserClient{config: u.config}).QueryFollowers(u)
 }
 
-// QueryFollowing queries the following edge of the User.
+// QueryFollowing queries the "following" edge of the User entity.
 func (u *User) QueryFollowing() *UserQuery {
 	return (&UserClient{config: u.config}).QueryFollowing(u)
 }
 
-// QueryTeam queries the team edge of the User.
+// QueryTeam queries the "team" edge of the User entity.
 func (u *User) QueryTeam() *PetQuery {
 	return (&UserClient{config: u.config}).QueryTeam(u)
 }
 
-// QuerySpouse queries the spouse edge of the User.
+// QuerySpouse queries the "spouse" edge of the User entity.
 func (u *User) QuerySpouse() *UserQuery {
 	return (&UserClient{config: u.config}).QuerySpouse(u)
 }
 
-// QueryChildren queries the children edge of the User.
+// QueryChildren queries the "children" edge of the User entity.
 func (u *User) QueryChildren() *UserQuery {
 	return (&UserClient{config: u.config}).QueryChildren(u)
 }
 
-// QueryParent queries the parent edge of the User.
+// QueryParent queries the "parent" edge of the User entity.
 func (u *User) QueryParent() *UserQuery {
 	return (&UserClient{config: u.config}).QueryParent(u)
 }
 
 // Update returns a builder for updating this User.
-// Note that, you need to call User.Unwrap() before calling this method, if this User
+// Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
 	return (&UserClient{config: u.config}).UpdateOne(u)
 }
 
-// Unwrap unwraps the entity that was returned from a transaction after it was closed,
-// so that all next queries will be executed through the driver which created the transaction.
+// Unwrap unwraps the User entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
 func (u *User) Unwrap() *User {
 	tx, ok := u.config.driver.(*txDriver)
 	if !ok {
@@ -314,11 +322,15 @@ func (u *User) String() string {
 	builder.WriteString(u.Last)
 	builder.WriteString(", nickname=")
 	builder.WriteString(u.Nickname)
+	builder.WriteString(", address=")
+	builder.WriteString(u.Address)
 	builder.WriteString(", phone=")
 	builder.WriteString(u.Phone)
 	builder.WriteString(", password=<sensitive>")
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	builder.WriteString(", employment=")
+	builder.WriteString(fmt.Sprintf("%v", u.Employment))
 	builder.WriteString(", SSOCert=")
 	builder.WriteString(u.SSOCert)
 	builder.WriteByte(')')
@@ -335,16 +347,18 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scanu []struct {
-		ID          string    `json:"id,omitempty"`
-		OptionalInt int       `json:"optional_int,omitempty"`
-		Age         int       `json:"age,omitempty"`
-		Name        string    `json:"name,omitempty"`
-		Last        string    `json:"last,omitempty"`
-		Nickname    string    `json:"nickname,omitempty"`
-		Phone       string    `json:"phone,omitempty"`
-		Password    string    `json:"password,omitempty"`
-		Role        user.Role `json:"role,omitempty"`
-		SSOCert     string    `json:"sso_cert,omitempty"`
+		ID          string          `json:"id,omitempty"`
+		OptionalInt int             `json:"optional_int,omitempty"`
+		Age         int             `json:"age,omitempty"`
+		Name        string          `json:"name,omitempty"`
+		Last        string          `json:"last,omitempty"`
+		Nickname    string          `json:"nickname,omitempty"`
+		Address     string          `json:"address,omitempty"`
+		Phone       string          `json:"phone,omitempty"`
+		Password    string          `json:"password,omitempty"`
+		Role        user.Role       `json:"role,omitempty"`
+		Employment  user.Employment `json:"employment,omitempty"`
+		SSOCert     string          `json:"sso_cert,omitempty"`
 	}
 	if err := vmap.Decode(&scanu); err != nil {
 		return err
@@ -357,9 +371,11 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 			Name:        v.Name,
 			Last:        v.Last,
 			Nickname:    v.Nickname,
+			Address:     v.Address,
 			Phone:       v.Phone,
 			Password:    v.Password,
 			Role:        v.Role,
+			Employment:  v.Employment,
 			SSOCert:     v.SSOCert,
 		})
 	}
