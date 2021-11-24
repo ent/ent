@@ -67,7 +67,8 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "", nil, nil).
 							AddRow("text", "longtext", "YES", "YES", "NULL", "", "", "", nil, nil).
 							AddRow("uuid", "char(36)", "YES", "YES", "NULL", "", "", "utf8mb4_bin", nil, nil).
-							AddRow("price", "decimal(6, 4)", "NO", "YES", "NULL", "", "", "", "6", "4"))
+							AddRow("price", "decimal(6, 4)", "NO", "YES", "NULL", "", "", "", "6", "4").
+							AddRow("bank_id", "varchar(255)", "NO", "YES", "NULL", "", "", "", nil, nil))
 					mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `sub_part`, `non_unique`, `seq_in_index` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
 						WithArgs("public", "users").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "sub_part", "non_unique", "seq_in_index"}).
@@ -115,7 +116,8 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("name", "varchar(255)", 0, "NULL", 0).
 							AddRow("text", "text", 0, "NULL", 0).
 							AddRow("uuid", "uuid", 0, "NULL", 0).
-							AddRow("price", "real", 1, "NULL", 0))
+							AddRow("price", "real", 1, "NULL", 0).
+							AddRow("bank_id", "varchar(255)", 1, "NULL", 0))
 					mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
 						WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "unique"}))
 					mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('pets') ORDER BY `pk`")).
@@ -156,7 +158,8 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil, nil).
 							AddRow("text", "text", "YES", "NULL", "text", nil, nil, nil).
 							AddRow("uuid", "uuid", "YES", "NULL", "uuid", nil, nil, nil).
-							AddRow("price", "numeric", "NO", "NULL", "numeric", "6", "4", nil))
+							AddRow("price", "numeric", "NO", "NULL", "numeric", "6", "4", nil).
+							AddRow("bank_id", "character", "NO", "NULL", "bpchar", nil, nil, 20))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "users"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
@@ -211,6 +214,9 @@ func TestInspector_Tables(t *testing.T) {
 						{Name: "price", Type: field.TypeFloat64, SchemaType: map[string]string{
 							dialect.MySQL:    "decimal(6,4)",
 							dialect.Postgres: "numeric(6,4)",
+						}},
+						{Name: "bank_id", Type: field.TypeString, SchemaType: map[string]string{
+							dialect.Postgres: "varchar(20)",
 						}},
 					}
 					t1 = &Table{
