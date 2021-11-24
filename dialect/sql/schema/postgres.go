@@ -229,12 +229,12 @@ const maxCharSize = 10 << 20
 // scanColumn scans the information a column from column description.
 func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
-		nullable         sql.NullString
-		defaults         sql.NullString
-		udt              sql.NullString
-		numericPrecision sql.NullInt64
-		numericScale     sql.NullInt64
-		numericCharacterMaximumLength     sql.NullInt64
+		nullable                      sql.NullString
+		defaults                      sql.NullString
+		udt                           sql.NullString
+		numericPrecision              sql.NullInt64
+		numericScale                  sql.NullInt64
+		numericCharacterMaximumLength sql.NullInt64
 	)
 	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt, &numericPrecision, &numericScale, &numericCharacterMaximumLength); err != nil {
 		return fmt.Errorf("scanning column description: %w", err)
