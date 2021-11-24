@@ -490,10 +490,10 @@ func UUID(v uuid.UUID) predicate.FieldType {
 	})
 }
 
-// NillableUUID applies equality check predicate on the "nillable_uuid" field. It's identical to NillableUUIDEQ.
-func NillableUUID(v uuid.UUID) predicate.FieldType {
+// UUIDNillable applies equality check predicate on the "uuid_nillable" field. It's identical to UUIDNillableEQ.
+func UUIDNillable(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNillableUUID), v))
+		s.Where(sql.EQ(s.C(FieldUUIDNillable), v))
 	})
 }
 
@@ -5751,22 +5751,22 @@ func UUIDNotNil() predicate.FieldType {
 	})
 }
 
-// NillableUUIDEQ applies the EQ predicate on the "nillable_uuid" field.
-func NillableUUIDEQ(v uuid.UUID) predicate.FieldType {
+// UUIDNillableEQ applies the EQ predicate on the "uuid_nillable" field.
+func UUIDNillableEQ(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNillableUUID), v))
+		s.Where(sql.EQ(s.C(FieldUUIDNillable), v))
 	})
 }
 
-// NillableUUIDNEQ applies the NEQ predicate on the "nillable_uuid" field.
-func NillableUUIDNEQ(v uuid.UUID) predicate.FieldType {
+// UUIDNillableNEQ applies the NEQ predicate on the "uuid_nillable" field.
+func UUIDNillableNEQ(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldNillableUUID), v))
+		s.Where(sql.NEQ(s.C(FieldUUIDNillable), v))
 	})
 }
 
-// NillableUUIDIn applies the In predicate on the "nillable_uuid" field.
-func NillableUUIDIn(vs ...uuid.UUID) predicate.FieldType {
+// UUIDNillableIn applies the In predicate on the "uuid_nillable" field.
+func UUIDNillableIn(vs ...uuid.UUID) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -5778,12 +5778,12 @@ func NillableUUIDIn(vs ...uuid.UUID) predicate.FieldType {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldNillableUUID), v...))
+		s.Where(sql.In(s.C(FieldUUIDNillable), v...))
 	})
 }
 
-// NillableUUIDNotIn applies the NotIn predicate on the "nillable_uuid" field.
-func NillableUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
+// UUIDNillableNotIn applies the NotIn predicate on the "uuid_nillable" field.
+func UUIDNillableNotIn(vs ...uuid.UUID) predicate.FieldType {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -5795,49 +5795,49 @@ func NillableUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldNillableUUID), v...))
+		s.Where(sql.NotIn(s.C(FieldUUIDNillable), v...))
 	})
 }
 
-// NillableUUIDGT applies the GT predicate on the "nillable_uuid" field.
-func NillableUUIDGT(v uuid.UUID) predicate.FieldType {
+// UUIDNillableGT applies the GT predicate on the "uuid_nillable" field.
+func UUIDNillableGT(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldNillableUUID), v))
+		s.Where(sql.GT(s.C(FieldUUIDNillable), v))
 	})
 }
 
-// NillableUUIDGTE applies the GTE predicate on the "nillable_uuid" field.
-func NillableUUIDGTE(v uuid.UUID) predicate.FieldType {
+// UUIDNillableGTE applies the GTE predicate on the "uuid_nillable" field.
+func UUIDNillableGTE(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldNillableUUID), v))
+		s.Where(sql.GTE(s.C(FieldUUIDNillable), v))
 	})
 }
 
-// NillableUUIDLT applies the LT predicate on the "nillable_uuid" field.
-func NillableUUIDLT(v uuid.UUID) predicate.FieldType {
+// UUIDNillableLT applies the LT predicate on the "uuid_nillable" field.
+func UUIDNillableLT(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldNillableUUID), v))
+		s.Where(sql.LT(s.C(FieldUUIDNillable), v))
 	})
 }
 
-// NillableUUIDLTE applies the LTE predicate on the "nillable_uuid" field.
-func NillableUUIDLTE(v uuid.UUID) predicate.FieldType {
+// UUIDNillableLTE applies the LTE predicate on the "uuid_nillable" field.
+func UUIDNillableLTE(v uuid.UUID) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldNillableUUID), v))
+		s.Where(sql.LTE(s.C(FieldUUIDNillable), v))
 	})
 }
 
-// NillableUUIDIsNil applies the IsNil predicate on the "nillable_uuid" field.
-func NillableUUIDIsNil() predicate.FieldType {
+// UUIDNillableIsNil applies the IsNil predicate on the "uuid_nillable" field.
+func UUIDNillableIsNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldNillableUUID)))
+		s.Where(sql.IsNull(s.C(FieldUUIDNillable)))
 	})
 }
 
-// NillableUUIDNotNil applies the NotNil predicate on the "nillable_uuid" field.
-func NillableUUIDNotNil() predicate.FieldType {
+// UUIDNillableNotNil applies the NotNil predicate on the "uuid_nillable" field.
+func UUIDNillableNotNil() predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldNillableUUID)))
+		s.Where(sql.NotNull(s.C(FieldUUIDNillable)))
 	})
 }
 

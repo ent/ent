@@ -230,7 +230,7 @@ func TestBytes(t *testing.T) {
 	assert.Equal(t, "uuid.UUID", fd.Info.Ident)
 	assert.Equal(t, "github.com/google/uuid", fd.Info.PkgPath)
 	assert.Equal(t, "uuid.UUID", fd.Info.String())
-	assert.True(t, fd.Info.Nillable)
+	assert.False(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
 	assert.NotEmpty(t, fd.Default.(func() uuid.UUID)())
 

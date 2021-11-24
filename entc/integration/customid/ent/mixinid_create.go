@@ -45,6 +45,14 @@ func (mic *MixinIDCreate) SetID(u uuid.UUID) *MixinIDCreate {
 	return mic
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (mic *MixinIDCreate) SetNillableID(u *uuid.UUID) *MixinIDCreate {
+	if u != nil {
+		mic.SetID(*u)
+	}
+	return mic
+}
+
 // Mutation returns the MixinIDMutation object of the builder.
 func (mic *MixinIDCreate) Mutation() *MixinIDMutation {
 	return mic.mutation

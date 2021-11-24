@@ -33,6 +33,14 @@ func (bc *BlobCreate) SetUUID(u uuid.UUID) *BlobCreate {
 	return bc
 }
 
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (bc *BlobCreate) SetNillableUUID(u *uuid.UUID) *BlobCreate {
+	if u != nil {
+		bc.SetUUID(*u)
+	}
+	return bc
+}
+
 // SetCount sets the "count" field.
 func (bc *BlobCreate) SetCount(i int) *BlobCreate {
 	bc.mutation.SetCount(i)
@@ -50,6 +58,14 @@ func (bc *BlobCreate) SetNillableCount(i *int) *BlobCreate {
 // SetID sets the "id" field.
 func (bc *BlobCreate) SetID(u uuid.UUID) *BlobCreate {
 	bc.mutation.SetID(u)
+	return bc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (bc *BlobCreate) SetNillableID(u *uuid.UUID) *BlobCreate {
+	if u != nil {
+		bc.SetID(*u)
+	}
 	return bc
 }
 

@@ -55,14 +55,6 @@ func (gc *GroupCreate) SetType(s string) *GroupCreate {
 	return gc
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (gc *GroupCreate) SetNillableType(s *string) *GroupCreate {
-	if s != nil {
-		gc.SetType(*s)
-	}
-	return gc
-}
-
 // SetMaxUsers sets the "max_users" field.
 func (gc *GroupCreate) SetMaxUsers(i int) *GroupCreate {
 	gc.mutation.SetMaxUsers(i)

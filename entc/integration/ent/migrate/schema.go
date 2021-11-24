@@ -127,7 +127,7 @@ var (
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE"}, Default: "READ"},
 		{Name: "priority", Type: field.TypeEnum, Nullable: true, Enums: []string{"UNKNOWN", "LOW", "HIGH"}},
 		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
-		{Name: "nillable_uuid", Type: field.TypeUUID, Nullable: true},
+		{Name: "uuid_nillable", Type: field.TypeUUID, Nullable: true},
 		{Name: "strings", Type: field.TypeJSON, Nullable: true},
 		{Name: "pair", Type: field.TypeBytes},
 		{Name: "nil_pair", Type: field.TypeBytes, Nullable: true},

@@ -54,14 +54,6 @@ func (fc *FileCreate) SetUser(s string) *FileCreate {
 	return fc
 }
 
-// SetNillableUser sets the "user" field if the given value is not nil.
-func (fc *FileCreate) SetNillableUser(s *string) *FileCreate {
-	if s != nil {
-		fc.SetUser(*s)
-	}
-	return fc
-}
-
 // SetGroup sets the "group" field.
 func (fc *FileCreate) SetGroup(s string) *FileCreate {
 	fc.mutation.SetGroup(s)

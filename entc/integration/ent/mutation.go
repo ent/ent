@@ -1436,7 +1436,7 @@ type FieldTypeMutation struct {
 	role                       *role.Role
 	priority                   *role.Priority
 	uuid                       *uuid.UUID
-	nillable_uuid              *uuid.UUID
+	uuid_nillable              *uuid.UUID
 	strings                    *[]string
 	pair                       *schema.Pair
 	nil_pair                   **schema.Pair
@@ -4876,53 +4876,53 @@ func (m *FieldTypeMutation) ResetUUID() {
 	delete(m.clearedFields, fieldtype.FieldUUID)
 }
 
-// SetNillableUUID sets the "nillable_uuid" field.
-func (m *FieldTypeMutation) SetNillableUUID(u uuid.UUID) {
-	m.nillable_uuid = &u
+// SetUUIDNillable sets the "uuid_nillable" field.
+func (m *FieldTypeMutation) SetUUIDNillable(u uuid.UUID) {
+	m.uuid_nillable = &u
 }
 
-// NillableUUID returns the value of the "nillable_uuid" field in the mutation.
-func (m *FieldTypeMutation) NillableUUID() (r uuid.UUID, exists bool) {
-	v := m.nillable_uuid
+// UUIDNillable returns the value of the "uuid_nillable" field in the mutation.
+func (m *FieldTypeMutation) UUIDNillable() (r uuid.UUID, exists bool) {
+	v := m.uuid_nillable
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldNillableUUID returns the old "nillable_uuid" field's value of the FieldType entity.
+// OldUUIDNillable returns the old "uuid_nillable" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldNillableUUID(ctx context.Context) (v *uuid.UUID, err error) {
+func (m *FieldTypeMutation) OldUUIDNillable(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNillableUUID is only allowed on UpdateOne operations")
+		return v, errors.New("OldUUIDNillable is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNillableUUID requires an ID field in the mutation")
+		return v, errors.New("OldUUIDNillable requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNillableUUID: %w", err)
+		return v, fmt.Errorf("querying old value for OldUUIDNillable: %w", err)
 	}
-	return oldValue.NillableUUID, nil
+	return oldValue.UUIDNillable, nil
 }
 
-// ClearNillableUUID clears the value of the "nillable_uuid" field.
-func (m *FieldTypeMutation) ClearNillableUUID() {
-	m.nillable_uuid = nil
-	m.clearedFields[fieldtype.FieldNillableUUID] = struct{}{}
+// ClearUUIDNillable clears the value of the "uuid_nillable" field.
+func (m *FieldTypeMutation) ClearUUIDNillable() {
+	m.uuid_nillable = nil
+	m.clearedFields[fieldtype.FieldUUIDNillable] = struct{}{}
 }
 
-// NillableUUIDCleared returns if the "nillable_uuid" field was cleared in this mutation.
-func (m *FieldTypeMutation) NillableUUIDCleared() bool {
-	_, ok := m.clearedFields[fieldtype.FieldNillableUUID]
+// UUIDNillableCleared returns if the "uuid_nillable" field was cleared in this mutation.
+func (m *FieldTypeMutation) UUIDNillableCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldUUIDNillable]
 	return ok
 }
 
-// ResetNillableUUID resets all changes to the "nillable_uuid" field.
-func (m *FieldTypeMutation) ResetNillableUUID() {
-	m.nillable_uuid = nil
-	delete(m.clearedFields, fieldtype.FieldNillableUUID)
+// ResetUUIDNillable resets all changes to the "uuid_nillable" field.
+func (m *FieldTypeMutation) ResetUUIDNillable() {
+	m.uuid_nillable = nil
+	delete(m.clearedFields, fieldtype.FieldUUIDNillable)
 }
 
 // SetStrings sets the "strings" field.
@@ -5441,8 +5441,8 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.uuid != nil {
 		fields = append(fields, fieldtype.FieldUUID)
 	}
-	if m.nillable_uuid != nil {
-		fields = append(fields, fieldtype.FieldNillableUUID)
+	if m.uuid_nillable != nil {
+		fields = append(fields, fieldtype.FieldUUIDNillable)
 	}
 	if m.strings != nil {
 		fields = append(fields, fieldtype.FieldStrings)
@@ -5587,8 +5587,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Priority()
 	case fieldtype.FieldUUID:
 		return m.UUID()
-	case fieldtype.FieldNillableUUID:
-		return m.NillableUUID()
+	case fieldtype.FieldUUIDNillable:
+		return m.UUIDNillable()
 	case fieldtype.FieldStrings:
 		return m.Strings()
 	case fieldtype.FieldPair:
@@ -5726,8 +5726,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldPriority(ctx)
 	case fieldtype.FieldUUID:
 		return m.OldUUID(ctx)
-	case fieldtype.FieldNillableUUID:
-		return m.OldNillableUUID(ctx)
+	case fieldtype.FieldUUIDNillable:
+		return m.OldUUIDNillable(ctx)
 	case fieldtype.FieldStrings:
 		return m.OldStrings(ctx)
 	case fieldtype.FieldPair:
@@ -6150,12 +6150,12 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUUID(v)
 		return nil
-	case fieldtype.FieldNillableUUID:
+	case fieldtype.FieldUUIDNillable:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetNillableUUID(v)
+		m.SetUUIDNillable(v)
 		return nil
 	case fieldtype.FieldStrings:
 		v, ok := value.([]string)
@@ -6761,8 +6761,8 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldUUID) {
 		fields = append(fields, fieldtype.FieldUUID)
 	}
-	if m.FieldCleared(fieldtype.FieldNillableUUID) {
-		fields = append(fields, fieldtype.FieldNillableUUID)
+	if m.FieldCleared(fieldtype.FieldUUIDNillable) {
+		fields = append(fields, fieldtype.FieldUUIDNillable)
 	}
 	if m.FieldCleared(fieldtype.FieldStrings) {
 		fields = append(fields, fieldtype.FieldStrings)
@@ -6940,8 +6940,8 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 	case fieldtype.FieldUUID:
 		m.ClearUUID()
 		return nil
-	case fieldtype.FieldNillableUUID:
-		m.ClearNillableUUID()
+	case fieldtype.FieldUUIDNillable:
+		m.ClearUUIDNillable()
 		return nil
 	case fieldtype.FieldStrings:
 		m.ClearStrings()
@@ -7134,8 +7134,8 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 	case fieldtype.FieldUUID:
 		m.ResetUUID()
 		return nil
-	case fieldtype.FieldNillableUUID:
-		m.ResetNillableUUID()
+	case fieldtype.FieldUUIDNillable:
+		m.ResetUUIDNillable()
 		return nil
 	case fieldtype.FieldStrings:
 		m.ResetStrings()

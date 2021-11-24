@@ -44,14 +44,6 @@ func (pu *PostUpdate) SetAuthorID(i int) *PostUpdate {
 	return pu
 }
 
-// SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (pu *PostUpdate) SetNillableAuthorID(i *int) *PostUpdate {
-	if i != nil {
-		pu.SetAuthorID(*i)
-	}
-	return pu
-}
-
 // ClearAuthorID clears the value of the "author_id" field.
 func (pu *PostUpdate) ClearAuthorID() *PostUpdate {
 	pu.mutation.ClearAuthorID()
@@ -216,14 +208,6 @@ func (puo *PostUpdateOne) SetText(s string) *PostUpdateOne {
 // SetAuthorID sets the "author_id" field.
 func (puo *PostUpdateOne) SetAuthorID(i int) *PostUpdateOne {
 	puo.mutation.SetAuthorID(i)
-	return puo
-}
-
-// SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (puo *PostUpdateOne) SetNillableAuthorID(i *int) *PostUpdateOne {
-	if i != nil {
-		puo.SetAuthorID(*i)
-	}
 	return puo
 }
 

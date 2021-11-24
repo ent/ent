@@ -137,25 +137,9 @@ func (ftc *FieldTypeCreate) SetNillableInt(i int) *FieldTypeCreate {
 	return ftc
 }
 
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt(i *int) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt(*i)
-	}
-	return ftc
-}
-
 // SetNillableInt8 sets the "nillable_int8" field.
 func (ftc *FieldTypeCreate) SetNillableInt8(i int8) *FieldTypeCreate {
 	ftc.mutation.SetNillableInt8(i)
-	return ftc
-}
-
-// SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt8(i *int8) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt8(*i)
-	}
 	return ftc
 }
 
@@ -165,39 +149,15 @@ func (ftc *FieldTypeCreate) SetNillableInt16(i int16) *FieldTypeCreate {
 	return ftc
 }
 
-// SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt16(i *int16) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt16(*i)
-	}
-	return ftc
-}
-
 // SetNillableInt32 sets the "nillable_int32" field.
 func (ftc *FieldTypeCreate) SetNillableInt32(i int32) *FieldTypeCreate {
 	ftc.mutation.SetNillableInt32(i)
 	return ftc
 }
 
-// SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt32(i *int32) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt32(*i)
-	}
-	return ftc
-}
-
 // SetNillableInt64 sets the "nillable_int64" field.
 func (ftc *FieldTypeCreate) SetNillableInt64(i int64) *FieldTypeCreate {
 	ftc.mutation.SetNillableInt64(i)
-	return ftc
-}
-
-// SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt64(i *int64) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt64(*i)
-	}
 	return ftc
 }
 
@@ -421,14 +381,6 @@ func (ftc *FieldTypeCreate) SetStringScanner(ss schema.StringScanner) *FieldType
 	return ftc
 }
 
-// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeCreate {
-	if ss != nil {
-		ftc.SetStringScanner(*ss)
-	}
-	return ftc
-}
-
 // SetDuration sets the "duration" field.
 func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
 	ftc.mutation.SetDuration(t)
@@ -460,14 +412,6 @@ func (ftc *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
 // SetNdir sets the "ndir" field.
 func (ftc *FieldTypeCreate) SetNdir(h http.Dir) *FieldTypeCreate {
 	ftc.mutation.SetNdir(h)
-	return ftc
-}
-
-// SetNillableNdir sets the "ndir" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
-	if h != nil {
-		ftc.SetNdir(*h)
-	}
 	return ftc
 }
 
@@ -528,14 +472,6 @@ func (ftc *FieldTypeCreate) SetNillableActive(s *schema.Status) *FieldTypeCreate
 // SetNullActive sets the "null_active" field.
 func (ftc *FieldTypeCreate) SetNullActive(s schema.Status) *FieldTypeCreate {
 	ftc.mutation.SetNullActive(s)
-	return ftc
-}
-
-// SetNillableNullActive sets the "null_active" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetNullActive(*s)
-	}
 	return ftc
 }
 
@@ -685,9 +621,17 @@ func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
 	return ftc
 }
 
-// SetNillableUUID sets the "nillable_uuid" field.
-func (ftc *FieldTypeCreate) SetNillableUUID(u uuid.UUID) *FieldTypeCreate {
-	ftc.mutation.SetNillableUUID(u)
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableUUID(u *uuid.UUID) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetUUID(*u)
+	}
+	return ftc
+}
+
+// SetUUIDNillable sets the "uuid_nillable" field.
+func (ftc *FieldTypeCreate) SetUUIDNillable(u uuid.UUID) *FieldTypeCreate {
+	ftc.mutation.SetUUIDNillable(u)
 	return ftc
 }
 
@@ -1155,8 +1099,8 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	if value, ok := ftc.mutation.UUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldUUID, value)
 	}
-	if value, ok := ftc.mutation.NillableUUID(); ok {
-		v.Property(dsl.Single, fieldtype.FieldNillableUUID, value)
+	if value, ok := ftc.mutation.UUIDNillable(); ok {
+		v.Property(dsl.Single, fieldtype.FieldUUIDNillable, value)
 	}
 	if value, ok := ftc.mutation.Strings(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStrings, value)

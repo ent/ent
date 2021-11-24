@@ -140,8 +140,8 @@ type FieldType struct {
 	Priority role.Priority `json:"priority,omitempty"`
 	// UUID holds the value of the "uuid" field.
 	UUID uuid.UUID `json:"uuid,omitempty"`
-	// NillableUUID holds the value of the "nillable_uuid" field.
-	NillableUUID *uuid.UUID `json:"nillable_uuid,omitempty"`
+	// UUIDNillable holds the value of the "uuid_nillable" field.
+	UUIDNillable *uuid.UUID `json:"uuid_nillable,omitempty"`
 	// Strings holds the value of the "strings" field.
 	Strings []string `json:"strings,omitempty"`
 	// Pair holds the value of the "pair" field.
@@ -223,7 +223,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Role                  role.Role             `json:"role,omitempty"`
 		Priority              role.Priority         `json:"priority,omitempty"`
 		UUID                  uuid.UUID             `json:"uuid,omitempty"`
-		NillableUUID          *uuid.UUID            `json:"nillable_uuid,omitempty"`
+		UUIDNillable          *uuid.UUID            `json:"uuid_nillable,omitempty"`
 		Strings               []string              `json:"strings,omitempty"`
 		Pair                  schema.Pair           `json:"pair,omitempty"`
 		NilPair               *schema.Pair          `json:"nil_pair,omitempty"`
@@ -293,7 +293,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Role = scanft.Role
 	ft.Priority = scanft.Priority
 	ft.UUID = scanft.UUID
-	ft.NillableUUID = scanft.NillableUUID
+	ft.UUIDNillable = scanft.UUIDNillable
 	ft.Strings = scanft.Strings
 	ft.Pair = scanft.Pair
 	ft.NilPair = scanft.NilPair
@@ -461,8 +461,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Priority))
 	builder.WriteString(", uuid=")
 	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
-	if v := ft.NillableUUID; v != nil {
-		builder.WriteString(", nillable_uuid=")
+	if v := ft.UUIDNillable; v != nil {
+		builder.WriteString(", uuid_nillable=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", strings=")
@@ -552,7 +552,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Role                  role.Role             `json:"role,omitempty"`
 		Priority              role.Priority         `json:"priority,omitempty"`
 		UUID                  uuid.UUID             `json:"uuid,omitempty"`
-		NillableUUID          *uuid.UUID            `json:"nillable_uuid,omitempty"`
+		UUIDNillable          *uuid.UUID            `json:"uuid_nillable,omitempty"`
 		Strings               []string              `json:"strings,omitempty"`
 		Pair                  schema.Pair           `json:"pair,omitempty"`
 		NilPair               *schema.Pair          `json:"nil_pair,omitempty"`
@@ -624,7 +624,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Role:                  v.Role,
 			Priority:              v.Priority,
 			UUID:                  v.UUID,
-			NillableUUID:          v.NillableUUID,
+			UUIDNillable:          v.UUIDNillable,
 			Strings:               v.Strings,
 			Pair:                  v.Pair,
 			NilPair:               v.NilPair,

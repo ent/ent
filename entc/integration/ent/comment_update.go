@@ -64,14 +64,6 @@ func (cu *CommentUpdate) SetNillableInt(i int) *CommentUpdate {
 	return cu
 }
 
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (cu *CommentUpdate) SetNillableNillableInt(i *int) *CommentUpdate {
-	if i != nil {
-		cu.SetNillableInt(*i)
-	}
-	return cu
-}
-
 // AddNillableInt adds i to the "nillable_int" field.
 func (cu *CommentUpdate) AddNillableInt(i int) *CommentUpdate {
 	cu.mutation.AddNillableInt(i)
@@ -258,14 +250,6 @@ func (cuo *CommentUpdateOne) AddUniqueFloat(f float64) *CommentUpdateOne {
 func (cuo *CommentUpdateOne) SetNillableInt(i int) *CommentUpdateOne {
 	cuo.mutation.ResetNillableInt()
 	cuo.mutation.SetNillableInt(i)
-	return cuo
-}
-
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (cuo *CommentUpdateOne) SetNillableNillableInt(i *int) *CommentUpdateOne {
-	if i != nil {
-		cuo.SetNillableInt(*i)
-	}
 	return cuo
 }
 

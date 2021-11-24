@@ -80,6 +80,14 @@ func (tu *TaskUpdate) SetUUID(u uuid.UUID) *TaskUpdate {
 	return tu
 }
 
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (tu *TaskUpdate) SetNillableUUID(u *uuid.UUID) *TaskUpdate {
+	if u != nil {
+		tu.SetUUID(*u)
+	}
+	return tu
+}
+
 // ClearUUID clears the value of the "uuid" field.
 func (tu *TaskUpdate) ClearUUID() *TaskUpdate {
 	tu.mutation.ClearUUID()
@@ -436,6 +444,14 @@ func (tuo *TaskUpdateOne) SetNillableStatus(t *task.Status) *TaskUpdateOne {
 // SetUUID sets the "uuid" field.
 func (tuo *TaskUpdateOne) SetUUID(u uuid.UUID) *TaskUpdateOne {
 	tuo.mutation.SetUUID(u)
+	return tuo
+}
+
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableUUID(u *uuid.UUID) *TaskUpdateOne {
+	if u != nil {
+		tuo.SetUUID(*u)
+	}
 	return tuo
 }
 

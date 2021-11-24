@@ -68,14 +68,6 @@ func (fu *FileUpdate) SetUser(s string) *FileUpdate {
 	return fu
 }
 
-// SetNillableUser sets the "user" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableUser(s *string) *FileUpdate {
-	if s != nil {
-		fu.SetUser(*s)
-	}
-	return fu
-}
-
 // ClearUser clears the value of the "user" field.
 func (fu *FileUpdate) ClearUser() *FileUpdate {
 	fu.mutation.ClearUser()
@@ -420,14 +412,6 @@ func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
 // SetUser sets the "user" field.
 func (fuo *FileUpdateOne) SetUser(s string) *FileUpdateOne {
 	fuo.mutation.SetUser(s)
-	return fuo
-}
-
-// SetNillableUser sets the "user" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
-	if s != nil {
-		fuo.SetUser(*s)
-	}
 	return fuo
 }
 

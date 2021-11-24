@@ -136,8 +136,8 @@ const (
 	FieldPriority = "priority"
 	// FieldUUID holds the string denoting the uuid field in the database.
 	FieldUUID = "uuid"
-	// FieldNillableUUID holds the string denoting the nillable_uuid field in the database.
-	FieldNillableUUID = "nillable_uuid"
+	// FieldUUIDNillable holds the string denoting the uuid_nillable field in the database.
+	FieldUUIDNillable = "uuid_nillable"
 	// FieldStrings holds the string denoting the strings field in the database.
 	FieldStrings = "strings"
 	// FieldPair holds the string denoting the pair field in the database.
