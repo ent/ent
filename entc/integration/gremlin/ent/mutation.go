@@ -1382,15 +1382,15 @@ type FieldTypeMutation struct {
 	validate_optional_int32    *int32
 	addvalidate_optional_int32 *int32
 	optional_uint              *uint
-	addoptional_uint           *uint
+	addoptional_uint           *int
 	optional_uint8             *uint8
-	addoptional_uint8          *uint8
+	addoptional_uint8          *int8
 	optional_uint16            *uint16
-	addoptional_uint16         *uint16
+	addoptional_uint16         *int16
 	optional_uint32            *uint32
-	addoptional_uint32         *uint32
+	addoptional_uint32         *int32
 	optional_uint64            *uint64
-	addoptional_uint64         *uint64
+	addoptional_uint64         *int64
 	state                      *fieldtype.State
 	optional_float             *float64
 	addoptional_float          *float64
@@ -2632,7 +2632,7 @@ func (m *FieldTypeMutation) OldOptionalUint(ctx context.Context) (v uint, err er
 }
 
 // AddOptionalUint adds u to the "optional_uint" field.
-func (m *FieldTypeMutation) AddOptionalUint(u uint) {
+func (m *FieldTypeMutation) AddOptionalUint(u int) {
 	if m.addoptional_uint != nil {
 		*m.addoptional_uint += u
 	} else {
@@ -2641,7 +2641,7 @@ func (m *FieldTypeMutation) AddOptionalUint(u uint) {
 }
 
 // AddedOptionalUint returns the value that was added to the "optional_uint" field in this mutation.
-func (m *FieldTypeMutation) AddedOptionalUint() (r uint, exists bool) {
+func (m *FieldTypeMutation) AddedOptionalUint() (r int, exists bool) {
 	v := m.addoptional_uint
 	if v == nil {
 		return
@@ -2702,7 +2702,7 @@ func (m *FieldTypeMutation) OldOptionalUint8(ctx context.Context) (v uint8, err 
 }
 
 // AddOptionalUint8 adds u to the "optional_uint8" field.
-func (m *FieldTypeMutation) AddOptionalUint8(u uint8) {
+func (m *FieldTypeMutation) AddOptionalUint8(u int8) {
 	if m.addoptional_uint8 != nil {
 		*m.addoptional_uint8 += u
 	} else {
@@ -2711,7 +2711,7 @@ func (m *FieldTypeMutation) AddOptionalUint8(u uint8) {
 }
 
 // AddedOptionalUint8 returns the value that was added to the "optional_uint8" field in this mutation.
-func (m *FieldTypeMutation) AddedOptionalUint8() (r uint8, exists bool) {
+func (m *FieldTypeMutation) AddedOptionalUint8() (r int8, exists bool) {
 	v := m.addoptional_uint8
 	if v == nil {
 		return
@@ -2772,7 +2772,7 @@ func (m *FieldTypeMutation) OldOptionalUint16(ctx context.Context) (v uint16, er
 }
 
 // AddOptionalUint16 adds u to the "optional_uint16" field.
-func (m *FieldTypeMutation) AddOptionalUint16(u uint16) {
+func (m *FieldTypeMutation) AddOptionalUint16(u int16) {
 	if m.addoptional_uint16 != nil {
 		*m.addoptional_uint16 += u
 	} else {
@@ -2781,7 +2781,7 @@ func (m *FieldTypeMutation) AddOptionalUint16(u uint16) {
 }
 
 // AddedOptionalUint16 returns the value that was added to the "optional_uint16" field in this mutation.
-func (m *FieldTypeMutation) AddedOptionalUint16() (r uint16, exists bool) {
+func (m *FieldTypeMutation) AddedOptionalUint16() (r int16, exists bool) {
 	v := m.addoptional_uint16
 	if v == nil {
 		return
@@ -2842,7 +2842,7 @@ func (m *FieldTypeMutation) OldOptionalUint32(ctx context.Context) (v uint32, er
 }
 
 // AddOptionalUint32 adds u to the "optional_uint32" field.
-func (m *FieldTypeMutation) AddOptionalUint32(u uint32) {
+func (m *FieldTypeMutation) AddOptionalUint32(u int32) {
 	if m.addoptional_uint32 != nil {
 		*m.addoptional_uint32 += u
 	} else {
@@ -2851,7 +2851,7 @@ func (m *FieldTypeMutation) AddOptionalUint32(u uint32) {
 }
 
 // AddedOptionalUint32 returns the value that was added to the "optional_uint32" field in this mutation.
-func (m *FieldTypeMutation) AddedOptionalUint32() (r uint32, exists bool) {
+func (m *FieldTypeMutation) AddedOptionalUint32() (r int32, exists bool) {
 	v := m.addoptional_uint32
 	if v == nil {
 		return
@@ -2912,7 +2912,7 @@ func (m *FieldTypeMutation) OldOptionalUint64(ctx context.Context) (v uint64, er
 }
 
 // AddOptionalUint64 adds u to the "optional_uint64" field.
-func (m *FieldTypeMutation) AddOptionalUint64(u uint64) {
+func (m *FieldTypeMutation) AddOptionalUint64(u int64) {
 	if m.addoptional_uint64 != nil {
 		*m.addoptional_uint64 += u
 	} else {
@@ -2921,7 +2921,7 @@ func (m *FieldTypeMutation) AddOptionalUint64(u uint64) {
 }
 
 // AddedOptionalUint64 returns the value that was added to the "optional_uint64" field in this mutation.
-func (m *FieldTypeMutation) AddedOptionalUint64() (r uint64, exists bool) {
+func (m *FieldTypeMutation) AddedOptionalUint64() (r int64, exists bool) {
 	v := m.addoptional_uint64
 	if v == nil {
 		return
@@ -6499,35 +6499,35 @@ func (m *FieldTypeMutation) AddField(name string, value ent.Value) error {
 		m.AddValidateOptionalInt32(v)
 		return nil
 	case fieldtype.FieldOptionalUint:
-		v, ok := value.(uint)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddOptionalUint(v)
 		return nil
 	case fieldtype.FieldOptionalUint8:
-		v, ok := value.(uint8)
+		v, ok := value.(int8)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddOptionalUint8(v)
 		return nil
 	case fieldtype.FieldOptionalUint16:
-		v, ok := value.(uint16)
+		v, ok := value.(int16)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddOptionalUint16(v)
 		return nil
 	case fieldtype.FieldOptionalUint32:
-		v, ok := value.(uint32)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddOptionalUint32(v)
 		return nil
 	case fieldtype.FieldOptionalUint64:
-		v, ok := value.(uint64)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

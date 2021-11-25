@@ -1264,6 +1264,29 @@ func (f Field) ConvertedToBasic() bool {
 	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
+// SignedType returns the "signed type version" of the field type.
+// This behavior is required for supporting addition/subtraction
+// in mutations for unsigned types.
+func (f Field) SignedType() (*field.TypeInfo, error) {
+	if !f.SupportsMutationAdd() {
+		return nil, fmt.Errorf("field %q does not support MutationAdd", f.Name)
+	}
+	t := *f.Type
+	switch f.Type.Type {
+	case field.TypeUint8:
+		t.Type = field.TypeInt8
+	case field.TypeUint16:
+		t.Type = field.TypeInt16
+	case field.TypeUint32:
+		t.Type = field.TypeInt32
+	case field.TypeUint64:
+		t.Type = field.TypeInt64
+	case field.TypeUint:
+		t.Type = field.TypeInt
+	}
+	return &t, nil
+}
+
 // SupportsMutationAdd reports if the field supports the mutation "Add(T) T" interface.
 func (f Field) SupportsMutationAdd() bool {
 	if !f.Type.Numeric() || f.IsEdgeField() {

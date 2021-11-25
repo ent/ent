@@ -118,6 +118,13 @@ func Types(t *testing.T, client *ent.Client) {
 	require.False(exists)
 	require.Equal("127.0.0.1", ft.LinkOtherFunc.String())
 
+	ft = client.FieldType.UpdateOne(ft).AddOptionalUint64(10).SaveX(ctx)
+	require.EqualValues(10, ft.OptionalUint64)
+	ft = client.FieldType.UpdateOne(ft).AddOptionalUint64(20).SetOptionalUint64(5).SaveX(ctx)
+	require.EqualValues(5, ft.OptionalUint64)
+	ft = client.FieldType.UpdateOne(ft).AddOptionalUint64(-5).SaveX(ctx)
+	require.Zero(ft.OptionalUint64)
+
 	err = client.FieldType.Create().
 		SetInt(1).
 		SetInt8(8).

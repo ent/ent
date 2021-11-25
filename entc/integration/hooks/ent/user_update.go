@@ -75,7 +75,7 @@ func (uu *UserUpdate) SetNillableWorth(u *uint) *UserUpdate {
 }
 
 // AddWorth adds u to the "worth" field.
-func (uu *UserUpdate) AddWorth(u uint) *UserUpdate {
+func (uu *UserUpdate) AddWorth(u int) *UserUpdate {
 	uu.mutation.AddWorth(u)
 	return uu
 }
@@ -506,7 +506,7 @@ func (uuo *UserUpdateOne) SetNillableWorth(u *uint) *UserUpdateOne {
 }
 
 // AddWorth adds u to the "worth" field.
-func (uuo *UserUpdateOne) AddWorth(u uint) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddWorth(u int) *UserUpdateOne {
 	uuo.mutation.AddWorth(u)
 	return uuo
 }

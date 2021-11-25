@@ -49,8 +49,8 @@ type {{ $mutation }} struct {
 	{{ $n.ID.BuilderField }} *{{ $n.ID.Type }}
 	{{- range $f := $n.MutationFields }}
 		{{ $f.BuilderField }} *{{ $f.Type }}
-		{{- if and $f.SupportsMutationAdd }}
-			add{{ $f.BuilderField }} *{{ $f.Type }}
+		{{- if $f.SupportsMutationAdd }}
+			add{{ $f.BuilderField }} *{{ $f.SignedType }}
 		{{- end }}
 	{{- end }}
 	clearedFields map[string]struct{}
@@ -220,7 +220,7 @@ func (m *{{ $mutation }}) IDs(ctx context.Context) ([]{{ $n.ID.Type }}, error) {
 	{{ if $f.SupportsMutationAdd }}
 		{{ $func := print "Add" $f.StructField }}
 		// {{ $func }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
+		func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.SignedType }}) {
 			{{- $structField := print "m.add" $f.BuilderField }}
 			if {{ $structField }} != nil {
 				{{ $f.MutationAddAssignExpr $structField $p }}
@@ -230,7 +230,7 @@ func (m *{{ $mutation }}) IDs(ctx context.Context) ([]{{ $n.ID.Type }}, error) {
 		}
 
 		// Added{{ $f.StructField }} returns the value that was added to the "{{ $f.Name }}" field in this mutation.
-		func (m *{{ $mutation }}) Added{{ $f.StructField }}() (r {{ $f.Type }}, exists bool) {
+		func (m *{{ $mutation }}) Added{{ $f.StructField }}() (r {{ $f.SignedType }}, exists bool) {
 			v := m.add{{ $f.BuilderField }}
 			if v == nil {
 				return
@@ -494,7 +494,7 @@ func (m *{{ $mutation }}) AddField(name string, value ent.Value) error {
 			{{- if $f.SupportsMutationAdd }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				case {{ $const }}:
-					v, ok := value.({{ $f.Type }})
+					v, ok := value.({{ $f.SignedType }})
 					if !ok {
 						return fmt.Errorf("unexpected type %T for field %s", value, name)
 					}
