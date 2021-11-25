@@ -1079,9 +1079,11 @@ func (u *UpdateBuilder) Set(column string, v interface{}) *UpdateBuilder {
 	return u
 }
 
-// Add adds a numeric value to the given column.
+// Add adds a numeric value to the given column. Note that, calling Set(c)
+// after Add(c) will erase previous calls with c from the builder.
 func (u *UpdateBuilder) Add(column string, v interface{}) *UpdateBuilder {
-	return u.Set(column, ExprFunc(func(b *Builder) {
+	u.columns = append(u.columns, column)
+	u.values = append(u.values, ExprFunc(func(b *Builder) {
 		b.WriteString("COALESCE")
 		b.Nested(func(b *Builder) {
 			b.Ident(Table(u.table).C(column)).Comma().WriteByte('0')
@@ -1089,6 +1091,7 @@ func (u *UpdateBuilder) Add(column string, v interface{}) *UpdateBuilder {
 		b.WriteString(" + ")
 		b.Arg(v)
 	}))
+	return u
 }
 
 // SetNull sets a column as null value.
