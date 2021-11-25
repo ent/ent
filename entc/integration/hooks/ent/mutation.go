@@ -607,7 +607,7 @@ type UserMutation struct {
 	addversion         *int
 	name               *string
 	worth              *uint
-	addworth           *uint
+	addworth           *int
 	clearedFields      map[string]struct{}
 	cards              map[int]struct{}
 	removedcards       map[int]struct{}
@@ -845,7 +845,7 @@ func (m *UserMutation) OldWorth(ctx context.Context) (v uint, err error) {
 }
 
 // AddWorth adds u to the "worth" field.
-func (m *UserMutation) AddWorth(u uint) {
+func (m *UserMutation) AddWorth(u int) {
 	if m.addworth != nil {
 		*m.addworth += u
 	} else {
@@ -854,7 +854,7 @@ func (m *UserMutation) AddWorth(u uint) {
 }
 
 // AddedWorth returns the value that was added to the "worth" field in this mutation.
-func (m *UserMutation) AddedWorth() (r uint, exists bool) {
+func (m *UserMutation) AddedWorth() (r int, exists bool) {
 	v := m.addworth
 	if v == nil {
 		return
@@ -1160,7 +1160,7 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		m.AddVersion(v)
 		return nil
 	case user.FieldWorth:
-		v, ok := value.(uint)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

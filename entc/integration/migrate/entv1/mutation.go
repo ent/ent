@@ -364,19 +364,19 @@ type ConversionMutation struct {
 	int8_to_string      *int8
 	addint8_to_string   *int8
 	uint8_to_string     *uint8
-	adduint8_to_string  *uint8
+	adduint8_to_string  *int8
 	int16_to_string     *int16
 	addint16_to_string  *int16
 	uint16_to_string    *uint16
-	adduint16_to_string *uint16
+	adduint16_to_string *int16
 	int32_to_string     *int32
 	addint32_to_string  *int32
 	uint32_to_string    *uint32
-	adduint32_to_string *uint32
+	adduint32_to_string *int32
 	int64_to_string     *int64
 	addint64_to_string  *int64
 	uint64_to_string    *uint64
-	adduint64_to_string *uint64
+	adduint64_to_string *int64
 	clearedFields       map[string]struct{}
 	done                bool
 	oldValue            func(context.Context) (*Conversion, error)
@@ -633,7 +633,7 @@ func (m *ConversionMutation) OldUint8ToString(ctx context.Context) (v uint8, err
 }
 
 // AddUint8ToString adds u to the "uint8_to_string" field.
-func (m *ConversionMutation) AddUint8ToString(u uint8) {
+func (m *ConversionMutation) AddUint8ToString(u int8) {
 	if m.adduint8_to_string != nil {
 		*m.adduint8_to_string += u
 	} else {
@@ -642,7 +642,7 @@ func (m *ConversionMutation) AddUint8ToString(u uint8) {
 }
 
 // AddedUint8ToString returns the value that was added to the "uint8_to_string" field in this mutation.
-func (m *ConversionMutation) AddedUint8ToString() (r uint8, exists bool) {
+func (m *ConversionMutation) AddedUint8ToString() (r int8, exists bool) {
 	v := m.adduint8_to_string
 	if v == nil {
 		return
@@ -773,7 +773,7 @@ func (m *ConversionMutation) OldUint16ToString(ctx context.Context) (v uint16, e
 }
 
 // AddUint16ToString adds u to the "uint16_to_string" field.
-func (m *ConversionMutation) AddUint16ToString(u uint16) {
+func (m *ConversionMutation) AddUint16ToString(u int16) {
 	if m.adduint16_to_string != nil {
 		*m.adduint16_to_string += u
 	} else {
@@ -782,7 +782,7 @@ func (m *ConversionMutation) AddUint16ToString(u uint16) {
 }
 
 // AddedUint16ToString returns the value that was added to the "uint16_to_string" field in this mutation.
-func (m *ConversionMutation) AddedUint16ToString() (r uint16, exists bool) {
+func (m *ConversionMutation) AddedUint16ToString() (r int16, exists bool) {
 	v := m.adduint16_to_string
 	if v == nil {
 		return
@@ -913,7 +913,7 @@ func (m *ConversionMutation) OldUint32ToString(ctx context.Context) (v uint32, e
 }
 
 // AddUint32ToString adds u to the "uint32_to_string" field.
-func (m *ConversionMutation) AddUint32ToString(u uint32) {
+func (m *ConversionMutation) AddUint32ToString(u int32) {
 	if m.adduint32_to_string != nil {
 		*m.adduint32_to_string += u
 	} else {
@@ -922,7 +922,7 @@ func (m *ConversionMutation) AddUint32ToString(u uint32) {
 }
 
 // AddedUint32ToString returns the value that was added to the "uint32_to_string" field in this mutation.
-func (m *ConversionMutation) AddedUint32ToString() (r uint32, exists bool) {
+func (m *ConversionMutation) AddedUint32ToString() (r int32, exists bool) {
 	v := m.adduint32_to_string
 	if v == nil {
 		return
@@ -1053,7 +1053,7 @@ func (m *ConversionMutation) OldUint64ToString(ctx context.Context) (v uint64, e
 }
 
 // AddUint64ToString adds u to the "uint64_to_string" field.
-func (m *ConversionMutation) AddUint64ToString(u uint64) {
+func (m *ConversionMutation) AddUint64ToString(u int64) {
 	if m.adduint64_to_string != nil {
 		*m.adduint64_to_string += u
 	} else {
@@ -1062,7 +1062,7 @@ func (m *ConversionMutation) AddUint64ToString(u uint64) {
 }
 
 // AddedUint64ToString returns the value that was added to the "uint64_to_string" field in this mutation.
-func (m *ConversionMutation) AddedUint64ToString() (r uint64, exists bool) {
+func (m *ConversionMutation) AddedUint64ToString() (r int64, exists bool) {
 	v := m.adduint64_to_string
 	if v == nil {
 		return
@@ -1335,7 +1335,7 @@ func (m *ConversionMutation) AddField(name string, value ent.Value) error {
 		m.AddInt8ToString(v)
 		return nil
 	case conversion.FieldUint8ToString:
-		v, ok := value.(uint8)
+		v, ok := value.(int8)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1349,7 +1349,7 @@ func (m *ConversionMutation) AddField(name string, value ent.Value) error {
 		m.AddInt16ToString(v)
 		return nil
 	case conversion.FieldUint16ToString:
-		v, ok := value.(uint16)
+		v, ok := value.(int16)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1363,7 +1363,7 @@ func (m *ConversionMutation) AddField(name string, value ent.Value) error {
 		m.AddInt32ToString(v)
 		return nil
 	case conversion.FieldUint32ToString:
-		v, ok := value.(uint32)
+		v, ok := value.(int32)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1377,7 +1377,7 @@ func (m *ConversionMutation) AddField(name string, value ent.Value) error {
 		m.AddInt64ToString(v)
 		return nil
 	case conversion.FieldUint64ToString:
-		v, ok := value.(uint64)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

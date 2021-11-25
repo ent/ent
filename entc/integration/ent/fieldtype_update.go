@@ -415,7 +415,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint(u *uint) *FieldTypeUpdate {
 }
 
 // AddOptionalUint adds u to the "optional_uint" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint(u uint) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint(u int) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint(u)
 	return ftu
 }
@@ -442,7 +442,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint8(u *uint8) *FieldTypeUpdate 
 }
 
 // AddOptionalUint8 adds u to the "optional_uint8" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint8(u uint8) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint8(u int8) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint8(u)
 	return ftu
 }
@@ -469,7 +469,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint16(u *uint16) *FieldTypeUpdat
 }
 
 // AddOptionalUint16 adds u to the "optional_uint16" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint16(u uint16) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint16(u int16) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint16(u)
 	return ftu
 }
@@ -496,7 +496,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint32(u *uint32) *FieldTypeUpdat
 }
 
 // AddOptionalUint32 adds u to the "optional_uint32" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint32(u uint32) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint32(u int32) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint32(u)
 	return ftu
 }
@@ -523,7 +523,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint64(u *uint64) *FieldTypeUpdat
 }
 
 // AddOptionalUint64 adds u to the "optional_uint64" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint64(u uint64) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint64(u int64) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint64(u)
 	return ftu
 }
@@ -2863,7 +2863,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint(u *uint) *FieldTypeUpdat
 }
 
 // AddOptionalUint adds u to the "optional_uint" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint(u uint) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint(u int) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint(u)
 	return ftuo
 }
@@ -2890,7 +2890,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint8(u *uint8) *FieldTypeUpd
 }
 
 // AddOptionalUint8 adds u to the "optional_uint8" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint8(u uint8) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint8(u int8) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint8(u)
 	return ftuo
 }
@@ -2917,7 +2917,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint16(u *uint16) *FieldTypeU
 }
 
 // AddOptionalUint16 adds u to the "optional_uint16" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint16(u uint16) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint16(u int16) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint16(u)
 	return ftuo
 }
@@ -2944,7 +2944,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint32(u *uint32) *FieldTypeU
 }
 
 // AddOptionalUint32 adds u to the "optional_uint32" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint32(u uint32) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint32(u int32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint32(u)
 	return ftuo
 }
@@ -2971,7 +2971,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint64(u *uint64) *FieldTypeU
 }
 
 // AddOptionalUint64 adds u to the "optional_uint64" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint64(u uint64) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint64(u int64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint64(u)
 	return ftuo
 }

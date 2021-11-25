@@ -1196,7 +1196,7 @@ type UserMutation struct {
 	id            *int
 	name          *string
 	age           *uint
-	addage        *uint
+	addage        *int
 	clearedFields map[string]struct{}
 	teams         map[int]struct{}
 	removedteams  map[int]struct{}
@@ -1376,7 +1376,7 @@ func (m *UserMutation) OldAge(ctx context.Context) (v uint, err error) {
 }
 
 // AddAge adds u to the "age" field.
-func (m *UserMutation) AddAge(u uint) {
+func (m *UserMutation) AddAge(u int) {
 	if m.addage != nil {
 		*m.addage += u
 	} else {
@@ -1385,7 +1385,7 @@ func (m *UserMutation) AddAge(u uint) {
 }
 
 // AddedAge returns the value that was added to the "age" field in this mutation.
-func (m *UserMutation) AddedAge() (r uint, exists bool) {
+func (m *UserMutation) AddedAge() (r int, exists bool) {
 	v := m.addage
 	if v == nil {
 		return
@@ -1626,7 +1626,7 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	case user.FieldAge:
-		v, ok := value.(uint)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

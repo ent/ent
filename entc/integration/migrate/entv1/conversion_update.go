@@ -94,7 +94,7 @@ func (cu *ConversionUpdate) SetNillableUint8ToString(u *uint8) *ConversionUpdate
 }
 
 // AddUint8ToString adds u to the "uint8_to_string" field.
-func (cu *ConversionUpdate) AddUint8ToString(u uint8) *ConversionUpdate {
+func (cu *ConversionUpdate) AddUint8ToString(u int8) *ConversionUpdate {
 	cu.mutation.AddUint8ToString(u)
 	return cu
 }
@@ -148,7 +148,7 @@ func (cu *ConversionUpdate) SetNillableUint16ToString(u *uint16) *ConversionUpda
 }
 
 // AddUint16ToString adds u to the "uint16_to_string" field.
-func (cu *ConversionUpdate) AddUint16ToString(u uint16) *ConversionUpdate {
+func (cu *ConversionUpdate) AddUint16ToString(u int16) *ConversionUpdate {
 	cu.mutation.AddUint16ToString(u)
 	return cu
 }
@@ -202,7 +202,7 @@ func (cu *ConversionUpdate) SetNillableUint32ToString(u *uint32) *ConversionUpda
 }
 
 // AddUint32ToString adds u to the "uint32_to_string" field.
-func (cu *ConversionUpdate) AddUint32ToString(u uint32) *ConversionUpdate {
+func (cu *ConversionUpdate) AddUint32ToString(u int32) *ConversionUpdate {
 	cu.mutation.AddUint32ToString(u)
 	return cu
 }
@@ -256,7 +256,7 @@ func (cu *ConversionUpdate) SetNillableUint64ToString(u *uint64) *ConversionUpda
 }
 
 // AddUint64ToString adds u to the "uint64_to_string" field.
-func (cu *ConversionUpdate) AddUint64ToString(u uint64) *ConversionUpdate {
+func (cu *ConversionUpdate) AddUint64ToString(u int64) *ConversionUpdate {
 	cu.mutation.AddUint64ToString(u)
 	return cu
 }
@@ -599,7 +599,7 @@ func (cuo *ConversionUpdateOne) SetNillableUint8ToString(u *uint8) *ConversionUp
 }
 
 // AddUint8ToString adds u to the "uint8_to_string" field.
-func (cuo *ConversionUpdateOne) AddUint8ToString(u uint8) *ConversionUpdateOne {
+func (cuo *ConversionUpdateOne) AddUint8ToString(u int8) *ConversionUpdateOne {
 	cuo.mutation.AddUint8ToString(u)
 	return cuo
 }
@@ -653,7 +653,7 @@ func (cuo *ConversionUpdateOne) SetNillableUint16ToString(u *uint16) *Conversion
 }
 
 // AddUint16ToString adds u to the "uint16_to_string" field.
-func (cuo *ConversionUpdateOne) AddUint16ToString(u uint16) *ConversionUpdateOne {
+func (cuo *ConversionUpdateOne) AddUint16ToString(u int16) *ConversionUpdateOne {
 	cuo.mutation.AddUint16ToString(u)
 	return cuo
 }
@@ -707,7 +707,7 @@ func (cuo *ConversionUpdateOne) SetNillableUint32ToString(u *uint32) *Conversion
 }
 
 // AddUint32ToString adds u to the "uint32_to_string" field.
-func (cuo *ConversionUpdateOne) AddUint32ToString(u uint32) *ConversionUpdateOne {
+func (cuo *ConversionUpdateOne) AddUint32ToString(u int32) *ConversionUpdateOne {
 	cuo.mutation.AddUint32ToString(u)
 	return cuo
 }
@@ -761,7 +761,7 @@ func (cuo *ConversionUpdateOne) SetNillableUint64ToString(u *uint64) *Conversion
 }
 
 // AddUint64ToString adds u to the "uint64_to_string" field.
-func (cuo *ConversionUpdateOne) AddUint64ToString(u uint64) *ConversionUpdateOne {
+func (cuo *ConversionUpdateOne) AddUint64ToString(u int64) *ConversionUpdateOne {
 	cuo.mutation.AddUint64ToString(u)
 	return cuo
 }
