@@ -458,6 +458,22 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{1, "a8m%"},
 		},
 		{
+			input: Update("users").
+				Set("age", 1).
+				Add("age", 2).
+				Where(HasPrefix("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `nickname` LIKE ?",
+			wantArgs:  []interface{}{1, 2, "a8m%"},
+		},
+		{
+			input: Update("users").
+				Add("age", 2).
+				Set("age", 1).
+				Where(HasPrefix("nickname", "a8m")),
+			wantQuery: "UPDATE `users` SET `age` = ? WHERE `nickname` LIKE ?",
+			wantArgs:  []interface{}{1, "a8m%"},
+		},
+		{
 			input: Dialect(dialect.Postgres).
 				Update("users").
 				Add("age", 1).
