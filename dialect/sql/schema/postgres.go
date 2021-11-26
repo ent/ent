@@ -229,14 +229,14 @@ const maxCharSize = 10 << 20
 // scanColumn scans the information a column from column description.
 func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
-		nullable                      sql.NullString
-		defaults                      sql.NullString
-		udt                           sql.NullString
-		numericPrecision              sql.NullInt64
-		numericScale                  sql.NullInt64
-		numericCharacterMaximumLength sql.NullInt64
+		nullable            sql.NullString
+		defaults            sql.NullString
+		udt                 sql.NullString
+		numericPrecision    sql.NullInt64
+		numericScale        sql.NullInt64
+		characterMaximumLen sql.NullInt64
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt, &numericPrecision, &numericScale, &numericCharacterMaximumLength); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt, &numericPrecision, &numericScale, &characterMaximumLen); err != nil {
 		return fmt.Errorf("scanning column description: %w", err)
 	}
 	if nullable.Valid {
@@ -268,8 +268,8 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	case "character", "character varying":
 		c.Type = field.TypeString
 		// If character maximum length is specified then we should take that into account.
-		if numericCharacterMaximumLength.Valid {
-			schemaType := fmt.Sprintf("varchar(%d)", numericCharacterMaximumLength.Int64)
+		if characterMaximumLen.Valid {
+			schemaType := fmt.Sprintf("varchar(%d)", characterMaximumLen.Int64)
 			c.SchemaType = map[string]string{dialect.Postgres: schemaType}
 		}
 	case "date", "time", "timestamp", "timestamp with time zone", "timestamp without time zone":
