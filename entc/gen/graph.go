@@ -231,7 +231,7 @@ func generate(g *Graph) error {
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it's
 	// suspended to the end of the writing.
-	return assets.format()
+	return assets.format(g.Config.Package)
 }
 
 // addNode creates a new Type/Node/Ent to the graph.
@@ -751,7 +751,9 @@ func (a assets) write() error {
 }
 
 // format runs "goimports" on all assets.
-func (a assets) format() error {
+func (a assets) format(localPrefix string) error {
+	imports.LocalPrefix = localPrefix
+
 	for _, file := range a.files {
 		path := file.path
 		src, err := imports.Process(path, file.content, nil)
