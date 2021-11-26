@@ -753,7 +753,6 @@ func (a assets) write() error {
 // format runs "goimports" on all assets.
 func (a assets) format(localPrefix string) error {
 	imports.LocalPrefix = localPrefix
-
 	for _, file := range a.files {
 		path := file.path
 		src, err := imports.Process(path, file.content, nil)
