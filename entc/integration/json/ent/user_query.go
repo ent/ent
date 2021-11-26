@@ -14,9 +14,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+
 	"entgo.io/ent/entc/integration/json/ent/predicate"
 	"entgo.io/ent/entc/integration/json/ent/user"
-	"entgo.io/ent/schema/field"
 )
 
 // UserQuery is the builder for querying User entities.

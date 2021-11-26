@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
 )
 

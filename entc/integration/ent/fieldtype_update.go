@@ -16,12 +16,13 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"

@@ -13,8 +13,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/schema/field"
+
+	"entgo.io/ent/entc/integration/ent/comment"
 )
 
 // CommentCreate is the builder for creating a Comment entity.

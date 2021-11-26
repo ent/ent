@@ -12,9 +12,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/spec"
-	"entgo.io/ent/schema/field"
 )
 
 // SpecDelete is the builder for deleting a Spec entity.

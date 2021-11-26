@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
 )

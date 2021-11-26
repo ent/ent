@@ -14,8 +14,9 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/schema/field"
+
+	"entgo.io/ent/entc/integration/ent/item"
 )
 
 // ItemCreate is the builder for creating a Item entity.

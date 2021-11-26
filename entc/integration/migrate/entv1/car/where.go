@@ -9,6 +9,7 @@ package car
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 )
 

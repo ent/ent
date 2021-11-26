@@ -11,8 +11,9 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/media"
 	"entgo.io/ent/schema/field"
+
+	"entgo.io/ent/entc/integration/migrate/entv2/media"
 )
 
 // MediaCreate is the builder for creating a Media entity.

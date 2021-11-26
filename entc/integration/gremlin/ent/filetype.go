@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/gremlin"
+
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 )
 

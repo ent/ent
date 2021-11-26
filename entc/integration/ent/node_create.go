@@ -13,8 +13,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/schema/field"
+
+	"entgo.io/ent/entc/integration/ent/node"
 )
 
 // NodeCreate is the builder for creating a Node entity.

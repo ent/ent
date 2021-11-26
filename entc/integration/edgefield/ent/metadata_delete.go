@@ -12,9 +12,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"entgo.io/ent/schema/field"
 )
 
 // MetadataDelete is the builder for deleting a Metadata entity.

@@ -9,8 +9,9 @@ package task
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

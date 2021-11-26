@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/json/ent/user"
 )
 

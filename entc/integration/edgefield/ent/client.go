@@ -11,8 +11,9 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/entc/integration/edgefield/ent/migrate"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/edgefield/ent/migrate"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/card"

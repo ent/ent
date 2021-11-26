@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
+
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 )
 

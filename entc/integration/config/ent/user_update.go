@@ -13,9 +13,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+
 	"entgo.io/ent/entc/integration/config/ent/predicate"
 	"entgo.io/ent/entc/integration/config/ent/user"
-	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.

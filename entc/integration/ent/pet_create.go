@@ -13,10 +13,11 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/pet"
-	"entgo.io/ent/entc/integration/ent/user"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/ent/pet"
+	"entgo.io/ent/entc/integration/ent/user"
 )
 
 // PetCreate is the builder for creating a Pet entity.

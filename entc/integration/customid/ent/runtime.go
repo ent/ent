@@ -7,6 +7,8 @@
 package ent
 
 import (
+	"github.com/google/uuid"
+
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
@@ -16,7 +18,6 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
-	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code

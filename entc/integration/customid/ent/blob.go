@@ -11,8 +11,9 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/customid/ent/blob"
 )
 
 // Blob is the model entity for the Blob schema.

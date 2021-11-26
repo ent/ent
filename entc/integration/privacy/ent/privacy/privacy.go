@@ -10,8 +10,9 @@ import (
 	"context"
 	"fmt"
 
-	"entgo.io/ent/entc/integration/privacy/ent"
 	"entgo.io/ent/entql"
+
+	"entgo.io/ent/entc/integration/privacy/ent"
 
 	"entgo.io/ent/privacy"
 )

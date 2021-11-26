@@ -11,10 +11,11 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/car"
-	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/edgefield/ent/car"
+	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 )
 
 // CarCreate is the builder for creating a Car entity.

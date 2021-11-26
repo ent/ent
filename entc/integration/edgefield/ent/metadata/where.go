@@ -9,6 +9,7 @@ package metadata
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 )
 

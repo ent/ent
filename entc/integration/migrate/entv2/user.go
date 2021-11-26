@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 )

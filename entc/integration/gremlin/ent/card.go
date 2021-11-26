@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/gremlin"
+
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 

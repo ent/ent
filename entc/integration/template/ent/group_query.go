@@ -14,9 +14,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+
 	"entgo.io/ent/entc/integration/template/ent/group"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
-	"entgo.io/ent/schema/field"
 )
 
 // GroupQuery is the builder for querying Group entities.

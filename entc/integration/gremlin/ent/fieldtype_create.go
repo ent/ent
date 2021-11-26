@@ -20,8 +20,9 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 )
 
 // FieldTypeCreate is the builder for creating a FieldType entity.

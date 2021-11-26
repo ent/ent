@@ -13,9 +13,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/task"
-	"entgo.io/ent/schema/field"
 )
 
 // TaskCreate is the builder for creating a Task entity.

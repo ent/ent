@@ -12,9 +12,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/session"
-	"entgo.io/ent/schema/field"
 )
 
 // SessionDelete is the builder for deleting a Session entity.

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/ent/schema"
+
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 )
 

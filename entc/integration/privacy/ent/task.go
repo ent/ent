@@ -11,9 +11,10 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
-	"github.com/google/uuid"
 )
 
 // Task is the model entity for the Task schema.

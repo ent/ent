@@ -9,6 +9,7 @@ package file
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
 

@@ -8,6 +8,7 @@ package comment
 
 import (
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
 

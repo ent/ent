@@ -12,8 +12,9 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/node"
 	"entgo.io/ent/schema/field"
+
+	"entgo.io/ent/entc/integration/edgefield/ent/node"
 )
 
 // NodeCreate is the builder for creating a Node entity.

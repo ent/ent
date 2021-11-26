@@ -11,8 +11,9 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/edgefield/ent/car"
 )
 
 // Car is the model entity for the Car schema.

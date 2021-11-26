@@ -21,9 +21,10 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"github.com/google/uuid"
+
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // FieldTypeUpdate is the builder for updating FieldType entities.

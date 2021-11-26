@@ -11,8 +11,9 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 )
 
 // MixinID is the model entity for the MixinID schema.

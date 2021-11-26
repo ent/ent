@@ -11,8 +11,9 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/config/ent/user"
 	"entgo.io/ent/schema/field"
+
+	"entgo.io/ent/entc/integration/config/ent/user"
 )
 
 // UserCreate is the builder for creating a User entity.

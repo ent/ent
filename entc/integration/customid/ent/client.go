@@ -11,9 +11,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/google/uuid"
+
 	"entgo.io/ent/entc/integration/customid/ent/migrate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
-	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"

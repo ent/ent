@@ -15,9 +15,10 @@ import (
 	"net/url"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
-	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.

@@ -9,6 +9,7 @@ package team
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 )
 

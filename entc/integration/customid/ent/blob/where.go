@@ -9,8 +9,9 @@ package blob
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/customid/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

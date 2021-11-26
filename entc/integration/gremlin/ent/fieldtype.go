@@ -17,8 +17,9 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 )
 
 // FieldType is the model entity for the FieldType schema.

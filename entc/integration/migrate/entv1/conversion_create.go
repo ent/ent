@@ -11,8 +11,9 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
 	"entgo.io/ent/schema/field"
+
+	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
 )
 
 // ConversionCreate is the builder for creating a Conversion entity.

@@ -8,6 +8,7 @@ package conversion
 
 import (
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 )
 

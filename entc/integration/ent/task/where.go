@@ -8,6 +8,7 @@ package task
 
 import (
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/schema"
 )

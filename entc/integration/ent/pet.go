@@ -11,9 +11,10 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/user"
-	"github.com/google/uuid"
 )
 
 // Pet is the model entity for the Pet schema.

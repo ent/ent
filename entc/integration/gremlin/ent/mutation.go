@@ -18,6 +18,8 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"github.com/google/uuid"
+
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
 	"entgo.io/ent/entc/integration/gremlin/ent/comment"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
@@ -32,7 +34,6 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 	"entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
-	"github.com/google/uuid"
 
 	"entgo.io/ent"
 )

@@ -8,6 +8,7 @@ package user
 
 import (
 	"entgo.io/ent/dialect/sql"
+
 	"entgo.io/ent/entc/integration/json/ent/predicate"
 )
 

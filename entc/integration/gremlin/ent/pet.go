@@ -11,8 +11,9 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/gremlin/ent/user"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
 // Pet is the model entity for the Pet schema.

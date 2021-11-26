@@ -16,6 +16,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
+
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
@@ -32,7 +34,6 @@ import (
 	"entgo.io/ent/entc/integration/ent/spec"
 	"entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
-	"github.com/google/uuid"
 
 	"entgo.io/ent"
 )
