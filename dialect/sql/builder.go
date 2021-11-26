@@ -2512,6 +2512,9 @@ func (s *Selector) Having(p *Predicate) *Selector {
 func (s *Selector) Query() (string, []interface{}) {
 	b := s.Builder.clone()
 	s.joinPrefix(&b)
+	if len(s.union) > 0 && s.postgres() {
+		b.WriteString("(")
+	}
 	b.WriteString("SELECT ")
 	if s.distinct {
 		b.WriteString("DISTINCT ")
@@ -2571,9 +2574,6 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString(" HAVING ")
 		b.Join(s.having)
 	}
-	if len(s.union) > 0 {
-		s.joinUnion(&b)
-	}
 	if len(s.order) > 0 {
 		s.joinOrder(&b)
 	}
@@ -2584,6 +2584,9 @@ func (s *Selector) Query() (string, []interface{}) {
 	if s.offset != nil {
 		b.WriteString(" OFFSET ")
 		b.WriteString(strconv.Itoa(*s.offset))
+	}
+	if len(s.union) > 0 {
+		s.joinUnion(&b)
 	}
 	s.joinLock(&b)
 	s.total = b.total
@@ -2618,9 +2621,15 @@ func (s *Selector) joinLock(b *Builder) {
 
 func (s *Selector) joinUnion(b *Builder) {
 	for _, union := range s.union {
+		if s.postgres() {
+			b.WriteString(")")
+		}
 		b.WriteString(" UNION ")
 		if union.unionType != "" {
 			b.WriteString(string(union.unionType) + " ")
+		}
+		if s.postgres() {
+			b.WriteString("(")
 		}
 		switch view := union.TableView.(type) {
 		case *SelectTable:
@@ -2634,6 +2643,9 @@ func (s *Selector) joinUnion(b *Builder) {
 				b.Ident(view.as)
 			}
 		}
+	}
+	if s.postgres() {
+		b.WriteString(")")
 	}
 }
 

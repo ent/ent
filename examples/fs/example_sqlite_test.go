@@ -16,7 +16,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func Example_RecursiveTraversal() {
+func Example_SQLite_RecursiveTraversal() {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
@@ -57,7 +57,7 @@ func Example_RecursiveTraversal() {
 	//	   ├─ ba
 	//	   └─ bb
 	//
-	names := client.File.Query().
+	names := client.Debug().File.Query().
 		Where(func(s *sql.Selector) {
 			t1, t2 := sql.Table(file.Table), sql.Table(file.Table)
 			with := sql.WithRecursive("undeleted", file.FieldID, file.FieldParentID)
@@ -94,4 +94,5 @@ func Example_RecursiveTraversal() {
 
 	// Output:
 	// ["a" "b" "ba" "bb"]
+
 }

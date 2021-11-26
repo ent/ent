@@ -27,14 +27,14 @@ possible.
 # Run integration tests
 If you touch any file in `entc`, run the following command in `entc`:
 
-```
+```shell
 go generate ./...
 ```
 
-Then, in `entc/inegration` run `docker-compose` in order to spin-up all database containers:
+Then, run `docker-compose` in order to spin-up all database containers:
 
-```
-docker-compose -f compose/docker-compose.yaml up -d --scale test=0
+```shell
+docker-compose -f entc/integration/docker-compose.yaml up -d --scale test=0
 ```
 
 Then, run `go test ./...` to run all integration tests.

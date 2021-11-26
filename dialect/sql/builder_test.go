@@ -1578,7 +1578,7 @@ func TestSelector_Union(t *testing.T) {
 				),
 		).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" WHERE "is_active" = $2 AND "age" > $3 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $4 AND "age" < $5`, query)
+	require.Equal(t, `(SELECT * FROM "users" WHERE "active" = $1) UNION (SELECT * FROM "old_users1" WHERE "is_active" = $2 AND "age" > $3) UNION ALL (SELECT * FROM "old_users2" WHERE "is_active" = $4 AND "age" < $5)`, query)
 	require.Equal(t, []interface{}{true, true, 20, "true", 18}, args)
 
 	t1, t2, t3 := Table("files"), Table("files"), Table("path")
@@ -1708,10 +1708,10 @@ func TestSelector_UnionOrderBy(t *testing.T) {
 		Select("*").
 		From(table).
 		Where(EQ("active", true)).
-		Union(Select("*").From(Table("old_users1"))).
-		OrderBy(table.C("whatever")).
+		OrderBy(table.C("whenever")).
+		Union(Select("*").From(Table("old_users1")).OrderBy(table.C("whatever"))).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" = $1 UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
+	require.Equal(t, `(SELECT * FROM "users" WHERE "active" = $1 ORDER BY "users"."whenever") UNION (SELECT * FROM "old_users1" ORDER BY "users"."whatever")`, query)
 }
 
 func TestUpdateBuilder_SetExpr(t *testing.T) {
