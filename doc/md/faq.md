@@ -22,7 +22,7 @@ sidebar_label: FAQ
 [How to add `CHECK` constraints to table?](#how-to-add-check-constraints-to-table)  
 [How to define a custom precision numeric field?](#how-to-define-a-custom-precision-numeric-field)  
 [How to configure two or more `DB` to separate read and write?](#how-to-configure-two-or-more-db-to-separate-read-and-write)  
-[How to change the character set and/or collation of a MySQL table?](#how-to-change-the-character-set-and-or-collation-of-a-mysql-table)
+[How to change the character set and/or collation of a MySQL table?](#how-to-change-the-character-set-andor-collation-of-a-mysql-table)
 
 ## Answers
 
