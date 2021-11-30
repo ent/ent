@@ -763,7 +763,7 @@ func (d *multiDriver) Close() error {
 #### How to change the character set and/or collation of a MySQL table?
 
 By default for MySQL the character set `utf8mb4` is used and the collation of `utf8mb4_bin`.
-However if you'd like to change the schema's character set and/or collaction you will need to use the annotation feature.
+However if you'd like to change the schema's character set and/or collation you need to use an annotation.
 
 Here's an example where we set the character set to `ascii` and the collation to `ascii_general_ci`.
 
