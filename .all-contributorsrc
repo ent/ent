@@ -645,6 +645,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "idc77",
+      "name": "idc77",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87644834?v=4",
+      "profile": "https://github.com/idc77",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
