@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect"
 )
@@ -3057,7 +3058,12 @@ func (b *Builder) Arg(a interface{}) *Builder {
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
 		param = "$" + strconv.Itoa(b.total)
 	} else if b.sqlserver() {
-		param = fmt.Sprintf("'%v'", a)
+		switch a.(type) {
+		case time.Time:
+			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2021-11-30 20:01:45.192"))
+		default:
+			param = fmt.Sprintf("'%v'", a)
+		}
 	}
 	if f, ok := a.(ParamFormatter); ok {
 		param = f.FormatParam(param, &StmtInfo{
