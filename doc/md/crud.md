@@ -281,7 +281,7 @@ id, err := client.User.
 	).
 	Update(func(u *ent.UserUpsert) {
 		u.SetAge(30)
-		u.UpadteName()
+		u.UpdateName()
 	}).
 	ID(ctx)
 
