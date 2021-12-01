@@ -974,6 +974,9 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 		i.writeDefault()
 	} else {
 		i.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
+		if i.dialect == dialect.SQLServer {
+			i.WriteString(" OUTPUT INSERTED.\"id\" ")
+		}
 		i.WriteString(" VALUES ")
 		for j, v := range i.values {
 			if j > 0 {
@@ -985,7 +988,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 	if i.conflict != nil {
 		i.writeConflict()
 	}
-	if len(i.returning) > 0 && !i.mysql() {
+	if len(i.returning) > 0 && !i.mysql() && !i.sqlserver() {
 		i.WriteString(" RETURNING ")
 		i.IdentComma(i.returning...)
 	}
@@ -2842,7 +2845,7 @@ type Builder struct {
 func (b *Builder) Quote(ident string) string {
 	quote := "`"
 	switch {
-	case b.postgres():
+	case b.postgres() || b.sqlserver():
 		// If it was quoted with the wrong
 		// identifier character.
 		if strings.Contains(ident, "`") {
@@ -2865,7 +2868,7 @@ func (b *Builder) Ident(s string) *Builder {
 			b.WriteString(b.Quote(b.qualifier)).WriteByte('.')
 		}
 		b.WriteString(b.Quote(s))
-	case (isFunc(s) || isModifier(s)) && b.postgres():
+	case (isFunc(s) || isModifier(s)) && (b.postgres() || b.sqlserver()):
 		// Modifiers and aggregation functions that
 		// were called without dialect information.
 		b.WriteString(strings.ReplaceAll(s, "`", `"`))
@@ -3044,13 +3047,17 @@ func (b *Builder) Arg(a interface{}) *Builder {
 		return b
 	}
 	b.total++
-	b.args = append(b.args, a)
+	if !b.sqlserver() {
+		b.args = append(b.args, a)
+	}
 	// Default placeholder param (MySQL and SQLite).
 	param := "?"
 	if b.postgres() {
 		// PostgreSQL arguments are referenced using the syntax $n.
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
 		param = "$" + strconv.Itoa(b.total)
+	} else if b.sqlserver() {
+		param = fmt.Sprintf("'%v'", a)
 	}
 	if f, ok := a.(ParamFormatter); ok {
 		param = f.FormatParam(param, &StmtInfo{
@@ -3176,6 +3183,10 @@ func (b Builder) mysql() bool {
 	return b.Dialect() == dialect.MySQL
 }
 
+func (b Builder) sqlserver() bool {
+	return b.Dialect() == dialect.SQLServer
+}
+
 // fromIdent sets the builder dialect from the identifier format.
 func (b *Builder) fromIdent(ident string) {
 	if strings.Contains(ident, `"`) {
@@ -3187,7 +3198,7 @@ func (b *Builder) fromIdent(ident string) {
 // isIdent reports if the given string is a dialect identifier.
 func (b *Builder) isIdent(s string) bool {
 	switch {
-	case b.postgres():
+	case b.postgres() || b.sqlserver():
 		return strings.Contains(s, `"`)
 	default:
 		return strings.Contains(s, "`")
