@@ -16,6 +16,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -3062,9 +3063,14 @@ func (b *Builder) Arg(a interface{}) *Builder {
 		case int8, int16, int, int32, int64, float32, float64, bool:
 			param = fmt.Sprintf("%s", a)
 		case time.Time:
-			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2006-01-02 03:04:05.000"))
+			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2021-11-30 20:01:45.192"))
 		default:
-			param = fmt.Sprintf("'%v'", a)
+			switch rv := reflect.ValueOf(a); rv.Kind() {
+			case reflect.Int8, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Float32, reflect.Float64, reflect.Bool:
+				param = fmt.Sprintf("%s", a)
+			default:
+				param = fmt.Sprintf("'%v'", a)
+			}
 		}
 	}
 	if f, ok := a.(ParamFormatter); ok {
