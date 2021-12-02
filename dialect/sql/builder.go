@@ -3060,7 +3060,7 @@ func (b *Builder) Arg(a interface{}) *Builder {
 	} else if b.sqlserver() {
 		switch a.(type) {
 		case time.Time:
-			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2021-11-30 20:01:45.192"))
+			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2006-01-02 03:04:05.000"))
 		default:
 			param = fmt.Sprintf("'%v'", a)
 		}
