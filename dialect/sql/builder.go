@@ -2595,6 +2595,8 @@ func (s *Selector) Query() (string, []interface{}) {
 				} else {
 					b.WriteString(" ROW")
 				}
+			} else {
+				b.WriteString("OFFSET 0 ROW")
 			}
 			if *s.limit > 0 {
 				b.WriteString(" FETCH NEXT ")
