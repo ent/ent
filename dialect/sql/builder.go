@@ -2588,7 +2588,7 @@ func (s *Selector) Query() (string, []interface{}) {
 				b.WriteString(" ORDER BY (SELECT NULL)  ")
 			}
 			if s.offset != nil {
-				b.WriteString("OFFSET ")
+				b.WriteString(" OFFSET ")
 				b.WriteString(strconv.Itoa(*s.offset))
 				if *s.offset > 0 {
 					b.WriteString(" ROWS")
@@ -2596,7 +2596,7 @@ func (s *Selector) Query() (string, []interface{}) {
 					b.WriteString(" ROW")
 				}
 			} else {
-				b.WriteString("OFFSET 0 ROW")
+				b.WriteString(" OFFSET 0 ROW")
 			}
 			if *s.limit > 0 {
 				b.WriteString(" FETCH NEXT ")
