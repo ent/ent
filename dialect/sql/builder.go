@@ -1276,7 +1276,11 @@ func False() *Predicate {
 // False appends FALSE to the predicate.
 func (p *Predicate) False() *Predicate {
 	return p.Append(func(b *Builder) {
-		b.WriteString("FALSE")
+		if b.dialect != dialect.SQLServer {
+			b.WriteString("FALSE")
+		} else {
+			b.WriteString("1!=1")
+		}
 	})
 }
 
@@ -3092,7 +3096,7 @@ func (b *Builder) Arg(a interface{}) *Builder {
 				param = "0"
 			}
 		case time.Time:
-			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2006-01-02 03:04:05.000"))
+			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2006-01-02 15:04:05.000"))
 		default:
 			switch rv := reflect.ValueOf(a); rv.Kind() {
 			case reflect.Int8, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
