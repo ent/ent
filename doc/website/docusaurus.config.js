@@ -62,6 +62,10 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
         },
         "blog": {
+          "feedOptions": {
+            "type": 'all',
+            "copyright": `Copyright © ${new Date().getFullYear()}, The Ent Authors.`,
+          },
           "path": "blog",
           "blogSidebarCount": 'ALL',
           "blogSidebarTitle": 'All our posts',
