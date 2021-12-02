@@ -2518,7 +2518,7 @@ func (s *Selector) Query() (string, []interface{}) {
 	b := s.Builder.clone()
 	s.joinPrefix(&b)
 	b.WriteString("SELECT ")
-	if s.distinct && s.dialect != dialect.SQLServer {
+	if s.distinct {
 		b.WriteString("DISTINCT ")
 	}
 	if len(s.columns) > 0 {
