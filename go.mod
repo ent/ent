@@ -12,7 +12,7 @@ require (
 	github.com/json-iterator/go v1.1.10
 	github.com/lib/pq v1.10.4
 	github.com/mattn/go-sqlite3 v1.14.9
-	github.com/mitchellh/mapstructure v1.4.2
+	github.com/mitchellh/mapstructure v1.4.3
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.1.3
