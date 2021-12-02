@@ -3059,6 +3059,8 @@ func (b *Builder) Arg(a interface{}) *Builder {
 		param = "$" + strconv.Itoa(b.total)
 	} else if b.sqlserver() {
 		switch a.(type) {
+		case int8, int16, int, int32, int64, float32, float64, bool:
+			param = fmt.Sprintf("%s", a)
 		case time.Time:
 			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2006-01-02 03:04:05.000"))
 		default:
