@@ -415,7 +415,28 @@ func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 	} else {
 		ops = append(ops, b.Column(c.Name).Attr("SET NOT NULL"))
 	}
+
+	if c.supportDefault() && c.Default != nil {
+		ops = append(ops, d.writeSetDefault(b.Column(c.Name), c))
+	}
+
 	return ops
+}
+
+func (d *Postgres) writeSetDefault(b *sql.ColumnBuilder, c *Column) *sql.ColumnBuilder {
+	attr := fmt.Sprint(c.Default)
+	switch v := c.Default.(type) {
+	case bool:
+		attr = strconv.FormatBool(v)
+	case string:
+		if t := c.Type; t != field.TypeUUID && t != field.TypeTime && !t.Numeric() {
+			// Escape single quote by replacing each with 2.
+			attr = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
+		}
+	}
+	b.Attr("SET DEFAULT " + attr)
+
+	return b
 }
 
 // hasUniqueName reports if the index has a unique name in the schema.

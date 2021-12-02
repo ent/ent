@@ -514,6 +514,36 @@ func TestPostgres_Create(t *testing.T) {
 			},
 		},
 		{
+			name: "modify column default value",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Default: "unknown"},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock pgMock) {
+				mock.start("120000")
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
+						AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
+						AddRow("name", "character", "NO", "NULL", "bpchar", nil, nil, nil))
+				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
+						AddRow("users_pkey", "id", "t", "t", 0))
+				mock.ExpectExec(escape(`ALTER TABLE "users" ALTER COLUMN "name" TYPE varchar, ALTER COLUMN "name" SET NOT NULL, ALTER COLUMN "name" SET DEFAULT 'unknown'`)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
 			name: "apply uniqueness on column",
 			tables: []*Table{
 				{
@@ -923,7 +953,7 @@ func TestPostgres_Create(t *testing.T) {
 					Name: "users",
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
-						{Name: "name", Type: field.TypeString, Nullable: false, SchemaType: map[string]string{dialect.Postgres: "varchar(20)"}},
+						{Name: "name", Type: field.TypeString, SchemaType: map[string]string{dialect.Postgres: "varchar(20)"}, Default: "unkown"},
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
