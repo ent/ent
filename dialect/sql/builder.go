@@ -3060,16 +3060,26 @@ func (b *Builder) Arg(a interface{}) *Builder {
 		param = "$" + strconv.Itoa(b.total)
 	} else if b.sqlserver() {
 		switch a.(type) {
-		case int8, int16, int, int32, int64, float32, float64, bool:
+		case int8, int16, int, int32, int64, float32, float64:
 			param = fmt.Sprintf("%v", a)
+		case bool:
+			if a.(bool) {
+				param = "1"
+			} else {
+				param = "0"
+			}
 		case time.Time:
 			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2021-11-30 20:01:45.192"))
 		default:
 			switch rv := reflect.ValueOf(a); rv.Kind() {
-			case reflect.Int8, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
-				param = fmt.Sprintf("%d", a)
-			case reflect.Float32, reflect.Float64, reflect.Bool:
+			case reflect.Int8, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Float32, reflect.Float64:
 				param = fmt.Sprintf("%v", a)
+			case reflect.Bool:
+				if rv.Bool() {
+					param = "1"
+				} else {
+					param = "0"
+				}
 			default:
 				param = fmt.Sprintf("'%v'", a)
 			}
