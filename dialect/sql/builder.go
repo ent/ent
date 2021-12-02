@@ -2583,10 +2583,31 @@ func (s *Selector) Query() (string, []interface{}) {
 		s.joinOrder(&b)
 	}
 	if s.limit != nil {
-		b.WriteString(" LIMIT ")
-		b.WriteString(strconv.Itoa(*s.limit))
+		if s.dialect == dialect.SQLServer {
+			if len(s.order) > 0 {
+				b.WriteString(" ORDER BY (SELECT NULL)  ")
+			}
+			if s.offset != nil {
+				b.WriteString("OFFSET ")
+				b.WriteString(strconv.Itoa(*s.offset))
+				if *s.offset > 0 {
+					b.WriteString(" ROWS")
+				} else {
+					b.WriteString(" ROW")
+				}
+			}
+			if *s.limit > 0 {
+				b.WriteString(" FETCH NEXT ")
+				b.WriteString(strconv.Itoa(*s.limit))
+				b.WriteString(" ROWS ONLY")
+			}
+		} else {
+			b.WriteString(" LIMIT ")
+			b.WriteString(strconv.Itoa(*s.limit))
+		}
+
 	}
-	if s.offset != nil {
+	if s.offset != nil && s.dialect != dialect.SQLServer {
 		b.WriteString(" OFFSET ")
 		b.WriteString(strconv.Itoa(*s.offset))
 	}
