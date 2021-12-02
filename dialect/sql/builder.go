@@ -2518,7 +2518,7 @@ func (s *Selector) Query() (string, []interface{}) {
 	b := s.Builder.clone()
 	s.joinPrefix(&b)
 	b.WriteString("SELECT ")
-	if s.distinct {
+	if s.distinct && s.dialect != dialect.SQLServer {
 		b.WriteString("DISTINCT ")
 	}
 	if len(s.columns) > 0 {
@@ -2584,7 +2584,7 @@ func (s *Selector) Query() (string, []interface{}) {
 	}
 	if s.limit != nil {
 		if s.dialect == dialect.SQLServer {
-			if len(s.order) > 0 {
+			if len(s.order) == 0 {
 				b.WriteString(" ORDER BY (SELECT NULL)  ")
 			}
 			if s.offset != nil {
