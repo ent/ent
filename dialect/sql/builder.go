@@ -3066,8 +3066,10 @@ func (b *Builder) Arg(a interface{}) *Builder {
 			param = fmt.Sprintf("'%s'", a.(time.Time).Format("2021-11-30 20:01:45.192"))
 		default:
 			switch rv := reflect.ValueOf(a); rv.Kind() {
-			case reflect.Int8, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Float32, reflect.Float64, reflect.Bool:
-				param = fmt.Sprintf("%s", a)
+			case reflect.Int8, reflect.Int, reflect.Int16, reflect.Int32, reflect.Int64:
+				param = fmt.Sprintf("%d", a)
+			case reflect.Float32, reflect.Float64, reflect.Bool:
+				param = fmt.Sprintf("%v", a)
 			default:
 				param = fmt.Sprintf("'%v'", a)
 			}
