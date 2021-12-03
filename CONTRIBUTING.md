@@ -25,20 +25,31 @@ possible.
   In order to test your documentation changes, run `npm start` from the `doc/website` directory, and open [localhost:3000](http://localhost:3000/).
 
 # Run integration tests
-If you touch any file in `entc`, run the following command in `entc`:
+If you touch any file in `entc`, run the following command:
 
 ```shell
-go generate ./...
+make gen
 ```
 
-Then, run `docker-compose` in order to spin-up all database containers:
+Then, run `make test` to run all integration tests.
+
+# Makefile Targets
 
 ```shell
-docker-compose -f entc/integration/docker-compose.yaml up -d --scale test=0
+
+Usage:
+ make [target]
+
+Targets:
+start                  start test databases
+stop                   stop test databases
+rm                     remove test databases
+gen                    go generate
+test-only              run tests only
+test                   start databases if not started then run tests
+all                    go generate, start databases if not started, run tests, stop databases and remove them
+help                   show help
 ```
-
-Then, run `go test ./...` to run all integration tests.
-
 
 ## Pull Requests
 We actively welcome your pull requests.
