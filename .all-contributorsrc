@@ -636,6 +636,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "naormatania",
+      "name": "Naor Matania",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6978437?v=4",
+      "profile": "https://github.com/naormatania",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "idc77",
+      "name": "idc77",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87644834?v=4",
+      "profile": "https://github.com/idc77",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "HurSungYun",
+      "name": "Sungyun Hur",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8033896?v=4",
+      "profile": "http://ethanhur.me",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

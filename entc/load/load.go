@@ -28,12 +28,18 @@ import (
 
 type (
 	// A SchemaSpec holds a serializable version of an ent.Schema
-	// and its Go package information.
+	// and its Go package and module information.
 	SchemaSpec struct {
-		// Schemas are the schema descriptors.
+		// Schemas defines the loaded schema descriptors.
 		Schemas []*Schema
-		// PkgPath is the package path of the loaded ent.Schema.
+
+		// PkgPath is the package path of the loaded
+		// ent.Schema package.
 		PkgPath string
+
+		// Module defines the module information for
+		// the user schema package if exists.
+		Module *packages.Module
 	}
 
 	// Config holds the configuration for loading an ent/schema package.
@@ -47,7 +53,7 @@ type (
 
 // Load loads the schemas package and build the Go plugin with this info.
 func (c *Config) Load() (*SchemaSpec, error) {
-	pkgPath, err := c.load()
+	spec, err := c.load()
 	if err != nil {
 		return nil, fmt.Errorf("entc/load: load schema dir: %w", err)
 	}
@@ -58,7 +64,10 @@ func (c *Config) Load() (*SchemaSpec, error) {
 	err = buildTmpl.ExecuteTemplate(&b, "main", struct {
 		*Config
 		Package string
-	}{c, pkgPath})
+	}{
+		Config:  c,
+		Package: spec.PkgPath,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("entc/load: execute template: %w", err)
 	}
@@ -69,7 +78,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 	if err := os.MkdirAll(".entc", os.ModePerm); err != nil {
 		return nil, err
 	}
-	target := fmt.Sprintf(".entc/%s.go", filename(pkgPath))
+	target := fmt.Sprintf(".entc/%s.go", filename(spec.PkgPath))
 	if err := os.WriteFile(target, buf, 0644); err != nil {
 		return nil, fmt.Errorf("entc/load: write file %s: %w", target, err)
 	}
@@ -78,7 +87,6 @@ func (c *Config) Load() (*SchemaSpec, error) {
 	if err != nil {
 		return nil, err
 	}
-	spec := &SchemaSpec{PkgPath: pkgPath}
 	for _, line := range strings.Split(out, "\n") {
 		schema, err := UnmarshalSchema([]byte(line))
 		if err != nil {
@@ -93,19 +101,19 @@ func (c *Config) Load() (*SchemaSpec, error) {
 var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
 
 // load loads the schemas info.
-func (c *Config) load() (string, error) {
+func (c *Config) load() (*SchemaSpec, error) {
 	pkgs, err := packages.Load(&packages.Config{
-		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo,
+		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedModule,
 	}, c.Path, entInterface.PkgPath())
 	if err != nil {
-		return "", fmt.Errorf("loading package: %w", err)
+		return nil, fmt.Errorf("loading package: %w", err)
 	}
 	if len(pkgs) < 2 {
-		return "", fmt.Errorf("missing package information for: %s", c.Path)
+		return nil, fmt.Errorf("missing package information for: %s", c.Path)
 	}
 	entPkg, pkg := pkgs[0], pkgs[1]
 	if len(pkg.Errors) != 0 {
-		return "", pkg.Errors[0]
+		return nil, pkg.Errors[0]
 	}
 	if pkgs[0].PkgPath != entInterface.PkgPath() {
 		entPkg, pkg = pkgs[1], pkgs[0]
@@ -119,10 +127,10 @@ func (c *Config) load() (string, error) {
 		}
 		spec, ok := k.Obj.Decl.(*ast.TypeSpec)
 		if !ok {
-			return "", fmt.Errorf("invalid declaration %T for %s", k.Obj.Decl, k.Name)
+			return nil, fmt.Errorf("invalid declaration %T for %s", k.Obj.Decl, k.Name)
 		}
 		if _, ok := spec.Type.(*ast.StructType); !ok {
-			return "", fmt.Errorf("invalid spec type %T for %s", spec.Type, k.Name)
+			return nil, fmt.Errorf("invalid spec type %T for %s", spec.Type, k.Name)
 		}
 		names = append(names, k.Name)
 	}
@@ -130,7 +138,7 @@ func (c *Config) load() (string, error) {
 		c.Names = names
 	}
 	sort.Strings(c.Names)
-	return pkg.PkgPath, nil
+	return &SchemaSpec{PkgPath: pkg.PkgPath, Module: pkg.Module}, nil
 }
 
 var (

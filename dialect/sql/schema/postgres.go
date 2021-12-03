@@ -92,7 +92,7 @@ func (d *Postgres) table(ctx context.Context, tx dialect.Tx, name string) (*Tabl
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(
 			"column_name", "data_type", "is_nullable", "column_default", "udt_name",
-			"numeric_precision", "numeric_scale",
+			"numeric_precision", "numeric_scale", "character_maximum_length",
 		).
 		From(sql.Table("columns").Schema("information_schema")).
 		Where(sql.And(
@@ -229,13 +229,14 @@ const maxCharSize = 10 << 20
 // scanColumn scans the information a column from column description.
 func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 	var (
-		nullable         sql.NullString
-		defaults         sql.NullString
-		udt              sql.NullString
-		numericPrecision sql.NullInt64
-		numericScale     sql.NullInt64
+		nullable            sql.NullString
+		defaults            sql.NullString
+		udt                 sql.NullString
+		numericPrecision    sql.NullInt64
+		numericScale        sql.NullInt64
+		characterMaximumLen sql.NullInt64
 	)
-	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt, &numericPrecision, &numericScale); err != nil {
+	if err := rows.Scan(&c.Name, &c.typ, &nullable, &defaults, &udt, &numericPrecision, &numericScale, &characterMaximumLen); err != nil {
 		return fmt.Errorf("scanning column description: %w", err)
 	}
 	if nullable.Valid {
@@ -266,6 +267,11 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Size = maxCharSize + 1
 	case "character", "character varying":
 		c.Type = field.TypeString
+		// If character maximum length is specified then we should take that into account.
+		if characterMaximumLen.Valid {
+			schemaType := fmt.Sprintf("varchar(%d)", characterMaximumLen.Int64)
+			c.SchemaType = map[string]string{dialect.Postgres: schemaType}
+		}
 	case "date", "time", "timestamp", "timestamp with time zone", "timestamp without time zone":
 		c.Type = field.TypeTime
 	case "bytea":

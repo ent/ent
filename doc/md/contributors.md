@@ -97,6 +97,11 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/JeremyV2014"><img src="https://avatars.githubusercontent.com/u/9276415?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jeremy Maxey-Vesperman</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=JeremyV2014" title="Code">💻</a> <a href="https://github.com/ent/ent/commits?author=JeremyV2014" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/tankbusta"><img src="https://avatars.githubusercontent.com/u/592749?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Christopher Schmitt</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=tankbusta" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/grevych"><img src="https://avatars.githubusercontent.com/u/3792003?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Gerardo Reyes</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=grevych" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/naormatania"><img src="https://avatars.githubusercontent.com/u/6978437?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Naor Matania</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=naormatania" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/idc77"><img src="https://avatars.githubusercontent.com/u/87644834?v=4?s=100" width="100px;" alt=""/><br /><sub><b>idc77</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=idc77" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://ethanhur.me"><img src="https://avatars.githubusercontent.com/u/8033896?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sungyun Hur</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=HurSungYun" title="Documentation">📖</a></td>
   </tr>
 </table>
 
