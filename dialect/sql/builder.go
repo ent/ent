@@ -977,7 +977,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 	} else {
 		i.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
 		if i.dialect == dialect.SQLServer {
-			i.WriteString(" OUTPUT INSERTED.\"id\" ")
+			i.WriteString(" OUTPUT INSERTED.\"" + i.returning[0] + "\" ")
 		}
 		i.WriteString(" VALUES ")
 		for j, v := range i.values {
