@@ -33,7 +33,7 @@ make gen
 
 Then, run `make test` to run all integration tests.
 
-# Makefile Targets
+## Makefile Targets
 
 ```shell
 
