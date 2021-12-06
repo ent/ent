@@ -102,6 +102,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/idc77"><img src="https://avatars.githubusercontent.com/u/87644834?v=4?s=100" width="100px;" alt=""/><br /><sub><b>idc77</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=idc77" title="Documentation">📖</a></td>
     <td align="center"><a href="http://ethanhur.me"><img src="https://avatars.githubusercontent.com/u/8033896?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sungyun Hur</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=HurSungYun" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/peanut-cc"><img src="https://avatars.githubusercontent.com/u/55480838?v=4?s=100" width="100px;" alt=""/><br /><sub><b>peanut-pg</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=peanut-cc" title="Documentation">📖</a></td>
   </tr>
 </table>
 
