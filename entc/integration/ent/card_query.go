@@ -530,6 +530,10 @@ func (cq *CardQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(cq.modifiers) > 0 {
 		_spec.Modifiers = cq.modifiers
 	}
+	_spec.Node.Columns = cq.fields
+	if len(cq.fields) > 0 {
+		_spec.Unique = cq.unique != nil && *cq.unique
+	}
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 
@@ -600,6 +604,9 @@ func (cq *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if cq.sql != nil {
 		selector = cq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if cq.unique != nil && *cq.unique {
+		selector.Distinct()
 	}
 	for _, m := range cq.modifiers {
 		m(selector)
@@ -914,9 +921,7 @@ func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range cgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(cgb.fields...)...)

@@ -934,7 +934,9 @@ The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examp
 ## Edge Field
 
 The `Field` option for edges allows users to expose foreign-keys as regular fields on the schema.
-Note that only relations that hold foreign-keys (edge-ids) are allowed to use this option.
+Note that only relations that hold foreign-keys (edge-ids) are allowed to use this option. Support
+for non-foreign-key fields in join tables is in progress (as of September 2021) and can be tracked with
+this [GitHub Issue](https://github.com/ent/ent/issues/1061).
 
 ```go
 // Fields of the Post.

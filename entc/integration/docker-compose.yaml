@@ -103,11 +103,22 @@ services:
     healthcheck:
       test: pg_isready -U postgres
     ports:
-      - 5433:5432
+      - 5432:5432
 
   postgres13:
     platform: linux/amd64
     image: postgres:13
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_PASSWORD: pass
+    healthcheck:
+      test: pg_isready -U postgres
+    ports:
+      - 5433:5432
+
+  postgres14:
+    platform: linux/amd64
+    image: postgres:14
     environment:
       POSTGRES_DB: test
       POSTGRES_PASSWORD: pass
@@ -119,7 +130,7 @@ services:
   gremlin:
     platform: linux/amd64
     image: entgo/gremlin-server
-    build: gremlin-server
+    build: compose/gremlin-server
     restart: on-failure
     ports:
       - 8182:8182

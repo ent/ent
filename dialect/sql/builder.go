@@ -908,14 +908,13 @@ func (i *InsertBuilder) OnConflict(opts ...ConflictOption) *InsertBuilder {
 
 // UpdateSet describes a set of changes of the `DO UPDATE` clause.
 type UpdateSet struct {
-	table   string
 	columns []string
 	update  *UpdateBuilder
 }
 
 // Table returns the table the `UPSERT` statement is executed on.
 func (u *UpdateSet) Table() *SelectTable {
-	return Dialect(u.update.dialect).Table(u.table)
+	return Dialect(u.update.dialect).Table(u.update.table)
 }
 
 // Columns returns all columns in the `INSERT` statement.
@@ -931,6 +930,12 @@ func (u *UpdateSet) UpdateColumns() []string {
 // Set sets a column to a given value.
 func (u *UpdateSet) Set(column string, v interface{}) *UpdateSet {
 	u.update.Set(column, v)
+	return u
+}
+
+// Add adds a numeric value to the given column.
+func (u *UpdateSet) Add(column string, v interface{}) *UpdateSet {
+	u.update.Add(column, v)
 	return u
 }
 
@@ -1025,13 +1030,14 @@ func (i *InsertBuilder) writeConflict() {
 	if len(i.conflict.action.update) == 0 {
 		i.AddError(errors.New("missing action for 'DO UPDATE SET' clause"))
 	}
-	u := &UpdateSet{table: i.table, columns: i.columns, update: &UpdateBuilder{}}
+	u := &UpdateSet{columns: i.columns, update: Dialect(i.dialect).Update(i.table)}
 	u.update.Builder = i.Builder
 	for _, f := range i.conflict.action.update {
 		f(u)
 	}
 	u.update.writeSetter(&i.Builder)
 	if p := i.conflict.action.where; p != nil {
+		p.qualifier = i.table
 		i.WriteString(" WHERE ").Join(p)
 	}
 }
@@ -1073,16 +1079,19 @@ func (u *UpdateBuilder) Set(column string, v interface{}) *UpdateBuilder {
 	return u
 }
 
-// Add adds a numeric value to the given column.
+// Add adds a numeric value to the given column. Note that, calling Set(c)
+// after Add(c) will erase previous calls with c from the builder.
 func (u *UpdateBuilder) Add(column string, v interface{}) *UpdateBuilder {
-	return u.Set(column, ExprFunc(func(b *Builder) {
+	u.columns = append(u.columns, column)
+	u.values = append(u.values, ExprFunc(func(b *Builder) {
 		b.WriteString("COALESCE")
 		b.Nested(func(b *Builder) {
-			b.Ident(column).Comma().Arg(0)
+			b.Ident(Table(u.table).C(column)).Comma().WriteByte('0')
 		})
 		b.WriteString(" + ")
 		b.Arg(v)
 	}))
+	return u
 }
 
 // SetNull sets a column as null value.
@@ -1590,6 +1599,42 @@ func (p *Predicate) Like(col, pattern string) *Predicate {
 	})
 }
 
+// escape escapes w with the default escape character ('/'),
+// to be used by the pattern matching functions below.
+// The second return value indicates if w was escaped or not.
+func escape(w string) (string, bool) {
+	var n int
+	for i := range w {
+		if c := w[i]; c == '%' || c == '_' || c == '\\' {
+			n++
+		}
+	}
+	// No characters to escape.
+	if n == 0 {
+		return w, false
+	}
+	var b strings.Builder
+	b.Grow(len(w) + n)
+	for i := range w {
+		if c := w[i]; c == '%' || c == '_' || c == '\\' {
+			b.WriteByte('\\')
+		}
+		b.WriteByte(w[i])
+	}
+	return b.String(), true
+}
+
+func (p *Predicate) escapedLike(col, left, right, word string) *Predicate {
+	return p.Append(func(b *Builder) {
+		w, escaped := escape(word)
+		b.Ident(col).WriteOp(OpLike)
+		b.Arg(left + w + right)
+		if p.dialect == dialect.SQLite && escaped {
+			p.WriteString(" ESCAPE ").Arg("\\")
+		}
+	})
+}
+
 // HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
 func HasPrefix(col, prefix string) *Predicate {
 	return P().HasPrefix(col, prefix)
@@ -1597,7 +1642,7 @@ func HasPrefix(col, prefix string) *Predicate {
 
 // HasPrefix is a helper predicate that checks prefix using the LIKE predicate.
 func (p *Predicate) HasPrefix(col, prefix string) *Predicate {
-	return p.Like(col, prefix+"%")
+	return p.escapedLike(col, "", "%", prefix)
 }
 
 // HasSuffix is a helper predicate that checks suffix using the LIKE predicate.
@@ -1605,7 +1650,7 @@ func HasSuffix(col, suffix string) *Predicate { return P().HasSuffix(col, suffix
 
 // HasSuffix is a helper predicate that checks suffix using the LIKE predicate.
 func (p *Predicate) HasSuffix(col, suffix string) *Predicate {
-	return p.Like(col, "%"+suffix)
+	return p.escapedLike(col, "%", "", suffix)
 }
 
 // EqualFold is a helper predicate that applies the "=" predicate with case-folding.
@@ -1636,39 +1681,45 @@ func (p *Predicate) EqualFold(col, sub string) *Predicate {
 func Contains(col, sub string) *Predicate { return P().Contains(col, sub) }
 
 // Contains is a helper predicate that checks substring using the LIKE predicate.
-func (p *Predicate) Contains(col, sub string) *Predicate {
-	return p.Like(col, "%"+sub+"%")
+func (p *Predicate) Contains(col, substr string) *Predicate {
+	return p.escapedLike(col, "%", "%", substr)
 }
 
 // ContainsFold is a helper predicate that checks substring using the LIKE predicate.
 func ContainsFold(col, sub string) *Predicate { return P().ContainsFold(col, sub) }
 
 // ContainsFold is a helper predicate that applies the LIKE predicate with case-folding.
-func (p *Predicate) ContainsFold(col, sub string) *Predicate {
+func (p *Predicate) ContainsFold(col, substr string) *Predicate {
 	return p.Append(func(b *Builder) {
-		f := &Func{}
-		f.SetDialect(b.dialect)
+		w, escaped := escape(substr)
 		switch b.dialect {
 		case dialect.MySQL:
 			// We assume the CHARACTER SET is configured to utf8mb4,
 			// because this how it is defined in dialect/sql/schema.
 			b.Ident(col).WriteString(" COLLATE utf8mb4_general_ci LIKE ")
+			b.Arg("%" + strings.ToLower(w) + "%")
 		case dialect.Postgres:
 			b.Ident(col).WriteString(" ILIKE ")
+			b.Arg("%" + strings.ToLower(w) + "%")
 		default: // SQLite.
+			var f Func
+			f.SetDialect(b.dialect)
 			f.Lower(col)
 			b.WriteString(f.String()).WriteString(" LIKE ")
+			b.Arg("%" + strings.ToLower(w) + "%")
+			if escaped {
+				p.WriteString(" ESCAPE ").Arg("\\")
+			}
 		}
-		b.Arg("%" + strings.ToLower(sub) + "%")
 	})
 }
 
-// CompositeGT returns a comiposite ">" predicate
+// CompositeGT returns a composite ">" predicate
 func CompositeGT(columns []string, args ...interface{}) *Predicate {
 	return P().CompositeGT(columns, args...)
 }
 
-// CompositeLT returns a comiposite "<" predicate
+// CompositeLT returns a composite "<" predicate
 func CompositeLT(columns []string, args ...interface{}) *Predicate {
 	return P().CompositeLT(columns, args...)
 }
@@ -2379,7 +2430,7 @@ func (s *Selector) ForShare(opts ...LockOption) *Selector {
 	return s.For(LockShare, opts...)
 }
 
-// LockUpdate sets the lock configuration for suffixing the
+// ForUpdate sets the lock configuration for suffixing the
 // `SELECT` statement with the `FOR UPDATE` clause.
 func (s *Selector) ForUpdate(opts ...LockOption) *Selector {
 	return s.For(LockUpdate, opts...)
@@ -2778,11 +2829,12 @@ func (n Queries) Query() (string, []interface{}) {
 
 // Builder is the base query builder for the sql dsl.
 type Builder struct {
-	sb      *strings.Builder // underlying builder.
-	dialect string           // configured dialect.
-	args    []interface{}    // query parameters.
-	total   int              // total number of parameters in query tree.
-	errs    []error          // errors that added during the query construction.
+	sb        *strings.Builder // underlying builder.
+	dialect   string           // configured dialect.
+	args      []interface{}    // query parameters.
+	total     int              // total number of parameters in query tree.
+	errs      []error          // errors that added during the query construction.
+	qualifier string           // qualifier to prefix identifiers (e.g. table name).
 }
 
 // Quote quotes the given identifier with the characters based
@@ -2809,6 +2861,9 @@ func (b *Builder) Ident(s string) *Builder {
 	switch {
 	case len(s) == 0:
 	case s != "*" && !b.isIdent(s) && !isFunc(s) && !isModifier(s):
+		if b.qualifier != "" {
+			b.WriteString(b.Quote(b.qualifier)).WriteByte('.')
+		}
 		b.WriteString(b.Quote(s))
 	case (isFunc(s) || isModifier(s)) && b.postgres():
 		// Modifiers and aggregation functions that

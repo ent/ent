@@ -133,7 +133,7 @@ func (gc *GroupCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
 	}
 	return nil
 }

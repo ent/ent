@@ -345,7 +345,8 @@ func (b *timeBuilder) Optional() *timeBuilder {
 	return b
 }
 
-// Immutable indicates that this field cannot be updated.
+// Immutable fields are fields that can be set only in the creation of the entity.
+// i.e., no setters will be generated for the entity updaters (one and many).
 func (b *timeBuilder) Immutable() *timeBuilder {
 	b.desc.Immutable = true
 	return b
@@ -549,6 +550,12 @@ func (b *bytesBuilder) Optional() *bytesBuilder {
 	return b
 }
 
+// Sensitive fields not printable and not serializable.
+func (b *bytesBuilder) Sensitive() *bytesBuilder {
+	b.desc.Sensitive = true
+	return b
+}
+
 // Unique makes the field unique within all vertices of this type.
 // Only supported in PostgreSQL.
 func (b *bytesBuilder) Unique() *bytesBuilder {
@@ -722,6 +729,28 @@ func (b *jsonBuilder) SchemaType(types map[string]string) *jsonBuilder {
 // codegen extensions.
 func (b *jsonBuilder) Annotations(annotations ...schema.Annotation) *jsonBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Default sets the default value of the field. For example:
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		// A static default value.
+//		Default([]http.Dir{"/tmp"})
+//
+//	field.JSON("dirs", []http.Dir{}).
+//		// A function for generating the default value.
+//		Default(DefaultDirs)
+//
+func (b *jsonBuilder) Default(v interface{}) *jsonBuilder {
+	b.desc.Default = v
+	switch fieldT, defaultT := b.desc.Info.RType.rtype, reflect.TypeOf(v); {
+	case fieldT == defaultT:
+	case defaultT.Kind() == reflect.Func:
+		b.desc.checkDefaultFunc(b.desc.Info.RType.rtype)
+	default:
+		b.desc.Err = fmt.Errorf("expect type (func() %[1]s) or (%[1]s) for other default value", b.desc.Info)
+	}
 	return b
 }
 

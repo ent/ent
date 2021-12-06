@@ -13,11 +13,11 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
       - name: Run linters
         uses: golangci/golangci-lint-action@v2.5.2
         with:
-          version: v1.28
+          version: v1.43.0
 
   unit:
     runs-on: ubuntu-latest
@@ -25,11 +25,11 @@ jobs:
       matrix:
         go: ['1.17', '1.16']
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - uses: actions/cache@v2.1.6
+      - uses: actions/cache@v2.1.7
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -54,11 +54,11 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17'
-      - uses: actions/cache@v2.1.6
+      - uses: actions/cache@v2.1.7
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -186,7 +186,7 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         ports:
-          - 5433:5432
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -194,6 +194,18 @@ jobs:
           --health-retries 5
       postgres13:
         image: postgres:13.1
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres14:
+        image: postgres:14
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -214,11 +226,11 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17'
-      - uses: actions/cache@v2.1.6
+      - uses: actions/cache@v2.1.7
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -340,7 +352,7 @@ jobs:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
         ports:
-          - 5433:5432
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -348,6 +360,18 @@ jobs:
           --health-retries 5
       postgres13:
         image: postgres:13.1
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres14:
+        image: postgres:14
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -368,13 +392,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17'
-      - uses: actions/cache@v2.1.6
+      - uses: actions/cache@v2.1.7
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}

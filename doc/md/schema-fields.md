@@ -295,6 +295,8 @@ func (User) Fields() []ent.Field {
 			Default("unknown"),
 		field.String("cuid").
 			DefaultFunc(cuid.New),
+		field.JSON("dirs", []http.Dir{}).
+			Default([]http.Dir{"/tmp"}),
 	}
 }
 ```
@@ -365,6 +367,11 @@ func (Group) Fields() []ent.Field {
 Here is another example for writing a reusable validator:
 
 ```go
+import (
+	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema/field"
+)
+
 // MaxRuneCount validates the rune length of a string by using the unicode/utf8 package.
 func MaxRuneCount(maxLen int) func(s string) error {
 	return func(s string) error {
@@ -376,8 +383,16 @@ func MaxRuneCount(maxLen int) func(s string) error {
 }
 
 field.String("name").
+	// If using a SQL-database: change the underlying data type to varchar(10).
+	Annotations(entsql.Annotation{
+		Size: 10,
+	}).
 	Validate(MaxRuneCount(10))
 field.String("nickname").
+	//  If using a SQL-database: change the underlying data type to varchar(20).
+	Annotations(entsql.Annotation{
+		Size: 20,
+	}).
 	Validate(MaxRuneCount(20))
 ```
 

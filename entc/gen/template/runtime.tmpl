@@ -155,7 +155,11 @@ func init() {
 				// {{ $default }} holds the default value on creation for the {{ $f.Name }} field.
 				{{- $defaultType := print $f.Type.Type }}{{ if $f.DefaultFunc }}{{ $defaultType = print "func() " $f.Type }}{{ end }}
 				{{- if and $f.HasGoType (not (hasPrefix $defaultType "func")) }}
-					{{ $default }} = {{ $f.Type }}({{ $desc }}.Default.({{ $defaultType }}))
+					{{- if or $f.IsJSON $f.IsOther }}
+						{{ $default }} = {{ $desc }}.Default.({{ $f.Type }})
+					{{- else }}
+						{{ $default }} = {{ $f.Type }}({{ $desc }}.Default.({{ $defaultType }}))
+					{{- end }}
 				{{- else }}
 					{{ $default }} = {{ $desc }}.Default.({{ $defaultType }})
 				{{- end }}

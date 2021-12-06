@@ -212,25 +212,25 @@ func (cc *CardCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CardCreate) check() error {
 	if _, ok := cc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "create_time"`)}
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Card.create_time"`)}
 	}
 	if _, ok := cc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "update_time"`)}
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Card.update_time"`)}
 	}
 	if _, ok := cc.mutation.Balance(); !ok {
-		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "balance"`)}
+		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "Card.balance"`)}
 	}
 	if _, ok := cc.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "number"`)}
+		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
 	}
 	if v, ok := cc.mutation.Number(); ok {
 		if err := card.NumberValidator(v); err != nil {
-			return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "number": %w`, err)}
+			return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
 		}
 	}
 	if v, ok := cc.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -430,6 +430,12 @@ func (u *CardUpsert) UpdateBalance() *CardUpsert {
 	return u
 }
 
+// AddBalance adds v to the "balance" field.
+func (u *CardUpsert) AddBalance(v float64) *CardUpsert {
+	u.Add(card.FieldBalance, v)
+	return u
+}
+
 // SetNumber sets the "number" field.
 func (u *CardUpsert) SetNumber(v string) *CardUpsert {
 	u.Set(card.FieldNumber, v)
@@ -460,7 +466,7 @@ func (u *CardUpsert) ClearName() *CardUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Card.Create().
@@ -471,6 +477,14 @@ func (u *CardUpsert) ClearName() *CardUpsert {
 //
 func (u *CardUpsertOne) UpdateNewValues() *CardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.CreateTime(); exists {
+			s.SetIgnore(card.FieldCreateTime)
+		}
+		if _, exists := u.create.mutation.Number(); exists {
+			s.SetIgnore(card.FieldNumber)
+		}
+	}))
 	return u
 }
 
@@ -534,6 +548,13 @@ func (u *CardUpsertOne) UpdateUpdateTime() *CardUpsertOne {
 func (u *CardUpsertOne) SetBalance(v float64) *CardUpsertOne {
 	return u.Update(func(s *CardUpsert) {
 		s.SetBalance(v)
+	})
+}
+
+// AddBalance adds v to the "balance" field.
+func (u *CardUpsertOne) AddBalance(v float64) *CardUpsertOne {
+	return u.Update(func(s *CardUpsert) {
+		s.AddBalance(v)
 	})
 }
 
@@ -741,7 +762,7 @@ type CardUpsertBulk struct {
 	create *CardCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Card.Create().
@@ -752,6 +773,16 @@ type CardUpsertBulk struct {
 //
 func (u *CardUpsertBulk) UpdateNewValues() *CardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.CreateTime(); exists {
+				s.SetIgnore(card.FieldCreateTime)
+			}
+			if _, exists := b.mutation.Number(); exists {
+				s.SetIgnore(card.FieldNumber)
+			}
+		}
+	}))
 	return u
 }
 
@@ -815,6 +846,13 @@ func (u *CardUpsertBulk) UpdateUpdateTime() *CardUpsertBulk {
 func (u *CardUpsertBulk) SetBalance(v float64) *CardUpsertBulk {
 	return u.Update(func(s *CardUpsert) {
 		s.SetBalance(v)
+	})
+}
+
+// AddBalance adds v to the "balance" field.
+func (u *CardUpsertBulk) AddBalance(v float64) *CardUpsertBulk {
+	return u.Update(func(s *CardUpsert) {
+		s.AddBalance(v)
 	})
 }
 

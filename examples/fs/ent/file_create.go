@@ -157,10 +157,10 @@ func (fc *FileCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
 	if _, ok := fc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
 	}
 	if _, ok := fc.mutation.Deleted(); !ok {
-		return &ValidationError{Name: "deleted", err: errors.New(`ent: missing required field "deleted"`)}
+		return &ValidationError{Name: "deleted", err: errors.New(`ent: missing required field "File.deleted"`)}
 	}
 	return nil
 }

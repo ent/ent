@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -364,7 +365,7 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 	}
 	id, ok := muo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Media.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`entv2: missing "Media.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := muo.fields; len(fields) > 0 {

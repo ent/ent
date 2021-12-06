@@ -459,6 +459,17 @@ func (t Type) MutableFields() []*Field {
 	return fields
 }
 
+// ImmutableFields returns all type fields that are immutable (for update).
+func (t Type) ImmutableFields() []*Field {
+	fields := make([]*Field, 0, len(t.Fields))
+	for _, f := range t.Fields {
+		if f.Immutable {
+			fields = append(fields, f)
+		}
+	}
+	return fields
+}
+
 // MutationFields returns all the fields that are available on the typed-mutation.
 func (t Type) MutationFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
@@ -864,7 +875,7 @@ func (f Field) UpdateDefaultName() string { return "Update" + f.DefaultName() }
 func (f Field) DefaultValue() interface{} { return f.def.DefaultValue }
 
 // DefaultFunc returns a bool stating if the default value is a func. Invoked by the template.
-func (f Field) DefaultFunc() interface{} { return f.def.DefaultKind == reflect.Func }
+func (f Field) DefaultFunc() bool { return f.def.DefaultKind == reflect.Func }
 
 // BuilderField returns the struct member of the field in the builder.
 func (f Field) BuilderField() string {
@@ -903,7 +914,7 @@ func (f Field) EnumValues() []string {
 
 // EnumName returns the constant name for the enum.
 func (f Field) EnumName(enum string) string {
-	if !token.IsExported(enum) {
+	if !token.IsExported(enum) || !token.IsIdentifier(enum) {
 		enum = pascal(enum)
 	}
 	return pascal(f.Name) + enum
@@ -993,6 +1004,9 @@ func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.Type
 
 // IsJSON returns true if the field is a JSON field.
 func (f Field) IsJSON() bool { return f.Type != nil && f.Type.Type == field.TypeJSON }
+
+// IsOther returns true if the field is an Other field.
+func (f Field) IsOther() bool { return f.Type != nil && f.Type.Type == field.TypeOther }
 
 // IsString returns true if the field is a string field.
 func (f Field) IsString() bool { return f.Type != nil && f.Type.Type == field.TypeString }
@@ -1250,7 +1264,30 @@ func (f Field) ConvertedToBasic() bool {
 	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
-// SupportsAdd reports if the field supports the mutation "Add(T) T" interface.
+// SignedType returns the "signed type version" of the field type.
+// This behavior is required for supporting addition/subtraction
+// in mutations for unsigned types.
+func (f Field) SignedType() (*field.TypeInfo, error) {
+	if !f.SupportsMutationAdd() {
+		return nil, fmt.Errorf("field %q does not support MutationAdd", f.Name)
+	}
+	t := *f.Type
+	switch f.Type.Type {
+	case field.TypeUint8:
+		t.Type = field.TypeInt8
+	case field.TypeUint16:
+		t.Type = field.TypeInt16
+	case field.TypeUint32:
+		t.Type = field.TypeInt32
+	case field.TypeUint64:
+		t.Type = field.TypeInt64
+	case field.TypeUint:
+		t.Type = field.TypeInt
+	}
+	return &t, nil
+}
+
+// SupportsMutationAdd reports if the field supports the mutation "Add(T) T" interface.
 func (f Field) SupportsMutationAdd() bool {
 	if !f.Type.Numeric() || f.IsEdgeField() {
 		return false
@@ -1330,6 +1367,8 @@ func (f Field) BasicType(ident string) (expr string) {
 	case field.TypeBytes:
 		if rt.Kind == reflect.Slice {
 			expr = fmt.Sprintf("[]byte(%s)", ident)
+		} else if rt.Kind == reflect.Array {
+			expr = ident + "[:]"
 		}
 	case field.TypeTime:
 		switch {
@@ -1371,16 +1410,16 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 	enums := make([]Enum, 0, len(lf.Enums))
 	values := make(map[string]bool, len(lf.Enums))
 	for i := range lf.Enums {
-		switch name, value := lf.Enums[i].N, lf.Enums[i].V; {
+		switch name, value := f.EnumName(lf.Enums[i].N), lf.Enums[i].V; {
 		case value == "":
 			return nil, fmt.Errorf("%q field value cannot be empty", f.Name)
 		case values[value]:
 			return nil, fmt.Errorf("duplicate values %q for enum field %q", value, f.Name)
-		case strings.IndexFunc(value, unicode.IsSpace) != -1:
-			return nil, fmt.Errorf("enum value %q cannot contain spaces", value)
+		case !token.IsIdentifier(name):
+			return nil, fmt.Errorf("enum %q does not have a valid Go indetifier (%q)", value, name)
 		default:
 			values[value] = true
-			enums = append(enums, Enum{Name: f.EnumName(name), Value: value})
+			enums = append(enums, Enum{Name: name, Value: value})
 		}
 	}
 	if value := lf.DefaultValue; value != nil {

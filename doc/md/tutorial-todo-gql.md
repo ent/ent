@@ -237,6 +237,7 @@ import (
 	"log"
 	"net/http"
 
+	"todo"
 	"todo/ent"
 	"todo/ent/migrate"
 
@@ -261,7 +262,7 @@ func main() {
 	}
 
 	// Configure the server and start listening on :8081.
-	srv := handler.NewDefaultServer(NewSchema(client))
+	srv := handler.NewDefaultServer(todo.NewSchema(client))
 	http.Handle("/",
 		playground.Handler("Todo", "/query"),
 	)

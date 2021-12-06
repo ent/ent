@@ -67,7 +67,8 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "", nil, nil).
 							AddRow("text", "longtext", "YES", "YES", "NULL", "", "", "", nil, nil).
 							AddRow("uuid", "char(36)", "YES", "YES", "NULL", "", "", "utf8mb4_bin", nil, nil).
-							AddRow("price", "decimal(6, 4)", "NO", "YES", "NULL", "", "", "", "6", "4"))
+							AddRow("price", "decimal(6, 4)", "NO", "YES", "NULL", "", "", "", "6", "4").
+							AddRow("bank_id", "varchar(255)", "NO", "YES", "NULL", "", "", "", nil, nil))
 					mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `sub_part`, `non_unique`, `seq_in_index` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = ? AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
 						WithArgs("public", "users").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "sub_part", "non_unique", "seq_in_index"}).
@@ -115,7 +116,8 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("name", "varchar(255)", 0, "NULL", 0).
 							AddRow("text", "text", 0, "NULL", 0).
 							AddRow("uuid", "uuid", 0, "NULL", 0).
-							AddRow("price", "real", 1, "NULL", 0))
+							AddRow("price", "real", 1, "NULL", 0).
+							AddRow("bank_id", "varchar(255)", 1, "NULL", 0))
 					mock.ExpectQuery(escape("SELECT `name`, `unique`, `origin` FROM pragma_index_list('users')")).
 						WillReturnRows(sqlmock.NewRows([]string{"name", "unique", "unique"}))
 					mock.ExpectQuery(escape("SELECT `name`, `type`, `notnull`, `dflt_value`, `pk` FROM pragma_table_info('pets') ORDER BY `pk`")).
@@ -149,42 +151,43 @@ func TestInspector_Tables(t *testing.T) {
 							AddRow("pets").
 							AddRow("groups").
 							AddRow("user_groups"))
-					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "users").
-						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale"}).
-							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil).
-							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil).
-							AddRow("text", "text", "YES", "NULL", "text", nil, nil).
-							AddRow("uuid", "uuid", "YES", "NULL", "uuid", nil, nil).
-							AddRow("price", "numeric", "NO", "NULL", "numeric", "6", "4"))
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
+							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
+							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil, nil).
+							AddRow("text", "text", "YES", "NULL", "text", nil, nil, nil).
+							AddRow("uuid", "uuid", "YES", "NULL", "uuid", nil, nil, nil).
+							AddRow("price", "numeric", "NO", "NULL", "numeric", "6", "4", nil).
+							AddRow("bank_id", "character", "NO", "NULL", "bpchar", nil, nil, 20))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "users"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 							AddRow("users_pkey", "id", "t", "t", 0))
-					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "pets").
-						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale"}).
-							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil).
-							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil).
-							AddRow("user_pets", "bigint", "YES", "NULL", "int8", nil, nil))
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
+							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
+							AddRow("name", "character", "YES", "NULL", "bpchar", nil, nil, nil).
+							AddRow("user_pets", "bigint", "YES", "NULL", "int8", nil, nil, nil))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "pets"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 							AddRow("pets_pkey", "id", "t", "t", 0))
-					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "groups").
-						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale"}).
-							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil).
-							AddRow("name", "character", "NO", "NULL", "bpchar", nil, nil))
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
+							AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
+							AddRow("name", "character", "NO", "NULL", "bpchar", nil, nil, nil))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "groups"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 							AddRow("groups_pkey", "id", "t", "t", 0))
-					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
+					mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length" FROM "information_schema"."columns" WHERE "table_schema" = $1 AND "table_name" = $2`)).
 						WithArgs("public", "user_groups").
-						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale"}).
-							AddRow("user_id", "bigint", "NO", "NULL", "int8", nil, nil).
-							AddRow("group_id", "bigint", "NO", "NULL", "int8", nil, nil))
+						WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale", "character_maximum_length"}).
+							AddRow("user_id", "bigint", "NO", "NULL", "int8", nil, nil, nil).
+							AddRow("group_id", "bigint", "NO", "NULL", "int8", nil, nil, nil))
 					mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "$1", "user_groups"))).
 						WithArgs("public").
 						WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}))
@@ -211,6 +214,9 @@ func TestInspector_Tables(t *testing.T) {
 						{Name: "price", Type: field.TypeFloat64, SchemaType: map[string]string{
 							dialect.MySQL:    "decimal(6,4)",
 							dialect.Postgres: "numeric(6,4)",
+						}},
+						{Name: "bank_id", Type: field.TypeString, SchemaType: map[string]string{
+							dialect.Postgres: "varchar(20)",
 						}},
 					}
 					t1 = &Table{

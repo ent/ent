@@ -8,7 +8,9 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -29,6 +31,12 @@ type CardUpdate struct {
 // Where appends a list predicates to the CardUpdate builder.
 func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	cu.mutation.Where(ps...)
+	return cu
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (cu *CardUpdate) SetUpdateTime(t time.Time) *CardUpdate {
+	cu.mutation.SetUpdateTime(t)
 	return cu
 }
 
@@ -212,7 +220,7 @@ func (cu *CardUpdate) defaults() {
 func (cu *CardUpdate) check() error {
 	if v, ok := cu.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -376,6 +384,12 @@ type CardUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CardMutation
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (cuo *CardUpdateOne) SetUpdateTime(t time.Time) *CardUpdateOne {
+	cuo.mutation.SetUpdateTime(t)
+	return cuo
 }
 
 // SetBalance sets the "balance" field.
@@ -565,7 +579,7 @@ func (cuo *CardUpdateOne) defaults() {
 func (cuo *CardUpdateOne) check() error {
 	if v, ok := cuo.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf("ent: validator failed for field \"name\": %w", err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
 	}
 	return nil
@@ -584,7 +598,7 @@ func (cuo *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) 
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Card.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Card.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := cuo.fields; len(fields) > 0 {

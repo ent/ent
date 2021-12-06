@@ -139,6 +139,20 @@ func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 	return uc
 }
 
+// SetEmployment sets the "employment" field.
+func (uc *UserCreate) SetEmployment(u user.Employment) *UserCreate {
+	uc.mutation.SetEmployment(u)
+	return uc
+}
+
+// SetNillableEmployment sets the "employment" field if the given value is not nil.
+func (uc *UserCreate) SetNillableEmployment(u *user.Employment) *UserCreate {
+	if u != nil {
+		uc.SetEmployment(*u)
+	}
+	return uc
+}
+
 // SetSSOCert sets the "SSOCert" field.
 func (uc *UserCreate) SetSSOCert(s string) *UserCreate {
 	uc.mutation.SetSSOCert(s)
@@ -417,30 +431,42 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultRole
 		uc.mutation.SetRole(v)
 	}
+	if _, ok := uc.mutation.Employment(); !ok {
+		v := user.DefaultEmployment
+		uc.mutation.SetEmployment(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if v, ok := uc.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
-			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "optional_int": %w`, err)}
+			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
 		}
 	}
 	if _, ok := uc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "age"`)}
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
 	}
 	if _, ok := uc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
 	if _, ok := uc.mutation.Last(); !ok {
-		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "last"`)}
+		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "User.last"`)}
 	}
 	if _, ok := uc.mutation.Role(); !ok {
-		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "role"`)}
+		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
 	}
 	if v, ok := uc.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "role": %w`, err)}
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
+		}
+	}
+	if _, ok := uc.mutation.Employment(); !ok {
+		return &ValidationError{Name: "employment", err: errors.New(`ent: missing required field "User.employment"`)}
+	}
+	if v, ok := uc.mutation.Employment(); ok {
+		if err := user.EmploymentValidator(v); err != nil {
+			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
 		}
 	}
 	return nil
@@ -542,6 +568,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldRole,
 		})
 		_node.Role = value
+	}
+	if value, ok := uc.mutation.Employment(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldEmployment,
+		})
+		_node.Employment = value
 	}
 	if value, ok := uc.mutation.SSOCert(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -828,6 +862,12 @@ func (u *UserUpsert) UpdateOptionalInt() *UserUpsert {
 	return u
 }
 
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *UserUpsert) AddOptionalInt(v int) *UserUpsert {
+	u.Add(user.FieldOptionalInt, v)
+	return u
+}
+
 // ClearOptionalInt clears the value of the "optional_int" field.
 func (u *UserUpsert) ClearOptionalInt() *UserUpsert {
 	u.SetNull(user.FieldOptionalInt)
@@ -843,6 +883,12 @@ func (u *UserUpsert) SetAge(v int) *UserUpsert {
 // UpdateAge sets the "age" field to the value that was provided on create.
 func (u *UserUpsert) UpdateAge() *UserUpsert {
 	u.SetExcluded(user.FieldAge)
+	return u
+}
+
+// AddAge adds v to the "age" field.
+func (u *UserUpsert) AddAge(v int) *UserUpsert {
+	u.Add(user.FieldAge, v)
 	return u
 }
 
@@ -954,6 +1000,18 @@ func (u *UserUpsert) UpdateRole() *UserUpsert {
 	return u
 }
 
+// SetEmployment sets the "employment" field.
+func (u *UserUpsert) SetEmployment(v user.Employment) *UserUpsert {
+	u.Set(user.FieldEmployment, v)
+	return u
+}
+
+// UpdateEmployment sets the "employment" field to the value that was provided on create.
+func (u *UserUpsert) UpdateEmployment() *UserUpsert {
+	u.SetExcluded(user.FieldEmployment)
+	return u
+}
+
 // SetSSOCert sets the "SSOCert" field.
 func (u *UserUpsert) SetSSOCert(v string) *UserUpsert {
 	u.Set(user.FieldSSOCert, v)
@@ -972,7 +1030,7 @@ func (u *UserUpsert) ClearSSOCert() *UserUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.User.Create().
@@ -1021,6 +1079,13 @@ func (u *UserUpsertOne) SetOptionalInt(v int) *UserUpsertOne {
 	})
 }
 
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *UserUpsertOne) AddOptionalInt(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddOptionalInt(v)
+	})
+}
+
 // UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
 func (u *UserUpsertOne) UpdateOptionalInt() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
@@ -1039,6 +1104,13 @@ func (u *UserUpsertOne) ClearOptionalInt() *UserUpsertOne {
 func (u *UserUpsertOne) SetAge(v int) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetAge(v)
+	})
+}
+
+// AddAge adds v to the "age" field.
+func (u *UserUpsertOne) AddAge(v int) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddAge(v)
 	})
 }
 
@@ -1172,6 +1244,20 @@ func (u *UserUpsertOne) SetRole(v user.Role) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateRole() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateRole()
+	})
+}
+
+// SetEmployment sets the "employment" field.
+func (u *UserUpsertOne) SetEmployment(v user.Employment) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetEmployment(v)
+	})
+}
+
+// UpdateEmployment sets the "employment" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateEmployment() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateEmployment()
 	})
 }
 
@@ -1358,7 +1444,7 @@ type UserUpsertBulk struct {
 	create *UserCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.User.Create().
@@ -1407,6 +1493,13 @@ func (u *UserUpsertBulk) SetOptionalInt(v int) *UserUpsertBulk {
 	})
 }
 
+// AddOptionalInt adds v to the "optional_int" field.
+func (u *UserUpsertBulk) AddOptionalInt(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddOptionalInt(v)
+	})
+}
+
 // UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
 func (u *UserUpsertBulk) UpdateOptionalInt() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
@@ -1425,6 +1518,13 @@ func (u *UserUpsertBulk) ClearOptionalInt() *UserUpsertBulk {
 func (u *UserUpsertBulk) SetAge(v int) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetAge(v)
+	})
+}
+
+// AddAge adds v to the "age" field.
+func (u *UserUpsertBulk) AddAge(v int) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddAge(v)
 	})
 }
 
@@ -1558,6 +1658,20 @@ func (u *UserUpsertBulk) SetRole(v user.Role) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateRole() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateRole()
+	})
+}
+
+// SetEmployment sets the "employment" field.
+func (u *UserUpsertBulk) SetEmployment(v user.Employment) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetEmployment(v)
+	})
+}
+
+// UpdateEmployment sets the "employment" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateEmployment() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateEmployment()
 	})
 }
 

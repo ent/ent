@@ -4,7 +4,7 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
-{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
 
 {{ define "dialect/sql/create" }}
 {{ $builder := pascal $.Scope.Builder }}
@@ -19,9 +19,24 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		}
 		return nil, err
 	}
-	{{- if and $.ID.UserDefined (not $.ID.Type.Numeric) }}
+	{{- if and $.ID.UserDefined (or $.ID.Type.ValueScanner (not $.ID.Type.Numeric)) }}
 		if _spec.ID.Value != nil {
-			_node.ID = _spec.ID.Value.({{ $.ID.Type }})
+			{{- /* If the ID type is not a pointer, but implements the ValueScanner interface (e.g. UUID fields). */}}
+			{{- if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}
+				if id, ok := _spec.ID.Value.(*{{ $.ID.Type }}); ok {
+					_node.ID = *id
+			{{- else }}
+				if id, ok := _spec.ID.Value.({{ $.ID.Type }}); ok {
+					_node.ID = id
+			{{- end }}
+			{{- if $.ID.Type.ValueScanner }}
+				} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+					return nil, err
+			{{- else  }}
+				} else {
+					return nil, fmt.Errorf("unexpected {{ $.Name }}.ID type: %T", _spec.ID.Value)
+			{{- end }}
+				}
 		}
 	{{- else }}
 		{{- if $.ID.UserDefined }}
@@ -56,7 +71,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	{{- if $.ID.UserDefined }}
 		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
 			_node.ID = id
-			_spec.ID.Value = id
+			_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
 		}
 	{{- end }}
 	{{- range $f := $.MutationFields }}

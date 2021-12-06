@@ -420,6 +420,10 @@ func (giq *GroupInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(giq.modifiers) > 0 {
 		_spec.Modifiers = giq.modifiers
 	}
+	_spec.Node.Columns = giq.fields
+	if len(giq.fields) > 0 {
+		_spec.Unique = giq.unique != nil && *giq.unique
+	}
 	return sqlgraph.CountNodes(ctx, giq.driver, _spec)
 }
 
@@ -490,6 +494,9 @@ func (giq *GroupInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if giq.sql != nil {
 		selector = giq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if giq.unique != nil && *giq.unique {
+		selector.Distinct()
 	}
 	for _, m := range giq.modifiers {
 		m(selector)
@@ -804,9 +811,7 @@ func (gigb *GroupInfoGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range gigb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(gigb.fields...)...)

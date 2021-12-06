@@ -91,6 +91,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
+	_spec.Node.Columns = {{ $receiver }}.fields
+	if len({{ $receiver }}.fields) > 0 {
+		{{- /* In case of field selection, configure query to unique only if was explicitly set to true. */}}
+		_spec.Unique = {{ $receiver }}.unique != nil && *{{ $receiver }}.unique
+	}
 	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, _spec)
 }
 
@@ -177,6 +182,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	if {{ $receiver }}.sql != nil {
 		selector = {{ $receiver }}.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if {{ $receiver }}.unique != nil && *{{ $receiver }}.unique {
+		selector.Distinct()
 	}
 	{{- /* Allow mutating the sql.Selector by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/query/selector/*" }}

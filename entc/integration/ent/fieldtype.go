@@ -74,12 +74,16 @@ type FieldType struct {
 	OptionalFloat float64 `json:"optional_float,omitempty"`
 	// OptionalFloat32 holds the value of the "optional_float32" field.
 	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 	// Datetime holds the value of the "datetime" field.
 	Datetime time.Time `json:"datetime,omitempty"`
 	// Decimal holds the value of the "decimal" field.
 	Decimal float64 `json:"decimal,omitempty"`
 	// LinkOther holds the value of the "link_other" field.
 	LinkOther *schema.Link `json:"link_other,omitempty"`
+	// LinkOtherFunc holds the value of the "link_other_func" field.
+	LinkOtherFunc *schema.Link `json:"link_other_func,omitempty"`
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
 	// StringArray holds the value of the "string_array" field.
@@ -112,6 +116,8 @@ type FieldType struct {
 	DeletedAt *sql.NullTime `json:"deleted_at,omitempty"`
 	// RawData holds the value of the "raw_data" field.
 	RawData []byte `json:"raw_data,omitempty"`
+	// Sensitive holds the value of the "sensitive" field.
+	Sensitive []byte `json:"-"`
 	// IP holds the value of the "ip" field.
 	IP net.IP `json:"ip,omitempty"`
 	// NullInt64 holds the value of the "null_int64" field.
@@ -166,13 +172,13 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = &sql.NullScanner{S: new(schema.StringScanner)}
 		case fieldtype.FieldNillableUUID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case fieldtype.FieldRawData, fieldtype.FieldIP, fieldtype.FieldStrings:
+		case fieldtype.FieldRawData, fieldtype.FieldSensitive, fieldtype.FieldIP, fieldtype.FieldStrings:
 			values[i] = new([]byte)
 		case fieldtype.FieldPriority:
 			values[i] = new(role.Priority)
 		case fieldtype.FieldBigInt:
 			values[i] = new(schema.BigInt)
-		case fieldtype.FieldLinkOther, fieldtype.FieldLink:
+		case fieldtype.FieldLinkOther, fieldtype.FieldLinkOtherFunc, fieldtype.FieldLink:
 			values[i] = new(schema.Link)
 		case fieldtype.FieldMAC:
 			values[i] = new(schema.MAC)
@@ -192,7 +198,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullFloat64)
 		case fieldtype.FieldID, fieldtype.FieldInt, fieldtype.FieldInt8, fieldtype.FieldInt16, fieldtype.FieldInt32, fieldtype.FieldInt64, fieldtype.FieldOptionalInt, fieldtype.FieldOptionalInt8, fieldtype.FieldOptionalInt16, fieldtype.FieldOptionalInt32, fieldtype.FieldOptionalInt64, fieldtype.FieldNillableInt, fieldtype.FieldNillableInt8, fieldtype.FieldNillableInt16, fieldtype.FieldNillableInt32, fieldtype.FieldNillableInt64, fieldtype.FieldValidateOptionalInt32, fieldtype.FieldOptionalUint, fieldtype.FieldOptionalUint8, fieldtype.FieldOptionalUint16, fieldtype.FieldOptionalUint32, fieldtype.FieldOptionalUint64, fieldtype.FieldDuration, fieldtype.FieldNullInt64, fieldtype.FieldSchemaInt, fieldtype.FieldSchemaInt8, fieldtype.FieldSchemaInt64:
 			values[i] = new(sql.NullInt64)
-		case fieldtype.FieldState, fieldtype.FieldPassword, fieldtype.FieldDir, fieldtype.FieldNdir, fieldtype.FieldStr, fieldtype.FieldNullStr, fieldtype.FieldRole:
+		case fieldtype.FieldState, fieldtype.FieldText, fieldtype.FieldPassword, fieldtype.FieldDir, fieldtype.FieldNdir, fieldtype.FieldStr, fieldtype.FieldNullStr, fieldtype.FieldRole:
 			values[i] = new(sql.NullString)
 		case fieldtype.FieldDatetime, fieldtype.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -370,6 +376,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value.Valid {
 				ft.OptionalFloat32 = float32(value.Float64)
 			}
+		case fieldtype.FieldText:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field text", values[i])
+			} else if value.Valid {
+				ft.Text = value.String
+			}
 		case fieldtype.FieldDatetime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field datetime", values[i])
@@ -387,6 +399,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				return fmt.Errorf("unexpected type %T for field link_other", values[i])
 			} else if value != nil {
 				ft.LinkOther = value
+			}
+		case fieldtype.FieldLinkOtherFunc:
+			if value, ok := values[i].(*schema.Link); !ok {
+				return fmt.Errorf("unexpected type %T for field link_other_func", values[i])
+			} else if value != nil {
+				ft.LinkOtherFunc = value
 			}
 		case fieldtype.FieldMAC:
 			if value, ok := values[i].(*schema.MAC); !ok {
@@ -486,6 +504,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 				return fmt.Errorf("unexpected type %T for field raw_data", values[i])
 			} else if value != nil {
 				ft.RawData = *value
+			}
+		case fieldtype.FieldSensitive:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field sensitive", values[i])
+			} else if value != nil {
+				ft.Sensitive = *value
 			}
 		case fieldtype.FieldIP:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -697,12 +721,16 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
 	builder.WriteString(", optional_float32=")
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
+	builder.WriteString(", text=")
+	builder.WriteString(ft.Text)
 	builder.WriteString(", datetime=")
 	builder.WriteString(ft.Datetime.Format(time.ANSIC))
 	builder.WriteString(", decimal=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
 	builder.WriteString(", link_other=")
 	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
+	builder.WriteString(", link_other_func=")
+	builder.WriteString(fmt.Sprintf("%v", ft.LinkOtherFunc))
 	builder.WriteString(", mac=")
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", string_array=")
@@ -746,6 +774,7 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
 	builder.WriteString(", raw_data=")
 	builder.WriteString(fmt.Sprintf("%v", ft.RawData))
+	builder.WriteString(", sensitive=<sensitive>")
 	builder.WriteString(", ip=")
 	builder.WriteString(fmt.Sprintf("%v", ft.IP))
 	builder.WriteString(", null_int64=")

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -48,7 +49,7 @@ func (uu *UserUpdate) SetNillableAge(u *uint) *UserUpdate {
 }
 
 // AddAge adds u to the "age" field.
-func (uu *UserUpdate) AddAge(u uint) *UserUpdate {
+func (uu *UserUpdate) AddAge(u int) *UserUpdate {
 	uu.mutation.AddAge(u)
 	return uu
 }
@@ -371,7 +372,7 @@ func (uuo *UserUpdateOne) SetNillableAge(u *uint) *UserUpdateOne {
 }
 
 // AddAge adds u to the "age" field.
-func (uuo *UserUpdateOne) AddAge(u uint) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddAge(u int) *UserUpdateOne {
 	uuo.mutation.AddAge(u)
 	return uuo
 }
@@ -533,7 +534,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := uuo.fields; len(fields) > 0 {

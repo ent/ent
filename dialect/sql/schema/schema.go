@@ -558,6 +558,7 @@ func addChecks(t *sql.TableBuilder, ant *entsql.Annotation) {
 		}
 		sort.Strings(names)
 		for _, name := range names {
+			name := name
 			t.Checks(func(b *sql.Builder) {
 				b.WriteString("CONSTRAINT ").Ident(name).WriteString(" CHECK " + checkExpr(checks[name]))
 			})

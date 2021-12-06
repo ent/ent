@@ -39,6 +39,8 @@ type User struct {
 	Password string `graphql:"-" json:"-"`
 	// Role holds the value of the "role" field.
 	Role user.Role `json:"role,omitempty"`
+	// Employment holds the value of the "employment" field.
+	Employment user.Employment `json:"employment,omitempty"`
 	// SSOCert holds the value of the "SSOCert" field.
 	SSOCert string `json:"SSOCert,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -204,7 +206,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case user.FieldID, user.FieldOptionalInt, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName, user.FieldLast, user.FieldNickname, user.FieldAddress, user.FieldPhone, user.FieldPassword, user.FieldRole, user.FieldSSOCert:
+		case user.FieldName, user.FieldLast, user.FieldNickname, user.FieldAddress, user.FieldPhone, user.FieldPassword, user.FieldRole, user.FieldEmployment, user.FieldSSOCert:
 			values[i] = new(sql.NullString)
 		case user.ForeignKeys[0]: // group_blocked
 			values[i] = new(sql.NullInt64)
@@ -286,6 +288,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field role", values[i])
 			} else if value.Valid {
 				u.Role = user.Role(value.String)
+			}
+		case user.FieldEmployment:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field employment", values[i])
+			} else if value.Valid {
+				u.Employment = user.Employment(value.String)
 			}
 		case user.FieldSSOCert:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -414,6 +422,8 @@ func (u *User) String() string {
 	builder.WriteString(", password=<sensitive>")
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	builder.WriteString(", employment=")
+	builder.WriteString(fmt.Sprintf("%v", u.Employment))
 	builder.WriteString(", SSOCert=")
 	builder.WriteString(u.SSOCert)
 	builder.WriteByte(')')

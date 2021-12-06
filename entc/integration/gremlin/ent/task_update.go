@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -122,7 +123,7 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 func (tu *TaskUpdate) check() error {
 	if v, ok := tu.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -264,7 +265,7 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 func (tuo *TaskUpdateOne) check() error {
 	if v, ok := tuo.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -274,7 +275,7 @@ func (tuo *TaskUpdateOne) gremlinSave(ctx context.Context) (*Task, error) {
 	res := &gremlin.Response{}
 	id, ok := tuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Task.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Task.id" for update`)}
 	}
 	query, bindings := tuo.gremlin(id).Query()
 	if err := tuo.driver.Exec(ctx, query, bindings, res); err != nil {

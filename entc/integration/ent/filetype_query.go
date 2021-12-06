@@ -420,6 +420,10 @@ func (ftq *FileTypeQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(ftq.modifiers) > 0 {
 		_spec.Modifiers = ftq.modifiers
 	}
+	_spec.Node.Columns = ftq.fields
+	if len(ftq.fields) > 0 {
+		_spec.Unique = ftq.unique != nil && *ftq.unique
+	}
 	return sqlgraph.CountNodes(ctx, ftq.driver, _spec)
 }
 
@@ -490,6 +494,9 @@ func (ftq *FileTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if ftq.sql != nil {
 		selector = ftq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if ftq.unique != nil && *ftq.unique {
+		selector.Distinct()
 	}
 	for _, m := range ftq.modifiers {
 		m(selector)
@@ -804,9 +811,7 @@ func (ftgb *FileTypeGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range ftgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(ftgb.fields...)...)

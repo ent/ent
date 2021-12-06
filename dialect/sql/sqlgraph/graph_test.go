@@ -592,13 +592,45 @@ func TestHasNeighbors(t *testing.T) {
 			selector:  sql.Select("*").From(sql.Table("users").Schema("s1")),
 			wantQuery: "SELECT * FROM `s1`.`users` WHERE `s1`.`users`.`id` IN (SELECT `s2`.`group_users`.`user_id` FROM `s2`.`group_users`)",
 		},
+		{
+			name: "O2M/2type2/selector",
+			step: NewStep(
+				From("users", "id"),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
+			selector:  sql.Select("*").From(sql.Select("*").From(sql.Table("users")).As("users")).As("users"),
+			wantQuery: "SELECT * FROM (SELECT * FROM `users`) AS `users` WHERE `users`.`id` IN (SELECT `pets`.`owner_id` FROM `pets` WHERE `pets`.`owner_id` IS NOT NULL)",
+		},
+		{
+			name: "M2O/2type2/selector",
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			selector:  sql.Select("*").From(sql.Select("*").From(sql.Table("pets")).As("pets")).As("pets"),
+			wantQuery: "SELECT * FROM (SELECT * FROM `pets`) AS `pets` WHERE `pets`.`owner_id` IS NOT NULL",
+		},
+		{
+			name: "M2M/2types/selector",
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+			selector:  sql.Select("*").From(sql.Select("*").From(sql.Table("users")).As("users")).As("users"),
+			wantQuery: "SELECT * FROM (SELECT * FROM `users`) AS `users` WHERE `users`.`id` IN (SELECT `user_groups`.`user_id` FROM `user_groups`)",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			HasNeighbors(tt.selector, tt.step)
-			query, args := tt.selector.Query()
-			require.Equal(t, tt.wantQuery, query)
-			require.Empty(t, args)
+			for _, s := range []*sql.Selector{tt.selector, tt.selector.Clone()} {
+				HasNeighbors(s, tt.step)
+				query, args := s.Query()
+				require.Equal(t, tt.wantQuery, query)
+				require.Empty(t, args)
+			}
 		})
 	}
 }
@@ -795,14 +827,62 @@ WHERE "s1"."users"."id" IN
   JOIN "s3"."groups" AS "t1" ON "s2"."user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
 			wantArgs: []interface{}{"GitHub"},
 		},
+		{
+			name: "O2M/selector",
+			step: NewStep(
+				From("users", "id"),
+				To("pets", "id"),
+				Edge(O2M, false, "pets", "owner_id"),
+			),
+			selector: sql.Dialect("postgres").Select("*").
+				From(sql.Select("*").From(sql.Table("users")).As("users")).
+				Where(sql.EQ("last_name", "mashraki")).As("users"),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("name", "pedro"))
+			},
+			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "last_name" = $1 AND "users"."id" IN (SELECT "pets"."owner_id" FROM "pets" WHERE "name" = $2)`,
+			wantArgs:  []interface{}{"mashraki", "pedro"},
+		},
+		{
+			name: "M2O/selector",
+			step: NewStep(
+				From("pets", "id"),
+				To("users", "id"),
+				Edge(M2O, true, "pets", "owner_id"),
+			),
+			selector: sql.Dialect("postgres").Select("*").
+				From(sql.Select("*").From(sql.Table("pets")).As("pets")).
+				Where(sql.EQ("name", "pedro")).As("pets"),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("last_name", "mashraki"))
+			},
+			wantQuery: `SELECT * FROM (SELECT * FROM "pets") AS "pets" WHERE "name" = $1 AND "pets"."owner_id" IN (SELECT "users"."id" FROM "users" WHERE "last_name" = $2)`,
+			wantArgs:  []interface{}{"pedro", "mashraki"},
+		},
+		{
+			name: "M2M/selector",
+			step: NewStep(
+				From("users", "id"),
+				To("groups", "id"),
+				Edge(M2M, false, "user_groups", "user_id", "group_id"),
+			),
+			selector: sql.Dialect("postgres").Select("*").From(sql.Select("*").From(sql.Table("users")).As("users")).As("users"),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("name", "GitHub"))
+			},
+			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "users"."id" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
+			wantArgs:  []interface{}{"GitHub"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			HasNeighborsWith(tt.selector, tt.step, tt.predicate)
-			query, args := tt.selector.Query()
-			tt.wantQuery = strings.Join(strings.Fields(tt.wantQuery), " ")
-			require.Equal(t, tt.wantQuery, query)
-			require.Equal(t, tt.wantArgs, args)
+			for _, s := range []*sql.Selector{tt.selector, tt.selector.Clone()} {
+				HasNeighborsWith(s, tt.step, tt.predicate)
+				query, args := s.Query()
+				tt.wantQuery = strings.Join(strings.Fields(tt.wantQuery), " ")
+				require.Equal(t, tt.wantQuery, query)
+				require.Equal(t, tt.wantArgs, args)
+			}
 		})
 	}
 }
@@ -1393,8 +1473,8 @@ func TestUpdateNode(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`age`, ?) + ? WHERE `id` = ? AND `deleted` = ?")).
-					WithArgs(0, 1, 1, false).
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND `deleted` = ?")).
+					WithArgs(1, 1, false).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ? AND `deleted` = ?")).
 					WithArgs(1, false).
@@ -1637,12 +1717,10 @@ func TestUpdateNodes(t *testing.T) {
 				},
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
 				// Apply field changes.
 				mock.ExpectExec(escape("UPDATE `users` SET `age` = ?, `name` = ?")).
 					WithArgs(30, "Ariel").
 					WillReturnResult(sqlmock.NewResult(0, 2))
-				mock.ExpectCommit()
 			},
 			wantAffected: 2,
 		},
@@ -1664,12 +1742,10 @@ func TestUpdateNodes(t *testing.T) {
 				},
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
 				// Clear fields.
 				mock.ExpectExec(escape("UPDATE `users` SET `age` = NULL, `name` = NULL WHERE `name` = ?")).
 					WithArgs("a8m").
 					WillReturnResult(sqlmock.NewResult(0, 1))
-				mock.ExpectCommit()
 			},
 			wantAffected: 1,
 		},
@@ -1692,14 +1768,54 @@ func TestUpdateNodes(t *testing.T) {
 				},
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
-				mock.ExpectBegin()
 				// Clear "car" and "workplace" foreign_keys and add "card" and a "parent".
 				mock.ExpectExec(escape("UPDATE `users` SET `workplace_id` = NULL, `car_id` = NULL, `parent_id` = ?, `card_id` = ?")).
 					WithArgs(4, 3).
 					WillReturnResult(sqlmock.NewResult(0, 3))
-				mock.ExpectCommit()
 			},
 			wantAffected: 3,
+		},
+		{
+			name: "o2m",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table: "users",
+					ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				},
+				Fields: FieldMut{
+					Add: []*FieldSpec{
+						{Column: "version", Type: field.TypeInt, Value: 1},
+					},
+				},
+				Edges: EdgeMut{
+					Clear: []*EdgeSpec{
+						{Rel: O2M, Table: "cards", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{20, 30}, IDSpec: &FieldSpec{Column: "id"}}},
+					},
+					Add: []*EdgeSpec{
+						{Rel: O2M, Table: "pets", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{40}, IDSpec: &FieldSpec{Column: "id"}}},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				// Get all node ids first.
+				mock.ExpectQuery(escape("SELECT `id` FROM `users`")).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).
+						AddRow(10))
+				mock.ExpectExec(escape("UPDATE `users` SET `version` = COALESCE(`users`.`version`, 0) + ? WHERE `id` = ?")).
+					WithArgs(1, 10).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				// Clear "owner_id" column in the "cards" table.
+				mock.ExpectExec(escape("UPDATE `cards` SET `owner_id` = NULL WHERE `id` IN (?, ?) AND `owner_id` = ?")).
+					WithArgs(20, 30, 10).
+					WillReturnResult(sqlmock.NewResult(0, 2))
+				// Set "owner_id" column in the "pets" table.
+				mock.ExpectExec(escape("UPDATE `pets` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
+					WithArgs(10, 40).
+					WillReturnResult(sqlmock.NewResult(0, 2))
+				mock.ExpectCommit()
+			},
+			wantAffected: 1,
 		},
 		{
 			name: "m2m_one",
@@ -1857,6 +1973,10 @@ func TestQueryNodes(t *testing.T) {
 		WithArgs(40).
 		WillReturnRows(sqlmock.NewRows([]string{"COUNT"}).
 			AddRow(3))
+	mock.ExpectQuery(escape("SELECT COUNT(DISTINCT `users`.`name`) FROM `users` WHERE `age` < ? ORDER BY `id` LIMIT 3 OFFSET 4 FOR UPDATE NOWAIT")).
+		WithArgs(40).
+		WillReturnRows(sqlmock.NewRows([]string{"COUNT"}).
+			AddRow(3))
 
 	var (
 		users []*user
@@ -1897,7 +2017,14 @@ func TestQueryNodes(t *testing.T) {
 	require.Equal(t, &user{id: 3, age: 30, name: "a8m", edges: struct{ fk1, fk2 int }{1, 1}}, users[2])
 
 	// Count nodes.
+	spec.Node.Columns = nil
 	n, err := CountNodes(context.Background(), sql.OpenDB("", db), spec)
+	require.NoError(t, err)
+	require.Equal(t, 3, n)
+
+	// Count nodes.
+	spec.Node.Columns = []string{"name"}
+	n, err = CountNodes(context.Background(), sql.OpenDB("", db), spec)
 	require.NoError(t, err)
 	require.Equal(t, 3, n)
 }

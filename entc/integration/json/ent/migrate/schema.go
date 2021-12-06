@@ -18,7 +18,7 @@ var (
 		{Name: "t", Type: field.TypeJSON, Nullable: true},
 		{Name: "url", Type: field.TypeJSON, Nullable: true},
 		{Name: "raw", Type: field.TypeJSON, Nullable: true},
-		{Name: "dirs", Type: field.TypeJSON, Nullable: true},
+		{Name: "dirs", Type: field.TypeJSON},
 		{Name: "ints", Type: field.TypeJSON, Nullable: true},
 		{Name: "floats", Type: field.TypeJSON, Nullable: true},
 		{Name: "strings", Type: field.TypeJSON, Nullable: true},

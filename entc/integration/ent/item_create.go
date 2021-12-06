@@ -135,12 +135,12 @@ func (ic *ItemCreate) defaults() {
 func (ic *ItemCreate) check() error {
 	if v, ok := ic.mutation.Text(); ok {
 		if err := item.TextValidator(v); err != nil {
-			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "text": %w`, err)}
+			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
 	}
 	if v, ok := ic.mutation.ID(); ok {
 		if err := item.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
 		}
 	}
 	return nil
@@ -155,7 +155,11 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(string)
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Item.ID type: %T", _spec.ID.Value)
+		}
 	}
 	return _node, nil
 }
@@ -256,7 +260,7 @@ func (u *ItemUpsert) ClearText() *ItemUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create except the ID field.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Item.Create().
@@ -490,7 +494,7 @@ type ItemUpsertBulk struct {
 	create *ItemCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Item.Create().

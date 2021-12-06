@@ -491,6 +491,10 @@ func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(nq.modifiers) > 0 {
 		_spec.Modifiers = nq.modifiers
 	}
+	_spec.Node.Columns = nq.fields
+	if len(nq.fields) > 0 {
+		_spec.Unique = nq.unique != nil && *nq.unique
+	}
 	return sqlgraph.CountNodes(ctx, nq.driver, _spec)
 }
 
@@ -561,6 +565,9 @@ func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if nq.sql != nil {
 		selector = nq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if nq.unique != nil && *nq.unique {
+		selector.Distinct()
 	}
 	for _, m := range nq.modifiers {
 		m(selector)
@@ -875,9 +882,7 @@ func (ngb *NodeGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range ngb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(ngb.fields...)...)

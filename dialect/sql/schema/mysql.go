@@ -250,19 +250,24 @@ func (d *MySQL) cType(c *Column) (t string) {
 		if size == 0 {
 			size = d.defaultSize(c)
 		}
-		if size <= math.MaxUint16 {
+		switch {
+		case c.typ == "tinytext", c.typ == "text":
+			t = c.typ
+		case size <= math.MaxUint16:
 			t = fmt.Sprintf("varchar(%d)", size)
-		} else {
+		case size == 1<<24-1:
+			t = "mediumtext"
+		default:
 			t = "longtext"
 		}
 	case field.TypeFloat32, field.TypeFloat64:
 		t = c.scanTypeOr("double")
 	case field.TypeTime:
 		t = c.scanTypeOr("timestamp")
-		// In MySQL < v8.0.2, the TIMESTAMP column has both `DEFAULT CURRENT_TIMESTAMP` and
-		// `ON UPDATE CURRENT_TIMESTAMP` if neither is specified explicitly. this behavior is
+		// In MariaDB or in MySQL < v8.0.2, the TIMESTAMP column has both `DEFAULT CURRENT_TIMESTAMP`
+		// and `ON UPDATE CURRENT_TIMESTAMP` if neither is specified explicitly. this behavior is
 		// suppressed if the column is defined with a `DEFAULT` clause or with the `NULL` attribute.
-		if compareVersions(d.version, "8.0.2") == -1 && c.Default == nil {
+		if _, maria := d.mariadb(); maria || compareVersions(d.version, "8.0.2") == -1 && c.Default == nil {
 			c.Nullable = c.Attr == ""
 		}
 	case field.TypeEnum:
@@ -461,6 +466,9 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 	case "text":
 		c.Size = math.MaxUint16
 		c.Type = field.TypeString
+	case "mediumtext":
+		c.Size = 1<<24 - 1
+		c.Type = field.TypeString
 	case "longtext":
 		c.Size = math.MaxInt32
 		c.Type = field.TypeString
@@ -468,9 +476,15 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeJSON
 	case "enum":
 		c.Type = field.TypeEnum
-		c.Enums = make([]string, len(parts)-1)
-		for i, e := range parts[1:] {
-			c.Enums[i] = strings.Trim(e, "'")
+		// Parse the enum values according to the MySQL format.
+		// github.com/mysql/mysql-server/blob/8.0/sql/field.cc#Field_enum::sql_type
+		values := strings.TrimSuffix(strings.TrimPrefix(c.typ, "enum("), ")")
+		if values == "" {
+			return fmt.Errorf("mysql: unexpected enum type: %q", c.typ)
+		}
+		parts := strings.Split(values, "','")
+		for i := range parts {
+			c.Enums = append(c.Enums, strings.Trim(parts[i], "'"))
 		}
 	case "char":
 		c.Type = field.TypeOther

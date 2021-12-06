@@ -142,10 +142,10 @@ func (gic *GroupInfoCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gic *GroupInfoCreate) check() error {
 	if _, ok := gic.mutation.Desc(); !ok {
-		return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "desc"`)}
+		return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
 	}
 	if _, ok := gic.mutation.MaxUsers(); !ok {
-		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "max_users"`)}
+		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
 	}
 	return nil
 }

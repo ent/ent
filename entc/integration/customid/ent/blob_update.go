@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -34,6 +35,27 @@ func (bu *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
 // SetUUID sets the "uuid" field.
 func (bu *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
 	bu.mutation.SetUUID(u)
+	return bu
+}
+
+// SetCount sets the "count" field.
+func (bu *BlobUpdate) SetCount(i int) *BlobUpdate {
+	bu.mutation.ResetCount()
+	bu.mutation.SetCount(i)
+	return bu
+}
+
+// SetNillableCount sets the "count" field if the given value is not nil.
+func (bu *BlobUpdate) SetNillableCount(i *int) *BlobUpdate {
+	if i != nil {
+		bu.SetCount(*i)
+	}
+	return bu
+}
+
+// AddCount adds i to the "count" field.
+func (bu *BlobUpdate) AddCount(i int) *BlobUpdate {
+	bu.mutation.AddCount(i)
 	return bu
 }
 
@@ -182,6 +204,20 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: blob.FieldUUID,
 		})
 	}
+	if value, ok := bu.mutation.Count(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: blob.FieldCount,
+		})
+	}
+	if value, ok := bu.mutation.AddedCount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: blob.FieldCount,
+		})
+	}
 	if bu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -293,6 +329,27 @@ type BlobUpdateOne struct {
 // SetUUID sets the "uuid" field.
 func (buo *BlobUpdateOne) SetUUID(u uuid.UUID) *BlobUpdateOne {
 	buo.mutation.SetUUID(u)
+	return buo
+}
+
+// SetCount sets the "count" field.
+func (buo *BlobUpdateOne) SetCount(i int) *BlobUpdateOne {
+	buo.mutation.ResetCount()
+	buo.mutation.SetCount(i)
+	return buo
+}
+
+// SetNillableCount sets the "count" field if the given value is not nil.
+func (buo *BlobUpdateOne) SetNillableCount(i *int) *BlobUpdateOne {
+	if i != nil {
+		buo.SetCount(*i)
+	}
+	return buo
+}
+
+// AddCount adds i to the "count" field.
+func (buo *BlobUpdateOne) AddCount(i int) *BlobUpdateOne {
+	buo.mutation.AddCount(i)
 	return buo
 }
 
@@ -436,7 +493,7 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 	}
 	id, ok := buo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Blob.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Blob.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := buo.fields; len(fields) > 0 {
@@ -463,6 +520,20 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 			Type:   field.TypeUUID,
 			Value:  value,
 			Column: blob.FieldUUID,
+		})
+	}
+	if value, ok := buo.mutation.Count(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: blob.FieldCount,
+		})
+	}
+	if value, ok := buo.mutation.AddedCount(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: blob.FieldCount,
 		})
 	}
 	if buo.mutation.ParentCleared() {

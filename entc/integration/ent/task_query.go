@@ -348,6 +348,10 @@ func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(tq.modifiers) > 0 {
 		_spec.Modifiers = tq.modifiers
 	}
+	_spec.Node.Columns = tq.fields
+	if len(tq.fields) > 0 {
+		_spec.Unique = tq.unique != nil && *tq.unique
+	}
 	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
 }
 
@@ -418,6 +422,9 @@ func (tq *TaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if tq.sql != nil {
 		selector = tq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if tq.unique != nil && *tq.unique {
+		selector.Distinct()
 	}
 	for _, m := range tq.modifiers {
 		m(selector)
@@ -732,9 +739,7 @@ func (tgb *TaskGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range tgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(tgb.fields...)...)

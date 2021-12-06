@@ -127,7 +127,7 @@ func (ic *InfoCreate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (ic *InfoCreate) check() error {
 	if _, ok := ic.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "content"`)}
+		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Info.content"`)}
 	}
 	return nil
 }

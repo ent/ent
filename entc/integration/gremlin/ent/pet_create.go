@@ -54,6 +54,20 @@ func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
 	return pc
 }
 
+// SetNickname sets the "nickname" field.
+func (pc *PetCreate) SetNickname(s string) *PetCreate {
+	pc.mutation.SetNickname(s)
+	return pc
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (pc *PetCreate) SetNillableNickname(s *string) *PetCreate {
+	if s != nil {
+		pc.SetNickname(*s)
+	}
+	return pc
+}
+
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (pc *PetCreate) SetTeamID(id string) *PetCreate {
 	pc.mutation.SetTeamID(id)
@@ -172,10 +186,10 @@ func (pc *PetCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pc *PetCreate) check() error {
 	if _, ok := pc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "age"`)}
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
 	}
 	if _, ok := pc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
 	return nil
 }
@@ -211,6 +225,9 @@ func (pc *PetCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := pc.mutation.UUID(); ok {
 		v.Property(dsl.Single, pet.FieldUUID, value)
+	}
+	if value, ok := pc.mutation.Nickname(); ok {
+		v.Property(dsl.Single, pet.FieldNickname, value)
 	}
 	for _, id := range pc.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()

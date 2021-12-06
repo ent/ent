@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -70,6 +71,26 @@ func (pu *PetUpdate) SetUUID(u uuid.UUID) *PetUpdate {
 // ClearUUID clears the value of the "uuid" field.
 func (pu *PetUpdate) ClearUUID() *PetUpdate {
 	pu.mutation.ClearUUID()
+	return pu
+}
+
+// SetNickname sets the "nickname" field.
+func (pu *PetUpdate) SetNickname(s string) *PetUpdate {
+	pu.mutation.SetNickname(s)
+	return pu
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableNickname(s *string) *PetUpdate {
+	if s != nil {
+		pu.SetNickname(*s)
+	}
+	return pu
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (pu *PetUpdate) ClearNickname() *PetUpdate {
+	pu.mutation.ClearNickname()
 	return pu
 }
 
@@ -222,9 +243,15 @@ func (pu *PetUpdate) gremlin() *dsl.Traversal {
 	if value, ok := pu.mutation.UUID(); ok {
 		v.Property(dsl.Single, pet.FieldUUID, value)
 	}
+	if value, ok := pu.mutation.Nickname(); ok {
+		v.Property(dsl.Single, pet.FieldNickname, value)
+	}
 	var properties []interface{}
 	if pu.mutation.UUIDCleared() {
 		properties = append(properties, pet.FieldUUID)
+	}
+	if pu.mutation.NicknameCleared() {
+		properties = append(properties, pet.FieldNickname)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -306,6 +333,26 @@ func (puo *PetUpdateOne) SetUUID(u uuid.UUID) *PetUpdateOne {
 // ClearUUID clears the value of the "uuid" field.
 func (puo *PetUpdateOne) ClearUUID() *PetUpdateOne {
 	puo.mutation.ClearUUID()
+	return puo
+}
+
+// SetNickname sets the "nickname" field.
+func (puo *PetUpdateOne) SetNickname(s string) *PetUpdateOne {
+	puo.mutation.SetNickname(s)
+	return puo
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableNickname(s *string) *PetUpdateOne {
+	if s != nil {
+		puo.SetNickname(*s)
+	}
+	return puo
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (puo *PetUpdateOne) ClearNickname() *PetUpdateOne {
+	puo.mutation.ClearNickname()
 	return puo
 }
 
@@ -429,7 +476,7 @@ func (puo *PetUpdateOne) gremlinSave(ctx context.Context) (*Pet, error) {
 	res := &gremlin.Response{}
 	id, ok := puo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Pet.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Pet.id" for update`)}
 	}
 	query, bindings := puo.gremlin(id).Query()
 	if err := puo.driver.Exec(ctx, query, bindings, res); err != nil {
@@ -470,9 +517,15 @@ func (puo *PetUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := puo.mutation.UUID(); ok {
 		v.Property(dsl.Single, pet.FieldUUID, value)
 	}
+	if value, ok := puo.mutation.Nickname(); ok {
+		v.Property(dsl.Single, pet.FieldNickname, value)
+	}
 	var properties []interface{}
 	if puo.mutation.UUIDCleared() {
 		properties = append(properties, pet.FieldUUID)
+	}
+	if puo.mutation.NicknameCleared() {
+		properties = append(properties, pet.FieldNickname)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

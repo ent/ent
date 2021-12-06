@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -205,7 +206,7 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 	}
 	id, ok := guo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`entv2: missing "Group.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := guo.fields; len(fields) > 0 {

@@ -8,11 +8,13 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/device"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
@@ -20,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 	"github.com/google/uuid"
 
@@ -37,11 +40,13 @@ const (
 	// Node types.
 	TypeBlob    = "Blob"
 	TypeCar     = "Car"
+	TypeDevice  = "Device"
 	TypeDoc     = "Doc"
 	TypeGroup   = "Group"
 	TypeMixinID = "MixinID"
 	TypeNote    = "Note"
 	TypePet     = "Pet"
+	TypeSession = "Session"
 	TypeUser    = "User"
 )
 
@@ -52,6 +57,8 @@ type BlobMutation struct {
 	typ           string
 	id            *uuid.UUID
 	uuid          *uuid.UUID
+	count         *int
+	addcount      *int
 	clearedFields map[string]struct{}
 	parent        *uuid.UUID
 	clearedparent bool
@@ -93,7 +100,7 @@ func withBlobID(id uuid.UUID) blobOption {
 		m.oldValue = func(ctx context.Context) (*Blob, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().Blob.Get(ctx, id)
 				}
@@ -126,7 +133,7 @@ func (m BlobMutation) Client() *Client {
 // it returns an error otherwise.
 func (m BlobMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -148,6 +155,25 @@ func (m *BlobMutation) ID() (id uuid.UUID, exists bool) {
 	return *m.id, true
 }
 
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BlobMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Blob.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
 // SetUUID sets the "uuid" field.
 func (m *BlobMutation) SetUUID(u uuid.UUID) {
 	m.uuid = &u
@@ -167,10 +193,10 @@ func (m *BlobMutation) UUID() (r uuid.UUID, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *BlobMutation) OldUUID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUUID is only allowed on UpdateOne operations")
+		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUUID requires an ID field in the mutation")
+		return v, errors.New("OldUUID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -182,6 +208,62 @@ func (m *BlobMutation) OldUUID(ctx context.Context) (v uuid.UUID, err error) {
 // ResetUUID resets all changes to the "uuid" field.
 func (m *BlobMutation) ResetUUID() {
 	m.uuid = nil
+}
+
+// SetCount sets the "count" field.
+func (m *BlobMutation) SetCount(i int) {
+	m.count = &i
+	m.addcount = nil
+}
+
+// Count returns the value of the "count" field in the mutation.
+func (m *BlobMutation) Count() (r int, exists bool) {
+	v := m.count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCount returns the old "count" field's value of the Blob entity.
+// If the Blob object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BlobMutation) OldCount(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCount: %w", err)
+	}
+	return oldValue.Count, nil
+}
+
+// AddCount adds i to the "count" field.
+func (m *BlobMutation) AddCount(i int) {
+	if m.addcount != nil {
+		*m.addcount += i
+	} else {
+		m.addcount = &i
+	}
+}
+
+// AddedCount returns the value that was added to the "count" field in this mutation.
+func (m *BlobMutation) AddedCount() (r int, exists bool) {
+	v := m.addcount
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCount resets all changes to the "count" field.
+func (m *BlobMutation) ResetCount() {
+	m.count = nil
+	m.addcount = nil
 }
 
 // SetParentID sets the "parent" edge to the Blob entity by id.
@@ -296,9 +378,12 @@ func (m *BlobMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BlobMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.uuid != nil {
 		fields = append(fields, blob.FieldUUID)
+	}
+	if m.count != nil {
+		fields = append(fields, blob.FieldCount)
 	}
 	return fields
 }
@@ -310,6 +395,8 @@ func (m *BlobMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case blob.FieldUUID:
 		return m.UUID()
+	case blob.FieldCount:
+		return m.Count()
 	}
 	return nil, false
 }
@@ -321,6 +408,8 @@ func (m *BlobMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	switch name {
 	case blob.FieldUUID:
 		return m.OldUUID(ctx)
+	case blob.FieldCount:
+		return m.OldCount(ctx)
 	}
 	return nil, fmt.Errorf("unknown Blob field %s", name)
 }
@@ -337,6 +426,13 @@ func (m *BlobMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetUUID(v)
 		return nil
+	case blob.FieldCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Blob field %s", name)
 }
@@ -344,13 +440,21 @@ func (m *BlobMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *BlobMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addcount != nil {
+		fields = append(fields, blob.FieldCount)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *BlobMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case blob.FieldCount:
+		return m.AddedCount()
+	}
 	return nil, false
 }
 
@@ -359,6 +463,13 @@ func (m *BlobMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *BlobMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case blob.FieldCount:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCount(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Blob numeric field %s", name)
 }
@@ -388,6 +499,9 @@ func (m *BlobMutation) ResetField(name string) error {
 	switch name {
 	case blob.FieldUUID:
 		m.ResetUUID()
+		return nil
+	case blob.FieldCount:
+		m.ResetCount()
 		return nil
 	}
 	return fmt.Errorf("unknown Blob field %s", name)
@@ -544,7 +658,7 @@ func withCarID(id int) carOption {
 		m.oldValue = func(ctx context.Context) (*Car, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().Car.Get(ctx, id)
 				}
@@ -577,7 +691,7 @@ func (m CarMutation) Client() *Client {
 // it returns an error otherwise.
 func (m CarMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -597,6 +711,25 @@ func (m *CarMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CarMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Car.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
 }
 
 // SetBeforeID sets the "before_id" field.
@@ -619,10 +752,10 @@ func (m *CarMutation) BeforeID() (r float64, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *CarMutation) OldBeforeID(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldBeforeID is only allowed on UpdateOne operations")
+		return v, errors.New("OldBeforeID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldBeforeID requires an ID field in the mutation")
+		return v, errors.New("OldBeforeID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -689,10 +822,10 @@ func (m *CarMutation) AfterID() (r float64, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *CarMutation) OldAfterID(ctx context.Context) (v float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldAfterID is only allowed on UpdateOne operations")
+		return v, errors.New("OldAfterID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldAfterID requires an ID field in the mutation")
+		return v, errors.New("OldAfterID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -758,10 +891,10 @@ func (m *CarMutation) Model() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *CarMutation) OldModel(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldModel is only allowed on UpdateOne operations")
+		return v, errors.New("OldModel is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldModel requires an ID field in the mutation")
+		return v, errors.New("OldModel requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -1082,6 +1215,413 @@ func (m *CarMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Car edge %s", name)
 }
 
+// DeviceMutation represents an operation that mutates the Device nodes in the graph.
+type DeviceMutation struct {
+	config
+	op                    Op
+	typ                   string
+	id                    *schema.ID
+	clearedFields         map[string]struct{}
+	active_session        *schema.ID
+	clearedactive_session bool
+	sessions              map[schema.ID]struct{}
+	removedsessions       map[schema.ID]struct{}
+	clearedsessions       bool
+	done                  bool
+	oldValue              func(context.Context) (*Device, error)
+	predicates            []predicate.Device
+}
+
+var _ ent.Mutation = (*DeviceMutation)(nil)
+
+// deviceOption allows management of the mutation configuration using functional options.
+type deviceOption func(*DeviceMutation)
+
+// newDeviceMutation creates new mutation for the Device entity.
+func newDeviceMutation(c config, op Op, opts ...deviceOption) *DeviceMutation {
+	m := &DeviceMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeDevice,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withDeviceID sets the ID field of the mutation.
+func withDeviceID(id schema.ID) deviceOption {
+	return func(m *DeviceMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Device
+		)
+		m.oldValue = func(ctx context.Context) (*Device, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Device.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withDevice sets the old Device of the mutation.
+func withDevice(node *Device) deviceOption {
+	return func(m *DeviceMutation) {
+		m.oldValue = func(context.Context) (*Device, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m DeviceMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m DeviceMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Device entities.
+func (m *DeviceMutation) SetID(id schema.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *DeviceMutation) ID() (id schema.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DeviceMutation) IDs(ctx context.Context) ([]schema.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []schema.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Device.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetActiveSessionID sets the "active_session" edge to the Session entity by id.
+func (m *DeviceMutation) SetActiveSessionID(id schema.ID) {
+	m.active_session = &id
+}
+
+// ClearActiveSession clears the "active_session" edge to the Session entity.
+func (m *DeviceMutation) ClearActiveSession() {
+	m.clearedactive_session = true
+}
+
+// ActiveSessionCleared reports if the "active_session" edge to the Session entity was cleared.
+func (m *DeviceMutation) ActiveSessionCleared() bool {
+	return m.clearedactive_session
+}
+
+// ActiveSessionID returns the "active_session" edge ID in the mutation.
+func (m *DeviceMutation) ActiveSessionID() (id schema.ID, exists bool) {
+	if m.active_session != nil {
+		return *m.active_session, true
+	}
+	return
+}
+
+// ActiveSessionIDs returns the "active_session" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ActiveSessionID instead. It exists only for internal usage by the builders.
+func (m *DeviceMutation) ActiveSessionIDs() (ids []schema.ID) {
+	if id := m.active_session; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetActiveSession resets all changes to the "active_session" edge.
+func (m *DeviceMutation) ResetActiveSession() {
+	m.active_session = nil
+	m.clearedactive_session = false
+}
+
+// AddSessionIDs adds the "sessions" edge to the Session entity by ids.
+func (m *DeviceMutation) AddSessionIDs(ids ...schema.ID) {
+	if m.sessions == nil {
+		m.sessions = make(map[schema.ID]struct{})
+	}
+	for i := range ids {
+		m.sessions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSessions clears the "sessions" edge to the Session entity.
+func (m *DeviceMutation) ClearSessions() {
+	m.clearedsessions = true
+}
+
+// SessionsCleared reports if the "sessions" edge to the Session entity was cleared.
+func (m *DeviceMutation) SessionsCleared() bool {
+	return m.clearedsessions
+}
+
+// RemoveSessionIDs removes the "sessions" edge to the Session entity by IDs.
+func (m *DeviceMutation) RemoveSessionIDs(ids ...schema.ID) {
+	if m.removedsessions == nil {
+		m.removedsessions = make(map[schema.ID]struct{})
+	}
+	for i := range ids {
+		delete(m.sessions, ids[i])
+		m.removedsessions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSessions returns the removed IDs of the "sessions" edge to the Session entity.
+func (m *DeviceMutation) RemovedSessionsIDs() (ids []schema.ID) {
+	for id := range m.removedsessions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SessionsIDs returns the "sessions" edge IDs in the mutation.
+func (m *DeviceMutation) SessionsIDs() (ids []schema.ID) {
+	for id := range m.sessions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSessions resets all changes to the "sessions" edge.
+func (m *DeviceMutation) ResetSessions() {
+	m.sessions = nil
+	m.clearedsessions = false
+	m.removedsessions = nil
+}
+
+// Where appends a list predicates to the DeviceMutation builder.
+func (m *DeviceMutation) Where(ps ...predicate.Device) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *DeviceMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Device).
+func (m *DeviceMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *DeviceMutation) Fields() []string {
+	fields := make([]string, 0, 0)
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *DeviceMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *DeviceMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, fmt.Errorf("unknown Device field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeviceMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Device field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *DeviceMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *DeviceMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *DeviceMutation) AddField(name string, value ent.Value) error {
+	return fmt.Errorf("unknown Device numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *DeviceMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *DeviceMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *DeviceMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Device nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *DeviceMutation) ResetField(name string) error {
+	return fmt.Errorf("unknown Device field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *DeviceMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.active_session != nil {
+		edges = append(edges, device.EdgeActiveSession)
+	}
+	if m.sessions != nil {
+		edges = append(edges, device.EdgeSessions)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *DeviceMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case device.EdgeActiveSession:
+		if id := m.active_session; id != nil {
+			return []ent.Value{*id}
+		}
+	case device.EdgeSessions:
+		ids := make([]ent.Value, 0, len(m.sessions))
+		for id := range m.sessions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *DeviceMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedsessions != nil {
+		edges = append(edges, device.EdgeSessions)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *DeviceMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case device.EdgeSessions:
+		ids := make([]ent.Value, 0, len(m.removedsessions))
+		for id := range m.removedsessions {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *DeviceMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedactive_session {
+		edges = append(edges, device.EdgeActiveSession)
+	}
+	if m.clearedsessions {
+		edges = append(edges, device.EdgeSessions)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *DeviceMutation) EdgeCleared(name string) bool {
+	switch name {
+	case device.EdgeActiveSession:
+		return m.clearedactive_session
+	case device.EdgeSessions:
+		return m.clearedsessions
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *DeviceMutation) ClearEdge(name string) error {
+	switch name {
+	case device.EdgeActiveSession:
+		m.ClearActiveSession()
+		return nil
+	}
+	return fmt.Errorf("unknown Device unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *DeviceMutation) ResetEdge(name string) error {
+	switch name {
+	case device.EdgeActiveSession:
+		m.ResetActiveSession()
+		return nil
+	case device.EdgeSessions:
+		m.ResetSessions()
+		return nil
+	}
+	return fmt.Errorf("unknown Device edge %s", name)
+}
+
 // DocMutation represents an operation that mutates the Doc nodes in the graph.
 type DocMutation struct {
 	config
@@ -1130,7 +1670,7 @@ func withDocID(id schema.DocID) docOption {
 		m.oldValue = func(ctx context.Context) (*Doc, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().Doc.Get(ctx, id)
 				}
@@ -1163,7 +1703,7 @@ func (m DocMutation) Client() *Client {
 // it returns an error otherwise.
 func (m DocMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -1185,6 +1725,25 @@ func (m *DocMutation) ID() (id schema.DocID, exists bool) {
 	return *m.id, true
 }
 
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *DocMutation) IDs(ctx context.Context) ([]schema.DocID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []schema.DocID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Doc.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
 // SetText sets the "text" field.
 func (m *DocMutation) SetText(s string) {
 	m.text = &s
@@ -1204,10 +1763,10 @@ func (m *DocMutation) Text() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *DocMutation) OldText(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
+		return v, errors.New("OldText is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldText requires an ID field in the mutation")
+		return v, errors.New("OldText requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -1599,7 +2158,7 @@ func withGroupID(id int) groupOption {
 		m.oldValue = func(ctx context.Context) (*Group, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().Group.Get(ctx, id)
 				}
@@ -1632,7 +2191,7 @@ func (m GroupMutation) Client() *Client {
 // it returns an error otherwise.
 func (m GroupMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -1652,6 +2211,25 @@ func (m *GroupMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *GroupMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Group.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
 }
 
 // AddUserIDs adds the "users" edge to the User entity by ids.
@@ -1927,7 +2505,7 @@ func withMixinIDID(id uuid.UUID) mixinidOption {
 		m.oldValue = func(ctx context.Context) (*MixinID, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().MixinID.Get(ctx, id)
 				}
@@ -1960,7 +2538,7 @@ func (m MixinIDMutation) Client() *Client {
 // it returns an error otherwise.
 func (m MixinIDMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -1982,6 +2560,25 @@ func (m *MixinIDMutation) ID() (id uuid.UUID, exists bool) {
 	return *m.id, true
 }
 
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MixinIDMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MixinID.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
 // SetSomeField sets the "some_field" field.
 func (m *MixinIDMutation) SetSomeField(s string) {
 	m.some_field = &s
@@ -2001,10 +2598,10 @@ func (m *MixinIDMutation) SomeField() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *MixinIDMutation) OldSomeField(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldSomeField is only allowed on UpdateOne operations")
+		return v, errors.New("OldSomeField is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldSomeField requires an ID field in the mutation")
+		return v, errors.New("OldSomeField requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -2037,10 +2634,10 @@ func (m *MixinIDMutation) MixinField() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *MixinIDMutation) OldMixinField(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldMixinField is only allowed on UpdateOne operations")
+		return v, errors.New("OldMixinField is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldMixinField requires an ID field in the mutation")
+		return v, errors.New("OldMixinField requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -2283,7 +2880,7 @@ func withNoteID(id schema.NoteID) noteOption {
 		m.oldValue = func(ctx context.Context) (*Note, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().Note.Get(ctx, id)
 				}
@@ -2316,7 +2913,7 @@ func (m NoteMutation) Client() *Client {
 // it returns an error otherwise.
 func (m NoteMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -2338,6 +2935,25 @@ func (m *NoteMutation) ID() (id schema.NoteID, exists bool) {
 	return *m.id, true
 }
 
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *NoteMutation) IDs(ctx context.Context) ([]schema.NoteID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []schema.NoteID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Note.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
 // SetText sets the "text" field.
 func (m *NoteMutation) SetText(s string) {
 	m.text = &s
@@ -2357,10 +2973,10 @@ func (m *NoteMutation) Text() (r string, exists bool) {
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *NoteMutation) OldText(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldText is only allowed on UpdateOne operations")
+		return v, errors.New("OldText is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldText requires an ID field in the mutation")
+		return v, errors.New("OldText requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
@@ -2759,7 +3375,7 @@ func withPetID(id string) petOption {
 		m.oldValue = func(ctx context.Context) (*Pet, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().Pet.Get(ctx, id)
 				}
@@ -2792,7 +3408,7 @@ func (m PetMutation) Client() *Client {
 // it returns an error otherwise.
 func (m PetMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -2812,6 +3428,25 @@ func (m *PetMutation) ID() (id string, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PetMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Pet.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by id.
@@ -3237,6 +3872,330 @@ func (m *PetMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Pet edge %s", name)
 }
 
+// SessionMutation represents an operation that mutates the Session nodes in the graph.
+type SessionMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *schema.ID
+	clearedFields map[string]struct{}
+	device        *schema.ID
+	cleareddevice bool
+	done          bool
+	oldValue      func(context.Context) (*Session, error)
+	predicates    []predicate.Session
+}
+
+var _ ent.Mutation = (*SessionMutation)(nil)
+
+// sessionOption allows management of the mutation configuration using functional options.
+type sessionOption func(*SessionMutation)
+
+// newSessionMutation creates new mutation for the Session entity.
+func newSessionMutation(c config, op Op, opts ...sessionOption) *SessionMutation {
+	m := &SessionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSession,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSessionID sets the ID field of the mutation.
+func withSessionID(id schema.ID) sessionOption {
+	return func(m *SessionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Session
+		)
+		m.oldValue = func(ctx context.Context) (*Session, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Session.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSession sets the old Session of the mutation.
+func withSession(node *Session) sessionOption {
+	return func(m *SessionMutation) {
+		m.oldValue = func(context.Context) (*Session, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SessionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SessionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Session entities.
+func (m *SessionMutation) SetID(id schema.ID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SessionMutation) ID() (id schema.ID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SessionMutation) IDs(ctx context.Context) ([]schema.ID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []schema.ID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Session.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetDeviceID sets the "device" edge to the Device entity by id.
+func (m *SessionMutation) SetDeviceID(id schema.ID) {
+	m.device = &id
+}
+
+// ClearDevice clears the "device" edge to the Device entity.
+func (m *SessionMutation) ClearDevice() {
+	m.cleareddevice = true
+}
+
+// DeviceCleared reports if the "device" edge to the Device entity was cleared.
+func (m *SessionMutation) DeviceCleared() bool {
+	return m.cleareddevice
+}
+
+// DeviceID returns the "device" edge ID in the mutation.
+func (m *SessionMutation) DeviceID() (id schema.ID, exists bool) {
+	if m.device != nil {
+		return *m.device, true
+	}
+	return
+}
+
+// DeviceIDs returns the "device" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DeviceID instead. It exists only for internal usage by the builders.
+func (m *SessionMutation) DeviceIDs() (ids []schema.ID) {
+	if id := m.device; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDevice resets all changes to the "device" edge.
+func (m *SessionMutation) ResetDevice() {
+	m.device = nil
+	m.cleareddevice = false
+}
+
+// Where appends a list predicates to the SessionMutation builder.
+func (m *SessionMutation) Where(ps ...predicate.Session) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *SessionMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Session).
+func (m *SessionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SessionMutation) Fields() []string {
+	fields := make([]string, 0, 0)
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SessionMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	return nil, fmt.Errorf("unknown Session field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SessionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Session field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SessionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SessionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SessionMutation) AddField(name string, value ent.Value) error {
+	return fmt.Errorf("unknown Session numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SessionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SessionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SessionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Session nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SessionMutation) ResetField(name string) error {
+	return fmt.Errorf("unknown Session field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SessionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.device != nil {
+		edges = append(edges, session.EdgeDevice)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SessionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case session.EdgeDevice:
+		if id := m.device; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SessionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SessionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SessionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleareddevice {
+		edges = append(edges, session.EdgeDevice)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SessionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case session.EdgeDevice:
+		return m.cleareddevice
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SessionMutation) ClearEdge(name string) error {
+	switch name {
+	case session.EdgeDevice:
+		m.ClearDevice()
+		return nil
+	}
+	return fmt.Errorf("unknown Session unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SessionMutation) ResetEdge(name string) error {
+	switch name {
+	case session.EdgeDevice:
+		m.ResetDevice()
+		return nil
+	}
+	return fmt.Errorf("unknown Session edge %s", name)
+}
+
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
@@ -3290,7 +4249,7 @@ func withUserID(id int) userOption {
 		m.oldValue = func(ctx context.Context) (*User, error) {
 			once.Do(func() {
 				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
+					err = errors.New("querying old values post mutation is not allowed")
 				} else {
 					value, err = m.Client().User.Get(ctx, id)
 				}
@@ -3323,7 +4282,7 @@ func (m UserMutation) Client() *Client {
 // it returns an error otherwise.
 func (m UserMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
 	tx := &Tx{config: m.config}
 	tx.init()
@@ -3343,6 +4302,25 @@ func (m *UserMutation) ID() (id int, exists bool) {
 		return
 	}
 	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by ids.

@@ -324,6 +324,10 @@ func (gq *GoodsQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(gq.modifiers) > 0 {
 		_spec.Modifiers = gq.modifiers
 	}
+	_spec.Node.Columns = gq.fields
+	if len(gq.fields) > 0 {
+		_spec.Unique = gq.unique != nil && *gq.unique
+	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
 
@@ -394,6 +398,9 @@ func (gq *GoodsQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if gq.sql != nil {
 		selector = gq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if gq.unique != nil && *gq.unique {
+		selector.Distinct()
 	}
 	for _, m := range gq.modifiers {
 		m(selector)
@@ -708,9 +715,7 @@ func (ggb *GoodsGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range ggb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(ggb.fields...)...)

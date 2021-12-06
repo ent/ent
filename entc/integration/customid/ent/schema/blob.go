@@ -30,6 +30,8 @@ func (Blob) Fields() []ent.Field {
 		field.UUID("uuid", uuid.UUID{}).
 			Default(uuid.New).
 			Unique(),
+		field.Int("count").
+			Default(0),
 	}
 }
 

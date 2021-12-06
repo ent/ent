@@ -42,9 +42,19 @@ go get github.com/hedwigz/entviz
 If you are not familiar with `entc` you're welcome to read [entc documentation](https://entgo.io/docs/code-gen#use-entc-as-a-package) to learn more about it.
 :::
 ```go title="ent/entc.go"
-err := entc.Generate("./schema", &gen.Config{}, entc.Extensions(entviz.Extension{}))
-if err != nil {
-	log.Fatalf("running ent codegen: %v", err)
+import (
+	"log"
+
+	"entgo.io/ent/entc"
+	"entgo.io/ent/entc/gen"
+	"github.com/hedwigz/entviz"
+)
+
+func main() {
+	err := entc.Generate("./schema", &gen.Config{}, entc.Extensions(entviz.Extension{}))
+	if err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
 }
 ```
 Let's say we have a simple schema with a user entity and some fields:

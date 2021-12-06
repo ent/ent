@@ -8,8 +8,11 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -21,6 +24,7 @@ type NoteCreate struct {
 	config
 	mutation *NoteMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetText sets the "text" field.
@@ -166,7 +170,7 @@ func (nc *NoteCreate) defaults() {
 func (nc *NoteCreate) check() error {
 	if v, ok := nc.mutation.ID(); ok {
 		if err := note.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "id": %w`, err)}
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Note.id": %w`, err)}
 		}
 	}
 	return nil
@@ -181,7 +185,11 @@ func (nc *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
 		return nil, err
 	}
 	if _spec.ID.Value != nil {
-		_node.ID = _spec.ID.Value.(schema.NoteID)
+		if id, ok := _spec.ID.Value.(schema.NoteID); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Note.ID type: %T", _spec.ID.Value)
+		}
 	}
 	return _node, nil
 }
@@ -197,6 +205,7 @@ func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	_spec.OnConflict = nc.conflict
 	if id, ok := nc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
@@ -251,10 +260,189 @@ func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Note.Create().
+//		SetText(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.NoteUpsert) {
+//			SetText(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (nc *NoteCreate) OnConflict(opts ...sql.ConflictOption) *NoteUpsertOne {
+	nc.conflict = opts
+	return &NoteUpsertOne{
+		create: nc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Note.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func (nc *NoteCreate) OnConflictColumns(columns ...string) *NoteUpsertOne {
+	nc.conflict = append(nc.conflict, sql.ConflictColumns(columns...))
+	return &NoteUpsertOne{
+		create: nc,
+	}
+}
+
+type (
+	// NoteUpsertOne is the builder for "upsert"-ing
+	//  one Note node.
+	NoteUpsertOne struct {
+		create *NoteCreate
+	}
+
+	// NoteUpsert is the "OnConflict" setter.
+	NoteUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetText sets the "text" field.
+func (u *NoteUpsert) SetText(v string) *NoteUpsert {
+	u.Set(note.FieldText, v)
+	return u
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *NoteUpsert) UpdateText() *NoteUpsert {
+	u.SetExcluded(note.FieldText)
+	return u
+}
+
+// ClearText clears the value of the "text" field.
+func (u *NoteUpsert) ClearText() *NoteUpsert {
+	u.SetNull(note.FieldText)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.Note.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(note.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+//
+func (u *NoteUpsertOne) UpdateNewValues() *NoteUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(note.FieldID)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//  client.Note.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
+func (u *NoteUpsertOne) Ignore() *NoteUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *NoteUpsertOne) DoNothing() *NoteUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the NoteCreate.OnConflict
+// documentation for more info.
+func (u *NoteUpsertOne) Update(set func(*NoteUpsert)) *NoteUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&NoteUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetText sets the "text" field.
+func (u *NoteUpsertOne) SetText(v string) *NoteUpsertOne {
+	return u.Update(func(s *NoteUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *NoteUpsertOne) UpdateText() *NoteUpsertOne {
+	return u.Update(func(s *NoteUpsert) {
+		s.UpdateText()
+	})
+}
+
+// ClearText clears the value of the "text" field.
+func (u *NoteUpsertOne) ClearText() *NoteUpsertOne {
+	return u.Update(func(s *NoteUpsert) {
+		s.ClearText()
+	})
+}
+
+// Exec executes the query.
+func (u *NoteUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for NoteCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *NoteUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *NoteUpsertOne) ID(ctx context.Context) (id schema.NoteID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: NoteUpsertOne.ID is not supported by MySQL driver. Use NoteUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *NoteUpsertOne) IDX(ctx context.Context) schema.NoteID {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // NoteCreateBulk is the builder for creating many Note entities in bulk.
 type NoteCreateBulk struct {
 	config
 	builders []*NoteCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Note entities in the database.
@@ -281,6 +469,7 @@ func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 					_, err = mutators[i+1].Mutate(root, ncb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = ncb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ncb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -327,6 +516,143 @@ func (ncb *NoteCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (ncb *NoteCreateBulk) ExecX(ctx context.Context) {
 	if err := ncb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Note.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.NoteUpsert) {
+//			SetText(v+v).
+//		}).
+//		Exec(ctx)
+//
+func (ncb *NoteCreateBulk) OnConflict(opts ...sql.ConflictOption) *NoteUpsertBulk {
+	ncb.conflict = opts
+	return &NoteUpsertBulk{
+		create: ncb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Note.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+//
+func (ncb *NoteCreateBulk) OnConflictColumns(columns ...string) *NoteUpsertBulk {
+	ncb.conflict = append(ncb.conflict, sql.ConflictColumns(columns...))
+	return &NoteUpsertBulk{
+		create: ncb,
+	}
+}
+
+// NoteUpsertBulk is the builder for "upsert"-ing
+// a bulk of Note nodes.
+type NoteUpsertBulk struct {
+	create *NoteCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Note.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(note.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+//
+func (u *NoteUpsertBulk) UpdateNewValues() *NoteUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(note.FieldID)
+				return
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Note.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+//
+func (u *NoteUpsertBulk) Ignore() *NoteUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *NoteUpsertBulk) DoNothing() *NoteUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the NoteCreateBulk.OnConflict
+// documentation for more info.
+func (u *NoteUpsertBulk) Update(set func(*NoteUpsert)) *NoteUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&NoteUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetText sets the "text" field.
+func (u *NoteUpsertBulk) SetText(v string) *NoteUpsertBulk {
+	return u.Update(func(s *NoteUpsert) {
+		s.SetText(v)
+	})
+}
+
+// UpdateText sets the "text" field to the value that was provided on create.
+func (u *NoteUpsertBulk) UpdateText() *NoteUpsertBulk {
+	return u.Update(func(s *NoteUpsert) {
+		s.UpdateText()
+	})
+}
+
+// ClearText clears the value of the "text" field.
+func (u *NoteUpsertBulk) ClearText() *NoteUpsertBulk {
+	return u.Update(func(s *NoteUpsert) {
+		s.ClearText()
+	})
+}
+
+// Exec executes the query.
+func (u *NoteUpsertBulk) Exec(ctx context.Context) error {
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the NoteCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for NoteCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *NoteUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -29,7 +29,7 @@ go mod init <project>
 ## Installation
 
 ```console
-go get entgo.io/ent/cmd/ent
+go get -d entgo.io/ent/cmd/ent
 ```
 
 After installing `ent` codegen tool, you should have it in your `PATH`.
@@ -48,6 +48,8 @@ The command above will generate the schema for `User` under `<project>/ent/schem
 ```go title="<project>/ent/schema/user.go"
 
 package schema
+
+import "entgo.io/ent"
 
 // User holds the schema definition for the User entity.
 type User struct {
@@ -71,6 +73,11 @@ Add 2 fields to the `User` schema:
 ```go title="<project>/ent/schema/user.go"
 
 package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
 
 // Fields of the User.
 func (User) Fields() []ent.Field {

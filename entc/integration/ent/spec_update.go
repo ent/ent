@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -332,7 +333,7 @@ func (suo *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) 
 	}
 	id, ok := suo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Spec.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Spec.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := suo.fields; len(fields) > 0 {

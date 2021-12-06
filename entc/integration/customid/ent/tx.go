@@ -20,6 +20,8 @@ type Tx struct {
 	Blob *BlobClient
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
+	// Device is the client for interacting with the Device builders.
+	Device *DeviceClient
 	// Doc is the client for interacting with the Doc builders.
 	Doc *DocClient
 	// Group is the client for interacting with the Group builders.
@@ -30,6 +32,8 @@ type Tx struct {
 	Note *NoteClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// Session is the client for interacting with the Session builders.
+	Session *SessionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -62,7 +66,7 @@ type (
 	// and returns a Committer. For example:
 	//
 	//	hook := func(next ent.Committer) ent.Committer {
-	//		return ent.CommitFunc(func(context.Context, tx *ent.Tx) error {
+	//		return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
 	//			// Do some stuff before.
 	//			if err := next.Commit(ctx, tx); err != nil {
 	//				return err
@@ -117,7 +121,7 @@ type (
 	// and returns a Rollbacker. For example:
 	//
 	//	hook := func(next ent.Rollbacker) ent.Rollbacker {
-	//		return ent.RollbackFunc(func(context.Context, tx *ent.Tx) error {
+	//		return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
 	//			// Do some stuff before.
 	//			if err := next.Rollback(ctx, tx); err != nil {
 	//				return err
@@ -169,11 +173,13 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Blob = NewBlobClient(tx.config)
 	tx.Car = NewCarClient(tx.config)
+	tx.Device = NewDeviceClient(tx.config)
 	tx.Doc = NewDocClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
 	tx.MixinID = NewMixinIDClient(tx.config)
 	tx.Note = NewNoteClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
+	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

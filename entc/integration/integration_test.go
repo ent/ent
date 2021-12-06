@@ -6,6 +6,7 @@ package integration
 
 import (
 	"context"
+	stdsql "database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -23,6 +24,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent"
+	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/enttest"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
@@ -90,7 +92,7 @@ func TestMaria(t *testing.T) {
 }
 
 func TestPostgres(t *testing.T) {
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433, "13": 5434} {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432, "13": 5433, "14": 5434} {
 		t.Run(version, func(t *testing.T) {
 			client := enttest.Open(t, dialect.Postgres, fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port), opts)
 			defer client.Close()
@@ -153,7 +155,6 @@ func Sanity(t *testing.T, client *ent.Client) {
 	usr := client.User.Create().SetName("foo").SetAge(20).SaveX(ctx)
 	client.User.Update().ExecX(ctx)
 	client.User.UpdateOne(usr).ExecX(ctx)
-	client.Node.Update().Where(node.ID(usr.ID)).ExecX(ctx)
 	require.Equal("foo", usr.Name)
 	require.Equal(20, usr.Age)
 	require.NotEmpty(usr.ID)
@@ -259,6 +260,34 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.True(ok)
 	require.Equal("-", fi.Tag.Get("json"))
 	client.User.Create().SetName("tarrence").SetAge(30).ExecX(ctx)
+
+	t.Run("StringPredicates", func(t *testing.T) {
+		client.Pet.Delete().ExecX(ctx)
+		a := client.Pet.Create().SetName("a%").SaveX(ctx)
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasPrefix("%a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.Or(pet.NameHasPrefix("%a%"), pet.NameHasPrefix("%a%"))).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasSuffix("%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("a%%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a%")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("%a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContainsFold("A%")).ExistX(ctx))
+
+		a.Update().SetName("a_\\").ExecX(ctx)
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasPrefix("%a")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasPrefix("a_")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameHasSuffix("a_\\")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("%a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameHasSuffix("a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContains("a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("%a")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContains("a%")).ExistX(ctx))
+		require.True(client.Pet.Query().Where(pet.NameContainsFold("A")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContainsFold("%A")).ExistX(ctx))
+		require.False(client.Pet.Query().Where(pet.NameContainsFold("A%")).ExistX(ctx))
+	})
 }
 
 func Upsert(t *testing.T, client *ent.Client) {
@@ -274,7 +303,9 @@ func Upsert(t *testing.T, client *ent.Client) {
 		SetName("Mashraki").
 		SetAge(30).
 		SetPhone("0000").
-		OnConflict(sql.ConflictColumns(user.FieldPhone)).
+		OnConflict(
+			sql.ConflictColumns(user.FieldPhone),
+		).
 		// Update "name" to the value that was set on create ("Mashraki").
 		UpdateName().
 		ExecX(ctx)
@@ -297,8 +328,19 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, u.ID, id)
 	u = client.User.GetX(ctx, u.ID)
 	require.Equal(t, "Mashraki", u.Name)
-	require.Equal(t, 33, u.Age, "address was modified by the UPDATE clause")
+	require.Equal(t, 33, u.Age, "age was modified by the UPDATE clause")
 	require.Equal(t, "localhost", u.Address, "address was modified by the UPDATE clause")
+
+	id = client.User.Create().
+		SetName("Boring").
+		SetAge(33).
+		SetPhone("0000").
+		OnConflictColumns(user.FieldPhone).
+		// Override some of the fields with custom update.
+		AddAge(-1).
+		IDX(ctx)
+	u = client.User.GetX(ctx, id)
+	require.Equal(t, 32, u.Age, "age was modified by the UPDATE clause")
 
 	builders := []*ent.UserCreate{
 		client.User.Create().SetName("A").SetAge(1).SetPhone("0000"), // Duplicate
@@ -356,6 +398,47 @@ func Upsert(t *testing.T, client *ent.Client) {
 			ExecX(ctx)
 		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
 	}
+
+	ts := time.Unix(1623279251, 0)
+	c1 := client.Card.Create().
+		SetNumber("102030").
+		SetCreateTime(ts).
+		SetUpdateTime(ts).
+		SaveX(ctx)
+
+	// "DO UPDATE SET ... WHERE ..." does not support by MySQL.
+	if strings.Contains(t.Name(), "Postgres") || strings.Contains(t.Name(), "SQLite") {
+		err = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflict(
+				sql.ConflictColumns(card.FieldNumber),
+				sql.UpdateWhere(sql.NEQ(card.FieldCreateTime, ts)),
+			).
+			UpdateNewValues().
+			Exec(ctx)
+		// Only rows for which the "UpdateWhere" expression
+		// returns true will be updated. That is, none.
+		require.True(t, errors.Is(err, stdsql.ErrNoRows))
+
+		id = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflict(
+				sql.ConflictColumns(card.FieldNumber),
+				sql.UpdateWhere(sql.EQ(card.FieldCreateTime, ts)),
+			).
+			UpdateNewValues().
+			IDX(ctx)
+	} else {
+		id = client.Card.Create().
+			SetNumber(c1.Number).
+			OnConflictColumns(card.FieldNumber).
+			UpdateNewValues().
+			IDX(ctx)
+	}
+
+	c2 := client.Card.GetX(ctx, id)
+	require.Equal(t, c1.CreateTime.Unix(), c2.CreateTime.Unix())
+	require.NotEqual(t, c1.UpdateTime.Unix(), c2.UpdateTime.Unix())
 }
 
 func Clone(t *testing.T, client *ent.Client) {
@@ -473,6 +556,16 @@ func Select(t *testing.T, client *ent.Client) {
 	require.Empty(a8m.Name)
 	require.Empty(a8m.Nickname)
 
+	client.Pet.CreateBulk(
+		client.Pet.Create().SetName("a"),
+		client.Pet.Create().SetName("a"),
+	).ExecX(ctx)
+	names = client.Pet.Query().Select(pet.FieldName).StringsX(ctx)
+	require.Equal([]string{"a", "a"}, names)
+	names = client.Pet.Query().Unique(true).Select(pet.FieldName).StringsX(ctx)
+	require.Equal([]string{"a"}, names)
+	client.Pet.Delete().ExecX(ctx)
+
 	pets := client.Pet.CreateBulk(
 		client.Pet.Create().SetName("a"),
 		client.Pet.Create().SetName("b"),
@@ -536,6 +629,14 @@ func Select(t *testing.T, client *ent.Client) {
 		require.Equal(p2[i].Name, p1[i].Name)
 		require.Equal(len(p1[i].Name), p1[1].NameLength)
 	}
+
+	// Select count.
+	names = client.Pet.Query().Order(ent.Asc(pet.FieldName)).Select(pet.FieldName).StringsX(ctx)
+	require.Equal([]string{"aa", "bb", "bb", "cc"}, names)
+	count := client.Pet.Query().Select(pet.FieldName).CountX(ctx)
+	require.Equal(4, count)
+	count = client.Pet.Query().Unique(true).Select(pet.FieldName).CountX(ctx)
+	require.Equal(3, count)
 
 	var (
 		gs []struct {
@@ -690,7 +791,7 @@ func Delete(t *testing.T, client *ent.Client) {
 	require.True(ent.IsNotFound(err))
 
 	for i := 0; i < 5; i++ {
-		client.Node.Create().SetValue(i).SaveX(ctx)
+		client.Node.Create().SetValue(i).ExecX(ctx)
 	}
 	affected, err := client.Node.Delete().Where(node.ValueGT(2)).Exec(ctx)
 	require.NoError(err)
@@ -813,7 +914,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	client.User.DeleteOne(brat).ExecX(ctx)
 	require.Equal(1, usr.QueryChildren().CountX(ctx))
 
-	client.Group.UpdateOne(grp).AddBlocked(neta).SaveX(ctx)
+	client.Group.UpdateOne(grp).AddBlocked(neta).ExecX(ctx)
 	blocked := usr.QueryGroups().OnlyX(ctx).QueryBlocked().OnlyX(ctx)
 	t.Log("blocked:", blocked)
 
@@ -844,7 +945,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Error(err, "name validator failed")
 	var checkerr schema.CheckError
 	require.True(errors.As(err, &checkerr))
-	require.EqualError(err, "ent: validator failed for field \"name\": last name must begin with uppercase")
+	require.EqualError(err, `ent: validator failed for field "Group.name": last name must begin with uppercase`)
 	require.EqualError(checkerr, "last name must begin with uppercase")
 	err = client.Group.Create().SetInfo(info).SetType("pass").SetName("Github20").SetExpire(time.Now().Add(time.Hour)).Exec(ctx)
 	require.Error(err, "name validator failed")
@@ -900,8 +1001,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Empty(client.User.Query().Where(user.NameIn("alex", "rocket")).AllX(ctx))
 	require.NotNil(client.User.Query().Where(user.HasParentWith(user.NameIn("a8m", "neta"))).OnlyX(ctx))
 	require.Len(client.User.Query().Where(user.NameContains("a8")).AllX(ctx), 1)
-	require.Len(client.User.Query().Where(user.NameHasPrefix("a8")).AllX(ctx), 1)
-	require.Len(client.User.Query().Where(user.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).AllX(ctx), 2)
+	require.Equal(1, client.User.Query().Where(user.NameHasPrefix("a8")).CountX(ctx))
+	require.Zero(client.User.Query().Where(user.NameHasPrefix("%a8%")).CountX(ctx))
+	require.Equal(2, client.User.Query().Where(user.Or(user.NameHasPrefix("a8"), user.NameHasSuffix("eta"))).CountX(ctx))
 
 	t.Log("group-by one field")
 	names, err := client.User.Query().GroupBy(user.FieldName).Strings(ctx)
@@ -916,8 +1018,8 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Zero(age)
 
 	t.Log("group-by two fields with aggregation")
-	client.User.Create().SetName(usr.Name).SetAge(usr.Age).SaveX(ctx)
-	client.User.Create().SetName(neta.Name).SetAge(neta.Age).SaveX(ctx)
+	client.User.Create().SetName(usr.Name).SetAge(usr.Age).ExecX(ctx)
+	client.User.Create().SetName(neta.Name).SetAge(neta.Age).ExecX(ctx)
 	child2 := client.User.Create().SetName(child.Name).SetAge(child.Age + 1).SaveX(ctx)
 	var v []struct {
 		Name  string `json:"name"`
@@ -1063,7 +1165,7 @@ func ClearEdges(t *testing.T, client *ent.Client) {
 	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfo(inf).AddUsers(a8m, nat).SaveX(ctx)
 	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf).AddUsers(a8m, nat).SaveX(ctx)
 	require.Equal(t, 2, a8m.QueryGroups().CountX(ctx))
-	a8m.Update().ClearGroups().SaveX(ctx)
+	a8m.Update().ClearGroups().ExecX(ctx)
 	require.Zero(t, a8m.QueryGroups().CountX(ctx))
 	err := client.Group.Update().AddUsers(a8m).Exec(ctx)
 	require.NoError(t, err, "return the user-edge back to groups")
@@ -1249,7 +1351,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
 		tx.OnRollback(m.rHook())
-		tx.Node.Create().SaveX(ctx)
+		tx.Node.Create().ExecX(ctx)
 		require.NoError(t, tx.Rollback())
 		require.Zero(t, client.Node.Query().CountX(ctx), "rollback should discard all changes")
 	})
@@ -1366,9 +1468,9 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
 	nati := client.User.Create().SetName("nati").SetAge(28).SetSpouse(a8m).SaveX(ctx)
 	alex := client.User.Create().SetName("alexsn").SetAge(35).AddFriends(a8m).SaveX(ctx)
-	client.Pet.Create().SetName("xabi").SaveX(ctx)
-	client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(nati).SaveX(ctx)
-	client.Card.Create().SetNumber("102030").SetOwner(a8m).SaveX(ctx)
+	client.Pet.Create().SetName("xabi").ExecX(ctx)
+	client.Pet.Create().SetName("pedro").SetOwner(a8m).SetTeam(nati).ExecX(ctx)
+	client.Card.Create().SetNumber("102030").SetOwner(a8m).ExecX(ctx)
 
 	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
 	files := ent.Files{
@@ -1558,7 +1660,7 @@ func Mutation(t *testing.T, client *ent.Client) {
 			m.SetAge(30)
 		}
 	}
-	uu := a8m.Update()
+	uu := a8m.Update().AddPets(pedro)
 	ub = client.User.Create()
 	setUsers(ub.Mutation(), uu.Mutation())
 	a8m = uu.SaveX(ctx)
@@ -1569,6 +1671,35 @@ func Mutation(t *testing.T, client *ent.Client) {
 	require.Equal(t, []int{usr.ID}, a8m.Update().AddFriends(usr).Mutation().FriendsIDs())
 	require.Empty(t, a8m.Update().AddFriends(usr).RemoveFriends(usr).Mutation().FriendsIDs())
 	require.Equal(t, []int{usr.ID}, a8m.Update().AddFriends(usr).RemoveFriends(a8m).Mutation().FriendsIDs())
+	a8m.Update().AddFriends(usr).ExecX(ctx)
+
+	t.Run("IDs", func(t *testing.T) {
+		ids := client.User.Query().IDsX(ctx)
+		u := client.User.Update().Where(user.IDIn(ids...)).AddAge(1)
+		mids, err := u.Mutation().IDs(ctx)
+		require.NoError(t, err)
+		// Order can change between the 2 queries.
+		sort.Ints(ids)
+		sort.Ints(mids)
+		require.Equal(t, ids, mids)
+		u.ExecX(ctx)
+
+		u = client.User.
+			Update().
+			AddAge(1).
+			Where(
+				user.Name(a8m.Name),
+				user.HasPets(),
+				user.HasPetsWith(
+					pet.Name(pedro.Name),
+				),
+			)
+		mids, err = u.Mutation().IDs(ctx)
+		require.NoError(t, err)
+		require.Len(t, mids, 1)
+		require.Equal(t, a8m.ID, mids[0])
+		u.ExecX(ctx)
+	})
 }
 
 // Test templates codegen.
@@ -1687,7 +1818,7 @@ func Lock(t *testing.T, client *ent.Client) {
 			require.EqualValues(t, "Lock wait timeout exceeded; try restarting transaction", err.Message)
 		}
 		require.NoError(t, tx2.Rollback())
-		p1.Update().SetName("updated").SaveX(ctx)
+		p1.Update().SetName("updated").ExecX(ctx)
 		require.NoError(t, tx1.Commit())
 		tx3.Pet.Query().Where(pet.ID(xabi.ID)).ForUpdate().OnlyX(ctx)
 		require.NoError(t, tx3.Rollback())

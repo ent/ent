@@ -70,6 +70,7 @@ func TestMySQL_Create(t *testing.T) {
 						Options:   "ENGINE = INNODB",
 						Check:     "price > 0",
 						Checks: map[string]string{
+							"valid_age":  "age > 0",
 							"valid_name": "name <> ''",
 						},
 					},
@@ -78,7 +79,7 @@ func TestMySQL_Create(t *testing.T) {
 			before: func(mock mysqlMock) {
 				mock.start("5.7.8")
 				mock.tableExists("users", false)
-				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `ts` timestamp NULL, `ts_default` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `decimal` decimal(6,2) NOT NULL, `unsigned decimal` decimal(6,2) unsigned NOT NULL, PRIMARY KEY(`id`), CHECK (price > 0), CONSTRAINT `valid_name` CHECK (name <> '')) CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE = INNODB")).
+				mock.ExpectExec(escape("CREATE TABLE IF NOT EXISTS `users`(`id` bigint AUTO_INCREMENT NOT NULL, `name` varchar(255) NULL, `age` bigint NOT NULL, `doc` json NULL, `enums` enum('a', 'b') NOT NULL, `uuid` char(36) binary NULL, `ts` timestamp NULL, `ts_default` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `decimal` decimal(6,2) NOT NULL, `unsigned decimal` decimal(6,2) unsigned NOT NULL, PRIMARY KEY(`id`), CHECK (price > 0), CONSTRAINT `valid_age` CHECK (age > 0), CONSTRAINT `valid_name` CHECK (name <> '')) CHARACTER SET utf8 COLLATE utf8_general_ci ENGINE = INNODB")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
@@ -250,6 +251,7 @@ func TestMySQL_Create(t *testing.T) {
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "name", Type: field.TypeString, Nullable: true},
 						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
+						{Name: "mediumtext", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.MySQL: "mediumtext"}},
 						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
 						{Name: "date", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{dialect.MySQL: "date"}},
 						{Name: "age", Type: field.TypeInt},
@@ -278,6 +280,7 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "", nil, nil).
 						AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "", nil, nil).
 						AddRow("text", "longtext", "YES", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("mediumtext", "mediumtext", "YES", "YES", "NULL", "", "", "", nil, nil).
 						AddRow("uuid", "char(36)", "YES", "YES", "NULL", "", "", "utf8mb4_bin", nil, nil).
 						AddRow("date", "date", "YES", "YES", "NULL", "", "", "", nil, nil).
 						// 8.0.19: new int column type formats
@@ -307,8 +310,9 @@ func TestMySQL_Create(t *testing.T) {
 					Columns: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
 						{Name: "name", Type: field.TypeString, Nullable: true},
-						{Name: "enums1", Type: field.TypeEnum, Enums: []string{"a", "b"}}, // add enum.
-						{Name: "enums2", Type: field.TypeEnum, Enums: []string{"a"}},      // remove enum.
+						{Name: "enums1", Type: field.TypeEnum, Enums: []string{"a", "b"}},   // add enum.
+						{Name: "enums2", Type: field.TypeEnum, Enums: []string{"a"}},        // remove enum.
+						{Name: "enums3", Type: field.TypeEnum, Enums: []string{"a", "b c"}}, // no changes.
 					},
 					PrimaryKey: []*Column{
 						{Name: "id", Type: field.TypeInt, Increment: true},
@@ -324,7 +328,8 @@ func TestMySQL_Create(t *testing.T) {
 						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "", nil, nil).
 						AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "", nil, nil).
 						AddRow("enums1", "enum('a')", "YES", "NO", "NULL", "", "", "", nil, nil).
-						AddRow("enums2", "enum('b', 'a')", "NO", "YES", "NULL", "", "", "", nil, nil))
+						AddRow("enums2", "enum('b', 'a')", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("enums3", "enum('a', 'b c')", "NO", "YES", "NULL", "", "", "", nil, nil))
 				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `sub_part`,  `non_unique`, `seq_in_index` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "sub_part", "non_unique", "seq_in_index"}).

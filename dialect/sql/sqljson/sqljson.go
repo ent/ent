@@ -21,8 +21,53 @@ import (
 //
 func HasKey(column string, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		ValuePath(b, column, opts...)
-		b.WriteOp(sql.OpNotNull)
+		switch b.Dialect() {
+		case dialect.SQLite:
+			b.Nested(func(b *sql.Builder) {
+				b.Join(
+					sql.Or(
+						// The result is NULL for JSON null.
+						sql.P(func(b *sql.Builder) {
+							ValuePath(b, column, opts...)
+							b.WriteOp(sql.OpNotNull)
+						}),
+						ValueIsNull(column, opts...),
+					),
+				)
+			})
+		default:
+			ValuePath(b, column, opts...)
+			b.WriteOp(sql.OpNotNull)
+		}
+	})
+}
+
+// ValueIsNull return a predicate for checking that a JSON value
+// (returned by the path) is a null literal (JSON "null").
+//
+// In order to check if the column is NULL (database NULL), or if
+// the JSON key exists, use sql.IsNull or sqljson.HasKey.
+//
+//	sqljson.ValueIsNull("a", sqljson.Path("b"))
+//
+func ValueIsNull(column string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		switch b.Dialect() {
+		case dialect.MySQL:
+			path := identPath(column, opts...)
+			b.WriteString("JSON_CONTAINS").Nested(func(b *sql.Builder) {
+				b.Ident(column).Comma()
+				b.WriteString("'null'").Comma()
+				path.mysqlPath(b)
+			})
+		case dialect.Postgres:
+			ValuePath(b, column, append(opts, Cast("jsonb"))...)
+			b.WriteOp(sql.OpEQ).WriteString("'null'::jsonb")
+		case dialect.SQLite:
+			path := identPath(column, opts...)
+			path.mysqlFunc("JSON_TYPE", b)
+			b.WriteOp(sql.OpEQ).WriteString("'null'")
+		}
 	})
 }
 
@@ -113,10 +158,7 @@ func ValueLTE(column string, arg interface{}, opts ...Option) *sql.Predicate {
 //
 func ValueContains(column string, arg interface{}, opts ...Option) *sql.Predicate {
 	return sql.P(func(b *sql.Builder) {
-		path := &PathOptions{Ident: column}
-		for i := range opts {
-			opts[i](path)
-		}
+		path := identPath(column, opts...)
 		switch b.Dialect() {
 		case dialect.MySQL:
 			b.WriteString("JSON_CONTAINS").Nested(func(b *sql.Builder) {
@@ -139,6 +181,36 @@ func ValueContains(column string, arg interface{}, opts ...Option) *sql.Predicat
 			path.value(b)
 			b.WriteString(" @> ").Arg(marshal(arg))
 		}
+	})
+}
+
+// StringHasPrefix return a predicate for checking that a JSON string value
+// (returned by the path) has the given substring as prefix
+func StringHasPrefix(column string, prefix string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		ValuePath(b, column, opts...)
+		b.Join(sql.HasPrefix("", prefix))
+	})
+}
+
+// StringHasSuffix return a predicate for checking that a JSON string value
+// (returned by the path) has the given substring as suffix
+func StringHasSuffix(column string, suffix string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		ValuePath(b, column, opts...)
+		b.Join(sql.HasSuffix("", suffix))
+	})
+}
+
+// StringContains return a predicate for checking that a JSON string value
+// (returned by the path) contains the given substring
+func StringContains(column string, sub string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		ValuePath(b, column, opts...)
+		b.Join(sql.Contains("", sub))
 	})
 }
 
@@ -224,10 +296,7 @@ func LenLTE(column string, size int, opts ...Option) *sql.Predicate {
 //	sqljson.ValuePath(b, Path("a", "b", "[1]", "c"), Cast("int"))
 //
 func ValuePath(b *sql.Builder, column string, opts ...Option) {
-	path := &PathOptions{Ident: column}
-	for i := range opts {
-		opts[i](path)
-	}
+	path := identPath(column, opts...)
 	path.value(b)
 }
 
@@ -237,10 +306,7 @@ func ValuePath(b *sql.Builder, column string, opts ...Option) {
 //	sqljson.LenPath(b, Path("a", "b", "[1]", "c"))
 //
 func LenPath(b *sql.Builder, column string, opts ...Option) {
-	path := &PathOptions{Ident: column}
-	for i := range opts {
-		opts[i](path)
-	}
+	path := identPath(column, opts...)
 	path.length(b)
 }
 
@@ -296,6 +362,15 @@ type PathOptions struct {
 	Path    []string
 	Cast    string
 	Unquote bool
+}
+
+// identPath creates a PathOptions for the given identifier.
+func identPath(ident string, opts ...Option) *PathOptions {
+	path := &PathOptions{Ident: ident}
+	for i := range opts {
+		opts[i](path)
+	}
+	return path
 }
 
 // value writes the path for getting the JSON value.

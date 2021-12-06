@@ -223,31 +223,31 @@ func (gc *GroupCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.Active(); !ok {
-		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "active"`)}
+		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Group.active"`)}
 	}
 	if _, ok := gc.mutation.Expire(); !ok {
-		return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "expire"`)}
+		return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "Group.expire"`)}
 	}
 	if v, ok := gc.mutation.GetType(); ok {
 		if err := group.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "type": %w`, err)}
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Group.type": %w`, err)}
 		}
 	}
 	if v, ok := gc.mutation.MaxUsers(); ok {
 		if err := group.MaxUsersValidator(v); err != nil {
-			return &ValidationError{Name: "max_users", err: fmt.Errorf(`ent: validator failed for field "max_users": %w`, err)}
+			return &ValidationError{Name: "max_users", err: fmt.Errorf(`ent: validator failed for field "Group.max_users": %w`, err)}
 		}
 	}
 	if _, ok := gc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
 	}
 	if v, ok := gc.mutation.Name(); ok {
 		if err := group.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "name": %w`, err)}
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
 		}
 	}
 	if _, ok := gc.mutation.InfoID(); !ok {
-		return &ValidationError{Name: "info", err: errors.New("ent: missing required edge \"info\"")}
+		return &ValidationError{Name: "info", err: errors.New(`ent: missing required edge "Group.info"`)}
 	}
 	return nil
 }
@@ -502,6 +502,12 @@ func (u *GroupUpsert) UpdateMaxUsers() *GroupUpsert {
 	return u
 }
 
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupUpsert) AddMaxUsers(v int) *GroupUpsert {
+	u.Add(group.FieldMaxUsers, v)
+	return u
+}
+
 // ClearMaxUsers clears the value of the "max_users" field.
 func (u *GroupUpsert) ClearMaxUsers() *GroupUpsert {
 	u.SetNull(group.FieldMaxUsers)
@@ -520,7 +526,7 @@ func (u *GroupUpsert) UpdateName() *GroupUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Group.Create().
@@ -615,6 +621,13 @@ func (u *GroupUpsertOne) ClearType() *GroupUpsertOne {
 func (u *GroupUpsertOne) SetMaxUsers(v int) *GroupUpsertOne {
 	return u.Update(func(s *GroupUpsert) {
 		s.SetMaxUsers(v)
+	})
+}
+
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupUpsertOne) AddMaxUsers(v int) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddMaxUsers(v)
 	})
 }
 
@@ -808,7 +821,7 @@ type GroupUpsertBulk struct {
 	create *GroupCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Group.Create().
@@ -903,6 +916,13 @@ func (u *GroupUpsertBulk) ClearType() *GroupUpsertBulk {
 func (u *GroupUpsertBulk) SetMaxUsers(v int) *GroupUpsertBulk {
 	return u.Update(func(s *GroupUpsert) {
 		s.SetMaxUsers(v)
+	})
+}
+
+// AddMaxUsers adds v to the "max_users" field.
+func (u *GroupUpsertBulk) AddMaxUsers(v int) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddMaxUsers(v)
 	})
 }
 

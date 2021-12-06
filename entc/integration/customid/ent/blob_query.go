@@ -521,6 +521,10 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 
 func (bq *BlobQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bq.querySpec()
+	_spec.Node.Columns = bq.fields
+	if len(bq.fields) > 0 {
+		_spec.Unique = bq.unique != nil && *bq.unique
+	}
 	return sqlgraph.CountNodes(ctx, bq.driver, _spec)
 }
 
@@ -591,6 +595,9 @@ func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if bq.sql != nil {
 		selector = bq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if bq.unique != nil && *bq.unique {
+		selector.Distinct()
 	}
 	for _, p := range bq.predicates {
 		p(selector)
@@ -870,9 +877,7 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range bgb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(bgb.fields...)...)

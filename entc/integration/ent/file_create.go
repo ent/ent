@@ -223,15 +223,15 @@ func (fc *FileCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (fc *FileCreate) check() error {
 	if _, ok := fc.mutation.Size(); !ok {
-		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "size"`)}
+		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
 	}
 	if v, ok := fc.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
-			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "size": %w`, err)}
+			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
 		}
 	}
 	if _, ok := fc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
 	}
 	return nil
 }
@@ -426,6 +426,12 @@ func (u *FileUpsert) UpdateSize() *FileUpsert {
 	return u
 }
 
+// AddSize adds v to the "size" field.
+func (u *FileUpsert) AddSize(v int) *FileUpsert {
+	u.Add(file.FieldSize, v)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *FileUpsert) SetName(v string) *FileUpsert {
 	u.Set(file.FieldName, v)
@@ -492,7 +498,7 @@ func (u *FileUpsert) ClearOp() *FileUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.File.Create().
@@ -538,6 +544,13 @@ func (u *FileUpsertOne) Update(set func(*FileUpsert)) *FileUpsertOne {
 func (u *FileUpsertOne) SetSize(v int) *FileUpsertOne {
 	return u.Update(func(s *FileUpsert) {
 		s.SetSize(v)
+	})
+}
+
+// AddSize adds v to the "size" field.
+func (u *FileUpsertOne) AddSize(v int) *FileUpsertOne {
+	return u.Update(func(s *FileUpsert) {
+		s.AddSize(v)
 	})
 }
 
@@ -787,7 +800,7 @@ type FileUpsertBulk struct {
 	create *FileCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.File.Create().
@@ -833,6 +846,13 @@ func (u *FileUpsertBulk) Update(set func(*FileUpsert)) *FileUpsertBulk {
 func (u *FileUpsertBulk) SetSize(v int) *FileUpsertBulk {
 	return u.Update(func(s *FileUpsert) {
 		s.SetSize(v)
+	})
+}
+
+// AddSize adds v to the "size" field.
+func (u *FileUpsertBulk) AddSize(v int) *FileUpsertBulk {
+	return u.Update(func(s *FileUpsert) {
+		s.AddSize(v)
 	})
 }
 

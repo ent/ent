@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -184,6 +185,20 @@ func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
 func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
 	if u != nil {
 		uu.SetRole(*u)
+	}
+	return uu
+}
+
+// SetEmployment sets the "employment" field.
+func (uu *UserUpdate) SetEmployment(u user.Employment) *UserUpdate {
+	uu.mutation.SetEmployment(u)
+	return uu
+}
+
+// SetNillableEmployment sets the "employment" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableEmployment(u *user.Employment) *UserUpdate {
+	if u != nil {
+		uu.SetEmployment(*u)
 	}
 	return uu
 }
@@ -629,12 +644,17 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 func (uu *UserUpdate) check() error {
 	if v, ok := uu.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
-			return &ValidationError{Name: "optional_int", err: fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)}
+			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
+		}
+	}
+	if v, ok := uu.mutation.Employment(); ok {
+		if err := user.EmploymentValidator(v); err != nil {
+			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
 		}
 	}
 	return nil
@@ -763,6 +783,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: user.FieldRole,
+		})
+	}
+	if value, ok := uu.mutation.Employment(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldEmployment,
 		})
 	}
 	if value, ok := uu.mutation.SSOCert(); ok {
@@ -1469,6 +1496,20 @@ func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
 	return uuo
 }
 
+// SetEmployment sets the "employment" field.
+func (uuo *UserUpdateOne) SetEmployment(u user.Employment) *UserUpdateOne {
+	uuo.mutation.SetEmployment(u)
+	return uuo
+}
+
+// SetNillableEmployment sets the "employment" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableEmployment(u *user.Employment) *UserUpdateOne {
+	if u != nil {
+		uuo.SetEmployment(*u)
+	}
+	return uuo
+}
+
 // SetSSOCert sets the "SSOCert" field.
 func (uuo *UserUpdateOne) SetSSOCert(s string) *UserUpdateOne {
 	uuo.mutation.SetSSOCert(s)
@@ -1917,12 +1958,17 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 func (uuo *UserUpdateOne) check() error {
 	if v, ok := uuo.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
-			return &ValidationError{Name: "optional_int", err: fmt.Errorf("ent: validator failed for field \"optional_int\": %w", err)}
+			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
+		}
+	}
+	if v, ok := uuo.mutation.Employment(); ok {
+		if err := user.EmploymentValidator(v); err != nil {
+			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
 		}
 	}
 	return nil
@@ -1941,7 +1987,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := uuo.fields; len(fields) > 0 {
@@ -2068,6 +2114,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: user.FieldRole,
+		})
+	}
+	if value, ok := uuo.mutation.Employment(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldEmployment,
 		})
 	}
 	if value, ok := uuo.mutation.SSOCert(); ok {

@@ -112,13 +112,13 @@ func (cc *CommentCreate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (cc *CommentCreate) check() error {
 	if _, ok := cc.mutation.Text(); !ok {
-		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "text"`)}
+		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "Comment.text"`)}
 	}
 	if _, ok := cc.mutation.PostID(); !ok {
-		return &ValidationError{Name: "post_id", err: errors.New(`ent: missing required field "post_id"`)}
+		return &ValidationError{Name: "post_id", err: errors.New(`ent: missing required field "Comment.post_id"`)}
 	}
 	if _, ok := cc.mutation.PostID(); !ok {
-		return &ValidationError{Name: "post", err: errors.New("ent: missing required edge \"post\"")}
+		return &ValidationError{Name: "post", err: errors.New(`ent: missing required edge "Comment.post"`)}
 	}
 	return nil
 }

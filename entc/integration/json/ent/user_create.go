@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -79,6 +80,7 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 		err  error
 		node *User
 	)
+	uc.defaults()
 	if len(uc.hooks) == 0 {
 		if err = uc.check(); err != nil {
 			return nil, err
@@ -136,8 +138,23 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.Dirs(); !ok {
+		v := user.DefaultDirs()
+		uc.mutation.SetDirs(v)
+	}
+	if _, ok := uc.mutation.Ints(); !ok {
+		v := user.DefaultInts
+		uc.mutation.SetInts(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
+	if _, ok := uc.mutation.Dirs(); !ok {
+		return &ValidationError{Name: "dirs", err: errors.New(`ent: missing required field "User.dirs"`)}
+	}
 	return nil
 }
 
@@ -238,6 +255,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	for i := range ucb.builders {
 		func(i int, root context.Context) {
 			builder := ucb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)
 				if !ok {

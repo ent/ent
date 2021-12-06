@@ -32,13 +32,17 @@ GraphQL mutations, and add additional methods on the different builders to accep
     // {{ $input }} represents a mutation input for creating {{ plural $n.Name | lower }}.
     type {{ $input }} struct {
         {{- range $f := $n.Fields }}
-            {{ $f.StructField }} {{ if and (or $f.Optional $f.Default) (not $f.Type.RType.IsPtr) }}*{{ end }}{{ $f.Type }}
+            {{- if not $f.IsEdgeField }}
+                {{ $f.StructField }} {{ if and (or $f.Optional $f.Default) (not $f.Type.RType.IsPtr) }}*{{ end }}{{ $f.Type }}
+            {{- end }}
         {{- end }}
         {{- range $e := $n.Edges }}
             {{- if $e.Unique }}
-                {{ $e.StructField }} {{ if $e.Optional }}*{{ end }}{{ $e.Type.ID.Type }}
+                {{- $structField := print (pascal $e.Name) "ID" }}
+                {{ $structField }} {{ if $e.Optional }}*{{ end }}{{ $e.Type.ID.Type }}
             {{- else }}
-                {{ $e.StructField }} []{{ $e.Type.ID.Type }}
+                {{- $structField := print (singular $e.Name | pascal) "IDs" }}
+                {{ $structField }} []{{ $e.Type.ID.Type }}
             {{- end }}
         {{- end }}
     }
@@ -49,14 +53,17 @@ GraphQL mutations, and add additional methods on the different builders to accep
     // {{ $input }} represents a mutation input for updating {{ plural $n.Name | lower }}.
     type {{ $input }} struct {
         {{- range $f := $n.MutableFields }}
-            {{ $f.StructField }} {{ if not $f.Type.RType.IsPtr }}*{{ end }}{{ $f.Type }}
-            {{- if $f.Optional }}
-                {{ print "Clear" $f.StructField }} bool
+            {{- if not $f.IsEdgeField }}
+                {{ $f.StructField }} {{ if not $f.Type.RType.IsPtr }}*{{ end }}{{ $f.Type }}
+                {{- if $f.Optional }}
+                    {{ print "Clear" $f.StructField }} bool
+                {{- end }}
             {{- end }}
         {{- end }}
         {{- range $e := $n.Edges }}
             {{- if $e.Unique }}
-                {{ $e.StructField }} *{{ $e.Type.ID.Type }}
+                {{- $structField := print (pascal $e.Name) "ID" }}
+                {{ $structField }} *{{ $e.Type.ID.Type }}
                 {{ $e.MutationClear }} bool
             {{- else }}
                 {{ $e.MutationAdd }} []{{ $e.Type.ID.Type }}

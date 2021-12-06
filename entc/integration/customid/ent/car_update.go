@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -185,12 +186,12 @@ func (cu *CarUpdate) ExecX(ctx context.Context) {
 func (cu *CarUpdate) check() error {
 	if v, ok := cu.mutation.BeforeID(); ok {
 		if err := car.BeforeIDValidator(v); err != nil {
-			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+			return &ValidationError{Name: "before_id", err: fmt.Errorf(`ent: validator failed for field "Car.before_id": %w`, err)}
 		}
 	}
 	if v, ok := cu.mutation.AfterID(); ok {
 		if err := car.AfterIDValidator(v); err != nil {
-			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+			return &ValidationError{Name: "after_id", err: fmt.Errorf(`ent: validator failed for field "Car.after_id": %w`, err)}
 		}
 	}
 	return nil
@@ -476,12 +477,12 @@ func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
 func (cuo *CarUpdateOne) check() error {
 	if v, ok := cuo.mutation.BeforeID(); ok {
 		if err := car.BeforeIDValidator(v); err != nil {
-			return &ValidationError{Name: "before_id", err: fmt.Errorf("ent: validator failed for field \"before_id\": %w", err)}
+			return &ValidationError{Name: "before_id", err: fmt.Errorf(`ent: validator failed for field "Car.before_id": %w`, err)}
 		}
 	}
 	if v, ok := cuo.mutation.AfterID(); ok {
 		if err := car.AfterIDValidator(v); err != nil {
-			return &ValidationError{Name: "after_id", err: fmt.Errorf("ent: validator failed for field \"after_id\": %w", err)}
+			return &ValidationError{Name: "after_id", err: fmt.Errorf(`ent: validator failed for field "Car.after_id": %w`, err)}
 		}
 	}
 	return nil
@@ -500,7 +501,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Car.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Car.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := cuo.fields; len(fields) > 0 {

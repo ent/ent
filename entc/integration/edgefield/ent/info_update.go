@@ -9,6 +9,7 @@ package ent
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -311,7 +312,7 @@ func (iuo *InfoUpdateOne) sqlSave(ctx context.Context) (_node *Info, err error) 
 	}
 	id, ok := iuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Info.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Info.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := iuo.fields; len(fields) > 0 {

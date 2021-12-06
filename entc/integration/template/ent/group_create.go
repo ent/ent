@@ -100,7 +100,7 @@ func (gc *GroupCreate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (gc *GroupCreate) check() error {
 	if _, ok := gc.mutation.MaxUsers(); !ok {
-		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "max_users"`)}
+		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "Group.max_users"`)}
 	}
 	return nil
 }

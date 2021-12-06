@@ -231,6 +231,8 @@ err := client.User.
 	// Override some of the fields with a custom update.
 	Update(func(u *ent.UserUpsert) {
 		u.SetAddress("localhost")
+		u.AddCount(1)
+		u.ClearPhone()
 	}).
 	Exec(ctx)
 ```
@@ -279,7 +281,7 @@ id, err := client.User.
 	).
 	Update(func(u *ent.UserUpsert) {
 		u.SetAge(30)
-		u.UpadteName()
+		u.UpdateName()
 	}).
 	ID(ctx)
 
@@ -327,6 +329,18 @@ users, err := a8m.
 	All(ctx)
 ```
 
+Count the number of posts without comments.
+```go
+n, err := client.Post.
+	Query().
+	Where(
+		post.Not(
+		    post.HasComments(),	
+		)
+	).
+	Count(ctx)
+```
+
 More advance traversals can be found in the [next section](traversals.md). 
 
 ## Field Selection
@@ -338,6 +352,26 @@ names, err := client.Pet.
 	Query().
 	Select(pet.FieldName).
 	Strings(ctx)
+```
+
+Get all unique pet names.
+
+```go
+names, err := client.Pet.
+	Query().
+	Unique(true).
+	Select(pet.FieldName).
+	Strings(ctx)
+```
+
+Count the number of unique pet names.
+
+```go
+n, err := client.Pet.
+	Query().
+	Unique(true).
+	Select(pet.FieldName).
+	Count(ctx)
 ```
 
 Select partial objects and partial associations.gs

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -192,7 +193,7 @@ func (guo *GoodsUpdateOne) gremlinSave(ctx context.Context) (*Goods, error) {
 	res := &gremlin.Response{}
 	id, ok := guo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Goods.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Goods.id" for update`)}
 	}
 	query, bindings := guo.gremlin(id).Query()
 	if err := guo.driver.Exec(ctx, query, bindings, res); err != nil {

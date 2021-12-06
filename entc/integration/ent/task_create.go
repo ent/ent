@@ -120,11 +120,11 @@ func (tc *TaskCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (tc *TaskCreate) check() error {
 	if _, ok := tc.mutation.Priority(); !ok {
-		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "priority"`)}
+		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
 	}
 	if v, ok := tc.mutation.Priority(); ok {
 		if err := task.PriorityValidator(int(v)); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "priority": %w`, err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -229,7 +229,13 @@ func (u *TaskUpsert) UpdatePriority() *TaskUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// AddPriority adds v to the "priority" field.
+func (u *TaskUpsert) AddPriority(v schema.Priority) *TaskUpsert {
+	u.Add(task.FieldPriority, v)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Task.Create().
@@ -275,6 +281,13 @@ func (u *TaskUpsertOne) Update(set func(*TaskUpsert)) *TaskUpsertOne {
 func (u *TaskUpsertOne) SetPriority(v schema.Priority) *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.SetPriority(v)
+	})
+}
+
+// AddPriority adds v to the "priority" field.
+func (u *TaskUpsertOne) AddPriority(v schema.Priority) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.AddPriority(v)
 	})
 }
 
@@ -447,7 +460,7 @@ type TaskUpsertBulk struct {
 	create *TaskCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Task.Create().
@@ -493,6 +506,13 @@ func (u *TaskUpsertBulk) Update(set func(*TaskUpsert)) *TaskUpsertBulk {
 func (u *TaskUpsertBulk) SetPriority(v schema.Priority) *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.SetPriority(v)
+	})
+}
+
+// AddPriority adds v to the "priority" field.
+func (u *TaskUpsertBulk) AddPriority(v schema.Priority) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.AddPriority(v)
 	})
 }
 

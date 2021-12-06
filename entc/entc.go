@@ -12,12 +12,14 @@ import (
 	"go/token"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/entc/internal"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/field"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -50,7 +52,7 @@ func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
 //		IDType: &field.TypeInfo{Type: field.TypeInt},
 //	})
 //
-func Generate(schemaPath string, cfg *gen.Config, options ...Option) (err error) {
+func Generate(schemaPath string, cfg *gen.Config, options ...Option) error {
 	if cfg.Target == "" {
 		abs, err := filepath.Abs(schemaPath)
 		if err != nil {
@@ -140,10 +142,13 @@ func Annotations(annotations ...Annotation) Option {
 		}
 		for _, ant := range annotations {
 			name := ant.Name()
-			if _, ok := cfg.Annotations[name]; ok {
+			if curr, ok := cfg.Annotations[name]; !ok {
+				cfg.Annotations[name] = ant
+			} else if m, ok := curr.(schema.Merger); ok {
+				cfg.Annotations[name] = m.Merge(ant)
+			} else {
 				return fmt.Errorf("duplicate annotations with name %q", name)
 			}
-			cfg.Annotations[name] = ant
 		}
 		return nil
 	}
@@ -173,51 +178,49 @@ func TemplateDir(path string) Option {
 	})
 }
 
-type (
-	// Extension describes an Ent code generation extension that
-	// allows customizing the code generation and integrate with
-	// other tools and libraries (e.g. GraphQL, gRPC, OpenAPI) by
-	// by registering hooks, templates and global annotations in
-	// one simple call.
+// Extension describes an Ent code generation extension that
+// allows customizing the code generation and integrate with
+// other tools and libraries (e.g. GraphQL, gRPC, OpenAPI) by
+// registering hooks, templates and global annotations in one
+// simple call.
+//
+//	ex, err := entgql.NewExtension(
+//		entgql.WithConfig("../gqlgen.yml"),
+//		entgql.WithSchema("../schema.graphql"),
+//	)
+//	if err != nil {
+//		log.Fatalf("creating graphql extension: %v", err)
+//	}
+//	err = entc.Generate("./schema", &gen.Config{
+//		Templates: entswag.Templates,
+//	}, entc.Extensions(ex))
+//	if err != nil {
+//		log.Fatalf("running ent codegen: %v", err)
+//	}
+//
+type Extension interface {
+	// Hooks holds an optional list of Hooks to apply
+	// on the graph before/after the code-generation.
+	Hooks() []gen.Hook
+
+	// Annotations injects global annotations to the gen.Config object that
+	// can be accessed globally in all templates. Unlike schema annotations,
+	// being serializable to JSON raw value is not mandatory.
 	//
-	//	ex, err := entgql.NewExtension(
-	//		entgql.WithConfig("../gqlgen.yml"),
-	//		entgql.WithSchema("../schema.graphql"),
-	//	)
-	//	if err != nil {
-	//		log.Fatalf("creating graphql extension: %v", err)
-	//	}
-	//	err = entc.Generate("./schema", &gen.Config{
-	//		Templates: entswag.Templates,
-	//	}, entc.Extensions(ex))
-	//	if err != nil {
-	//		log.Fatalf("running ent codegen: %v", err)
-	//	}
+	//	{{- with $.Config.Annotations.GQL }}
+	//		{{/* Annotation usage goes here. */}}
+	//	{{- end }}
 	//
-	Extension interface {
-		// Hooks holds an optional list of Hooks to apply
-		// on the graph before/after the code-generation.
-		Hooks() []gen.Hook
+	Annotations() []Annotation
 
-		// Annotations injects global annotations to the gen.Config object that
-		// can be accessed globally in all templates. Unlike schema annotations,
-		// being serializable to JSON raw value is not mandatory.
-		//
-		//	{{- with $.Config.Annotations.GQL }}
-		//		{{/* Annotation usage goes here. */}}
-		//	{{- end }}
-		//
-		Annotations() []Annotation
+	// Templates specifies a list of alternative templates
+	// to execute or to override the default.
+	Templates() []*gen.Template
 
-		// Templates specifies a list of alternative templates
-		// to execute or to override the default.
-		Templates() []*gen.Template
-
-		// Options specifies a list of entc.Options to evaluate on
-		// the gen.Config before executing the code generation.
-		Options() []Option
-	}
-)
+	// Options specifies a list of entc.Options to evaluate on
+	// the gen.Config before executing the code generation.
+	Options() []Option
+}
 
 // Extensions evaluates the list of Extensions on the gen.Config.
 func Extensions(extensions ...Extension) Option {
@@ -263,6 +266,85 @@ func (DefaultExtension) Options() []Option { return nil }
 
 var _ Extension = (*DefaultExtension)(nil)
 
+// DependencyOption allows configuring optional dependencies using functional options.
+type DependencyOption func(*gen.Dependency) error
+
+// DependencyType sets the type of the struct field in
+// the generated builders for the configured dependency.
+func DependencyType(v interface{}) DependencyOption {
+	return func(d *gen.Dependency) error {
+		if v == nil {
+			return errors.New("nil dependency type")
+		}
+		t := reflect.TypeOf(v)
+		tv := indirect(t)
+		d.Type = &field.TypeInfo{
+			Ident:   t.String(),
+			PkgPath: tv.PkgPath(),
+			RType: &field.RType{
+				Kind:    t.Kind(),
+				Name:    tv.Name(),
+				Ident:   tv.String(),
+				PkgPath: tv.PkgPath(),
+			},
+		}
+		return nil
+	}
+}
+
+// DependencyTypeInfo is similar to DependencyType, but
+// allows setting the field.TypeInfo explicitly.
+func DependencyTypeInfo(t *field.TypeInfo) DependencyOption {
+	return func(d *gen.Dependency) error {
+		if t == nil {
+			return errors.New("nil dependency type info")
+		}
+		d.Type = t
+		return nil
+	}
+}
+
+// DependencyName sets the struct field and the option name
+// of the dependency in the generated builders.
+func DependencyName(name string) DependencyOption {
+	return func(d *gen.Dependency) error {
+		d.Field = name
+		d.Option = name
+		return nil
+	}
+}
+
+// Dependency allows configuring optional dependencies as struct fields on the
+// generated builders. For example:
+//
+//	opts := []entc.Option{
+//		entc.Dependency(
+//			entc.DependencyType(&http.Client{}),
+//		),
+//		entc.Dependency(
+//			entc.DependencyName("DB"),
+//			entc.DependencyType(&sql.DB{}),
+//		)
+//	}
+//	if err := entc.Generate("./ent/path", &gen.Config{}, opts...); err != nil {
+//		log.Fatalf("running ent codegen: %v", err)
+//	}
+//
+func Dependency(opts ...DependencyOption) Option {
+	return func(cfg *gen.Config) error {
+		d := &gen.Dependency{}
+		for _, opt := range opts {
+			if err := opt(d); err != nil {
+				return err
+			}
+		}
+		if err := d.Build(); err != nil {
+			return err
+		}
+		return Annotations(gen.Dependencies{d})(cfg)
+	}
+}
+
 // templateOption ensures the template instantiate
 // once for config and execute the given Option.
 func templateOption(next func(t *gen.Template) (*gen.Template, error)) Option {
@@ -306,4 +388,12 @@ func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
 	}
 	target := filepath.Join(cfg.Target, "internal/schema.go")
 	return (&internal.Snapshot{Path: target, Config: cfg}).Restore()
+}
+
+// indirect returns the type at the end of indirection.
+func indirect(t reflect.Type) reflect.Type {
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return t
 }

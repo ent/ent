@@ -153,7 +153,7 @@ func (pc *PostCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pc *PostCreate) check() error {
 	if _, ok := pc.mutation.Text(); !ok {
-		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "text"`)}
+		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "Post.text"`)}
 	}
 	return nil
 }

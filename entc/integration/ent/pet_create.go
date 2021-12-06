@@ -53,6 +53,20 @@ func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
 	return pc
 }
 
+// SetNickname sets the "nickname" field.
+func (pc *PetCreate) SetNickname(s string) *PetCreate {
+	pc.mutation.SetNickname(s)
+	return pc
+}
+
+// SetNillableNickname sets the "nickname" field if the given value is not nil.
+func (pc *PetCreate) SetNillableNickname(s *string) *PetCreate {
+	if s != nil {
+		pc.SetNickname(*s)
+	}
+	return pc
+}
+
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (pc *PetCreate) SetTeamID(id int) *PetCreate {
 	pc.mutation.SetTeamID(id)
@@ -171,10 +185,10 @@ func (pc *PetCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pc *PetCreate) check() error {
 	if _, ok := pc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "age"`)}
+		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
 	}
 	if _, ok := pc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
 	return nil
 }
@@ -227,6 +241,14 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 			Column: pet.FieldUUID,
 		})
 		_node.UUID = value
+	}
+	if value, ok := pc.mutation.Nickname(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: pet.FieldNickname,
+		})
+		_node.Nickname = value
 	}
 	if nodes := pc.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -334,6 +356,12 @@ func (u *PetUpsert) UpdateAge() *PetUpsert {
 	return u
 }
 
+// AddAge adds v to the "age" field.
+func (u *PetUpsert) AddAge(v float64) *PetUpsert {
+	u.Add(pet.FieldAge, v)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *PetUpsert) SetName(v string) *PetUpsert {
 	u.Set(pet.FieldName, v)
@@ -364,7 +392,25 @@ func (u *PetUpsert) ClearUUID() *PetUpsert {
 	return u
 }
 
-// UpdateNewValues updates the fields using the new values that were set on create.
+// SetNickname sets the "nickname" field.
+func (u *PetUpsert) SetNickname(v string) *PetUpsert {
+	u.Set(pet.FieldNickname, v)
+	return u
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *PetUpsert) UpdateNickname() *PetUpsert {
+	u.SetExcluded(pet.FieldNickname)
+	return u
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *PetUpsert) ClearNickname() *PetUpsert {
+	u.SetNull(pet.FieldNickname)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Pet.Create().
@@ -413,6 +459,13 @@ func (u *PetUpsertOne) SetAge(v float64) *PetUpsertOne {
 	})
 }
 
+// AddAge adds v to the "age" field.
+func (u *PetUpsertOne) AddAge(v float64) *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.AddAge(v)
+	})
+}
+
 // UpdateAge sets the "age" field to the value that was provided on create.
 func (u *PetUpsertOne) UpdateAge() *PetUpsertOne {
 	return u.Update(func(s *PetUpsert) {
@@ -452,6 +505,27 @@ func (u *PetUpsertOne) UpdateUUID() *PetUpsertOne {
 func (u *PetUpsertOne) ClearUUID() *PetUpsertOne {
 	return u.Update(func(s *PetUpsert) {
 		s.ClearUUID()
+	})
+}
+
+// SetNickname sets the "nickname" field.
+func (u *PetUpsertOne) SetNickname(v string) *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.SetNickname(v)
+	})
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *PetUpsertOne) UpdateNickname() *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.UpdateNickname()
+	})
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *PetUpsertOne) ClearNickname() *PetUpsertOne {
+	return u.Update(func(s *PetUpsert) {
+		s.ClearNickname()
 	})
 }
 
@@ -617,7 +691,7 @@ type PetUpsertBulk struct {
 	create *PetCreateBulk
 }
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.Pet.Create().
@@ -666,6 +740,13 @@ func (u *PetUpsertBulk) SetAge(v float64) *PetUpsertBulk {
 	})
 }
 
+// AddAge adds v to the "age" field.
+func (u *PetUpsertBulk) AddAge(v float64) *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.AddAge(v)
+	})
+}
+
 // UpdateAge sets the "age" field to the value that was provided on create.
 func (u *PetUpsertBulk) UpdateAge() *PetUpsertBulk {
 	return u.Update(func(s *PetUpsert) {
@@ -705,6 +786,27 @@ func (u *PetUpsertBulk) UpdateUUID() *PetUpsertBulk {
 func (u *PetUpsertBulk) ClearUUID() *PetUpsertBulk {
 	return u.Update(func(s *PetUpsert) {
 		s.ClearUUID()
+	})
+}
+
+// SetNickname sets the "nickname" field.
+func (u *PetUpsertBulk) SetNickname(v string) *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.SetNickname(v)
+	})
+}
+
+// UpdateNickname sets the "nickname" field to the value that was provided on create.
+func (u *PetUpsertBulk) UpdateNickname() *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.UpdateNickname()
+	})
+}
+
+// ClearNickname clears the value of the "nickname" field.
+func (u *PetUpsertBulk) ClearNickname() *PetUpsertBulk {
+	return u.Update(func(s *PetUpsert) {
+		s.ClearNickname()
 	})
 }
 

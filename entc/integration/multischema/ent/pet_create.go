@@ -38,16 +38,16 @@ func (pc *PetCreate) SetNillableName(s *string) *PetCreate {
 	return pc
 }
 
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
-	pc.mutation.SetOwnerID(id)
+// SetOwnerID sets the "owner_id" field.
+func (pc *PetCreate) SetOwnerID(i int) *PetCreate {
+	pc.mutation.SetOwnerID(i)
 	return pc
 }
 
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (pc *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
-	if id != nil {
-		pc = pc.SetOwnerID(*id)
+// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
+func (pc *PetCreate) SetNillableOwnerID(i *int) *PetCreate {
+	if i != nil {
+		pc.SetOwnerID(*i)
 	}
 	return pc
 }
@@ -137,7 +137,7 @@ func (pc *PetCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pc *PetCreate) check() error {
 	if _, ok := pc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
 	return nil
 }
@@ -193,7 +193,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_pets = &nodes[0]
+		_node.OwnerID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

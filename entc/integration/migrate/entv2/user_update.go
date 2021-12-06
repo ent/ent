@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -418,27 +419,27 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 func (uu *UserUpdate) check() error {
 	if v, ok := uu.mutation.MixedEnum(); ok {
 		if err := user.MixedEnumValidator(v); err != nil {
-			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf("entv2: validator failed for field \"mixed_enum\": %w", err)}
+			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf(`entv2: validator failed for field "User.mixed_enum": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.Nickname(); ok {
 		if err := user.NicknameValidator(v); err != nil {
-			return &ValidationError{Name: "nickname", err: fmt.Errorf("entv2: validator failed for field \"nickname\": %w", err)}
+			return &ValidationError{Name: "nickname", err: fmt.Errorf(`entv2: validator failed for field "User.nickname": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.Blob(); ok {
 		if err := user.BlobValidator(v); err != nil {
-			return &ValidationError{Name: "blob", err: fmt.Errorf("entv2: validator failed for field \"blob\": %w", err)}
+			return &ValidationError{Name: "blob", err: fmt.Errorf(`entv2: validator failed for field "User.blob": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
+			return &ValidationError{Name: "state", err: fmt.Errorf(`entv2: validator failed for field "User.state": %w`, err)}
 		}
 	}
 	if v, ok := uu.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("entv2: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entv2: validator failed for field "User.status": %w`, err)}
 		}
 	}
 	return nil
@@ -1170,27 +1171,27 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 func (uuo *UserUpdateOne) check() error {
 	if v, ok := uuo.mutation.MixedEnum(); ok {
 		if err := user.MixedEnumValidator(v); err != nil {
-			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf("entv2: validator failed for field \"mixed_enum\": %w", err)}
+			return &ValidationError{Name: "mixed_enum", err: fmt.Errorf(`entv2: validator failed for field "User.mixed_enum": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.Nickname(); ok {
 		if err := user.NicknameValidator(v); err != nil {
-			return &ValidationError{Name: "nickname", err: fmt.Errorf("entv2: validator failed for field \"nickname\": %w", err)}
+			return &ValidationError{Name: "nickname", err: fmt.Errorf(`entv2: validator failed for field "User.nickname": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.Blob(); ok {
 		if err := user.BlobValidator(v); err != nil {
-			return &ValidationError{Name: "blob", err: fmt.Errorf("entv2: validator failed for field \"blob\": %w", err)}
+			return &ValidationError{Name: "blob", err: fmt.Errorf(`entv2: validator failed for field "User.blob": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.State(); ok {
 		if err := user.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("entv2: validator failed for field \"state\": %w", err)}
+			return &ValidationError{Name: "state", err: fmt.Errorf(`entv2: validator failed for field "User.state": %w`, err)}
 		}
 	}
 	if v, ok := uuo.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf("entv2: validator failed for field \"status\": %w", err)}
+			return &ValidationError{Name: "status", err: fmt.Errorf(`entv2: validator failed for field "User.status": %w`, err)}
 		}
 	}
 	return nil
@@ -1209,7 +1210,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	id, ok := uuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing User.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`entv2: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := uuo.fields; len(fields) > 0 {

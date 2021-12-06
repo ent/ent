@@ -159,10 +159,10 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	return a
 }
 
-var (
-	_ schema.Annotation = (*Annotation)(nil)
-	_ schema.Merger     = (*Annotation)(nil)
-)
+var _ interface {
+	schema.Annotation
+	schema.Merger
+} = (*Annotation)(nil)
 
 // ReferenceOption for constraint actions.
 type ReferenceOption string
@@ -218,7 +218,7 @@ func Prefix(prefix uint) *IndexAnnotation {
 	}
 }
 
-// PrefixColumns returns a new index annotation with column prefix for
+// PrefixColumn returns a new index annotation with column prefix for
 // multi-column indexes. In MySQL, the following annotation maps to:
 //
 //	index.Fields("c1", "c2", "c3").

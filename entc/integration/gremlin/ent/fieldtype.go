@@ -74,12 +74,16 @@ type FieldType struct {
 	OptionalFloat float64 `json:"optional_float,omitempty"`
 	// OptionalFloat32 holds the value of the "optional_float32" field.
 	OptionalFloat32 float32 `json:"optional_float32,omitempty"`
+	// Text holds the value of the "text" field.
+	Text string `json:"text,omitempty"`
 	// Datetime holds the value of the "datetime" field.
 	Datetime time.Time `json:"datetime,omitempty"`
 	// Decimal holds the value of the "decimal" field.
 	Decimal float64 `json:"decimal,omitempty"`
 	// LinkOther holds the value of the "link_other" field.
 	LinkOther *schema.Link `json:"link_other,omitempty"`
+	// LinkOtherFunc holds the value of the "link_other_func" field.
+	LinkOtherFunc *schema.Link `json:"link_other_func,omitempty"`
 	// MAC holds the value of the "mac" field.
 	MAC schema.MAC `json:"mac,omitempty"`
 	// StringArray holds the value of the "string_array" field.
@@ -112,6 +116,8 @@ type FieldType struct {
 	DeletedAt *sql.NullTime `json:"deleted_at,omitempty"`
 	// RawData holds the value of the "raw_data" field.
 	RawData []byte `json:"raw_data,omitempty"`
+	// Sensitive holds the value of the "sensitive" field.
+	Sensitive []byte `json:"-"`
 	// IP holds the value of the "ip" field.
 	IP net.IP `json:"ip,omitempty"`
 	// NullInt64 holds the value of the "null_int64" field.
@@ -184,9 +190,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		State                 fieldtype.State       `json:"state,omitempty"`
 		OptionalFloat         float64               `json:"optional_float,omitempty"`
 		OptionalFloat32       float32               `json:"optional_float32,omitempty"`
+		Text                  string                `json:"text,omitempty"`
 		Datetime              int64                 `json:"datetime,omitempty"`
 		Decimal               float64               `json:"decimal,omitempty"`
 		LinkOther             *schema.Link          `json:"link_other,omitempty"`
+		LinkOtherFunc         *schema.Link          `json:"link_other_func,omitempty"`
 		MAC                   schema.MAC            `json:"mac,omitempty"`
 		StringArray           schema.Strings        `json:"string_array,omitempty"`
 		Password              string                `json:"password,omitempty"`
@@ -203,6 +211,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		Deleted               *sql.NullBool         `json:"deleted,omitempty"`
 		DeletedAt             *sql.NullTime         `json:"deleted_at,omitempty"`
 		RawData               []byte                `json:"raw_data,omitempty"`
+		Sensitive             []byte                `json:"sensitive,omitempty"`
 		IP                    net.IP                `json:"ip,omitempty"`
 		NullInt64             *sql.NullInt64        `json:"null_int64,omitempty"`
 		SchemaInt             schema.Int            `json:"schema_int,omitempty"`
@@ -251,9 +260,11 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.State = scanft.State
 	ft.OptionalFloat = scanft.OptionalFloat
 	ft.OptionalFloat32 = scanft.OptionalFloat32
+	ft.Text = scanft.Text
 	ft.Datetime = time.Unix(0, scanft.Datetime)
 	ft.Decimal = scanft.Decimal
 	ft.LinkOther = scanft.LinkOther
+	ft.LinkOtherFunc = scanft.LinkOtherFunc
 	ft.MAC = scanft.MAC
 	ft.StringArray = scanft.StringArray
 	ft.Password = scanft.Password
@@ -270,6 +281,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.Deleted = scanft.Deleted
 	ft.DeletedAt = scanft.DeletedAt
 	ft.RawData = scanft.RawData
+	ft.Sensitive = scanft.Sensitive
 	ft.IP = scanft.IP
 	ft.NullInt64 = scanft.NullInt64
 	ft.SchemaInt = scanft.SchemaInt
@@ -373,12 +385,16 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
 	builder.WriteString(", optional_float32=")
 	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
+	builder.WriteString(", text=")
+	builder.WriteString(ft.Text)
 	builder.WriteString(", datetime=")
 	builder.WriteString(ft.Datetime.Format(time.ANSIC))
 	builder.WriteString(", decimal=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
 	builder.WriteString(", link_other=")
 	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
+	builder.WriteString(", link_other_func=")
+	builder.WriteString(fmt.Sprintf("%v", ft.LinkOtherFunc))
 	builder.WriteString(", mac=")
 	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
 	builder.WriteString(", string_array=")
@@ -422,6 +438,7 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
 	builder.WriteString(", raw_data=")
 	builder.WriteString(fmt.Sprintf("%v", ft.RawData))
+	builder.WriteString(", sensitive=<sensitive>")
 	builder.WriteString(", ip=")
 	builder.WriteString(fmt.Sprintf("%v", ft.IP))
 	builder.WriteString(", null_int64=")
@@ -502,9 +519,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		State                 fieldtype.State       `json:"state,omitempty"`
 		OptionalFloat         float64               `json:"optional_float,omitempty"`
 		OptionalFloat32       float32               `json:"optional_float32,omitempty"`
+		Text                  string                `json:"text,omitempty"`
 		Datetime              int64                 `json:"datetime,omitempty"`
 		Decimal               float64               `json:"decimal,omitempty"`
 		LinkOther             *schema.Link          `json:"link_other,omitempty"`
+		LinkOtherFunc         *schema.Link          `json:"link_other_func,omitempty"`
 		MAC                   schema.MAC            `json:"mac,omitempty"`
 		StringArray           schema.Strings        `json:"string_array,omitempty"`
 		Password              string                `json:"password,omitempty"`
@@ -521,6 +540,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		Deleted               *sql.NullBool         `json:"deleted,omitempty"`
 		DeletedAt             *sql.NullTime         `json:"deleted_at,omitempty"`
 		RawData               []byte                `json:"raw_data,omitempty"`
+		Sensitive             []byte                `json:"sensitive,omitempty"`
 		IP                    net.IP                `json:"ip,omitempty"`
 		NullInt64             *sql.NullInt64        `json:"null_int64,omitempty"`
 		SchemaInt             schema.Int            `json:"schema_int,omitempty"`
@@ -571,9 +591,11 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			State:                 v.State,
 			OptionalFloat:         v.OptionalFloat,
 			OptionalFloat32:       v.OptionalFloat32,
+			Text:                  v.Text,
 			Datetime:              time.Unix(0, v.Datetime),
 			Decimal:               v.Decimal,
 			LinkOther:             v.LinkOther,
+			LinkOtherFunc:         v.LinkOtherFunc,
 			MAC:                   v.MAC,
 			StringArray:           v.StringArray,
 			Password:              v.Password,
@@ -590,6 +612,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			Deleted:               v.Deleted,
 			DeletedAt:             v.DeletedAt,
 			RawData:               v.RawData,
+			Sensitive:             v.Sensitive,
 			IP:                    v.IP,
 			NullInt64:             v.NullInt64,
 			SchemaInt:             v.SchemaInt,

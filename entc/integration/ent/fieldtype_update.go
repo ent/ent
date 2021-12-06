@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -414,7 +415,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint(u *uint) *FieldTypeUpdate {
 }
 
 // AddOptionalUint adds u to the "optional_uint" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint(u uint) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint(u int) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint(u)
 	return ftu
 }
@@ -441,7 +442,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint8(u *uint8) *FieldTypeUpdate 
 }
 
 // AddOptionalUint8 adds u to the "optional_uint8" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint8(u uint8) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint8(u int8) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint8(u)
 	return ftu
 }
@@ -468,7 +469,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint16(u *uint16) *FieldTypeUpdat
 }
 
 // AddOptionalUint16 adds u to the "optional_uint16" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint16(u uint16) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint16(u int16) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint16(u)
 	return ftu
 }
@@ -495,7 +496,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint32(u *uint32) *FieldTypeUpdat
 }
 
 // AddOptionalUint32 adds u to the "optional_uint32" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint32(u uint32) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint32(u int32) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint32(u)
 	return ftu
 }
@@ -522,7 +523,7 @@ func (ftu *FieldTypeUpdate) SetNillableOptionalUint64(u *uint64) *FieldTypeUpdat
 }
 
 // AddOptionalUint64 adds u to the "optional_uint64" field.
-func (ftu *FieldTypeUpdate) AddOptionalUint64(u uint64) *FieldTypeUpdate {
+func (ftu *FieldTypeUpdate) AddOptionalUint64(u int64) *FieldTypeUpdate {
 	ftu.mutation.AddOptionalUint64(u)
 	return ftu
 }
@@ -607,6 +608,26 @@ func (ftu *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
 	return ftu
 }
 
+// SetText sets the "text" field.
+func (ftu *FieldTypeUpdate) SetText(s string) *FieldTypeUpdate {
+	ftu.mutation.SetText(s)
+	return ftu
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableText(s *string) *FieldTypeUpdate {
+	if s != nil {
+		ftu.SetText(*s)
+	}
+	return ftu
+}
+
+// ClearText clears the value of the "text" field.
+func (ftu *FieldTypeUpdate) ClearText() *FieldTypeUpdate {
+	ftu.mutation.ClearText()
+	return ftu
+}
+
 // SetDatetime sets the "datetime" field.
 func (ftu *FieldTypeUpdate) SetDatetime(t time.Time) *FieldTypeUpdate {
 	ftu.mutation.SetDatetime(t)
@@ -663,6 +684,18 @@ func (ftu *FieldTypeUpdate) SetLinkOther(s *schema.Link) *FieldTypeUpdate {
 // ClearLinkOther clears the value of the "link_other" field.
 func (ftu *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate {
 	ftu.mutation.ClearLinkOther()
+	return ftu
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftu *FieldTypeUpdate) SetLinkOtherFunc(s *schema.Link) *FieldTypeUpdate {
+	ftu.mutation.SetLinkOtherFunc(s)
+	return ftu
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (ftu *FieldTypeUpdate) ClearLinkOtherFunc() *FieldTypeUpdate {
+	ftu.mutation.ClearLinkOtherFunc()
 	return ftu
 }
 
@@ -928,6 +961,18 @@ func (ftu *FieldTypeUpdate) SetRawData(b []byte) *FieldTypeUpdate {
 // ClearRawData clears the value of the "raw_data" field.
 func (ftu *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
 	ftu.mutation.ClearRawData()
+	return ftu
+}
+
+// SetSensitive sets the "sensitive" field.
+func (ftu *FieldTypeUpdate) SetSensitive(b []byte) *FieldTypeUpdate {
+	ftu.mutation.SetSensitive(b)
+	return ftu
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (ftu *FieldTypeUpdate) ClearSensitive() *FieldTypeUpdate {
+	ftu.mutation.ClearSensitive()
 	return ftu
 }
 
@@ -1355,47 +1400,47 @@ func (ftu *FieldTypeUpdate) defaults() {
 func (ftu *FieldTypeUpdate) check() error {
 	if v, ok := ftu.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
+			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.MAC(); ok {
 		if err := fieldtype.MACValidator(v.String()); err != nil {
-			return &ValidationError{Name: "mac", err: fmt.Errorf("ent: validator failed for field \"mac\": %w", err)}
+			return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.Ndir(); ok {
 		if err := fieldtype.NdirValidator(string(v)); err != nil {
-			return &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+			return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
-			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.RawData(); ok {
 		if err := fieldtype.RawDataValidator(v); err != nil {
-			return &ValidationError{Name: "raw_data", err: fmt.Errorf("ent: validator failed for field \"raw_data\": %w", err)}
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.IP(); ok {
 		if err := fieldtype.IPValidator([]byte(v)); err != nil {
-			return &ValidationError{Name: "ip", err: fmt.Errorf("ent: validator failed for field \"ip\": %w", err)}
+			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
 		}
 	}
 	if v, ok := ftu.mutation.Priority(); ok {
 		if err := fieldtype.PriorityValidator(v); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -1862,6 +1907,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldOptionalFloat32,
 		})
 	}
+	if value, ok := ftu.mutation.Text(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldText,
+		})
+	}
+	if ftu.mutation.TextCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldText,
+		})
+	}
 	if value, ok := ftu.mutation.Datetime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -1906,6 +1964,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeOther,
 			Column: fieldtype.FieldLinkOther,
+		})
+	}
+	if value, ok := ftu.mutation.LinkOtherFunc(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldLinkOtherFunc,
+		})
+	}
+	if ftu.mutation.LinkOtherFuncCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: fieldtype.FieldLinkOtherFunc,
 		})
 	}
 	if value, ok := ftu.mutation.MAC(); ok {
@@ -2115,6 +2186,19 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Column: fieldtype.FieldRawData,
+		})
+	}
+	if value, ok := ftu.mutation.Sensitive(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldSensitive,
+		})
+	}
+	if ftu.mutation.SensitiveCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: fieldtype.FieldSensitive,
 		})
 	}
 	if value, ok := ftu.mutation.IP(); ok {
@@ -2779,7 +2863,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint(u *uint) *FieldTypeUpdat
 }
 
 // AddOptionalUint adds u to the "optional_uint" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint(u uint) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint(u int) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint(u)
 	return ftuo
 }
@@ -2806,7 +2890,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint8(u *uint8) *FieldTypeUpd
 }
 
 // AddOptionalUint8 adds u to the "optional_uint8" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint8(u uint8) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint8(u int8) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint8(u)
 	return ftuo
 }
@@ -2833,7 +2917,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint16(u *uint16) *FieldTypeU
 }
 
 // AddOptionalUint16 adds u to the "optional_uint16" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint16(u uint16) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint16(u int16) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint16(u)
 	return ftuo
 }
@@ -2860,7 +2944,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint32(u *uint32) *FieldTypeU
 }
 
 // AddOptionalUint32 adds u to the "optional_uint32" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint32(u uint32) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint32(u int32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint32(u)
 	return ftuo
 }
@@ -2887,7 +2971,7 @@ func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUint64(u *uint64) *FieldTypeU
 }
 
 // AddOptionalUint64 adds u to the "optional_uint64" field.
-func (ftuo *FieldTypeUpdateOne) AddOptionalUint64(u uint64) *FieldTypeUpdateOne {
+func (ftuo *FieldTypeUpdateOne) AddOptionalUint64(u int64) *FieldTypeUpdateOne {
 	ftuo.mutation.AddOptionalUint64(u)
 	return ftuo
 }
@@ -2972,6 +3056,26 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetText sets the "text" field.
+func (ftuo *FieldTypeUpdateOne) SetText(s string) *FieldTypeUpdateOne {
+	ftuo.mutation.SetText(s)
+	return ftuo
+}
+
+// SetNillableText sets the "text" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableText(s *string) *FieldTypeUpdateOne {
+	if s != nil {
+		ftuo.SetText(*s)
+	}
+	return ftuo
+}
+
+// ClearText clears the value of the "text" field.
+func (ftuo *FieldTypeUpdateOne) ClearText() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearText()
+	return ftuo
+}
+
 // SetDatetime sets the "datetime" field.
 func (ftuo *FieldTypeUpdateOne) SetDatetime(t time.Time) *FieldTypeUpdateOne {
 	ftuo.mutation.SetDatetime(t)
@@ -3028,6 +3132,18 @@ func (ftuo *FieldTypeUpdateOne) SetLinkOther(s *schema.Link) *FieldTypeUpdateOne
 // ClearLinkOther clears the value of the "link_other" field.
 func (ftuo *FieldTypeUpdateOne) ClearLinkOther() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearLinkOther()
+	return ftuo
+}
+
+// SetLinkOtherFunc sets the "link_other_func" field.
+func (ftuo *FieldTypeUpdateOne) SetLinkOtherFunc(s *schema.Link) *FieldTypeUpdateOne {
+	ftuo.mutation.SetLinkOtherFunc(s)
+	return ftuo
+}
+
+// ClearLinkOtherFunc clears the value of the "link_other_func" field.
+func (ftuo *FieldTypeUpdateOne) ClearLinkOtherFunc() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearLinkOtherFunc()
 	return ftuo
 }
 
@@ -3293,6 +3409,18 @@ func (ftuo *FieldTypeUpdateOne) SetRawData(b []byte) *FieldTypeUpdateOne {
 // ClearRawData clears the value of the "raw_data" field.
 func (ftuo *FieldTypeUpdateOne) ClearRawData() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearRawData()
+	return ftuo
+}
+
+// SetSensitive sets the "sensitive" field.
+func (ftuo *FieldTypeUpdateOne) SetSensitive(b []byte) *FieldTypeUpdateOne {
+	ftuo.mutation.SetSensitive(b)
+	return ftuo
+}
+
+// ClearSensitive clears the value of the "sensitive" field.
+func (ftuo *FieldTypeUpdateOne) ClearSensitive() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearSensitive()
 	return ftuo
 }
 
@@ -3727,47 +3855,47 @@ func (ftuo *FieldTypeUpdateOne) defaults() {
 func (ftuo *FieldTypeUpdateOne) check() error {
 	if v, ok := ftuo.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf("ent: validator failed for field \"validate_optional_int32\": %w", err)}
+			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf("ent: validator failed for field \"state\": %w", err)}
+			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.MAC(); ok {
 		if err := fieldtype.MACValidator(v.String()); err != nil {
-			return &ValidationError{Name: "mac", err: fmt.Errorf("ent: validator failed for field \"mac\": %w", err)}
+			return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.Ndir(); ok {
 		if err := fieldtype.NdirValidator(string(v)); err != nil {
-			return &ValidationError{Name: "ndir", err: fmt.Errorf("ent: validator failed for field \"ndir\": %w", err)}
+			return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
-			return &ValidationError{Name: "link", err: fmt.Errorf("ent: validator failed for field \"link\": %w", err)}
+			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.RawData(); ok {
 		if err := fieldtype.RawDataValidator(v); err != nil {
-			return &ValidationError{Name: "raw_data", err: fmt.Errorf("ent: validator failed for field \"raw_data\": %w", err)}
+			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.IP(); ok {
 		if err := fieldtype.IPValidator([]byte(v)); err != nil {
-			return &ValidationError{Name: "ip", err: fmt.Errorf("ent: validator failed for field \"ip\": %w", err)}
+			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf("ent: validator failed for field \"role\": %w", err)}
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
 		}
 	}
 	if v, ok := ftuo.mutation.Priority(); ok {
 		if err := fieldtype.PriorityValidator(v); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf("ent: validator failed for field \"priority\": %w", err)}
+			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
 		}
 	}
 	return nil
@@ -3786,7 +3914,7 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 	}
 	id, ok := ftuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing FieldType.ID for update")}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "FieldType.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := ftuo.fields; len(fields) > 0 {
@@ -4251,6 +4379,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldOptionalFloat32,
 		})
 	}
+	if value, ok := ftuo.mutation.Text(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: fieldtype.FieldText,
+		})
+	}
+	if ftuo.mutation.TextCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: fieldtype.FieldText,
+		})
+	}
 	if value, ok := ftuo.mutation.Datetime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -4295,6 +4436,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeOther,
 			Column: fieldtype.FieldLinkOther,
+		})
+	}
+	if value, ok := ftuo.mutation.LinkOtherFunc(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Value:  value,
+			Column: fieldtype.FieldLinkOtherFunc,
+		})
+	}
+	if ftuo.mutation.LinkOtherFuncCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeOther,
+			Column: fieldtype.FieldLinkOtherFunc,
 		})
 	}
 	if value, ok := ftuo.mutation.MAC(); ok {
@@ -4504,6 +4658,19 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
 			Column: fieldtype.FieldRawData,
+		})
+	}
+	if value, ok := ftuo.mutation.Sensitive(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: fieldtype.FieldSensitive,
+		})
+	}
+	if ftuo.mutation.SensitiveCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Column: fieldtype.FieldSensitive,
 		})
 	}
 	if value, ok := ftuo.mutation.IP(); ok {

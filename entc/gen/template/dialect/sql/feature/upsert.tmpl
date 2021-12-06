@@ -123,6 +123,15 @@ type (
 		return u
 	}
 
+	{{ if $f.SupportsMutationAdd }}
+		{{ $func := print "Add" $f.StructField }}
+		// {{ $func }} adds v to the "{{ $f.Name }}" field.
+		func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
+			u.Add({{ $.Package }}.{{ $f.Constant }}, v)
+			return u
+		}
+	{{ end }}
+
 	{{ if $f.Optional }}
 		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
@@ -134,7 +143,7 @@ type (
 {{ end }}
 
 
-// UpdateNewValues updates the fields using the new values that were set on create{{ if $.ID.UserDefined }} except the ID field{{ end }}.
+// UpdateNewValues updates the mutable fields using the new values that were set on create{{ if $.ID.UserDefined }} except the ID field{{ end }}.
 // Using this option is equivalent to using:
 //
 //	client.{{ $.Name }}.Create().
@@ -150,11 +159,18 @@ type (
 //
 func (u *{{ $upsertOne }}) UpdateNewValues() *{{ $upsertOne }} {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	{{- if $.ID.UserDefined }}
+	{{- if or $.ID.UserDefined $.ImmutableFields }}
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-			if _, exists := u.create.mutation.ID(); exists {
-				s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
-			}
+			{{- if $.ID.UserDefined }}
+				if _, exists := u.create.mutation.ID(); exists {
+					s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+				}
+			{{- end }}
+			{{- range $f := $.ImmutableFields }}
+				if _, exists := u.create.mutation.{{ $f.MutationGet }}(); exists {
+					s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+				}
+			{{- end }}
 		}))
 	{{- end }}
 	return u
@@ -188,32 +204,8 @@ func (u *{{ $upsertOne }}) Update(set func(*{{ $upsertSet }})) *{{ $upsertOne }}
 	return u
 }
 
-{{ range $f := $.Fields }}
-	{{ $func := print "Set" $f.StructField }}
-	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func (u *{{ $upsertOne }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertOne }} {
-		return u.Update(func(s *{{ $upsertSet }}) {
-			s.{{ $func }}(v)
-		})
-	}
-
-	{{ $func = print "Update" $f.StructField }}
-	// {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
-	func (u *{{ $upsertOne }}) {{ $func }}() *{{ $upsertOne }} {
-		return u.Update(func(s *{{ $upsertSet }}) {
-			s.{{ $func }}()
-		})
-	}
-
-	{{ if $f.Optional }}
-		{{ $func := print "Clear" $f.StructField }}
-		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
-		func (u *{{ $upsertOne }}) {{ $func }}() *{{ $upsertOne }} {
-			return u.Update(func(s *{{ $upsertSet }}) {
-				s.{{ $func }}()
-			})
-		}
-	{{ end }}
+{{ with extend $ "Upsert" $upsertOne "UpsertSet" $upsertSet }}
+	{{ template "helper/upsert/fields" . }}
 {{ end }}
 
 // Exec executes the query.
@@ -321,7 +313,7 @@ type {{ $upsertBulk }} struct {
 }
 
 
-// UpdateNewValues updates the fields using the new values that
+// UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
 //	client.{{ $.Name }}.Create().
@@ -337,13 +329,20 @@ type {{ $upsertBulk }} struct {
 //
 func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	{{- if $.ID.UserDefined }}
+	{{- if or $.ID.UserDefined $.ImmutableFields }}
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 			for _, b := range u.create.builders {
-				if _, exists := b.mutation.ID(); exists {
-					s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
-					return
-				}
+				{{- if $.ID.UserDefined }}
+					if _, exists := b.mutation.ID(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+						return
+					}
+				{{- end }}
+				{{- range $f := $.ImmutableFields }}
+					if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+					}
+				{{- end }}
 			}
 		}))
 	{{- end }}
@@ -378,32 +377,8 @@ func (u *{{ $upsertBulk }}) Update(set func(*{{ $upsertSet }})) *{{ $upsertBulk 
 	return u
 }
 
-{{ range $f := $.Fields }}
-    {{ $func := print "Set" $f.StructField }}
-    // {{ $func }} sets the "{{ $f.Name }}" field.
-	func (u *{{ $upsertBulk }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertBulk }} {
-		return u.Update(func(s *{{ $upsertSet }}) {
-			s.{{ $func }}(v)
-		})
-	}
-
-    {{ $func = print "Update" $f.StructField }}
-    // {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
-    func (u *{{ $upsertBulk }}) {{ $func }}() *{{ $upsertBulk }} {
-        return u.Update(func(s *{{ $upsertSet }}) {
-            s.{{ $func }}()
-        })
-    }
-
-    {{ if $f.Optional }}
-        {{ $func := print "Clear" $f.StructField }}
-        // {{ $func }} clears the value of the "{{ $f.Name }}" field.
-        func (u *{{ $upsertBulk }}) {{ $func }}() *{{ $upsertBulk }} {
-            return u.Update(func(s *{{ $upsertSet }}) {
-                s.{{ $func }}()
-            })
-        }
-    {{ end }}
+{{ with extend $ "Upsert" $upsertBulk "UpsertSet" $upsertSet }}
+	{{ template "helper/upsert/fields" . }}
 {{ end }}
 
 // Exec executes the query.
@@ -426,3 +401,46 @@ func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
 	}
 }
 {{- end }}
+
+{{ define "helper/upsert/fields" }}
+{{ $upsert := $.Scope.Upsert }}
+{{ $upsertSet := $.Scope.UpsertSet }}
+
+{{ range $f := $.Fields }}
+    {{ $func := print "Set" $f.StructField }}
+    // {{ $func }} sets the "{{ $f.Name }}" field.
+	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+		return u.Update(func(s *{{ $upsertSet }}) {
+			s.{{ $func }}(v)
+		})
+	}
+
+	{{ if $f.SupportsMutationAdd }}
+		{{ $func := print "Add" $f.StructField }}
+		// {{ $func }} adds v to the "{{ $f.Name }}" field.
+		func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+			return u.Update(func(s *{{ $upsertSet }}) {
+				s.{{ $func }}(v)
+			})
+		}
+	{{ end }}
+
+    {{ $func = print "Update" $f.StructField }}
+    // {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
+    func (u *{{ $upsert }}) {{ $func }}() *{{ $upsert }} {
+        return u.Update(func(s *{{ $upsertSet }}) {
+            s.{{ $func }}()
+        })
+    }
+
+    {{ if $f.Optional }}
+        {{ $func := print "Clear" $f.StructField }}
+        // {{ $func }} clears the value of the "{{ $f.Name }}" field.
+        func (u *{{ $upsert }}) {{ $func }}() *{{ $upsert }} {
+            return u.Update(func(s *{{ $upsertSet }}) {
+                s.{{ $func }}()
+            })
+        }
+    {{ end }}
+{{ end }}
+{{ end }}

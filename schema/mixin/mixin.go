@@ -65,8 +65,7 @@ func (UpdateTime) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("update_time").
 			Default(time.Now).
-			UpdateDefault(time.Now).
-			Immutable(),
+			UpdateDefault(time.Now),
 	}
 }
 

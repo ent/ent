@@ -4,7 +4,7 @@ title: GraphQL Integration
 ---
 
 The `ent` framework provides an integration with GraphQL through the [99designs/gqlgen](https://github.com/99designs/gqlgen)
-library using the [external templates](templates.md) option (i.e. it can be extended to support other libraries).
+library using the [extension](extension.md) option (i.e. it can be extended to support other libraries).
 
 ## Quick Introduction
 
@@ -14,7 +14,7 @@ Follow these 3 steps to enable it to your project:
 
 1\. Create a new Go file named `ent/entc.go`, and paste the following content:
 
-```go
+```go title="ent/entc.go"
 // +build ignore
 
 package main
@@ -40,7 +40,7 @@ func main() {
 
 2\. Edit the `ent/generate.go` file to execute the `ent/entc.go` file:
 
-```go
+```go title="ent/generate.go"
 package ent
 
 //go:generate go run -mod=mod entc.go
@@ -60,7 +60,7 @@ After running codegen, the following add-ons will be added to your project.
 
 ## Node API
 
-A new file named `ent/node.go` was created that implements the [Relay Node interface](https://relay.dev/graphql/objectidentification.htm).
+A new file named `ent/gql_node.go` was created that implements the [Relay Node interface](https://relay.dev/graphql/objectidentification.htm).
 
 In order to use the new generated `ent.Noder` interface in the [GraphQL resolver](https://gqlgen.com/reference/resolvers/),
 add the `Node` method to the query resolver, and look at the [configuration](#gql-configuration) section to understand
@@ -290,7 +290,7 @@ func (Todo) Edges() []ent.Edge {
 
 ### Usage and Configuration
 
-The GraphQL extension generates also edge-resolvers for the nodes under the `edge.go` file as follows:
+The GraphQL extension generates also edge-resolvers for the nodes under the `gql_edge.go` file as follows:
 ```go
 func (t *Todo) Children(ctx context.Context) ([]*Todo, error) {
 	result, err := t.Edges.ChildrenOrErr()

@@ -35,6 +35,8 @@ func (Pet) Fields() []ent.Field {
 		field.String("name"),
 		field.UUID("uuid", uuid.UUID{}).
 			Optional(),
+		field.String("nickname").
+			Optional(),
 	}
 }
 
@@ -54,5 +56,7 @@ func (Pet) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("name").
 			Edges("owner"),
+		index.Fields("nickname").
+			Unique(),
 	}
 }

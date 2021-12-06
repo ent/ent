@@ -521,6 +521,10 @@ func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
 
 func (gq *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := gq.querySpec()
+	_spec.Node.Columns = gq.fields
+	if len(gq.fields) > 0 {
+		_spec.Unique = gq.unique != nil && *gq.unique
+	}
 	return sqlgraph.CountNodes(ctx, gq.driver, _spec)
 }
 
@@ -591,6 +595,9 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if gq.sql != nil {
 		selector = gq.sql
 		selector.Select(selector.Columns(columns...)...)
+	}
+	if gq.unique != nil && *gq.unique {
+		selector.Distinct()
 	}
 	for _, p := range gq.predicates {
 		p(selector)
@@ -870,9 +877,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 		for _, f := range ggb.fields {
 			columns = append(columns, selector.C(f))
 		}
-		for _, c := range aggregation {
-			columns = append(columns, c)
-		}
+		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
 	return selector.GroupBy(selector.Columns(ggb.fields...)...)
