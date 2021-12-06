@@ -663,6 +663,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "peanut-cc",
+      "name": "peanut-pg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/55480838?v=4",
+      "profile": "https://github.com/peanut-cc",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
