@@ -237,9 +237,7 @@ func (d *MySQL) cType(c *Column) (t string) {
 	case field.TypeFloat32, field.TypeFloat64:
 		t = c.scanTypeOr("double")
 	case field.TypeTime:
-		t = c.scanTypeOr("timestamp")
-		// In MySQL, timestamp columns are `NOT NULL` by default, and assigning NULL
-		// assigns the current_timestamp(). We avoid this if not set otherwise.
+		t = c.scanTypeOr("datetime")
 		c.Nullable = c.Attr == ""
 	case field.TypeEnum:
 		values := make([]string, len(c.Enums))
