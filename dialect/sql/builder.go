@@ -2568,6 +2568,9 @@ func (s *Selector) Query() (string, []interface{}) {
 			b.Join(join.on)
 		}
 	}
+	if s.lock != nil && s.dialect == dialect.SQLServer {
+		b.WriteString(" WITH (updlock) ")
+	}
 	if s.where != nil {
 		b.WriteString(" WHERE ")
 		b.Join(s.where)
@@ -2631,7 +2634,7 @@ func (s *Selector) joinPrefix(b *Builder) {
 }
 
 func (s *Selector) joinLock(b *Builder) {
-	if s.lock == nil {
+	if s.lock == nil || s.dialect == dialect.SQLServer {
 		return
 	}
 	b.Pad()
