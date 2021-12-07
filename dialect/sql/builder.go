@@ -899,6 +899,9 @@ func ResolveWith(fn func(*UpdateSet)) ConflictOption {
 //		)
 //
 func (i *InsertBuilder) OnConflict(opts ...ConflictOption) *InsertBuilder {
+	if i.dialect == dialect.SQLServer {
+		i.AddError(errors.New("sql: INSERT ON DUPLICATE KEY not supported in SQL Server"))
+	}
 	if i.conflict == nil {
 		i.conflict = &conflict{}
 	}
