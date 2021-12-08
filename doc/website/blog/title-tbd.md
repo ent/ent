@@ -94,7 +94,7 @@ Very cool!
 
 ### List: The Superior GetAll
 With optional method generation out of the way, we could return our focus to adding `GetAll`. How could we implement 
-this method in a safe fashion? Rotem suggested we base the method off of Google's API Improvment Proposal (AIP) for List, 
+this method in a safe fashion? Rotem suggested we base the method off of Google's API Improvement Proposal (AIP) for List, 
 [AIP-132](https://google.aip.dev/132). This approach allows a client to retrieve all entities, but breaks the retrieval 
 up into pages. As an added bonus, it also sounds better than "GetAll"!
 
