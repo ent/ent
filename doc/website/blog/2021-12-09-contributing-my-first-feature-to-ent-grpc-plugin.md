@@ -5,13 +5,13 @@ authorURL: "https://github.com/jeremyv2014"
 authorImageURL: "https://avatars.githubusercontent.com/u/9276415?v=4"
 ---
 
-I have an embarrassing secret to share. I've been writing software for years, but, until recently, I 
-didn't know what an ORM was. I learned many things obtaining my B.S. in Computer Engineering, but 
-Object-Relational Mapping was not one of those; I was too focused on building things out of bits and bytes to be 
-bothered with something that high-level. It shouldn't be too surprising then, that when I found myself tasked with 
-helping to build a distributed web application, I ended up outside my comfort zone.
+I've been writing software for years, but, until recently, I didn't know what an ORM was. I learned many things 
+obtaining my B.S. in Computer Engineering, but Object-Relational Mapping was not one of those; I was too focused on 
+building things out of bits and bytes to be bothered with something that high-level. It shouldn't be too surprising 
+then, that when I found myself tasked with helping to build a distributed web application, I ended up outside my comfort 
+zone.
 
-One of the difficulties of developing software for someone else is that you aren't able to see inside their head; The 
+One of the difficulties with developing software for someone else is, that you aren't able to see inside their head. The 
 requirements aren't always clear and asking questions only helps you understand so much of what they are looking for. 
 Sometimes, you just have to build a prototype and demonstrate it to get useful feedback.
 
