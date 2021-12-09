@@ -1,5 +1,5 @@
 ---
-title: "TBD"
+title: "What I learned contributing my first feature to Ent's gRPC plugin"
 author: Jeremy Vesperman
 authorURL: "https://github.com/jeremyv2014"
 authorImageURL: "https://avatars.githubusercontent.com/u/9276415?v=4"
