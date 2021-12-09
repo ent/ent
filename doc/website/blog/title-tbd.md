@@ -6,10 +6,10 @@ authorImageURL: "https://avatars.githubusercontent.com/u/9276415?v=4"
 ---
 
 I have an embarrassing secret to share. I've been writing software for years, but, until recently, I 
-didn't know what an ORM library was. I learned many things obtaining my B.S. in Computer Engineering, but 
+didn't know what an ORM was. I learned many things obtaining my B.S. in Computer Engineering, but 
 Object-Relational Mapping was not one of those; I was too focused on building things out of bits and bytes to be 
-bothered with something that high-level. It shouldn't be too surprising, then, that when I found myself tasked with 
-helping build a distributed web application, I would end up outside my comfort zone.
+bothered with something that high-level. It shouldn't be too surprising then, that when I found myself tasked with 
+helping to build a distributed web application, I ended up outside my comfort zone.
 
 One of the difficulties of developing software for someone else is that you aren't able to see inside their head; The 
 requirements aren't always clear and asking questions only helps you understand so much of what they are looking for. 
@@ -27,17 +27,17 @@ tasks:
 7. Repeat
 
 Hundreds of hours of work only to find out that everything needs to be re-written. So frustrating! I think you can 
-imagine my relief (and also embarrassment), then, when a senior developer asked me why I wasn't using an ORM library 
+imagine my relief (and also embarrassment), when a senior developer asked me why I wasn't using an ORM 
 like Ent. 
 
 
 ### Discovering Ent
 It only took one day to re-implement our current data model with Ent. I couldn't believe I had been doing all this work 
 by hand when such a framework existed! The gRPC integration through entproto was the icing on the cake! I could perform 
-basic CRUD operations over gRPC just by adding a few annotations to my schema. This will allow me to skip all the steps 
-between data model definition and re-designing the web interface! There was, however, just one problem for my use case. 
-How do you get the details of entities over the gRPC interface if you don't know their ids ahead of time? I see that 
-ent can query all, but where is the `GetAll` method for entproto?
+basic CRUD operations over gRPC just by adding a few annotations to my schema. This allows me to skip all the steps 
+between data model definition and re-designing the web interface! There was, however, just one problem for my use case: 
+How do you get the details of entities over the gRPC interface if you don't know their IDs ahead of time? I see that 
+Ent can query all, but where is the `GetAll` method for entproto?
 
 ### Becoming an Open-Source Contributor
 I was surprised to find it didn't exist! I could have added it to my project by implementing the feature in a separate 
@@ -51,11 +51,11 @@ myself up for.
 In the morning, I awoke to the disappointment of my pull request being closed by [Rotem](https://github.com/rotemtam), 
 but with an invitation to collaborate further to refine the idea. The reason for closing the request was obvious, my 
 implementation of `GetAll` was dangerous. Returning an entire table's worth of data is only feasible if the table is 
-small. Exposing this interface on large table could have disastrous results!
+small. Exposing this interface on a large table could have disastrous results!
 
 ### Optional Service Method Generation
 My solution was to make the `GetAll` method optional by passing an argument into `entproto.Service()`. This 
-would give users control over whether this feature was exposed. We decided that this was a desirable feature, but that 
+provides control over whether this feature is exposed. We decided that this was a desirable feature, but that 
 it should be more generic. Why should `GetAll` get special treatment just because it was added last? It would be better 
 if all methods could be optionally generated. Something like:
 ```go
@@ -69,6 +69,7 @@ func Service(methods ...Method)
 The problem with this approach is that you can only have one argument type that is variable length. What if we wanted to 
 add additional options to the service annotation later on? This is where I was introduced to the powerful design pattern 
 of [functional options](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis):
+
 ```go
 // ServiceOption configures the entproto.Service annotation.
 type ServiceOption func(svc *service)
@@ -130,7 +131,7 @@ The `page_token` field is a base64-encoded string utilized by the server to dete
 empty token means that we want the first page.
 
 #### View
-The `view` field is used to specify whether the response should return the edge ids associated with the entities.
+The `view` field is used to specify whether the response should return the edge IDs associated with the entities.
 
 
 ### List Response
@@ -144,35 +145,35 @@ message ListUserResponse {
 ```
 
 #### List
-The `*_list` field contains page entities.
+The `user_list` field contains page entities.
 
 #### Next Page Token
-The `next_page_token` field is a base64-encoded string that can be utilized in another List Request to retrieve the next 
+The `next_page_token` field is a base64-encoded string that can be utilized in another List request to retrieve the next 
 page of entities. An empty token means that this response contains the last page of entities.
 
 
 ### Pagination
 With the gRPC interface determined, the challenge of implementing it began. One of the most critical design decisions 
-was how to actually implement the pagination. The naïve approach would be to use `LIMIT/OFFSET` pagination to skip over 
+was how to implement the pagination. The naive approach would be to use `LIMIT/OFFSET` pagination to skip over 
 the entries we've already seen. However, this approach has massive [drawbacks](https://use-the-index-luke.com/no-offset); 
 the most problematic being that the database has to _fetch all the rows it is skipping_ to get the rows we want. 
 
 #### Keyset Pagination
-A much better approach, Rotem proposed, was to use Keyset pagination. This approach is slightly more 
-complicated in that it requires the use of a unique column (or combination of columns) to order the rows, but 
-is significantly faster. This is because we can take advantage of the sorted rows to select only entries with 
+Rotem proposed a much better approach: keyset pagination. This approach is slightly more 
+complicated since it requires the use of a unique column (or combination of columns) to order the rows. But 
+in exchange we gain a significant performance improvement. This is because we can take advantage of the sorted rows to select only entries with 
 unique column(s) values that are greater (ascending order) or less (descending order) than / equal to the value(s) in 
 the client-provided page token. Thus, the database doesn't have to fetch the rows we want to skip over, significantly 
 speeding up queries on large tables!
 
 With keyset pagination selected, the next step was to determine how to order the entities. The most straightforward 
-approach for ent was to use the `id` field; every schema will have this, and it is guaranteed to be unique for the schema. 
+approach for Ent was to use the `id` field; every schema will have this, and it is guaranteed to be unique for the schema. 
 This is the approach we chose to use for the initial implementation. Additionally, a decision needed to be made regarding 
 whether ascending or descending order should be employed. Descending order was chosen for the initial release.
 
 
 ### Usage
-Let's take a look at how to actually use `List`:
+Let's take a look at how to actually use the new `List` feature:
 
 ```go
 package main
@@ -193,10 +194,8 @@ func main() {
     log.Fatalf("failed connecting to server: %s", err)
   }
   defer conn.Close()
-
   // Create a User service Client on the connection.
   client := entpb.NewUserServiceClient(conn)
-
   ctx := context.Background()
   // Initialize token for first page.
   pageToken := ""
@@ -211,14 +210,12 @@ func main() {
         se, _ := status.FromError(err)
         log.Fatalf("failed retrieving user list: status=%s message=%s", se.Code(), se.Message())
     }
-
     // Check if we've reached the last page of users.
     if users.NextPageToken == "" {
         break
     }
     // Update token for next request.
     pageToken = users.NextPageToken
-
     log.Printf("users retrieved: %v", users)
   }
 }
@@ -237,8 +234,8 @@ template (I'm only one person!).
 
 ### Wrap-up
 I was pretty nervous when I first embarked on my quest to contribute this functionality to entproto; as a newbie open-source 
-contributor, I didn't know what to expect. I'm happy to share that working on the ent project was a ton of fun! 
-I got to work with awesome, knowledgeable people all while helping out the open-source community. From functional 
-options and Keyset pagination to smaller insights gained through PR review, I learned so much about Go 
+contributor, I didn't know what to expect. I'm happy to share that working on the Ent project was a ton of fun! 
+I got to work with awesome, knowledgeable people while helping out the open-source community. From functional 
+options and keyset pagination to smaller insights gained through PR review, I learned so much about Go 
 (and software development in general) in the process! I'd highly encourage anyone thinking they might want to contribute 
 something to take that leap! You'll be surprised with how much you gain from the experience.
