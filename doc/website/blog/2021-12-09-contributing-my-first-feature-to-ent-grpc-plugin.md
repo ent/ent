@@ -228,7 +228,7 @@ limited to the `id` column. This makes `List` compatible with any schema, but it
 should be able to specify what columns to sort by. Alternatively, the sort column(s) could be defined in the schema. 
 Additionally, `List` is restricted to descending order. In the future, this could be an option specified in the request. 
 Finally, `List` currently only works with schemas that use `int32`, `uuid`, or `string` type `id` fields. This is because 
-a separate conversion method to/from the page token must be defined for each type that ent supports in the code generation 
+a separate conversion method to/from the page token must be defined for each type that Ent supports in the code generation 
 template (I'm only one person!).
 
 
