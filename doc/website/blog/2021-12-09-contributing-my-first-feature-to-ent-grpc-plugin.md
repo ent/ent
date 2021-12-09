@@ -239,3 +239,14 @@ I got to work with awesome, knowledgeable people while helping out the open-sour
 options and keyset pagination to smaller insights gained through PR review, I learned so much about Go 
 (and software development in general) in the process! I'd highly encourage anyone thinking they might want to contribute 
 something to take that leap! You'll be surprised with how much you gain from the experience.
+
+Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+
+:::note For more Ent news and updates:
+
+- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Follow us on [Twitter](https://twitter.com/entgo_io)
+- Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
+
+:::
