@@ -3,6 +3,7 @@ title: "What I learned contributing my first feature to Ent's gRPC plugin"
 author: Jeremy Vesperman
 authorURL: "https://github.com/jeremyv2014"
 authorImageURL: "https://avatars.githubusercontent.com/u/9276415?v=4"
+image: https://entgo.io/images/assets/grpc/ent_party.png
 ---
 
 I've been writing software for years, but, until recently, I didn't know what an ORM was. I learned many things 
