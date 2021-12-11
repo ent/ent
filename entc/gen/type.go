@@ -896,7 +896,7 @@ func (f Field) StructField() string {
 
 // EnumNames returns the enum values of a field.
 func (f Field) EnumNames() []string {
-	names := make([]string, 0, len(f.def.Enums))
+	names := make([]string, 0, len(f.Enums))
 	for _, e := range f.Enums {
 		names = append(names, e.Name)
 	}
@@ -905,7 +905,7 @@ func (f Field) EnumNames() []string {
 
 // EnumValues returns the values of the enum field.
 func (f Field) EnumValues() []string {
-	values := make([]string, 0, len(f.def.Enums))
+	values := make([]string, 0, len(f.Enums))
 	for _, e := range f.Enums {
 		values = append(values, e.Value)
 	}
