@@ -288,7 +288,59 @@ func TestPostgres_Create(t *testing.T) {
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0))
-				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" bigint NOT NULL, ALTER COLUMN "updated_at" TYPE timestamp with time zone, ALTER COLUMN "updated_at" DROP NOT NULL, ALTER COLUMN "deleted_at" TYPE timestamp with time zone, ALTER COLUMN "deleted_at" DROP NOT NULL`)).
+				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" bigint NOT NULL, ALTER COLUMN "created_at" TYPE date, ALTER COLUMN "created_at" SET DEFAULT CURRENT_DATE, ALTER COLUMN "created_at" SET NOT NULL, ALTER COLUMN "updated_at" TYPE timestamp with time zone, ALTER COLUMN "updated_at" DROP NOT NULL, ALTER COLUMN "deleted_at" TYPE timestamp with time zone, ALTER COLUMN "deleted_at" DROP NOT NULL`)).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add default value to column",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true, Default: "John Doe"},
+						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
+						{Name: "age", Type: field.TypeInt, Default: 10},
+						{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{dialect.Postgres: "date"}, Default: "CURRENT_DATE"},
+						{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{dialect.MySQL: "date"}, Nullable: true},
+						{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+						{Name: "cidr", Type: field.TypeString, SchemaType: map[string]string{dialect.Postgres: "cidr"}},
+						{Name: "inet", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "inet"}},
+						{Name: "macaddr", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "macaddr"}},
+						{Name: "macaddr8", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "macaddr8"}},
+						{Name: "strings", Type: field.TypeOther, SchemaType: map[string]string{dialect.Postgres: "text[]"}, Nullable: true},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock pgMock) {
+				mock.start("120000")
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape(`SELECT "column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale" FROM "information_schema"."columns" WHERE "table_schema" = CURRENT_SCHEMA() AND "table_name" = $1`)).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "data_type", "is_nullable", "column_default", "udt_name", "numeric_precision", "numeric_scale"}).
+						AddRow("id", "bigint", "NO", "NULL", "int8", nil, nil).
+						AddRow("name", "character varying", "YES", "NULL", "varchar", nil, nil).
+						AddRow("uuid", "uuid", "YES", "NULL", "uuid", nil, nil).
+						AddRow("created_at", "date", "NO", "CURRENT_DATE", "date", nil, nil).
+						AddRow("updated_at", "timestamp", "YES", "NULL", "timestamptz", nil, nil).
+						AddRow("deleted_at", "date", "YES", "NULL", "date", nil, nil).
+						AddRow("text", "text", "YES", "NULL", "text", nil, nil).
+						AddRow("age", "bigint", "YES", "NULL", "int8", nil, nil).
+						AddRow("cidr", "cidr", "NO", "NULL", "cidr", nil, nil).
+						AddRow("inet", "inet", "YES", "NULL", "inet", nil, nil).
+						AddRow("macaddr", "macaddr", "YES", "NULL", "macaddr", nil, nil).
+						AddRow("macaddr8", "macaddr8", "YES", "NULL", "macaddr8", nil, nil).
+						AddRow("strings", "ARRAY", "YES", "NULL", "_text", nil, nil))
+				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
+						AddRow("users_pkey", "id", "t", "t", 0))
+				mock.ExpectExec(escape(`ALTER TABLE "users" ALTER COLUMN "name" TYPE varchar, ALTER COLUMN "name" SET DEFAULT 'John Doe', ALTER COLUMN "name" DROP NOT NULL, ALTER COLUMN "age" TYPE bigint, ALTER COLUMN "age" SET DEFAULT 10, ALTER COLUMN "age" SET NOT NULL, ALTER COLUMN "created_at" TYPE date, ALTER COLUMN "created_at" SET DEFAULT CURRENT_DATE, ALTER COLUMN "created_at" SET NOT NULL, ALTER COLUMN "updated_at" TYPE timestamp with time zone, ALTER COLUMN "updated_at" DROP NOT NULL, ALTER COLUMN "deleted_at" TYPE timestamp with time zone, ALTER COLUMN "deleted_at" DROP NOT NULL`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

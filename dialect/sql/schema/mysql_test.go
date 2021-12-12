@@ -301,7 +301,65 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "sub_part", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", nil, "0", "1"))
-				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint NOT NULL, ADD COLUMN `ts` timestamp NOT NULL")).
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint NOT NULL, ADD COLUMN `ts` timestamp NOT NULL, MODIFY COLUMN `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP")).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectCommit()
+			},
+		},
+		{
+			name: "add default value to columns",
+			tables: []*Table{
+				{
+					Name: "users",
+					Columns: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+						{Name: "name", Type: field.TypeString, Nullable: true, Default: "John Doe"},
+						{Name: "text", Type: field.TypeString, Nullable: true, Size: math.MaxInt32},
+						{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+						{Name: "date", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{dialect.MySQL: "date"}},
+						{Name: "age", Type: field.TypeInt, Default: 10},
+						{Name: "tiny", Type: field.TypeInt8},
+						{Name: "tiny_unsigned", Type: field.TypeUint8},
+						{Name: "small", Type: field.TypeInt16},
+						{Name: "small_unsigned", Type: field.TypeUint16},
+						{Name: "big", Type: field.TypeInt64},
+						{Name: "big_unsigned", Type: field.TypeUint64},
+						{Name: "decimal", Type: field.TypeFloat64, SchemaType: map[string]string{dialect.MySQL: "decimal(6,2)"}},
+						{Name: "unsigned_decimal", Type: field.TypeFloat64, SchemaType: map[string]string{dialect.MySQL: "decimal(6,2) unsigned"}},
+						{Name: "timestamp", Type: field.TypeTime, SchemaType: map[string]string{dialect.MySQL: "TIMESTAMP"}, Default: "CURRENT_TIMESTAMP"},
+					},
+					PrimaryKey: []*Column{
+						{Name: "id", Type: field.TypeInt, Increment: true},
+					},
+				},
+			},
+			before: func(mock mysqlMock) {
+				mock.start("8.0.19")
+				mock.tableExists("users", true)
+				mock.ExpectQuery(escape("SELECT `column_name`, `column_type`, `is_nullable`, `column_key`, `column_default`, `extra`, `character_set_name`, `collation_name`, `numeric_precision`, `numeric_scale` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ?")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"column_name", "column_type", "is_nullable", "column_key", "column_default", "extra", "character_set_name", "collation_name", "numeric_precision", "numeric_scale"}).
+						AddRow("id", "bigint(20)", "NO", "PRI", "NULL", "auto_increment", "", "", nil, nil).
+						AddRow("name", "varchar(255)", "YES", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("text", "longtext", "YES", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("uuid", "char(36)", "YES", "YES", "NULL", "", "", "utf8mb4_bin", nil, nil).
+						AddRow("date", "date", "YES", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("age", "int(11)", "YES", "YES", "NULL", "", "", "", nil, nil).
+						// 8.0.19: new int column type formats
+						AddRow("tiny", "tinyint", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("tiny_unsigned", "tinyint unsigned", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("small", "smallint", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("small_unsigned", "smallint unsigned", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("big", "bigint", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("big_unsigned", "bigint unsigned", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("decimal", "decimal(6,2)", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("unsigned_decimal", "decimal(6,2) unsigned", "NO", "YES", "NULL", "", "", "", nil, nil).
+						AddRow("timestamp", "timestamp", "NO", "NO", "NULL", "DEFAULT_GENERATED on update CURRENT_TIMESTAMP", "", "", nil, nil))
+				mock.ExpectQuery(escape("SELECT `index_name`, `column_name`, `sub_part`,  `non_unique`, `seq_in_index` FROM `INFORMATION_SCHEMA`.`STATISTICS` WHERE `TABLE_SCHEMA` = (SELECT DATABASE()) AND `TABLE_NAME` = ? ORDER BY `index_name`, `seq_in_index`")).
+					WithArgs("users").
+					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "sub_part", "non_unique", "seq_in_index"}).
+						AddRow("PRIMARY", "id", nil, "0", "1"))
+				mock.ExpectExec(escape("ALTER TABLE `users` MODIFY COLUMN `name` varchar(255) NULL DEFAULT 'John Doe', MODIFY COLUMN `age` bigint NOT NULL DEFAULT 10, MODIFY COLUMN `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
