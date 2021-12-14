@@ -212,3 +212,16 @@ CREATE INDEX `users_description` ON `users`(`description`(128))
 CREATE INDEX `users_c1_c2_c3` ON `users`(`c1`(100), `c2`(200), `c3`)
 ```
 
+## Storage Key
+
+Like Fields, custom index name can be configured using the `StorageKey` method.
+It's mapped to a index name in SQL dialects.
+
+```go
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("field1", "field2").
+			StorageKey("custom_index"),
+	}
+}
+```
