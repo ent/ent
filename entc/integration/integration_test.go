@@ -600,6 +600,16 @@ func Select(t *testing.T, client *ent.Client) {
 		}).
 		IntsX(ctx)
 	require.Equal([]int{1, 1, 1, 1}, lens)
+
+	dlen := client.Pet.Query().
+		Modify(func(s *sql.Selector) {
+			s.SelectExpr(sql.ExprFunc(func(b *sql.Builder) {
+				b.WriteString("LENGTH(name)").WriteOp(sql.OpMul).Arg(2)
+			}))
+		}).
+		IntsX(ctx)
+	require.Equal([]int{2, 2, 2, 2}, dlen)
+
 	for i := range pets {
 		pets[i].Update().SetName(pets[i].Name + pets[i].Name).ExecX(ctx)
 	}
