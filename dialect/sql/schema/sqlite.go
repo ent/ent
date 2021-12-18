@@ -138,7 +138,7 @@ func (d *SQLite) addColumn(c *Column) *sql.ColumnBuilder {
 		b.Attr("PRIMARY KEY AUTOINCREMENT")
 	}
 	c.nullable(b)
-	c.defaultValue(b)
+	c.defaultValue(b, "DEFAULT ")
 	return b
 }
 

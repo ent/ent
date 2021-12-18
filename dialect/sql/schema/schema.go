@@ -288,7 +288,7 @@ func (c *Column) ScanDefault(value string) error {
 // defaultValue adds the `DEFAULT` attribute to the column.
 // Note that, in SQLite if a NOT NULL constraint is specified,
 // then the column must have a default value which not NULL.
-func (c *Column) defaultValue(b *sql.ColumnBuilder) {
+func (c *Column) defaultValue(b *sql.ColumnBuilder, clause string) {
 	if c.Default == nil || !c.supportDefault() {
 		return
 	}
@@ -298,12 +298,12 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 	case bool:
 		attr = strconv.FormatBool(v)
 	case string:
-		if t := c.Type; t != field.TypeUUID && t != field.TypeTime {
+		if t := c.Type; t != field.TypeUUID && t != field.TypeTime && !t.Numeric() {
 			// Escape single quote by replacing each with 2.
 			attr = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
 		}
 	}
-	b.Attr("DEFAULT " + attr)
+	b.Attr(clause + attr)
 }
 
 // supportDefault reports if the column type supports default value.

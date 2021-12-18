@@ -375,7 +375,7 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 		// Change nullability of a column.
 		case c1.Nullable != c2.Nullable:
 			change.column.modify = append(change.column.modify, c1)
-		// Change default value
+		// Change default value.
 		case c1.Default != nil && c2.Default == nil:
 			change.column.modify = append(change.column.modify, c1)
 		}
