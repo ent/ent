@@ -295,7 +295,7 @@ func (d *MySQL) addColumn(c *Column) *sql.ColumnBuilder {
 		b.Attr("AUTO_INCREMENT")
 	}
 	c.nullable(b)
-	c.defaultValue(b, "DEFAULT ")
+	c.defaultValue(b)
 	if c.Collation != "" {
 		b.Attr("COLLATE " + c.Collation)
 	}
