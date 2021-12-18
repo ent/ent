@@ -1552,6 +1552,40 @@ func TestSelector_OrderByExpr(t *testing.T) {
 	require.Equal(t, []interface{}{28, 1, 2}, args)
 }
 
+func TestSelector_SelectExpr(t *testing.T) {
+	query, args := SelectExpr(
+		Expr("?", "a"),
+		ExprFunc(func(b *Builder) {
+			b.Ident("first_name").WriteOp(OpAdd).Ident("last_name")
+		}),
+		ExprFunc(func(b *Builder) {
+			b.WriteString("COALESCE(").Ident("age").Comma().Arg(0).WriteByte(')')
+		}),
+		Expr("?", "b"),
+	).From(Table("users")).Query()
+	require.Equal(t, "SELECT ?, `first_name` + `last_name`, COALESCE(`age`, ?), ? FROM `users`", query)
+	require.Equal(t, []interface{}{"a", 0, "b"}, args)
+
+	query, args = Dialect(dialect.Postgres).
+		Select("name").
+		AppendSelectExpr(
+			Expr("age + $1", 1),
+			ExprFunc(func(b *Builder) {
+				b.Nested(func(b *Builder) {
+					b.WriteString("similarity(").Ident("name").Comma().Arg("A").WriteByte(')')
+					b.WriteOp(OpAdd)
+					b.WriteString("similarity(").Ident("desc").Comma().Arg("D").WriteByte(')')
+				})
+				b.WriteString(" AS s")
+			}),
+			Expr("rank + $4", 10),
+		).
+		From(Table("users")).
+		Query()
+	require.Equal(t, `SELECT "name", age + $1, (similarity("name", $2) + similarity("desc", $3)) AS s, rank + $4 FROM "users"`, query)
+	require.Equal(t, []interface{}{1, "A", "D", 10}, args)
+}
+
 func TestSelector_Union(t *testing.T) {
 	query, args := Dialect(dialect.Postgres).
 		Select("*").

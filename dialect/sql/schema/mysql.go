@@ -431,7 +431,7 @@ func (d *MySQL) scanColumn(c *Column, rows *sql.Rows) error {
 		default:
 			c.Type = field.TypeInt8
 		}
-	case "double":
+	case "double", "float":
 		c.Type = field.TypeFloat64
 	case "numeric", "decimal":
 		c.Type = field.TypeFloat64

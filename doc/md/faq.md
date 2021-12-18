@@ -296,11 +296,11 @@ func (i *Inet) Scan(value interface{}) (err error) {
     case nil:
     case []byte:
         if i.IP = net.ParseIP(string(v)); i.IP == nil {
-            err = fmt.Errorf("invalid value for ip %q", s)
+            err = fmt.Errorf("invalid value for ip %q", v)
         }
     case string:
         if i.IP = net.ParseIP(v); i.IP == nil {
-            err = fmt.Errorf("invalid value for ip %q", s)
+            err = fmt.Errorf("invalid value for ip %q", v)
         }
     default:
         err = fmt.Errorf("unexpected type %T", v)
