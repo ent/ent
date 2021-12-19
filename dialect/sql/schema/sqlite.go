@@ -289,7 +289,6 @@ func (d *SQLite) scanColumn(c *Column, rows *sql.Rows) error {
 	if err != nil {
 		return err
 	}
-
 	switch strings.ToLower(parts[0]) {
 	case "bool", "boolean":
 		c.Type = field.TypeBool
