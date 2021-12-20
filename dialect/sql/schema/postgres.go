@@ -404,11 +404,7 @@ func (d *Postgres) writeDefault(b *sql.ColumnBuilder, c *Column, clause string) 
 		}
 	}
 
-	var sb strings.Builder
-	sb.WriteString(clause)
-	sb.WriteString(attr)
-
-	b.Attr(sb.String())
+	b.Attr(caluse + " " + attr)
 }
 
 // alterColumn returns list of ColumnBuilder for applying in order to alter a column.
