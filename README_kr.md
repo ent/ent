@@ -39,7 +39,7 @@ ent를 사용 및 개발하기 위한 문서는 이쪽: https://entgo.io
 
 만약 당신의 회사 또는 당신의 제품으로 `ent`를 이용할 경우, [ent users page](https://github.com/ent/ent/wiki/ent-users) 에 우리가 알 수 있도록 추가해 주세요.
 
-업데이트를 확인하려면 Twitter에서 https://twitter.com/entgo_io 를 follow 하세요.
+업데이트를 확인하려면 Twitter에서 https://twitter.com/entgo_io 를 Follow 하세요.
 
 
 ## 프로젝트에 관하여
