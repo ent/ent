@@ -420,7 +420,6 @@ func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 	} else {
 		ops = append(ops, b.Column(c.Name).Attr("SET NOT NULL"))
 	}
-
 	if c.Default != nil && c.supportDefault() {
 		ops = append(ops, d.writeSetDefault(b.Column(c.Name), c))
 	}
