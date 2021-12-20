@@ -403,8 +403,7 @@ func (d *Postgres) writeDefault(b *sql.ColumnBuilder, c *Column, clause string) 
 			attr = fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
 		}
 	}
-
-	b.Attr(caluse + " " + attr)
+	b.Attr(clause + " " + attr)
 }
 
 // alterColumn returns list of ColumnBuilder for applying in order to alter a column.
