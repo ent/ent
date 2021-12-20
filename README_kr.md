@@ -32,11 +32,9 @@ ent를 사용 및 개발하기 위한 문서는 이쪽: https://entgo.io
 
 ## ent 커뮤니티에 참여하세요
 `ent`의 구축은 커뮤니티 전체의 협력없이는 실현할 수 없었습니다. 
-
-우리는 `ent`의 모든 기여자들을 [contributors page](doc/md/contributors.md)에서 관리합니다.
+우리는 `ent`의 모든 기여자들을 [contributors page](doc/md/contributors.md)에서 관리하고있습니다.
 
 `ent`에 기여하기 전, 먼저 [CONTRIBUTING](CONTRIBUTING.md)을 읽어주시길 바랍니다.
-
 만약 당신의 회사 또는 당신의 제품으로 `ent`를 이용할 경우, [ent users page](https://github.com/ent/ent/wiki/ent-users) 에 우리가 알 수 있도록 추가해 주세요.
 
 업데이트를 확인하려면 Twitter에서 https://twitter.com/entgo_io 를 Follow 하세요.
