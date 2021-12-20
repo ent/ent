@@ -428,7 +428,7 @@ func (d *Postgres) alterColumn(c *Column) (ops []*sql.ColumnBuilder) {
 }
 
 func (d *Postgres) writeSetDefault(b *sql.ColumnBuilder, c *Column) *sql.ColumnBuilder {
-	d.writeDefault(b, c, "SET DEFAULT ")
+	d.writeDefault(b, c, "SET DEFAULT")
 	return b
 }
 
