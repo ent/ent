@@ -20,7 +20,7 @@ In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extrem
 
 ```graphql
 input AddTodoInput {
-	title: String
+	title: String!
 }
 
 type AddTodoOutput {
