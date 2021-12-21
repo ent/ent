@@ -16,11 +16,49 @@ Compared to Nodejs, the most popular runtime for AWS Lambda, Go offers faster st
 On the other hand, Ent presents an innovative approach towards type-safe access to relational databases, which in my opinion, is unmatched in the Go ecosystem.
 In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extremely powerful setup to face today's demanding API requirements.
 
-### Getting Started
+### Setting up AWS AppSync
+
+```graphql
+input AddTodoInput {
+	title: String
+}
+
+type AddTodoOutput {
+	todo: Todo!
+}
+
+type Mutation {
+	addTodo(input: AddTodoInput!): AddTodoOutput!
+	removeTodo(input: RemoveTodoInput!): RemoveTodoOutput!
+}
+
+type Query {
+	todos: [Todo!]!
+	todo(id: ID!): Todo
+}
+
+input RemoveTodoInput {
+	todoId: ID!
+}
+
+type RemoveTodoOutput {
+	todo: Todo!
+}
+
+type Todo {
+	id: ID!
+	title: String!
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+}
+```
+
+### Developing AWS Lambda
 
 ### Deploying AWS Lambda
-
-### Setting up AWS AppSync
 
 ### Wrapping Up
 
