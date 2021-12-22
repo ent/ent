@@ -18,6 +18,26 @@ In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extrem
 
 ### Setting up AWS AppSync
 
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of getting started with AWS AppSync from scratch" src="https://entgo.io/images/assets/appsync/from-scratch.png" />
+  <p style={{fontSize: 12}}>Getting started from sratch with AWS AppSync</p>
+</div>
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of creating a new AWS AppSync API resource" src="https://entgo.io/images/assets/appsync/create-resources.png" />
+  <p style={{fontSize: 12}}>Creating a new API resource in AWS AppSync</p>
+</div>
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of the landing page of the AWS AppSync API" src="https://entgo.io/images/assets/appsync/getting-started.png" />
+  <p style={{fontSize: 12}}>Landing page of the AWS AppSync API</p>
+</div>
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of the initial GraphQL schema of the AWS AppSync API" src="https://entgo.io/images/assets/appsync/initial-schema.png" />
+  <p style={{fontSize: 12}}>Initial GraphQL schema of the AWS AppSync API</p>
+</div>
+
 ```graphql
 input AddTodoInput {
 	title: String!
@@ -55,6 +75,11 @@ schema {
 	mutation: Mutation
 }
 ```
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot AWS AppSync: Final GraphQL schema for AWS AppSync API" src="https://entgo.io/images/assets/appsync/final-schema.png" />
+  <p style={{fontSize: 12}}>Final GraphQL schema of AWS AppSync API</p>
+</div>
 
 ### Developing AWS Lambda with Ent
 
