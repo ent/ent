@@ -301,7 +301,7 @@ func TestMySQL_Create(t *testing.T) {
 					WithArgs("users").
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "sub_part", "non_unique", "seq_in_index"}).
 						AddRow("PRIMARY", "id", nil, "0", "1"))
-				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint NOT NULL, ADD COLUMN `ts` timestamp NOT NULL")).
+				mock.ExpectExec(escape("ALTER TABLE `users` ADD COLUMN `age` bigint NOT NULL, ADD COLUMN `ts` timestamp NOT NULL, MODIFY COLUMN `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP")).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},

@@ -2032,23 +2032,23 @@ type Selector struct {
 	Builder
 	// ctx stores contextual data typically from
 	// generated code such as alternate table schemas.
-	ctx      context.Context
-	as       string
-	columns  []string
-	from     TableView
-	joins    []join
-	where    *Predicate
-	or       bool
-	not      bool
-	order    []interface{}
-	group    []string
-	having   *Predicate
-	limit    *int
-	offset   *int
-	distinct bool
-	union    []union
-	prefix   Queries
-	lock     *LockOptions
+	ctx       context.Context
+	as        string
+	selection []interface{}
+	from      TableView
+	joins     []join
+	where     *Predicate
+	or        bool
+	not       bool
+	order     []interface{}
+	group     []string
+	having    *Predicate
+	limit     *int
+	offset    *int
+	distinct  bool
+	union     []union
+	prefix    Queries
+	lock      *LockOptions
 }
 
 // WithContext sets the context into the *Selector.
@@ -2082,22 +2082,57 @@ func Select(columns ...string) *Selector {
 	return (&Selector{}).Select(columns...)
 }
 
+// SelectExpr is like Select, but supports passing arbitrary
+// expressions for SELECT clause.
+func SelectExpr(exprs ...Querier) *Selector {
+	return (&Selector{}).SelectExpr(exprs...)
+}
+
 // Select changes the columns selection of the SELECT statement.
 // Empty selection means all columns *.
 func (s *Selector) Select(columns ...string) *Selector {
-	s.columns = columns
+	s.selection = make([]interface{}, len(columns))
+	for i := range columns {
+		s.selection[i] = columns[i]
+	}
 	return s
 }
 
-// AppendSelect appends additional columns/expressions to the SELECT statement.
+// AppendSelect appends additional columns to the SELECT statement.
 func (s *Selector) AppendSelect(columns ...string) *Selector {
-	s.columns = append(s.columns, columns...)
+	for i := range columns {
+		s.selection = append(s.selection, columns[i])
+	}
+	return s
+}
+
+// SelectExpr changes the columns selection of the SELECT statement
+// with custom list of expressions.
+func (s *Selector) SelectExpr(exprs ...Querier) *Selector {
+	s.selection = make([]interface{}, len(exprs))
+	for i := range exprs {
+		s.selection[i] = exprs[i]
+	}
+	return s
+}
+
+// AppendSelectExpr  appends additional expressions to the SELECT statement.
+func (s *Selector) AppendSelectExpr(exprs ...Querier) *Selector {
+	for i := range exprs {
+		s.selection = append(s.selection, exprs[i])
+	}
 	return s
 }
 
 // SelectedColumns returns the selected columns of the Selector.
 func (s *Selector) SelectedColumns() []string {
-	return s.columns
+	columns := make([]string, 0, len(s.selection))
+	for i := range s.selection {
+		if c, ok := s.selection[i].(string); ok {
+			columns = append(columns, c)
+		}
+	}
+	return columns
 }
 
 // From sets the source of `FROM` clause.
@@ -2339,7 +2374,7 @@ func (s *Selector) Count(columns ...string) *Selector {
 		b.IdentComma(columns...)
 		column = b.String()
 	}
-	s.columns = []string{Count(column)}
+	s.Select(Count(column))
 	return s
 }
 
@@ -2447,21 +2482,21 @@ func (s *Selector) Clone() *Selector {
 		joins[i] = s.joins[i].clone()
 	}
 	return &Selector{
-		Builder:  s.Builder.clone(),
-		ctx:      s.ctx,
-		as:       s.as,
-		or:       s.or,
-		not:      s.not,
-		from:     s.from,
-		limit:    s.limit,
-		offset:   s.offset,
-		distinct: s.distinct,
-		where:    s.where.clone(),
-		having:   s.having.clone(),
-		joins:    append([]join{}, joins...),
-		group:    append([]string{}, s.group...),
-		order:    append([]interface{}{}, s.order...),
-		columns:  append([]string{}, s.columns...),
+		Builder:   s.Builder.clone(),
+		ctx:       s.ctx,
+		as:        s.as,
+		or:        s.or,
+		not:       s.not,
+		from:      s.from,
+		limit:     s.limit,
+		offset:    s.offset,
+		distinct:  s.distinct,
+		where:     s.where.clone(),
+		having:    s.having.clone(),
+		joins:     append([]join{}, joins...),
+		group:     append([]string{}, s.group...),
+		order:     append([]interface{}{}, s.order...),
+		selection: append([]interface{}{}, s.selection...),
 	}
 }
 
@@ -2519,8 +2554,8 @@ func (s *Selector) Query() (string, []interface{}) {
 	if s.distinct {
 		b.WriteString("DISTINCT ")
 	}
-	if len(s.columns) > 0 {
-		b.IdentComma(s.columns...)
+	if len(s.selection) > 0 {
+		s.joinSelect(&b)
 	} else {
 		b.WriteString("*")
 	}
@@ -2660,6 +2695,20 @@ func (s *Selector) joinOrder(b *Builder) {
 			b.Ident(order)
 		case Querier:
 			b.Join(order)
+		}
+	}
+}
+
+func (s *Selector) joinSelect(b *Builder) {
+	for i := range s.selection {
+		if i > 0 {
+			b.Comma()
+		}
+		switch s := s.selection[i].(type) {
+		case string:
+			b.Ident(s)
+		case Querier:
+			b.Join(s)
 		}
 	}
 }
@@ -3331,6 +3380,19 @@ func (d *DialectBuilder) Delete(table string) *DeleteBuilder {
 //
 func (d *DialectBuilder) Select(columns ...string) *Selector {
 	b := Select(columns...)
+	b.SetDialect(d.dialect)
+	return b
+}
+
+// SelectExpr is like Select, but supports passing arbitrary
+// expressions for SELECT clause.
+//
+//	Dialect(dialect.Postgres).
+//		SelectExpr(expr...).
+//		From(Table("users"))
+//
+func (d *DialectBuilder) SelectExpr(exprs ...Querier) *Selector {
+	b := SelectExpr(exprs...)
 	b.SetDialect(d.dialect)
 	return b
 }
