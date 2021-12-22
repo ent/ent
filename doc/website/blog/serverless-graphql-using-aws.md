@@ -56,7 +56,86 @@ schema {
 }
 ```
 
-### Developing AWS Lambda
+### Developing AWS Lambda with Ent
+
+Create an empty directory and change directory:
+```console
+mkdir entgo-aws-appsync && cd $_
+```
+Setup go modules and Ent:
+```console
+go mod init entgo-aws-appsync
+go mod tidy
+go get -d entgo.io/ent/cmd/ent
+```
+
+Create the `Todo` schema
+```console
+go run entgo.io/ent/cmd/ent init Todo
+```
+and add the `title` field:
+```go title="ent/schema/todo.go"
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
+
+// Todo holds the schema definition for the Todo entity.
+type Todo struct {
+	ent.Schema
+}
+
+// Fields of the Todo.
+func (Todo) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("title"),
+	}
+}
+
+// Edges of the Todo.
+func (Todo) Edges() []ent.Edge {
+	return nil
+}
+```
+Finally, generate the schema:
+```console
+go generate ./ent
+```
+
+Write the resolvers:
+```go title="internal/resolver/resolver.go"
+
+```
+
+Write the event handler:
+```go title="internal/handler/resolver.go"
+
+```
+
+Bootstrap the Ent client and event handler for AWS Lambda:
+```go title="lambda/main.go"
+package main
+
+import (
+	"entgo-aws-appsync/ent"
+	"entgo-aws-appsync/internal/handler"
+	"log"
+
+	"github.com/aws/aws-lambda-go/lambda"
+)
+
+func main() {
+	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+
+	lambda.Start(handler.New(client))
+}
+```
 
 ### Deploying AWS Lambda
 
