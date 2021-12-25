@@ -16,7 +16,7 @@ Compared to Nodejs, the most popular runtime for AWS Lambda, Go offers faster st
 On the other hand, Ent presents an innovative approach towards type-safe access to relational databases, which in my opinion, is unmatched in the Go ecosystem.
 In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extremely powerful setup to face today's demanding API requirements.
 
-### Setting up AWS AppSync
+### Setting up AWS AppSync schema
 
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of getting started with AWS AppSync from scratch" src="https://entgo.io/images/assets/appsync/from-scratch.png" />
@@ -40,7 +40,7 @@ In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extrem
 
 ```graphql
 input AddTodoInput {
-	title: String!
+	title: String
 }
 
 type AddTodoOutput {
@@ -81,7 +81,9 @@ schema {
   <p style={{fontSize: 12}}>Final GraphQL schema of AWS AppSync API</p>
 </div>
 
-### Developing AWS Lambda with Ent
+### Setting up AWS Lambda
+
+### Setting up Ent and deploying AWS Lambda
 
 Create an empty directory and change directory:
 ```console
@@ -131,12 +133,153 @@ go generate ./ent
 
 Write the resolvers:
 ```go title="internal/resolver/resolver.go"
+package handler
 
+import (
+	"context"
+	"encoding/json"
+	"entgo-aws-appsync/ent"
+	"entgo-aws-appsync/internal/resolver"
+	"fmt"
+	"log"
+)
+
+type Action string
+
+const (
+	ActionMigrate Action = "migrate"
+
+	ActionTodos      = "todos"
+	ActionTodoByID   = "todoById"
+	ActionAddTodo    = "addTodo"
+	ActionRemoveTodo = "removeTodo"
+)
+
+type Event struct {
+	Action Action          `json:"action"`
+	Input  json.RawMessage `json:"input"`
+}
+
+type Handler struct {
+	client *ent.Client
+}
+
+func New(c *ent.Client) *Handler {
+	return &Handler{
+		client: c,
+	}
+}
+
+func (h *Handler) Handle(ctx context.Context, e Event) (interface{}, error) {
+	log.Printf("action: %s", e.Action)
+	log.Printf("payload: %s", e.Input)
+
+	switch e.Action {
+	case ActionMigrate:
+		return nil, h.client.Schema.Create(ctx)
+	case ActionTodos:
+		input := resolver.TodosInput{}
+		return resolver.Todos(ctx, h.client, input)
+	case ActionTodoByID:
+		input := resolver.TodoByIDInput{}
+		if err := json.Unmarshal(e.Input, &input); err != nil {
+			return nil, fmt.Errorf("failed parsing %s params: %w", ActionTodoByID, err)
+		}
+		return resolver.TodoByID(ctx, h.client, input)
+	case ActionAddTodo:
+		input := resolver.AddTodoInput{}
+		if err := json.Unmarshal(e.Input, &input); err != nil {
+			return nil, fmt.Errorf("failed parsing %s params: %w", ActionAddTodo, err)
+		}
+		return resolver.AddTodo(ctx, h.client, input)
+	case ActionRemoveTodo:
+		input := resolver.RemoveTodoInput{}
+		if err := json.Unmarshal(e.Input, &input); err != nil {
+			return nil, fmt.Errorf("failed parsing %s params: %w", ActionRemoveTodo, err)
+		}
+		return resolver.RemoveTodo(ctx, h.client, input)
+	}
+
+	return nil, fmt.Errorf("invalid action %q", e.Action)
+}
 ```
 
 Write the event handler:
 ```go title="internal/handler/resolver.go"
+package resolver
 
+import (
+	"context"
+	"fmt"
+	"strconv"
+
+	"entgo-aws-appsync/ent"
+	"entgo-aws-appsync/ent/todo"
+)
+
+type TodosInput struct{}
+
+func Todos(ctx context.Context, client *ent.Client, input TodosInput) ([]*ent.Todo, error) {
+	return client.Todo.
+		Query().
+		All(ctx)
+}
+
+type TodoByIDInput struct {
+	ID string `json:"id"`
+}
+
+func TodoByID(ctx context.Context, client *ent.Client, input TodoByIDInput) (*ent.Todo, error) {
+	tid, err := strconv.Atoi(input.ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed parsing todo id: %w", err)
+	}
+	return client.Todo.
+		Query().
+		Where(todo.ID(tid)).
+		Only(ctx)
+}
+
+type AddTodoInput struct {
+	Title string `json:"title"`
+}
+
+type AddTodoOutput struct {
+	Todo *ent.Todo `json:"todo"`
+}
+
+func AddTodo(ctx context.Context, client *ent.Client, input AddTodoInput) (*AddTodoOutput, error) {
+	t, err := client.Todo.
+		Create().
+		SetTitle(input.Title).
+		Save(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed creating todo: %w", err)
+	}
+	return &AddTodoOutput{Todo: t}, nil
+}
+
+type RemoveTodoInput struct {
+	TodoID string `json:"todoId"`
+}
+
+type RemoveTodoOutput struct {
+	Todo *ent.Todo `json:"todo"`
+}
+
+func RemoveTodo(ctx context.Context, client *ent.Client, input RemoveTodoInput) (*RemoveTodoOutput, error) {
+	t, err := TodoByID(ctx, client, TodoByIDInput{ID: input.TodoID})
+	if err != nil {
+		return nil, fmt.Errorf("failed querying todo with id %q: %w", input.TodoID, err)
+	}
+	err = client.Todo.
+		DeleteOne(t).
+		Exec(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed deleting todo with id %q: %w", input.TodoID, err)
+	}
+	return &RemoveTodoOutput{Todo: t}, nil
+}
 ```
 
 Bootstrap the Ent client and event handler for AWS Lambda:
@@ -144,25 +287,109 @@ Bootstrap the Ent client and event handler for AWS Lambda:
 package main
 
 import (
+	"database/sql"
 	"entgo-aws-appsync/ent"
 	"entgo-aws-appsync/internal/handler"
 	"log"
+	"os"
 
+	entsql "entgo.io/ent/dialect/sql"
+
+	"entgo.io/ent/dialect"
 	"github.com/aws/aws-lambda-go/lambda"
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 func main() {
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatalf("failed opening connection to sqlite: %v", err)
+		log.Fatalf("failed opening database connection: %v", err)
 	}
+
+	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, db)))
 	defer client.Close()
 
-	lambda.Start(handler.New(client))
+	lambda.Start(handler.New(client).Handle)
 }
 ```
 
-### Deploying AWS Lambda
+### Configuring AWS AppSync resolvers
+
+```vtl title="Query.todos"
+{
+  "version" : "2017-02-28",
+  "operation": "Invoke",
+  "payload": {
+  	"action": "todos"
+  }
+}
+```
+
+```vtl title="Query.todo"
+{
+  "version" : "2017-02-28",
+  "operation": "Invoke",
+  "payload": {
+  	"action": "todo",
+    "input": $util.toJson($context.args.input)
+  }
+}
+```
+
+```vtl title="Mutation.addTodo"
+{
+  "version" : "2017-02-28",
+  "operation": "Invoke",
+  "payload": {
+  	"action": "addTodo",
+    "input": $util.toJson($context.args.input)
+  }
+}
+```
+
+```vtl title="Mutation.removeTodo"
+{
+  "version" : "2017-02-28",
+  "operation": "Invoke",
+  "payload": {
+  	"action": "removeTodo",
+    "input": $util.toJson($context.args.input)
+  }
+}
+```
+
+### Testing AppSync using the Query explorer
+
+```graphql
+mutation MyMutation {
+  addTodo(input: {title: "foo"}) {
+    todo {
+      id
+      title
+    }
+  }
+}
+
+```
+
+```graphql
+query MyQuery {
+  todos {
+    title
+    id
+  }
+}
+
+```
+
+```graphql
+query MyQuery {
+  todo(id: "1") {
+    title
+    id
+  }
+}
+```
 
 ### Wrapping Up
 
