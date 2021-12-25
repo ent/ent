@@ -414,6 +414,31 @@ func TestBuilder(t *testing.T) {
 		{
 			input: Dialect(dialect.Postgres).
 				Update("users").
+				Add("rank", 10).
+				Where(
+					Or(
+						EQ("rank", Select("rank").From(Table("ranks")).Where(EQ("name", "foo"))),
+						GT("score", Select("score").From(Table("scores")).Where(GT("count", 0))),
+					),
+				),
+			wantQuery: `UPDATE "users" SET "rank" = COALESCE("users"."rank", 0) + $1 WHERE "rank" = (SELECT "rank" FROM "ranks" WHERE "name" = $2) OR "score" > (SELECT "score" FROM "scores" WHERE "count" > $3)`,
+			wantArgs:  []interface{}{10, "foo", 0},
+		},
+		{
+			input: Update("users").
+				Add("rank", 10).
+				Where(
+					Or(
+						EQ("rank", Select("rank").From(Table("ranks")).Where(EQ("name", "foo"))),
+						GT("score", Select("score").From(Table("scores")).Where(GT("count", 0))),
+					),
+				),
+			wantQuery: "UPDATE `users` SET `rank` = COALESCE(`users`.`rank`, 0) + ? WHERE `rank` = (SELECT `rank` FROM `ranks` WHERE `name` = ?) OR `score` > (SELECT `score` FROM `scores` WHERE `count` > ?)",
+			wantArgs:  []interface{}{10, "foo", 0},
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Update("users").
 				Set("name", "foo").
 				Set("age", 10).
 				Where(P().EQ("name", "foo")),
