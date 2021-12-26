@@ -5,7 +5,7 @@ authorURL: "https://github.com/bodokaiser"
 authorImageURL: "https://avatars.githubusercontent.com/u/1780466?v=4"
 ---
 
-[Graphql][1] is a query language for HTTP APIs, providing a statically-typed interface to conveniently represent today's complex data hierarchies.
+[GraphQL][1] is a query language for HTTP APIs, providing a statically-typed interface to conveniently represent today's complex data hierarchies.
 One way to use GraphQL is to import a library implementing a GraphQL server to which one registers custom resolvers implementing the database interface.
 An alternative way is to use a GraphQL cloud service to implement the GraphQL server and register serverless cloud functions as resolvers.
 Among the many benefits of cloud services, one of the biggest practical advantages is the resolvers' independence and composability.
@@ -16,31 +16,36 @@ Compared to Nodejs, the most popular runtime for AWS Lambda, Go offers faster st
 On the other hand, Ent presents an innovative approach towards type-safe access to relational databases, which in my opinion, is unmatched in the Go ecosystem.
 In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extremely powerful setup to face today's demanding API requirements.
 
+In the next sections, we set up GraphQL in AWS AppSync and the AWS Lambda function running Ent.
+Subsequently, we propose a Go implementation integrating Ent and the AWS Lambda event handler, followed by performing a quick test of the Ent function.
+Finally, we register it as a data source to our AWS AppSync API and configure the resolvers, which define the mapping from GraphQL requests to AWS Lambda events.
+Be aware that this tutorial requires an AWS account, a public accessible Postgres database, which may incur costs.
+
 ### Setting up AWS AppSync schema
 
+To set up the GraphQL schema in AWS AppSync, sign in to your AWS account and select the AppSync service through the navbar.
+The landing page of the AppSync service should render you a "Create API" button, which you may click to arrive at the "Getting Started" page as depicted in the screenshot below.
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of getting started with AWS AppSync from scratch" src="https://entgo.io/images/assets/appsync/from-scratch.png" />
   <p style={{fontSize: 12}}>Getting started from sratch with AWS AppSync</p>
 </div>
-
+In the top panel reading "Customize your API or import from Amazon DynamoDB" select the option "Build from scratch" and click the "Start" button belonging to the panel.
+You should now see a form where you may insert the API name.
+For the present tutorial, we type "Todo", see the screenshot below, and click the "Create" button.
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of creating a new AWS AppSync API resource" src="https://entgo.io/images/assets/appsync/create-resources.png" />
   <p style={{fontSize: 12}}>Creating a new API resource in AWS AppSync</p>
 </div>
-
+After creating the AppSync API, you should see a landing page showing a panel to define the schema, a panel to query the API, and a panel on integrating AppSync into your app as captured in the screenshot below.
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of the landing page of the AWS AppSync API" src="https://entgo.io/images/assets/appsync/getting-started.png" />
   <p style={{fontSize: 12}}>Landing page of the AWS AppSync API</p>
 </div>
 
-<div style={{textAlign: 'center'}}>
-  <img alt="Screenshot of the initial GraphQL schema of the AWS AppSync API" src="https://entgo.io/images/assets/appsync/initial-schema.png" />
-  <p style={{fontSize: 12}}>Initial GraphQL schema of the AWS AppSync API</p>
-</div>
-
+Click the "Edit Schema" button in the first panel and replace the previous schema with the following GraphQL schema:
 ```graphql
 input AddTodoInput {
-	title: String
+	title: String!
 }
 
 type AddTodoOutput {
@@ -75,13 +80,40 @@ schema {
 	mutation: Mutation
 }
 ```
-
+After replacing the schema, a short validation runs and you should be able to click a "Save Schema" button on the top right corner and you should find yourself with the following view:
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot AWS AppSync: Final GraphQL schema for AWS AppSync API" src="https://entgo.io/images/assets/appsync/final-schema.png" />
   <p style={{fontSize: 12}}>Final GraphQL schema of AWS AppSync API</p>
 </div>
+If we sent GraphQL requests to our AppSync API, the API would return errors as no resolvers have been attached to the schema.
+We will configure the resolvers after deploying the Ent function via AWS Lambda.
+
+Explaining the present GraphQL schema in detail is beyond the scope of this tutorial.
+In short, the GraphQL schema implements a list todos operation via `Query.todos`, a single read todo operation via `Query.todo`, a create todo operation via `Mutation.createTodo`, and a delete operation via `Mutation.deleteTodo`.
+The GraphQL API is similar to a simple REST API design of an `/todos` resource, where we would use `GET /todos`, `GET /todos/:id`, `POST /todos`, and `DELETE /todos/:id`.
+For details on the GraphQL schema design, I obtain inspiration from the [GitHub GraphQL API](https://docs.github.com/en/graphql/reference/queries).
 
 ### Setting up AWS Lambda
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/function-list.png" />
+  <p style={{fontSize: 12}}>AWS Lambda landing page showing functions.</p>
+</div>
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/function-overview.png" />
+  <p style={{fontSize: 12}}>AWS Lambda function overview of Ent function.</p>
+</div>
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/runtime-settings.png" />
+  <p style={{fontSize: 12}}>AWS Lambda runtime settings of Ent function.</p>
+</div>
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/envars.png" />
+  <p style={{fontSize: 12}}>AWS Lambda environemnt variables settings of Ent function.</p>
+</div>
 
 ### Setting up Ent and deploying AWS Lambda
 
@@ -312,6 +344,17 @@ func main() {
 	lambda.Start(handler.New(client).Handle)
 }
 ```
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of invoking the Ent Lambda with a migrate action" src="https://entgo.io/images/assets/appsync/execution-result.png" />
+  <p style={{fontSize: 12}}>Invoking Lambda with a "migrate" action</p>
+</div>
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of invoking the Ent Lambda with a todos action" src="https://entgo.io/images/assets/appsync/execution-result2.png" />
+  <p style={{fontSize: 12}}>Invoking Lambda with a "todos" action</p>
+</div>
+
 
 ### Configuring AWS AppSync resolvers
 
