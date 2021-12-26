@@ -19,7 +19,7 @@ In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extrem
 In the next sections, we set up GraphQL in AWS AppSync and the AWS Lambda function running Ent.
 Subsequently, we propose a Go implementation integrating Ent and the AWS Lambda event handler, followed by performing a quick test of the Ent function.
 Finally, we register it as a data source to our AWS AppSync API and configure the resolvers, which define the mapping from GraphQL requests to AWS Lambda events.
-Be aware that this tutorial requires an AWS account, a public accessible Postgres database, which may incur costs.
+Be aware that this tutorial requires an AWS account and **the URL to a public-accessible Postgres database**, which may incur costs.
 
 ### Setting up AWS AppSync schema
 
@@ -91,29 +91,44 @@ We will configure the resolvers after deploying the Ent function via AWS Lambda.
 Explaining the present GraphQL schema in detail is beyond the scope of this tutorial.
 In short, the GraphQL schema implements a list todos operation via `Query.todos`, a single read todo operation via `Query.todo`, a create todo operation via `Mutation.createTodo`, and a delete operation via `Mutation.deleteTodo`.
 The GraphQL API is similar to a simple REST API design of an `/todos` resource, where we would use `GET /todos`, `GET /todos/:id`, `POST /todos`, and `DELETE /todos/:id`.
-For details on the GraphQL schema design, I obtain inspiration from the [GitHub GraphQL API](https://docs.github.com/en/graphql/reference/queries).
+For details on the GraphQL schema design, e.g., the arguments and returns from the `Query` and `Mutation` objects, I obtain inspiration from the [GitHub GraphQL API](https://docs.github.com/en/graphql/reference/queries).
 
 ### Setting up AWS Lambda
 
+With the AppSync API in place, our next stop is the AWS Lambda function to run Ent.
+For this, we navigate to the AWS Lambda service through the navbar, which leads us to the landing page of the AWS Lambda service showing our list of functions:
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/function-list.png" />
   <p style={{fontSize: 12}}>AWS Lambda landing page showing functions.</p>
 </div>
-
+We click the "Create function" button on the top right and select "Author from scratch" in the upper panel.
+Furthermore, we name the function "ent", set the runtime to "Go 1.x", and click the "Create function" button at the bottom.
+We should then find ourselves viewing the landing page of our "ent" function:
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/function-overview.png" />
   <p style={{fontSize: 12}}>AWS Lambda function overview of Ent function.</p>
 </div>
-
+Before reviewing the Go code and uploading the compiled Go code, we need to adjust some default settings of the function.
+First, we change the default handler name from `hello` to `main`, which equals the filename of the compiled Go binary:
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/runtime-settings.png" />
   <p style={{fontSize: 12}}>AWS Lambda runtime settings of Ent function.</p>
 </div>
-
+Second, we add an environment the variable `DATABASE_URL` encoding the database network parameters and credentials:
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/envars.png" />
   <p style={{fontSize: 12}}>AWS Lambda environemnt variables settings of Ent function.</p>
 </div>
+The database URL follows the schema `postgres://username:password@hostname/dbname`.
+By default, AWS Lambda encrypts the environment variables, making them a fast and safe mechanism to supply database connection parameters.
+Alternatively, one can supply an ARN ID to an AWS Secretsmanager secret from which the function requests new credentials.
+Using AWS Secretmanager supports rotating credentials but requires an additional request at the start of each Lambda.
+A third option is to use AWS IAM to handle the database authorization.
+The former two options make only sense when using AWS RDS.
+
+If you created your Postgres database in AWS RDS, the default username and database name are `postgres`.
+The password can be reset by modifying the AWS RDS instance.
+Be aware that AWS RDS is a rather expensive service and that the network configuration is highly non-trivial!
 
 ### Setting up Ent and deploying AWS Lambda
 
