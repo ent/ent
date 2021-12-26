@@ -469,6 +469,10 @@ However, in most cases it is suffucient to return the response object "as is".
 
 ### Testing AppSync using the Query explorer
 
+The easiest way to test the API is to use the Query Explorer in AWS AppSync.
+Alternatively, one can register an API key in the settings of our AppSync API and use any standard GraphQL client.
+
+Let us first create a todo with the title `foo`:
 ```graphql
 mutation MyMutation {
   addTodo(input: {title: "foo"}) {
@@ -481,6 +485,8 @@ mutation MyMutation {
 
 ```
 
+Requesting a list of the todos should return a single todo with title `foo`:
+
 ```graphql
 query MyQuery {
   todos {
@@ -490,6 +496,8 @@ query MyQuery {
 }
 
 ```
+
+Requesting the `foo` todo by id should work too:
 
 ```graphql
 query MyQuery {
@@ -502,10 +510,20 @@ query MyQuery {
 
 ### Wrapping Up
 
-Additional topics:
-* AWS RDS Proxy because database connections can run out.
-* AWS Aurora serverless
-* AWS EC2 VPC considerations with Aurora serverless
+We successfully deployed a serverless GraphQL API for managing simple todos using AWS AppSync, AWS Lambda, and Ent.
+In particular, we provided step-by-step instructions on configuring AWS AppSync and AWS Lambda through the web console.
+Furthermore, we presented a proposal for how to structure our Go code.
+
+I successfully employed a similar but more complex setup for a B2B SaaS project I am working on part-time in a small team of two.
+The developer experience is consistently pleasurable:
+Writing SQL queries with Ent is almost a no-brainer because of the type-safe code generation and well-designed API.
+Complex features like pagination are provided through the GraphQL extension.
+Using a serverless infrastructure keeps the fixed cost down to a minimum and embraces separation of concerns.
+
+Some potential challenges arise with a serverless architecture, which needs to be addressed.
+First, having many Lambda functions spawn at the same time quickly exhausts the connection pool of the database, and it is advised to use AWS RDS Proxy as a connection pool.
+Second, testing becomes more elaborate as we can not run the GraphQL server or Lambda outside AWS.
+In my experience, it is often sufficient to have thorough end-to-end tests for the GraphQL API and local tests for small independent parts of your code, e.g., validations.
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
