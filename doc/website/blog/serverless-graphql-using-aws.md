@@ -132,18 +132,19 @@ Be aware that AWS RDS is a rather expensive service and that the network configu
 
 ### Setting up Ent and deploying AWS Lambda
 
-Create an empty directory and change directory:
+We now review, compile and deploy the missing Go program, which you can also find at [bodokaiser/entgo-aws-appsync](https://github.com/bodokaiser/entgo-aws-appsync), for the "ent" function to run.
+
+First, we create an empty directory to which we change:
 ```console
 mkdir entgo-aws-appsync && cd $_
 ```
-Setup go modules and Ent:
+Second, we enable go modules and install the Ent toolset:
 ```console
 go mod init entgo-aws-appsync
 go mod tidy
 go get -d entgo.io/ent/cmd/ent
 ```
-
-Create the `Todo` schema
+Third, we create the `Todo` schema
 ```console
 go run entgo.io/ent/cmd/ent init Todo
 ```
@@ -173,85 +174,12 @@ func (Todo) Edges() []ent.Edge {
 	return nil
 }
 ```
-Finally, generate the schema:
+Finally, we perform the Ent code generation:
 ```console
 go generate ./ent
 ```
 
-Write the resolvers:
-```go title="internal/resolver/resolver.go"
-package handler
-
-import (
-	"context"
-	"encoding/json"
-	"entgo-aws-appsync/ent"
-	"entgo-aws-appsync/internal/resolver"
-	"fmt"
-	"log"
-)
-
-type Action string
-
-const (
-	ActionMigrate Action = "migrate"
-
-	ActionTodos      = "todos"
-	ActionTodoByID   = "todoById"
-	ActionAddTodo    = "addTodo"
-	ActionRemoveTodo = "removeTodo"
-)
-
-type Event struct {
-	Action Action          `json:"action"`
-	Input  json.RawMessage `json:"input"`
-}
-
-type Handler struct {
-	client *ent.Client
-}
-
-func New(c *ent.Client) *Handler {
-	return &Handler{
-		client: c,
-	}
-}
-
-func (h *Handler) Handle(ctx context.Context, e Event) (interface{}, error) {
-	log.Printf("action: %s", e.Action)
-	log.Printf("payload: %s", e.Input)
-
-	switch e.Action {
-	case ActionMigrate:
-		return nil, h.client.Schema.Create(ctx)
-	case ActionTodos:
-		input := resolver.TodosInput{}
-		return resolver.Todos(ctx, h.client, input)
-	case ActionTodoByID:
-		input := resolver.TodoByIDInput{}
-		if err := json.Unmarshal(e.Input, &input); err != nil {
-			return nil, fmt.Errorf("failed parsing %s params: %w", ActionTodoByID, err)
-		}
-		return resolver.TodoByID(ctx, h.client, input)
-	case ActionAddTodo:
-		input := resolver.AddTodoInput{}
-		if err := json.Unmarshal(e.Input, &input); err != nil {
-			return nil, fmt.Errorf("failed parsing %s params: %w", ActionAddTodo, err)
-		}
-		return resolver.AddTodo(ctx, h.client, input)
-	case ActionRemoveTodo:
-		input := resolver.RemoveTodoInput{}
-		if err := json.Unmarshal(e.Input, &input); err != nil {
-			return nil, fmt.Errorf("failed parsing %s params: %w", ActionRemoveTodo, err)
-		}
-		return resolver.RemoveTodo(ctx, h.client, input)
-	}
-
-	return nil, fmt.Errorf("invalid action %q", e.Action)
-}
-```
-
-Write the event handler:
+Using the Ent, we write a set of resolver functions, which implement the create, read, and delete operations on the todos:
 ```go title="internal/handler/resolver.go"
 package resolver
 
@@ -328,8 +256,84 @@ func RemoveTodo(ctx context.Context, client *ent.Client, input RemoveTodoInput) 
 	return &RemoveTodoOutput{Todo: t}, nil
 }
 ```
+Using input structs for the resolver functions allows mapping the GraphQL request arguments.
+Using output structs allows us to return multiple objects for more complex operations.
 
-Bootstrap the Ent client and event handler for AWS Lambda:
+To map the Lambda event to a resolver function, we implement a Handler, which performs the mapping according to an `action` field in the event:
+```go title="internal/handler/handler.go"
+package handler
+
+import (
+	"context"
+	"encoding/json"
+	"entgo-aws-appsync/ent"
+	"entgo-aws-appsync/internal/resolver"
+	"fmt"
+	"log"
+)
+
+type Action string
+
+const (
+	ActionMigrate Action = "migrate"
+
+	ActionTodos      = "todos"
+	ActionTodoByID   = "todoById"
+	ActionAddTodo    = "addTodo"
+	ActionRemoveTodo = "removeTodo"
+)
+
+type Event struct {
+	Action Action          `json:"action"`
+	Input  json.RawMessage `json:"input"`
+}
+
+type Handler struct {
+	client *ent.Client
+}
+
+func New(c *ent.Client) *Handler {
+	return &Handler{
+		client: c,
+	}
+}
+
+func (h *Handler) Handle(ctx context.Context, e Event) (interface{}, error) {
+	log.Printf("action: %s", e.Action)
+	log.Printf("payload: %s", e.Input)
+
+	switch e.Action {
+	case ActionMigrate:
+		return nil, h.client.Schema.Create(ctx)
+	case ActionTodos:
+		input := resolver.TodosInput{}
+		return resolver.Todos(ctx, h.client, input)
+	case ActionTodoByID:
+		input := resolver.TodoByIDInput{}
+		if err := json.Unmarshal(e.Input, &input); err != nil {
+			return nil, fmt.Errorf("failed parsing %s params: %w", ActionTodoByID, err)
+		}
+		return resolver.TodoByID(ctx, h.client, input)
+	case ActionAddTodo:
+		input := resolver.AddTodoInput{}
+		if err := json.Unmarshal(e.Input, &input); err != nil {
+			return nil, fmt.Errorf("failed parsing %s params: %w", ActionAddTodo, err)
+		}
+		return resolver.AddTodo(ctx, h.client, input)
+	case ActionRemoveTodo:
+		input := resolver.RemoveTodoInput{}
+		if err := json.Unmarshal(e.Input, &input); err != nil {
+			return nil, fmt.Errorf("failed parsing %s params: %w", ActionRemoveTodo, err)
+		}
+		return resolver.RemoveTodo(ctx, h.client, input)
+	}
+
+	return nil, fmt.Errorf("invalid action %q", e.Action)
+}
+```
+In addition to the resolver actions, we also added a migration action, which is a convenient way to expose database migrations.
+
+Finally, we need to register our `Handler` as AWS Lambda event handler:
 ```go title="lambda/main.go"
 package main
 
@@ -359,19 +363,57 @@ func main() {
 	lambda.Start(handler.New(client).Handle)
 }
 ```
+The function body of `main` is executed whenever an AWS Lambda performs a cold starts.
+After the cold start, a Lambda function is considered "warm," and only the event handler runs, making Lambda executions extremely efficient.
 
+To compile and deploy the Go code, we run:
+```console
+GOOS=linux go build -o main ./lambda
+zip function.zip main
+aws lambda update-function-code --function-name ent --zip-file fileb://function.zip
+```
+The first command creates a compiled binary named `main`.
+The second command compresses the binary to a ZIP archive, required by AWS Lambda.
+The third command replaces the function code of the AWS Lambda named `ent` with the new ZIP archive.
+If you work with multiple AWS accounts you want to use the `--profile <your aws profile>` swiitch.
+
+After you successfully deployed the AWS Lambda, open the "Test" tab of the `ent` function in the web console and invoke it with a "migrate" action:
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of invoking the Ent Lambda with a migrate action" src="https://entgo.io/images/assets/appsync/execution-result.png" />
   <p style={{fontSize: 12}}>Invoking Lambda with a "migrate" action</p>
 </div>
-
+On success, you should get a green feedback box and test the result of a "todos" action:
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of invoking the Ent Lambda with a todos action" src="https://entgo.io/images/assets/appsync/execution-result2.png" />
   <p style={{fontSize: 12}}>Invoking Lambda with a "todos" action</p>
 </div>
-
+In case the test executions fail, you most probably have an issue with your database connection.
 
 ### Configuring AWS AppSync resolvers
+
+With the ent Lambda successfully deployed, we are left to register the ent Lambda as a data source to our AppSync API and configure the schema resolvers to map the AppSync requests to Lambda events.
+First, open our AWS AppSync API in the web console and move to the "data sources" configuration, which you find in the navigation pane on the left.
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of the list of data sources registered to the AWS AppSync API" src="https://entgo.io/images/assets/appsync/data-sources-list.png" />
+  <p style={{fontSize: 12}}>List of data sources registered to the AWS AppSync API</p>
+</div>
+Click the "Create data source" button in the top right to start registering the Ent function as data source:
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot registering the ent Lambda as data source to the AWS AppSync API" src="https://entgo.io/images/assets/appsync/data-sources-ent.png" />
+  <p style={{fontSize: 12}}>Registering the ent Lambda as data source to the AWS AppSync API</p>
+</div>
+Now, open the GraphQL schema of the AppSync API and search for the `Query` type in the sidebar to the right.
+Click the "Attach" button next to the `Query.Todos` type:
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot attaching a resolver to Query type in the AWS AppSync API" src="https://entgo.io/images/assets/appsync/schema-query.png" />
+  <p style={{fontSize: 12}}>Attaching a resolver for the todos Query in the AWS AppSync API</p>
+</div>
+In the resolver view for `Query.todos`, select the Lambda function as data source, enable the request mapping template option,
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot configuring the resolver mapping for the todos Query in the AWS AppSync API" src="https://entgo.io/images/assets/appsync/resolver-todos.png" />
+  <p style={{fontSize: 12}}>Configuring the resolver mapping for the todos Query in the AWS AppSync API</p>
+</div>
+and copy the following template:
 
 ```vtl title="Query.todos"
 {
@@ -382,6 +424,9 @@ func main() {
   }
 }
 ```
+
+Repeat the same procedure for the remaining `Query` and `Mutation` types:
+
 
 ```vtl title="Query.todo"
 {
@@ -415,6 +460,12 @@ func main() {
   }
 }
 ```
+
+The request mapping templates let us construct the event objects with which we invoke the Lambda functions.
+Through the `$context` object, we have access to the GraphQL request and the authentication session.
+In addition, it is possible to arange multiple resolvers sequentielly and reference the respectie outputs via the `$context` objct.
+In principle, it is also possible to define response mapping templates.
+However, in most cases it is suffucient to return the response object "as is".
 
 ### Testing AppSync using the Query explorer
 
@@ -450,6 +501,11 @@ query MyQuery {
 ```
 
 ### Wrapping Up
+
+Additional topics:
+* AWS RDS Proxy because database connections can run out.
+* AWS Aurora serverless
+* AWS EC2 VPC considerations with Aurora serverless
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
