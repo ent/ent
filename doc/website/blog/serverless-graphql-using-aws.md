@@ -394,23 +394,23 @@ In case the test executions fail, you most probably have an issue with your data
 With the ent Lambda successfully deployed, we are left to register the ent Lambda as a data source to our AppSync API and configure the schema resolvers to map the AppSync requests to Lambda events.
 First, open our AWS AppSync API in the web console and move to the "data sources" configuration, which you find in the navigation pane on the left.
 <div style={{textAlign: 'center'}}>
-  <img alt="Screenshot of the list of data sources registered to the AWS AppSync API" src="https://entgo.io/images/assets/appsync/data-sources-list.png" />
+  <img alt="Screenshot of the list of data sources registered to the AWS AppSync API" src="https://entgo.io/images/assets/appsync/data-sources.png" />
   <p style={{fontSize: 12}}>List of data sources registered to the AWS AppSync API</p>
 </div>
 Click the "Create data source" button in the top right to start registering the Ent function as data source:
 <div style={{textAlign: 'center'}}>
-  <img alt="Screenshot registering the ent Lambda as data source to the AWS AppSync API" src="https://entgo.io/images/assets/appsync/data-sources-ent.png" />
+  <img alt="Screenshot registering the ent Lambda as data source to the AWS AppSync API" src="https://entgo.io/images/assets/appsync/new-data-source.png" />
   <p style={{fontSize: 12}}>Registering the ent Lambda as data source to the AWS AppSync API</p>
 </div>
 Now, open the GraphQL schema of the AppSync API and search for the `Query` type in the sidebar to the right.
 Click the "Attach" button next to the `Query.Todos` type:
 <div style={{textAlign: 'center'}}>
-  <img alt="Screenshot attaching a resolver to Query type in the AWS AppSync API" src="https://entgo.io/images/assets/appsync/schema-query.png" />
+  <img alt="Screenshot attaching a resolver to Query type in the AWS AppSync API" src="https://entgo.io/images/assets/appsync/todo-schema.png" />
   <p style={{fontSize: 12}}>Attaching a resolver for the todos Query in the AWS AppSync API</p>
 </div>
 In the resolver view for `Query.todos`, select the Lambda function as data source, enable the request mapping template option,
 <div style={{textAlign: 'center'}}>
-  <img alt="Screenshot configuring the resolver mapping for the todos Query in the AWS AppSync API" src="https://entgo.io/images/assets/appsync/resolver-todos.png" />
+  <img alt="Screenshot configuring the resolver mapping for the todos Query in the AWS AppSync API" src="https://entgo.io/images/assets/appsync/edit-resolver.png" />
   <p style={{fontSize: 12}}>Configuring the resolver mapping for the todos Query in the AWS AppSync API</p>
 </div>
 and copy the following template:
@@ -484,6 +484,10 @@ mutation MyMutation {
 }
 
 ```
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of an executed addTodo Mutation using the AppSync Query Explorer" src="https://entgo.io/images/assets/appsync/todo-queries.png" />
+  <p style={{fontSize: 12}}>"addTodo" Mutation using the AppSync Query Explorer</p>
+</div>
 
 Requesting a list of the todos should return a single todo with title `foo`:
 
@@ -496,6 +500,10 @@ query MyQuery {
 }
 
 ```
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of an executed addTodo Mutation using the AppSync Query Explorer" src="https://entgo.io/images/assets/appsync/todo-queries-3.png" />
+  <p style={{fontSize: 12}}>"addTodo" Mutation using the AppSync Query Explorer</p>
+</div>
 
 Requesting the `foo` todo by id should work too:
 
@@ -507,6 +515,10 @@ query MyQuery {
   }
 }
 ```
+<div style={{textAlign: 'center'}}>
+  <img alt="Screenshot of an executed addTodo Mutation using the AppSync Query Explorer" src="https://entgo.io/images/assets/appsync/todo-queries-4.png" />
+  <p style={{fontSize: 12}}>"addTodo" Mutation using the AppSync Query Explorer</p>
+</div>
 
 ### Wrapping Up
 
