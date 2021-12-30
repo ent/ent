@@ -3095,6 +3095,8 @@ func (b *Builder) Arg(a interface{}) *Builder {
 		switch a.(type) {
 		case int8, int16, int, int32, int64, float32, float64:
 			param = fmt.Sprintf("%v", a)
+		case []byte:
+			param = fmt.Sprintf("'%s'", a)
 		case bool:
 			if a.(bool) {
 				param = "1"
