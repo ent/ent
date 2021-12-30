@@ -13,13 +13,13 @@ For example, we can write one resolver to a relational database and another to a
 
 We consider such a kind of setup using [Amazon Web Services (AWS)][2] in the following. In particular, we use [AWS AppSync][3] as the GraphQL cloud service and [AWS Lambda][4] to run a relational database resolver, which we implement using [Go][5] with [Ent][6] as the entity framework.
 Compared to Nodejs, the most popular runtime for AWS Lambda, Go offers faster start times, higher performance, and, in my opinion, an improved developer experience.
-On the other hand, Ent presents an innovative approach towards type-safe access to relational databases, which in my opinion, is unmatched in the Go ecosystem.
+As an additional complement, Ent presents an innovative approach towards type-safe access to relational databases, which, in my opinion, is unmatched in the Go ecosystem.
 In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extremely powerful setup to face today's demanding API requirements.
 
 In the next sections, we set up GraphQL in AWS AppSync and the AWS Lambda function running Ent.
 Subsequently, we propose a Go implementation integrating Ent and the AWS Lambda event handler, followed by performing a quick test of the Ent function.
 Finally, we register it as a data source to our AWS AppSync API and configure the resolvers, which define the mapping from GraphQL requests to AWS Lambda events.
-Be aware that this tutorial requires an AWS account and **the URL to a public-accessible Postgres database**, which may incur costs.
+Be aware that this tutorial requires an AWS account and **the URL to a publicly-accessible Postgres database**, which may incur costs.
 
 ### Setting up AWS AppSync schema
 
@@ -87,7 +87,7 @@ schema {
 }
 ```
 
-After replacing the schema, a short validation runs and you should be able to click a "Save Schema" button on the top right corner and you should find yourself with the following view:
+After replacing the schema, a short validation runs and you should be able to click the "Save Schema" button on the top right corner and find yourself with the following view:
 
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot AWS AppSync: Final GraphQL schema for AWS AppSync API" src="https://entgo.io/images/assets/appsync/final-schema.png" />
@@ -114,14 +114,14 @@ For this, we navigate to the AWS Lambda service through the navbar, which leads 
 
 We click the "Create function" button on the top right and select "Author from scratch" in the upper panel.
 Furthermore, we name the function "ent", set the runtime to "Go 1.x", and click the "Create function" button at the bottom.
-We should then find ourselves viewing the landing page of our "ent" function:a
+We should then find ourselves viewing the landing page of our "ent" function:
 
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of AWS Lambda landing page listing functions" src="https://entgo.io/images/assets/appsync/function-overview.png" />
-  <p style={{fontSize: 12}}>AWS Lambda function overview of Ent function.</p>
+  <p style={{fontSize: 12}}>AWS Lambda function overview of the Ent function.</p>
 </div>
 
-Before reviewing the Go code and uploading the compiled Go code, we need to adjust some default settings of the function.
+Before reviewing the Go code and uploading the compiled binary, we need to adjust some default settings of the "ent" function.
 First, we change the default handler name from `hello` to `main`, which equals the filename of the compiled Go binary:
 
 <div style={{textAlign: 'center'}}>
@@ -136,12 +136,12 @@ Second, we add an environment the variable `DATABASE_URL` encoding the database 
   <p style={{fontSize: 12}}>AWS Lambda environemnt variables settings of Ent function.</p>
 </div>
 
-The database URL follows the schema `postgres://username:password@hostname/dbname`.
+To open a connection to the database, pass in a [DSN](https://en.wikipedia.org/wiki/Data_source_name), e.g., `postgres://username:password@hostname/dbname`.
 By default, AWS Lambda encrypts the environment variables, making them a fast and safe mechanism to supply database connection parameters.
 Alternatively, one can use the AWS Secretsmanager service and dynamically request credentials during the Lambda function's cold start, allowing, among others, rotating credentials.
 A third option is to use AWS IAM to handle the database authorization.
 
-If you created your Postgres database using the AWS RDS service, the default username and database name are `postgres`.
+If you created your Postgres database in AWS RDS, the default username and database name is `postgres`.
 The password can be reset by modifying the AWS RDS instance.
 
 ### Setting up Ent and deploying AWS Lambda
@@ -152,7 +152,8 @@ You can find the complete source code in [bodokaiser/entgo-aws-appsync](https://
 First, we create an empty directory to which we change:
 
 ```console
-mkdir entgo-aws-appsync && cd $_
+mkdir entgo-aws-appsync
+cd entgo-aws-appsync
 ```
 
 Second, we enable go modules and install the Ent toolset:
@@ -163,7 +164,7 @@ go mod tidy
 go get -d entgo.io/ent/cmd/ent
 ```
 
-Third, we create the `Todo` schema
+Third, we create the `Todo` schema:
 
 ```console
 go run entgo.io/ent/cmd/ent init Todo
@@ -201,7 +202,7 @@ Finally, we perform the Ent code generation:
 go generate ./ent
 ```
 
-Using the Ent, we write a set of resolver functions, which implement the create, read, and delete operations on the todos:
+Using Ent, we write a set of resolver functions, which implement the create, read, and delete operations on the todos:
 
 ```go title="internal/handler/resolver.go"
 package resolver
@@ -280,8 +281,8 @@ func RemoveTodo(ctx context.Context, client *ent.Client, input RemoveTodoInput) 
 }
 ```
 
-Using input structs for the resolver functions allows mapping the GraphQL request arguments.
-Using output structs allows us to return multiple objects for more complex operations.
+Using input structs for the resolver functions allows for mapping the GraphQL request arguments.
+Using output structs allows for returning multiple objects for more complex operations.
 
 To map the Lambda event to a resolver function, we implement a Handler, which performs the mapping according to an `action` field in the event:
 
@@ -291,10 +292,11 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"entgo-aws-appsync/ent"
-	"entgo-aws-appsync/internal/resolver"
 	"fmt"
 	"log"
+
+	"entgo-aws-appsync/ent"
+	"entgo-aws-appsync/internal/resolver"
 )
 
 type Action string
@@ -366,16 +368,17 @@ package main
 
 import (
 	"database/sql"
-	"entgo-aws-appsync/ent"
-	"entgo-aws-appsync/internal/handler"
 	"log"
 	"os"
 
 	entsql "entgo.io/ent/dialect/sql"
-
 	"entgo.io/ent/dialect"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/jackc/pgx/v4/stdlib"
+
+	"entgo-aws-appsync/ent"
+	"entgo-aws-appsync/internal/handler"
 )
 
 func main() {
@@ -391,7 +394,7 @@ func main() {
 }
 ```
 
-The function body of `main` is executed whenever an AWS Lambda performs a cold starts.
+The function body of `main` is executed whenever an AWS Lambda performs a cold start.
 After the cold start, a Lambda function is considered "warm," with only the event handler code being executed, making Lambda executions very efficient.
 
 To compile and deploy the Go code, we run:
@@ -405,9 +408,9 @@ aws lambda update-function-code --function-name ent --zip-file fileb://function.
 The first command creates a compiled binary named `main`.
 The second command compresses the binary to a ZIP archive, required by AWS Lambda.
 The third command replaces the function code of the AWS Lambda named `ent` with the new ZIP archive.
-If you work with multiple AWS accounts you want to use the `--profile <your aws profile>` swiitch.
+If you work with multiple AWS accounts you want to use the `--profile <your aws profile>` switch.
 
-After you successfully deployed the AWS Lambda, open the "Test" tab of the `ent` function in the web console and invoke it with a "migrate" action:
+After you successfully deployed the AWS Lambda, open the "Test" tab of the "ent" function in the web console and invoke it with a "migrate" action:
 
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot of invoking the Ent Lambda with a migrate action" src="https://entgo.io/images/assets/appsync/execution-result.png" />
@@ -425,7 +428,7 @@ In case the test executions fail, you most probably have an issue with your data
 
 ### Configuring AWS AppSync resolvers
 
-With the ent Lambda successfully deployed, we are left to register the ent Lambda as a data source to our AppSync API and configure the schema resolvers to map the AppSync requests to Lambda events.
+With the "ent" function successfully deployed, we are left to register the ent Lambda as a data source to our AppSync API and configure the schema resolvers to map the AppSync requests to Lambda events.
 First, open our AWS AppSync API in the web console and move to "Data Sources", which you find in the navigation pane on the left.
 
 <div style={{textAlign: 'center'}}>
@@ -433,7 +436,7 @@ First, open our AWS AppSync API in the web console and move to "Data Sources", w
   <p style={{fontSize: 12}}>List of data sources registered to the AWS AppSync API</p>
 </div>
 
-Click the "Create data source" button in the top right to start registering the Ent function as data source:
+Click the "Create data source" button in the top right to start registering the "ent" function as data source:
 
 <div style={{textAlign: 'center'}}>
   <img alt="Screenshot registering the ent Lambda as data source to the AWS AppSync API" src="https://entgo.io/images/assets/appsync/new-data-source.png" />
@@ -505,14 +508,14 @@ Repeat the same procedure for the remaining `Query` and `Mutation` types:
 
 The request mapping templates let us construct the event objects with which we invoke the Lambda functions.
 Through the `$context` object, we have access to the GraphQL request and the authentication session.
-In addition, it is possible to arange multiple resolvers sequentielly and reference the respectie outputs via the `$context` objct.
+In addition, it is possible to arrange multiple resolvers sequentially and reference the respective outputs via the `$context` object.
 In principle, it is also possible to define response mapping templates.
-However, in most cases it is suffucient to return the response object "as is".
+However, in most cases it is sufficient enough to return the response object "as is".
 
 ### Testing AppSync using the Query explorer
 
 The easiest way to test the API is to use the Query Explorer in AWS AppSync.
-Alternatively, one can register an API key in the settings of our AppSync API and use any standard GraphQL client.
+Alternatively, one can register an API key in the settings of their AppSync API and use any standard GraphQL client.
 
 Let us first create a todo with the title `foo`:
 
