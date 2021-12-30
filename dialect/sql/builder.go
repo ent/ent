@@ -979,7 +979,7 @@ func (i *InsertBuilder) Query() (string, []interface{}) {
 		i.writeDefault()
 	} else {
 		i.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
-		if i.dialect == dialect.SQLServer {
+		if i.dialect == dialect.SQLServer && len(i.returning) > 0 {
 			i.WriteString(" OUTPUT INSERTED.\"" + i.returning[0] + "\" ")
 		}
 		i.WriteString(" VALUES ")
