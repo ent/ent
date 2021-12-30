@@ -12,7 +12,7 @@ Among the many benefits of cloud services, one of the biggest practical advantag
 For example, we can write one resolver to a relational database and another to a search database.
 
 We consider such a kind of setup using [Amazon Web Services (AWS)][2] in the following. In particular, we use [AWS AppSync][3] as the GraphQL cloud service and [AWS Lambda][4] to run a relational database resolver, which we implement using [Go][5] with [Ent][6] as the entity framework.
-Compared to Nodejs, the most popular runtime for AWS Lambda, Go offers faster start times, higher performance, and, in my opinion, an improved developer experience.
+Compared to Nodejs, the most popular runtime for AWS Lambda, Go offers faster start times, higher performance, and, from my point of view, an improved developer experience.
 As an additional complement, Ent presents an innovative approach towards type-safe access to relational databases, which, in my opinion, is unmatched in the Go ecosystem.
 In conclusion, running Ent with AWS Lambda as AWS AppSync resolvers is an extremely powerful setup to face today's demanding API requirements.
 
@@ -172,7 +172,7 @@ go run entgo.io/ent/cmd/ent init Todo
 
 and add the `title` field:
 
-```go title="ent/schema/todo.go"
+```go {15-17} title="ent/schema/todo.go"
 package schema
 
 import (
@@ -216,18 +216,22 @@ import (
 	"entgo-aws-appsync/ent/todo"
 )
 
+// TodosInput is the input to the Todos query.
 type TodosInput struct{}
 
+// Todos queries all todos.
 func Todos(ctx context.Context, client *ent.Client, input TodosInput) ([]*ent.Todo, error) {
 	return client.Todo.
 		Query().
 		All(ctx)
 }
 
+// TodoByIDInput is the input to the TodoByID query.
 type TodoByIDInput struct {
 	ID string `json:"id"`
 }
 
+// TodoByID queries a single todo by its id.
 func TodoByID(ctx context.Context, client *ent.Client, input TodoByIDInput) (*ent.Todo, error) {
 	tid, err := strconv.Atoi(input.ID)
 	if err != nil {
@@ -239,14 +243,17 @@ func TodoByID(ctx context.Context, client *ent.Client, input TodoByIDInput) (*en
 		Only(ctx)
 }
 
+// AddTodoInput is the input to the AddTodo mutation.
 type AddTodoInput struct {
 	Title string `json:"title"`
 }
 
+// AddTodoOutput is the output to the AddTodo mutation.
 type AddTodoOutput struct {
 	Todo *ent.Todo `json:"todo"`
 }
 
+// AddTodo adds a todo and returns it.
 func AddTodo(ctx context.Context, client *ent.Client, input AddTodoInput) (*AddTodoOutput, error) {
 	t, err := client.Todo.
 		Create().
@@ -258,14 +265,17 @@ func AddTodo(ctx context.Context, client *ent.Client, input AddTodoInput) (*AddT
 	return &AddTodoOutput{Todo: t}, nil
 }
 
+// RemoveTodoInput is the input to the RemoveTodo mutation.
 type RemoveTodoInput struct {
 	TodoID string `json:"todoId"`
 }
 
+// RemoveTodoOutput is the output to the RemoveTodo mutation.
 type RemoveTodoOutput struct {
 	Todo *ent.Todo `json:"todo"`
 }
 
+// RemoveTodo removes a todo and returns it.
 func RemoveTodo(ctx context.Context, client *ent.Client, input RemoveTodoInput) (*RemoveTodoOutput, error) {
 	t, err := TodoByID(ctx, client, TodoByIDInput{ID: input.TodoID})
 	if err != nil {
@@ -299,8 +309,10 @@ import (
 	"entgo-aws-appsync/internal/resolver"
 )
 
+// Action specifies the event type.
 type Action string
 
+// List of supported event actions.
 const (
 	ActionMigrate Action = "migrate"
 
@@ -310,45 +322,48 @@ const (
 	ActionRemoveTodo = "removeTodo"
 )
 
+// Event is the argument of the event handler.
 type Event struct {
 	Action Action          `json:"action"`
 	Input  json.RawMessage `json:"input"`
 }
 
+// Handler handles supported events.
 type Handler struct {
 	client *ent.Client
 }
 
+// Returns a new event handler.
 func New(c *ent.Client) *Handler {
 	return &Handler{
 		client: c,
 	}
 }
 
+// Handle implements the event handling by action.
 func (h *Handler) Handle(ctx context.Context, e Event) (interface{}, error) {
-	log.Printf("action: %s", e.Action)
-	log.Printf("payload: %s", e.Input)
+	log.Printf("action %s with payload %s\n", e.Action, e.Input)
 
 	switch e.Action {
 	case ActionMigrate:
 		return nil, h.client.Schema.Create(ctx)
 	case ActionTodos:
-		input := resolver.TodosInput{}
+		var input resolver.TodosInput
 		return resolver.Todos(ctx, h.client, input)
 	case ActionTodoByID:
-		input := resolver.TodoByIDInput{}
+		var input resolver.TodoByIDInput
 		if err := json.Unmarshal(e.Input, &input); err != nil {
 			return nil, fmt.Errorf("failed parsing %s params: %w", ActionTodoByID, err)
 		}
 		return resolver.TodoByID(ctx, h.client, input)
 	case ActionAddTodo:
-		input := resolver.AddTodoInput{}
+		var input resolver.AddTodoInput
 		if err := json.Unmarshal(e.Input, &input); err != nil {
 			return nil, fmt.Errorf("failed parsing %s params: %w", ActionAddTodo, err)
 		}
 		return resolver.AddTodo(ctx, h.client, input)
 	case ActionRemoveTodo:
-		input := resolver.RemoveTodoInput{}
+		var input resolver.RemoveTodoInput
 		if err := json.Unmarshal(e.Input, &input); err != nil {
 			return nil, fmt.Errorf("failed parsing %s params: %w", ActionRemoveTodo, err)
 		}
@@ -371,8 +386,8 @@ import (
 	"log"
 	"os"
 
-	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -382,14 +397,17 @@ import (
 )
 
 func main() {
+	// open the daatabase connection using the pgx driver
 	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("failed opening database connection: %v", err)
 	}
 
+	// initiate the ent database client for the Postgres database
 	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, db)))
 	defer client.Close()
 
+	// register our event handler to lissten on Lambda events
 	lambda.Start(handler.New(client).Handle)
 }
 ```
@@ -465,7 +483,7 @@ and copy the following template:
   "version" : "2017-02-28",
   "operation": "Invoke",
   "payload": {
-  	"action": "todos"
+    "action": "todos"
   }
 }
 ```
@@ -478,7 +496,7 @@ Repeat the same procedure for the remaining `Query` and `Mutation` types:
   "version" : "2017-02-28",
   "operation": "Invoke",
   "payload": {
-  	"action": "todo",
+    "action": "todo",
     "input": $util.toJson($context.args.input)
   }
 }
@@ -489,7 +507,7 @@ Repeat the same procedure for the remaining `Query` and `Mutation` types:
   "version" : "2017-02-28",
   "operation": "Invoke",
   "payload": {
-  	"action": "addTodo",
+    "action": "addTodo",
     "input": $util.toJson($context.args.input)
   }
 }
@@ -500,7 +518,7 @@ Repeat the same procedure for the remaining `Query` and `Mutation` types:
   "version" : "2017-02-28",
   "operation": "Invoke",
   "payload": {
-  	"action": "removeTodo",
+    "action": "removeTodo",
     "input": $util.toJson($context.args.input)
   }
 }
