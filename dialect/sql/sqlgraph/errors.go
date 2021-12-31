@@ -22,7 +22,7 @@ func IsUniqueConstraintError(err error) bool {
 		"Error 1062",                 // MySQL
 		"violates unique constraint", // Postgres
 		"UNIQUE constraint failed",   // SQLite
-		"Violation of UNIQUE KEY constraint",   // mssql
+		"UNIQUE KEY",   // mssql
 	}
 	for _, s := range uniquenessErrors {
 		if strings.Contains(err.Error(), s) {
