@@ -73,7 +73,7 @@ func (t Type) ConstName() string {
 	switch {
 	case !t.Valid():
 		return typeNames[TypeInvalid]
-	case int(t) < len(constNames) && constNames[t] != "":
+	case t < len(constNames) && constNames[t] != "":
 		return constNames[t]
 	default:
 		return "Type" + strings.Title(typeNames[t])

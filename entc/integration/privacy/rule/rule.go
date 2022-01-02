@@ -116,7 +116,7 @@ func DenyIfStatusChangedByOther() privacy.MutationRule {
 			return privacy.Skip
 		}
 		view, ok := viewer.FromContext(ctx).(*viewer.UserViewer)
-		// Skip if the the viewer is an admin (or an app).
+		// Skip if the viewer is an admin (or an app).
 		if !ok || view.Admin() {
 			return privacy.Skip
 		}
@@ -141,7 +141,7 @@ func DenyIfStatusChangedByOther() privacy.MutationRule {
 func AllowIfViewerInTheSameTeam() privacy.MutationRule {
 	policy := privacy.TaskMutationRuleFunc(func(ctx context.Context, m *ent.TaskMutation) error {
 		view, ok := viewer.FromContext(ctx).(*viewer.UserViewer)
-		// Skip if the the viewer is an admin (or an app).
+		// Skip if the viewer is an admin (or an app).
 		if !ok || view.Admin() {
 			return privacy.Skip
 		}
