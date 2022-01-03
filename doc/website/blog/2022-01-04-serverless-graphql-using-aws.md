@@ -156,18 +156,16 @@ mkdir entgo-aws-appsync
 cd entgo-aws-appsync
 ```
 
-Second, we enable go modules and install the Ent toolset:
+Second, we initiate a new Go module to contain our project:
 
 ```console
 go mod init entgo-aws-appsync
-go mod tidy
-go get -d entgo.io/ent/cmd/ent
 ```
 
-Third, we create the `Todo` schema:
+Third, we create the `Todo` schema while pulling in the ent dependencies:
 
 ```console
-go run entgo.io/ent/cmd/ent init Todo
+go run -mod=mod entgo.io/ent/cmd/ent init Todo
 ```
 
 and add the `title` field:
