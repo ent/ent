@@ -3,6 +3,7 @@ title: Serverless GraphQL using with AWS and ent
 author: Bodo Kaiser
 authorURL: "https://github.com/bodokaiser"
 authorImageURL: "https://avatars.githubusercontent.com/u/1780466?v=4"
+image: https://entgo.io/images/assets/appsync/share.png
 ---
 
 [GraphQL][1] is a query language for HTTP APIs, providing a statically-typed interface to conveniently represent today's complex data hierarchies.
