@@ -43,7 +43,7 @@ type Tx struct {
 {{ range $func := keys $funcs }}
 	{{ $iface := get $funcs $func }}
 	type (
-		// {{ $iface }} is the interface that wraps the {{ $iface }} method.
+		// {{ $iface }} is the interface that wraps the {{ $func }} method.
 		{{ $iface }} interface {
 			{{ $func }}(context.Context, *Tx) error
 		}
