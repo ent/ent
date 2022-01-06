@@ -14,6 +14,10 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
+
+	"ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/postgres"
+	"ariga.io/atlas/sql/schema"
 )
 
 // Postgres is a postgres migration driver.
@@ -25,7 +29,7 @@ type Postgres struct {
 
 // init loads the Postgres version from the database for later use in the migration process.
 // It returns an error if the server version is lower than v10.
-func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
+func (d *Postgres) init(ctx context.Context, tx dialect.ExecQuerier) error {
 	rows := &sql.Rows{}
 	if err := tx.Query(ctx, "SHOW server_version_num", []interface{}{}, rows); err != nil {
 		return fmt.Errorf("querying server version %w", err)
@@ -52,14 +56,14 @@ func (d *Postgres) init(ctx context.Context, tx dialect.Tx) error {
 }
 
 // tableExist checks if a table exists in the database and current schema.
-func (d *Postgres) tableExist(ctx context.Context, tx dialect.Tx, name string) (bool, error) {
+func (d *Postgres) tableExist(ctx context.Context, conn dialect.ExecQuerier, name string) (bool, error) {
 	query, args := sql.Dialect(dialect.Postgres).
 		Select(sql.Count("*")).From(sql.Table("tables").Schema("information_schema")).
 		Where(sql.And(
 			d.matchSchema(),
 			sql.EQ("table_name", name),
 		)).Query()
-	return exist(ctx, tx, query, args...)
+	return exist(ctx, conn, query, args...)
 }
 
 // tableExist checks if a foreign-key exists in the current schema.
@@ -75,7 +79,7 @@ func (d *Postgres) fkExist(ctx context.Context, tx dialect.Tx, name string) (boo
 }
 
 // setRange sets restart the identity column to the given offset. Used by the universal-id option.
-func (d *Postgres) setRange(ctx context.Context, tx dialect.Tx, t *Table, value int) error {
+func (d *Postgres) setRange(ctx context.Context, conn dialect.ExecQuerier, t *Table, value int64) error {
 	if value == 0 {
 		value = 1 // RESTART value cannot be < 1.
 	}
@@ -83,7 +87,7 @@ func (d *Postgres) setRange(ctx context.Context, tx dialect.Tx, t *Table, value 
 	if len(t.PrimaryKey) == 1 {
 		pk = t.PrimaryKey[0].Name
 	}
-	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s RESTART WITH %d", t.Name, pk, value), []interface{}{}, nil)
+	return conn.Exec(ctx, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s RESTART WITH %d", t.Name, pk, value), []interface{}{}, nil)
 }
 
 // table loads the current table description from the database.
@@ -664,3 +668,118 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
   AND tc.table_name = '%s'
 order by constraint_name, kcu.ordinal_position;
 `
+
+// Atlas integration.
+
+func (d *Postgres) atOpen(conn dialect.ExecQuerier) (migrate.Driver, error) {
+	return postgres.Open(&db{ExecQuerier: conn})
+}
+
+func (d *Postgres) atTable(t1 *Table, t2 *schema.Table) {
+	if t1.Annotation != nil {
+		setAtChecks(t1, t2)
+	}
+}
+
+func (d *Postgres) atTypeC(c1 *Column, c2 *schema.Column) error {
+	if c1.SchemaType != nil && c1.SchemaType[dialect.Postgres] != "" {
+		t, err := postgres.ParseType(strings.ToLower(c1.SchemaType[dialect.Postgres]))
+		if err != nil {
+			return err
+		}
+		c2.Type.Type = t
+		return nil
+	}
+	var t schema.Type
+	switch c1.Type {
+	case field.TypeBool:
+		t = &schema.BoolType{T: postgres.TypeBoolean}
+	case field.TypeUint8, field.TypeInt8, field.TypeInt16, field.TypeUint16:
+		t = &schema.IntegerType{T: postgres.TypeSmallInt}
+	case field.TypeInt32, field.TypeUint32:
+		t = &schema.IntegerType{T: postgres.TypeInt}
+	case field.TypeInt, field.TypeUint, field.TypeInt64, field.TypeUint64:
+		t = &schema.IntegerType{T: postgres.TypeBigInt}
+	case field.TypeFloat32:
+		t = &schema.FloatType{T: c1.scanTypeOr(postgres.TypeReal)}
+	case field.TypeFloat64:
+		t = &schema.FloatType{T: c1.scanTypeOr(postgres.TypeDouble)}
+	case field.TypeBytes:
+		t = &schema.BinaryType{T: postgres.TypeBytea}
+	case field.TypeUUID:
+		t = &postgres.UUIDType{T: postgres.TypeUUID}
+	case field.TypeJSON:
+		t = &schema.JSONType{T: postgres.TypeJSONB}
+	case field.TypeString:
+		t = &schema.StringType{T: postgres.TypeVarChar}
+		if c1.Size > maxCharSize {
+			t = &schema.StringType{T: postgres.TypeText}
+		}
+	case field.TypeTime:
+		t = &schema.TimeType{T: c1.scanTypeOr(postgres.TypeTimestampWTZ)}
+	case field.TypeEnum:
+		// Although atlas supports enum types, we keep backwards compatibility
+		// with previous versions of ent and use varchar (see cType).
+		t = &schema.StringType{T: postgres.TypeVarChar}
+	case field.TypeOther:
+		t = &schema.UnsupportedType{T: c1.typ}
+	default:
+		t, err := postgres.ParseType(strings.ToLower(c1.typ))
+		if err != nil {
+			return err
+		}
+		c2.Type.Type = t
+	}
+	c2.Type.Type = t
+	return nil
+}
+
+func (d *Postgres) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schema.Column) {
+	// For UNIQUE columns, PostgreSQL create an implicit index named
+	// "<table>_<column>_key<i>". Ent uses the MySQL approach
+	// in its migration, and name these indexes as the columns.
+	for _, idx := range t1.Indexes {
+		// Index also defined explicitly, and will be add in atIndexes.
+		if idx.Unique && d.atImplicitIndexName(idx, t1, c1) {
+			return
+		}
+	}
+	t2.AddIndexes(schema.NewUniqueIndex(c1.Name).AddColumns(c2))
+}
+
+func (d *Postgres) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {
+	if idx.Name == c1.Name {
+		return true
+	}
+	p := fmt.Sprintf("%s_%s_key", t1.Name, c1.Name)
+	if idx.Name == p {
+		return true
+	}
+	i, err := strconv.ParseInt(strings.TrimPrefix(idx.Name, p), 10, 64)
+	return err == nil && i > 0
+}
+
+func (d *Postgres) atIncrementC(t *schema.Table, c *schema.Column) {
+	id := &postgres.Identity{}
+	for _, a := range t.Attrs {
+		if a, ok := a.(*postgres.Identity); ok {
+			id = a
+		}
+	}
+	c.AddAttrs(id)
+}
+
+func (d *Postgres) atIncrementT(t *schema.Table, v int64) {
+	t.AddAttrs(&postgres.Identity{Sequence: &postgres.Sequence{Start: v}})
+}
+
+func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) error {
+	for _, c1 := range idx1.Columns {
+		c2, ok := t2.Column(c1.Name)
+		if !ok {
+			return fmt.Errorf("unexpected index %q column: %q", idx1.Name, c1.Name)
+		}
+		idx2.AddParts(&schema.IndexPart{C: c2})
+	}
+	return nil
+}

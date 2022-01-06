@@ -22,6 +22,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	sqlschema "entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/card"
@@ -109,6 +110,7 @@ func TestPostgres(t *testing.T) {
 
 var (
 	opts = enttest.WithMigrateOptions(
+		sqlschema.WithAtlas(true),
 		migrate.WithDropIndex(true),
 		migrate.WithDropColumn(true),
 	)
@@ -1673,7 +1675,7 @@ func NoSchemaChanges(t *testing.T, client *ent.Client) {
 		}
 		return len(p), nil
 	})
-	err := client.Schema.WriteTo(context.Background(), w, migrate.WithDropIndex(true), migrate.WithDropColumn(true))
+	err := client.Schema.WriteTo(context.Background(), w, migrate.WithDropIndex(true), migrate.WithDropColumn(true), sqlschema.WithAtlas(true))
 	require.NoError(t, err)
 }
 
