@@ -9,7 +9,6 @@ import (
 	"crypto/md5"
 	"fmt"
 	"math"
-	"sort"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -322,8 +321,6 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 	if len(curr.PrimaryKey) != len(new.PrimaryKey) {
 		return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
 	}
-	sort.Slice(new.PrimaryKey, func(i, j int) bool { return new.PrimaryKey[i].Name < new.PrimaryKey[j].Name })
-	sort.Slice(curr.PrimaryKey, func(i, j int) bool { return curr.PrimaryKey[i].Name < curr.PrimaryKey[j].Name })
 	for i := range curr.PrimaryKey {
 		if curr.PrimaryKey[i].Name != new.PrimaryKey[i].Name {
 			return nil, fmt.Errorf("cannot change primary key for table: %q", curr.Name)
