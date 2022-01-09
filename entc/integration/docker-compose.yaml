@@ -9,6 +9,8 @@ services:
   mysql56:
     platform: linux/amd64
     image: mysql:5.6.51
+    # need to set this manually starting from 5.6.36
+    #command: --sql-mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass

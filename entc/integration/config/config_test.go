@@ -73,6 +73,8 @@ func TestMySQL(t *testing.T) {
 			require.NoError(t, err)
 			defer root.Close()
 			ctx := context.Background()
+			err = root.Exec(ctx, "DROP DATABASE IF EXISTS config", []interface{}{}, new(sql.Result))
+			require.NoError(t, err, "dropping database")
 			err = root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS config", []interface{}{}, new(sql.Result))
 			require.NoError(t, err, "creating database")
 			defer root.Exec(ctx, "DROP DATABASE IF EXISTS config", []interface{}{}, new(sql.Result))
@@ -87,6 +89,15 @@ func TestMySQL(t *testing.T) {
 			u, err := client.User.Create().SetID(200).Save(ctx)
 			require.NoError(t, err)
 			assert.Equal(t, 200, u.ID)
+
+			if version == "56" {
+				// need to set this manually starting from 5.6.36
+				err = root.Exec(ctx, "SET GLOBAL sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'", []interface{}{}, new(sql.Result))
+				require.NoError(t, err, "set global sql_mode")
+				err = drv.Exec(ctx, "SET SESSION sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'", []interface{}{}, new(sql.Result))
+				require.NoError(t, err, "set session sql_mode")
+			}
+
 			_, err = client.User.Create().Save(ctx)
 			assert.Error(t, err)
 		})
