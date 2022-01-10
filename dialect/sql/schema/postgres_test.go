@@ -279,7 +279,7 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("name", "character varying", "YES", "NULL", "varchar", nil, nil, nil).
 						AddRow("uuid", "uuid", "YES", "NULL", "uuid", nil, nil, nil).
 						AddRow("created_at", "date", "NO", "CURRENT_DATE", "date", nil, nil, nil).
-						AddRow("updated_at", "timestamp", "YES", "NULL", "timestamptz", nil, nil, nil).
+						AddRow("updated_at", "timestamp with time zone", "YES", "NULL", "timestamptz", nil, nil, nil).
 						AddRow("deleted_at", "date", "YES", "NULL", "date", nil, nil, nil).
 						AddRow("text", "text", "YES", "NULL", "text", nil, nil, nil).
 						AddRow("cidr", "cidr", "NO", "NULL", "cidr", nil, nil, nil).
