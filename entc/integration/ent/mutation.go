@@ -185,6 +185,10 @@ func (m *CardMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetCreateTime sets the "create_time" field.
 func (m *CardMutation) SetCreateTime(t time.Time) {
+	// convert into the timezone in which we want to store the time.
+	if m.config.storeInTz != nil {
+		t = t.In(m.config.storeInTz)
+	}
 	m.create_time = &t
 }
 
@@ -221,6 +225,10 @@ func (m *CardMutation) ResetCreateTime() {
 
 // SetUpdateTime sets the "update_time" field.
 func (m *CardMutation) SetUpdateTime(t time.Time) {
+	// convert into the timezone in which we want to store the time.
+	if m.config.storeInTz != nil {
+		t = t.In(m.config.storeInTz)
+	}
 	m.update_time = &t
 }
 
@@ -257,6 +265,7 @@ func (m *CardMutation) ResetUpdateTime() {
 
 // SetBalance sets the "balance" field.
 func (m *CardMutation) SetBalance(f float64) {
+	// convert into the timezone in which we want to store the time.
 	m.balance = &f
 	m.addbalance = nil
 }
@@ -313,6 +322,7 @@ func (m *CardMutation) ResetBalance() {
 
 // SetNumber sets the "number" field.
 func (m *CardMutation) SetNumber(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.number = &s
 }
 
@@ -349,6 +359,7 @@ func (m *CardMutation) ResetNumber() {
 
 // SetName sets the "name" field.
 func (m *CardMutation) SetName(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.name = &s
 }
 
@@ -917,6 +928,7 @@ func (m *CommentMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetUniqueInt sets the "unique_int" field.
 func (m *CommentMutation) SetUniqueInt(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.unique_int = &i
 	m.addunique_int = nil
 }
@@ -973,6 +985,7 @@ func (m *CommentMutation) ResetUniqueInt() {
 
 // SetUniqueFloat sets the "unique_float" field.
 func (m *CommentMutation) SetUniqueFloat(f float64) {
+	// convert into the timezone in which we want to store the time.
 	m.unique_float = &f
 	m.addunique_float = nil
 }
@@ -1029,6 +1042,7 @@ func (m *CommentMutation) ResetUniqueFloat() {
 
 // SetNillableInt sets the "nillable_int" field.
 func (m *CommentMutation) SetNillableInt(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.nillable_int = &i
 	m.addnillable_int = nil
 }
@@ -1551,6 +1565,7 @@ func (m *FieldTypeMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetInt sets the "int" field.
 func (m *FieldTypeMutation) SetInt(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.int = &i
 	m.addint = nil
 }
@@ -1607,6 +1622,7 @@ func (m *FieldTypeMutation) ResetInt() {
 
 // SetInt8 sets the "int8" field.
 func (m *FieldTypeMutation) SetInt8(i int8) {
+	// convert into the timezone in which we want to store the time.
 	m.int8 = &i
 	m.addint8 = nil
 }
@@ -1663,6 +1679,7 @@ func (m *FieldTypeMutation) ResetInt8() {
 
 // SetInt16 sets the "int16" field.
 func (m *FieldTypeMutation) SetInt16(i int16) {
+	// convert into the timezone in which we want to store the time.
 	m.int16 = &i
 	m.addint16 = nil
 }
@@ -1719,6 +1736,7 @@ func (m *FieldTypeMutation) ResetInt16() {
 
 // SetInt32 sets the "int32" field.
 func (m *FieldTypeMutation) SetInt32(i int32) {
+	// convert into the timezone in which we want to store the time.
 	m.int32 = &i
 	m.addint32 = nil
 }
@@ -1775,6 +1793,7 @@ func (m *FieldTypeMutation) ResetInt32() {
 
 // SetInt64 sets the "int64" field.
 func (m *FieldTypeMutation) SetInt64(i int64) {
+	// convert into the timezone in which we want to store the time.
 	m.int64 = &i
 	m.addint64 = nil
 }
@@ -1831,6 +1850,7 @@ func (m *FieldTypeMutation) ResetInt64() {
 
 // SetOptionalInt sets the "optional_int" field.
 func (m *FieldTypeMutation) SetOptionalInt(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_int = &i
 	m.addoptional_int = nil
 }
@@ -1901,6 +1921,7 @@ func (m *FieldTypeMutation) ResetOptionalInt() {
 
 // SetOptionalInt8 sets the "optional_int8" field.
 func (m *FieldTypeMutation) SetOptionalInt8(i int8) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_int8 = &i
 	m.addoptional_int8 = nil
 }
@@ -1971,6 +1992,7 @@ func (m *FieldTypeMutation) ResetOptionalInt8() {
 
 // SetOptionalInt16 sets the "optional_int16" field.
 func (m *FieldTypeMutation) SetOptionalInt16(i int16) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_int16 = &i
 	m.addoptional_int16 = nil
 }
@@ -2041,6 +2063,7 @@ func (m *FieldTypeMutation) ResetOptionalInt16() {
 
 // SetOptionalInt32 sets the "optional_int32" field.
 func (m *FieldTypeMutation) SetOptionalInt32(i int32) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_int32 = &i
 	m.addoptional_int32 = nil
 }
@@ -2111,6 +2134,7 @@ func (m *FieldTypeMutation) ResetOptionalInt32() {
 
 // SetOptionalInt64 sets the "optional_int64" field.
 func (m *FieldTypeMutation) SetOptionalInt64(i int64) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_int64 = &i
 	m.addoptional_int64 = nil
 }
@@ -2181,6 +2205,7 @@ func (m *FieldTypeMutation) ResetOptionalInt64() {
 
 // SetNillableInt sets the "nillable_int" field.
 func (m *FieldTypeMutation) SetNillableInt(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.nillable_int = &i
 	m.addnillable_int = nil
 }
@@ -2251,6 +2276,7 @@ func (m *FieldTypeMutation) ResetNillableInt() {
 
 // SetNillableInt8 sets the "nillable_int8" field.
 func (m *FieldTypeMutation) SetNillableInt8(i int8) {
+	// convert into the timezone in which we want to store the time.
 	m.nillable_int8 = &i
 	m.addnillable_int8 = nil
 }
@@ -2321,6 +2347,7 @@ func (m *FieldTypeMutation) ResetNillableInt8() {
 
 // SetNillableInt16 sets the "nillable_int16" field.
 func (m *FieldTypeMutation) SetNillableInt16(i int16) {
+	// convert into the timezone in which we want to store the time.
 	m.nillable_int16 = &i
 	m.addnillable_int16 = nil
 }
@@ -2391,6 +2418,7 @@ func (m *FieldTypeMutation) ResetNillableInt16() {
 
 // SetNillableInt32 sets the "nillable_int32" field.
 func (m *FieldTypeMutation) SetNillableInt32(i int32) {
+	// convert into the timezone in which we want to store the time.
 	m.nillable_int32 = &i
 	m.addnillable_int32 = nil
 }
@@ -2461,6 +2489,7 @@ func (m *FieldTypeMutation) ResetNillableInt32() {
 
 // SetNillableInt64 sets the "nillable_int64" field.
 func (m *FieldTypeMutation) SetNillableInt64(i int64) {
+	// convert into the timezone in which we want to store the time.
 	m.nillable_int64 = &i
 	m.addnillable_int64 = nil
 }
@@ -2531,6 +2560,7 @@ func (m *FieldTypeMutation) ResetNillableInt64() {
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
 func (m *FieldTypeMutation) SetValidateOptionalInt32(i int32) {
+	// convert into the timezone in which we want to store the time.
 	m.validate_optional_int32 = &i
 	m.addvalidate_optional_int32 = nil
 }
@@ -2601,6 +2631,7 @@ func (m *FieldTypeMutation) ResetValidateOptionalInt32() {
 
 // SetOptionalUint sets the "optional_uint" field.
 func (m *FieldTypeMutation) SetOptionalUint(u uint) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_uint = &u
 	m.addoptional_uint = nil
 }
@@ -2671,6 +2702,7 @@ func (m *FieldTypeMutation) ResetOptionalUint() {
 
 // SetOptionalUint8 sets the "optional_uint8" field.
 func (m *FieldTypeMutation) SetOptionalUint8(u uint8) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_uint8 = &u
 	m.addoptional_uint8 = nil
 }
@@ -2741,6 +2773,7 @@ func (m *FieldTypeMutation) ResetOptionalUint8() {
 
 // SetOptionalUint16 sets the "optional_uint16" field.
 func (m *FieldTypeMutation) SetOptionalUint16(u uint16) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_uint16 = &u
 	m.addoptional_uint16 = nil
 }
@@ -2811,6 +2844,7 @@ func (m *FieldTypeMutation) ResetOptionalUint16() {
 
 // SetOptionalUint32 sets the "optional_uint32" field.
 func (m *FieldTypeMutation) SetOptionalUint32(u uint32) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_uint32 = &u
 	m.addoptional_uint32 = nil
 }
@@ -2881,6 +2915,7 @@ func (m *FieldTypeMutation) ResetOptionalUint32() {
 
 // SetOptionalUint64 sets the "optional_uint64" field.
 func (m *FieldTypeMutation) SetOptionalUint64(u uint64) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_uint64 = &u
 	m.addoptional_uint64 = nil
 }
@@ -2951,6 +2986,7 @@ func (m *FieldTypeMutation) ResetOptionalUint64() {
 
 // SetState sets the "state" field.
 func (m *FieldTypeMutation) SetState(f fieldtype.State) {
+	// convert into the timezone in which we want to store the time.
 	m.state = &f
 }
 
@@ -3000,6 +3036,7 @@ func (m *FieldTypeMutation) ResetState() {
 
 // SetOptionalFloat sets the "optional_float" field.
 func (m *FieldTypeMutation) SetOptionalFloat(f float64) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_float = &f
 	m.addoptional_float = nil
 }
@@ -3070,6 +3107,7 @@ func (m *FieldTypeMutation) ResetOptionalFloat() {
 
 // SetOptionalFloat32 sets the "optional_float32" field.
 func (m *FieldTypeMutation) SetOptionalFloat32(f float32) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_float32 = &f
 	m.addoptional_float32 = nil
 }
@@ -3140,6 +3178,7 @@ func (m *FieldTypeMutation) ResetOptionalFloat32() {
 
 // SetText sets the "text" field.
 func (m *FieldTypeMutation) SetText(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.text = &s
 }
 
@@ -3189,6 +3228,10 @@ func (m *FieldTypeMutation) ResetText() {
 
 // SetDatetime sets the "datetime" field.
 func (m *FieldTypeMutation) SetDatetime(t time.Time) {
+	// convert into the timezone in which we want to store the time.
+	if m.config.storeInTz != nil {
+		t = t.In(m.config.storeInTz)
+	}
 	m.datetime = &t
 }
 
@@ -3238,6 +3281,7 @@ func (m *FieldTypeMutation) ResetDatetime() {
 
 // SetDecimal sets the "decimal" field.
 func (m *FieldTypeMutation) SetDecimal(f float64) {
+	// convert into the timezone in which we want to store the time.
 	m.decimal = &f
 	m.adddecimal = nil
 }
@@ -3308,6 +3352,7 @@ func (m *FieldTypeMutation) ResetDecimal() {
 
 // SetLinkOther sets the "link_other" field.
 func (m *FieldTypeMutation) SetLinkOther(s *schema.Link) {
+	// convert into the timezone in which we want to store the time.
 	m.link_other = &s
 }
 
@@ -3357,6 +3402,7 @@ func (m *FieldTypeMutation) ResetLinkOther() {
 
 // SetLinkOtherFunc sets the "link_other_func" field.
 func (m *FieldTypeMutation) SetLinkOtherFunc(s *schema.Link) {
+	// convert into the timezone in which we want to store the time.
 	m.link_other_func = &s
 }
 
@@ -3406,6 +3452,7 @@ func (m *FieldTypeMutation) ResetLinkOtherFunc() {
 
 // SetMAC sets the "mac" field.
 func (m *FieldTypeMutation) SetMAC(s schema.MAC) {
+	// convert into the timezone in which we want to store the time.
 	m.mac = &s
 }
 
@@ -3455,6 +3502,7 @@ func (m *FieldTypeMutation) ResetMAC() {
 
 // SetStringArray sets the "string_array" field.
 func (m *FieldTypeMutation) SetStringArray(s schema.Strings) {
+	// convert into the timezone in which we want to store the time.
 	m.string_array = &s
 }
 
@@ -3504,6 +3552,7 @@ func (m *FieldTypeMutation) ResetStringArray() {
 
 // SetPassword sets the "password" field.
 func (m *FieldTypeMutation) SetPassword(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.password = &s
 }
 
@@ -3553,6 +3602,7 @@ func (m *FieldTypeMutation) ResetPassword() {
 
 // SetStringScanner sets the "string_scanner" field.
 func (m *FieldTypeMutation) SetStringScanner(ss schema.StringScanner) {
+	// convert into the timezone in which we want to store the time.
 	m.string_scanner = &ss
 }
 
@@ -3602,6 +3652,7 @@ func (m *FieldTypeMutation) ResetStringScanner() {
 
 // SetDuration sets the "duration" field.
 func (m *FieldTypeMutation) SetDuration(t time.Duration) {
+	// convert into the timezone in which we want to store the time.
 	m.duration = &t
 	m.addduration = nil
 }
@@ -3672,6 +3723,7 @@ func (m *FieldTypeMutation) ResetDuration() {
 
 // SetDir sets the "dir" field.
 func (m *FieldTypeMutation) SetDir(h http.Dir) {
+	// convert into the timezone in which we want to store the time.
 	m.dir = &h
 }
 
@@ -3708,6 +3760,7 @@ func (m *FieldTypeMutation) ResetDir() {
 
 // SetNdir sets the "ndir" field.
 func (m *FieldTypeMutation) SetNdir(h http.Dir) {
+	// convert into the timezone in which we want to store the time.
 	m.ndir = &h
 }
 
@@ -3757,6 +3810,7 @@ func (m *FieldTypeMutation) ResetNdir() {
 
 // SetStr sets the "str" field.
 func (m *FieldTypeMutation) SetStr(ss sql.NullString) {
+	// convert into the timezone in which we want to store the time.
 	m.str = &ss
 }
 
@@ -3806,6 +3860,7 @@ func (m *FieldTypeMutation) ResetStr() {
 
 // SetNullStr sets the "null_str" field.
 func (m *FieldTypeMutation) SetNullStr(ss *sql.NullString) {
+	// convert into the timezone in which we want to store the time.
 	m.null_str = &ss
 }
 
@@ -3855,6 +3910,7 @@ func (m *FieldTypeMutation) ResetNullStr() {
 
 // SetLink sets the "link" field.
 func (m *FieldTypeMutation) SetLink(s schema.Link) {
+	// convert into the timezone in which we want to store the time.
 	m.link = &s
 }
 
@@ -3904,6 +3960,7 @@ func (m *FieldTypeMutation) ResetLink() {
 
 // SetNullLink sets the "null_link" field.
 func (m *FieldTypeMutation) SetNullLink(s *schema.Link) {
+	// convert into the timezone in which we want to store the time.
 	m.null_link = &s
 }
 
@@ -3953,6 +4010,7 @@ func (m *FieldTypeMutation) ResetNullLink() {
 
 // SetActive sets the "active" field.
 func (m *FieldTypeMutation) SetActive(s schema.Status) {
+	// convert into the timezone in which we want to store the time.
 	m.active = &s
 }
 
@@ -4002,6 +4060,7 @@ func (m *FieldTypeMutation) ResetActive() {
 
 // SetNullActive sets the "null_active" field.
 func (m *FieldTypeMutation) SetNullActive(s schema.Status) {
+	// convert into the timezone in which we want to store the time.
 	m.null_active = &s
 }
 
@@ -4051,6 +4110,7 @@ func (m *FieldTypeMutation) ResetNullActive() {
 
 // SetDeleted sets the "deleted" field.
 func (m *FieldTypeMutation) SetDeleted(sb *sql.NullBool) {
+	// convert into the timezone in which we want to store the time.
 	m.deleted = &sb
 }
 
@@ -4100,6 +4160,7 @@ func (m *FieldTypeMutation) ResetDeleted() {
 
 // SetDeletedAt sets the "deleted_at" field.
 func (m *FieldTypeMutation) SetDeletedAt(st *sql.NullTime) {
+	// convert into the timezone in which we want to store the time.
 	m.deleted_at = &st
 }
 
@@ -4149,6 +4210,7 @@ func (m *FieldTypeMutation) ResetDeletedAt() {
 
 // SetRawData sets the "raw_data" field.
 func (m *FieldTypeMutation) SetRawData(b []byte) {
+	// convert into the timezone in which we want to store the time.
 	m.raw_data = &b
 }
 
@@ -4198,6 +4260,7 @@ func (m *FieldTypeMutation) ResetRawData() {
 
 // SetSensitive sets the "sensitive" field.
 func (m *FieldTypeMutation) SetSensitive(b []byte) {
+	// convert into the timezone in which we want to store the time.
 	m.sensitive = &b
 }
 
@@ -4247,6 +4310,7 @@ func (m *FieldTypeMutation) ResetSensitive() {
 
 // SetIP sets the "ip" field.
 func (m *FieldTypeMutation) SetIP(n net.IP) {
+	// convert into the timezone in which we want to store the time.
 	m.ip = &n
 }
 
@@ -4296,6 +4360,7 @@ func (m *FieldTypeMutation) ResetIP() {
 
 // SetNullInt64 sets the "null_int64" field.
 func (m *FieldTypeMutation) SetNullInt64(si *sql.NullInt64) {
+	// convert into the timezone in which we want to store the time.
 	m.null_int64 = &si
 }
 
@@ -4345,6 +4410,7 @@ func (m *FieldTypeMutation) ResetNullInt64() {
 
 // SetSchemaInt sets the "schema_int" field.
 func (m *FieldTypeMutation) SetSchemaInt(s schema.Int) {
+	// convert into the timezone in which we want to store the time.
 	m.schema_int = &s
 	m.addschema_int = nil
 }
@@ -4415,6 +4481,7 @@ func (m *FieldTypeMutation) ResetSchemaInt() {
 
 // SetSchemaInt8 sets the "schema_int8" field.
 func (m *FieldTypeMutation) SetSchemaInt8(s schema.Int8) {
+	// convert into the timezone in which we want to store the time.
 	m.schema_int8 = &s
 	m.addschema_int8 = nil
 }
@@ -4485,6 +4552,7 @@ func (m *FieldTypeMutation) ResetSchemaInt8() {
 
 // SetSchemaInt64 sets the "schema_int64" field.
 func (m *FieldTypeMutation) SetSchemaInt64(s schema.Int64) {
+	// convert into the timezone in which we want to store the time.
 	m.schema_int64 = &s
 	m.addschema_int64 = nil
 }
@@ -4555,6 +4623,7 @@ func (m *FieldTypeMutation) ResetSchemaInt64() {
 
 // SetSchemaFloat sets the "schema_float" field.
 func (m *FieldTypeMutation) SetSchemaFloat(s schema.Float64) {
+	// convert into the timezone in which we want to store the time.
 	m.schema_float = &s
 	m.addschema_float = nil
 }
@@ -4625,6 +4694,7 @@ func (m *FieldTypeMutation) ResetSchemaFloat() {
 
 // SetSchemaFloat32 sets the "schema_float32" field.
 func (m *FieldTypeMutation) SetSchemaFloat32(s schema.Float32) {
+	// convert into the timezone in which we want to store the time.
 	m.schema_float32 = &s
 	m.addschema_float32 = nil
 }
@@ -4695,6 +4765,7 @@ func (m *FieldTypeMutation) ResetSchemaFloat32() {
 
 // SetNullFloat sets the "null_float" field.
 func (m *FieldTypeMutation) SetNullFloat(sf *sql.NullFloat64) {
+	// convert into the timezone in which we want to store the time.
 	m.null_float = &sf
 }
 
@@ -4744,6 +4815,7 @@ func (m *FieldTypeMutation) ResetNullFloat() {
 
 // SetRole sets the "role" field.
 func (m *FieldTypeMutation) SetRole(r role.Role) {
+	// convert into the timezone in which we want to store the time.
 	m.role = &r
 }
 
@@ -4780,6 +4852,7 @@ func (m *FieldTypeMutation) ResetRole() {
 
 // SetPriority sets the "priority" field.
 func (m *FieldTypeMutation) SetPriority(r role.Priority) {
+	// convert into the timezone in which we want to store the time.
 	m.priority = &r
 }
 
@@ -4829,6 +4902,7 @@ func (m *FieldTypeMutation) ResetPriority() {
 
 // SetUUID sets the "uuid" field.
 func (m *FieldTypeMutation) SetUUID(u uuid.UUID) {
+	// convert into the timezone in which we want to store the time.
 	m.uuid = &u
 }
 
@@ -4878,6 +4952,7 @@ func (m *FieldTypeMutation) ResetUUID() {
 
 // SetNillableUUID sets the "nillable_uuid" field.
 func (m *FieldTypeMutation) SetNillableUUID(u uuid.UUID) {
+	// convert into the timezone in which we want to store the time.
 	m.nillable_uuid = &u
 }
 
@@ -4927,6 +5002,7 @@ func (m *FieldTypeMutation) ResetNillableUUID() {
 
 // SetStrings sets the "strings" field.
 func (m *FieldTypeMutation) SetStrings(s []string) {
+	// convert into the timezone in which we want to store the time.
 	m.strings = &s
 }
 
@@ -4976,6 +5052,7 @@ func (m *FieldTypeMutation) ResetStrings() {
 
 // SetPair sets the "pair" field.
 func (m *FieldTypeMutation) SetPair(s schema.Pair) {
+	// convert into the timezone in which we want to store the time.
 	m.pair = &s
 }
 
@@ -5012,6 +5089,7 @@ func (m *FieldTypeMutation) ResetPair() {
 
 // SetNilPair sets the "nil_pair" field.
 func (m *FieldTypeMutation) SetNilPair(s *schema.Pair) {
+	// convert into the timezone in which we want to store the time.
 	m.nil_pair = &s
 }
 
@@ -5061,6 +5139,7 @@ func (m *FieldTypeMutation) ResetNilPair() {
 
 // SetVstring sets the "vstring" field.
 func (m *FieldTypeMutation) SetVstring(ss schema.VString) {
+	// convert into the timezone in which we want to store the time.
 	m.vstring = &ss
 }
 
@@ -5097,6 +5176,7 @@ func (m *FieldTypeMutation) ResetVstring() {
 
 // SetTriple sets the "triple" field.
 func (m *FieldTypeMutation) SetTriple(s schema.Triple) {
+	// convert into the timezone in which we want to store the time.
 	m.triple = &s
 }
 
@@ -5133,6 +5213,7 @@ func (m *FieldTypeMutation) ResetTriple() {
 
 // SetBigInt sets the "big_int" field.
 func (m *FieldTypeMutation) SetBigInt(si schema.BigInt) {
+	// convert into the timezone in which we want to store the time.
 	m.big_int = &si
 	m.addbig_int = nil
 }
@@ -5203,6 +5284,7 @@ func (m *FieldTypeMutation) ResetBigInt() {
 
 // SetPasswordOther sets the "password_other" field.
 func (m *FieldTypeMutation) SetPasswordOther(s schema.Password) {
+	// convert into the timezone in which we want to store the time.
 	m.password_other = &s
 }
 
@@ -7335,6 +7417,7 @@ func (m *FileMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetSize sets the "size" field.
 func (m *FileMutation) SetSize(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.size = &i
 	m.addsize = nil
 }
@@ -7391,6 +7474,7 @@ func (m *FileMutation) ResetSize() {
 
 // SetName sets the "name" field.
 func (m *FileMutation) SetName(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.name = &s
 }
 
@@ -7427,6 +7511,7 @@ func (m *FileMutation) ResetName() {
 
 // SetUser sets the "user" field.
 func (m *FileMutation) SetUser(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.user = &s
 }
 
@@ -7476,6 +7561,7 @@ func (m *FileMutation) ResetUser() {
 
 // SetGroup sets the "group" field.
 func (m *FileMutation) SetGroup(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.group = &s
 }
 
@@ -7525,6 +7611,7 @@ func (m *FileMutation) ResetGroup() {
 
 // SetOp sets the "op" field.
 func (m *FileMutation) SetOp(b bool) {
+	// convert into the timezone in which we want to store the time.
 	m._op = &b
 }
 
@@ -8162,6 +8249,7 @@ func (m *FileTypeMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetName sets the "name" field.
 func (m *FileTypeMutation) SetName(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.name = &s
 }
 
@@ -8198,6 +8286,7 @@ func (m *FileTypeMutation) ResetName() {
 
 // SetType sets the "type" field.
 func (m *FileTypeMutation) SetType(f filetype.Type) {
+	// convert into the timezone in which we want to store the time.
 	m._type = &f
 }
 
@@ -8234,6 +8323,7 @@ func (m *FileTypeMutation) ResetType() {
 
 // SetState sets the "state" field.
 func (m *FileTypeMutation) SetState(f filetype.State) {
+	// convert into the timezone in which we want to store the time.
 	m.state = &f
 }
 
@@ -8934,6 +9024,7 @@ func (m *GroupMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetActive sets the "active" field.
 func (m *GroupMutation) SetActive(b bool) {
+	// convert into the timezone in which we want to store the time.
 	m.active = &b
 }
 
@@ -8970,6 +9061,10 @@ func (m *GroupMutation) ResetActive() {
 
 // SetExpire sets the "expire" field.
 func (m *GroupMutation) SetExpire(t time.Time) {
+	// convert into the timezone in which we want to store the time.
+	if m.config.storeInTz != nil {
+		t = t.In(m.config.storeInTz)
+	}
 	m.expire = &t
 }
 
@@ -9006,6 +9101,7 @@ func (m *GroupMutation) ResetExpire() {
 
 // SetType sets the "type" field.
 func (m *GroupMutation) SetType(s string) {
+	// convert into the timezone in which we want to store the time.
 	m._type = &s
 }
 
@@ -9055,6 +9151,7 @@ func (m *GroupMutation) ResetType() {
 
 // SetMaxUsers sets the "max_users" field.
 func (m *GroupMutation) SetMaxUsers(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.max_users = &i
 	m.addmax_users = nil
 }
@@ -9125,6 +9222,7 @@ func (m *GroupMutation) ResetMaxUsers() {
 
 // SetName sets the "name" field.
 func (m *GroupMutation) SetName(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.name = &s
 }
 
@@ -9846,6 +9944,7 @@ func (m *GroupInfoMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetDesc sets the "desc" field.
 func (m *GroupInfoMutation) SetDesc(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.desc = &s
 }
 
@@ -9882,6 +9981,7 @@ func (m *GroupInfoMutation) ResetDesc() {
 
 // SetMaxUsers sets the "max_users" field.
 func (m *GroupInfoMutation) SetMaxUsers(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.max_users = &i
 	m.addmax_users = nil
 }
@@ -10341,6 +10441,7 @@ func (m *ItemMutation) IDs(ctx context.Context) ([]string, error) {
 
 // SetText sets the "text" field.
 func (m *ItemMutation) SetText(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.text = &s
 }
 
@@ -10679,6 +10780,7 @@ func (m *NodeMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetValue sets the "value" field.
 func (m *NodeMutation) SetValue(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.value = &i
 	m.addvalue = nil
 }
@@ -11180,6 +11282,7 @@ func (m *PetMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetAge sets the "age" field.
 func (m *PetMutation) SetAge(f float64) {
+	// convert into the timezone in which we want to store the time.
 	m.age = &f
 	m.addage = nil
 }
@@ -11236,6 +11339,7 @@ func (m *PetMutation) ResetAge() {
 
 // SetName sets the "name" field.
 func (m *PetMutation) SetName(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.name = &s
 }
 
@@ -11272,6 +11376,7 @@ func (m *PetMutation) ResetName() {
 
 // SetUUID sets the "uuid" field.
 func (m *PetMutation) SetUUID(u uuid.UUID) {
+	// convert into the timezone in which we want to store the time.
 	m.uuid = &u
 }
 
@@ -11321,6 +11426,7 @@ func (m *PetMutation) ResetUUID() {
 
 // SetNickname sets the "nickname" field.
 func (m *PetMutation) SetNickname(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.nickname = &s
 }
 
@@ -12193,6 +12299,7 @@ func (m *TaskMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetPriority sets the "priority" field.
 func (m *TaskMutation) SetPriority(s schema.Priority) {
+	// convert into the timezone in which we want to store the time.
 	m.priority = &s
 	m.addpriority = nil
 }
@@ -12580,6 +12687,7 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 
 // SetOptionalInt sets the "optional_int" field.
 func (m *UserMutation) SetOptionalInt(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.optional_int = &i
 	m.addoptional_int = nil
 }
@@ -12650,6 +12758,7 @@ func (m *UserMutation) ResetOptionalInt() {
 
 // SetAge sets the "age" field.
 func (m *UserMutation) SetAge(i int) {
+	// convert into the timezone in which we want to store the time.
 	m.age = &i
 	m.addage = nil
 }
@@ -12706,6 +12815,7 @@ func (m *UserMutation) ResetAge() {
 
 // SetName sets the "name" field.
 func (m *UserMutation) SetName(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.name = &s
 }
 
@@ -12742,6 +12852,7 @@ func (m *UserMutation) ResetName() {
 
 // SetLast sets the "last" field.
 func (m *UserMutation) SetLast(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.last = &s
 }
 
@@ -12778,6 +12889,7 @@ func (m *UserMutation) ResetLast() {
 
 // SetNickname sets the "nickname" field.
 func (m *UserMutation) SetNickname(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.nickname = &s
 }
 
@@ -12827,6 +12939,7 @@ func (m *UserMutation) ResetNickname() {
 
 // SetAddress sets the "address" field.
 func (m *UserMutation) SetAddress(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.address = &s
 }
 
@@ -12876,6 +12989,7 @@ func (m *UserMutation) ResetAddress() {
 
 // SetPhone sets the "phone" field.
 func (m *UserMutation) SetPhone(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.phone = &s
 }
 
@@ -12925,6 +13039,7 @@ func (m *UserMutation) ResetPhone() {
 
 // SetPassword sets the "password" field.
 func (m *UserMutation) SetPassword(s string) {
+	// convert into the timezone in which we want to store the time.
 	m.password = &s
 }
 
@@ -12974,6 +13089,7 @@ func (m *UserMutation) ResetPassword() {
 
 // SetRole sets the "role" field.
 func (m *UserMutation) SetRole(u user.Role) {
+	// convert into the timezone in which we want to store the time.
 	m.role = &u
 }
 
@@ -13010,6 +13126,7 @@ func (m *UserMutation) ResetRole() {
 
 // SetEmployment sets the "employment" field.
 func (m *UserMutation) SetEmployment(u user.Employment) {
+	// convert into the timezone in which we want to store the time.
 	m.employment = &u
 }
 
@@ -13046,6 +13163,7 @@ func (m *UserMutation) ResetEmployment() {
 
 // SetSSOCert sets the "SSOCert" field.
 func (m *UserMutation) SetSSOCert(s string) {
+	// convert into the timezone in which we want to store the time.
 	m._SSOCert = &s
 }
 

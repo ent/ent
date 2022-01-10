@@ -272,7 +272,7 @@ func Text(v string) predicate.FieldType {
 // Datetime applies equality check predicate on the "datetime" field. It's identical to DatetimeEQ.
 func Datetime(v time.Time) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDatetime), v))
+		s.Where(sql.EQ(s.C(FieldDatetime), s.TimeInTz(v)))
 	})
 }
 
@@ -2729,14 +2729,14 @@ func TextContainsFold(v string) predicate.FieldType {
 // DatetimeEQ applies the EQ predicate on the "datetime" field.
 func DatetimeEQ(v time.Time) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDatetime), v))
+		s.Where(sql.EQ(s.C(FieldDatetime), s.TimeInTz(v)))
 	})
 }
 
 // DatetimeNEQ applies the NEQ predicate on the "datetime" field.
 func DatetimeNEQ(v time.Time) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDatetime), v))
+		s.Where(sql.NEQ(s.C(FieldDatetime), s.TimeInTz(v)))
 	})
 }
 
@@ -2747,6 +2747,9 @@ func DatetimeIn(vs ...time.Time) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
+		for i := range vs {
+			v[i] = s.TimeInTz(vs[i])
+		}
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -2764,6 +2767,9 @@ func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
 		v[i] = vs[i]
 	}
 	return predicate.FieldType(func(s *sql.Selector) {
+		for i := range vs {
+			v[i] = s.TimeInTz(vs[i])
+		}
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -2777,28 +2783,28 @@ func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
 // DatetimeGT applies the GT predicate on the "datetime" field.
 func DatetimeGT(v time.Time) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDatetime), v))
+		s.Where(sql.GT(s.C(FieldDatetime), s.TimeInTz(v)))
 	})
 }
 
 // DatetimeGTE applies the GTE predicate on the "datetime" field.
 func DatetimeGTE(v time.Time) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDatetime), v))
+		s.Where(sql.GTE(s.C(FieldDatetime), s.TimeInTz(v)))
 	})
 }
 
 // DatetimeLT applies the LT predicate on the "datetime" field.
 func DatetimeLT(v time.Time) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDatetime), v))
+		s.Where(sql.LT(s.C(FieldDatetime), s.TimeInTz(v)))
 	})
 }
 
 // DatetimeLTE applies the LTE predicate on the "datetime" field.
 func DatetimeLTE(v time.Time) predicate.FieldType {
 	return predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDatetime), v))
+		s.Where(sql.LTE(s.C(FieldDatetime), s.TimeInTz(v)))
 	})
 }
 

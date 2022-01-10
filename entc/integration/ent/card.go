@@ -115,13 +115,23 @@ func (c *Card) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				c.CreateTime = value.Time
+				if c.config.readIntoTz != nil {
+					c.CreateTime = value.Time.In(c.config.readIntoTz)
+				} else {
+					c.CreateTime = value.Time
+				}
+
 			}
 		case card.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				c.UpdateTime = value.Time
+				if c.config.readIntoTz != nil {
+					c.UpdateTime = value.Time.In(c.config.readIntoTz)
+				} else {
+					c.UpdateTime = value.Time
+				}
+
 			}
 		case card.FieldBalance:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {

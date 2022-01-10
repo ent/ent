@@ -386,7 +386,12 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field datetime", values[i])
 			} else if value.Valid {
-				ft.Datetime = value.Time
+				if ft.config.readIntoTz != nil {
+					ft.Datetime = value.Time.In(ft.config.readIntoTz)
+				} else {
+					ft.Datetime = value.Time
+				}
+
 			}
 		case fieldtype.FieldDecimal:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {

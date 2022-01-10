@@ -100,14 +100,14 @@ func IDLTE(id int) predicate.Card {
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+		s.Where(sql.EQ(s.C(FieldCreateTime), s.TimeInTz(v)))
 	})
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
+		s.Where(sql.EQ(s.C(FieldUpdateTime), s.TimeInTz(v)))
 	})
 }
 
@@ -135,14 +135,14 @@ func Name(v string) predicate.Card {
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+		s.Where(sql.EQ(s.C(FieldCreateTime), s.TimeInTz(v)))
 	})
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
+		s.Where(sql.NEQ(s.C(FieldCreateTime), s.TimeInTz(v)))
 	})
 }
 
@@ -153,6 +153,9 @@ func CreateTimeIn(vs ...time.Time) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
+		for i := range vs {
+			v[i] = s.TimeInTz(vs[i])
+		}
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -170,6 +173,9 @@ func CreateTimeNotIn(vs ...time.Time) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
+		for i := range vs {
+			v[i] = s.TimeInTz(vs[i])
+		}
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -183,42 +189,42 @@ func CreateTimeNotIn(vs ...time.Time) predicate.Card {
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
+		s.Where(sql.GT(s.C(FieldCreateTime), s.TimeInTz(v)))
 	})
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
+		s.Where(sql.GTE(s.C(FieldCreateTime), s.TimeInTz(v)))
 	})
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
+		s.Where(sql.LT(s.C(FieldCreateTime), s.TimeInTz(v)))
 	})
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
+		s.Where(sql.LTE(s.C(FieldCreateTime), s.TimeInTz(v)))
 	})
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
+		s.Where(sql.EQ(s.C(FieldUpdateTime), s.TimeInTz(v)))
 	})
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
+		s.Where(sql.NEQ(s.C(FieldUpdateTime), s.TimeInTz(v)))
 	})
 }
 
@@ -229,6 +235,9 @@ func UpdateTimeIn(vs ...time.Time) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
+		for i := range vs {
+			v[i] = s.TimeInTz(vs[i])
+		}
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -246,6 +255,9 @@ func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
 		v[i] = vs[i]
 	}
 	return predicate.Card(func(s *sql.Selector) {
+		for i := range vs {
+			v[i] = s.TimeInTz(vs[i])
+		}
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -259,28 +271,28 @@ func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
+		s.Where(sql.GT(s.C(FieldUpdateTime), s.TimeInTz(v)))
 	})
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
+		s.Where(sql.GTE(s.C(FieldUpdateTime), s.TimeInTz(v)))
 	})
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
+		s.Where(sql.LT(s.C(FieldUpdateTime), s.TimeInTz(v)))
 	})
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.Card {
 	return predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
+		s.Where(sql.LTE(s.C(FieldUpdateTime), s.TimeInTz(v)))
 	})
 }
 

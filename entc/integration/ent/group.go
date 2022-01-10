@@ -140,7 +140,12 @@ func (gr *Group) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expire", values[i])
 			} else if value.Valid {
-				gr.Expire = value.Time
+				if gr.config.readIntoTz != nil {
+					gr.Expire = value.Time.In(gr.config.readIntoTz)
+				} else {
+					gr.Expire = value.Time
+				}
+
 			}
 		case group.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {

@@ -7,6 +7,8 @@
 package ent
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 )
@@ -24,6 +26,9 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
+
+	storeInTz  *time.Location
+	readIntoTz *time.Location
 }
 
 // hooks per client, for fast access.
@@ -72,5 +77,19 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// StoreInTz sets the timezone to convert all time into before storing.
+func StoreInTz(loc *time.Location) Option {
+	return func(c *config) {
+		c.storeInTz = loc
+	}
+}
+
+// ReadIntoTz sets the timezone to convert all time into when reading.
+func ReadIntoTz(loc *time.Location) Option {
+	return func(c *config) {
+		c.readIntoTz = loc
 	}
 }

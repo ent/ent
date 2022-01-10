@@ -107,7 +107,7 @@ func Active(v bool) predicate.Group {
 // Expire applies equality check predicate on the "expire" field. It's identical to ExpireEQ.
 func Expire(v time.Time) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExpire), v))
+		s.Where(sql.EQ(s.C(FieldExpire), s.TimeInTz(v)))
 	})
 }
 
@@ -149,14 +149,14 @@ func ActiveNEQ(v bool) predicate.Group {
 // ExpireEQ applies the EQ predicate on the "expire" field.
 func ExpireEQ(v time.Time) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldExpire), v))
+		s.Where(sql.EQ(s.C(FieldExpire), s.TimeInTz(v)))
 	})
 }
 
 // ExpireNEQ applies the NEQ predicate on the "expire" field.
 func ExpireNEQ(v time.Time) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldExpire), v))
+		s.Where(sql.NEQ(s.C(FieldExpire), s.TimeInTz(v)))
 	})
 }
 
@@ -167,6 +167,9 @@ func ExpireIn(vs ...time.Time) predicate.Group {
 		v[i] = vs[i]
 	}
 	return predicate.Group(func(s *sql.Selector) {
+		for i := range vs {
+			v[i] = s.TimeInTz(vs[i])
+		}
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -184,6 +187,9 @@ func ExpireNotIn(vs ...time.Time) predicate.Group {
 		v[i] = vs[i]
 	}
 	return predicate.Group(func(s *sql.Selector) {
+		for i := range vs {
+			v[i] = s.TimeInTz(vs[i])
+		}
 		// if not arguments were provided, append the FALSE constants,
 		// since we can't apply "IN ()". This will make this predicate falsy.
 		if len(v) == 0 {
@@ -197,28 +203,28 @@ func ExpireNotIn(vs ...time.Time) predicate.Group {
 // ExpireGT applies the GT predicate on the "expire" field.
 func ExpireGT(v time.Time) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldExpire), v))
+		s.Where(sql.GT(s.C(FieldExpire), s.TimeInTz(v)))
 	})
 }
 
 // ExpireGTE applies the GTE predicate on the "expire" field.
 func ExpireGTE(v time.Time) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldExpire), v))
+		s.Where(sql.GTE(s.C(FieldExpire), s.TimeInTz(v)))
 	})
 }
 
 // ExpireLT applies the LT predicate on the "expire" field.
 func ExpireLT(v time.Time) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldExpire), v))
+		s.Where(sql.LT(s.C(FieldExpire), s.TimeInTz(v)))
 	})
 }
 
 // ExpireLTE applies the LTE predicate on the "expire" field.
 func ExpireLTE(v time.Time) predicate.Group {
 	return predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldExpire), v))
+		s.Where(sql.LTE(s.C(FieldExpire), s.TimeInTz(v)))
 	})
 }
 
