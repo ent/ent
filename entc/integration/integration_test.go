@@ -1412,7 +1412,7 @@ func Tx(t *testing.T, client *ent.Client) {
 				err := next.Rollback(ctx, tx)
 				m.onRollback(err)
 
-				//require.NotNil(t, ctx)
+				require.NotNil(t, ctx)
 
 				return err
 			})
