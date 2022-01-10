@@ -8,6 +8,7 @@ package ent
 
 import (
 	"net/http"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -28,6 +29,16 @@ type config struct {
 	hooks *hooks
 	// HTTPClient field added by a test template.
 	HTTPClient *http.Client
+
+	readIntoTz *time.Location
+}
+
+// timeInTz will convert the read time.Time into the configured timezone (if configured).
+func (c *config) timeInTz(t time.Time) time.Time {
+	if c.readIntoTz != nil {
+		return t.In(c.readIntoTz)
+	}
+	return t
 }
 
 // hooks per client, for fast access.
@@ -65,6 +76,13 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// ReadIntoTz sets the timezone to convert all time into when reading.
+func ReadIntoTz(loc *time.Location) Option {
+	return func(c *config) {
+		c.readIntoTz = loc
 	}
 }
 

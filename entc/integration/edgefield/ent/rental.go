@@ -109,7 +109,7 @@ func (r *Rental) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field date", values[i])
 			} else if value.Valid {
-				r.Date = value.Time
+				r.Date = r.timeInTz(value.Time)
 			}
 		case rental.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

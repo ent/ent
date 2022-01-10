@@ -92,7 +92,7 @@ func (c *Card) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expired", values[i])
 			} else if value.Valid {
-				c.Expired = value.Time
+				c.Expired = c.timeInTz(value.Time)
 			}
 		case card.FieldNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {

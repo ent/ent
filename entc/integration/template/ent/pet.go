@@ -96,7 +96,7 @@ func (pe *Pet) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field licensed_at", values[i])
 			} else if value.Valid {
 				pe.LicensedAt = new(time.Time)
-				*pe.LicensedAt = value.Time
+				*pe.LicensedAt = pe.timeInTz(value.Time)
 			}
 		case pet.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
