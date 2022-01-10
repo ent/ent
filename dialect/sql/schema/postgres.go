@@ -272,7 +272,7 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 			schemaType := fmt.Sprintf("varchar(%d)", characterMaximumLen.Int64)
 			c.SchemaType = map[string]string{dialect.Postgres: schemaType}
 		}
-	case "date", "time", "timestamp", "timestamp with time zone", "timestamp without time zone":
+	case "date", "time with time zone", "time without time zone", "timestamp with time zone", "timestamp without time zone":
 		c.Type = field.TypeTime
 	case "bytea":
 		c.Type = field.TypeBytes
