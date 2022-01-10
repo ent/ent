@@ -43,12 +43,14 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 	{{ $comparable := or $f.ConvertedToBasic $f.Type.Valuer }}
 	{{ $undeclared := (and (ne $func "Label") (ne $func "Hooks") (ne $func "Policy")) }}
 	{{- if and $hasP $comparable $undeclared }}
-		{{ $arg := "v" }}
+		{{ $arg := "v" -}}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
 		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
 			{{- if and $f.HasGoType (not $f.Type.Valuer) }}
 				vc := {{ $f.BasicType "v" }}
 				{{- $arg = "vc" }}
+			{{- else if eq $f.Type.String "time.Time" }}
+				{{- $arg = printf "s.TimeInTz(%s)" $arg }}
 			{{- end }}
 			return predicate.{{ $.Name }}(
 				{{- with extend $ "Arg" $arg "Field" $f -}}
@@ -81,6 +83,8 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 			{{- else if and (not $op.Niladic) $f.HasGoType (or $stringOp (not $f.Type.Valuer)) }}
 				vc := {{ $f.BasicType "v" }}
 				{{- $arg = "vc" }}
+			{{- else if eq $f.Type.String "time.Time" }}
+				{{- $arg = printf "s.TimeInTz(%s)" $arg }}
 			{{- end }}
 			return predicate.{{ $.Name }}(
 				{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}

@@ -111,13 +111,37 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 			} else if value.Valid {
 				{{- if $f.NillableValue }}
 					{{ $ret }}.{{ $field }} = new({{ $f.Type }})
-					*{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
+					{{ if eq $f.Type.String "time.Time" -}}
+						if {{ $ret }}.config.readIntoTz != nil {
+							*{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}.In({{ $ret }}.config.readIntoTz)
+						} else {
+							*{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
+						}
+					{{ else -}}
+						*{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
+					{{- end }}
 				{{- else }}
-					{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
+					{{ if eq $f.Type.String "time.Time" -}}
+						if {{ $ret }}.config.readIntoTz != nil {
+							{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}.In({{ $ret }}.config.readIntoTz)
+						} else {
+							{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
+						}
+					{{ else -}}
+						{{ $ret }}.{{ $field }} = {{ $f.ScanTypeField "value" }}
+					{{- end }}
 				{{- end }}
 		{{- else }}
 			} else if value != nil {
-				{{ $ret }}.{{ $field }} = {{ if and (not $f.Nillable) (not $f.Type.RType.IsPtr) }}*{{ end }}value
+				{{ if eq $f.Type.String "time.Time" -}}
+				if {{ $ret }}.config.readIntoTz != nil {
+					{{ $ret }}.{{ $field }} = value.In({{ $ret }}.config.readIntoTz)
+				} else {
+					{{ $ret }}.{{ $field }} = {{ if and (not $f.Nillable) (not $f.Type.RType.IsPtr) }}*{{ end }}value
+				}
+				{{ else -}}
+					{{ $ret }}.{{ $field }} = {{ if and (not $f.Nillable) (not $f.Type.RType.IsPtr) }}*{{ end }}value
+				{{- end }}
 		{{- end }}
 		}
 	{{- end }}

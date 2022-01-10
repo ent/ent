@@ -184,6 +184,12 @@ func (m *{{ $mutation }}) IDs(ctx context.Context) ([]{{ $n.ID.Type }}, error) {
 	{{ $func := $f.MutationSet }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func (m *{{ $mutation }}) {{ $func }}({{ $p }} {{ $f.Type }}) {
+		// convert into the timezone in which we want to store the time.
+		{{ if eq $f.Type.String "time.Time" -}}
+		if m.config.storeInTz != nil {
+			{{ $p }} = {{ $p }}.In(m.config.storeInTz)
+		}
+		{{ end -}}
 		m.{{ $f.BuilderField }} = &{{ $p }}
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if $f.SupportsMutationAdd }}

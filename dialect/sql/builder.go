@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect"
 )
@@ -2892,10 +2893,11 @@ func (n Queries) Query() (string, []interface{}) {
 type Builder struct {
 	sb        *strings.Builder // underlying builder.
 	dialect   string           // configured dialect.
-	args      []interface{}    // query parameters.
-	total     int              // total number of parameters in query tree.
-	errs      []error          // errors that added during the query construction.
-	qualifier string           // qualifier to prefix identifiers (e.g. table name).
+	tz        *time.Location
+	args      []interface{} // query parameters.
+	total     int           // total number of parameters in query tree.
+	errs      []error       // errors that added during the query construction.
+	qualifier string        // qualifier to prefix identifiers (e.g. table name).
 }
 
 // Quote quotes the given identifier with the characters based
@@ -3253,6 +3255,18 @@ func (b *Builder) isIdent(s string) bool {
 	default:
 		return strings.Contains(s, "`")
 	}
+}
+
+// TimeInTz will return the provided time in the configured timezone, if present.
+func (b *Builder) TimeInTz(t time.Time) time.Time {
+	if b.tz != nil {
+		return t.In(b.tz)
+	}
+	return t
+}
+
+func (b *Builder) SetTimeInTz(tz *time.Location) {
+	b.tz = tz
 }
 
 // state wraps the all methods for setting and getting

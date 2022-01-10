@@ -48,6 +48,11 @@ in the LICENSE file in the root directory of this source tree.
 	{{- $storage := $.Scope.Storage -}}
 	func(s *sql.Selector) {
 		{{- if $op.Variadic }}
+			{{- if eq $f.Type.String "time.Time" }}
+				for i := range vs {
+					{{ $arg }}[i] = s.TimeInTz(vs[i])
+				}
+			{{- end }}
 			// if not arguments were provided, append the FALSE constants,
 			// since we can't apply "IN ()". This will make this predicate falsy.
 			if len({{ $arg }}) == 0 {
