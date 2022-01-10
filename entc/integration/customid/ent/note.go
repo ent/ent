@@ -138,6 +138,11 @@ func (n *Note) Unwrap() *Note {
 	return n
 }
 
+// TableName returns the table name of the Note in the database.
+func (n *Note) TableName() string {
+	return note.Table
+}
+
 // String implements the fmt.Stringer.
 func (n *Note) String() string {
 	var builder strings.Builder

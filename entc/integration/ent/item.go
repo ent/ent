@@ -80,6 +80,11 @@ func (i *Item) Unwrap() *Item {
 	return i
 }
 
+// TableName returns the table name of the Item in the database.
+func (i *Item) TableName() string {
+	return item.Table
+}
+
 // String implements the fmt.Stringer.
 func (i *Item) String() string {
 	var builder strings.Builder

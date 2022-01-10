@@ -131,6 +131,11 @@ func (d *Device) Unwrap() *Device {
 	return d
 }
 
+// TableName returns the table name of the Device in the database.
+func (d *Device) TableName() string {
+	return device.Table
+}
+
 // String implements the fmt.Stringer.
 func (d *Device) String() string {
 	var builder strings.Builder

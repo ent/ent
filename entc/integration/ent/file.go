@@ -217,6 +217,11 @@ func (f *File) Unwrap() *File {
 	return f
 }
 
+// TableName returns the table name of the File in the database.
+func (f *File) TableName() string {
+	return file.Table
+}
+
 // String implements the fmt.Stringer.
 func (f *File) String() string {
 	var builder strings.Builder

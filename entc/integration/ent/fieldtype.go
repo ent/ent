@@ -658,6 +658,11 @@ func (ft *FieldType) Unwrap() *FieldType {
 	return ft
 }
 
+// TableName returns the table name of the FieldType in the database.
+func (ft *FieldType) TableName() string {
+	return fieldtype.Table
+}
+
 // String implements the fmt.Stringer.
 func (ft *FieldType) String() string {
 	var builder strings.Builder

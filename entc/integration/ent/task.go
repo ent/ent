@@ -81,6 +81,11 @@ func (t *Task) Unwrap() *Task {
 	return t
 }
 
+// TableName returns the table name of the Task in the database.
+func (t *Task) TableName() string {
+	return task.Table
+}
+
 // String implements the fmt.Stringer.
 func (t *Task) String() string {
 	var builder strings.Builder

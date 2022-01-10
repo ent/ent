@@ -124,6 +124,11 @@ func (ft *FileType) Unwrap() *FileType {
 	return ft
 }
 
+// TableName returns the table name of the FileType in the database.
+func (ft *FileType) TableName() string {
+	return filetype.Table
+}
+
 // String implements the fmt.Stringer.
 func (ft *FileType) String() string {
 	var builder strings.Builder

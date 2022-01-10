@@ -116,6 +116,11 @@ func (gi *GroupInfo) Unwrap() *GroupInfo {
 	return gi
 }
 
+// TableName returns the table name of the GroupInfo in the database.
+func (gi *GroupInfo) TableName() string {
+	return groupinfo.Table
+}
+
 // String implements the fmt.Stringer.
 func (gi *GroupInfo) String() string {
 	var builder strings.Builder

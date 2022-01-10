@@ -157,6 +157,11 @@ func (m *Metadata) Unwrap() *Metadata {
 	return m
 }
 
+// TableName returns the table name of the Metadata in the database.
+func (m *Metadata) TableName() string {
+	return metadata.Table
+}
+
 // String implements the fmt.Stringer.
 func (m *Metadata) String() string {
 	var builder strings.Builder

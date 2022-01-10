@@ -108,6 +108,11 @@ func (c *City) Unwrap() *City {
 	return c
 }
 
+// TableName returns the table name of the City in the database.
+func (c *City) TableName() string {
+	return city.Table
+}
+
 // String implements the fmt.Stringer.
 func (c *City) String() string {
 	var builder strings.Builder

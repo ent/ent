@@ -109,6 +109,11 @@ func (c *Car) Unwrap() *Car {
 	return c
 }
 
+// TableName returns the table name of the Car in the database.
+func (c *Car) TableName() string {
+	return car.Table
+}
+
 // String implements the fmt.Stringer.
 func (c *Car) String() string {
 	var builder strings.Builder

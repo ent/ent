@@ -72,6 +72,11 @@ func (_go *Goods) Unwrap() *Goods {
 	return _go
 }
 
+// TableName returns the table name of the Goods in the database.
+func (_go *Goods) TableName() string {
+	return goods.Table
+}
+
 // String implements the fmt.Stringer.
 func (_go *Goods) String() string {
 	var builder strings.Builder

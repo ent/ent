@@ -156,6 +156,11 @@ func (r *Rental) Unwrap() *Rental {
 	return r
 }
 
+// TableName returns the table name of the Rental in the database.
+func (r *Rental) TableName() string {
+	return rental.Table
+}
+
 // String implements the fmt.Stringer.
 func (r *Rental) String() string {
 	var builder strings.Builder

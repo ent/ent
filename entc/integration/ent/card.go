@@ -181,6 +181,11 @@ func (c *Card) Unwrap() *Card {
 	return c
 }
 
+// TableName returns the table name of the Card in the database.
+func (c *Card) TableName() string {
+	return card.Table
+}
+
 // String implements the fmt.Stringer.
 func (c *Card) String() string {
 	var builder strings.Builder

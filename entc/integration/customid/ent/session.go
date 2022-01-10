@@ -115,6 +115,11 @@ func (s *Session) Unwrap() *Session {
 	return s
 }
 
+// TableName returns the table name of the Session in the database.
+func (s *Session) TableName() string {
+	return session.Table
+}
+
 // String implements the fmt.Stringer.
 func (s *Session) String() string {
 	var builder strings.Builder

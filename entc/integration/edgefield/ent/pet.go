@@ -112,6 +112,11 @@ func (pe *Pet) Unwrap() *Pet {
 	return pe
 }
 
+// TableName returns the table name of the Pet in the database.
+func (pe *Pet) TableName() string {
+	return pet.Table
+}
+
 // String implements the fmt.Stringer.
 func (pe *Pet) String() string {
 	var builder strings.Builder

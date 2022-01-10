@@ -98,6 +98,11 @@ func (m *Media) Unwrap() *Media {
 	return m
 }
 
+// TableName returns the table name of the Media in the database.
+func (m *Media) TableName() string {
+	return media.Table
+}
+
 // String implements the fmt.Stringer.
 func (m *Media) String() string {
 	var builder strings.Builder

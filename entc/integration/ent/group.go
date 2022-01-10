@@ -211,6 +211,11 @@ func (gr *Group) Unwrap() *Group {
 	return gr
 }
 
+// TableName returns the table name of the Group in the database.
+func (gr *Group) TableName() string {
+	return group.Table
+}
+
 // String implements the fmt.Stringer.
 func (gr *Group) String() string {
 	var builder strings.Builder

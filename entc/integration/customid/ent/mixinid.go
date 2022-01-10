@@ -91,6 +91,11 @@ func (mi *MixinID) Unwrap() *MixinID {
 	return mi
 }
 
+// TableName returns the table name of the MixinID in the database.
+func (mi *MixinID) TableName() string {
+	return mixinid.Table
+}
+
 // String implements the fmt.Stringer.
 func (mi *MixinID) String() string {
 	var builder strings.Builder
