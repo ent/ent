@@ -1411,14 +1411,12 @@ func Tx(t *testing.T, client *ent.Client) {
 			return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
 				err := next.Rollback(ctx, tx)
 				m.onRollback(err)
-
-				require.NotNil(t, ctx)
-
+				require.Nil(t, ctx)
 				return err
 			})
 		})
 		err = tx.Item.Create().Exec(ctx)
-		require.Error(t, err) // because of read-only in tx opts
+		require.Error(t, err, "expect creation to fail in read-only tx")
 		require.NoError(t, tx.Rollback())
 	})
 
@@ -1428,16 +1426,11 @@ func Tx(t *testing.T, client *ent.Client) {
 		}
 		tx, err := client.BeginTx(ctx, &sql.TxOptions{Isolation: stdsql.LevelReadCommitted})
 		require.NoError(t, err)
-		var m mocker
-		m.On("onCommit", nil).Once()
-		defer m.AssertExpectations(t)
 
 		tx.OnCommit(func(next ent.Committer) ent.Committer {
 			return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
 				err := next.Commit(ctx, tx)
-				m.onCommit(err)
 				require.NotNil(t, ctx)
-
 				return err
 			})
 		})

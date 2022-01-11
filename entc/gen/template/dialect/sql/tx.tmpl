@@ -21,7 +21,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-	    ctx:    ctx,
+		ctx: ctx,
 		config: cfg,
 		{{- range $n := $.Nodes }}
 			{{ $n.Name }}: New{{ $n.Name }}Client(cfg),
