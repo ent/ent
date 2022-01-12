@@ -941,7 +941,7 @@ var mutMethods = func() map[string]struct{} {
 }()
 
 // MutationGet returns the method name for getting the field value.
-// The default name is just a pascal format. If the the method conflicts
+// The default name is just a pascal format. If the method conflicts
 // with the mutation methods, prefix the method with "Get".
 func (f Field) MutationGet() string {
 	name := pascal(f.Name)
@@ -961,7 +961,7 @@ func (f Field) MutationGetOld() string {
 }
 
 // MutationReset returns the method name for resetting the field value.
-// The default name is "Reset<FieldName>". If the the method conflicts
+// The default name is "Reset<FieldName>". If the method conflicts
 // with the mutation methods, suffix the method with "Field".
 func (f Field) MutationReset() string {
 	name := "Reset" + pascal(f.Name)
@@ -972,7 +972,7 @@ func (f Field) MutationReset() string {
 }
 
 // MutationSet returns the method name for setting the field value.
-// The default name is "Set<FieldName>". If the the method conflicts
+// The default name is "Set<FieldName>". If the method conflicts
 // with the mutation methods, suffix the method with "Field".
 func (f Field) MutationSet() string {
 	name := "Set" + f.StructField()
@@ -1021,7 +1021,7 @@ func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeI
 func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.TypeEnum }
 
 // IsEdgeField reports if the given field is an edge-field (i.e. a foreign-key)
-// that was referenced by one of the edges).
+// that was referenced by one of the edges.
 func (f Field) IsEdgeField() bool { return f.fk != nil }
 
 // Edge returns the edge this field is point to.
@@ -1204,7 +1204,7 @@ func (f Field) incremental(def bool) bool {
 	return def
 }
 
-// size returns the the field size defined in the schema.
+// size returns the field size defined in the schema.
 func (f Field) size() int64 {
 	if ant := f.EntSQL(); ant != nil && ant.Size != 0 {
 		return ant.Size
@@ -1259,7 +1259,7 @@ func (f Field) HasGoType() bool {
 }
 
 // ConvertedToBasic indicates if the Go type of the field
-// can be converted to basic type (string, int, etc).
+// can be converted to basic type (string, int, etc.).
 func (f Field) ConvertedToBasic() bool {
 	return !f.HasGoType() || f.BasicType("ident") != ""
 }
@@ -1576,7 +1576,7 @@ func (e Edge) MutationAdd() string {
 }
 
 // MutationReset returns the method name for resetting the edge value.
-// The default name is "Reset<EdgeName>". If the the method conflicts
+// The default name is "Reset<EdgeName>". If the method conflicts
 // with the mutation methods, suffix the method with "Edge".
 func (e Edge) MutationReset() string {
 	name := "Reset" + pascal(e.Name)
@@ -1587,7 +1587,7 @@ func (e Edge) MutationReset() string {
 }
 
 // MutationClear returns the method name for clearing the edge value.
-// The default name is "Clear<EdgeName>". If the the method conflicts
+// The default name is "Clear<EdgeName>". If the method conflicts
 // with the mutation methods, suffix the method with "Edge".
 func (e Edge) MutationClear() string {
 	name := "Clear" + pascal(e.Name)
@@ -1604,7 +1604,7 @@ func (e Edge) MutationRemove() string {
 
 // MutationCleared returns the method name for indicating if the edge
 // was cleared in the mutation. The default name is "<EdgeName>Cleared".
-// If the the method conflicts with the mutation methods, add "Edge" the
+// If the method conflicts with the mutation methods, add "Edge" the
 // after the edge name.
 func (e Edge) MutationCleared() string {
 	name := pascal(e.Name) + "Cleared"

@@ -1326,7 +1326,7 @@ func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
 		b.WriteOp(OpEQ)
-		b.Arg(arg)
+		p.arg(b, arg)
 	})
 }
 
@@ -1350,7 +1350,7 @@ func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
 		b.WriteOp(OpNEQ)
-		b.Arg(arg)
+		p.arg(b, arg)
 	})
 }
 
@@ -1374,7 +1374,7 @@ func (p *Predicate) LT(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
 		p.WriteOp(OpLT)
-		b.Arg(arg)
+		p.arg(b, arg)
 	})
 }
 
@@ -1398,7 +1398,7 @@ func (p *Predicate) LTE(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
 		p.WriteOp(OpLTE)
-		b.Arg(arg)
+		p.arg(b, arg)
 	})
 }
 
@@ -1422,7 +1422,7 @@ func (p *Predicate) GT(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
 		p.WriteOp(OpGT)
-		b.Arg(arg)
+		p.arg(b, arg)
 	})
 }
 
@@ -1446,7 +1446,7 @@ func (p *Predicate) GTE(col string, arg interface{}) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
 		p.WriteOp(OpGTE)
-		b.Arg(arg)
+		p.arg(b, arg)
 	})
 }
 
@@ -1765,6 +1765,18 @@ func (p *Predicate) Query() (string, []interface{}) {
 		f(&p.Builder)
 	}
 	return p.String(), p.args
+}
+
+// arg calls Builder.Arg, but wraps `a` with parens in case of a Selector.
+func (*Predicate) arg(b *Builder, a interface{}) {
+	switch a.(type) {
+	case *Selector:
+		b.Nested(func(b *Builder) {
+			b.Arg(a)
+		})
+	default:
+		b.Arg(a)
+	}
 }
 
 // clone returns a shallow clone of p.

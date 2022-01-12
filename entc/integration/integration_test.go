@@ -1397,7 +1397,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		require.Error(t, err, "cannot start a transaction within a transaction")
 		require.NoError(t, tx.Rollback())
 	})
-	t.Run("TxOptions", func(t *testing.T) {
+	t.Run("TxOptions Rollback", func(t *testing.T) {
 		if client.Dialect() == dialect.SQLite {
 			t.Skip("Skipping SQLite")
 		}
@@ -1406,10 +1406,38 @@ func Tx(t *testing.T, client *ent.Client) {
 		var m mocker
 		m.On("onRollback", nil).Once()
 		defer m.AssertExpectations(t)
-		tx.OnRollback(m.rHook())
+		tx.OnRollback(func(next ent.Rollbacker) ent.Rollbacker {
+			return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
+				err := next.Rollback(ctx, tx)
+				m.onRollback(err)
+				require.NotNil(t, ctx)
+				return err
+			})
+		})
 		err = tx.Item.Create().Exec(ctx)
-		require.Error(t, err)
+		require.Error(t, err, "expect creation to fail in read-only tx")
 		require.NoError(t, tx.Rollback())
+	})
+	t.Run("TxOptions Commit", func(t *testing.T) {
+		if client.Dialect() == dialect.SQLite {
+			t.Skip("Skipping SQLite")
+		}
+		tx, err := client.BeginTx(ctx, &sql.TxOptions{Isolation: stdsql.LevelReadCommitted})
+		require.NoError(t, err)
+		var m mocker
+		m.On("onCommit", nil).Once()
+		defer m.AssertExpectations(t)
+		tx.OnCommit(func(next ent.Committer) ent.Committer {
+			return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
+				err := next.Commit(ctx, tx)
+				m.onCommit(err)
+				require.NotNil(t, ctx)
+				return err
+			})
+		})
+		err = tx.Item.Create().Exec(ctx)
+		require.NoError(t, tx.Commit())
+		require.NoError(t, err)
 	})
 }
 

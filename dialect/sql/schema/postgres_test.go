@@ -279,7 +279,7 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("name", "character varying", "YES", "NULL", "varchar", nil, nil, nil).
 						AddRow("uuid", "uuid", "YES", "NULL", "uuid", nil, nil, nil).
 						AddRow("created_at", "date", "NO", "CURRENT_DATE", "date", nil, nil, nil).
-						AddRow("updated_at", "timestamp", "YES", "NULL", "timestamptz", nil, nil, nil).
+						AddRow("updated_at", "timestamp with time zone", "YES", "NULL", "timestamptz", nil, nil, nil).
 						AddRow("deleted_at", "date", "YES", "NULL", "date", nil, nil, nil).
 						AddRow("text", "text", "YES", "NULL", "text", nil, nil, nil).
 						AddRow("cidr", "cidr", "NO", "NULL", "cidr", nil, nil, nil).
@@ -290,7 +290,7 @@ func TestPostgres_Create(t *testing.T) {
 				mock.ExpectQuery(escape(fmt.Sprintf(indexesQuery, "CURRENT_SCHEMA()", "users"))).
 					WillReturnRows(sqlmock.NewRows([]string{"index_name", "column_name", "primary", "unique", "seq_in_index"}).
 						AddRow("users_pkey", "id", "t", "t", 0))
-				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" bigint NOT NULL, ALTER COLUMN "created_at" TYPE date, ALTER COLUMN "created_at" SET NOT NULL, ALTER COLUMN "created_at" SET DEFAULT CURRENT_DATE, ALTER COLUMN "updated_at" TYPE timestamp with time zone, ALTER COLUMN "updated_at" DROP NOT NULL, ALTER COLUMN "deleted_at" TYPE timestamp with time zone, ALTER COLUMN "deleted_at" DROP NOT NULL`)).
+				mock.ExpectExec(escape(`ALTER TABLE "users" ADD COLUMN "age" bigint NOT NULL, ALTER COLUMN "created_at" TYPE date, ALTER COLUMN "created_at" SET NOT NULL, ALTER COLUMN "created_at" SET DEFAULT CURRENT_DATE, ALTER COLUMN "deleted_at" TYPE timestamp with time zone, ALTER COLUMN "deleted_at" DROP NOT NULL`)).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mock.ExpectCommit()
 			},
