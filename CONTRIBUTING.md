@@ -34,7 +34,7 @@ go generate ./...
 Then, in `entc/inegration` run `docker-compose` in order to spin-up all database containers:
 
 ```
-docker-compose -f compose/docker-compose.yaml up -d --scale test=0
+docker-compose -f docker-compose.yaml up -d
 ```
 
 Then, run `go test ./...` to run all integration tests.
