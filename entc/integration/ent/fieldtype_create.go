@@ -685,9 +685,25 @@ func (ftc *FieldTypeCreate) SetOptionalUUID(u uuid.UUID) *FieldTypeCreate {
 	return ftc
 }
 
+// SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableOptionalUUID(u *uuid.UUID) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetOptionalUUID(*u)
+	}
+	return ftc
+}
+
 // SetNillableUUID sets the "nillable_uuid" field.
 func (ftc *FieldTypeCreate) SetNillableUUID(u uuid.UUID) *FieldTypeCreate {
 	ftc.mutation.SetNillableUUID(u)
+	return ftc
+}
+
+// SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
+func (ftc *FieldTypeCreate) SetNillableNillableUUID(u *uuid.UUID) *FieldTypeCreate {
+	if u != nil {
+		ftc.SetNillableUUID(*u)
+	}
 	return ftc
 }
 

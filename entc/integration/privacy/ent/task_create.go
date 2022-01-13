@@ -66,6 +66,14 @@ func (tc *TaskCreate) SetUUID(u uuid.UUID) *TaskCreate {
 	return tc
 }
 
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableUUID(u *uuid.UUID) *TaskCreate {
+	if u != nil {
+		tc.SetUUID(*u)
+	}
+	return tc
+}
+
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
 func (tc *TaskCreate) AddTeamIDs(ids ...int) *TaskCreate {
 	tc.mutation.AddTeamIDs(ids...)

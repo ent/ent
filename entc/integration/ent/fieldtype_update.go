@@ -1187,6 +1187,14 @@ func (ftu *FieldTypeUpdate) SetOptionalUUID(u uuid.UUID) *FieldTypeUpdate {
 	return ftu
 }
 
+// SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableOptionalUUID(u *uuid.UUID) *FieldTypeUpdate {
+	if u != nil {
+		ftu.SetOptionalUUID(*u)
+	}
+	return ftu
+}
+
 // ClearOptionalUUID clears the value of the "optional_uuid" field.
 func (ftu *FieldTypeUpdate) ClearOptionalUUID() *FieldTypeUpdate {
 	ftu.mutation.ClearOptionalUUID()
@@ -1196,6 +1204,14 @@ func (ftu *FieldTypeUpdate) ClearOptionalUUID() *FieldTypeUpdate {
 // SetNillableUUID sets the "nillable_uuid" field.
 func (ftu *FieldTypeUpdate) SetNillableUUID(u uuid.UUID) *FieldTypeUpdate {
 	ftu.mutation.SetNillableUUID(u)
+	return ftu
+}
+
+// SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableNillableUUID(u *uuid.UUID) *FieldTypeUpdate {
+	if u != nil {
+		ftu.SetNillableUUID(*u)
+	}
 	return ftu
 }
 
@@ -3635,6 +3651,14 @@ func (ftuo *FieldTypeUpdateOne) SetOptionalUUID(u uuid.UUID) *FieldTypeUpdateOne
 	return ftuo
 }
 
+// SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableOptionalUUID(u *uuid.UUID) *FieldTypeUpdateOne {
+	if u != nil {
+		ftuo.SetOptionalUUID(*u)
+	}
+	return ftuo
+}
+
 // ClearOptionalUUID clears the value of the "optional_uuid" field.
 func (ftuo *FieldTypeUpdateOne) ClearOptionalUUID() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearOptionalUUID()
@@ -3644,6 +3668,14 @@ func (ftuo *FieldTypeUpdateOne) ClearOptionalUUID() *FieldTypeUpdateOne {
 // SetNillableUUID sets the "nillable_uuid" field.
 func (ftuo *FieldTypeUpdateOne) SetNillableUUID(u uuid.UUID) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNillableUUID(u)
+	return ftuo
+}
+
+// SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableNillableUUID(u *uuid.UUID) *FieldTypeUpdateOne {
+	if u != nil {
+		ftuo.SetNillableUUID(*u)
+	}
 	return ftuo
 }
 

@@ -31,7 +31,7 @@ If you touch any file in `entc`, run the following command in `entc`:
 go generate ./...
 ```
 
-Then, in `entc/inegration` run `docker-compose` in order to spin-up all database containers:
+Then, in `entc/integration` run `docker-compose` in order to spin-up all database containers:
 
 ```
 docker-compose -f docker-compose.yaml up -d
