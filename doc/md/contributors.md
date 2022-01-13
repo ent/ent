@@ -105,6 +105,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/peanut-cc"><img src="https://avatars.githubusercontent.com/u/55480838?v=4?s=100" width="100px;" alt=""/><br /><sub><b>peanut-pg</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=peanut-cc" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/m3hm3t"><img src="https://avatars.githubusercontent.com/u/22320354?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mehmet Yılmaz</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=m3hm3t" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/Laconty"><img src="https://avatars.githubusercontent.com/u/17760166?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Roman Maklakov</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=Laconty" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/genevieve"><img src="https://avatars.githubusercontent.com/u/12158641?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Genevieve</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=genevieve" title="Code">💻</a></td>
   </tr>
 </table>
 
