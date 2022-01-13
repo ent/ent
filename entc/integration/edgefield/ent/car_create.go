@@ -44,6 +44,14 @@ func (cc *CarCreate) SetID(u uuid.UUID) *CarCreate {
 	return cc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (cc *CarCreate) SetNillableID(u *uuid.UUID) *CarCreate {
+	if u != nil {
+		cc.SetID(*u)
+	}
+	return cc
+}
+
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
 func (cc *CarCreate) AddRentalIDs(ids ...int) *CarCreate {
 	cc.mutation.AddRentalIDs(ids...)

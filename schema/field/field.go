@@ -129,10 +129,9 @@ func UUID(name string, typ driver.Valuer) *uuidBuilder {
 	b := &uuidBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{
-			Type:     TypeUUID,
-			Nillable: true,
-			Ident:    rt.String(),
-			PkgPath:  indirect(rt).PkgPath(),
+			Type:    TypeUUID,
+			Ident:   rt.String(),
+			PkgPath: indirect(rt).PkgPath(),
 		},
 	}}
 	b.desc.goType(typ, valueScannerType)
@@ -1159,7 +1158,7 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		},
 	}
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
 	switch pt := reflect.PtrTo(t); {

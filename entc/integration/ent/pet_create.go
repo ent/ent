@@ -53,6 +53,14 @@ func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
 	return pc
 }
 
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (pc *PetCreate) SetNillableUUID(u *uuid.UUID) *PetCreate {
+	if u != nil {
+		pc.SetUUID(*u)
+	}
+	return pc
+}
+
 // SetNickname sets the "nickname" field.
 func (pc *PetCreate) SetNickname(s string) *PetCreate {
 	pc.mutation.SetNickname(s)
