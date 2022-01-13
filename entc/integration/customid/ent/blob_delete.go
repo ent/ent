@@ -30,6 +30,14 @@ func (bd *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
 	return bd
 }
 
+// WhereIf appends a list predicates to the BlobDelete builder if b is true.
+func (bd *BlobDelete) WhereIf(b bool, ps ...predicate.Blob) *BlobDelete {
+	if b {
+		bd.mutation.Where(ps...)
+	}
+	return bd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (bd *BlobDelete) Exec(ctx context.Context) (int, error) {
 	var (

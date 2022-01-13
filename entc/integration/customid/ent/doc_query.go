@@ -45,6 +45,14 @@ func (dq *DocQuery) Where(ps ...predicate.Doc) *DocQuery {
 	return dq
 }
 
+// WhereIf adds a new predicates to the DocQuery builder if b is true.
+func (dq *DocQuery) WhereIf(b bool, ps ...predicate.Doc) *DocQuery {
+	if b {
+		dq.predicates = append(dq.predicates, ps...)
+	}
+	return dq
+}
+
 // Limit adds a limit step to the query.
 func (dq *DocQuery) Limit(limit int) *DocQuery {
 	dq.limit = &limit

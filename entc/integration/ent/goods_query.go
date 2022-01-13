@@ -41,6 +41,14 @@ func (gq *GoodsQuery) Where(ps ...predicate.Goods) *GoodsQuery {
 	return gq
 }
 
+// WhereIf adds a new predicates to the GoodsQuery builder if b is true.
+func (gq *GoodsQuery) WhereIf(b bool, ps ...predicate.Goods) *GoodsQuery {
+	if b {
+		gq.predicates = append(gq.predicates, ps...)
+	}
+	return gq
+}
+
 // Limit adds a limit step to the query.
 func (gq *GoodsQuery) Limit(limit int) *GoodsQuery {
 	gq.limit = &limit

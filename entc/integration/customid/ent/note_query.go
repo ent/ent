@@ -45,6 +45,14 @@ func (nq *NoteQuery) Where(ps ...predicate.Note) *NoteQuery {
 	return nq
 }
 
+// WhereIf adds a new predicates to the NoteQuery builder if b is true.
+func (nq *NoteQuery) WhereIf(b bool, ps ...predicate.Note) *NoteQuery {
+	if b {
+		nq.predicates = append(nq.predicates, ps...)
+	}
+	return nq
+}
+
 // Limit adds a limit step to the query.
 func (nq *NoteQuery) Limit(limit int) *NoteQuery {
 	nq.limit = &limit

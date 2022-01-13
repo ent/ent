@@ -33,6 +33,14 @@ func (du *DeviceUpdate) Where(ps ...predicate.Device) *DeviceUpdate {
 	return du
 }
 
+// WhereIf appends a list predicates to the DeviceUpdate builder if b is true.
+func (du *DeviceUpdate) WhereIf(b bool, ps ...predicate.Device) *DeviceUpdate {
+	if b {
+		du.mutation.Where(ps...)
+	}
+	return du
+}
+
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
 func (du *DeviceUpdate) SetActiveSessionID(id schema.ID) *DeviceUpdate {
 	du.mutation.SetActiveSessionID(id)

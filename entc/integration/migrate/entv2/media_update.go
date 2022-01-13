@@ -31,6 +31,14 @@ func (mu *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
 	return mu
 }
 
+// WhereIf appends a list predicates to the MediaUpdate builder if b is true.
+func (mu *MediaUpdate) WhereIf(b bool, ps ...predicate.Media) *MediaUpdate {
+	if b {
+		mu.mutation.Where(ps...)
+	}
+	return mu
+}
+
 // SetSource sets the "source" field.
 func (mu *MediaUpdate) SetSource(s string) *MediaUpdate {
 	mu.mutation.SetSource(s)

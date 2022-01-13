@@ -30,6 +30,14 @@ func (md *MediaDelete) Where(ps ...predicate.Media) *MediaDelete {
 	return md
 }
 
+// WhereIf appends a list predicates to the MediaDelete builder if b is true.
+func (md *MediaDelete) WhereIf(b bool, ps ...predicate.Media) *MediaDelete {
+	if b {
+		md.mutation.Where(ps...)
+	}
+	return md
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (md *MediaDelete) Exec(ctx context.Context) (int, error) {
 	var (

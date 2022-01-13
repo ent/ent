@@ -33,6 +33,14 @@ func (tu *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
 	return tu
 }
 
+// WhereIf appends a list predicates to the TeamUpdate builder if b is true.
+func (tu *TeamUpdate) WhereIf(b bool, ps ...predicate.Team) *TeamUpdate {
+	if b {
+		tu.mutation.Where(ps...)
+	}
+	return tu
+}
+
 // SetName sets the "name" field.
 func (tu *TeamUpdate) SetName(s string) *TeamUpdate {
 	tu.mutation.SetName(s)

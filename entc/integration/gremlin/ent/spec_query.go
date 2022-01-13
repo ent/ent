@@ -42,6 +42,14 @@ func (sq *SpecQuery) Where(ps ...predicate.Spec) *SpecQuery {
 	return sq
 }
 
+// WhereIf adds a new predicates to the SpecQuery builder if b is true.
+func (sq *SpecQuery) WhereIf(b bool, ps ...predicate.Spec) *SpecQuery {
+	if b {
+		sq.predicates = append(sq.predicates, ps...)
+	}
+	return sq
+}
+
 // Limit adds a limit step to the query.
 func (sq *SpecQuery) Limit(limit int) *SpecQuery {
 	sq.limit = &limit

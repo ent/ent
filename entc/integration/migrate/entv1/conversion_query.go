@@ -39,6 +39,14 @@ func (cq *ConversionQuery) Where(ps ...predicate.Conversion) *ConversionQuery {
 	return cq
 }
 
+// WhereIf adds a new predicates to the ConversionQuery builder if b is true.
+func (cq *ConversionQuery) WhereIf(b bool, ps ...predicate.Conversion) *ConversionQuery {
+	if b {
+		cq.predicates = append(cq.predicates, ps...)
+	}
+	return cq
+}
+
 // Limit adds a limit step to the query.
 func (cq *ConversionQuery) Limit(limit int) *ConversionQuery {
 	cq.limit = &limit

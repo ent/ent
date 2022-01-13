@@ -30,6 +30,14 @@ func (md *MetadataDelete) Where(ps ...predicate.Metadata) *MetadataDelete {
 	return md
 }
 
+// WhereIf appends a list predicates to the MetadataDelete builder if b is true.
+func (md *MetadataDelete) WhereIf(b bool, ps ...predicate.Metadata) *MetadataDelete {
+	if b {
+		md.mutation.Where(ps...)
+	}
+	return md
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (md *MetadataDelete) Exec(ctx context.Context) (int, error) {
 	var (

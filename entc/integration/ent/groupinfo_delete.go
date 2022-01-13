@@ -30,6 +30,14 @@ func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
 	return gid
 }
 
+// WhereIf appends a list predicates to the GroupInfoDelete builder if b is true.
+func (gid *GroupInfoDelete) WhereIf(b bool, ps ...predicate.GroupInfo) *GroupInfoDelete {
+	if b {
+		gid.mutation.Where(ps...)
+	}
+	return gid
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
 	var (

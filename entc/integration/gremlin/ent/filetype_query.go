@@ -42,6 +42,14 @@ func (ftq *FileTypeQuery) Where(ps ...predicate.FileType) *FileTypeQuery {
 	return ftq
 }
 
+// WhereIf adds a new predicates to the FileTypeQuery builder if b is true.
+func (ftq *FileTypeQuery) WhereIf(b bool, ps ...predicate.FileType) *FileTypeQuery {
+	if b {
+		ftq.predicates = append(ftq.predicates, ps...)
+	}
+	return ftq
+}
+
 // Limit adds a limit step to the query.
 func (ftq *FileTypeQuery) Limit(limit int) *FileTypeQuery {
 	ftq.limit = &limit

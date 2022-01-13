@@ -43,6 +43,14 @@ func (uq *UserQuery) Where(ps ...predicate.User) *UserQuery {
 	return uq
 }
 
+// WhereIf adds a new predicates to the UserQuery builder if b is true.
+func (uq *UserQuery) WhereIf(b bool, ps ...predicate.User) *UserQuery {
+	if b {
+		uq.predicates = append(uq.predicates, ps...)
+	}
+	return uq
+}
+
 // Limit adds a limit step to the query.
 func (uq *UserQuery) Limit(limit int) *UserQuery {
 	uq.limit = &limit

@@ -44,6 +44,14 @@ func (cq *CarQuery) Where(ps ...predicate.Car) *CarQuery {
 	return cq
 }
 
+// WhereIf adds a new predicates to the CarQuery builder if b is true.
+func (cq *CarQuery) WhereIf(b bool, ps ...predicate.Car) *CarQuery {
+	if b {
+		cq.predicates = append(cq.predicates, ps...)
+	}
+	return cq
+}
+
 // Limit adds a limit step to the query.
 func (cq *CarQuery) Limit(limit int) *CarQuery {
 	cq.limit = &limit

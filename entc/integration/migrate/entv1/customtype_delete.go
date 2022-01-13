@@ -30,6 +30,14 @@ func (ctd *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete
 	return ctd
 }
 
+// WhereIf appends a list predicates to the CustomTypeDelete builder if b is true.
+func (ctd *CustomTypeDelete) WhereIf(b bool, ps ...predicate.CustomType) *CustomTypeDelete {
+	if b {
+		ctd.mutation.Where(ps...)
+	}
+	return ctd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ctd *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
 	var (

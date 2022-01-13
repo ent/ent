@@ -39,6 +39,14 @@ func (ftu *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
 	return ftu
 }
 
+// WhereIf appends a list predicates to the FieldTypeUpdate builder if b is true.
+func (ftu *FieldTypeUpdate) WhereIf(b bool, ps ...predicate.FieldType) *FieldTypeUpdate {
+	if b {
+		ftu.mutation.Where(ps...)
+	}
+	return ftu
+}
+
 // SetInt sets the "int" field.
 func (ftu *FieldTypeUpdate) SetInt(i int) *FieldTypeUpdate {
 	ftu.mutation.ResetInt()

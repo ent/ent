@@ -30,6 +30,14 @@ func (sd *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
 	return sd
 }
 
+// WhereIf appends a list predicates to the SessionDelete builder if b is true.
+func (sd *SessionDelete) WhereIf(b bool, ps ...predicate.Session) *SessionDelete {
+	if b {
+		sd.mutation.Where(ps...)
+	}
+	return sd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (sd *SessionDelete) Exec(ctx context.Context) (int, error) {
 	var (

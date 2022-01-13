@@ -39,6 +39,14 @@ func (mq *MediaQuery) Where(ps ...predicate.Media) *MediaQuery {
 	return mq
 }
 
+// WhereIf adds a new predicates to the MediaQuery builder if b is true.
+func (mq *MediaQuery) WhereIf(b bool, ps ...predicate.Media) *MediaQuery {
+	if b {
+		mq.predicates = append(mq.predicates, ps...)
+	}
+	return mq
+}
+
 // Limit adds a limit step to the query.
 func (mq *MediaQuery) Limit(limit int) *MediaQuery {
 	mq.limit = &limit

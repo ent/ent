@@ -45,6 +45,14 @@ func (rq *RentalQuery) Where(ps ...predicate.Rental) *RentalQuery {
 	return rq
 }
 
+// WhereIf adds a new predicates to the RentalQuery builder if b is true.
+func (rq *RentalQuery) WhereIf(b bool, ps ...predicate.Rental) *RentalQuery {
+	if b {
+		rq.predicates = append(rq.predicates, ps...)
+	}
+	return rq
+}
+
 // Limit adds a limit step to the query.
 func (rq *RentalQuery) Limit(limit int) *RentalQuery {
 	rq.limit = &limit

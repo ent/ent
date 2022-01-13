@@ -32,6 +32,14 @@ func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 	return cu
 }
 
+// WhereIf appends a list predicates to the CarUpdate builder if b is true.
+func (cu *CarUpdate) WhereIf(b bool, ps ...predicate.Car) *CarUpdate {
+	if b {
+		cu.mutation.Where(ps...)
+	}
+	return cu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CarUpdate) SetOwnerID(id int) *CarUpdate {
 	cu.mutation.SetOwnerID(id)

@@ -30,6 +30,14 @@ func (mid *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
 	return mid
 }
 
+// WhereIf appends a list predicates to the MixinIDDelete builder if b is true.
+func (mid *MixinIDDelete) WhereIf(b bool, ps ...predicate.MixinID) *MixinIDDelete {
+	if b {
+		mid.mutation.Where(ps...)
+	}
+	return mid
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (mid *MixinIDDelete) Exec(ctx context.Context) (int, error) {
 	var (

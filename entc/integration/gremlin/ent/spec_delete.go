@@ -31,6 +31,14 @@ func (sd *SpecDelete) Where(ps ...predicate.Spec) *SpecDelete {
 	return sd
 }
 
+// WhereIf appends a list predicates to the SpecDelete builder if b is true.
+func (sd *SpecDelete) WhereIf(b bool, ps ...predicate.Spec) *SpecDelete {
+	if b {
+		sd.mutation.Where(ps...)
+	}
+	return sd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (sd *SpecDelete) Exec(ctx context.Context) (int, error) {
 	var (

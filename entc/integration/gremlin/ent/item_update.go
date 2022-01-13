@@ -33,6 +33,14 @@ func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
 	return iu
 }
 
+// WhereIf appends a list predicates to the ItemUpdate builder if b is true.
+func (iu *ItemUpdate) WhereIf(b bool, ps ...predicate.Item) *ItemUpdate {
+	if b {
+		iu.mutation.Where(ps...)
+	}
+	return iu
+}
+
 // SetText sets the "text" field.
 func (iu *ItemUpdate) SetText(s string) *ItemUpdate {
 	iu.mutation.SetText(s)

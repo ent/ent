@@ -36,6 +36,14 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
+// WhereIf appends a list predicates to the UserUpdate builder if b is true.
+func (uu *UserUpdate) WhereIf(b bool, ps ...predicate.User) *UserUpdate {
+	if b {
+		uu.mutation.Where(ps...)
+	}
+	return uu
+}
+
 // SetParentID sets the "parent_id" field.
 func (uu *UserUpdate) SetParentID(i int) *UserUpdate {
 	uu.mutation.SetParentID(i)

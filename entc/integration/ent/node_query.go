@@ -46,6 +46,14 @@ func (nq *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
 	return nq
 }
 
+// WhereIf adds a new predicates to the NodeQuery builder if b is true.
+func (nq *NodeQuery) WhereIf(b bool, ps ...predicate.Node) *NodeQuery {
+	if b {
+		nq.predicates = append(nq.predicates, ps...)
+	}
+	return nq
+}
+
 // Limit adds a limit step to the query.
 func (nq *NodeQuery) Limit(limit int) *NodeQuery {
 	nq.limit = &limit

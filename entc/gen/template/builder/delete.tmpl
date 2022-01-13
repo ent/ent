@@ -34,6 +34,14 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 	return {{ $receiver }}
 }
 
+// WhereIf appends a list predicates to the {{ $builder }} builder if b is true.
+func ({{ $receiver }} *{{ $builder }}) WhereIf(b bool, ps ...predicate.{{ $.Name }}) *{{ $builder }} {
+	if b {
+	    {{ $mutation }}.Where(ps...)
+	}
+	return {{ $receiver }}
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver}} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 	var (

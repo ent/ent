@@ -30,6 +30,14 @@ func (td *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
 	return td
 }
 
+// WhereIf appends a list predicates to the TaskDelete builder if b is true.
+func (td *TaskDelete) WhereIf(b bool, ps ...predicate.Task) *TaskDelete {
+	if b {
+		td.mutation.Where(ps...)
+	}
+	return td
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TaskDelete) Exec(ctx context.Context) (int, error) {
 	var (

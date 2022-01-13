@@ -33,6 +33,14 @@ func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 	return tu
 }
 
+// WhereIf appends a list predicates to the TaskUpdate builder if b is true.
+func (tu *TaskUpdate) WhereIf(b bool, ps ...predicate.Task) *TaskUpdate {
+	if b {
+		tu.mutation.Where(ps...)
+	}
+	return tu
+}
+
 // SetPriority sets the "priority" field.
 func (tu *TaskUpdate) SetPriority(s schema.Priority) *TaskUpdate {
 	tu.mutation.ResetPriority()

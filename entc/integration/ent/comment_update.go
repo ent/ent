@@ -31,6 +31,14 @@ func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	return cu
 }
 
+// WhereIf appends a list predicates to the CommentUpdate builder if b is true.
+func (cu *CommentUpdate) WhereIf(b bool, ps ...predicate.Comment) *CommentUpdate {
+	if b {
+		cu.mutation.Where(ps...)
+	}
+	return cu
+}
+
 // SetUniqueInt sets the "unique_int" field.
 func (cu *CommentUpdate) SetUniqueInt(i int) *CommentUpdate {
 	cu.mutation.ResetUniqueInt()

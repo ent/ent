@@ -42,6 +42,14 @@ func (iq *InfoQuery) Where(ps ...predicate.Info) *InfoQuery {
 	return iq
 }
 
+// WhereIf adds a new predicates to the InfoQuery builder if b is true.
+func (iq *InfoQuery) WhereIf(b bool, ps ...predicate.Info) *InfoQuery {
+	if b {
+		iq.predicates = append(iq.predicates, ps...)
+	}
+	return iq
+}
+
 // Limit adds a limit step to the query.
 func (iq *InfoQuery) Limit(limit int) *InfoQuery {
 	iq.limit = &limit

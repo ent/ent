@@ -31,6 +31,14 @@ func (id *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
 	return id
 }
 
+// WhereIf appends a list predicates to the ItemDelete builder if b is true.
+func (id *ItemDelete) WhereIf(b bool, ps ...predicate.Item) *ItemDelete {
+	if b {
+		id.mutation.Where(ps...)
+	}
+	return id
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (id *ItemDelete) Exec(ctx context.Context) (int, error) {
 	var (

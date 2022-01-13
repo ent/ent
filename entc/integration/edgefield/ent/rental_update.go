@@ -35,6 +35,14 @@ func (ru *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
 	return ru
 }
 
+// WhereIf appends a list predicates to the RentalUpdate builder if b is true.
+func (ru *RentalUpdate) WhereIf(b bool, ps ...predicate.Rental) *RentalUpdate {
+	if b {
+		ru.mutation.Where(ps...)
+	}
+	return ru
+}
+
 // SetDate sets the "date" field.
 func (ru *RentalUpdate) SetDate(t time.Time) *RentalUpdate {
 	ru.mutation.SetDate(t)

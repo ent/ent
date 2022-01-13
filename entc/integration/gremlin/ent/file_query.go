@@ -46,6 +46,14 @@ func (fq *FileQuery) Where(ps ...predicate.File) *FileQuery {
 	return fq
 }
 
+// WhereIf adds a new predicates to the FileQuery builder if b is true.
+func (fq *FileQuery) WhereIf(b bool, ps ...predicate.File) *FileQuery {
+	if b {
+		fq.predicates = append(fq.predicates, ps...)
+	}
+	return fq
+}
+
 // Limit adds a limit step to the query.
 func (fq *FileQuery) Limit(limit int) *FileQuery {
 	fq.limit = &limit

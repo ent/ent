@@ -45,6 +45,14 @@ func (pq *PostQuery) Where(ps ...predicate.Post) *PostQuery {
 	return pq
 }
 
+// WhereIf adds a new predicates to the PostQuery builder if b is true.
+func (pq *PostQuery) WhereIf(b bool, ps ...predicate.Post) *PostQuery {
+	if b {
+		pq.predicates = append(pq.predicates, ps...)
+	}
+	return pq
+}
+
 // Limit adds a limit step to the query.
 func (pq *PostQuery) Limit(limit int) *PostQuery {
 	pq.limit = &limit

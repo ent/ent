@@ -36,6 +36,14 @@ func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return cu
 }
 
+// WhereIf appends a list predicates to the CardUpdate builder if b is true.
+func (cu *CardUpdate) WhereIf(b bool, ps ...predicate.Card) *CardUpdate {
+	if b {
+		cu.mutation.Where(ps...)
+	}
+	return cu
+}
+
 // SetUpdateTime sets the "update_time" field.
 func (cu *CardUpdate) SetUpdateTime(t time.Time) *CardUpdate {
 	cu.mutation.SetUpdateTime(t)

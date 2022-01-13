@@ -30,6 +30,14 @@ func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
 	return nd
 }
 
+// WhereIf appends a list predicates to the NodeDelete builder if b is true.
+func (nd *NodeDelete) WhereIf(b bool, ps ...predicate.Node) *NodeDelete {
+	if b {
+		nd.mutation.Where(ps...)
+	}
+	return nd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
 	var (

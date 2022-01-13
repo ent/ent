@@ -41,6 +41,14 @@ func (tq *TaskQuery) Where(ps ...predicate.Task) *TaskQuery {
 	return tq
 }
 
+// WhereIf adds a new predicates to the TaskQuery builder if b is true.
+func (tq *TaskQuery) WhereIf(b bool, ps ...predicate.Task) *TaskQuery {
+	if b {
+		tq.predicates = append(tq.predicates, ps...)
+	}
+	return tq
+}
+
 // Limit adds a limit step to the query.
 func (tq *TaskQuery) Limit(limit int) *TaskQuery {
 	tq.limit = &limit

@@ -30,6 +30,14 @@ func (dd *DeviceDelete) Where(ps ...predicate.Device) *DeviceDelete {
 	return dd
 }
 
+// WhereIf appends a list predicates to the DeviceDelete builder if b is true.
+func (dd *DeviceDelete) WhereIf(b bool, ps ...predicate.Device) *DeviceDelete {
+	if b {
+		dd.mutation.Where(ps...)
+	}
+	return dd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (dd *DeviceDelete) Exec(ctx context.Context) (int, error) {
 	var (

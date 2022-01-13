@@ -32,6 +32,14 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return gu
 }
 
+// WhereIf appends a list predicates to the GroupUpdate builder if b is true.
+func (gu *GroupUpdate) WhereIf(b bool, ps ...predicate.Group) *GroupUpdate {
+	if b {
+		gu.mutation.Where(ps...)
+	}
+	return gu
+}
+
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (gu *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
 	gu.mutation.AddUserIDs(ids...)

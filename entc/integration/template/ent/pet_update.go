@@ -33,6 +33,14 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return pu
 }
 
+// WhereIf appends a list predicates to the PetUpdate builder if b is true.
+func (pu *PetUpdate) WhereIf(b bool, ps ...predicate.Pet) *PetUpdate {
+	if b {
+		pu.mutation.Where(ps...)
+	}
+	return pu
+}
+
 // SetAge sets the "age" field.
 func (pu *PetUpdate) SetAge(i int) *PetUpdate {
 	pu.mutation.ResetAge()

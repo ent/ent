@@ -33,6 +33,14 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return pu
 }
 
+// WhereIf appends a list predicates to the PetUpdate builder if b is true.
+func (pu *PetUpdate) WhereIf(b bool, ps ...predicate.Pet) *PetUpdate {
+	if b {
+		pu.mutation.Where(ps...)
+	}
+	return pu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
 	pu.mutation.SetOwnerID(id)

@@ -30,6 +30,14 @@ func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
 	return fd
 }
 
+// WhereIf appends a list predicates to the FileDelete builder if b is true.
+func (fd *FileDelete) WhereIf(b bool, ps ...predicate.File) *FileDelete {
+	if b {
+		fd.mutation.Where(ps...)
+	}
+	return fd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
 	var (

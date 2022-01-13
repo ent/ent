@@ -30,6 +30,14 @@ func (cd *ConversionDelete) Where(ps ...predicate.Conversion) *ConversionDelete 
 	return cd
 }
 
+// WhereIf appends a list predicates to the ConversionDelete builder if b is true.
+func (cd *ConversionDelete) WhereIf(b bool, ps ...predicate.Conversion) *ConversionDelete {
+	if b {
+		cd.mutation.Where(ps...)
+	}
+	return cd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *ConversionDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -45,6 +45,14 @@ func (mq *MetadataQuery) Where(ps ...predicate.Metadata) *MetadataQuery {
 	return mq
 }
 
+// WhereIf adds a new predicates to the MetadataQuery builder if b is true.
+func (mq *MetadataQuery) WhereIf(b bool, ps ...predicate.Metadata) *MetadataQuery {
+	if b {
+		mq.predicates = append(mq.predicates, ps...)
+	}
+	return mq
+}
+
 // Limit adds a limit step to the query.
 func (mq *MetadataQuery) Limit(limit int) *MetadataQuery {
 	mq.limit = &limit

@@ -32,6 +32,14 @@ func (mu *MetadataUpdate) Where(ps ...predicate.Metadata) *MetadataUpdate {
 	return mu
 }
 
+// WhereIf appends a list predicates to the MetadataUpdate builder if b is true.
+func (mu *MetadataUpdate) WhereIf(b bool, ps ...predicate.Metadata) *MetadataUpdate {
+	if b {
+		mu.mutation.Where(ps...)
+	}
+	return mu
+}
+
 // SetAge sets the "age" field.
 func (mu *MetadataUpdate) SetAge(i int) *MetadataUpdate {
 	mu.mutation.ResetAge()

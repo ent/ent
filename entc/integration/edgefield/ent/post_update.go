@@ -32,6 +32,14 @@ func (pu *PostUpdate) Where(ps ...predicate.Post) *PostUpdate {
 	return pu
 }
 
+// WhereIf appends a list predicates to the PostUpdate builder if b is true.
+func (pu *PostUpdate) WhereIf(b bool, ps ...predicate.Post) *PostUpdate {
+	if b {
+		pu.mutation.Where(ps...)
+	}
+	return pu
+}
+
 // SetText sets the "text" field.
 func (pu *PostUpdate) SetText(s string) *PostUpdate {
 	pu.mutation.SetText(s)

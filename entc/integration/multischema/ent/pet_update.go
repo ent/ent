@@ -33,6 +33,14 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return pu
 }
 
+// WhereIf appends a list predicates to the PetUpdate builder if b is true.
+func (pu *PetUpdate) WhereIf(b bool, ps ...predicate.Pet) *PetUpdate {
+	if b {
+		pu.mutation.Where(ps...)
+	}
+	return pu
+}
+
 // SetName sets the "name" field.
 func (pu *PetUpdate) SetName(s string) *PetUpdate {
 	pu.mutation.SetName(s)

@@ -43,6 +43,14 @@ func (giq *GroupInfoQuery) Where(ps ...predicate.GroupInfo) *GroupInfoQuery {
 	return giq
 }
 
+// WhereIf adds a new predicates to the GroupInfoQuery builder if b is true.
+func (giq *GroupInfoQuery) WhereIf(b bool, ps ...predicate.GroupInfo) *GroupInfoQuery {
+	if b {
+		giq.predicates = append(giq.predicates, ps...)
+	}
+	return giq
+}
+
 // Limit adds a limit step to the query.
 func (giq *GroupInfoQuery) Limit(limit int) *GroupInfoQuery {
 	giq.limit = &limit

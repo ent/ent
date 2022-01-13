@@ -41,6 +41,14 @@ func (iq *ItemQuery) Where(ps ...predicate.Item) *ItemQuery {
 	return iq
 }
 
+// WhereIf adds a new predicates to the ItemQuery builder if b is true.
+func (iq *ItemQuery) WhereIf(b bool, ps ...predicate.Item) *ItemQuery {
+	if b {
+		iq.predicates = append(iq.predicates, ps...)
+	}
+	return iq
+}
+
 // Limit adds a limit step to the query.
 func (iq *ItemQuery) Limit(limit int) *ItemQuery {
 	iq.limit = &limit

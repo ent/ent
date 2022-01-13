@@ -45,6 +45,14 @@ func (tq *TeamQuery) Where(ps ...predicate.Team) *TeamQuery {
 	return tq
 }
 
+// WhereIf adds a new predicates to the TeamQuery builder if b is true.
+func (tq *TeamQuery) WhereIf(b bool, ps ...predicate.Team) *TeamQuery {
+	if b {
+		tq.predicates = append(tq.predicates, ps...)
+	}
+	return tq
+}
+
 // Limit adds a limit step to the query.
 func (tq *TeamQuery) Limit(limit int) *TeamQuery {
 	tq.limit = &limit

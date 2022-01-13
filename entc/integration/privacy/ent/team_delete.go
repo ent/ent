@@ -30,6 +30,14 @@ func (td *TeamDelete) Where(ps ...predicate.Team) *TeamDelete {
 	return td
 }
 
+// WhereIf appends a list predicates to the TeamDelete builder if b is true.
+func (td *TeamDelete) WhereIf(b bool, ps ...predicate.Team) *TeamDelete {
+	if b {
+		td.mutation.Where(ps...)
+	}
+	return td
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TeamDelete) Exec(ctx context.Context) (int, error) {
 	var (

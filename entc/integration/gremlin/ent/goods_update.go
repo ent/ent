@@ -31,6 +31,14 @@ func (gu *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
 	return gu
 }
 
+// WhereIf appends a list predicates to the GoodsUpdate builder if b is true.
+func (gu *GoodsUpdate) WhereIf(b bool, ps ...predicate.Goods) *GoodsUpdate {
+	if b {
+		gu.mutation.Where(ps...)
+	}
+	return gu
+}
+
 // Mutation returns the GoodsMutation object of the builder.
 func (gu *GoodsUpdate) Mutation() *GoodsMutation {
 	return gu.mutation

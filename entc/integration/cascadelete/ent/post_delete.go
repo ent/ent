@@ -30,6 +30,14 @@ func (pd *PostDelete) Where(ps ...predicate.Post) *PostDelete {
 	return pd
 }
 
+// WhereIf appends a list predicates to the PostDelete builder if b is true.
+func (pd *PostDelete) WhereIf(b bool, ps ...predicate.Post) *PostDelete {
+	if b {
+		pd.mutation.Where(ps...)
+	}
+	return pd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PostDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -30,6 +30,14 @@ func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
 	return gd
 }
 
+// WhereIf appends a list predicates to the GroupDelete builder if b is true.
+func (gd *GroupDelete) WhereIf(b bool, ps ...predicate.Group) *GroupDelete {
+	if b {
+		gd.mutation.Where(ps...)
+	}
+	return gd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
 	var (
