@@ -255,7 +255,7 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		field.Enum("priority").
 			Optional().
 			GoType(role.Priority(0)),
-		field.UUID("uuid", uuid.UUID{}).
+		field.UUID("optional_uuid", uuid.UUID{}).
 			Optional(),
 		field.UUID("nillable_uuid", uuid.UUID{}).
 			Optional().

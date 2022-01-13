@@ -133,7 +133,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			fieldtype.FieldNullFloat:             {Type: field.TypeFloat64, Column: fieldtype.FieldNullFloat},
 			fieldtype.FieldRole:                  {Type: field.TypeEnum, Column: fieldtype.FieldRole},
 			fieldtype.FieldPriority:              {Type: field.TypeEnum, Column: fieldtype.FieldPriority},
-			fieldtype.FieldUUID:                  {Type: field.TypeUUID, Column: fieldtype.FieldUUID},
+			fieldtype.FieldOptionalUUID:          {Type: field.TypeUUID, Column: fieldtype.FieldOptionalUUID},
 			fieldtype.FieldNillableUUID:          {Type: field.TypeUUID, Column: fieldtype.FieldNillableUUID},
 			fieldtype.FieldStrings:               {Type: field.TypeJSON, Column: fieldtype.FieldStrings},
 			fieldtype.FieldPair:                  {Type: field.TypeBytes, Column: fieldtype.FieldPair},
@@ -1116,9 +1116,9 @@ func (f *FieldTypeFilter) WherePriority(p entql.StringP) {
 	f.Where(p.Field(fieldtype.FieldPriority))
 }
 
-// WhereUUID applies the entql [16]byte predicate on the uuid field.
-func (f *FieldTypeFilter) WhereUUID(p entql.ValueP) {
-	f.Where(p.Field(fieldtype.FieldUUID))
+// WhereOptionalUUID applies the entql [16]byte predicate on the optional_uuid field.
+func (f *FieldTypeFilter) WhereOptionalUUID(p entql.ValueP) {
+	f.Where(p.Field(fieldtype.FieldOptionalUUID))
 }
 
 // WhereNillableUUID applies the entql [16]byte predicate on the nillable_uuid field.

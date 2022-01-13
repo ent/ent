@@ -1183,15 +1183,15 @@ func (ftu *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
 	return ftu
 }
 
-// SetUUID sets the "uuid" field.
-func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
-	ftu.mutation.SetUUID(u)
+// SetOptionalUUID sets the "optional_uuid" field.
+func (ftu *FieldTypeUpdate) SetOptionalUUID(u uuid.UUID) *FieldTypeUpdate {
+	ftu.mutation.SetOptionalUUID(u)
 	return ftu
 }
 
-// ClearUUID clears the value of the "uuid" field.
-func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
-	ftu.mutation.ClearUUID()
+// ClearOptionalUUID clears the value of the "optional_uuid" field.
+func (ftu *FieldTypeUpdate) ClearOptionalUUID() *FieldTypeUpdate {
+	ftu.mutation.ClearOptionalUUID()
 	return ftu
 }
 
@@ -1726,8 +1726,8 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if value, ok := ftu.mutation.Priority(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPriority, value)
 	}
-	if value, ok := ftu.mutation.UUID(); ok {
-		v.Property(dsl.Single, fieldtype.FieldUUID, value)
+	if value, ok := ftu.mutation.OptionalUUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUUID, value)
 	}
 	if value, ok := ftu.mutation.NillableUUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableUUID, value)
@@ -1904,8 +1904,8 @@ func (ftu *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	if ftu.mutation.PriorityCleared() {
 		properties = append(properties, fieldtype.FieldPriority)
 	}
-	if ftu.mutation.UUIDCleared() {
-		properties = append(properties, fieldtype.FieldUUID)
+	if ftu.mutation.OptionalUUIDCleared() {
+		properties = append(properties, fieldtype.FieldOptionalUUID)
 	}
 	if ftu.mutation.NillableUUIDCleared() {
 		properties = append(properties, fieldtype.FieldNillableUUID)
@@ -3082,15 +3082,15 @@ func (ftuo *FieldTypeUpdateOne) ClearPriority() *FieldTypeUpdateOne {
 	return ftuo
 }
 
-// SetUUID sets the "uuid" field.
-func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
-	ftuo.mutation.SetUUID(u)
+// SetOptionalUUID sets the "optional_uuid" field.
+func (ftuo *FieldTypeUpdateOne) SetOptionalUUID(u uuid.UUID) *FieldTypeUpdateOne {
+	ftuo.mutation.SetOptionalUUID(u)
 	return ftuo
 }
 
-// ClearUUID clears the value of the "uuid" field.
-func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
-	ftuo.mutation.ClearUUID()
+// ClearOptionalUUID clears the value of the "optional_uuid" field.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalUUID() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearOptionalUUID()
 	return ftuo
 }
 
@@ -3637,8 +3637,8 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := ftuo.mutation.Priority(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPriority, value)
 	}
-	if value, ok := ftuo.mutation.UUID(); ok {
-		v.Property(dsl.Single, fieldtype.FieldUUID, value)
+	if value, ok := ftuo.mutation.OptionalUUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUUID, value)
 	}
 	if value, ok := ftuo.mutation.NillableUUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableUUID, value)
@@ -3815,8 +3815,8 @@ func (ftuo *FieldTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	if ftuo.mutation.PriorityCleared() {
 		properties = append(properties, fieldtype.FieldPriority)
 	}
-	if ftuo.mutation.UUIDCleared() {
-		properties = append(properties, fieldtype.FieldUUID)
+	if ftuo.mutation.OptionalUUIDCleared() {
+		properties = append(properties, fieldtype.FieldOptionalUUID)
 	}
 	if ftuo.mutation.NillableUUIDCleared() {
 		properties = append(properties, fieldtype.FieldNillableUUID)
