@@ -197,6 +197,9 @@ func (d *MySQL) tBuilder(t *Table) *sql.TableBuilder {
 		}
 		addChecks(b, t.Annotation)
 	}
+	if t.partition != nil {
+		b.Partition(t.partition)
+	}
 	return b
 }
 

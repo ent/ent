@@ -66,6 +66,13 @@ func WithForeignKeys(b bool) MigrateOption {
 	}
 }
 
+// WithPartition add partition config. Defaults to none.
+func WithPartition(ptype sql.PartitionType, key string, pslice []string, tableName string) MigrateOption {
+	return func(m *Migrate) {
+		m.partitions = append(m.partitions, sql.CreatePartition(ptype, key, pslice, tableName))
+	}
+}
+
 // WithHooks adds a list of hooks to the schema migration.
 func WithHooks(hooks ...Hook) MigrateOption {
 	return func(m *Migrate) {
@@ -105,13 +112,14 @@ func (f CreateFunc) Create(ctx context.Context, tables ...*Table) error {
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
-	universalID     bool     // global unique ids.
-	dropColumns     bool     // drop deleted columns.
-	dropIndexes     bool     // drop deleted indexes.
-	withFixture     bool     // with fks rename fixture.
-	withForeignKeys bool     // with foreign keys
-	typeRanges      []string // types order by their range.
-	hooks           []Hook   // hooks to apply before creation
+	universalID     bool             // global unique ids.
+	dropColumns     bool             // drop deleted columns.
+	dropIndexes     bool             // drop deleted indexes.
+	withFixture     bool             // with fks rename fixture.
+	withForeignKeys bool             // with foreign keys
+	typeRanges      []string         // types order by their range.
+	hooks           []Hook           // hooks to apply before creation
+	partitions      []*sql.Partition // partition config
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
@@ -593,6 +601,12 @@ func (m *Migrate) setupTable(t *Table) {
 		fk.Symbol = m.symbol(fk.Symbol)
 		for i := range fk.Columns {
 			fk.Columns[i].foreign = fk
+		}
+	}
+	for _, p := range m.partitions {
+		if p.TableMatch(t.Name) {
+			t.partition = p
+			break
 		}
 	}
 }

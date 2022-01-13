@@ -105,6 +105,48 @@ func TestBuilder(t *testing.T) {
 			wantQuery: `CREATE TABLE IF NOT EXISTS "users"("id" serial, "card_id" int, PRIMARY KEY("id", "name"), FOREIGN KEY("card_id") REFERENCES "cards"("id") ON DELETE SET NULL)`,
 		},
 		{
+			input: CreateTable("users").
+				Columns(
+					Column("id").Type("int").Attr("auto_increment"),
+					Column("name").Type("varchar(255)"),
+				).
+				PrimaryKey("id").
+				Partition(&Partition{
+					partitionType:       PartitionByRange,
+					partitionRangeKey:   "id",
+					partitionRangeSlice: []string{"5", "10", "maxvalue"},
+				}),
+			wantQuery: "CREATE TABLE `users`(`id` int auto_increment, `name` varchar(255), PRIMARY KEY(`id`)) PARTITION BY RANGE (`id`) (PARTITION p0 VALUES LESS THAN (5),PARTITION p1 VALUES LESS THAN (10),PARTITION p2 VALUES LESS THAN (maxvalue))",
+		},
+		{
+			input: CreateTable("users").
+				Columns(
+					Column("id").Type("int").Attr("auto_increment"),
+					Column("name").Type("varchar(255)"),
+				).
+				PrimaryKey("id").
+				Partition(&Partition{
+					partitionType:       PartitionByRange,
+					partitionRangeKey:   "id",
+					partitionRangeSlice: []string{"maxvalue"},
+				}),
+			wantQuery: "CREATE TABLE `users`(`id` int auto_increment, `name` varchar(255), PRIMARY KEY(`id`)) PARTITION BY RANGE (`id`) (PARTITION p0 VALUES LESS THAN (maxvalue))",
+		},
+		{
+			input: CreateTable("users").
+				Columns(
+					Column("id").Type("int").Attr("auto_increment"),
+					Column("name").Type("varchar(255)"),
+				).
+				PrimaryKey("id").
+				Partition(&Partition{
+					partitionType:       PartitionNone,
+					partitionRangeKey:   "id",
+					partitionRangeSlice: []string{"maxvalue"},
+				}),
+			wantQuery: "CREATE TABLE `users`(`id` int auto_increment, `name` varchar(255), PRIMARY KEY(`id`))",
+		},
+		{
 			input: AlterTable("users").
 				AddColumn(Column("group_id").Type("int").Attr("UNIQUE")).
 				AddForeignKey(ForeignKey().Columns("group_id").

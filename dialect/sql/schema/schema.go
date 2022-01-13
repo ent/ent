@@ -36,6 +36,7 @@ type Table struct {
 	PrimaryKey  []*Column
 	ForeignKeys []*ForeignKey
 	Annotation  *entsql.Annotation
+	partition   *sql.Partition
 }
 
 // NewTable returns a new table with the given name.

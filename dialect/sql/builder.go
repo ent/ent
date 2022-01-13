@@ -22,6 +22,40 @@ import (
 	"entgo.io/ent/dialect"
 )
 
+// PartitionType defined partition by type
+type PartitionType int
+
+const (
+	//SendStageFailed partition none
+	PartitionNone PartitionType = 0
+
+	//PartitionByRange partition by range
+	PartitionByRange PartitionType = 1
+)
+
+// Partition defined the config of partition
+type Partition struct {
+	partitionType       PartitionType // partition type
+	partitionRangeKey   string        // partition by range key
+	partitionRangeSlice []string      // partition by range slice
+	partitionTableName  string        // partition effect table name
+}
+
+// CreatePartition returns a partition config.
+func CreatePartition(ptype PartitionType, key string, slice []string, table string) *Partition {
+	return &Partition{
+		partitionType:       ptype,
+		partitionRangeKey:   key,
+		partitionRangeSlice: slice,
+		partitionTableName:  table,
+	}
+}
+
+// TableMatch returns whether table name matched
+func (p *Partition) TableMatch(table string) bool {
+	return p.partitionTableName == table
+}
+
 // Querier wraps the basic Query method that is implemented
 // by the different builders in this file.
 type Querier interface {
@@ -117,6 +151,7 @@ type TableBuilder struct {
 	primary     []string         // primary key.
 	constraints []Querier        // foreign keys and indices.
 	checks      []func(*Builder) // check constraints.
+	partition   *Partition       // partition type
 }
 
 // CreateTable returns a query builder for the `CREATE TABLE` statement.
@@ -197,6 +232,12 @@ func (t *TableBuilder) Collate(s string) *TableBuilder {
 	return t
 }
 
+// Partition appends the `PARTITION BY` clause to the statement. MySQL only.
+func (t *TableBuilder) Partition(p *Partition) *TableBuilder {
+	t.partition = p
+	return t
+}
+
 // Options appends additional options to to the statement (MySQL only).
 func (t *TableBuilder) Options(s string) *TableBuilder {
 	t.options = s
@@ -238,6 +279,19 @@ func (t *TableBuilder) Query() (string, []interface{}) {
 	}
 	if t.options != "" {
 		t.WriteString(" " + t.options)
+	}
+	if t.partition != nil {
+		switch t.partition.partitionType {
+		case PartitionByRange:
+			t.WriteString(" PARTITION BY RANGE (" + t.Quote(t.partition.partitionRangeKey) + ") (")
+			for index, p := range t.partition.partitionRangeSlice {
+				t.WriteString(fmt.Sprintf("PARTITION p%v VALUES LESS THAN (%v)", index, p))
+				if index != len(t.partition.partitionRangeSlice)-1 {
+					t.WriteString(",")
+				}
+			}
+			t.WriteString(")")
+		}
 	}
 	return t.String(), t.args
 }
