@@ -244,14 +244,6 @@ func (ftu *FieldTypeUpdate) SetNillableInt(i int) *FieldTypeUpdate {
 	return ftu
 }
 
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNillableInt(i *int) *FieldTypeUpdate {
-	if i != nil {
-		ftu.SetNillableInt(*i)
-	}
-	return ftu
-}
-
 // AddNillableInt adds i to the "nillable_int" field.
 func (ftu *FieldTypeUpdate) AddNillableInt(i int) *FieldTypeUpdate {
 	ftu.mutation.AddNillableInt(i)
@@ -268,14 +260,6 @@ func (ftu *FieldTypeUpdate) ClearNillableInt() *FieldTypeUpdate {
 func (ftu *FieldTypeUpdate) SetNillableInt8(i int8) *FieldTypeUpdate {
 	ftu.mutation.ResetNillableInt8()
 	ftu.mutation.SetNillableInt8(i)
-	return ftu
-}
-
-// SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNillableInt8(i *int8) *FieldTypeUpdate {
-	if i != nil {
-		ftu.SetNillableInt8(*i)
-	}
 	return ftu
 }
 
@@ -298,14 +282,6 @@ func (ftu *FieldTypeUpdate) SetNillableInt16(i int16) *FieldTypeUpdate {
 	return ftu
 }
 
-// SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNillableInt16(i *int16) *FieldTypeUpdate {
-	if i != nil {
-		ftu.SetNillableInt16(*i)
-	}
-	return ftu
-}
-
 // AddNillableInt16 adds i to the "nillable_int16" field.
 func (ftu *FieldTypeUpdate) AddNillableInt16(i int16) *FieldTypeUpdate {
 	ftu.mutation.AddNillableInt16(i)
@@ -325,14 +301,6 @@ func (ftu *FieldTypeUpdate) SetNillableInt32(i int32) *FieldTypeUpdate {
 	return ftu
 }
 
-// SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNillableInt32(i *int32) *FieldTypeUpdate {
-	if i != nil {
-		ftu.SetNillableInt32(*i)
-	}
-	return ftu
-}
-
 // AddNillableInt32 adds i to the "nillable_int32" field.
 func (ftu *FieldTypeUpdate) AddNillableInt32(i int32) *FieldTypeUpdate {
 	ftu.mutation.AddNillableInt32(i)
@@ -349,14 +317,6 @@ func (ftu *FieldTypeUpdate) ClearNillableInt32() *FieldTypeUpdate {
 func (ftu *FieldTypeUpdate) SetNillableInt64(i int64) *FieldTypeUpdate {
 	ftu.mutation.ResetNillableInt64()
 	ftu.mutation.SetNillableInt64(i)
-	return ftu
-}
-
-// SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNillableInt64(i *int64) *FieldTypeUpdate {
-	if i != nil {
-		ftu.SetNillableInt64(*i)
-	}
 	return ftu
 }
 
@@ -757,14 +717,6 @@ func (ftu *FieldTypeUpdate) SetStringScanner(ss schema.StringScanner) *FieldType
 	return ftu
 }
 
-// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeUpdate {
-	if ss != nil {
-		ftu.SetStringScanner(*ss)
-	}
-	return ftu
-}
-
 // ClearStringScanner clears the value of the "string_scanner" field.
 func (ftu *FieldTypeUpdate) ClearStringScanner() *FieldTypeUpdate {
 	ftu.mutation.ClearStringScanner()
@@ -807,14 +759,6 @@ func (ftu *FieldTypeUpdate) SetNillableDir(h *http.Dir) *FieldTypeUpdate {
 // SetNdir sets the "ndir" field.
 func (ftu *FieldTypeUpdate) SetNdir(h http.Dir) *FieldTypeUpdate {
 	ftu.mutation.SetNdir(h)
-	return ftu
-}
-
-// SetNillableNdir sets the "ndir" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNdir(h *http.Dir) *FieldTypeUpdate {
-	if h != nil {
-		ftu.SetNdir(*h)
-	}
 	return ftu
 }
 
@@ -911,14 +855,6 @@ func (ftu *FieldTypeUpdate) ClearActive() *FieldTypeUpdate {
 // SetNullActive sets the "null_active" field.
 func (ftu *FieldTypeUpdate) SetNullActive(s schema.Status) *FieldTypeUpdate {
 	ftu.mutation.SetNullActive(s)
-	return ftu
-}
-
-// SetNillableNullActive sets the "null_active" field if the given value is not nil.
-func (ftu *FieldTypeUpdate) SetNillableNullActive(s *schema.Status) *FieldTypeUpdate {
-	if s != nil {
-		ftu.SetNullActive(*s)
-	}
 	return ftu
 }
 
@@ -1187,21 +1123,29 @@ func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
 	return ftu
 }
 
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (ftu *FieldTypeUpdate) SetNillableUUID(u *uuid.UUID) *FieldTypeUpdate {
+	if u != nil {
+		ftu.SetUUID(*u)
+	}
+	return ftu
+}
+
 // ClearUUID clears the value of the "uuid" field.
 func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
 	ftu.mutation.ClearUUID()
 	return ftu
 }
 
-// SetNillableUUID sets the "nillable_uuid" field.
-func (ftu *FieldTypeUpdate) SetNillableUUID(u uuid.UUID) *FieldTypeUpdate {
-	ftu.mutation.SetNillableUUID(u)
+// SetUUIDNillable sets the "uuid_nillable" field.
+func (ftu *FieldTypeUpdate) SetUUIDNillable(u uuid.UUID) *FieldTypeUpdate {
+	ftu.mutation.SetUUIDNillable(u)
 	return ftu
 }
 
-// ClearNillableUUID clears the value of the "nillable_uuid" field.
-func (ftu *FieldTypeUpdate) ClearNillableUUID() *FieldTypeUpdate {
-	ftu.mutation.ClearNillableUUID()
+// ClearUUIDNillable clears the value of the "uuid_nillable" field.
+func (ftu *FieldTypeUpdate) ClearUUIDNillable() *FieldTypeUpdate {
+	ftu.mutation.ClearUUIDNillable()
 	return ftu
 }
 
@@ -2373,17 +2317,17 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldUUID,
 		})
 	}
-	if value, ok := ftu.mutation.NillableUUID(); ok {
+	if value, ok := ftu.mutation.UUIDNillable(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  value,
-			Column: fieldtype.FieldNillableUUID,
+			Column: fieldtype.FieldUUIDNillable,
 		})
 	}
-	if ftu.mutation.NillableUUIDCleared() {
+	if ftu.mutation.UUIDNillableCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Column: fieldtype.FieldNillableUUID,
+			Column: fieldtype.FieldUUIDNillable,
 		})
 	}
 	if value, ok := ftu.mutation.Strings(); ok {
@@ -2692,14 +2636,6 @@ func (ftuo *FieldTypeUpdateOne) SetNillableInt(i int) *FieldTypeUpdateOne {
 	return ftuo
 }
 
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt(i *int) *FieldTypeUpdateOne {
-	if i != nil {
-		ftuo.SetNillableInt(*i)
-	}
-	return ftuo
-}
-
 // AddNillableInt adds i to the "nillable_int" field.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt(i int) *FieldTypeUpdateOne {
 	ftuo.mutation.AddNillableInt(i)
@@ -2716,14 +2652,6 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableInt() *FieldTypeUpdateOne {
 func (ftuo *FieldTypeUpdateOne) SetNillableInt8(i int8) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNillableInt8()
 	ftuo.mutation.SetNillableInt8(i)
-	return ftuo
-}
-
-// SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt8(i *int8) *FieldTypeUpdateOne {
-	if i != nil {
-		ftuo.SetNillableInt8(*i)
-	}
 	return ftuo
 }
 
@@ -2746,14 +2674,6 @@ func (ftuo *FieldTypeUpdateOne) SetNillableInt16(i int16) *FieldTypeUpdateOne {
 	return ftuo
 }
 
-// SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt16(i *int16) *FieldTypeUpdateOne {
-	if i != nil {
-		ftuo.SetNillableInt16(*i)
-	}
-	return ftuo
-}
-
 // AddNillableInt16 adds i to the "nillable_int16" field.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt16(i int16) *FieldTypeUpdateOne {
 	ftuo.mutation.AddNillableInt16(i)
@@ -2773,14 +2693,6 @@ func (ftuo *FieldTypeUpdateOne) SetNillableInt32(i int32) *FieldTypeUpdateOne {
 	return ftuo
 }
 
-// SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt32(i *int32) *FieldTypeUpdateOne {
-	if i != nil {
-		ftuo.SetNillableInt32(*i)
-	}
-	return ftuo
-}
-
 // AddNillableInt32 adds i to the "nillable_int32" field.
 func (ftuo *FieldTypeUpdateOne) AddNillableInt32(i int32) *FieldTypeUpdateOne {
 	ftuo.mutation.AddNillableInt32(i)
@@ -2797,14 +2709,6 @@ func (ftuo *FieldTypeUpdateOne) ClearNillableInt32() *FieldTypeUpdateOne {
 func (ftuo *FieldTypeUpdateOne) SetNillableInt64(i int64) *FieldTypeUpdateOne {
 	ftuo.mutation.ResetNillableInt64()
 	ftuo.mutation.SetNillableInt64(i)
-	return ftuo
-}
-
-// SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNillableInt64(i *int64) *FieldTypeUpdateOne {
-	if i != nil {
-		ftuo.SetNillableInt64(*i)
-	}
 	return ftuo
 }
 
@@ -3205,14 +3109,6 @@ func (ftuo *FieldTypeUpdateOne) SetStringScanner(ss schema.StringScanner) *Field
 	return ftuo
 }
 
-// SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeUpdateOne {
-	if ss != nil {
-		ftuo.SetStringScanner(*ss)
-	}
-	return ftuo
-}
-
 // ClearStringScanner clears the value of the "string_scanner" field.
 func (ftuo *FieldTypeUpdateOne) ClearStringScanner() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearStringScanner()
@@ -3255,14 +3151,6 @@ func (ftuo *FieldTypeUpdateOne) SetNillableDir(h *http.Dir) *FieldTypeUpdateOne 
 // SetNdir sets the "ndir" field.
 func (ftuo *FieldTypeUpdateOne) SetNdir(h http.Dir) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNdir(h)
-	return ftuo
-}
-
-// SetNillableNdir sets the "ndir" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNdir(h *http.Dir) *FieldTypeUpdateOne {
-	if h != nil {
-		ftuo.SetNdir(*h)
-	}
 	return ftuo
 }
 
@@ -3359,14 +3247,6 @@ func (ftuo *FieldTypeUpdateOne) ClearActive() *FieldTypeUpdateOne {
 // SetNullActive sets the "null_active" field.
 func (ftuo *FieldTypeUpdateOne) SetNullActive(s schema.Status) *FieldTypeUpdateOne {
 	ftuo.mutation.SetNullActive(s)
-	return ftuo
-}
-
-// SetNillableNullActive sets the "null_active" field if the given value is not nil.
-func (ftuo *FieldTypeUpdateOne) SetNillableNullActive(s *schema.Status) *FieldTypeUpdateOne {
-	if s != nil {
-		ftuo.SetNullActive(*s)
-	}
 	return ftuo
 }
 
@@ -3635,21 +3515,29 @@ func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
 	return ftuo
 }
 
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (ftuo *FieldTypeUpdateOne) SetNillableUUID(u *uuid.UUID) *FieldTypeUpdateOne {
+	if u != nil {
+		ftuo.SetUUID(*u)
+	}
+	return ftuo
+}
+
 // ClearUUID clears the value of the "uuid" field.
 func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
 	ftuo.mutation.ClearUUID()
 	return ftuo
 }
 
-// SetNillableUUID sets the "nillable_uuid" field.
-func (ftuo *FieldTypeUpdateOne) SetNillableUUID(u uuid.UUID) *FieldTypeUpdateOne {
-	ftuo.mutation.SetNillableUUID(u)
+// SetUUIDNillable sets the "uuid_nillable" field.
+func (ftuo *FieldTypeUpdateOne) SetUUIDNillable(u uuid.UUID) *FieldTypeUpdateOne {
+	ftuo.mutation.SetUUIDNillable(u)
 	return ftuo
 }
 
-// ClearNillableUUID clears the value of the "nillable_uuid" field.
-func (ftuo *FieldTypeUpdateOne) ClearNillableUUID() *FieldTypeUpdateOne {
-	ftuo.mutation.ClearNillableUUID()
+// ClearUUIDNillable clears the value of the "uuid_nillable" field.
+func (ftuo *FieldTypeUpdateOne) ClearUUIDNillable() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearUUIDNillable()
 	return ftuo
 }
 
@@ -4845,17 +4733,17 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldUUID,
 		})
 	}
-	if value, ok := ftuo.mutation.NillableUUID(); ok {
+	if value, ok := ftuo.mutation.UUIDNillable(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  value,
-			Column: fieldtype.FieldNillableUUID,
+			Column: fieldtype.FieldUUIDNillable,
 		})
 	}
-	if ftuo.mutation.NillableUUIDCleared() {
+	if ftuo.mutation.UUIDNillableCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Column: fieldtype.FieldNillableUUID,
+			Column: fieldtype.FieldUUIDNillable,
 		})
 	}
 	if value, ok := ftuo.mutation.Strings(); ok {

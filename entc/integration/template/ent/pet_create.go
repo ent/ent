@@ -37,14 +37,6 @@ func (pc *PetCreate) SetLicensedAt(t time.Time) *PetCreate {
 	return pc
 }
 
-// SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
-func (pc *PetCreate) SetNillableLicensedAt(t *time.Time) *PetCreate {
-	if t != nil {
-		pc.SetLicensedAt(*t)
-	}
-	return pc
-}
-
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
 	pc.mutation.SetOwnerID(id)

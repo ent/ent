@@ -38,6 +38,14 @@ func (bu *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
 	return bu
 }
 
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (bu *BlobUpdate) SetNillableUUID(u *uuid.UUID) *BlobUpdate {
+	if u != nil {
+		bu.SetUUID(*u)
+	}
+	return bu
+}
+
 // SetCount sets the "count" field.
 func (bu *BlobUpdate) SetCount(i int) *BlobUpdate {
 	bu.mutation.ResetCount()
@@ -329,6 +337,14 @@ type BlobUpdateOne struct {
 // SetUUID sets the "uuid" field.
 func (buo *BlobUpdateOne) SetUUID(u uuid.UUID) *BlobUpdateOne {
 	buo.mutation.SetUUID(u)
+	return buo
+}
+
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (buo *BlobUpdateOne) SetNillableUUID(u *uuid.UUID) *BlobUpdateOne {
+	if u != nil {
+		buo.SetUUID(*u)
+	}
 	return buo
 }
 

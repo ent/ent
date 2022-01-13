@@ -1159,7 +1159,7 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 		},
 	}
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
 	switch pt := reflect.PtrTo(t); {

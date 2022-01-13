@@ -36,14 +36,6 @@ func (pc *PostCreate) SetAuthorID(i int) *PostCreate {
 	return pc
 }
 
-// SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (pc *PostCreate) SetNillableAuthorID(i *int) *PostCreate {
-	if i != nil {
-		pc.SetAuthorID(*i)
-	}
-	return pc
-}
-
 // SetAuthor sets the "author" edge to the User entity.
 func (pc *PostCreate) SetAuthor(u *User) *PostCreate {
 	return pc.SetAuthorID(u.ID)

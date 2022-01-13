@@ -200,7 +200,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal(schema.Pair{K: []byte("K1"), V: []byte("V1")}, ft.Pair)
 	require.Equal(&schema.Pair{K: []byte("K1"), V: []byte("V1")}, ft.NilPair)
 	require.EqualValues([]string{"qux"}, ft.StringArray)
-	require.Nil(ft.NillableUUID)
+	require.Nil(ft.UUIDNillable)
 	require.Equal(uuid.UUID{}, ft.UUID)
 	require.Equal("2000", ft.BigInt.String())
 	require.EqualValues(100, ft.Int64, "UpdateDefault sets the value to 100")

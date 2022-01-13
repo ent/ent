@@ -44,14 +44,6 @@ func (cc *CommentCreate) SetNillableInt(i int) *CommentCreate {
 	return cc
 }
 
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
-	if i != nil {
-		cc.SetNillableInt(*i)
-	}
-	return cc
-}
-
 // Mutation returns the CommentMutation object of the builder.
 func (cc *CommentCreate) Mutation() *CommentMutation {
 	return cc.mutation

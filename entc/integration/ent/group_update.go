@@ -61,14 +61,6 @@ func (gu *GroupUpdate) SetType(s string) *GroupUpdate {
 	return gu
 }
 
-// SetNillableType sets the "type" field if the given value is not nil.
-func (gu *GroupUpdate) SetNillableType(s *string) *GroupUpdate {
-	if s != nil {
-		gu.SetType(*s)
-	}
-	return gu
-}
-
 // ClearType clears the value of the "type" field.
 func (gu *GroupUpdate) ClearType() *GroupUpdate {
 	gu.mutation.ClearType()
@@ -632,14 +624,6 @@ func (guo *GroupUpdateOne) SetExpire(t time.Time) *GroupUpdateOne {
 // SetType sets the "type" field.
 func (guo *GroupUpdateOne) SetType(s string) *GroupUpdateOne {
 	guo.mutation.SetType(s)
-	return guo
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (guo *GroupUpdateOne) SetNillableType(s *string) *GroupUpdateOne {
-	if s != nil {
-		guo.SetType(*s)
-	}
 	return guo
 }
 
