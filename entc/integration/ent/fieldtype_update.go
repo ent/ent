@@ -1181,15 +1181,15 @@ func (ftu *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
 	return ftu
 }
 
-// SetUUID sets the "uuid" field.
-func (ftu *FieldTypeUpdate) SetUUID(u uuid.UUID) *FieldTypeUpdate {
-	ftu.mutation.SetUUID(u)
+// SetOptionalUUID sets the "optional_uuid" field.
+func (ftu *FieldTypeUpdate) SetOptionalUUID(u uuid.UUID) *FieldTypeUpdate {
+	ftu.mutation.SetOptionalUUID(u)
 	return ftu
 }
 
-// ClearUUID clears the value of the "uuid" field.
-func (ftu *FieldTypeUpdate) ClearUUID() *FieldTypeUpdate {
-	ftu.mutation.ClearUUID()
+// ClearOptionalUUID clears the value of the "optional_uuid" field.
+func (ftu *FieldTypeUpdate) ClearOptionalUUID() *FieldTypeUpdate {
+	ftu.mutation.ClearOptionalUUID()
 	return ftu
 }
 
@@ -2360,17 +2360,17 @@ func (ftu *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: fieldtype.FieldPriority,
 		})
 	}
-	if value, ok := ftu.mutation.UUID(); ok {
+	if value, ok := ftu.mutation.OptionalUUID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  value,
-			Column: fieldtype.FieldUUID,
+			Column: fieldtype.FieldOptionalUUID,
 		})
 	}
-	if ftu.mutation.UUIDCleared() {
+	if ftu.mutation.OptionalUUIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Column: fieldtype.FieldUUID,
+			Column: fieldtype.FieldOptionalUUID,
 		})
 	}
 	if value, ok := ftu.mutation.NillableUUID(); ok {
@@ -3629,15 +3629,15 @@ func (ftuo *FieldTypeUpdateOne) ClearPriority() *FieldTypeUpdateOne {
 	return ftuo
 }
 
-// SetUUID sets the "uuid" field.
-func (ftuo *FieldTypeUpdateOne) SetUUID(u uuid.UUID) *FieldTypeUpdateOne {
-	ftuo.mutation.SetUUID(u)
+// SetOptionalUUID sets the "optional_uuid" field.
+func (ftuo *FieldTypeUpdateOne) SetOptionalUUID(u uuid.UUID) *FieldTypeUpdateOne {
+	ftuo.mutation.SetOptionalUUID(u)
 	return ftuo
 }
 
-// ClearUUID clears the value of the "uuid" field.
-func (ftuo *FieldTypeUpdateOne) ClearUUID() *FieldTypeUpdateOne {
-	ftuo.mutation.ClearUUID()
+// ClearOptionalUUID clears the value of the "optional_uuid" field.
+func (ftuo *FieldTypeUpdateOne) ClearOptionalUUID() *FieldTypeUpdateOne {
+	ftuo.mutation.ClearOptionalUUID()
 	return ftuo
 }
 
@@ -4832,17 +4832,17 @@ func (ftuo *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, 
 			Column: fieldtype.FieldPriority,
 		})
 	}
-	if value, ok := ftuo.mutation.UUID(); ok {
+	if value, ok := ftuo.mutation.OptionalUUID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  value,
-			Column: fieldtype.FieldUUID,
+			Column: fieldtype.FieldOptionalUUID,
 		})
 	}
-	if ftuo.mutation.UUIDCleared() {
+	if ftuo.mutation.OptionalUUIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Column: fieldtype.FieldUUID,
+			Column: fieldtype.FieldOptionalUUID,
 		})
 	}
 	if value, ok := ftuo.mutation.NillableUUID(); ok {

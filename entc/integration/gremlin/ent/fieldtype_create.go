@@ -679,9 +679,9 @@ func (ftc *FieldTypeCreate) SetNillablePriority(r *role.Priority) *FieldTypeCrea
 	return ftc
 }
 
-// SetUUID sets the "uuid" field.
-func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
-	ftc.mutation.SetUUID(u)
+// SetOptionalUUID sets the "optional_uuid" field.
+func (ftc *FieldTypeCreate) SetOptionalUUID(u uuid.UUID) *FieldTypeCreate {
+	ftc.mutation.SetOptionalUUID(u)
 	return ftc
 }
 
@@ -1152,8 +1152,8 @@ func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
 	if value, ok := ftc.mutation.Priority(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPriority, value)
 	}
-	if value, ok := ftc.mutation.UUID(); ok {
-		v.Property(dsl.Single, fieldtype.FieldUUID, value)
+	if value, ok := ftc.mutation.OptionalUUID(); ok {
+		v.Property(dsl.Single, fieldtype.FieldOptionalUUID, value)
 	}
 	if value, ok := ftc.mutation.NillableUUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableUUID, value)

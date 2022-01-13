@@ -679,9 +679,9 @@ func (ftc *FieldTypeCreate) SetNillablePriority(r *role.Priority) *FieldTypeCrea
 	return ftc
 }
 
-// SetUUID sets the "uuid" field.
-func (ftc *FieldTypeCreate) SetUUID(u uuid.UUID) *FieldTypeCreate {
-	ftc.mutation.SetUUID(u)
+// SetOptionalUUID sets the "optional_uuid" field.
+func (ftc *FieldTypeCreate) SetOptionalUUID(u uuid.UUID) *FieldTypeCreate {
+	ftc.mutation.SetOptionalUUID(u)
 	return ftc
 }
 
@@ -1439,13 +1439,13 @@ func (ftc *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		})
 		_node.Priority = value
 	}
-	if value, ok := ftc.mutation.UUID(); ok {
+	if value, ok := ftc.mutation.OptionalUUID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  value,
-			Column: fieldtype.FieldUUID,
+			Column: fieldtype.FieldOptionalUUID,
 		})
-		_node.UUID = value
+		_node.OptionalUUID = value
 	}
 	if value, ok := ftc.mutation.NillableUUID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -2711,21 +2711,21 @@ func (u *FieldTypeUpsert) ClearPriority() *FieldTypeUpsert {
 	return u
 }
 
-// SetUUID sets the "uuid" field.
-func (u *FieldTypeUpsert) SetUUID(v uuid.UUID) *FieldTypeUpsert {
-	u.Set(fieldtype.FieldUUID, v)
+// SetOptionalUUID sets the "optional_uuid" field.
+func (u *FieldTypeUpsert) SetOptionalUUID(v uuid.UUID) *FieldTypeUpsert {
+	u.Set(fieldtype.FieldOptionalUUID, v)
 	return u
 }
 
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *FieldTypeUpsert) UpdateUUID() *FieldTypeUpsert {
-	u.SetExcluded(fieldtype.FieldUUID)
+// UpdateOptionalUUID sets the "optional_uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsert) UpdateOptionalUUID() *FieldTypeUpsert {
+	u.SetExcluded(fieldtype.FieldOptionalUUID)
 	return u
 }
 
-// ClearUUID clears the value of the "uuid" field.
-func (u *FieldTypeUpsert) ClearUUID() *FieldTypeUpsert {
-	u.SetNull(fieldtype.FieldUUID)
+// ClearOptionalUUID clears the value of the "optional_uuid" field.
+func (u *FieldTypeUpsert) ClearOptionalUUID() *FieldTypeUpsert {
+	u.SetNull(fieldtype.FieldOptionalUUID)
 	return u
 }
 
@@ -4240,24 +4240,24 @@ func (u *FieldTypeUpsertOne) ClearPriority() *FieldTypeUpsertOne {
 	})
 }
 
-// SetUUID sets the "uuid" field.
-func (u *FieldTypeUpsertOne) SetUUID(v uuid.UUID) *FieldTypeUpsertOne {
+// SetOptionalUUID sets the "optional_uuid" field.
+func (u *FieldTypeUpsertOne) SetOptionalUUID(v uuid.UUID) *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
-		s.SetUUID(v)
+		s.SetOptionalUUID(v)
 	})
 }
 
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *FieldTypeUpsertOne) UpdateUUID() *FieldTypeUpsertOne {
+// UpdateOptionalUUID sets the "optional_uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsertOne) UpdateOptionalUUID() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
-		s.UpdateUUID()
+		s.UpdateOptionalUUID()
 	})
 }
 
-// ClearUUID clears the value of the "uuid" field.
-func (u *FieldTypeUpsertOne) ClearUUID() *FieldTypeUpsertOne {
+// ClearOptionalUUID clears the value of the "optional_uuid" field.
+func (u *FieldTypeUpsertOne) ClearOptionalUUID() *FieldTypeUpsertOne {
 	return u.Update(func(s *FieldTypeUpsert) {
-		s.ClearUUID()
+		s.ClearOptionalUUID()
 	})
 }
 
@@ -5956,24 +5956,24 @@ func (u *FieldTypeUpsertBulk) ClearPriority() *FieldTypeUpsertBulk {
 	})
 }
 
-// SetUUID sets the "uuid" field.
-func (u *FieldTypeUpsertBulk) SetUUID(v uuid.UUID) *FieldTypeUpsertBulk {
+// SetOptionalUUID sets the "optional_uuid" field.
+func (u *FieldTypeUpsertBulk) SetOptionalUUID(v uuid.UUID) *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
-		s.SetUUID(v)
+		s.SetOptionalUUID(v)
 	})
 }
 
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *FieldTypeUpsertBulk) UpdateUUID() *FieldTypeUpsertBulk {
+// UpdateOptionalUUID sets the "optional_uuid" field to the value that was provided on create.
+func (u *FieldTypeUpsertBulk) UpdateOptionalUUID() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
-		s.UpdateUUID()
+		s.UpdateOptionalUUID()
 	})
 }
 
-// ClearUUID clears the value of the "uuid" field.
-func (u *FieldTypeUpsertBulk) ClearUUID() *FieldTypeUpsertBulk {
+// ClearOptionalUUID clears the value of the "optional_uuid" field.
+func (u *FieldTypeUpsertBulk) ClearOptionalUUID() *FieldTypeUpsertBulk {
 	return u.Update(func(s *FieldTypeUpsert) {
-		s.ClearUUID()
+		s.ClearOptionalUUID()
 	})
 }
 
