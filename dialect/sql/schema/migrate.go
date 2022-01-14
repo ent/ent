@@ -101,6 +101,22 @@ func (m *localEntTypes) types(ctx context.Context) error {
 // MigrateOption allows for managing schema configuration using functional options.
 type MigrateOption func(*Migrate)
 
+// WithGlobalUniqueID sets the universal ids options to the migration.
+// Defaults to false.
+func WithGlobalUniqueID(b bool) MigrateOption {
+	return func(m *Migrate) {
+		m.entTypes = &localEntTypes{}
+	}
+}
+
+// WithEntTypes sets the universal ids options to the migration.
+// Defaults to false.
+func WithEntTypes(entTypes EntTypesStore) MigrateOption {
+	return func(m *Migrate) {
+		m.entTypes = entTypes
+	}
+}
+
 // WithDropColumn sets the columns dropping option to the migration.
 // Defaults to false.
 func WithDropColumn(b bool) MigrateOption {
@@ -177,22 +193,6 @@ type Migrate struct {
 	withFixture     bool   // with fks rename fixture.
 	withForeignKeys bool   // with foreign keys
 	hooks           []Hook // hooks to apply before creation
-}
-
-// WithGlobalUniqueID sets the universal ids options to the migration.
-// Defaults to false.
-func WithGlobalUniqueID(b bool) MigrateOption {
-	return func(m *Migrate) {
-		m.entTypes = &localEntTypes{}
-	}
-}
-
-// WithGlobalUniqueID sets the universal ids options to the migration.
-// Defaults to false.
-func WithEntTypes(entTypes EntTypesStore) MigrateOption {
-	return func(m *Migrate) {
-		m.entTypes = entTypes
-	}
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
