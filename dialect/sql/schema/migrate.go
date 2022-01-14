@@ -289,7 +289,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 			}
 			// If global unique identifier is enabled and it's not
 			// a relation table, allocate a range for the table pk.
-			if m.entTypes != nil && len(t.PrimaryKey) == 1 {
+			if len(t.PrimaryKey) == 1 {
 				if err := m.allocPKRange(ctx, tx, t); err != nil {
 					return err
 				}
@@ -593,6 +593,10 @@ func (m *Migrate) verify(ctx context.Context, tx dialect.Tx, t *Table) error {
 }
 
 func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) error {
+	if m.entTypes == nil {
+		return nil
+	}
+
 	id, err := m.entTypes.AllocRange(ctx, t.Name)
 	if err != nil {
 		return err
