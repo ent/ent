@@ -56,7 +56,7 @@ func TestMySQL(t *testing.T) {
 }
 
 func TestMaria(t *testing.T) {
-	for version, port := range map[string]int{"105": 4306, "102": 4307} {
+	for version, port := range map[string]int{"102": 4306, "103": 4307, "104": 4308, "105": 4309, "106": 4310} {
 		t.Run(version, func(t *testing.T) {
 			db, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/", port))
 			require.NoError(t, err)
@@ -86,7 +86,7 @@ func TestMaria(t *testing.T) {
 }
 
 func TestPostgres(t *testing.T) {
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433, "13": 5434} {
+	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432, "13": 5433, "14": 5434} {
 		t.Run(version, func(t *testing.T) {
 			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable", port)
 			db, err := sql.Open(dialect.Postgres, dsn)

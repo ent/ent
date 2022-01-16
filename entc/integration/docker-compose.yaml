@@ -6,9 +6,11 @@ version: "3.7"
 
 services:
 
-  mysql:
+  mysql56:
     platform: linux/amd64
-    image: mysql:5.6.35
+    image: mysql:5.6.51
+    # need to set this manually starting from 5.6.36
+    command: --sql-mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -19,7 +21,7 @@ services:
 
   mysql57:
     platform: linux/amd64
-    image: mysql:5.7.26
+    image: mysql:5.7.36
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -30,7 +32,7 @@ services:
 
   mysql8:
     platform: linux/amd64
-    image: mysql:8.0.19
+    image: mysql:8.0.27
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -39,9 +41,9 @@ services:
     ports:
       - 3308:3306
 
-  mariadb:
+  mariadb102:
     platform: linux/amd64
-    image: mariadb
+    image: mariadb:10.2.40
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -50,9 +52,9 @@ services:
     ports:
       - 4306:3306
 
-  mariadb102:
+  mariadb103:
     platform: linux/amd64
-    image: mariadb:10.2.32
+    image: mariadb:10.3.31
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -61,9 +63,9 @@ services:
     ports:
       - 4307:3306
 
-  mariadb103:
+  mariadb104:
     platform: linux/amd64
-    image: mariadb:10.3.13
+    image: mariadb:10.4.21
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: pass
@@ -72,9 +74,31 @@ services:
     ports:
       - 4308:3306
 
+  mariadb105:
+    platform: linux/amd64
+    image: mariadb:10.5.12
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4309:3306
+
+  mariadb106:
+    platform: linux/amd64
+    image: mariadb:10.6.4
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: pass
+    healthcheck:
+      test: mysqladmin ping -ppass
+    ports:
+      - 4310:3306
+
   postgres10:
     platform: linux/amd64
-    image: postgres:10
+    image: postgres:10.18
     environment:
       POSTGRES_DB: test
       POSTGRES_PASSWORD: pass
@@ -85,7 +109,7 @@ services:
 
   postgres11:
     platform: linux/amd64
-    image: postgres:11
+    image: postgres:11.13
     environment:
       POSTGRES_DB: test
       POSTGRES_PASSWORD: pass
@@ -96,7 +120,7 @@ services:
 
   postgres12:
     platform: linux/amd64
-    image: postgres:12
+    image: postgres:12.8
     environment:
       POSTGRES_DB: test
       POSTGRES_PASSWORD: pass
@@ -107,7 +131,7 @@ services:
 
   postgres13:
     platform: linux/amd64
-    image: postgres:13
+    image: postgres:13.4
     environment:
       POSTGRES_DB: test
       POSTGRES_PASSWORD: pass
@@ -118,7 +142,7 @@ services:
 
   postgres14:
     platform: linux/amd64
-    image: postgres:14
+    image: postgres:14.0
     environment:
       POSTGRES_DB: test
       POSTGRES_PASSWORD: pass

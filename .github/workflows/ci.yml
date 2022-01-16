@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mysql56:
-        image: mysql:5.6.35
+        image: mysql:5.6.51
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -92,7 +92,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       mysql57:
-        image: mysql:5.7.26
+        image: mysql:5.7.36
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -105,7 +105,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       mysql8:
-        image: mysql:8
+        image: mysql:8.0.27
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -117,8 +117,8 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
-      maria:
-        image: mariadb
+      maria102:
+        image: mariadb:10.2.40
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -130,8 +130,8 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
-      maria102:
-        image: mariadb:10.2.32
+      maria103:
+        image: mariadb:10.3.31
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -143,8 +143,8 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
-      maria103:
-        image: mariadb:10.3.13
+      maria104:
+        image: mariadb:10.4.21
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -156,8 +156,34 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
+      maria105:
+        image: mariadb:10.5.12
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4309:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+      maria106:
+        image: mariadb:10.6.4
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4310:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
       postgres10:
-        image: postgres:10
+        image: postgres:10.18
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -169,7 +195,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres11:
-        image: postgres:11
+        image: postgres:11.13
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -181,7 +207,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres12:
-        image: postgres:12.3
+        image: postgres:12.8
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -193,7 +219,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres13:
-        image: postgres:13.1
+        image: postgres:13.4
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -205,7 +231,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres14:
-        image: postgres:14
+        image: postgres:14.0
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -245,7 +271,7 @@ jobs:
     if: ${{ github.ref != 'refs/heads/master' }}
     services:
       mysql56:
-        image: mysql:5.6.35
+        image: mysql:5.6.51
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -258,7 +284,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       mysql57:
-        image: mysql:5.7.26
+        image: mysql:5.7.36
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -271,7 +297,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
       mysql8:
-        image: mysql:8
+        image: mysql:8.0.27
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -283,8 +309,8 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
-      maria:
-        image: mariadb
+      maria102:
+        image: mariadb:10.2.40
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -296,8 +322,8 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
-      maria102:
-        image: mariadb:10.2.32
+      maria103:
+        image: mariadb:10.3.31
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -309,8 +335,8 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
-      maria103:
-        image: mariadb:10.3.13
+      maria104:
+        image: mariadb:10.4.21
         env:
           MYSQL_DATABASE: test
           MYSQL_ROOT_PASSWORD: pass
@@ -322,8 +348,34 @@ jobs:
           --health-start-period 10s
           --health-timeout 5s
           --health-retries 10
+      maria105:
+        image: mariadb:10.5.12
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4309:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
+      maria106:
+        image: mariadb:10.6.4
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: pass
+        ports:
+          - 4310:3306
+        options: >-
+          --health-cmd "mysqladmin ping -ppass"
+          --health-interval 10s
+          --health-start-period 10s
+          --health-timeout 5s
+          --health-retries 10
       postgres10:
-        image: postgres:10
+        image: postgres:10.18
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -335,7 +387,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres11:
-        image: postgres:11
+        image: postgres:11.13
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -347,7 +399,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres12:
-        image: postgres:12.3
+        image: postgres:12.8
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -359,7 +411,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres13:
-        image: postgres:13.1
+        image: postgres:13.4
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass
@@ -371,7 +423,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       postgres14:
-        image: postgres:14
+        image: postgres:14.0
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: pass

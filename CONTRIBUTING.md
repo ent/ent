@@ -37,7 +37,8 @@ Then, in `entc/integration` run `docker-compose` in order to spin-up all databas
 docker-compose -f docker-compose.yaml up -d
 ```
 
-Then, run `go test ./...` to run all integration tests.
+Then, run `go test -tags sqlite_json ./...` to run all integration tests.
+The `sqlite_json` build tag is required by go-sqlite3 package to have the JSON_EXTRACT method.
 
 
 ## Pull Requests

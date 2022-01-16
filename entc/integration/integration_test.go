@@ -45,65 +45,64 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSQLite(t *testing.T) {
-	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1", opts)
-	defer client.Close()
-	for _, tt := range tests {
-		name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-		t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
-			drop(t, client)
-			tt(t, client)
+const (
+	SQLite   = "SQLite"
+	MySQL    = "MySQL"
+	Maria    = "Maria"
+	Postgres = "Postgres"
+)
+
+func TestDatabases(t *testing.T) {
+	databases := []struct {
+		engine  string
+		version string
+		port    int
+	}{
+		{engine: SQLite, version: "3"},
+		{engine: MySQL, version: "56", port: 3306},
+		{engine: MySQL, version: "57", port: 3307},
+		{engine: MySQL, version: "8", port: 3308},
+		{engine: Maria, version: "10.2", port: 4306},
+		{engine: Maria, version: "10.3", port: 4307},
+		{engine: Maria, version: "10.4", port: 4308},
+		{engine: Maria, version: "10.5", port: 4309},
+		{engine: Maria, version: "10.6", port: 4310},
+		{engine: Postgres, version: "10", port: 5430},
+		{engine: Postgres, version: "11", port: 5431},
+		{engine: Postgres, version: "12", port: 5432},
+		{engine: Postgres, version: "13", port: 5433},
+		{engine: Postgres, version: "14", port: 5434},
+	}
+	for _, db := range databases {
+		// NOTE: test case names must have a specific format, because subtests do match against it
+		t.Run(fmt.Sprintf("%s/%s", db.engine, db.version), func(t *testing.T) {
+			client := getClient(t, db.engine, db.port)
+			require.NotNil(t, client)
+			defer client.Close()
+			for _, tt := range tests {
+				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
+				subTestName := name[strings.LastIndex(name, ".")+1:]
+				t.Run(subTestName, func(t *testing.T) {
+					drop(t, client)
+					tt(t, client)
+				})
+			}
 		})
 	}
 }
 
-func TestMySQL(t *testing.T) {
-	for version, port := range map[string]int{"56": 3306, "57": 3307, "8": 3308} {
+func getClient(t *testing.T, engine string, port int) *ent.Client {
+	t.Helper()
+	switch engine {
+	case SQLite:
+		return enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1", opts)
+	case MySQL, Maria:
 		addr := net.JoinHostPort("localhost", strconv.Itoa(port))
-		t.Run(version, func(t *testing.T) {
-			client := enttest.Open(t, dialect.MySQL, fmt.Sprintf("root:pass@tcp(%s)/test?parseTime=True", addr), opts)
-			defer client.Close()
-			for _, tt := range tests {
-				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
-					drop(t, client)
-					tt(t, client)
-				})
-			}
-		})
-	}
-}
-
-func TestMaria(t *testing.T) {
-	for version, port := range map[string]int{"10.5": 4306, "10.2": 4307, "10.3": 4308} {
-		t.Run(version, func(t *testing.T) {
-			addr := net.JoinHostPort("localhost", strconv.Itoa(port))
-			client := enttest.Open(t, dialect.MySQL, fmt.Sprintf("root:pass@tcp(%s)/test?parseTime=True", addr), opts)
-			defer client.Close()
-			for _, tt := range tests {
-				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
-					drop(t, client)
-					tt(t, client)
-				})
-			}
-		})
-	}
-}
-
-func TestPostgres(t *testing.T) {
-	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5432, "13": 5433, "14": 5434} {
-		t.Run(version, func(t *testing.T) {
-			client := enttest.Open(t, dialect.Postgres, fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port), opts)
-			defer client.Close()
-			for _, tt := range tests {
-				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
-				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
-					drop(t, client)
-					tt(t, client)
-				})
-			}
-		})
+		return enttest.Open(t, dialect.MySQL, fmt.Sprintf("root:pass@tcp(%s)/test?parseTime=True", addr), opts)
+	case Postgres:
+		return enttest.Open(t, dialect.Postgres, fmt.Sprintf("host=localhost port=%d user=postgres dbname=test password=pass sslmode=disable", port), opts)
+	default:
+		return nil
 	}
 }
 
@@ -359,7 +358,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 	// Setting primary key manually.
 	a := client.Item.Create().SetID("A").SaveX(ctx)
 	require.Equal(t, "A", a.ID)
-	if strings.Contains(t.Name(), "MySQL") || strings.Contains(t.Name(), "Maria") {
+	if strings.Contains(t.Name(), MySQL) || strings.Contains(t.Name(), Maria) {
 		// MySQL is skipped since it does not support the RETURNING clause. Maria is skipped
 		// as well, because there's no way to distinguish between MySQL and Maria at runtime.
 		client.Item.Create().SetID("A").OnConflict().Ignore().ExecX(ctx)
@@ -1340,8 +1339,12 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 
 type mocker struct{ mock.Mock }
 
-func (m *mocker) onCommit(err error)   { m.Called(err) }
-func (m *mocker) onRollback(err error) { m.Called(err) }
+func (m *mocker) onCommit(err error) {
+	m.Called(err)
+}
+func (m *mocker) onRollback(err error) {
+	m.Called(err)
+}
 func (m *mocker) rHook() ent.RollbackHook {
 	return func(next ent.Rollbacker) ent.Rollbacker {
 		return ent.RollbackFunc(func(ctx context.Context, tx *ent.Tx) error {
@@ -1663,7 +1666,9 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 // writerFunc is an io.Writer implemented by the underlying func.
 type writerFunc func(p []byte) (int, error)
 
-func (f writerFunc) Write(p []byte) (int, error) { return f(p) }
+func (f writerFunc) Write(p []byte) (int, error) {
+	return f(p)
+}
 
 func NoSchemaChanges(t *testing.T, client *ent.Client) {
 	w := writerFunc(func(p []byte) (int, error) {
@@ -1824,7 +1829,7 @@ func ConstraintChecks(t *testing.T, client *ent.Client) {
 }
 
 func Lock(t *testing.T, client *ent.Client) {
-	for _, d := range []string{"SQLite", "MySQL/5", "Maria/10.2"} {
+	for _, d := range []string{SQLite, fmt.Sprintf("%s/5", MySQL), fmt.Sprintf("%s/10.2", Maria)} {
 		if strings.Contains(t.Name(), d) {
 			t.Skip("unsupported version")
 		}
@@ -1842,15 +1847,15 @@ func Lock(t *testing.T, client *ent.Client) {
 		p1 := tx1.Pet.Query().Where(pet.ID(xabi.ID)).ForUpdate().OnlyX(ctx)
 		_, err = tx2.Pet.Query().Where(pet.ID(xabi.ID)).ForUpdate(sql.WithLockAction(sql.NoWait)).Only(ctx)
 		switch name := t.Name(); {
-		case strings.Contains(name, "Postgres"):
+		case strings.Contains(name, Postgres):
 			err := err.(*pq.Error)
 			require.EqualValues(t, "55P03", err.Code)
 			require.EqualValues(t, `could not obtain lock on row in relation "pet"`, err.Message)
-		case strings.Contains(name, "MySQL"):
+		case strings.Contains(name, MySQL):
 			err := err.(*mysql.MySQLError)
 			require.EqualValues(t, 3572, err.Number)
 			require.EqualValues(t, "Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.", err.Message)
-		case strings.Contains(name, "Maria"):
+		case strings.Contains(name, Maria):
 			err := err.(*mysql.MySQLError)
 			require.EqualValues(t, 1205, err.Number)
 			require.EqualValues(t, "Lock wait timeout exceeded; try restarting transaction", err.Message)
@@ -1863,7 +1868,7 @@ func Lock(t *testing.T, client *ent.Client) {
 	})
 
 	t.Run("ForShare", func(t *testing.T) {
-		if strings.Contains(t.Name(), "Maria") {
+		if strings.Contains(t.Name(), Maria) {
 			t.Skip("unsupported version")
 		}
 		tx1, err := client.Tx(ctx)
