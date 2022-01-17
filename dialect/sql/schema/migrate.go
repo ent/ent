@@ -24,8 +24,8 @@ const (
 )
 
 type EntTypesStore interface {
-	AllocRange(ctx context.Context, name string) (int, error)
-	TypeRange(ctx context.Context, name string) (int, bool)
+	AllocRange(ctx context.Context, name string) (int64, error)
+	TypeRange(ctx context.Context, name string) (int64, bool)
 }
 
 type localEntTypes struct {
@@ -36,7 +36,7 @@ type localEntTypes struct {
 
 var _ EntTypesStore = (*localEntTypes)(nil)
 
-func (m *localEntTypes) TypeRange(_ context.Context, name string) (int, bool) {
+func (m *localEntTypes) TypeRange(_ context.Context, name string) (int64, bool) {
 	id := indexOf(m.typeRanges, name)
 	if id == -1 {
 		return 0, false
@@ -44,7 +44,7 @@ func (m *localEntTypes) TypeRange(_ context.Context, name string) (int, bool) {
 	return id << 32, true
 }
 
-func (m *localEntTypes) AllocRange(ctx context.Context, name string) (int, error) {
+func (m *localEntTypes) AllocRange(ctx context.Context, name string) (int64, error) {
 	id, ok := m.TypeRange(ctx, name)
 	if ok {
 		return id, nil
@@ -60,7 +60,7 @@ func (m *localEntTypes) AllocRange(ctx context.Context, name string) (int, error
 		return 0, fmt.Errorf("insert into type: %w", err)
 	}
 
-	id = len(m.typeRanges)
+	id = int64(len(m.typeRanges))
 	m.typeRanges = append(m.typeRanges, name)
 	return id << 32, nil
 }
@@ -696,10 +696,10 @@ func exist(ctx context.Context, tx dialect.Tx, query string, args ...interface{}
 	return n > 0, nil
 }
 
-func indexOf(a []string, s string) int {
+func indexOf(a []string, s string) int64 {
 	for i := range a {
 		if a[i] == s {
-			return i
+			return int64(i)
 		}
 	}
 	return -1
@@ -711,7 +711,7 @@ type sqlDialect interface {
 	table(context.Context, dialect.Tx, string) (*Table, error)
 	tableExist(context.Context, dialect.Tx, string) (bool, error)
 	fkExist(context.Context, dialect.Tx, string) (bool, error)
-	setRange(context.Context, dialect.Tx, *Table, int) error
+	setRange(context.Context, dialect.Tx, *Table, int64) error
 	dropIndex(context.Context, dialect.Tx, *Index, string) error
 	// table, column and index builder per dialect.
 	cType(*Column) string
@@ -736,5 +736,5 @@ type fkRenamer interface {
 
 // verifyRanger wraps the method for verifying global-id range correctness.
 type verifyRanger interface {
-	verifyRange(context.Context, dialect.Tx, *Table, int) error
+	verifyRange(context.Context, dialect.Tx, *Table, int64) error
 }

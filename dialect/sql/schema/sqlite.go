@@ -50,7 +50,7 @@ func (d *SQLite) tableExist(ctx context.Context, tx dialect.Tx, name string) (bo
 // whenever a table that contains an AUTOINCREMENT column is created. However, it populates to it a rows (for tables)
 // only after the first insertion. Therefore, we check. If a record (for the given table) already exists in the "sqlite_sequence"
 // table, we updated it. Otherwise, we insert a new value.
-func (d *SQLite) setRange(ctx context.Context, tx dialect.Tx, t *Table, value int) error {
+func (d *SQLite) setRange(ctx context.Context, tx dialect.Tx, t *Table, value int64) error {
 	query, args := sql.Select().Count().
 		From(sql.Table("sqlite_sequence")).
 		Where(sql.EQ("name", t.Name)).

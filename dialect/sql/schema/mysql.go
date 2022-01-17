@@ -133,11 +133,11 @@ func (d *MySQL) indexes(ctx context.Context, tx dialect.Tx, t *Table) ([]*Index,
 	return idx, nil
 }
 
-func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, t *Table, value int) error {
+func (d *MySQL) setRange(ctx context.Context, tx dialect.Tx, t *Table, value int64) error {
 	return tx.Exec(ctx, fmt.Sprintf("ALTER TABLE `%s` AUTO_INCREMENT = %d", t.Name, value), []interface{}{}, nil)
 }
 
-func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expected int) error {
+func (d *MySQL) verifyRange(ctx context.Context, tx dialect.Tx, t *Table, expected int64) error {
 	if expected == 0 {
 		return nil
 	}
