@@ -110,7 +110,7 @@ func (tq *TenantQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Tenant entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Tenant entity is not found.
+// Returns a *NotSingularError when more than one Tenant entity is found.
 // Returns a *NotFoundError when no Tenant entities are found.
 func (tq *TenantQuery) Only(ctx context.Context) (*Tenant, error) {
 	nodes, err := tq.Limit(2).All(ctx)
@@ -137,7 +137,7 @@ func (tq *TenantQuery) OnlyX(ctx context.Context) *Tenant {
 }
 
 // OnlyID is like Only, but returns the only Tenant ID in the query.
-// Returns a *NotSingularError when exactly one Tenant ID is not found.
+// Returns a *NotSingularError when more than one Tenant ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TenantQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

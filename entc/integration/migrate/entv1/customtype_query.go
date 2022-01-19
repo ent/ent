@@ -110,7 +110,7 @@ func (ctq *CustomTypeQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single CustomType entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one CustomType entity is not found.
+// Returns a *NotSingularError when more than one CustomType entity is found.
 // Returns a *NotFoundError when no CustomType entities are found.
 func (ctq *CustomTypeQuery) Only(ctx context.Context) (*CustomType, error) {
 	nodes, err := ctq.Limit(2).All(ctx)
@@ -137,7 +137,7 @@ func (ctq *CustomTypeQuery) OnlyX(ctx context.Context) *CustomType {
 }
 
 // OnlyID is like Only, but returns the only CustomType ID in the query.
-// Returns a *NotSingularError when exactly one CustomType ID is not found.
+// Returns a *NotSingularError when more than one CustomType ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (ctq *CustomTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

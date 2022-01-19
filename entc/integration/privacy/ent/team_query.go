@@ -160,7 +160,7 @@ func (tq *TeamQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Team entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Team entity is not found.
+// Returns a *NotSingularError when more than one Team entity is found.
 // Returns a *NotFoundError when no Team entities are found.
 func (tq *TeamQuery) Only(ctx context.Context) (*Team, error) {
 	nodes, err := tq.Limit(2).All(ctx)
@@ -187,7 +187,7 @@ func (tq *TeamQuery) OnlyX(ctx context.Context) *Team {
 }
 
 // OnlyID is like Only, but returns the only Team ID in the query.
-// Returns a *NotSingularError when exactly one Team ID is not found.
+// Returns a *NotSingularError when more than one Team ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TeamQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

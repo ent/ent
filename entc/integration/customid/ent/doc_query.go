@@ -160,7 +160,7 @@ func (dq *DocQuery) FirstIDX(ctx context.Context) schema.DocID {
 }
 
 // Only returns a single Doc entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Doc entity is not found.
+// Returns a *NotSingularError when more than one Doc entity is found.
 // Returns a *NotFoundError when no Doc entities are found.
 func (dq *DocQuery) Only(ctx context.Context) (*Doc, error) {
 	nodes, err := dq.Limit(2).All(ctx)
@@ -187,7 +187,7 @@ func (dq *DocQuery) OnlyX(ctx context.Context) *Doc {
 }
 
 // OnlyID is like Only, but returns the only Doc ID in the query.
-// Returns a *NotSingularError when exactly one Doc ID is not found.
+// Returns a *NotSingularError when more than one Doc ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (dq *DocQuery) OnlyID(ctx context.Context) (id schema.DocID, err error) {
 	var ids []schema.DocID

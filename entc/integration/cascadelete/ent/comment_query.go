@@ -135,7 +135,7 @@ func (cq *CommentQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Comment entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Comment entity is not found.
+// Returns a *NotSingularError when more than one Comment entity is found.
 // Returns a *NotFoundError when no Comment entities are found.
 func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
 	nodes, err := cq.Limit(2).All(ctx)
@@ -162,7 +162,7 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 }
 
 // OnlyID is like Only, but returns the only Comment ID in the query.
-// Returns a *NotSingularError when exactly one Comment ID is not found.
+// Returns a *NotSingularError when more than one Comment ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (cq *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

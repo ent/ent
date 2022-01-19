@@ -159,7 +159,7 @@ func (fq *FileQuery) FirstIDX(ctx context.Context) string {
 }
 
 // Only returns a single File entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one File entity is not found.
+// Returns a *NotSingularError when more than one File entity is found.
 // Returns a *NotFoundError when no File entities are found.
 func (fq *FileQuery) Only(ctx context.Context) (*File, error) {
 	nodes, err := fq.Limit(2).All(ctx)
@@ -186,7 +186,7 @@ func (fq *FileQuery) OnlyX(ctx context.Context) *File {
 }
 
 // OnlyID is like Only, but returns the only File ID in the query.
-// Returns a *NotSingularError when exactly one File ID is not found.
+// Returns a *NotSingularError when more than one File ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (fq *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string

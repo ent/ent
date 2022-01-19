@@ -160,7 +160,7 @@ func (pq *PostQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Post entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Post entity is not found.
+// Returns a *NotSingularError when more than one Post entity is found.
 // Returns a *NotFoundError when no Post entities are found.
 func (pq *PostQuery) Only(ctx context.Context) (*Post, error) {
 	nodes, err := pq.Limit(2).All(ctx)
@@ -187,7 +187,7 @@ func (pq *PostQuery) OnlyX(ctx context.Context) *Post {
 }
 
 // OnlyID is like Only, but returns the only Post ID in the query.
-// Returns a *NotSingularError when exactly one Post ID is not found.
+// Returns a *NotSingularError when more than one Post ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (pq *PostQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

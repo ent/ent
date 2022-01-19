@@ -182,7 +182,7 @@ func (uq *UserQuery) FirstIDX(ctx context.Context) uint64 {
 }
 
 // Only returns a single User entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one User entity is not found.
+// Returns a *NotSingularError when more than one User entity is found.
 // Returns a *NotFoundError when no User entities are found.
 func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 	nodes, err := uq.Limit(2).All(ctx)
@@ -209,7 +209,7 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 }
 
 // OnlyID is like Only, but returns the only User ID in the query.
-// Returns a *NotSingularError when exactly one User ID is not found.
+// Returns a *NotSingularError when more than one User ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (uq *UserQuery) OnlyID(ctx context.Context) (id uint64, err error) {
 	var ids []uint64

@@ -112,7 +112,7 @@ func (tq *TaskQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Task entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Task entity is not found.
+// Returns a *NotSingularError when more than one Task entity is found.
 // Returns a *NotFoundError when no Task entities are found.
 func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
 	nodes, err := tq.Limit(2).All(ctx)
@@ -139,7 +139,7 @@ func (tq *TaskQuery) OnlyX(ctx context.Context) *Task {
 }
 
 // OnlyID is like Only, but returns the only Task ID in the query.
-// Returns a *NotSingularError when exactly one Task ID is not found.
+// Returns a *NotSingularError when more than one Task ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (tq *TaskQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
