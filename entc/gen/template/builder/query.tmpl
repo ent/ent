@@ -144,7 +144,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Typ
 }
 
 // Only returns a single {{ $.Name }} entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than exactly one {{ $.Name }} entity is found.
+// Returns a *NotSingularError when more than one {{ $.Name }} entity is found.
 // Returns a *NotFoundError when no {{ $.Name }} entities are found.
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
 	nodes, err := {{ $receiver }}.Limit(2).All(ctx)
