@@ -171,7 +171,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 }
 
 // OnlyID is like Only, but returns the only {{ $.Name }} ID in the query.
-// Returns a *NotSingularError when more than exactly one {{ $.Name }} ID is found.
+// Returns a *NotSingularError when more than one {{ $.Name }} ID is found.
 // Returns a *NotFoundError when no entities are found.
 func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 	var ids []{{ $.ID.Type }}
