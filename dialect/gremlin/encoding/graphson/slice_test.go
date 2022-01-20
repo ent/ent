@@ -151,13 +151,6 @@ func TestDecodeSlice(t *testing.T) {
 			}`,
 			want: [...]byte{42, 55},
 		},
-		{
-			in: `{
-				"@type": "g:List",
-				"@value": null
-			}`,
-			want: []int(nil),
-		},
 	}
 
 	for _, tc := range tests {
