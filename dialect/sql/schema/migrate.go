@@ -23,6 +23,81 @@ const (
 	MaxTypes = math.MaxUint16
 )
 
+type EntTypesStore interface {
+	AllocRange(ctx context.Context, name string) (int64, error)
+	TypeRange(ctx context.Context, name string) (int64, bool)
+}
+
+type localEntTypes struct {
+	sqlDialect
+	tx         dialect.Tx
+	typeRanges []string
+}
+
+var _ EntTypesStore = (*localEntTypes)(nil)
+
+func (m *localEntTypes) TypeRange(_ context.Context, name string) (int64, bool) {
+	id := indexOf(m.typeRanges, name)
+	if id == -1 {
+		return 0, false
+	}
+	return id << 32, true
+}
+
+func (m *localEntTypes) AllocRange(ctx context.Context, name string) (int64, error) {
+	id, ok := m.TypeRange(ctx, name)
+	if ok {
+		return id, nil
+	}
+
+	if len(m.typeRanges) > MaxTypes {
+		return 0, fmt.Errorf("max number of types exceeded: %d", MaxTypes)
+	}
+
+	query, args := sql.Dialect(m.Dialect()).
+		Insert(TypeTable).Columns("type").Values(name).Query()
+	if err := m.tx.Exec(ctx, query, args, nil); err != nil {
+		return 0, fmt.Errorf("insert into type: %w", err)
+	}
+
+	id = int64(len(m.typeRanges))
+	m.typeRanges = append(m.typeRanges, name)
+	return id << 32, nil
+}
+
+func (m *localEntTypes) setup(dialect sqlDialect, tx dialect.Tx) {
+	m.sqlDialect = dialect
+	m.tx = tx
+}
+
+// types loads the type list from the database.
+// If the table does not create, it will create one.
+func (m *localEntTypes) types(ctx context.Context) error {
+	exists, err := m.tableExist(ctx, m.tx, TypeTable)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		t := NewTable(TypeTable).
+			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
+			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
+		query, args := m.tBuilder(t).Query()
+		if err := m.tx.Exec(ctx, query, args, nil); err != nil {
+			return fmt.Errorf("create types table: %w", err)
+		}
+		return nil
+	}
+
+	rows := &sql.Rows{}
+	query, args := sql.Dialect(m.Dialect()).
+		Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
+	if err := m.tx.Query(ctx, query, args, rows); err != nil {
+		return fmt.Errorf("query types table: %w", err)
+	}
+	defer rows.Close()
+	return sql.ScanSlice(rows, &m.typeRanges)
+}
+
 // MigrateOption allows for managing schema configuration using functional options.
 type MigrateOption func(*Migrate)
 
@@ -30,7 +105,15 @@ type MigrateOption func(*Migrate)
 // Defaults to false.
 func WithGlobalUniqueID(b bool) MigrateOption {
 	return func(m *Migrate) {
-		m.universalID = b
+		m.entTypes = &localEntTypes{}
+	}
+}
+
+// WithEntTypes sets the universal ids options to the migration.
+// Defaults to false.
+func WithEntTypes(entTypes EntTypesStore) MigrateOption {
+	return func(m *Migrate) {
+		m.entTypes = entTypes
 	}
 }
 
@@ -104,13 +187,12 @@ func (f CreateFunc) Create(ctx context.Context, tables ...*Table) error {
 // Migrate runs the migrations logic for the SQL dialects.
 type Migrate struct {
 	sqlDialect
-	universalID     bool     // global unique ids.
-	dropColumns     bool     // drop deleted columns.
-	dropIndexes     bool     // drop deleted indexes.
-	withFixture     bool     // with fks rename fixture.
-	withForeignKeys bool     // with foreign keys
-	typeRanges      []string // types order by their range.
-	hooks           []Hook   // hooks to apply before creation
+	entTypes        EntTypesStore
+	dropColumns     bool   // drop deleted columns.
+	dropIndexes     bool   // drop deleted indexes.
+	withFixture     bool   // with fks rename fixture.
+	withForeignKeys bool   // with foreign keys
+	hooks           []Hook // hooks to apply before creation
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
@@ -161,8 +243,13 @@ func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
 	if err := m.init(ctx, tx); err != nil {
 		return rollback(tx, err)
 	}
-	if m.universalID {
-		if err := m.types(ctx, tx); err != nil {
+
+	if e, ok := m.entTypes.(interface {
+		setup(sqlDialect, dialect.Tx)
+		types(ctx context.Context) error
+	}); ok {
+		e.setup(m.sqlDialect, tx)
+		if err := e.types(ctx); err != nil {
 			return rollback(tx, err)
 		}
 	}
@@ -202,7 +289,7 @@ func (m *Migrate) txCreate(ctx context.Context, tx dialect.Tx, tables ...*Table)
 			}
 			// If global unique identifier is enabled and it's not
 			// a relation table, allocate a range for the table pk.
-			if m.universalID && len(t.PrimaryKey) == 1 {
+			if len(t.PrimaryKey) == 1 {
 				if err := m.allocPKRange(ctx, tx, t); err != nil {
 					return err
 				}
@@ -495,61 +582,27 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 // verify verifies that the auto-increment counter is correct for table with universal-id support.
 func (m *Migrate) verify(ctx context.Context, tx dialect.Tx, t *Table) error {
 	vr, ok := m.sqlDialect.(verifyRanger)
-	if !ok || !m.universalID {
+	if !ok || m.entTypes == nil {
 		return nil
 	}
-	id := indexOf(m.typeRanges, t.Name)
-	if id == -1 {
-		return nil
-	}
-	return vr.verifyRange(ctx, tx, t, id<<32)
-}
 
-// types loads the type list from the database.
-// If the table does not create, it will create one.
-func (m *Migrate) types(ctx context.Context, tx dialect.Tx) error {
-	exists, err := m.tableExist(ctx, tx, TypeTable)
-	if err != nil {
-		return err
+	if id, ok := m.entTypes.TypeRange(ctx, t.Name); ok {
+		return vr.verifyRange(ctx, tx, t, id)
 	}
-	if !exists {
-		t := NewTable(TypeTable).
-			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
-			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
-		query, args := m.tBuilder(t).Query()
-		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create types table: %w", err)
-		}
-		return nil
-	}
-	rows := &sql.Rows{}
-	query, args := sql.Dialect(m.Dialect()).
-		Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
-	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return fmt.Errorf("query types table: %w", err)
-	}
-	defer rows.Close()
-	return sql.ScanSlice(rows, &m.typeRanges)
+	return nil
 }
 
 func (m *Migrate) allocPKRange(ctx context.Context, tx dialect.Tx, t *Table) error {
-	id := indexOf(m.typeRanges, t.Name)
-	// If the table re-created, re-use its range from
-	// the past. otherwise, allocate a new id-range.
-	if id == -1 {
-		if len(m.typeRanges) > MaxTypes {
-			return fmt.Errorf("max number of types exceeded: %d", MaxTypes)
-		}
-		query, args := sql.Dialect(m.Dialect()).
-			Insert(TypeTable).Columns("type").Values(t.Name).Query()
-		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("insert into type: %w", err)
-		}
-		id = len(m.typeRanges)
-		m.typeRanges = append(m.typeRanges, t.Name)
+	if m.entTypes == nil {
+		return nil
+	}
+
+	id, err := m.entTypes.AllocRange(ctx, t.Name)
+	if err != nil {
+		return err
 	}
 	// Set the id offset for table.
-	return m.setRange(ctx, tx, t, id<<32)
+	return m.setRange(ctx, tx, t, id)
 }
 
 // fkColumn returns the column name of a foreign-key.
@@ -643,10 +696,10 @@ func exist(ctx context.Context, tx dialect.Tx, query string, args ...interface{}
 	return n > 0, nil
 }
 
-func indexOf(a []string, s string) int {
+func indexOf(a []string, s string) int64 {
 	for i := range a {
 		if a[i] == s {
-			return i
+			return int64(i)
 		}
 	}
 	return -1
@@ -658,7 +711,7 @@ type sqlDialect interface {
 	table(context.Context, dialect.Tx, string) (*Table, error)
 	tableExist(context.Context, dialect.Tx, string) (bool, error)
 	fkExist(context.Context, dialect.Tx, string) (bool, error)
-	setRange(context.Context, dialect.Tx, *Table, int) error
+	setRange(context.Context, dialect.Tx, *Table, int64) error
 	dropIndex(context.Context, dialect.Tx, *Index, string) error
 	// table, column and index builder per dialect.
 	cType(*Column) string
@@ -683,5 +736,5 @@ type fkRenamer interface {
 
 // verifyRanger wraps the method for verifying global-id range correctness.
 type verifyRanger interface {
-	verifyRange(context.Context, dialect.Tx, *Table, int) error
+	verifyRange(context.Context, dialect.Tx, *Table, int64) error
 }
