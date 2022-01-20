@@ -4,6 +4,8 @@ ariga.io/atlas v0.3.1-0.20220119202923-858157a8fb34 h1:MT0Zn/ldwSZUii4o7jOSNpEKe
 ariga.io/atlas v0.3.1-0.20220119202923-858157a8fb34/go.mod h1:XcLUpQX7Cq4qtagEHIleq3MJaBeeJ76BS8doc4gkOJk=
 ariga.io/atlas v0.3.1-0.20220120065714-4306a49e7dfc h1:t4vx8+j99T4QD+PToUmKMeI6XCjWHsuuPpHh9//t3Kc=
 ariga.io/atlas v0.3.1-0.20220120065714-4306a49e7dfc/go.mod h1:XcLUpQX7Cq4qtagEHIleq3MJaBeeJ76BS8doc4gkOJk=
+ariga.io/atlas v0.3.2-0.20220120225051-c3fac7d636dd h1:YxnJl3ySvwQ3C7Rspa4CrQtwrftTZ0F8WJ36CvY7nWE=
+ariga.io/atlas v0.3.2-0.20220120225051-c3fac7d636dd/go.mod h1:XcLUpQX7Cq4qtagEHIleq3MJaBeeJ76BS8doc4gkOJk=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
