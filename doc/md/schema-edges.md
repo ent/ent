@@ -1034,6 +1034,12 @@ func (Card) Edges() []ent.Edge {
 
 If the example above, a card entity cannot be created without its owner. 
 
+:::info
+Note that, starting with [v0.10](https://github.com/ent/ent/releases/tag/v0.10.0), foreign key columns are created
+as `NOT NULL` in the database for required edges that are not [self-reference](#o2m-same-type). In order to migrate
+existing foreign key columns, use the [Atlas Migration](migrate.md#atlas-integration) option.
+:::
+
 ## StorageKey
 
 By default, Ent configures edge storage-keys by the edge-owner (the schema that holds the `edge.To`), and not the by

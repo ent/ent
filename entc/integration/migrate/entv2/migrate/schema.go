@@ -16,7 +16,7 @@ var (
 	// CarsColumns holds the columns for the "cars" table.
 	CarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "user_car", Type: field.TypeInt, Nullable: true},
+		{Name: "user_car", Type: field.TypeInt},
 	}
 	// CarsTable holds the schema information for the "cars" table.
 	CarsTable = &schema.Table{
@@ -28,7 +28,7 @@ var (
 				Symbol:     "cars_users_car",
 				Columns:    []*schema.Column{CarsColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
