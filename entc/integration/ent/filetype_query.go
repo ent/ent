@@ -138,7 +138,7 @@ func (ftq *FileTypeQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single FileType entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one FileType entity is not found.
+// Returns a *NotSingularError when more than one FileType entity is found.
 // Returns a *NotFoundError when no FileType entities are found.
 func (ftq *FileTypeQuery) Only(ctx context.Context) (*FileType, error) {
 	nodes, err := ftq.Limit(2).All(ctx)
@@ -165,7 +165,7 @@ func (ftq *FileTypeQuery) OnlyX(ctx context.Context) *FileType {
 }
 
 // OnlyID is like Only, but returns the only FileType ID in the query.
-// Returns a *NotSingularError when exactly one FileType ID is not found.
+// Returns a *NotSingularError when more than one FileType ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

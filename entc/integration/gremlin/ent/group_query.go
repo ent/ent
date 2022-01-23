@@ -173,7 +173,7 @@ func (gq *GroupQuery) FirstIDX(ctx context.Context) string {
 }
 
 // Only returns a single Group entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Group entity is not found.
+// Returns a *NotSingularError when more than one Group entity is found.
 // Returns a *NotFoundError when no Group entities are found.
 func (gq *GroupQuery) Only(ctx context.Context) (*Group, error) {
 	nodes, err := gq.Limit(2).All(ctx)
@@ -200,7 +200,7 @@ func (gq *GroupQuery) OnlyX(ctx context.Context) *Group {
 }
 
 // OnlyID is like Only, but returns the only Group ID in the query.
-// Returns a *NotSingularError when exactly one Group ID is not found.
+// Returns a *NotSingularError when more than one Group ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (gq *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string

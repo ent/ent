@@ -110,7 +110,7 @@ func (cq *ConversionQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Conversion entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Conversion entity is not found.
+// Returns a *NotSingularError when more than one Conversion entity is found.
 // Returns a *NotFoundError when no Conversion entities are found.
 func (cq *ConversionQuery) Only(ctx context.Context) (*Conversion, error) {
 	nodes, err := cq.Limit(2).All(ctx)
@@ -137,7 +137,7 @@ func (cq *ConversionQuery) OnlyX(ctx context.Context) *Conversion {
 }
 
 // OnlyID is like Only, but returns the only Conversion ID in the query.
-// Returns a *NotSingularError when exactly one Conversion ID is not found.
+// Returns a *NotSingularError when more than one Conversion ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (cq *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

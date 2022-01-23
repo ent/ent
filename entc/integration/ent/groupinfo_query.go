@@ -138,7 +138,7 @@ func (giq *GroupInfoQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single GroupInfo entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one GroupInfo entity is not found.
+// Returns a *NotSingularError when more than one GroupInfo entity is found.
 // Returns a *NotFoundError when no GroupInfo entities are found.
 func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
 	nodes, err := giq.Limit(2).All(ctx)
@@ -165,7 +165,7 @@ func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
 }
 
 // OnlyID is like Only, but returns the only GroupInfo ID in the query.
-// Returns a *NotSingularError when exactly one GroupInfo ID is not found.
+// Returns a *NotSingularError when more than one GroupInfo ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

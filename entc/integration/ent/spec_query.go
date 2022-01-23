@@ -138,7 +138,7 @@ func (sq *SpecQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Spec entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Spec entity is not found.
+// Returns a *NotSingularError when more than one Spec entity is found.
 // Returns a *NotFoundError when no Spec entities are found.
 func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 	nodes, err := sq.Limit(2).All(ctx)
@@ -165,7 +165,7 @@ func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
 }
 
 // OnlyID is like Only, but returns the only Spec ID in the query.
-// Returns a *NotSingularError when exactly one Spec ID is not found.
+// Returns a *NotSingularError when more than one Spec ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (sq *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

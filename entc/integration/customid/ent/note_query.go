@@ -160,7 +160,7 @@ func (nq *NoteQuery) FirstIDX(ctx context.Context) schema.NoteID {
 }
 
 // Only returns a single Note entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Note entity is not found.
+// Returns a *NotSingularError when more than one Note entity is found.
 // Returns a *NotFoundError when no Note entities are found.
 func (nq *NoteQuery) Only(ctx context.Context) (*Note, error) {
 	nodes, err := nq.Limit(2).All(ctx)
@@ -187,7 +187,7 @@ func (nq *NoteQuery) OnlyX(ctx context.Context) *Note {
 }
 
 // OnlyID is like Only, but returns the only Note ID in the query.
-// Returns a *NotSingularError when exactly one Note ID is not found.
+// Returns a *NotSingularError when more than one Note ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (nq *NoteQuery) OnlyID(ctx context.Context) (id schema.NoteID, err error) {
 	var ids []schema.NoteID

@@ -160,7 +160,7 @@ func (rq *RentalQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Rental entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Rental entity is not found.
+// Returns a *NotSingularError when more than one Rental entity is found.
 // Returns a *NotFoundError when no Rental entities are found.
 func (rq *RentalQuery) Only(ctx context.Context) (*Rental, error) {
 	nodes, err := rq.Limit(2).All(ctx)
@@ -187,7 +187,7 @@ func (rq *RentalQuery) OnlyX(ctx context.Context) *Rental {
 }
 
 // OnlyID is like Only, but returns the only Rental ID in the query.
-// Returns a *NotSingularError when exactly one Rental ID is not found.
+// Returns a *NotSingularError when more than one Rental ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (rq *RentalQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

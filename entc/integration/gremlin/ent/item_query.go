@@ -111,7 +111,7 @@ func (iq *ItemQuery) FirstIDX(ctx context.Context) string {
 }
 
 // Only returns a single Item entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Item entity is not found.
+// Returns a *NotSingularError when more than one Item entity is found.
 // Returns a *NotFoundError when no Item entities are found.
 func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
 	nodes, err := iq.Limit(2).All(ctx)
@@ -138,7 +138,7 @@ func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
 }
 
 // OnlyID is like Only, but returns the only Item ID in the query.
-// Returns a *NotSingularError when exactly one Item ID is not found.
+// Returns a *NotSingularError when more than one Item ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string

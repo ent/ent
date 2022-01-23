@@ -161,7 +161,7 @@ func (nq *NodeQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Node entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Node entity is not found.
+// Returns a *NotSingularError when more than one Node entity is found.
 // Returns a *NotFoundError when no Node entities are found.
 func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
 	nodes, err := nq.Limit(2).All(ctx)
@@ -188,7 +188,7 @@ func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
 }
 
 // OnlyID is like Only, but returns the only Node ID in the query.
-// Returns a *NotSingularError when exactly one Node ID is not found.
+// Returns a *NotSingularError when more than one Node ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (nq *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

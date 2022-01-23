@@ -144,7 +144,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Typ
 }
 
 // Only returns a single {{ $.Name }} entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one {{ $.Name }} entity is not found.
+// Returns a *NotSingularError when more than one {{ $.Name }} entity is found.
 // Returns a *NotFoundError when no {{ $.Name }} entities are found.
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
 	nodes, err := {{ $receiver }}.Limit(2).All(ctx)
@@ -171,7 +171,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 }
 
 // OnlyID is like Only, but returns the only {{ $.Name }} ID in the query.
-// Returns a *NotSingularError when exactly one {{ $.Name }} ID is not found.
+// Returns a *NotSingularError when more than one {{ $.Name }} ID is found.
 // Returns a *NotFoundError when no entities are found.
 func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 	var ids []{{ $.ID.Type }}
