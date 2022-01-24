@@ -101,6 +101,12 @@ func init() {
 	fieldtypeDescLink := fieldtypeFields[38].Descriptor()
 	// fieldtype.LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	fieldtype.LinkValidator = fieldtypeDescLink.Validators[0].(func(string) error)
+	// fieldtypeDescDeletedAt is the schema descriptor for deleted_at field.
+	fieldtypeDescDeletedAt := fieldtypeFields[43].Descriptor()
+	// fieldtype.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	fieldtype.DefaultDeletedAt = fieldtypeDescDeletedAt.Default.(func() *sql.NullTime)
+	// fieldtype.UpdateDefaultDeletedAt holds the default value on update for the deleted_at field.
+	fieldtype.UpdateDefaultDeletedAt = fieldtypeDescDeletedAt.UpdateDefault.(func() *sql.NullTime)
 	// fieldtypeDescRawData is the schema descriptor for raw_data field.
 	fieldtypeDescRawData := fieldtypeFields[44].Descriptor()
 	// fieldtype.RawDataValidator is a validator for the "raw_data" field. It is called by the builders before save.

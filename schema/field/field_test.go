@@ -407,7 +407,7 @@ func TestTime(t *testing.T) {
 	assert.Equal(t, now, fd.UpdateDefault.(func() time.Time)())
 
 	type Time time.Time
-	fd = field.Time("deleted_at").GoType(Time{}).Descriptor()
+	fd = field.Time("deleted_at").GoType(Time{}).Default(func() Time { return Time{} }).Descriptor()
 	assert.NoError(t, fd.Err)
 	assert.Equal(t, "field_test.Time", fd.Info.Ident)
 	assert.Equal(t, "entgo.io/ent/schema/field_test", fd.Info.PkgPath)
@@ -423,6 +423,8 @@ func TestTime(t *testing.T) {
 	assert.True(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
 
+	fd = field.Time("deleted_at").GoType(Time{}).Default(time.Now).Descriptor()
+	assert.Error(t, fd.Err)
 	fd = field.Time("active").GoType(1).Descriptor()
 	assert.Error(t, fd.Err)
 	fd = field.Time("active").GoType(struct{}{}).Descriptor()
