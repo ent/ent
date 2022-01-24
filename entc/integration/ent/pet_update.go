@@ -66,6 +66,14 @@ func (pu *PetUpdate) SetUUID(u uuid.UUID) *PetUpdate {
 	return pu
 }
 
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableUUID(u *uuid.UUID) *PetUpdate {
+	if u != nil {
+		pu.SetUUID(*u)
+	}
+	return pu
+}
+
 // ClearUUID clears the value of the "uuid" field.
 func (pu *PetUpdate) ClearUUID() *PetUpdate {
 	pu.mutation.ClearUUID()
@@ -385,6 +393,14 @@ func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
 // SetUUID sets the "uuid" field.
 func (puo *PetUpdateOne) SetUUID(u uuid.UUID) *PetUpdateOne {
 	puo.mutation.SetUUID(u)
+	return puo
+}
+
+// SetNillableUUID sets the "uuid" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableUUID(u *uuid.UUID) *PetUpdateOne {
+	if u != nil {
+		puo.SetUUID(*u)
+	}
 	return puo
 }
 

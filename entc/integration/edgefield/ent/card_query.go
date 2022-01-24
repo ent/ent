@@ -135,7 +135,7 @@ func (cq *CardQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Card entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Card entity is not found.
+// Returns a *NotSingularError when more than one Card entity is found.
 // Returns a *NotFoundError when no Card entities are found.
 func (cq *CardQuery) Only(ctx context.Context) (*Card, error) {
 	nodes, err := cq.Limit(2).All(ctx)
@@ -162,7 +162,7 @@ func (cq *CardQuery) OnlyX(ctx context.Context) *Card {
 }
 
 // OnlyID is like Only, but returns the only Card ID in the query.
-// Returns a *NotSingularError when exactly one Card ID is not found.
+// Returns a *NotSingularError when more than one Card ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (cq *CardQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

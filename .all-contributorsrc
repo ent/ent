@@ -690,6 +690,33 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "genevieve",
+      "name": "Genevieve",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12158641?v=4",
+      "profile": "https://github.com/genevieve",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "cjraa",
+      "name": "Clarence",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62199269?v=4",
+      "profile": "https://github.com/cjraa",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "iamnande",
+      "name": "Nicholas Anderson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7806510?v=4",
+      "profile": "https://www.linkedin.com/in/iamnande/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

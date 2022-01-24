@@ -111,7 +111,7 @@ func (gq *GoodsQuery) FirstIDX(ctx context.Context) string {
 }
 
 // Only returns a single Goods entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Goods entity is not found.
+// Returns a *NotSingularError when more than one Goods entity is found.
 // Returns a *NotFoundError when no Goods entities are found.
 func (gq *GoodsQuery) Only(ctx context.Context) (*Goods, error) {
 	nodes, err := gq.Limit(2).All(ctx)
@@ -138,7 +138,7 @@ func (gq *GoodsQuery) OnlyX(ctx context.Context) *Goods {
 }
 
 // OnlyID is like Only, but returns the only Goods ID in the query.
-// Returns a *NotSingularError when exactly one Goods ID is not found.
+// Returns a *NotSingularError when more than one Goods ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (gq *GoodsQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string

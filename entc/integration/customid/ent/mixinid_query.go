@@ -111,7 +111,7 @@ func (miq *MixinIDQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single MixinID entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one MixinID entity is not found.
+// Returns a *NotSingularError when more than one MixinID entity is found.
 // Returns a *NotFoundError when no MixinID entities are found.
 func (miq *MixinIDQuery) Only(ctx context.Context) (*MixinID, error) {
 	nodes, err := miq.Limit(2).All(ctx)
@@ -138,7 +138,7 @@ func (miq *MixinIDQuery) OnlyX(ctx context.Context) *MixinID {
 }
 
 // OnlyID is like Only, but returns the only MixinID ID in the query.
-// Returns a *NotSingularError when exactly one MixinID ID is not found.
+// Returns a *NotSingularError when more than one MixinID ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (miq *MixinIDQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID

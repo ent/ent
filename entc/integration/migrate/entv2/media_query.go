@@ -110,7 +110,7 @@ func (mq *MediaQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Media entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Media entity is not found.
+// Returns a *NotSingularError when more than one Media entity is found.
 // Returns a *NotFoundError when no Media entities are found.
 func (mq *MediaQuery) Only(ctx context.Context) (*Media, error) {
 	nodes, err := mq.Limit(2).All(ctx)
@@ -137,7 +137,7 @@ func (mq *MediaQuery) OnlyX(ctx context.Context) *Media {
 }
 
 // OnlyID is like Only, but returns the only Media ID in the query.
-// Returns a *NotSingularError when exactly one Media ID is not found.
+// Returns a *NotSingularError when more than one Media ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (mq *MediaQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

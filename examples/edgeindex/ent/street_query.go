@@ -136,7 +136,7 @@ func (sq *StreetQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Street entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Street entity is not found.
+// Returns a *NotSingularError when more than one Street entity is found.
 // Returns a *NotFoundError when no Street entities are found.
 func (sq *StreetQuery) Only(ctx context.Context) (*Street, error) {
 	nodes, err := sq.Limit(2).All(ctx)
@@ -163,7 +163,7 @@ func (sq *StreetQuery) OnlyX(ctx context.Context) *Street {
 }
 
 // OnlyID is like Only, but returns the only Street ID in the query.
-// Returns a *NotSingularError when exactly one Street ID is not found.
+// Returns a *NotSingularError when more than one Street ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (sq *StreetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

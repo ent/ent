@@ -256,3 +256,107 @@ func main() {
     }
 }
 ```
+
+## Atlas Integration
+
+Starting with v0.10, Ent supports running migration with [Atlas](https://atlasgo.io), which is a more robust
+migration framework that covers many features that are not supported by current Ent migrate package. In order
+to execute a migration with the Atlas engine, use the `WithAtlas(true)` option.
+
+```go {21}
+package main
+
+import (
+    "context"
+    "log"
+
+    "<project>/ent"
+    "<project>/ent/migrate"
+
+    "entgo.io/ent/dialect/sql/schema"
+)
+
+func main() {
+    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalf("failed connecting to mysql: %v", err)
+    }
+    defer client.Close()
+    ctx := context.Background()
+    // Run migration.
+    err = client.Schema.Create(ctx, schema.WithAtlas(true))
+    if err != nil {
+        log.Fatalf("failed creating schema resources: %v", err)
+    }
+}
+```
+
+In addition to the standard options (e.g. `WithDropColumn`, `WithGlobalUniqueID`), the Atlas integration provides additional
+options for hooking into schema migration steps.
+
+![atlas-migration-process](https://entgo.io/images/assets/migrate-atlas-process.png)
+
+
+Here are two examples that show how to hook into the Atlas `Diff` and `Apply` steps.
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "<project>/ent"
+    "<project>/ent/migrate"
+
+	"ariga.io/atlas/sql/migrate"
+	atlas "ariga.io/atlas/sql/schema"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql/schema"
+)
+
+func main() {
+    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalf("failed connecting to mysql: %v", err)
+    }
+    defer client.Close()
+    ctx := context.Background()
+    // Run migration.
+    err := 	client.Schema.Create(
+		ctx,
+		// Hook into Atlas Diff process.
+		schema.WithDiffHook(func(next schema.Differ) schema.Differ {
+			return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+				// Before calculating changes.
+				changes, err := next.Diff(current, desired)
+				if err != nil {
+					return nil, err
+				}
+				// After diff, you can filter
+				// changes or return new ones.
+				return changes, nil
+			})
+		}),
+		// Hook into Atlas Apply process.
+		schema.WithApplyHook(func(next schema.Applier) schema.Applier {
+			return schema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *migrate.Plan) error {
+				// Example to hook into the apply process, or implement
+				// a custom applier. For example, write to a file.
+				//
+				//	for _, c := range plan.Changes {
+				//		fmt.Printf("%s: %s", c.Comment, c.Cmd)
+				//		if err := conn.Exec(ctx, c.Cmd, c.Args, nil); err != nil {
+				//			return err
+				//		}
+				//	}
+				//
+				return next.Apply(ctx, conn, plan)
+			})
+		}),
+	)
+    if err != nil {
+        log.Fatalf("failed creating schema resources: %v", err)
+    }
+}
+```

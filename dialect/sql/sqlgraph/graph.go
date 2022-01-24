@@ -379,16 +379,9 @@ func CreateNode(ctx context.Context, drv dialect.Driver, spec *CreateSpec) error
 
 // BatchCreate applies the BatchCreateSpec on the graph.
 func BatchCreate(ctx context.Context, drv dialect.Driver, spec *BatchCreateSpec) error {
-	tx, err := drv.Tx(ctx)
-	if err != nil {
-		return err
-	}
-	gr := graph{tx: tx, builder: sql.Dialect(drv.Dialect())}
+	gr := graph{tx: drv, builder: sql.Dialect(drv.Dialect())}
 	cr := &batchCreator{BatchCreateSpec: spec, graph: gr}
-	if err := cr.nodes(ctx, tx); err != nil {
-		return rollback(tx, err)
-	}
-	return tx.Commit()
+	return cr.nodes(ctx, drv)
 }
 
 type (
@@ -954,7 +947,7 @@ type batchCreator struct {
 	*BatchCreateSpec
 }
 
-func (c *batchCreator) nodes(ctx context.Context, tx dialect.ExecQuerier) error {
+func (c *batchCreator) nodes(ctx context.Context, drv dialect.Driver) error {
 	if len(c.Nodes) == 0 {
 		return nil
 	}
@@ -1001,21 +994,43 @@ func (c *batchCreator) nodes(ctx context.Context, tx dialect.ExecQuerier) error 
 		}
 		insert.Values(vs...)
 	}
-	if err := c.batchInsert(ctx, tx, insert); err != nil {
-		return fmt.Errorf("insert nodes to table %q: %w", c.Nodes[0].Table, err)
-	}
-	if err := c.batchAddM2M(ctx, c.BatchCreateSpec); err != nil {
+	tx, err := c.mayTx(ctx, drv)
+	if err != nil {
 		return err
 	}
-	// FKs that exist in different tables can't be updated in batch (using the CASE
-	// statement), because we rely on RowsAffected to check if the FK column is NULL.
-	for _, node := range c.Nodes {
-		edges := EdgeSpecs(node.Edges).GroupRel()
-		if err := c.graph.addFKEdges(ctx, []driver.Value{node.ID.Value}, append(edges[O2M], edges[O2O]...)); err != nil {
+	c.tx = tx
+	if err := func() error {
+		if err := c.batchInsert(ctx, tx, insert); err != nil {
+			return fmt.Errorf("insert nodes to table %q: %w", c.Nodes[0].Table, err)
+		}
+		if err := c.batchAddM2M(ctx, c.BatchCreateSpec); err != nil {
 			return err
 		}
+		// FKs that exist in different tables can't be updated in batch (using the CASE
+		// statement), because we rely on RowsAffected to check if the FK column is NULL.
+		for _, node := range c.Nodes {
+			edges := EdgeSpecs(node.Edges).GroupRel()
+			if err := c.graph.addFKEdges(ctx, []driver.Value{node.ID.Value}, append(edges[O2M], edges[O2O]...)); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return rollback(tx, err)
 	}
-	return nil
+	return tx.Commit()
+}
+
+// mayTx opens a new transaction if the create operation spans across multiple statements.
+func (c *batchCreator) mayTx(ctx context.Context, drv dialect.Driver) (dialect.Tx, error) {
+	for _, node := range c.Nodes {
+		for _, edge := range node.Edges {
+			if isExternalEdge(edge) {
+				return drv.Tx(ctx)
+			}
+		}
+	}
+	return dialect.NopTx(drv), nil
 }
 
 // batchInsert inserts a batch of nodes to their table and sets their ID if it was not provided by the user.
@@ -1205,8 +1220,8 @@ func (g *graph) clearFKEdges(ctx context.Context, ids []driver.Value, edges []*E
 func (g *graph) addFKEdges(ctx context.Context, ids []driver.Value, edges []*EdgeSpec) error {
 	id := ids[0]
 	if len(ids) > 1 && len(edges) != 0 {
-		// O2M and O2O edges are defined by a FK in the "other" table.
-		// Therefore, ids[i+1] will override ids[i] which is invalid.
+		// O2M and non-inverse O2O edges are defined by a FK in the "other"
+		// table. Therefore, ids[i+1] will override ids[i] which is invalid.
 		return fmt.Errorf("unable to link FK edge to more than 1 node: %v", ids)
 	}
 	for _, edge := range edges {
@@ -1256,6 +1271,12 @@ func hasExternalEdges(addEdges, clearEdges map[Rel][]*EdgeSpec) bool {
 		}
 	}
 	return false
+}
+
+// isExternalEdge reports if the given edge requires an UPDATE
+// or an INSERT to other table.
+func isExternalEdge(e *EdgeSpec) bool {
+	return e.Rel == M2M || e.Rel == O2M || e.Rel == O2O && !e.Inverse
 }
 
 // setTableColumns is shared between updater and creator.

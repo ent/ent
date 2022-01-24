@@ -31,7 +31,7 @@ in the LICENSE file in the root directory of this source tree.
 		return {{ $receiver }}
 	}
 
-	{{/* Avoid generting nillable setters for nillable types. */}}
+	{{/* Avoid generating nillable setters for nillable types. */}}
 	{{ if and (not $f.Type.Nillable) (or $f.Optional $f.Default) (not (and $updater $f.UpdateDefault)) }}
 		{{ $nillableFunc := print "SetNillable" $f.StructField }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.

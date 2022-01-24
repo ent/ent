@@ -135,7 +135,7 @@ func (iq *InfoQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Info entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Info entity is not found.
+// Returns a *NotSingularError when more than one Info entity is found.
 // Returns a *NotFoundError when no Info entities are found.
 func (iq *InfoQuery) Only(ctx context.Context) (*Info, error) {
 	nodes, err := iq.Limit(2).All(ctx)
@@ -162,7 +162,7 @@ func (iq *InfoQuery) OnlyX(ctx context.Context) *Info {
 }
 
 // OnlyID is like Only, but returns the only Info ID in the query.
-// Returns a *NotSingularError when exactly one Info ID is not found.
+// Returns a *NotSingularError when more than one Info ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (iq *InfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

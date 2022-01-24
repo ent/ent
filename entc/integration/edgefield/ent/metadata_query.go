@@ -182,7 +182,7 @@ func (mq *MetadataQuery) FirstIDX(ctx context.Context) int {
 }
 
 // Only returns a single Metadata entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Metadata entity is not found.
+// Returns a *NotSingularError when more than one Metadata entity is found.
 // Returns a *NotFoundError when no Metadata entities are found.
 func (mq *MetadataQuery) Only(ctx context.Context) (*Metadata, error) {
 	nodes, err := mq.Limit(2).All(ctx)
@@ -209,7 +209,7 @@ func (mq *MetadataQuery) OnlyX(ctx context.Context) *Metadata {
 }
 
 // OnlyID is like Only, but returns the only Metadata ID in the query.
-// Returns a *NotSingularError when exactly one Metadata ID is not found.
+// Returns a *NotSingularError when more than one Metadata ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (mq *MetadataQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int

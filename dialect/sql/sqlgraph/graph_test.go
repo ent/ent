@@ -1284,10 +1284,86 @@ func TestBatchCreate(t *testing.T) {
 				},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectBegin()
 				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `name`) VALUES (?, ?, ?), (?, ?, ?) ON DUPLICATE KEY UPDATE `active` = `users`.`active`, `age` = `users`.`age`, `name` = `users`.`name`")).
 					WithArgs(false, 32, "a8m", true, 30, "nati").
 					WillReturnResult(sqlmock.NewResult(10, 2))
+			},
+		},
+		{
+			name: "no tx",
+			spec: &BatchCreateSpec{
+				Nodes: []*CreateSpec{
+					{
+						Table: "users",
+						ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+						Fields: []*FieldSpec{
+							{Column: "age", Type: field.TypeInt, Value: 32},
+							{Column: "name", Type: field.TypeString, Value: "a8m"},
+							{Column: "active", Type: field.TypeBool, Value: false},
+						},
+						Edges: []*EdgeSpec{
+							{Rel: M2O, Table: "company", Columns: []string{"workplace_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+							{Rel: O2O, Inverse: true, Table: "users", Columns: []string{"best_friend_id"}, Target: &EdgeTarget{Nodes: []driver.Value{3}, IDSpec: &FieldSpec{Column: "id"}}},
+						},
+					},
+					{
+						Table: "users",
+						ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+						Fields: []*FieldSpec{
+							{Column: "age", Type: field.TypeInt, Value: 30},
+							{Column: "name", Type: field.TypeString, Value: "nati"},
+						},
+						Edges: []*EdgeSpec{
+							{Rel: M2O, Table: "company", Columns: []string{"workplace_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}}},
+							{Rel: O2O, Inverse: true, Table: "users", Columns: []string{"best_friend_id"}, Target: &EdgeTarget{Nodes: []driver.Value{4}, IDSpec: &FieldSpec{Column: "id"}}},
+						},
+					},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				// Insert nodes with FKs.
+				m.ExpectExec(escape("INSERT INTO `users` (`active`, `age`, `best_friend_id`, `name`, `workplace_id`) VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)")).
+					WithArgs(false, 32, 3, "a8m", 2, nil, 30, 4, "nati", 2).
+					WillReturnResult(sqlmock.NewResult(10, 2))
+			},
+		},
+		{
+			name: "with tx",
+			spec: &BatchCreateSpec{
+				Nodes: []*CreateSpec{
+					{
+						Table: "users",
+						ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+						Fields: []*FieldSpec{
+							{Column: "name", Type: field.TypeString, Value: "a8m"},
+						},
+						Edges: []*EdgeSpec{
+							{Rel: O2O, Table: "cards", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{3}, IDSpec: &FieldSpec{Column: "id"}}},
+						},
+					},
+					{
+						Table: "users",
+						ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+						Fields: []*FieldSpec{
+							{Column: "name", Type: field.TypeString, Value: "nati"},
+						},
+						Edges: []*EdgeSpec{
+							{Rel: O2O, Table: "cards", Columns: []string{"owner_id"}, Target: &EdgeTarget{Nodes: []driver.Value{4}, IDSpec: &FieldSpec{Column: "id"}}},
+						},
+					},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?), (?)")).
+					WithArgs("a8m", "nati").
+					WillReturnResult(sqlmock.NewResult(10, 2))
+				m.ExpectExec(escape("UPDATE `cards` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
+					WithArgs(10 /* LAST_INSERT_ID() */, 3).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("UPDATE `cards` SET `owner_id` = ? WHERE `id` = ? AND `owner_id` IS NULL")).
+					WithArgs(11 /* LAST_INSERT_ID() + 1 */, 4).
+					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
 			},
 		},

@@ -143,7 +143,7 @@ func (pq *PetQuery) FirstIDX(ctx context.Context) string {
 }
 
 // Only returns a single Pet entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Pet entity is not found.
+// Returns a *NotSingularError when more than one Pet entity is found.
 // Returns a *NotFoundError when no Pet entities are found.
 func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
 	nodes, err := pq.Limit(2).All(ctx)
@@ -170,7 +170,7 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 }
 
 // OnlyID is like Only, but returns the only Pet ID in the query.
-// Returns a *NotSingularError when exactly one Pet ID is not found.
+// Returns a *NotSingularError when more than one Pet ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string

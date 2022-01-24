@@ -137,7 +137,7 @@ func (sq *SessionQuery) FirstIDX(ctx context.Context) schema.ID {
 }
 
 // Only returns a single Session entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Session entity is not found.
+// Returns a *NotSingularError when more than one Session entity is found.
 // Returns a *NotFoundError when no Session entities are found.
 func (sq *SessionQuery) Only(ctx context.Context) (*Session, error) {
 	nodes, err := sq.Limit(2).All(ctx)
@@ -164,7 +164,7 @@ func (sq *SessionQuery) OnlyX(ctx context.Context) *Session {
 }
 
 // OnlyID is like Only, but returns the only Session ID in the query.
-// Returns a *NotSingularError when exactly one Session ID is not found.
+// Returns a *NotSingularError when more than one Session ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (sq *SessionQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 	var ids []schema.ID

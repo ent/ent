@@ -34,6 +34,14 @@ func (dc *DeviceCreate) SetID(s schema.ID) *DeviceCreate {
 	return dc
 }
 
+// SetNillableID sets the "id" field if the given value is not nil.
+func (dc *DeviceCreate) SetNillableID(s *schema.ID) *DeviceCreate {
+	if s != nil {
+		dc.SetID(*s)
+	}
+	return dc
+}
+
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
 func (dc *DeviceCreate) SetActiveSessionID(id schema.ID) *DeviceCreate {
 	dc.mutation.SetActiveSessionID(id)

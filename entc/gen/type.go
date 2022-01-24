@@ -1416,7 +1416,7 @@ func (f Field) enums(lf *load.Field) ([]Enum, error) {
 		case values[value]:
 			return nil, fmt.Errorf("duplicate values %q for enum field %q", value, f.Name)
 		case !token.IsIdentifier(name):
-			return nil, fmt.Errorf("enum %q does not have a valid Go indetifier (%q)", value, name)
+			return nil, fmt.Errorf("enum %q does not have a valid Go identifier (%q)", value, name)
 		default:
 			values[value] = true
 			enums = append(enums, Enum{Name: name, Value: value})

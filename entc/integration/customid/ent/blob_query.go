@@ -160,7 +160,7 @@ func (bq *BlobQuery) FirstIDX(ctx context.Context) uuid.UUID {
 }
 
 // Only returns a single Blob entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Blob entity is not found.
+// Returns a *NotSingularError when more than one Blob entity is found.
 // Returns a *NotFoundError when no Blob entities are found.
 func (bq *BlobQuery) Only(ctx context.Context) (*Blob, error) {
 	nodes, err := bq.Limit(2).All(ctx)
@@ -187,7 +187,7 @@ func (bq *BlobQuery) OnlyX(ctx context.Context) *Blob {
 }
 
 // OnlyID is like Only, but returns the only Blob ID in the query.
-// Returns a *NotSingularError when exactly one Blob ID is not found.
+// Returns a *NotSingularError when more than one Blob ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (bq *BlobQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID

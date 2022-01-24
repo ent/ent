@@ -1435,7 +1435,7 @@ type FieldTypeMutation struct {
 	null_float                 **sql.NullFloat64
 	role                       *role.Role
 	priority                   *role.Priority
-	uuid                       *uuid.UUID
+	optional_uuid              *uuid.UUID
 	nillable_uuid              *uuid.UUID
 	strings                    *[]string
 	pair                       *schema.Pair
@@ -4827,53 +4827,53 @@ func (m *FieldTypeMutation) ResetPriority() {
 	delete(m.clearedFields, fieldtype.FieldPriority)
 }
 
-// SetUUID sets the "uuid" field.
-func (m *FieldTypeMutation) SetUUID(u uuid.UUID) {
-	m.uuid = &u
+// SetOptionalUUID sets the "optional_uuid" field.
+func (m *FieldTypeMutation) SetOptionalUUID(u uuid.UUID) {
+	m.optional_uuid = &u
 }
 
-// UUID returns the value of the "uuid" field in the mutation.
-func (m *FieldTypeMutation) UUID() (r uuid.UUID, exists bool) {
-	v := m.uuid
+// OptionalUUID returns the value of the "optional_uuid" field in the mutation.
+func (m *FieldTypeMutation) OptionalUUID() (r uuid.UUID, exists bool) {
+	v := m.optional_uuid
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldUUID returns the old "uuid" field's value of the FieldType entity.
+// OldOptionalUUID returns the old "optional_uuid" field's value of the FieldType entity.
 // If the FieldType object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FieldTypeMutation) OldUUID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *FieldTypeMutation) OldOptionalUUID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUUID is only allowed on UpdateOne operations")
+		return v, errors.New("OldOptionalUUID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUUID requires an ID field in the mutation")
+		return v, errors.New("OldOptionalUUID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUUID: %w", err)
+		return v, fmt.Errorf("querying old value for OldOptionalUUID: %w", err)
 	}
-	return oldValue.UUID, nil
+	return oldValue.OptionalUUID, nil
 }
 
-// ClearUUID clears the value of the "uuid" field.
-func (m *FieldTypeMutation) ClearUUID() {
-	m.uuid = nil
-	m.clearedFields[fieldtype.FieldUUID] = struct{}{}
+// ClearOptionalUUID clears the value of the "optional_uuid" field.
+func (m *FieldTypeMutation) ClearOptionalUUID() {
+	m.optional_uuid = nil
+	m.clearedFields[fieldtype.FieldOptionalUUID] = struct{}{}
 }
 
-// UUIDCleared returns if the "uuid" field was cleared in this mutation.
-func (m *FieldTypeMutation) UUIDCleared() bool {
-	_, ok := m.clearedFields[fieldtype.FieldUUID]
+// OptionalUUIDCleared returns if the "optional_uuid" field was cleared in this mutation.
+func (m *FieldTypeMutation) OptionalUUIDCleared() bool {
+	_, ok := m.clearedFields[fieldtype.FieldOptionalUUID]
 	return ok
 }
 
-// ResetUUID resets all changes to the "uuid" field.
-func (m *FieldTypeMutation) ResetUUID() {
-	m.uuid = nil
-	delete(m.clearedFields, fieldtype.FieldUUID)
+// ResetOptionalUUID resets all changes to the "optional_uuid" field.
+func (m *FieldTypeMutation) ResetOptionalUUID() {
+	m.optional_uuid = nil
+	delete(m.clearedFields, fieldtype.FieldOptionalUUID)
 }
 
 // SetNillableUUID sets the "nillable_uuid" field.
@@ -5438,8 +5438,8 @@ func (m *FieldTypeMutation) Fields() []string {
 	if m.priority != nil {
 		fields = append(fields, fieldtype.FieldPriority)
 	}
-	if m.uuid != nil {
-		fields = append(fields, fieldtype.FieldUUID)
+	if m.optional_uuid != nil {
+		fields = append(fields, fieldtype.FieldOptionalUUID)
 	}
 	if m.nillable_uuid != nil {
 		fields = append(fields, fieldtype.FieldNillableUUID)
@@ -5585,8 +5585,8 @@ func (m *FieldTypeMutation) Field(name string) (ent.Value, bool) {
 		return m.Role()
 	case fieldtype.FieldPriority:
 		return m.Priority()
-	case fieldtype.FieldUUID:
-		return m.UUID()
+	case fieldtype.FieldOptionalUUID:
+		return m.OptionalUUID()
 	case fieldtype.FieldNillableUUID:
 		return m.NillableUUID()
 	case fieldtype.FieldStrings:
@@ -5724,8 +5724,8 @@ func (m *FieldTypeMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldRole(ctx)
 	case fieldtype.FieldPriority:
 		return m.OldPriority(ctx)
-	case fieldtype.FieldUUID:
-		return m.OldUUID(ctx)
+	case fieldtype.FieldOptionalUUID:
+		return m.OldOptionalUUID(ctx)
 	case fieldtype.FieldNillableUUID:
 		return m.OldNillableUUID(ctx)
 	case fieldtype.FieldStrings:
@@ -6143,12 +6143,12 @@ func (m *FieldTypeMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPriority(v)
 		return nil
-	case fieldtype.FieldUUID:
+	case fieldtype.FieldOptionalUUID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetUUID(v)
+		m.SetOptionalUUID(v)
 		return nil
 	case fieldtype.FieldNillableUUID:
 		v, ok := value.(uuid.UUID)
@@ -6758,8 +6758,8 @@ func (m *FieldTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(fieldtype.FieldPriority) {
 		fields = append(fields, fieldtype.FieldPriority)
 	}
-	if m.FieldCleared(fieldtype.FieldUUID) {
-		fields = append(fields, fieldtype.FieldUUID)
+	if m.FieldCleared(fieldtype.FieldOptionalUUID) {
+		fields = append(fields, fieldtype.FieldOptionalUUID)
 	}
 	if m.FieldCleared(fieldtype.FieldNillableUUID) {
 		fields = append(fields, fieldtype.FieldNillableUUID)
@@ -6937,8 +6937,8 @@ func (m *FieldTypeMutation) ClearField(name string) error {
 	case fieldtype.FieldPriority:
 		m.ClearPriority()
 		return nil
-	case fieldtype.FieldUUID:
-		m.ClearUUID()
+	case fieldtype.FieldOptionalUUID:
+		m.ClearOptionalUUID()
 		return nil
 	case fieldtype.FieldNillableUUID:
 		m.ClearNillableUUID()
@@ -7131,8 +7131,8 @@ func (m *FieldTypeMutation) ResetField(name string) error {
 	case fieldtype.FieldPriority:
 		m.ResetPriority()
 		return nil
-	case fieldtype.FieldUUID:
-		m.ResetUUID()
+	case fieldtype.FieldOptionalUUID:
+		m.ResetOptionalUUID()
 		return nil
 	case fieldtype.FieldNillableUUID:
 		m.ResetNillableUUID()

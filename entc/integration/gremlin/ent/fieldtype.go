@@ -138,8 +138,8 @@ type FieldType struct {
 	Role role.Role `json:"role,omitempty"`
 	// Priority holds the value of the "priority" field.
 	Priority role.Priority `json:"priority,omitempty"`
-	// UUID holds the value of the "uuid" field.
-	UUID uuid.UUID `json:"uuid,omitempty"`
+	// OptionalUUID holds the value of the "optional_uuid" field.
+	OptionalUUID uuid.UUID `json:"optional_uuid,omitempty"`
 	// NillableUUID holds the value of the "nillable_uuid" field.
 	NillableUUID *uuid.UUID `json:"nillable_uuid,omitempty"`
 	// Strings holds the value of the "strings" field.
@@ -222,7 +222,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 		NullFloat             *sql.NullFloat64      `json:"null_float,omitempty"`
 		Role                  role.Role             `json:"role,omitempty"`
 		Priority              role.Priority         `json:"priority,omitempty"`
-		UUID                  uuid.UUID             `json:"uuid,omitempty"`
+		OptionalUUID          uuid.UUID             `json:"optional_uuid,omitempty"`
 		NillableUUID          *uuid.UUID            `json:"nillable_uuid,omitempty"`
 		Strings               []string              `json:"strings,omitempty"`
 		Pair                  schema.Pair           `json:"pair,omitempty"`
@@ -292,7 +292,7 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 	ft.NullFloat = scanft.NullFloat
 	ft.Role = scanft.Role
 	ft.Priority = scanft.Priority
-	ft.UUID = scanft.UUID
+	ft.OptionalUUID = scanft.OptionalUUID
 	ft.NillableUUID = scanft.NillableUUID
 	ft.Strings = scanft.Strings
 	ft.Pair = scanft.Pair
@@ -459,8 +459,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
 	builder.WriteString(", priority=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Priority))
-	builder.WriteString(", uuid=")
-	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
+	builder.WriteString(", optional_uuid=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUUID))
 	if v := ft.NillableUUID; v != nil {
 		builder.WriteString(", nillable_uuid=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
@@ -551,7 +551,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 		NullFloat             *sql.NullFloat64      `json:"null_float,omitempty"`
 		Role                  role.Role             `json:"role,omitempty"`
 		Priority              role.Priority         `json:"priority,omitempty"`
-		UUID                  uuid.UUID             `json:"uuid,omitempty"`
+		OptionalUUID          uuid.UUID             `json:"optional_uuid,omitempty"`
 		NillableUUID          *uuid.UUID            `json:"nillable_uuid,omitempty"`
 		Strings               []string              `json:"strings,omitempty"`
 		Pair                  schema.Pair           `json:"pair,omitempty"`
@@ -623,7 +623,7 @@ func (ft *FieldTypes) FromResponse(res *gremlin.Response) error {
 			NullFloat:             v.NullFloat,
 			Role:                  v.Role,
 			Priority:              v.Priority,
-			UUID:                  v.UUID,
+			OptionalUUID:          v.OptionalUUID,
 			NillableUUID:          v.NillableUUID,
 			Strings:               v.Strings,
 			Pair:                  v.Pair,

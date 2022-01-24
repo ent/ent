@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -26,14 +27,6 @@ type CarCreate struct {
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cc *CarCreate) SetOwnerID(id int) *CarCreate {
 	cc.mutation.SetOwnerID(id)
-	return cc
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (cc *CarCreate) SetNillableOwnerID(id *int) *CarCreate {
-	if id != nil {
-		cc = cc.SetOwnerID(*id)
-	}
 	return cc
 }
 
@@ -112,6 +105,9 @@ func (cc *CarCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CarCreate) check() error {
+	if _, ok := cc.mutation.OwnerID(); !ok {
+		return &ValidationError{Name: "owner", err: errors.New(`entv2: missing required edge "Car.owner"`)}
+	}
 	return nil
 }
 

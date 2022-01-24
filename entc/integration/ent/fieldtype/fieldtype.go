@@ -134,8 +134,8 @@ const (
 	FieldRole = "role"
 	// FieldPriority holds the string denoting the priority field in the database.
 	FieldPriority = "priority"
-	// FieldUUID holds the string denoting the uuid field in the database.
-	FieldUUID = "uuid"
+	// FieldOptionalUUID holds the string denoting the optional_uuid field in the database.
+	FieldOptionalUUID = "optional_uuid"
 	// FieldNillableUUID holds the string denoting the nillable_uuid field in the database.
 	FieldNillableUUID = "nillable_uuid"
 	// FieldStrings holds the string denoting the strings field in the database.
@@ -215,7 +215,7 @@ var Columns = []string{
 	FieldNullFloat,
 	FieldRole,
 	FieldPriority,
-	FieldUUID,
+	FieldOptionalUUID,
 	FieldNillableUUID,
 	FieldStrings,
 	FieldPair,

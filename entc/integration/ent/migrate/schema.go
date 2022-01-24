@@ -126,7 +126,7 @@ var (
 		{Name: "null_float", Type: field.TypeFloat64, Nullable: true},
 		{Name: "role", Type: field.TypeEnum, Enums: []string{"ADMIN", "OWNER", "USER", "READ", "WRITE"}, Default: "READ"},
 		{Name: "priority", Type: field.TypeEnum, Nullable: true, Enums: []string{"UNKNOWN", "LOW", "HIGH"}},
-		{Name: "uuid", Type: field.TypeUUID, Nullable: true},
+		{Name: "optional_uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "nillable_uuid", Type: field.TypeUUID, Nullable: true},
 		{Name: "strings", Type: field.TypeJSON, Nullable: true},
 		{Name: "pair", Type: field.TypeBytes},
@@ -247,7 +247,7 @@ var (
 		{Name: "type", Type: field.TypeString, Nullable: true, Size: 255},
 		{Name: "max_users", Type: field.TypeInt, Nullable: true, Default: 10},
 		{Name: "name", Type: field.TypeString},
-		{Name: "group_info", Type: field.TypeInt, Nullable: true},
+		{Name: "group_info", Type: field.TypeInt},
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
@@ -259,7 +259,7 @@ var (
 				Symbol:     "groups_group_infos_info",
 				Columns:    []*schema.Column{GroupsColumns[6]},
 				RefColumns: []*schema.Column{GroupInfosColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}

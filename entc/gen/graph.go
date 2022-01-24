@@ -456,15 +456,20 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			}
 			switch e.Rel.Type {
 			case O2O, O2M:
-				// The "owner" is the table that owns the relation (we set the foreign-key on)
-				// and "ref" is the referenced table.
+				// The "owner" is the table that owns the relation (we set
+				// the foreign-key on) and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
 				pk := ref.PrimaryKey[0]
 				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, Unique: e.Rel.Type == O2O, SchemaType: pk.SchemaType, Nullable: true}
+				// If it's not a circular reference (self-referencing table),
+				// and the inverse edge is required, make it non-nullable.
+				if n != e.Type && e.Ref != nil && !e.Ref.Optional {
+					column.Nullable = false
+				}
 				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
-					OnDelete:   deleteAction(e),
+					OnDelete:   deleteAction(e, column),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
 					Symbol:     fkSymbol(e, owner, ref),
@@ -473,10 +478,15 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
 				pk := ref.PrimaryKey[0]
 				column := &schema.Column{Name: e.Rel.Column(), Size: pk.Size, Type: pk.Type, SchemaType: pk.SchemaType, Nullable: true}
+				// If it's not a circular reference (self-referencing table),
+				// and the edge is non-optional (required), make it non-nullable.
+				if n != e.Type && !e.Optional {
+					column.Nullable = false
+				}
 				mayAddColumn(owner, column)
 				owner.AddForeignKey(&schema.ForeignKey{
 					RefTable:   ref,
-					OnDelete:   deleteAction(e),
+					OnDelete:   deleteAction(e, column),
 					Columns:    []*schema.Column{column},
 					RefColumns: []*schema.Column{ref.PrimaryKey[0]},
 					Symbol:     fkSymbol(e, owner, ref),
@@ -563,8 +573,11 @@ func fkSymbols(e *Edge, c1, c2 *schema.Column) (string, string) {
 }
 
 // deleteAction returns the referential action for DELETE operations of the given edge.
-func deleteAction(e *Edge) schema.ReferenceOption {
-	action := schema.SetNull
+func deleteAction(e *Edge, c *schema.Column) schema.ReferenceOption {
+	action := schema.NoAction
+	if c.Nullable {
+		action = schema.SetNull
+	}
 	if ant := e.EntSQL(); ant != nil && ant.OnDelete != "" {
 		action = schema.ReferenceOption(ant.OnDelete)
 	}

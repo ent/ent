@@ -138,8 +138,8 @@ type FieldType struct {
 	Role role.Role `json:"role,omitempty"`
 	// Priority holds the value of the "priority" field.
 	Priority role.Priority `json:"priority,omitempty"`
-	// UUID holds the value of the "uuid" field.
-	UUID uuid.UUID `json:"uuid,omitempty"`
+	// OptionalUUID holds the value of the "optional_uuid" field.
+	OptionalUUID uuid.UUID `json:"optional_uuid,omitempty"`
 	// NillableUUID holds the value of the "nillable_uuid" field.
 	NillableUUID *uuid.UUID `json:"nillable_uuid,omitempty"`
 	// Strings holds the value of the "strings" field.
@@ -202,7 +202,7 @@ func (*FieldType) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case fieldtype.FieldDatetime, fieldtype.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case fieldtype.FieldUUID:
+		case fieldtype.FieldOptionalUUID:
 			values[i] = new(uuid.UUID)
 		case fieldtype.ForeignKeys[0]: // file_field
 			values[i] = new(sql.NullInt64)
@@ -571,11 +571,11 @@ func (ft *FieldType) assignValues(columns []string, values []interface{}) error 
 			} else if value != nil {
 				ft.Priority = *value
 			}
-		case fieldtype.FieldUUID:
+		case fieldtype.FieldOptionalUUID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field uuid", values[i])
+				return fmt.Errorf("unexpected type %T for field optional_uuid", values[i])
 			} else if value != nil {
-				ft.UUID = *value
+				ft.OptionalUUID = *value
 			}
 		case fieldtype.FieldNillableUUID:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -795,8 +795,8 @@ func (ft *FieldType) String() string {
 	builder.WriteString(fmt.Sprintf("%v", ft.Role))
 	builder.WriteString(", priority=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Priority))
-	builder.WriteString(", uuid=")
-	builder.WriteString(fmt.Sprintf("%v", ft.UUID))
+	builder.WriteString(", optional_uuid=")
+	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUUID))
 	if v := ft.NillableUUID; v != nil {
 		builder.WriteString(", nillable_uuid=")
 		builder.WriteString(fmt.Sprintf("%v", *v))

@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/migrate/entv1"
 	migratev1 "entgo.io/ent/entc/integration/migrate/entv1/migrate"
 	userv1 "entgo.io/ent/entc/integration/migrate/entv1/user"
@@ -22,6 +23,8 @@ import (
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 
+	"ariga.io/atlas/sql/migrate"
+	atlas "ariga.io/atlas/sql/schema"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -88,16 +91,51 @@ func TestSQLite(t *testing.T) {
 
 	ctx := context.Background()
 	client := entv2.NewClient(entv2.Driver(drv))
-	require.NoError(t, client.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), migratev2.WithDropIndex(true))
+	require.NoError(
+		t,
+		client.Schema.Create(
+			ctx,
+			migratev2.WithGlobalUniqueID(true),
+			migratev2.WithDropIndex(true),
+			schema.WithDiffHook(func(next schema.Differ) schema.Differ {
+				return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+					// Example to hook into the diff process.
+					changes, err := next.Diff(current, desired)
+					if err != nil {
+						return nil, err
+					}
+					// After diff, you can filter
+					// changes or return new ones.
+					return changes, nil
+				})
+			}),
+			schema.WithApplyHook(func(next schema.Applier) schema.Applier {
+				return schema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *migrate.Plan) error {
+					// Example to hook into the apply process, or implement
+					// a custom applier. For example, write to a file.
+					//
+					//	for _, c := range plan.Changes {
+					//		fmt.Printf("%s: %s", c.Comment, c.Cmd)
+					//		if err := conn.Exec(ctx, c.Cmd, c.Args, nil); err != nil {
+					//			return err
+					//		}
+					//	}
+					//
+					return next.Apply(ctx, conn, plan)
+				})
+			}),
+		),
+	)
 
 	SanityV2(t, drv.Dialect(), client)
-	idRange(t, client.Car.Create().SaveX(ctx).ID, 0, 1<<32)
+	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx)
+	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 	idRange(t, client.Group.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
 	idRange(t, client.Media.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
 	idRange(t, client.Pet.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
-	idRange(t, client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx).ID, 6<<32-1, 7<<32)
+	idRange(t, u.ID, 6<<32-1, 7<<32)
 
 	// Override the default behavior of LIKE in SQLite.
 	// https://www.sqlite.org/pragma.html#pragma_case_sensitive_like
@@ -118,19 +156,20 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	ctx := context.Background()
 
 	// Run migration and execute queries on v1.
-	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true)))
+	require.NoError(t, clientv1.Schema.Create(ctx, migratev1.WithGlobalUniqueID(true), schema.WithAtlas(true)))
 	SanityV1(t, dialect, clientv1)
 
 	// Run migration and execute queries on v2.
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true)))
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true)), "should not create additional resources on multiple runs")
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
 
-	idRange(t, clientv2.Car.Create().SaveX(ctx).ID, 0, 1<<32)
+	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
+	idRange(t, clientv2.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, clientv2.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
-	idRange(t, clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx).ID, 3<<32-1, 4<<32)
+	idRange(t, u.ID, 3<<32-1, 4<<32)
 	idRange(t, clientv2.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
 	idRange(t, clientv2.Media.Create().SaveX(ctx).ID, 5<<32-1, 6<<32)
 	idRange(t, clientv2.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)

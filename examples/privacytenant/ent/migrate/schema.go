@@ -16,7 +16,7 @@ var (
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Default: "Unknown"},
-		{Name: "group_tenant", Type: field.TypeInt, Nullable: true},
+		{Name: "group_tenant", Type: field.TypeInt},
 	}
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
@@ -28,7 +28,7 @@ var (
 				Symbol:     "groups_tenants_tenant",
 				Columns:    []*schema.Column{GroupsColumns[2]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -48,7 +48,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString, Default: "Unknown"},
 		{Name: "foods", Type: field.TypeJSON, Nullable: true},
-		{Name: "user_tenant", Type: field.TypeInt, Nullable: true},
+		{Name: "user_tenant", Type: field.TypeInt},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -60,7 +60,7 @@ var (
 				Symbol:     "users_tenants_tenant",
 				Columns:    []*schema.Column{UsersColumns[3]},
 				RefColumns: []*schema.Column{TenantsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}

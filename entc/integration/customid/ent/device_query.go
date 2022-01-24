@@ -161,7 +161,7 @@ func (dq *DeviceQuery) FirstIDX(ctx context.Context) schema.ID {
 }
 
 // Only returns a single Device entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when exactly one Device entity is not found.
+// Returns a *NotSingularError when more than one Device entity is found.
 // Returns a *NotFoundError when no Device entities are found.
 func (dq *DeviceQuery) Only(ctx context.Context) (*Device, error) {
 	nodes, err := dq.Limit(2).All(ctx)
@@ -188,7 +188,7 @@ func (dq *DeviceQuery) OnlyX(ctx context.Context) *Device {
 }
 
 // OnlyID is like Only, but returns the only Device ID in the query.
-// Returns a *NotSingularError when exactly one Device ID is not found.
+// Returns a *NotSingularError when more than one Device ID is found.
 // Returns a *NotFoundError when no entities are found.
 func (dq *DeviceQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 	var ids []schema.ID
