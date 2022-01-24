@@ -117,6 +117,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	require.False(exists)
 	require.Equal("127.0.0.1", ft.LinkOtherFunc.String())
+	require.False(ft.DeletedAt.Time.IsZero())
 
 	ft = client.FieldType.UpdateOne(ft).AddOptionalUint64(10).SaveX(ctx)
 	require.EqualValues(10, ft.OptionalUint64)
@@ -205,6 +206,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Equal("2000", ft.BigInt.String())
 	require.EqualValues(100, ft.Int64, "UpdateDefault sets the value to 100")
 	require.EqualValues(100, ft.Duration, "UpdateDefault sets the value to 100ns")
+	require.False(ft.DeletedAt.Time.IsZero())
 
 	err = client.Task.CreateBulk(
 		client.Task.Create().SetPriority(schema.PriorityLow),

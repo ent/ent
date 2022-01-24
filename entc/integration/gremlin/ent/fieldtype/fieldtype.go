@@ -177,6 +177,10 @@ var (
 	DefaultNullStr func() *sql.NullString
 	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	LinkValidator func(string) error
+	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
+	DefaultDeletedAt func() *sql.NullTime
+	// UpdateDefaultDeletedAt holds the default value on update for the "deleted_at" field.
+	UpdateDefaultDeletedAt func() *sql.NullTime
 	// RawDataValidator is a validator for the "raw_data" field. It is called by the builders before save.
 	RawDataValidator func([]byte) error
 	// DefaultIP holds the default value on creation for the "ip" field.

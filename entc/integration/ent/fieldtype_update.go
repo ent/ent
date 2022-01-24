@@ -1410,6 +1410,10 @@ func (ftu *FieldTypeUpdate) defaults() {
 		v := fieldtype.UpdateDefaultDuration()
 		ftu.mutation.SetDuration(v)
 	}
+	if _, ok := ftu.mutation.DeletedAt(); !ok && !ftu.mutation.DeletedAtCleared() {
+		v := fieldtype.UpdateDefaultDeletedAt()
+		ftu.mutation.SetDeletedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -3880,6 +3884,10 @@ func (ftuo *FieldTypeUpdateOne) defaults() {
 	if _, ok := ftuo.mutation.Duration(); !ok && !ftuo.mutation.DurationCleared() {
 		v := fieldtype.UpdateDefaultDuration()
 		ftuo.mutation.SetDuration(v)
+	}
+	if _, ok := ftuo.mutation.DeletedAt(); !ok && !ftuo.mutation.DeletedAtCleared() {
+		v := fieldtype.UpdateDefaultDeletedAt()
+		ftuo.mutation.SetDeletedAt(v)
 	}
 }
 
