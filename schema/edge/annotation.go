@@ -7,7 +7,7 @@ package edge
 import "entgo.io/ent/schema"
 
 // Annotation is a builtin schema annotation for
-// configuring the edges behavior in codegen.
+// configuring the edges' behavior in codegen.
 type Annotation struct {
 	// The StructTag option allows overriding the struct-tag
 	// of the `Edges` field in the generated entity. For example:

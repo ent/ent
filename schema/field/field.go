@@ -26,7 +26,7 @@ func String(name string) *stringBuilder {
 }
 
 // Text returns a new string field without limitation on the size.
-// In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has not effect.
+// In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has no effect.
 func Text(name string) *stringBuilder {
 	return &stringBuilder{&Descriptor{
 		Name: name,
@@ -892,7 +892,7 @@ func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
 	b.Values(ev.Values()...)
 	b.desc.goType(ev, stringType)
 	// If an error already exists, let that be returned instead.
-	// Otherwise check that the underlying type is either a string
+	// Otherwise, check that the underlying type is either a string
 	// or implements Stringer.
 	if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.Stringer() {
 		b.desc.Err = errors.New("enum values which implement ValueScanner must also implement Stringer")

@@ -64,7 +64,7 @@ type Annotation struct {
 	//
 	Size int64 `json:"size,omitempty"`
 
-	// Incremental defines the autoincremental behavior of a column. For example:
+	// Incremental defines the auto-incremental behavior of a column. For example:
 	//
 	//  incrementalEnabled := true
 	//  entsql.Annotation{
@@ -190,7 +190,7 @@ type IndexAnnotation struct {
 	//
 	Prefix uint
 
-	// PrefixColumns defines column prefixes for a multi column index.
+	// PrefixColumns defines column prefixes for a multi-column index.
 	// In MySQL, the following annotation maps to:
 	//
 	//	index.Fields("c1", "c2", "c3").

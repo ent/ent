@@ -47,7 +47,7 @@ type (
 		Indexes() []Index
 		// Config returns an optional config for the schema.
 		//
-		// Deprecated: the Config method predates the Annotations method and it
+		// Deprecated: the Config method predates the Annotations method, and it
 		// is planned be removed in v0.5.0. New code should use Annotations instead.
 		//
 		//	func (T) Annotations() []schema.Annotation {
@@ -83,7 +83,7 @@ type (
 		Descriptor() *field.Descriptor
 	}
 
-	// A Edge interface returns an edge descriptor for vertex edges.
+	// An Edge interface returns an edge descriptor for vertex edges.
 	// The usage for the interface is as follows:
 	//
 	//	func (T) Edges() []ent.Edge {
@@ -96,7 +96,7 @@ type (
 		Descriptor() *edge.Descriptor
 	}
 
-	// A Index interface returns an index descriptor for vertex indexes.
+	// An Index interface returns an index descriptor for vertex indexes.
 	// The usage for the interface is as follows:
 	//
 	//	func (T) Indexes() []ent.Index {
@@ -271,7 +271,7 @@ type (
 		// ClearedFields returns all nullable fields that were cleared
 		// during this mutation.
 		ClearedFields() []string
-		// FieldCleared returns a boolean indicates if this field was
+		// FieldCleared returns a bool indicates if this field was
 		// cleared in this mutation.
 		FieldCleared(name string) bool
 		// ClearField clears the value for the given name. It returns an
@@ -300,7 +300,7 @@ type (
 		// ClearedEdges returns all edge names that were cleared in this
 		// mutation.
 		ClearedEdges() []string
-		// EdgeCleared returns a boolean indicates if this edge was
+		// EdgeCleared returns a bool indicates if this edge was
 		// cleared in this mutation.
 		EdgeCleared(name string) bool
 		// ClearEdge clears the value for the given name. It returns an
@@ -356,7 +356,7 @@ const (
 	OpUpdate                   // update nodes by predicate (if any).
 	OpUpdateOne                // update one node.
 	OpDelete                   // delete nodes by predicate (if any).
-	OpDeleteOne                // delete one one.
+	OpDeleteOne                // delete one node.
 )
 
 // Is reports whether o is match the given operation.
