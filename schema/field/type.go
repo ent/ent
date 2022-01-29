@@ -67,7 +67,7 @@ func (t Type) Valid() bool {
 	return t > TypeInvalid && t < endTypes
 }
 
-// ConstName returns the constant name of a info type.
+// ConstName returns the constant name of an info type.
 // It's used by entc for printing the constant name in templates.
 func (t Type) ConstName() string {
 	switch {

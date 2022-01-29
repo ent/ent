@@ -14,8 +14,8 @@ type Annotation struct {
 	//
 	//	field.Annotation{
 	//		StructTag: map[string]string{
-	//			"id": `json:"id,omitempty" yaml:"-"`
-	//		}
+	//			"id": `json:"id,omitempty" yaml:"-"`,
+	//		},
 	//	}
 	//
 	StructTag map[string]string
