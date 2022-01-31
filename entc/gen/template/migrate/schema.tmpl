@@ -115,6 +115,21 @@ var (
 											{{- end }}
 										},
 									{{- end }}
+									{{- with $ant.Desc }}
+										Desc: {{ . }},
+									{{- end }}
+									{{- with $keys := keys $ant.DescColumns }}
+										DescColumns: map[string]bool{
+										{{- range $k := $keys }}
+											{{- /* Use the column reference instead of using raw string. */}}
+											{{- range $i, $c := $t.Columns }}
+												{{- if eq $k $c.Name }}
+													{{ $columns }}[{{ $i }}].Name: {{ index $ant.DescColumns $k }},
+												{{ end }}
+											{{- end }}
+										{{- end }}
+										},
+									{{- end }}
 								},
 							{{- end }}
 						},
