@@ -202,6 +202,29 @@ type IndexAnnotation struct {
 	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1`(100), `c2`(200), `c3`)
 	//
 	PrefixColumns map[string]uint
+
+	// Desc defines the DESC clause for a single column index.
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("column").
+	//		Annotation(entsql.Desc())
+	//
+	//	CREATE INDEX `table_column` ON `table`(`column` DESC)
+	//
+	Desc bool
+
+	// DescColumns defines the DESC clause for columns in a multi column index.
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("c1", "c2", "c3").
+	//		Annotation(
+	//			entsql.DescColumn("c1"),
+	//			entsql.DescColumn("c2"),
+	//		)
+	//
+	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1` DESC, `c2` DESC, `c3`)
+	//
+	DescColumns map[string]bool
 }
 
 // Prefix returns a new index annotation with a single string column index.
@@ -237,6 +260,40 @@ func PrefixColumn(name string, prefix uint) *IndexAnnotation {
 	}
 }
 
+// Desc returns a new index annotation with the DESC clause for a
+// single column index. In MySQL, the following annotation maps to:
+//
+//	index.Fields("column").
+//		Annotation(entsql.Desc())
+//
+//	CREATE INDEX `table_column` ON `table`(`column` DESC)
+//
+func Desc() *IndexAnnotation {
+	return &IndexAnnotation{
+		Desc: true,
+	}
+}
+
+// DescColumns returns a new index annotation with the DESC clause attached to
+// the columns in the index. In MySQL, the following annotation maps to:
+//
+//	index.Fields("c1", "c2", "c3").
+//		Annotation(
+//			entsql.DescColumns("c1", "c2"),
+//		)
+//
+//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1` DESC, `c2` DESC, `c3`)
+//
+func DescColumns(names ...string) *IndexAnnotation {
+	ant := &IndexAnnotation{
+		DescColumns: make(map[string]bool, len(names)),
+	}
+	for i := range names {
+		ant.DescColumns[names[i]] = true
+	}
+	return ant
+}
+
 // Name describes the annotation name.
 func (IndexAnnotation) Name() string {
 	return "EntSQLIndexes"
@@ -264,6 +321,17 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		}
 		for column, prefix := range ant.PrefixColumns {
 			a.PrefixColumns[column] = prefix
+		}
+	}
+	if ant.Desc {
+		a.Desc = ant.Desc
+	}
+	if ant.DescColumns != nil {
+		if a.DescColumns == nil {
+			a.DescColumns = make(map[string]bool)
+		}
+		for column, desc := range ant.DescColumns {
+			a.DescColumns[column] = desc
 		}
 	}
 	return a
