@@ -468,6 +468,10 @@ func (m *Migrate) aIndexes(b atBuilder, t1 *Table, t2 *schema.Table) error {
 		if err := b.atIndex(idx1, t2, idx2); err != nil {
 			return err
 		}
+		desc := descIndexes(idx1)
+		for _, p := range idx2.Parts {
+			p.Desc = desc[p.C.Name]
+		}
 		t2.AddIndexes(idx2)
 	}
 	return nil
@@ -492,4 +496,21 @@ func setAtChecks(t1 *Table, t2 *schema.Table) {
 			})
 		}
 	}
+}
+
+// descIndexes returns a map holding the DESC mapping if exist.
+func descIndexes(idx *Index) map[string]bool {
+	descs := make(map[string]bool)
+	if idx.Annotation == nil {
+		return descs
+	}
+	// If DESC (without a column) was defined on the
+	// annotation, map it to the single column index.
+	if idx.Annotation.Desc && len(idx.Columns) == 1 {
+		descs[idx.Columns[0].Name] = idx.Annotation.Desc
+	}
+	for column, desc := range idx.Annotation.DescColumns {
+		descs[column] = desc
+	}
+	return descs
 }
