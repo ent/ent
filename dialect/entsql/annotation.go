@@ -218,8 +218,7 @@ type IndexAnnotation struct {
 	//
 	//	index.Fields("c1", "c2", "c3").
 	//		Annotation(
-	//			entsql.DescColumn("c1"),
-	//			entsql.DescColumn("c2"),
+	//			entsql.DescColumns("c1", "c2"),
 	//		)
 	//
 	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1` DESC, `c2` DESC, `c3`)
