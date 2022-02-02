@@ -18,6 +18,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
 	"entgo.io/ent/entc/integration/gremlin/ent/comment"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
@@ -30,7 +31,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
-	"entgo.io/ent/entc/integration/gremlin/ent/task"
+	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 	"github.com/google/uuid"
 
@@ -12085,8 +12086,8 @@ type TaskMutation struct {
 	op            Op
 	typ           string
 	id            *string
-	priority      *schema.Priority
-	addpriority   *schema.Priority
+	priority      *task.Priority
+	addpriority   *task.Priority
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Task, error)
@@ -12192,13 +12193,13 @@ func (m *TaskMutation) IDs(ctx context.Context) ([]string, error) {
 }
 
 // SetPriority sets the "priority" field.
-func (m *TaskMutation) SetPriority(s schema.Priority) {
-	m.priority = &s
+func (m *TaskMutation) SetPriority(t task.Priority) {
+	m.priority = &t
 	m.addpriority = nil
 }
 
 // Priority returns the value of the "priority" field in the mutation.
-func (m *TaskMutation) Priority() (r schema.Priority, exists bool) {
+func (m *TaskMutation) Priority() (r task.Priority, exists bool) {
 	v := m.priority
 	if v == nil {
 		return
@@ -12209,7 +12210,7 @@ func (m *TaskMutation) Priority() (r schema.Priority, exists bool) {
 // OldPriority returns the old "priority" field's value of the Task entity.
 // If the Task object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TaskMutation) OldPriority(ctx context.Context) (v schema.Priority, err error) {
+func (m *TaskMutation) OldPriority(ctx context.Context) (v task.Priority, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPriority is only allowed on UpdateOne operations")
 	}
@@ -12223,17 +12224,17 @@ func (m *TaskMutation) OldPriority(ctx context.Context) (v schema.Priority, err 
 	return oldValue.Priority, nil
 }
 
-// AddPriority adds s to the "priority" field.
-func (m *TaskMutation) AddPriority(s schema.Priority) {
+// AddPriority adds t to the "priority" field.
+func (m *TaskMutation) AddPriority(t task.Priority) {
 	if m.addpriority != nil {
-		*m.addpriority += s
+		*m.addpriority += t
 	} else {
-		m.addpriority = &s
+		m.addpriority = &t
 	}
 }
 
 // AddedPriority returns the value that was added to the "priority" field in this mutation.
-func (m *TaskMutation) AddedPriority() (r schema.Priority, exists bool) {
+func (m *TaskMutation) AddedPriority() (r task.Priority, exists bool) {
 	v := m.addpriority
 	if v == nil {
 		return
@@ -12268,7 +12269,7 @@ func (m *TaskMutation) Type() string {
 func (m *TaskMutation) Fields() []string {
 	fields := make([]string, 0, 1)
 	if m.priority != nil {
-		fields = append(fields, task.FieldPriority)
+		fields = append(fields, enttask.FieldPriority)
 	}
 	return fields
 }
@@ -12278,7 +12279,7 @@ func (m *TaskMutation) Fields() []string {
 // schema.
 func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case task.FieldPriority:
+	case enttask.FieldPriority:
 		return m.Priority()
 	}
 	return nil, false
@@ -12289,7 +12290,7 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case task.FieldPriority:
+	case enttask.FieldPriority:
 		return m.OldPriority(ctx)
 	}
 	return nil, fmt.Errorf("unknown Task field %s", name)
@@ -12300,8 +12301,8 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *TaskMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case task.FieldPriority:
-		v, ok := value.(schema.Priority)
+	case enttask.FieldPriority:
+		v, ok := value.(task.Priority)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -12316,7 +12317,7 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 func (m *TaskMutation) AddedFields() []string {
 	var fields []string
 	if m.addpriority != nil {
-		fields = append(fields, task.FieldPriority)
+		fields = append(fields, enttask.FieldPriority)
 	}
 	return fields
 }
@@ -12326,7 +12327,7 @@ func (m *TaskMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *TaskMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case task.FieldPriority:
+	case enttask.FieldPriority:
 		return m.AddedPriority()
 	}
 	return nil, false
@@ -12337,8 +12338,8 @@ func (m *TaskMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TaskMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case task.FieldPriority:
-		v, ok := value.(schema.Priority)
+	case enttask.FieldPriority:
+		v, ok := value.(task.Priority)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -12371,7 +12372,7 @@ func (m *TaskMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TaskMutation) ResetField(name string) error {
 	switch name {
-	case task.FieldPriority:
+	case enttask.FieldPriority:
 		m.ResetPriority()
 		return nil
 	}

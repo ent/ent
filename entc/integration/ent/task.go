@@ -11,8 +11,9 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/entc/integration/ent/schema/task"
+
+	enttask "entgo.io/ent/entc/integration/ent/task"
 )
 
 // Task is the model entity for the Task schema.
@@ -21,7 +22,7 @@ type Task struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Priority holds the value of the "priority" field.
-	Priority schema.Priority `json:"priority,omitempty"`
+	Priority task.Priority `json:"priority,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -29,7 +30,7 @@ func (*Task) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case task.FieldID, task.FieldPriority:
+		case enttask.FieldID, enttask.FieldPriority:
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Task", columns[i])
@@ -46,17 +47,17 @@ func (t *Task) assignValues(columns []string, values []interface{}) error {
 	}
 	for i := range columns {
 		switch columns[i] {
-		case task.FieldID:
+		case enttask.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			t.ID = int(value.Int64)
-		case task.FieldPriority:
+		case enttask.FieldPriority:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field priority", values[i])
 			} else if value.Valid {
-				t.Priority = schema.Priority(value.Int64)
+				t.Priority = task.Priority(value.Int64)
 			}
 		}
 	}

@@ -14,8 +14,9 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/gremlin/ent/task"
+	"entgo.io/ent/entc/integration/ent/schema/task"
+
+	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -26,15 +27,15 @@ type TaskCreate struct {
 }
 
 // SetPriority sets the "priority" field.
-func (tc *TaskCreate) SetPriority(s schema.Priority) *TaskCreate {
-	tc.mutation.SetPriority(s)
+func (tc *TaskCreate) SetPriority(t task.Priority) *TaskCreate {
+	tc.mutation.SetPriority(t)
 	return tc
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tc *TaskCreate) SetNillablePriority(s *schema.Priority) *TaskCreate {
-	if s != nil {
-		tc.SetPriority(*s)
+func (tc *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
+	if t != nil {
+		tc.SetPriority(*t)
 	}
 	return tc
 }
@@ -111,7 +112,7 @@ func (tc *TaskCreate) ExecX(ctx context.Context) {
 // defaults sets the default values of the builder before save.
 func (tc *TaskCreate) defaults() {
 	if _, ok := tc.mutation.Priority(); !ok {
-		v := task.DefaultPriority
+		v := enttask.DefaultPriority
 		tc.mutation.SetPriority(v)
 	}
 }
@@ -122,7 +123,7 @@ func (tc *TaskCreate) check() error {
 		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
 	}
 	if v, ok := tc.mutation.Priority(); ok {
-		if err := task.PriorityValidator(int(v)); err != nil {
+		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
@@ -146,9 +147,9 @@ func (tc *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
 }
 
 func (tc *TaskCreate) gremlin() *dsl.Traversal {
-	v := g.AddV(task.Label)
+	v := g.AddV(enttask.Label)
 	if value, ok := tc.mutation.Priority(); ok {
-		v.Property(dsl.Single, task.FieldPriority, value)
+		v.Property(dsl.Single, enttask.FieldPriority, value)
 	}
 	return v.ValueMap(true)
 }

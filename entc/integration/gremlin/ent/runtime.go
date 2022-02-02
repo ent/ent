@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
@@ -20,7 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
-	"entgo.io/ent/entc/integration/gremlin/ent/task"
+	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 )
 
@@ -225,14 +226,14 @@ func init() {
 	petDescAge := petFields[0].Descriptor()
 	// pet.DefaultAge holds the default value on creation for the age field.
 	pet.DefaultAge = petDescAge.Default.(float64)
-	taskFields := schema.Task{}.Fields()
-	_ = taskFields
-	// taskDescPriority is the schema descriptor for priority field.
-	taskDescPriority := taskFields[0].Descriptor()
-	// task.DefaultPriority holds the default value on creation for the priority field.
-	task.DefaultPriority = schema.Priority(taskDescPriority.Default.(int))
-	// task.PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
-	task.PriorityValidator = taskDescPriority.Validators[0].(func(int) error)
+	enttaskFields := schema.Task{}.Fields()
+	_ = enttaskFields
+	// enttaskDescPriority is the schema descriptor for priority field.
+	enttaskDescPriority := enttaskFields[0].Descriptor()
+	// enttask.DefaultPriority holds the default value on creation for the priority field.
+	enttask.DefaultPriority = task.Priority(enttaskDescPriority.Default.(int))
+	// enttask.PriorityValidator is a validator for the "priority" field. It is called by the builders before save.
+	enttask.PriorityValidator = enttaskDescPriority.Validators[0].(func(int) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

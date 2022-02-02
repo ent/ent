@@ -15,7 +15,8 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/entc/integration/gremlin/ent/task"
+
+	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
 // TaskDelete is the builder for deleting a Task entity.
@@ -82,7 +83,7 @@ func (td *TaskDelete) gremlinExec(ctx context.Context) (int, error) {
 }
 
 func (td *TaskDelete) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel(task.Label)
+	t := g.V().HasLabel(enttask.Label)
 	for _, p := range td.mutation.predicates {
 		p(t)
 	}
@@ -101,7 +102,7 @@ func (tdo *TaskDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{task.Label}
+		return &NotFoundError{enttask.Label}
 	default:
 		return nil
 	}

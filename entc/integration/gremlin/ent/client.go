@@ -24,7 +24,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
-	"entgo.io/ent/entc/integration/gremlin/ent/task"
+	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 
 	"entgo.io/ent/dialect"
@@ -1464,7 +1464,7 @@ func NewTaskClient(c config) *TaskClient {
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `task.Hooks(f(g(h())))`.
+// A call to `Use(f, g, h)` equals to `enttask.Hooks(f(g(h())))`.
 func (c *TaskClient) Use(hooks ...Hook) {
 	c.hooks.Task = append(c.hooks.Task, hooks...)
 }
@@ -1511,7 +1511,7 @@ func (c *TaskClient) DeleteOne(t *Task) *TaskDeleteOne {
 
 // DeleteOneID returns a delete builder for the given id.
 func (c *TaskClient) DeleteOneID(id string) *TaskDeleteOne {
-	builder := c.Delete().Where(task.ID(id))
+	builder := c.Delete().Where(enttask.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
 	return &TaskDeleteOne{builder}
@@ -1526,7 +1526,7 @@ func (c *TaskClient) Query() *TaskQuery {
 
 // Get returns a Task entity by its id.
 func (c *TaskClient) Get(ctx context.Context, id string) (*Task, error) {
-	return c.Query().Where(task.ID(id)).Only(ctx)
+	return c.Query().Where(enttask.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

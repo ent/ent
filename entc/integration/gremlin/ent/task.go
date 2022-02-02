@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/gremlin"
-	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema/task"
 )
 
 // Task is the model entity for the Task schema.
@@ -20,7 +20,7 @@ type Task struct {
 	// ID of the ent.
 	ID string `json:"id,omitempty"`
 	// Priority holds the value of the "priority" field.
-	Priority schema.Priority `json:"priority,omitempty"`
+	Priority task.Priority `json:"priority,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Task.
@@ -30,8 +30,8 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scant struct {
-		ID       string          `json:"id,omitempty"`
-		Priority schema.Priority `json:"priority,omitempty"`
+		ID       string        `json:"id,omitempty"`
+		Priority task.Priority `json:"priority,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
@@ -80,8 +80,8 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		return err
 	}
 	var scant []struct {
-		ID       string          `json:"id,omitempty"`
-		Priority schema.Priority `json:"priority,omitempty"`
+		ID       string        `json:"id,omitempty"`
+		Priority task.Priority `json:"priority,omitempty"`
 	}
 	if err := vmap.Decode(&scant); err != nil {
 		return err
