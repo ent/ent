@@ -14,9 +14,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/schema/field"
+
+	enttask "entgo.io/ent/entc/integration/ent/task"
 )
 
 // TaskUpdate is the builder for updating Task entities.
@@ -33,23 +34,23 @@ func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 }
 
 // SetPriority sets the "priority" field.
-func (tu *TaskUpdate) SetPriority(s schema.Priority) *TaskUpdate {
+func (tu *TaskUpdate) SetPriority(t task.Priority) *TaskUpdate {
 	tu.mutation.ResetPriority()
-	tu.mutation.SetPriority(s)
+	tu.mutation.SetPriority(t)
 	return tu
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillablePriority(s *schema.Priority) *TaskUpdate {
-	if s != nil {
-		tu.SetPriority(*s)
+func (tu *TaskUpdate) SetNillablePriority(t *task.Priority) *TaskUpdate {
+	if t != nil {
+		tu.SetPriority(*t)
 	}
 	return tu
 }
 
-// AddPriority adds s to the "priority" field.
-func (tu *TaskUpdate) AddPriority(s schema.Priority) *TaskUpdate {
-	tu.mutation.AddPriority(s)
+// AddPriority adds t to the "priority" field.
+func (tu *TaskUpdate) AddPriority(t task.Priority) *TaskUpdate {
+	tu.mutation.AddPriority(t)
 	return tu
 }
 
@@ -121,7 +122,7 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (tu *TaskUpdate) check() error {
 	if v, ok := tu.mutation.Priority(); ok {
-		if err := task.PriorityValidator(int(v)); err != nil {
+		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
@@ -131,11 +132,11 @@ func (tu *TaskUpdate) check() error {
 func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   task.Table,
-			Columns: task.Columns,
+			Table:   enttask.Table,
+			Columns: enttask.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: task.FieldID,
+				Column: enttask.FieldID,
 			},
 		},
 	}
@@ -150,19 +151,19 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: task.FieldPriority,
+			Column: enttask.FieldPriority,
 		})
 	}
 	if value, ok := tu.mutation.AddedPriority(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: task.FieldPriority,
+			Column: enttask.FieldPriority,
 		})
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{task.Label}
+			err = &NotFoundError{enttask.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{err.Error(), err}
 		}
@@ -180,23 +181,23 @@ type TaskUpdateOne struct {
 }
 
 // SetPriority sets the "priority" field.
-func (tuo *TaskUpdateOne) SetPriority(s schema.Priority) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) SetPriority(t task.Priority) *TaskUpdateOne {
 	tuo.mutation.ResetPriority()
-	tuo.mutation.SetPriority(s)
+	tuo.mutation.SetPriority(t)
 	return tuo
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillablePriority(s *schema.Priority) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetPriority(*s)
+func (tuo *TaskUpdateOne) SetNillablePriority(t *task.Priority) *TaskUpdateOne {
+	if t != nil {
+		tuo.SetPriority(*t)
 	}
 	return tuo
 }
 
-// AddPriority adds s to the "priority" field.
-func (tuo *TaskUpdateOne) AddPriority(s schema.Priority) *TaskUpdateOne {
-	tuo.mutation.AddPriority(s)
+// AddPriority adds t to the "priority" field.
+func (tuo *TaskUpdateOne) AddPriority(t task.Priority) *TaskUpdateOne {
+	tuo.mutation.AddPriority(t)
 	return tuo
 }
 
@@ -275,7 +276,7 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (tuo *TaskUpdateOne) check() error {
 	if v, ok := tuo.mutation.Priority(); ok {
-		if err := task.PriorityValidator(int(v)); err != nil {
+		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
@@ -285,11 +286,11 @@ func (tuo *TaskUpdateOne) check() error {
 func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   task.Table,
-			Columns: task.Columns,
+			Table:   enttask.Table,
+			Columns: enttask.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: task.FieldID,
+				Column: enttask.FieldID,
 			},
 		},
 	}
@@ -300,12 +301,12 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 	_spec.Node.ID.Value = id
 	if fields := tuo.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, task.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, enttask.FieldID)
 		for _, f := range fields {
-			if !task.ValidColumn(f) {
+			if !enttask.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != task.FieldID {
+			if f != enttask.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -321,14 +322,14 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: task.FieldPriority,
+			Column: enttask.FieldPriority,
 		})
 	}
 	if value, ok := tuo.mutation.AddedPriority(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: task.FieldPriority,
+			Column: enttask.FieldPriority,
 		})
 	}
 	_node = &Task{config: tuo.config}
@@ -336,7 +337,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, tuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{task.Label}
+			err = &NotFoundError{enttask.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{err.Error(), err}
 		}

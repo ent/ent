@@ -18,7 +18,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/entc/integration/ent/schema/task"
+	enttask "entgo.io/ent/entc/integration/ent/task"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -209,21 +210,21 @@ func Types(t *testing.T, client *ent.Client) {
 	require.False(ft.DeletedAt.Time.IsZero())
 
 	err = client.Task.CreateBulk(
-		client.Task.Create().SetPriority(schema.PriorityLow),
-		client.Task.Create().SetPriority(schema.PriorityMid),
-		client.Task.Create().SetPriority(schema.PriorityHigh),
+		client.Task.Create().SetPriority(task.PriorityLow),
+		client.Task.Create().SetPriority(task.PriorityMid),
+		client.Task.Create().SetPriority(task.PriorityHigh),
 	).Exec(ctx)
 	require.NoError(err)
-	err = client.Task.Create().SetPriority(schema.Priority(10)).Exec(ctx)
+	err = client.Task.Create().SetPriority(task.Priority(10)).Exec(ctx)
 	require.Error(err)
 
-	tasks := client.Task.Query().Order(ent.Asc(task.FieldPriority)).AllX(ctx)
-	require.Equal(schema.PriorityLow, tasks[0].Priority)
-	require.Equal(schema.PriorityMid, tasks[1].Priority)
-	require.Equal(schema.PriorityHigh, tasks[2].Priority)
+	tasks := client.Task.Query().Order(ent.Asc(enttask.FieldPriority)).AllX(ctx)
+	require.Equal(task.PriorityLow, tasks[0].Priority)
+	require.Equal(task.PriorityMid, tasks[1].Priority)
+	require.Equal(task.PriorityHigh, tasks[2].Priority)
 
-	tasks = client.Task.Query().Order(ent.Desc(task.FieldPriority)).AllX(ctx)
-	require.Equal(schema.PriorityLow, tasks[2].Priority)
-	require.Equal(schema.PriorityMid, tasks[1].Priority)
-	require.Equal(schema.PriorityHigh, tasks[0].Priority)
+	tasks = client.Task.Query().Order(ent.Desc(enttask.FieldPriority)).AllX(ctx)
+	require.Equal(task.PriorityLow, tasks[2].Priority)
+	require.Equal(task.PriorityMid, tasks[1].Priority)
+	require.Equal(task.PriorityHigh, tasks[0].Priority)
 }

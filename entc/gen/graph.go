@@ -157,6 +157,7 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	for i := range schemas {
 		g.addIndexes(schemas[i])
 	}
+	aliases(g)
 	g.defaults()
 	return
 }
@@ -203,7 +204,7 @@ func generate(g *Graph) error {
 	)
 	templates, external = g.templates()
 	for _, n := range g.Nodes {
-		assets.dirs = append(assets.dirs, filepath.Join(g.Config.Target, n.Package()))
+		assets.dirs = append(assets.dirs, filepath.Join(g.Config.Target, n.PackageDir()))
 		for _, tmpl := range Templates {
 			b := bytes.NewBuffer(nil)
 			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {

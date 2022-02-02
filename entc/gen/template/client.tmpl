@@ -16,7 +16,7 @@ import (
 
 	"{{ $.Config.Package }}/migrate"
 	{{ range $n := $.Nodes }}
-		"{{ $n.Config.Package }}/{{ $n.Package }}"
+		{{ $n.Alias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
 	{{- end }}
 
 	"entgo.io/ent/dialect"

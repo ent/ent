@@ -20,7 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/spec"
-	"entgo.io/ent/entc/integration/ent/task"
+	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -282,16 +282,16 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[12] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
-			Table:   task.Table,
-			Columns: task.Columns,
+			Table:   enttask.Table,
+			Columns: enttask.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: task.FieldID,
+				Column: enttask.FieldID,
 			},
 		},
 		Type: "Task",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			task.FieldPriority: {Type: field.TypeInt, Column: task.FieldPriority},
+			enttask.FieldPriority: {Type: field.TypeInt, Column: enttask.FieldPriority},
 		},
 	}
 	graph.Nodes[13] = &sqlgraph.Node{
@@ -1849,12 +1849,12 @@ func (f *TaskFilter) Where(p entql.P) {
 
 // WhereID applies the entql int predicate on the id field.
 func (f *TaskFilter) WhereID(p entql.IntP) {
-	f.Where(p.Field(task.FieldID))
+	f.Where(p.Field(enttask.FieldID))
 }
 
 // WherePriority applies the entql int predicate on the priority field.
 func (f *TaskFilter) WherePriority(p entql.IntP) {
-	f.Where(p.Field(task.FieldPriority))
+	f.Where(p.Field(enttask.FieldPriority))
 }
 
 // addPredicate implements the predicateAdder interface.

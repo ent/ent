@@ -16,8 +16,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/schema/field"
+
+	enttask "entgo.io/ent/entc/integration/ent/task"
 )
 
 // TaskQuery is the builder for querying Task entities.
@@ -74,7 +75,7 @@ func (tq *TaskQuery) First(ctx context.Context) (*Task, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{task.Label}
+		return nil, &NotFoundError{enttask.Label}
 	}
 	return nodes[0], nil
 }
@@ -96,7 +97,7 @@ func (tq *TaskQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 		return
 	}
 	return ids[0], nil
@@ -123,9 +124,9 @@ func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{task.Label}
+		return nil, &NotFoundError{enttask.Label}
 	default:
-		return nil, &NotSingularError{task.Label}
+		return nil, &NotSingularError{enttask.Label}
 	}
 }
 
@@ -150,9 +151,9 @@ func (tq *TaskQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
-		err = &NotSingularError{task.Label}
+		err = &NotSingularError{enttask.Label}
 	}
 	return
 }
@@ -186,7 +187,7 @@ func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
 // IDs executes the query and returns a list of Task IDs.
 func (tq *TaskQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	if err := tq.Select(task.FieldID).Scan(ctx, &ids); err != nil {
+	if err := tq.Select(enttask.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -259,12 +260,12 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 // Example:
 //
 //	var v []struct {
-//		Priority schema.Priority `json:"priority,omitempty"`
+//		Priority task.Priority `json:"priority,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Task.Query().
-//		GroupBy(task.FieldPriority).
+//		GroupBy(enttask.FieldPriority).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -286,11 +287,11 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Priority schema.Priority `json:"priority,omitempty"`
+//		Priority task.Priority `json:"priority,omitempty"`
 //	}
 //
 //	client.Task.Query().
-//		Select(task.FieldPriority).
+//		Select(enttask.FieldPriority).
 //		Scan(ctx, &v)
 //
 func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
@@ -300,7 +301,7 @@ func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
 
 func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tq.fields {
-		if !task.ValidColumn(f) {
+		if !enttask.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -366,11 +367,11 @@ func (tq *TaskQuery) sqlExist(ctx context.Context) (bool, error) {
 func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   task.Table,
-			Columns: task.Columns,
+			Table:   enttask.Table,
+			Columns: enttask.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: task.FieldID,
+				Column: enttask.FieldID,
 			},
 		},
 		From:   tq.sql,
@@ -381,9 +382,9 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := tq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, task.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, enttask.FieldID)
 		for i := range fields {
-			if fields[i] != task.FieldID {
+			if fields[i] != enttask.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -413,10 +414,10 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 
 func (tq *TaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tq.driver.Dialect())
-	t1 := builder.Table(task.Table)
+	t1 := builder.Table(enttask.Table)
 	columns := tq.fields
 	if len(columns) == 0 {
-		columns = task.Columns
+		columns = enttask.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if tq.sql != nil {
@@ -544,7 +545,7 @@ func (tgb *TaskGroupBy) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskGroupBy.Strings returned %d results when one was expected", len(v))
 	}
@@ -593,7 +594,7 @@ func (tgb *TaskGroupBy) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskGroupBy.Ints returned %d results when one was expected", len(v))
 	}
@@ -642,7 +643,7 @@ func (tgb *TaskGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskGroupBy.Float64s returned %d results when one was expected", len(v))
 	}
@@ -691,7 +692,7 @@ func (tgb *TaskGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskGroupBy.Bools returned %d results when one was expected", len(v))
 	}
@@ -709,7 +710,7 @@ func (tgb *TaskGroupBy) BoolX(ctx context.Context) bool {
 
 func (tgb *TaskGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 	for _, f := range tgb.fields {
-		if !task.ValidColumn(f) {
+		if !enttask.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -799,7 +800,7 @@ func (ts *TaskSelect) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskSelect.Strings returned %d results when one was expected", len(v))
 	}
@@ -846,7 +847,7 @@ func (ts *TaskSelect) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskSelect.Ints returned %d results when one was expected", len(v))
 	}
@@ -893,7 +894,7 @@ func (ts *TaskSelect) Float64(ctx context.Context) (_ float64, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskSelect.Float64s returned %d results when one was expected", len(v))
 	}
@@ -940,7 +941,7 @@ func (ts *TaskSelect) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskSelect.Bools returned %d results when one was expected", len(v))
 	}

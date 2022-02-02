@@ -5,10 +5,10 @@
 package schema
 
 import (
-	"fmt"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+
+	"entgo.io/ent/entc/integration/ent/schema/task"
 )
 
 // Task holds the schema definition for the Task entity.
@@ -20,40 +20,10 @@ type Task struct {
 func (Task) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("priority").
-			GoType(Priority(0)).
-			Default(int(PriorityMid)).
+			GoType(task.Priority(0)).
+			Default(int(task.PriorityMid)).
 			Validate(func(i int) error {
-				return Priority(i).Validate()
+				return task.Priority(i).Validate()
 			}),
-	}
-}
-
-type Priority int
-
-const (
-	PriorityLow Priority = iota
-	PriorityMid
-	PriorityHigh
-)
-
-func (p Priority) String() string {
-	s := "unknown"
-	switch p {
-	case PriorityLow:
-		s = "low"
-	case PriorityMid:
-		s = "mid"
-	case PriorityHigh:
-		s = "high"
-	}
-	return s
-}
-
-func (p Priority) Validate() error {
-	switch p {
-	case PriorityLow, PriorityMid, PriorityHigh:
-		return nil
-	default:
-		return fmt.Errorf("invalid priority value: %v", p)
 	}
 }

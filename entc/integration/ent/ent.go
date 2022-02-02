@@ -24,7 +24,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/spec"
-	"entgo.io/ent/entc/integration/ent/task"
+	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 )
 
@@ -58,7 +58,7 @@ func columnChecker(table string) func(string) error {
 		node.Table:      node.ValidColumn,
 		pet.Table:       pet.ValidColumn,
 		spec.Table:      spec.ValidColumn,
-		task.Table:      task.ValidColumn,
+		enttask.Table:   enttask.ValidColumn,
 		user.Table:      user.ValidColumn,
 	}
 	check, ok := checks[table]

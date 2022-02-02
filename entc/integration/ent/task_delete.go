@@ -13,8 +13,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/schema/field"
+
+	enttask "entgo.io/ent/entc/integration/ent/task"
 )
 
 // TaskDelete is the builder for deleting a Task entity.
@@ -74,10 +75,10 @@ func (td *TaskDelete) ExecX(ctx context.Context) int {
 func (td *TaskDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: task.Table,
+			Table: enttask.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: task.FieldID,
+				Column: enttask.FieldID,
 			},
 		},
 	}
@@ -103,7 +104,7 @@ func (tdo *TaskDeleteOne) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{task.Label}
+		return &NotFoundError{enttask.Label}
 	default:
 		return nil
 	}

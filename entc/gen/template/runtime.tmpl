@@ -72,7 +72,7 @@ import (
 		"{{ . }}"
 	{{- end }}
 	{{- range $n := $.Nodes }}
-		"{{ $.Config.Package }}/{{ $n.Package }}"
+		{{ $n.Alias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 		{{- /* Import external packages */}}
 		{{- template "import/types" $n }}
 	{{- end }}

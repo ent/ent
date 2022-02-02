@@ -15,9 +15,10 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
-	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/entc/integration/gremlin/ent/task"
+
+	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
 // TaskUpdate is the builder for updating Task entities.
@@ -34,23 +35,23 @@ func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 }
 
 // SetPriority sets the "priority" field.
-func (tu *TaskUpdate) SetPriority(s schema.Priority) *TaskUpdate {
+func (tu *TaskUpdate) SetPriority(t task.Priority) *TaskUpdate {
 	tu.mutation.ResetPriority()
-	tu.mutation.SetPriority(s)
+	tu.mutation.SetPriority(t)
 	return tu
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillablePriority(s *schema.Priority) *TaskUpdate {
-	if s != nil {
-		tu.SetPriority(*s)
+func (tu *TaskUpdate) SetNillablePriority(t *task.Priority) *TaskUpdate {
+	if t != nil {
+		tu.SetPriority(*t)
 	}
 	return tu
 }
 
-// AddPriority adds s to the "priority" field.
-func (tu *TaskUpdate) AddPriority(s schema.Priority) *TaskUpdate {
-	tu.mutation.AddPriority(s)
+// AddPriority adds t to the "priority" field.
+func (tu *TaskUpdate) AddPriority(t task.Priority) *TaskUpdate {
+	tu.mutation.AddPriority(t)
 	return tu
 }
 
@@ -122,7 +123,7 @@ func (tu *TaskUpdate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (tu *TaskUpdate) check() error {
 	if v, ok := tu.mutation.Priority(); ok {
-		if err := task.PriorityValidator(int(v)); err != nil {
+		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
@@ -142,7 +143,7 @@ func (tu *TaskUpdate) gremlinSave(ctx context.Context) (int, error) {
 }
 
 func (tu *TaskUpdate) gremlin() *dsl.Traversal {
-	v := g.V().HasLabel(task.Label)
+	v := g.V().HasLabel(enttask.Label)
 	for _, p := range tu.mutation.predicates {
 		p(v)
 	}
@@ -150,10 +151,10 @@ func (tu *TaskUpdate) gremlin() *dsl.Traversal {
 		trs []*dsl.Traversal
 	)
 	if value, ok := tu.mutation.Priority(); ok {
-		v.Property(dsl.Single, task.FieldPriority, value)
+		v.Property(dsl.Single, enttask.FieldPriority, value)
 	}
 	if value, ok := tu.mutation.AddedPriority(); ok {
-		v.Property(dsl.Single, task.FieldPriority, __.Union(__.Values(task.FieldPriority), __.Constant(value)).Sum())
+		v.Property(dsl.Single, enttask.FieldPriority, __.Union(__.Values(enttask.FieldPriority), __.Constant(value)).Sum())
 	}
 	v.Count()
 	trs = append(trs, v)
@@ -169,23 +170,23 @@ type TaskUpdateOne struct {
 }
 
 // SetPriority sets the "priority" field.
-func (tuo *TaskUpdateOne) SetPriority(s schema.Priority) *TaskUpdateOne {
+func (tuo *TaskUpdateOne) SetPriority(t task.Priority) *TaskUpdateOne {
 	tuo.mutation.ResetPriority()
-	tuo.mutation.SetPriority(s)
+	tuo.mutation.SetPriority(t)
 	return tuo
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillablePriority(s *schema.Priority) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetPriority(*s)
+func (tuo *TaskUpdateOne) SetNillablePriority(t *task.Priority) *TaskUpdateOne {
+	if t != nil {
+		tuo.SetPriority(*t)
 	}
 	return tuo
 }
 
-// AddPriority adds s to the "priority" field.
-func (tuo *TaskUpdateOne) AddPriority(s schema.Priority) *TaskUpdateOne {
-	tuo.mutation.AddPriority(s)
+// AddPriority adds t to the "priority" field.
+func (tuo *TaskUpdateOne) AddPriority(t task.Priority) *TaskUpdateOne {
+	tuo.mutation.AddPriority(t)
 	return tuo
 }
 
@@ -264,7 +265,7 @@ func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (tuo *TaskUpdateOne) check() error {
 	if v, ok := tuo.mutation.Priority(); ok {
-		if err := task.PriorityValidator(int(v)); err != nil {
+		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
@@ -297,10 +298,10 @@ func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 		trs []*dsl.Traversal
 	)
 	if value, ok := tuo.mutation.Priority(); ok {
-		v.Property(dsl.Single, task.FieldPriority, value)
+		v.Property(dsl.Single, enttask.FieldPriority, value)
 	}
 	if value, ok := tuo.mutation.AddedPriority(); ok {
-		v.Property(dsl.Single, task.FieldPriority, __.Union(__.Values(task.FieldPriority), __.Constant(value)).Sum())
+		v.Property(dsl.Single, enttask.FieldPriority, __.Union(__.Values(enttask.FieldPriority), __.Constant(value)).Sum())
 	}
 	if len(tuo.fields) > 0 {
 		fields := make([]interface{}, 0, len(tuo.fields)+1)

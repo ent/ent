@@ -35,6 +35,9 @@ type (
 		schema *load.Schema
 		// Name holds the type/ent name.
 		Name string
+		// alias, or local package name of the generated package.
+		// Empty means no alias.
+		alias string
 		// ID holds the ID field of this type.
 		ID *Field
 		// Fields holds all the primitive fields of this type.
@@ -269,8 +272,19 @@ func (t Type) EntSQL() *entsql.Annotation {
 
 // Package returns the package name of this node.
 func (t Type) Package() string {
-	return strings.ToLower(t.Name)
+	if name := t.Alias(); name != "" {
+		return name
+	}
+	return t.PackageDir()
 }
+
+// PackageDir returns the name of the package directory.
+func (t Type) PackageDir() string { return strings.ToLower(t.Name) }
+
+// Alias returns local package name of a type if there is one.
+// A package has an alias if its generated name conflicts with
+// one of the imports of the user-defined types.
+func (t Type) Alias() string { return t.alias }
 
 // Receiver returns the receiver name of this node. It makes sure the
 // receiver names doesn't conflict with import names.
@@ -741,19 +755,19 @@ func (t Type) MutationName() string {
 }
 
 // SiblingImports returns all sibling packages that are needed for the different builders.
-func (t Type) SiblingImports() []string {
+func (t Type) SiblingImports() []struct{ Alias, Path string } {
 	var (
-		paths = []string{path.Join(t.Config.Package, t.Package())}
-		seen  = map[string]bool{paths[0]: true}
+		imports = []struct{ Alias, Path string }{{Alias: t.Alias(), Path: path.Join(t.Config.Package, t.PackageDir())}}
+		seen    = map[string]bool{imports[0].Path: true}
 	)
 	for _, e := range t.Edges {
-		name := path.Join(t.Config.Package, e.Type.Package())
-		if !seen[name] {
-			seen[name] = true
-			paths = append(paths, name)
+		p := path.Join(t.Config.Package, e.Type.PackageDir())
+		if !seen[p] {
+			seen[p] = true
+			imports = append(imports, struct{ Alias, Path string }{Alias: e.Type.Alias(), Path: p})
 		}
 	}
-	return paths
+	return imports
 }
 
 // NumHooks returns the number of hooks declared in the type schema.
@@ -840,7 +854,7 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 	case f.Info.Type == field.TypeEnum:
 		if tf.Enums, err = tf.enums(f); err == nil && !tf.HasGoType() {
 			// Enum types should be named as follows: typepkg.Field.
-			f.Info.Ident = fmt.Sprintf("%s.%s", t.Package(), pascal(f.Name))
+			f.Info.Ident = fmt.Sprintf("%s.%s", t.PackageDir(), pascal(f.Name))
 		}
 	case tf.Validators > 0 && !tf.ConvertedToBasic():
 		err = fmt.Errorf("GoType %q for field %q must be converted to the basic %q type for validators", tf.Type, f.Name, tf.Type.Type)
@@ -858,6 +872,32 @@ func (t Type) UnexportedForeignKeys() []*ForeignKey {
 		}
 	}
 	return fks
+}
+
+// aliases adds package aliases (local names) for all type-packages that
+// their import identifier conflicts with user-defined packages (i.e. GoType).
+func aliases(g *Graph) {
+	names := make(map[string]*Type)
+	for _, n := range g.Nodes {
+		names[n.PackageDir()] = n
+	}
+	for _, n := range g.Nodes {
+		for _, f := range n.Fields {
+			if !f.HasGoType() {
+				continue
+			}
+			name := f.Type.PkgName
+			if name == "" && f.Type.PkgPath != "" {
+				name = path.Base(f.Type.PkgPath)
+			}
+			// An user-defined type already uses the
+			// package local name.
+			if n, ok := names[name]; ok {
+				// By default, a package named "pet" will be named as "entpet".
+				n.alias = path.Base(g.Package) + name
+			}
+		}
+	}
 }
 
 // Constant returns the constant name of the field.
