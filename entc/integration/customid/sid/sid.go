@@ -1,12 +1,16 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 package sid
 
 import (
+	"crypto/rand"
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strconv"
-	"time"
 )
 
 type ID string
@@ -38,17 +42,12 @@ func (i *ID) Scan(src interface{}) error {
 func New() ID {
 	return NewLength(10)
 }
-func NewLength(len int) ID {
-	return ID(randomString(len))
-}
 
-func randomString(n int) string {
-	s := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(s)
+func NewLength(l int) ID {
 	var out string
-	for len(out) < n {
-		out += fmt.Sprint(r.Int())
+	for len(out) < l {
+		result, _ := rand.Int(rand.Reader, big.NewInt(100))
+		out += fmt.Sprint(result)
 	}
-
-	return out[:n]
+	return ID(out[:l])
 }
