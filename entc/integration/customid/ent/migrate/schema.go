@@ -158,6 +158,16 @@ var (
 			},
 		},
 	}
+	// OthersColumns holds the columns for the "others" table.
+	OthersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeOther, Unique: true, SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint", "sqlite3": "integer"}},
+	}
+	// OthersTable holds the schema information for the "others" table.
+	OthersTable = &schema.Table{
+		Name:       "others",
+		Columns:    OthersColumns,
+		PrimaryKey: []*schema.Column{OthersColumns[0]},
+	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true, Size: 36},
@@ -306,6 +316,7 @@ var (
 		GroupsTable,
 		MixinIdsTable,
 		NotesTable,
+		OthersTable,
 		PetsTable,
 		SessionsTable,
 		UsersTable,

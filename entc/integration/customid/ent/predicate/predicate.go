@@ -31,6 +31,9 @@ type MixinID func(*sql.Selector)
 // Note is the predicate function for note builders.
 type Note func(*sql.Selector)
 
+// Other is the predicate function for other builders.
+type Other func(*sql.Selector)
+
 // Pet is the predicate function for pet builders.
 type Pet func(*sql.Selector)
 

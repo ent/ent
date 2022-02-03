@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/customid/ent/migrate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/entc/integration/customid/sid"
 	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/customid/ent/blob"
@@ -22,6 +23,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
+	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/user"
@@ -50,6 +52,8 @@ type Client struct {
 	MixinID *MixinIDClient
 	// Note is the client for interacting with the Note builders.
 	Note *NoteClient
+	// Other is the client for interacting with the Other builders.
+	Other *OtherClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// Session is the client for interacting with the Session builders.
@@ -76,6 +80,7 @@ func (c *Client) init() {
 	c.Group = NewGroupClient(c.config)
 	c.MixinID = NewMixinIDClient(c.config)
 	c.Note = NewNoteClient(c.config)
+	c.Other = NewOtherClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -119,6 +124,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Group:   NewGroupClient(cfg),
 		MixinID: NewMixinIDClient(cfg),
 		Note:    NewNoteClient(cfg),
+		Other:   NewOtherClient(cfg),
 		Pet:     NewPetClient(cfg),
 		Session: NewSessionClient(cfg),
 		User:    NewUserClient(cfg),
@@ -148,6 +154,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Group:   NewGroupClient(cfg),
 		MixinID: NewMixinIDClient(cfg),
 		Note:    NewNoteClient(cfg),
+		Other:   NewOtherClient(cfg),
 		Pet:     NewPetClient(cfg),
 		Session: NewSessionClient(cfg),
 		User:    NewUserClient(cfg),
@@ -187,6 +194,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Group.Use(hooks...)
 	c.MixinID.Use(hooks...)
 	c.Note.Use(hooks...)
+	c.Other.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.Session.Use(hooks...)
 	c.User.Use(hooks...)
@@ -980,6 +988,96 @@ func (c *NoteClient) QueryChildren(n *Note) *NoteQuery {
 // Hooks returns the client hooks.
 func (c *NoteClient) Hooks() []Hook {
 	return c.hooks.Note
+}
+
+// OtherClient is a client for the Other schema.
+type OtherClient struct {
+	config
+}
+
+// NewOtherClient returns a client for the Other from the given config.
+func NewOtherClient(c config) *OtherClient {
+	return &OtherClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `other.Hooks(f(g(h())))`.
+func (c *OtherClient) Use(hooks ...Hook) {
+	c.hooks.Other = append(c.hooks.Other, hooks...)
+}
+
+// Create returns a create builder for Other.
+func (c *OtherClient) Create() *OtherCreate {
+	mutation := newOtherMutation(c.config, OpCreate)
+	return &OtherCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Other entities.
+func (c *OtherClient) CreateBulk(builders ...*OtherCreate) *OtherCreateBulk {
+	return &OtherCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Other.
+func (c *OtherClient) Update() *OtherUpdate {
+	mutation := newOtherMutation(c.config, OpUpdate)
+	return &OtherUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OtherClient) UpdateOne(o *Other) *OtherUpdateOne {
+	mutation := newOtherMutation(c.config, OpUpdateOne, withOther(o))
+	return &OtherUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OtherClient) UpdateOneID(id sid.ID) *OtherUpdateOne {
+	mutation := newOtherMutation(c.config, OpUpdateOne, withOtherID(id))
+	return &OtherUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Other.
+func (c *OtherClient) Delete() *OtherDelete {
+	mutation := newOtherMutation(c.config, OpDelete)
+	return &OtherDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *OtherClient) DeleteOne(o *Other) *OtherDeleteOne {
+	return c.DeleteOneID(o.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *OtherClient) DeleteOneID(id sid.ID) *OtherDeleteOne {
+	builder := c.Delete().Where(other.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OtherDeleteOne{builder}
+}
+
+// Query returns a query builder for Other.
+func (c *OtherClient) Query() *OtherQuery {
+	return &OtherQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Other entity by its id.
+func (c *OtherClient) Get(ctx context.Context, id sid.ID) (*Other, error) {
+	return c.Query().Where(other.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OtherClient) GetX(ctx context.Context, id sid.ID) *Other {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OtherClient) Hooks() []Hook {
+	return c.hooks.Other
 }
 
 // PetClient is a client for the Pet schema.

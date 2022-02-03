@@ -51,7 +51,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []int
 	for {{ $idx }} := range columns {
 		switch columns[{{ $idx }}] {
 		case {{ $.Package }}.{{ $.ID.Constant }}:
-			{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes) }}
+			{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther) }}
 				{{- with extend $ "Idx" $idx "Field" $.ID "Rec" $receiver }}
 					{{ template "dialect/sql/decode/field" . }}
 				{{- end }}
