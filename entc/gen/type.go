@@ -1057,6 +1057,9 @@ func (f Field) IsUUID() bool { return f.Type != nil && f.Type.Type == field.Type
 // IsInt returns true if the field is an int field.
 func (f Field) IsInt() bool { return f.Type != nil && f.Type.Type == field.TypeInt }
 
+// IsInt64 returns true if the field is an int64 field.
+func (f Field) IsInt64() bool { return f.Type != nil && f.Type.Type == field.TypeInt64 }
+
 // IsEnum returns true if the field is an enum field.
 func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.TypeEnum }
 
