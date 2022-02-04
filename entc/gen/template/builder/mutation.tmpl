@@ -17,7 +17,7 @@ import (
 	"sync"
 
 	{{- range $n := $.Nodes }}
-		{{ $n.Alias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
+		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 		{{- template "import/types" $n }}
 	{{- end }}
 

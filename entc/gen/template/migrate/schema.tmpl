@@ -14,7 +14,7 @@ in the LICENSE file in the root directory of this source tree.
 
 import (
 	{{ range $n := $.Nodes }}
-		{{ $n.Alias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
+		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 	{{- end }}
 
 	"entgo.io/ent/dialect/entsql"

@@ -272,7 +272,7 @@ func (t Type) EntSQL() *entsql.Annotation {
 
 // Package returns the package name of this node.
 func (t Type) Package() string {
-	if name := t.Alias(); name != "" {
+	if name := t.PackageAlias(); name != "" {
 		return name
 	}
 	return t.PackageDir()
@@ -281,10 +281,10 @@ func (t Type) Package() string {
 // PackageDir returns the name of the package directory.
 func (t Type) PackageDir() string { return strings.ToLower(t.Name) }
 
-// Alias returns local package name of a type if there is one.
+// PackageAlias returns local package name of a type if there is one.
 // A package has an alias if its generated name conflicts with
 // one of the imports of the user-defined types.
-func (t Type) Alias() string { return t.alias }
+func (t Type) PackageAlias() string { return t.alias }
 
 // Receiver returns the receiver name of this node. It makes sure the
 // receiver names doesn't conflict with import names.
@@ -757,14 +757,14 @@ func (t Type) MutationName() string {
 // SiblingImports returns all sibling packages that are needed for the different builders.
 func (t Type) SiblingImports() []struct{ Alias, Path string } {
 	var (
-		imports = []struct{ Alias, Path string }{{Alias: t.Alias(), Path: path.Join(t.Config.Package, t.PackageDir())}}
+		imports = []struct{ Alias, Path string }{{Alias: t.PackageAlias(), Path: path.Join(t.Config.Package, t.PackageDir())}}
 		seen    = map[string]bool{imports[0].Path: true}
 	)
 	for _, e := range t.Edges {
 		p := path.Join(t.Config.Package, e.Type.PackageDir())
 		if !seen[p] {
 			seen[p] = true
-			imports = append(imports, struct{ Alias, Path string }{Alias: e.Type.Alias(), Path: p})
+			imports = append(imports, struct{ Alias, Path string }{Alias: e.Type.PackageAlias(), Path: p})
 		}
 	}
 	return imports
