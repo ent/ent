@@ -135,7 +135,7 @@ func (Todo) Edges() []ent.Edge {
 }
 ```
 :::info
-Bind() annotation now enabled by default, and use Unbind() to opt-out
+The `Bind()` annotation is now enabled by default, use `Unbind()` to opt-out.
 :::
 
 After adding these annotations, `entgql` will do the binding mentioned in the [section](#ent-solution) above. Additionally, it
