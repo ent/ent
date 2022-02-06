@@ -19,7 +19,7 @@ src="https://s3.eu-central-1.amazonaws.com/entgo.io/assets/gopher_graph.png"/>
 
 ## クイックインストール
 ```console
-go get -d entgo.io/ent/cmd/ent
+go install entgo.io/ent/cmd/ent@latest
 ```
 
 [Go modules]を使ったインストールについては、[entgo.io website][entgo instal]をご覧ください。
