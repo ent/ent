@@ -19,10 +19,13 @@ type Other struct {
 // Fields of the Other.
 func (Other) Fields() []ent.Field {
 	return []ent.Field{
-		field.Other("id", sid.ID("")).SchemaType(map[string]string{
-			dialect.MySQL:    "bigint",
-			dialect.Postgres: "bigint",
-			dialect.SQLite:   "integer",
-		}).Default(sid.New).Unique().Immutable(),
+		field.Other("id", sid.ID("")).
+			SchemaType(map[string]string{
+				dialect.MySQL:    "bigint",
+				dialect.Postgres: "bigint",
+				dialect.SQLite:   "integer",
+			}).
+			Default(sid.New).
+			Immutable(),
 	}
 }
