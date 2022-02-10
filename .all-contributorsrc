@@ -726,6 +726,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "crossworth",
+      "name": "Pedro Henrique",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1251151?v=4",
+      "profile": "https://pedro.dev.br",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
