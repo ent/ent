@@ -30,6 +30,8 @@ type Tx struct {
 	MixinID *MixinIDClient
 	// Note is the client for interacting with the Note builders.
 	Note *NoteClient
+	// Other is the client for interacting with the Other builders.
+	Other *OtherClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// Session is the client for interacting with the Session builders.
@@ -178,6 +180,7 @@ func (tx *Tx) init() {
 	tx.Group = NewGroupClient(tx.config)
 	tx.MixinID = NewMixinIDClient(tx.config)
 	tx.Note = NewNoteClient(tx.config)
+	tx.Other = NewOtherClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.User = NewUserClient(tx.config)

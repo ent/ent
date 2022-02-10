@@ -13,9 +13,11 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
+	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/entc/integration/customid/sid"
 	"github.com/google/uuid"
 )
 
@@ -115,6 +117,12 @@ func init() {
 			return nil
 		}
 	}()
+	otherFields := schema.Other{}.Fields()
+	_ = otherFields
+	// otherDescID is the schema descriptor for id field.
+	otherDescID := otherFields[0].Descriptor()
+	// other.DefaultID holds the default value on creation for the id field.
+	other.DefaultID = otherDescID.Default.(func() sid.ID)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescID is the schema descriptor for id field.

@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/group"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
+	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/user"
@@ -49,6 +50,7 @@ func columnChecker(table string) func(string) error {
 		group.Table:   group.ValidColumn,
 		mixinid.Table: mixinid.ValidColumn,
 		note.Table:    note.ValidColumn,
+		other.Table:   other.ValidColumn,
 		pet.Table:     pet.ValidColumn,
 		session.Table: session.ValidColumn,
 		user.Table:    user.ValidColumn,

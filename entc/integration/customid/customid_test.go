@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/schema/field"
 	"github.com/go-sql-driver/mysql"
 
@@ -195,6 +196,14 @@ func CustomID(t *testing.T, client *ent.Client) {
 			UpdateNewValues().
 			ExecX(ctx)
 		require.Equal(t, "Hello World", client.Doc.GetX(ctx, d.ID).Text)
+	})
+
+	t.Run("OtherID", func(t *testing.T) {
+		other := client.Other.Create().SaveX(ctx)
+		require.NotEmpty(t, other.ID.String())
+
+		other = client.Other.Create().SetID(sid.NewLength(15)).SaveX(ctx)
+		require.NotEmpty(t, other.ID.String())
 	})
 }
 
