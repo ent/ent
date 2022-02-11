@@ -61,8 +61,8 @@ func WithDiffHook(hooks ...DiffHook) MigrateOption {
 	}
 }
 
-// SkipChanges allows skipping/filtering list of changes
-// returned by the differ before executing migration planning.
+// WithSkipChanges allows skipping/filtering list of changes
+// returned by the Differ before executing migration planning.
 //
 //	SkipChanges(schema.DropTable|schema.DropColumn)
 //
@@ -72,7 +72,7 @@ func WithSkipChanges(skip ChangeKind) MigrateOption {
 	}
 }
 
-// A Change of schema.
+// A ChangeKind denotes the kind of schema change.
 type ChangeKind uint
 
 // List of change types.
@@ -173,15 +173,15 @@ func filterChanges(skip ChangeKind) DiffHook {
 type (
 	// Applier is the interface that wraps the Apply method.
 	Applier interface {
-		// Diff creates the given tables in the database.
+		// Apply applies the given migrate.Plan on the database.
 		Apply(context.Context, dialect.ExecQuerier, *migrate.Plan) error
 	}
 
 	// The ApplyFunc type is an adapter to allow the use of ordinary function as Applier.
-	// If f is a function with the appropriate signature, ApplyFunc(f) is a Applier that calls f.
+	// If f is a function with the appropriate signature, ApplyFunc(f) is an Applier that calls f.
 	ApplyFunc func(context.Context, dialect.ExecQuerier, *migrate.Plan) error
 
-	// ApplyHook defines the "migration applying middleware". A function that gets a Applier and returns a Applier.
+	// ApplyHook defines the "migration applying middleware". A function that gets an Applier and returns an Applier.
 	ApplyHook func(Applier) Applier
 )
 
@@ -190,7 +190,7 @@ func (f ApplyFunc) Apply(ctx context.Context, conn dialect.ExecQuerier, plan *mi
 	return f(ctx, conn, plan)
 }
 
-// func adds a list of ApplyHook to the schema migration.
+// WithApplyHook adds a list of ApplyHook to the schema migration.
 //
 //	schema.WithApplyHook(func(next schema.Applier) schema.Applier {
 //		return schema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *migrate.Plan) error {
