@@ -137,7 +137,7 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 }
 
 // Create creates all schema resources in the database. It works in an "append-only"
-// mode, which means, it only create tables, append column to tables or modifying column type.
+// mode, which means, it only creates tables, appends columns to tables or modifies column types.
 //
 // Column can be modified by turning into a NULL from NOT NULL, or having a type conversion not
 // resulting data altering. From example, changing varchar(255) to varchar(120) is invalid, but
@@ -157,6 +157,16 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 		creator = m.hooks[i](creator)
 	}
 	return creator.Create(ctx, tables...)
+}
+
+// Diff compares the state read from the StateReader with the state defined by Ent.
+// Changes will be written to migration files by the configures Planner.
+func (m *Migrate) Diff(ctx context.Context, tables ...*Table) error {
+	plan, err := m.atDiff(ctx, m, tables...)
+	if err != nil {
+		return err
+	}
+	return m.atlas.pl.WritePlan(plan)
 }
 
 func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
@@ -383,7 +393,6 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			change.column.modify = append(change.column.modify, c1)
 		}
 	}
-
 	// Drop columns.
 	for _, c1 := range curr.Columns {
 		// If a column was dropped, multi-columns indexes that are associated with this column will
@@ -394,7 +403,6 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			change.column.drop = append(change.column.drop, c1)
 		}
 	}
-
 	// Add or modify indexes.
 	for _, idx1 := range new.Indexes {
 		switch idx2, ok := curr.index(idx1.Name); {
@@ -413,7 +421,6 @@ func (m *Migrate) changeSet(curr, new *Table) (*changes, error) {
 			}
 		}
 	}
-
 	// Drop indexes.
 	for _, idx := range curr.Indexes {
 		if _, isFK := new.fk(idx.Name); !isFK && !new.hasIndex(idx.Name, idx.realname) {

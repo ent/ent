@@ -12,12 +12,11 @@ import (
 	"sort"
 	"strings"
 
+	"ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/schema"
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
-
-	"ariga.io/atlas/sql/migrate"
-	"ariga.io/atlas/sql/schema"
 )
 
 type (
@@ -221,6 +220,13 @@ func WithAtlas(b bool) MigrateOption {
 	}
 }
 
+// WithPlanner sets atlas migration planner to use for versioned migrations.
+func WithPlanner(pl *migrate.Planner) MigrateOption {
+	return func(m *Migrate) {
+		m.atlas.pl = pl
+	}
+}
+
 type (
 	// atlasOptions describes the options for atlas.
 	atlasOptions struct {
@@ -228,6 +234,7 @@ type (
 		diff    []DiffHook
 		apply   []ApplyHook
 		skip    ChangeKind
+		pl      *migrate.Planner
 	}
 
 	// atBuilder must be implemented by the different drivers in
@@ -245,7 +252,7 @@ type (
 
 func (m *Migrate) setupAtlas() error {
 	// Using one of the Atlas options, opt-in to Atlas migration.
-	if !m.atlas.enabled && (m.atlas.skip != NoChange || len(m.atlas.diff) > 0 || len(m.atlas.apply) > 0) {
+	if !m.atlas.enabled && (m.atlas.skip != NoChange || len(m.atlas.diff) > 0 || len(m.atlas.apply) > 0) || m.atlas.pl != nil {
 		m.atlas.enabled = true
 	}
 	if !m.atlas.enabled {
@@ -289,36 +296,7 @@ func (m *Migrate) atCreate(ctx context.Context, tables ...*Table) error {
 				return err
 			}
 		}
-		drv, err := m.atOpen(tx)
-		if err != nil {
-			return err
-		}
-		current, err := drv.InspectSchema(ctx, "", &schema.InspectOptions{
-			Tables: func() (t []string) {
-				for i := range tables {
-					t = append(t, tables[i].Name)
-				}
-				return t
-			}(),
-		})
-		if err != nil {
-			return err
-		}
-		tt, err := m.aTables(ctx, m, tx, tables)
-		if err != nil {
-			return err
-		}
-		// Diff changes.
-		var differ Differ = DiffFunc(drv.SchemaDiff)
-		for i := len(m.atlas.diff) - 1; i >= 0; i-- {
-			differ = m.atlas.diff[i](differ)
-		}
-		changes, err := differ.Diff(current, &schema.Schema{Name: current.Name, Attrs: current.Attrs, Tables: tt})
-		if err != nil {
-			return err
-		}
-		// Plan changes.
-		plan, err := drv.PlanChanges(ctx, "plan", changes)
+		plan, err := m.atDiff(ctx, tx, tables...)
 		if err != nil {
 			return err
 		}
@@ -342,6 +320,39 @@ func (m *Migrate) atCreate(ctx context.Context, tables ...*Table) error {
 		return rollback(tx, err)
 	}
 	return tx.Commit()
+}
+
+func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, tables ...*Table) (*migrate.Plan, error) {
+	drv, err := m.atOpen(conn)
+	if err != nil {
+		return nil, err
+	}
+	current, err := drv.InspectSchema(ctx, "", &schema.InspectOptions{
+		Tables: func() (t []string) {
+			for i := range tables {
+				t = append(t, tables[i].Name)
+			}
+			return t
+		}(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	tt, err := m.aTables(ctx, m, conn, tables)
+	if err != nil {
+		return nil, err
+	}
+	// Diff changes.
+	var differ Differ = DiffFunc(drv.SchemaDiff)
+	for i := len(m.atlas.diff) - 1; i >= 0; i-- {
+		differ = m.atlas.diff[i](differ)
+	}
+	changes, err := differ.Diff(current, &schema.Schema{Name: current.Name, Attrs: current.Attrs, Tables: tt})
+	if err != nil {
+		return nil, err
+	}
+	// Plan changes.
+	return drv.PlanChanges(ctx, "plan", changes)
 }
 
 type db struct{ dialect.ExecQuerier }
