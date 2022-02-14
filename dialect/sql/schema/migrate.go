@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math"
 
+	"ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
@@ -166,7 +167,7 @@ func (m *Migrate) Diff(ctx context.Context, tables ...*Table) error {
 	if err != nil {
 		return err
 	}
-	return m.atlas.pl.WritePlan(plan)
+	return migrate.New(nil, m.atlas.dir, m.atlas.fmt).WritePlan(plan)
 }
 
 func (m *Migrate) create(ctx context.Context, tables ...*Table) error {

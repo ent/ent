@@ -220,10 +220,17 @@ func WithAtlas(b bool) MigrateOption {
 	}
 }
 
-// WithPlanner sets atlas migration planner to use for versioned migrations.
-func WithPlanner(pl *migrate.Planner) MigrateOption {
+// WithDir sets the atlas migration directory to use to store migration files.
+func WithDir(dir migrate.Dir) MigrateOption {
 	return func(m *Migrate) {
-		m.atlas.pl = pl
+		m.atlas.dir = dir
+	}
+}
+
+// WithFormatter sets atlas formatter to use to write changes to migration files.
+func WithFormatter(fmt migrate.Formatter) MigrateOption {
+	return func(m *Migrate) {
+		m.atlas.fmt = fmt
 	}
 }
 
@@ -234,7 +241,8 @@ type (
 		diff    []DiffHook
 		apply   []ApplyHook
 		skip    ChangeKind
-		pl      *migrate.Planner
+		dir     migrate.Dir
+		fmt     migrate.Formatter
 	}
 
 	// atBuilder must be implemented by the different drivers in
@@ -252,7 +260,7 @@ type (
 
 func (m *Migrate) setupAtlas() error {
 	// Using one of the Atlas options, opt-in to Atlas migration.
-	if !m.atlas.enabled && (m.atlas.skip != NoChange || len(m.atlas.diff) > 0 || len(m.atlas.apply) > 0) || m.atlas.pl != nil {
+	if !m.atlas.enabled && (m.atlas.skip != NoChange || len(m.atlas.diff) > 0 || len(m.atlas.apply) > 0) || m.atlas.dir != nil {
 		m.atlas.enabled = true
 	}
 	if !m.atlas.enabled {
@@ -276,6 +284,9 @@ func (m *Migrate) setupAtlas() error {
 	}
 	if k == NoChange {
 		m.atlas.diff = append(m.atlas.diff, filterChanges(k))
+	}
+	if m.atlas.dir != nil && m.atlas.fmt == nil {
+		m.atlas.fmt = migrate.DefaultFormatter
 	}
 	return nil
 }
