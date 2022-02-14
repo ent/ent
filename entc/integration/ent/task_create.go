@@ -13,9 +13,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/schema"
-	"entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/schema/field"
+
+	enttask "entgo.io/ent/entc/integration/ent/task"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -27,15 +28,15 @@ type TaskCreate struct {
 }
 
 // SetPriority sets the "priority" field.
-func (tc *TaskCreate) SetPriority(s schema.Priority) *TaskCreate {
-	tc.mutation.SetPriority(s)
+func (tc *TaskCreate) SetPriority(t task.Priority) *TaskCreate {
+	tc.mutation.SetPriority(t)
 	return tc
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tc *TaskCreate) SetNillablePriority(s *schema.Priority) *TaskCreate {
-	if s != nil {
-		tc.SetPriority(*s)
+func (tc *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
+	if t != nil {
+		tc.SetPriority(*t)
 	}
 	return tc
 }
@@ -112,7 +113,7 @@ func (tc *TaskCreate) ExecX(ctx context.Context) {
 // defaults sets the default values of the builder before save.
 func (tc *TaskCreate) defaults() {
 	if _, ok := tc.mutation.Priority(); !ok {
-		v := task.DefaultPriority
+		v := enttask.DefaultPriority
 		tc.mutation.SetPriority(v)
 	}
 }
@@ -123,7 +124,7 @@ func (tc *TaskCreate) check() error {
 		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
 	}
 	if v, ok := tc.mutation.Priority(); ok {
-		if err := task.PriorityValidator(int(v)); err != nil {
+		if err := enttask.PriorityValidator(int(v)); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
@@ -147,10 +148,10 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Task{config: tc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: task.Table,
+			Table: enttask.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: task.FieldID,
+				Column: enttask.FieldID,
 			},
 		}
 	)
@@ -159,7 +160,7 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: task.FieldPriority,
+			Column: enttask.FieldPriority,
 		})
 		_node.Priority = value
 	}
@@ -218,20 +219,20 @@ type (
 )
 
 // SetPriority sets the "priority" field.
-func (u *TaskUpsert) SetPriority(v schema.Priority) *TaskUpsert {
-	u.Set(task.FieldPriority, v)
+func (u *TaskUpsert) SetPriority(v task.Priority) *TaskUpsert {
+	u.Set(enttask.FieldPriority, v)
 	return u
 }
 
 // UpdatePriority sets the "priority" field to the value that was provided on create.
 func (u *TaskUpsert) UpdatePriority() *TaskUpsert {
-	u.SetExcluded(task.FieldPriority)
+	u.SetExcluded(enttask.FieldPriority)
 	return u
 }
 
 // AddPriority adds v to the "priority" field.
-func (u *TaskUpsert) AddPriority(v schema.Priority) *TaskUpsert {
-	u.Add(task.FieldPriority, v)
+func (u *TaskUpsert) AddPriority(v task.Priority) *TaskUpsert {
+	u.Add(enttask.FieldPriority, v)
 	return u
 }
 
@@ -278,14 +279,14 @@ func (u *TaskUpsertOne) Update(set func(*TaskUpsert)) *TaskUpsertOne {
 }
 
 // SetPriority sets the "priority" field.
-func (u *TaskUpsertOne) SetPriority(v schema.Priority) *TaskUpsertOne {
+func (u *TaskUpsertOne) SetPriority(v task.Priority) *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.SetPriority(v)
 	})
 }
 
 // AddPriority adds v to the "priority" field.
-func (u *TaskUpsertOne) AddPriority(v schema.Priority) *TaskUpsertOne {
+func (u *TaskUpsertOne) AddPriority(v task.Priority) *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.AddPriority(v)
 	})
@@ -503,14 +504,14 @@ func (u *TaskUpsertBulk) Update(set func(*TaskUpsert)) *TaskUpsertBulk {
 }
 
 // SetPriority sets the "priority" field.
-func (u *TaskUpsertBulk) SetPriority(v schema.Priority) *TaskUpsertBulk {
+func (u *TaskUpsertBulk) SetPriority(v task.Priority) *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.SetPriority(v)
 	})
 }
 
 // AddPriority adds v to the "priority" field.
-func (u *TaskUpsertBulk) AddPriority(v schema.Priority) *TaskUpsertBulk {
+func (u *TaskUpsertBulk) AddPriority(v task.Priority) *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.AddPriority(v)
 	})

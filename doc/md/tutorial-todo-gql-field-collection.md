@@ -134,6 +134,9 @@ func (Todo) Edges() []ent.Edge {
 	}
 }
 ```
+:::info
+The `Bind()` annotation is now enabled by default, use `Unbind()` to opt-out.
+:::
 
 After adding these annotations, `entgql` will do the binding mentioned in the [section](#ent-solution) above. Additionally, it
 will also generate edge-resolvers for the nodes under the `edge.go` file:

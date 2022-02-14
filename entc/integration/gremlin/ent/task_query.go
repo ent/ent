@@ -17,7 +17,8 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/entc/integration/gremlin/ent/task"
+
+	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
 // TaskQuery is the builder for querying Task entities.
@@ -73,7 +74,7 @@ func (tq *TaskQuery) First(ctx context.Context) (*Task, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{task.Label}
+		return nil, &NotFoundError{enttask.Label}
 	}
 	return nodes[0], nil
 }
@@ -95,7 +96,7 @@ func (tq *TaskQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 		return
 	}
 	return ids[0], nil
@@ -122,9 +123,9 @@ func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{task.Label}
+		return nil, &NotFoundError{enttask.Label}
 	default:
-		return nil, &NotSingularError{task.Label}
+		return nil, &NotSingularError{enttask.Label}
 	}
 }
 
@@ -149,9 +150,9 @@ func (tq *TaskQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
-		err = &NotSingularError{task.Label}
+		err = &NotSingularError{enttask.Label}
 	}
 	return
 }
@@ -185,7 +186,7 @@ func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
 // IDs executes the query and returns a list of Task IDs.
 func (tq *TaskQuery) IDs(ctx context.Context) ([]string, error) {
 	var ids []string
-	if err := tq.Select(task.FieldID).Scan(ctx, &ids); err != nil {
+	if err := tq.Select(enttask.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -258,12 +259,12 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 // Example:
 //
 //	var v []struct {
-//		Priority schema.Priority `json:"priority,omitempty"`
+//		Priority task.Priority `json:"priority,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Task.Query().
-//		GroupBy(task.FieldPriority).
+//		GroupBy(enttask.FieldPriority).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
@@ -285,11 +286,11 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Priority schema.Priority `json:"priority,omitempty"`
+//		Priority task.Priority `json:"priority,omitempty"`
 //	}
 //
 //	client.Task.Query().
-//		Select(task.FieldPriority).
+//		Select(enttask.FieldPriority).
 //		Scan(ctx, &v)
 //
 func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
@@ -351,7 +352,7 @@ func (tq *TaskQuery) gremlinExist(ctx context.Context) (bool, error) {
 }
 
 func (tq *TaskQuery) gremlinQuery(context.Context) *dsl.Traversal {
-	v := g.V().HasLabel(task.Label)
+	v := g.V().HasLabel(enttask.Label)
 	if tq.gremlin != nil {
 		v = tq.gremlin.Clone()
 	}
@@ -444,7 +445,7 @@ func (tgb *TaskGroupBy) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskGroupBy.Strings returned %d results when one was expected", len(v))
 	}
@@ -493,7 +494,7 @@ func (tgb *TaskGroupBy) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskGroupBy.Ints returned %d results when one was expected", len(v))
 	}
@@ -542,7 +543,7 @@ func (tgb *TaskGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskGroupBy.Float64s returned %d results when one was expected", len(v))
 	}
@@ -591,7 +592,7 @@ func (tgb *TaskGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskGroupBy.Bools returned %d results when one was expected", len(v))
 	}
@@ -698,7 +699,7 @@ func (ts *TaskSelect) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskSelect.Strings returned %d results when one was expected", len(v))
 	}
@@ -745,7 +746,7 @@ func (ts *TaskSelect) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskSelect.Ints returned %d results when one was expected", len(v))
 	}
@@ -792,7 +793,7 @@ func (ts *TaskSelect) Float64(ctx context.Context) (_ float64, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskSelect.Float64s returned %d results when one was expected", len(v))
 	}
@@ -839,7 +840,7 @@ func (ts *TaskSelect) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{task.Label}
+		err = &NotFoundError{enttask.Label}
 	default:
 		err = fmt.Errorf("ent: TaskSelect.Bools returned %d results when one was expected", len(v))
 	}
@@ -861,7 +862,7 @@ func (ts *TaskSelect) gremlinScan(ctx context.Context, v interface{}) error {
 		res       = &gremlin.Response{}
 	)
 	if len(ts.fields) == 1 {
-		if ts.fields[0] != task.FieldID {
+		if ts.fields[0] != enttask.FieldID {
 			traversal = ts.gremlin.Values(ts.fields...)
 		} else {
 			traversal = ts.gremlin.ID()

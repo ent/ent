@@ -880,6 +880,10 @@ func (ftc *FieldTypeCreate) defaults() {
 		v := fieldtype.DefaultNullStr()
 		ftc.mutation.SetNullStr(v)
 	}
+	if _, ok := ftc.mutation.DeletedAt(); !ok {
+		v := fieldtype.DefaultDeletedAt()
+		ftc.mutation.SetDeletedAt(v)
+	}
 	if _, ok := ftc.mutation.IP(); !ok {
 		v := fieldtype.DefaultIP()
 		ftc.mutation.SetIP(v)

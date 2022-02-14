@@ -19,6 +19,8 @@ func TestCmd(t *testing.T) {
 	stderr := bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
 	require.NoError(t, cmd.Run(), stderr.String())
+	cmd = exec.Command("go", "run", "entgo.io/ent/cmd/ent", "init", "User")
+	require.Error(t, cmd.Run())
 
 	_, err := os.Stat("ent/generate.go")
 	require.NoError(t, err)

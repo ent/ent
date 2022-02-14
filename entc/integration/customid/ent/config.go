@@ -35,6 +35,7 @@ type hooks struct {
 	Group   []ent.Hook
 	MixinID []ent.Hook
 	Note    []ent.Hook
+	Other   []ent.Hook
 	Pet     []ent.Hook
 	Session []ent.Hook
 	User    []ent.Hook

@@ -82,7 +82,7 @@ var (
 		{
 			Name: "meta",
 			Format: func(t *Type) string {
-				return fmt.Sprintf("%s/%s.go", t.Package(), t.Package())
+				return fmt.Sprintf("%[1]s/%[1]s.go", t.PackageDir())
 			},
 			ExtendPatterns: []string{
 				"meta/additional/*",
@@ -405,7 +405,7 @@ func (d *Dependency) defaultName() (string, error) {
 }
 
 func pkgf(s string) func(t *Type) string {
-	return func(t *Type) string { return fmt.Sprintf(s, t.Package()) }
+	return func(t *Type) string { return fmt.Sprintf(s, t.PackageDir()) }
 }
 
 // match reports if the given name matches the extended pattern.

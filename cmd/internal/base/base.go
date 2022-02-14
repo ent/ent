@@ -184,6 +184,9 @@ func initEnv(target string, names []string) error {
 		if err := gen.ValidSchemaName(name); err != nil {
 			return fmt.Errorf("init schema %s: %w", name, err)
 		}
+		if fileExists(target, name) {
+			return fmt.Errorf("init schema %s: already exists", name)
+		}
 		b := bytes.NewBuffer(nil)
 		if err := tmpl.Execute(b, name); err != nil {
 			return fmt.Errorf("executing template %s: %w", name, err)
@@ -211,6 +214,12 @@ func createDir(target string) error {
 		return fmt.Errorf("creating generate.go file: %w", err)
 	}
 	return nil
+}
+
+func fileExists(target, name string) bool {
+	var _, err = os.Stat(filepath.Join(target, strings.ToLower(name+".go")))
+
+	return err == nil
 }
 
 // schema template for the "init" command.

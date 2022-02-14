@@ -47,7 +47,7 @@ type assocBuilder struct {
 	desc *Descriptor
 }
 
-// Unique sets the edge type to be unique. Basically, it's limited the ent to be one of the two:
+// Unique sets the edge type to be unique. Basically, it limits the edge to be one of the two:
 // one2one or one2many. one2one applied if the inverse-edge is also unique.
 func (b *assocBuilder) Unique() *assocBuilder {
 	b.desc.Unique = true
@@ -133,7 +133,7 @@ func (b *inverseBuilder) Ref(ref string) *inverseBuilder {
 	return b
 }
 
-// Unique sets the edge type to be unique. Basically, it's limited the ent to be one of the two:
+// Unique sets the edge type to be unique. Basically, it limits the edge to be one of the two:
 // one2one or one2many. one2one applied if the inverse-edge is also unique.
 func (b *inverseBuilder) Unique() *inverseBuilder {
 	b.desc.Unique = true

@@ -717,6 +717,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "hezhizhen",
+      "name": "Zhizhen He",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7611700?v=4",
+      "profile": "https://github.com/hezhizhen",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "crossworth",
+      "name": "Pedro Henrique",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1251151?v=4",
+      "profile": "https://pedro.dev.br",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

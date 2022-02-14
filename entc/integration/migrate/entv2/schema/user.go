@@ -124,6 +124,8 @@ func (User) Indexes() []ent.Index {
 		// and defining a new one.
 		index.Fields("phone", "age").
 			Unique(),
+		index.Fields("age").
+			Annotations(entsql.Desc()),
 	}
 }
 

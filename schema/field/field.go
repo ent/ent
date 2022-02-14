@@ -26,7 +26,7 @@ func String(name string) *stringBuilder {
 }
 
 // Text returns a new string field without limitation on the size.
-// In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has not effect.
+// In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has no effect.
 func Text(name string) *stringBuilder {
 	return &stringBuilder{&Descriptor{
 		Name: name,
@@ -369,8 +369,8 @@ func (b *timeBuilder) StructTag(s string) *timeBuilder {
 //	field.Time("created_at").
 //		Default(time.Now)
 //
-func (b *timeBuilder) Default(f func() time.Time) *timeBuilder {
-	b.desc.Default = f
+func (b *timeBuilder) Default(fn interface{}) *timeBuilder {
+	b.desc.Default = fn
 	return b
 }
 
@@ -381,8 +381,13 @@ func (b *timeBuilder) Default(f func() time.Time) *timeBuilder {
 //		Default(time.Now).
 //		UpdateDefault(time.Now),
 //
-func (b *timeBuilder) UpdateDefault(f func() time.Time) *timeBuilder {
-	b.desc.UpdateDefault = f
+//	field.Time("deleted_at").
+//		Optional().
+//		GoType(&sql.NullTime{}).
+//		UpdateDefault(NewNullTime),
+//
+func (b *timeBuilder) UpdateDefault(fn interface{}) *timeBuilder {
+	b.desc.UpdateDefault = fn
 	return b
 }
 
@@ -418,6 +423,9 @@ func (b *timeBuilder) Annotations(annotations ...schema.Annotation) *timeBuilder
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *timeBuilder) Descriptor() *Descriptor {
+	if b.desc.Default != nil {
+		b.desc.checkDefaultFunc(timeType)
+	}
 	return b.desc
 }
 
@@ -884,7 +892,7 @@ func (b *enumBuilder) GoType(ev EnumValues) *enumBuilder {
 	b.Values(ev.Values()...)
 	b.desc.goType(ev, stringType)
 	// If an error already exists, let that be returned instead.
-	// Otherwise check that the underlying type is either a string
+	// Otherwise, check that the underlying type is either a string
 	// or implements Stringer.
 	if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.Stringer() {
 		b.desc.Err = errors.New("enum values which implement ValueScanner must also implement Stringer")
