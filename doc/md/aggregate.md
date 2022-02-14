@@ -88,7 +88,7 @@ func Do(ctx context.Context, client *ent.Client) {
 
 ## Having + Group By
 
-This example requires custom SQL modifiers. See how to enable them [here](features.md#custom-sql-modifiers)
+This example requires custom SQL modifiers. See how to enable them [here](https://entgo.io/docs/feature-flags/#custom-sql-modifiers)
 
 In this example we're going to query the oldest users for each role.
 
@@ -129,7 +129,7 @@ func Do(ctx context.Context, client *ent.Client) {
 
 ```
 
-**Note:** The `sql.Raw` is crucial to have. It  tells the predicate that `sql.Max` or whatever wrapped function is not an arguement.
+**Note:** The `sql.Raw` is crucial to have. It tells the predicate that `sql.Max` is not an arguement.
 
 The above code essentially generates the following SQL query:
 
