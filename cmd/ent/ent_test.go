@@ -6,9 +6,11 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +20,8 @@ func TestCmd(t *testing.T) {
 	cmd := exec.Command("go", "run", "entgo.io/ent/cmd/ent", "init", "User")
 	stderr := bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
-	require.NoError(t, cmd.Run(), stderr.String())
+	require.NoError(t, cmd.Run())
+	require.Zero(t, stderr.String())
 	cmd = exec.Command("go", "run", "entgo.io/ent/cmd/ent", "init", "User")
 	require.Error(t, cmd.Run())
 
@@ -30,8 +33,29 @@ func TestCmd(t *testing.T) {
 	cmd = exec.Command("go", "run", "entgo.io/ent/cmd/ent", "generate", "./ent/schema")
 	stderr = bytes.NewBuffer(nil)
 	cmd.Stderr = stderr
-	require.NoError(t, cmd.Run(), stderr.String())
+	require.NoError(t, cmd.Run())
+	require.Zero(t, stderr.String())
 
 	_, err = os.Stat("ent/user.go")
+	require.NoError(t, err)
+
+	require.NoError(t, os.MkdirAll("migrations", 0750))
+	defer os.RemoveAll("migrations")
+
+	cmd = exec.Command(
+		"go", "run", "entgo.io/ent/cmd/ent",
+		"migrate", "diff",
+		"./ent/schema",
+		"--dir", "migrations",
+		"--dsn", "file:ent?mode=memory&_fk=1",
+		"--driver", "sqlite3",
+	)
+	stderr = bytes.NewBuffer(nil)
+	cmd.Stderr = stderr
+	require.NoError(t, cmd.Run())
+	require.Zero(t, stderr.String())
+	_, err = os.Stat(fmt.Sprintf("migrations/%d.up.sql", time.Now().Unix()))
+	require.NoError(t, err)
+	_, err = os.Stat(fmt.Sprintf("migrations/%d.down.sql", time.Now().Unix()))
 	require.NoError(t, err)
 }

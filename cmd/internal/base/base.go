@@ -7,6 +7,7 @@ package base
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -16,7 +17,10 @@ import (
 	"text/template"
 	"unicode"
 
+	migrate2 "ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/cmd/internal/printer"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
 	"entgo.io/ent/schema/field"
@@ -108,6 +112,58 @@ func DescribeCmd() *cobra.Command {
 			printer.Fprint(os.Stdout, graph)
 		},
 	}
+}
+
+func DiffCmd() *cobra.Command {
+	var (
+		dsn string
+		drv string
+		dir string
+		cmd = &cobra.Command{
+			Use: "migrate [flags] command",
+		}
+	)
+	cmd.AddCommand(
+		&cobra.Command{
+			Use:   "diff [flags] path",
+			Short: "create a new migration file by comparing the database / migration directory state with your schema graph",
+			Example: examples(
+				"ent diff ./ent/schema --dir migrations --dsn sqlite://file:ent.db?_fk=1",
+			),
+			Args: cobra.ExactArgs(1),
+			Run: func(cmd *cobra.Command, args []string) {
+				graph, err := entc.LoadGraph(args[0], &gen.Config{})
+				if err != nil {
+					log.Fatalln(err)
+				}
+				tbls, err := graph.Tables()
+				if err != nil {
+					log.Fatalln(err)
+				}
+				d, err := migrate2.NewLocalDir(dir)
+				if err != nil {
+					log.Fatalln(err)
+				}
+				dlct, err := sql.Open(drv, dsn)
+				if err != nil {
+					log.Fatalln(err)
+				}
+				migrate, err := schema.NewMigrate(dlct, schema.WithDir(d))
+				if err != nil {
+					log.Fatalln(err)
+				}
+				if err := migrate.Diff(context.Background(), tbls...); err != nil {
+					log.Fatalln(err)
+				}
+			},
+		},
+	)
+	cmd.PersistentFlags().StringVar(&dir, "dir", "migrations", "path/to/migration/files")
+	cmd.PersistentFlags().StringVar(&dsn, "dsn", "", "dsn of the dev database")
+	cmd.PersistentFlags().StringVar(&drv, "driver", "", "driver to use")
+	cmd.MarkPersistentFlagRequired("driver")
+	cmd.MarkPersistentFlagRequired("dsn")
+	return cmd
 }
 
 // GenerateCmd returns the generate command for ent/c packages.

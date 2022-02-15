@@ -10,6 +10,10 @@ import (
 	"entgo.io/ent/cmd/internal/base"
 
 	"github.com/spf13/cobra"
+
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -19,6 +23,7 @@ func main() {
 		base.InitCmd(),
 		base.DescribeCmd(),
 		base.GenerateCmd(),
+		base.DiffCmd(),
 	)
 	_ = cmd.Execute()
 }
