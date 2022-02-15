@@ -426,6 +426,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		// clone intermediate query.
 		gremlin: uq.gremlin.Clone(),
 		path:    uq.path,
+		unique:  uq.unique,
 	}
 }
 

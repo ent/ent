@@ -272,8 +272,9 @@ func (iq *InfoQuery) Clone() *InfoQuery {
 		predicates: append([]predicate.Info{}, iq.predicates...),
 		withUser:   iq.withUser.Clone(),
 		// clone intermediate query.
-		sql:  iq.sql.Clone(),
-		path: iq.path,
+		sql:    iq.sql.Clone(),
+		path:   iq.path,
+		unique: iq.unique,
 	}
 }
 

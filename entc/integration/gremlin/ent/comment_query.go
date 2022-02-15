@@ -249,6 +249,7 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		// clone intermediate query.
 		gremlin: cq.gremlin.Clone(),
 		path:    cq.path,
+		unique:  cq.unique,
 	}
 }
 

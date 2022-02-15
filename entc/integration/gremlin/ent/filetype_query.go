@@ -266,6 +266,7 @@ func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
 		// clone intermediate query.
 		gremlin: ftq.gremlin.Clone(),
 		path:    ftq.path,
+		unique:  ftq.unique,
 	}
 }
 

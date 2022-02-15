@@ -246,8 +246,9 @@ func (tq *TenantQuery) Clone() *TenantQuery {
 		order:      append([]OrderFunc{}, tq.order...),
 		predicates: append([]predicate.Tenant{}, tq.predicates...),
 		// clone intermediate query.
-		sql:  tq.sql.Clone(),
-		path: tq.path,
+		sql:    tq.sql.Clone(),
+		path:   tq.path,
+		unique: tq.unique,
 	}
 }
 

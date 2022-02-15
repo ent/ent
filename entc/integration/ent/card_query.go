@@ -301,8 +301,9 @@ func (cq *CardQuery) Clone() *CardQuery {
 		withOwner:  cq.withOwner.Clone(),
 		withSpec:   cq.withSpec.Clone(),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:    cq.sql.Clone(),
+		path:   cq.path,
+		unique: cq.unique,
 	}
 }
 

@@ -246,8 +246,9 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 		order:      append([]OrderFunc{}, cq.order...),
 		predicates: append([]predicate.Conversion{}, cq.predicates...),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:    cq.sql.Clone(),
+		path:   cq.path,
+		unique: cq.unique,
 	}
 }
 

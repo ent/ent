@@ -299,8 +299,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withTenant: uq.withTenant.Clone(),
 		withGroups: uq.withGroups.Clone(),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:    uq.sql.Clone(),
+		path:   uq.path,
+		unique: uq.unique,
 	}
 }
 

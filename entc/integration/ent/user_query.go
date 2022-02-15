@@ -519,8 +519,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withChildren:  uq.withChildren.Clone(),
 		withParent:    uq.withParent.Clone(),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:    uq.sql.Clone(),
+		path:   uq.path,
+		unique: uq.unique,
 	}
 }
 

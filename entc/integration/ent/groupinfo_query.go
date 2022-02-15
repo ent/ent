@@ -275,8 +275,9 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
 		withGroups: giq.withGroups.Clone(),
 		// clone intermediate query.
-		sql:  giq.sql.Clone(),
-		path: giq.path,
+		sql:    giq.sql.Clone(),
+		path:   giq.path,
+		unique: giq.unique,
 	}
 }
 

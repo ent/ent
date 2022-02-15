@@ -282,6 +282,7 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		// clone intermediate query.
 		gremlin: nq.gremlin.Clone(),
 		path:    nq.path,
+		unique:  nq.unique,
 	}
 }
 

@@ -272,8 +272,9 @@ func (pq *PostQuery) Clone() *PostQuery {
 		predicates: append([]predicate.Post{}, pq.predicates...),
 		withAuthor: pq.withAuthor.Clone(),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:    pq.sql.Clone(),
+		path:   pq.path,
+		unique: pq.unique,
 	}
 }
 

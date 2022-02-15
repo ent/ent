@@ -273,8 +273,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		predicates: append([]predicate.User{}, uq.predicates...),
 		withCard:   uq.withCard.Clone(),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:    uq.sql.Clone(),
+		path:   uq.path,
+		unique: uq.unique,
 	}
 }
 

@@ -299,8 +299,9 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		withPrev:   nq.withPrev.Clone(),
 		withNext:   nq.withNext.Clone(),
 		// clone intermediate query.
-		sql:  nq.sql.Clone(),
-		path: nq.path,
+		sql:    nq.sql.Clone(),
+		path:   nq.path,
+		unique: nq.unique,
 	}
 }
 

@@ -266,6 +266,7 @@ func (sq *SpecQuery) Clone() *SpecQuery {
 		// clone intermediate query.
 		gremlin: sq.gremlin.Clone(),
 		path:    sq.path,
+		unique:  sq.unique,
 	}
 }
 

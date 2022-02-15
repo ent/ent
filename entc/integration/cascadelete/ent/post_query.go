@@ -298,8 +298,9 @@ func (pq *PostQuery) Clone() *PostQuery {
 		withAuthor:   pq.withAuthor.Clone(),
 		withComments: pq.withComments.Clone(),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:    pq.sql.Clone(),
+		path:   pq.path,
+		unique: pq.unique,
 	}
 }
 

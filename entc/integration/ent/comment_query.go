@@ -248,8 +248,9 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 		order:      append([]OrderFunc{}, cq.order...),
 		predicates: append([]predicate.Comment{}, cq.predicates...),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:    cq.sql.Clone(),
+		path:   cq.path,
+		unique: cq.unique,
 	}
 }
 

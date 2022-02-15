@@ -267,6 +267,7 @@ func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
 		// clone intermediate query.
 		gremlin: giq.gremlin.Clone(),
 		path:    giq.path,
+		unique:  giq.unique,
 	}
 }
 

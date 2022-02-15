@@ -315,6 +315,7 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		// clone intermediate query.
 		gremlin: gq.gremlin.Clone(),
 		path:    gq.path,
+		unique:  gq.unique,
 	}
 }
 

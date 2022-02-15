@@ -306,8 +306,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withPets:   uq.withPets.Clone(),
 		withGroups: uq.withGroups.Clone(),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:    uq.sql.Clone(),
+		path:   uq.path,
+		unique: uq.unique,
 	}
 }
 

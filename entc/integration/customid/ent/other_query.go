@@ -247,8 +247,9 @@ func (oq *OtherQuery) Clone() *OtherQuery {
 		order:      append([]OrderFunc{}, oq.order...),
 		predicates: append([]predicate.Other{}, oq.predicates...),
 		// clone intermediate query.
-		sql:  oq.sql.Clone(),
-		path: oq.path,
+		sql:    oq.sql.Clone(),
+		path:   oq.path,
+		unique: oq.unique,
 	}
 }
 

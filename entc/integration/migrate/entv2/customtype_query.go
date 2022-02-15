@@ -246,8 +246,9 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 		order:      append([]OrderFunc{}, ctq.order...),
 		predicates: append([]predicate.CustomType{}, ctq.predicates...),
 		// clone intermediate query.
-		sql:  ctq.sql.Clone(),
-		path: ctq.path,
+		sql:    ctq.sql.Clone(),
+		path:   ctq.path,
+		unique: ctq.unique,
 	}
 }
 

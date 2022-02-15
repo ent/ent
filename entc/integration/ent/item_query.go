@@ -248,8 +248,9 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 		order:      append([]OrderFunc{}, iq.order...),
 		predicates: append([]predicate.Item{}, iq.predicates...),
 		// clone intermediate query.
-		sql:  iq.sql.Clone(),
-		path: iq.path,
+		sql:    iq.sql.Clone(),
+		path:   iq.path,
+		unique: iq.unique,
 	}
 }
 
