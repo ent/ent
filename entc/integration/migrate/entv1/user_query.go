@@ -346,8 +346,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withSpouse:   uq.withSpouse.Clone(),
 		withCar:      uq.withCar.Clone(),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:    uq.sql.Clone(),
+		path:   uq.path,
+		unique: uq.unique,
 	}
 }
 

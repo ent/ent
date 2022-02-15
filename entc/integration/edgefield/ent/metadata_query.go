@@ -321,8 +321,9 @@ func (mq *MetadataQuery) Clone() *MetadataQuery {
 		withChildren: mq.withChildren.Clone(),
 		withParent:   mq.withParent.Clone(),
 		// clone intermediate query.
-		sql:  mq.sql.Clone(),
-		path: mq.path,
+		sql:    mq.sql.Clone(),
+		path:   mq.path,
+		unique: mq.unique,
 	}
 }
 

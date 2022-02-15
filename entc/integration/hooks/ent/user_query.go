@@ -322,8 +322,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withFriends:    uq.withFriends.Clone(),
 		withBestFriend: uq.withBestFriend.Clone(),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:    uq.sql.Clone(),
+		path:   uq.path,
+		unique: uq.unique,
 	}
 }
 

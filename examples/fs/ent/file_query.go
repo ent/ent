@@ -296,8 +296,9 @@ func (fq *FileQuery) Clone() *FileQuery {
 		withParent:   fq.withParent.Clone(),
 		withChildren: fq.withChildren.Clone(),
 		// clone intermediate query.
-		sql:  fq.sql.Clone(),
-		path: fq.path,
+		sql:    fq.sql.Clone(),
+		path:   fq.path,
+		unique: fq.unique,
 	}
 }
 

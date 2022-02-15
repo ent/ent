@@ -249,8 +249,9 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 		order:      append([]OrderFunc{}, gq.order...),
 		predicates: append([]predicate.Group{}, gq.predicates...),
 		// clone intermediate query.
-		sql:  gq.sql.Clone(),
-		path: gq.path,
+		sql:    gq.sql.Clone(),
+		path:   gq.path,
+		unique: gq.unique,
 	}
 }
 

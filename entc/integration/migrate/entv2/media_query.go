@@ -246,8 +246,9 @@ func (mq *MediaQuery) Clone() *MediaQuery {
 		order:      append([]OrderFunc{}, mq.order...),
 		predicates: append([]predicate.Media{}, mq.predicates...),
 		// clone intermediate query.
-		sql:  mq.sql.Clone(),
-		path: mq.path,
+		sql:    mq.sql.Clone(),
+		path:   mq.path,
+		unique: mq.unique,
 	}
 }
 

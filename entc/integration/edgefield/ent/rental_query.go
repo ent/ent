@@ -298,8 +298,9 @@ func (rq *RentalQuery) Clone() *RentalQuery {
 		withUser:   rq.withUser.Clone(),
 		withCar:    rq.withCar.Clone(),
 		// clone intermediate query.
-		sql:  rq.sql.Clone(),
-		path: rq.path,
+		sql:    rq.sql.Clone(),
+		path:   rq.path,
+		unique: rq.unique,
 	}
 }
 

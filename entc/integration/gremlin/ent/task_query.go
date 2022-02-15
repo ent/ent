@@ -250,6 +250,7 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 		// clone intermediate query.
 		gremlin: tq.gremlin.Clone(),
 		path:    tq.path,
+		unique:  tq.unique,
 	}
 }
 

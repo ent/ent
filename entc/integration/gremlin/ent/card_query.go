@@ -284,6 +284,7 @@ func (cq *CardQuery) Clone() *CardQuery {
 		// clone intermediate query.
 		gremlin: cq.gremlin.Clone(),
 		path:    cq.path,
+		unique:  cq.unique,
 	}
 }
 

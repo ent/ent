@@ -249,6 +249,7 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		// clone intermediate query.
 		gremlin: ftq.gremlin.Clone(),
 		path:    ftq.path,
+		unique:  ftq.unique,
 	}
 }
 

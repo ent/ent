@@ -299,8 +299,9 @@ func (dq *DeviceQuery) Clone() *DeviceQuery {
 		withActiveSession: dq.withActiveSession.Clone(),
 		withSessions:      dq.withSessions.Clone(),
 		// clone intermediate query.
-		sql:  dq.sql.Clone(),
-		path: dq.path,
+		sql:    dq.sql.Clone(),
+		path:   dq.path,
+		unique: dq.unique,
 	}
 }
 

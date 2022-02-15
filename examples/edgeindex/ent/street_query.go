@@ -273,8 +273,9 @@ func (sq *StreetQuery) Clone() *StreetQuery {
 		predicates: append([]predicate.Street{}, sq.predicates...),
 		withCity:   sq.withCity.Clone(),
 		// clone intermediate query.
-		sql:  sq.sql.Clone(),
-		path: sq.path,
+		sql:    sq.sql.Clone(),
+		path:   sq.path,
+		unique: sq.unique,
 	}
 }
 

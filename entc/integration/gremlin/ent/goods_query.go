@@ -249,6 +249,7 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 		// clone intermediate query.
 		gremlin: gq.gremlin.Clone(),
 		path:    gq.path,
+		unique:  gq.unique,
 	}
 }
 

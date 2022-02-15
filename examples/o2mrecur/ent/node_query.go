@@ -297,8 +297,9 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		withParent:   nq.withParent.Clone(),
 		withChildren: nq.withChildren.Clone(),
 		// clone intermediate query.
-		sql:  nq.sql.Clone(),
-		path: nq.path,
+		sql:    nq.sql.Clone(),
+		path:   nq.path,
+		unique: nq.unique,
 	}
 }
 

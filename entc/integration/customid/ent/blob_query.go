@@ -298,8 +298,9 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		withParent: bq.withParent.Clone(),
 		withLinks:  bq.withLinks.Clone(),
 		// clone intermediate query.
-		sql:  bq.sql.Clone(),
-		path: bq.path,
+		sql:    bq.sql.Clone(),
+		path:   bq.path,
+		unique: bq.unique,
 	}
 }
 

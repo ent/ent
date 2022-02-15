@@ -347,8 +347,9 @@ func (pq *PetQuery) Clone() *PetQuery {
 		withFriends:    pq.withFriends.Clone(),
 		withBestFriend: pq.withBestFriend.Clone(),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:    pq.sql.Clone(),
+		path:   pq.path,
+		unique: pq.unique,
 	}
 }
 

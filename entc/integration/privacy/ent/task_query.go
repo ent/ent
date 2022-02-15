@@ -299,8 +299,9 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 		withTeams:  tq.withTeams.Clone(),
 		withOwner:  tq.withOwner.Clone(),
 		// clone intermediate query.
-		sql:  tq.sql.Clone(),
-		path: tq.path,
+		sql:    tq.sql.Clone(),
+		path:   tq.path,
+		unique: tq.unique,
 	}
 }
 

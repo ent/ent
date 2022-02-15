@@ -300,6 +300,7 @@ func (fq *FileQuery) Clone() *FileQuery {
 		// clone intermediate query.
 		gremlin: fq.gremlin.Clone(),
 		path:    fq.path,
+		unique:  fq.unique,
 	}
 }
 

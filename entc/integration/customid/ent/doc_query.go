@@ -298,8 +298,9 @@ func (dq *DocQuery) Clone() *DocQuery {
 		withParent:   dq.withParent.Clone(),
 		withChildren: dq.withChildren.Clone(),
 		// clone intermediate query.
-		sql:  dq.sql.Clone(),
-		path: dq.path,
+		sql:    dq.sql.Clone(),
+		path:   dq.path,
+		unique: dq.unique,
 	}
 }
 

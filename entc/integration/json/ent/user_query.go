@@ -246,8 +246,9 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:      append([]OrderFunc{}, uq.order...),
 		predicates: append([]predicate.User{}, uq.predicates...),
 		// clone intermediate query.
-		sql:  uq.sql.Clone(),
-		path: uq.path,
+		sql:    uq.sql.Clone(),
+		path:   uq.path,
+		unique: uq.unique,
 	}
 }
 

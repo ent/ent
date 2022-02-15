@@ -276,8 +276,9 @@ func (pq *PetQuery) Clone() *PetQuery {
 		predicates: append([]predicate.Pet{}, pq.predicates...),
 		withOwner:  pq.withOwner.Clone(),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:    pq.sql.Clone(),
+		path:   pq.path,
+		unique: pq.unique,
 	}
 }
 

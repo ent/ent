@@ -249,8 +249,9 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 		order:      append([]OrderFunc{}, ftq.order...),
 		predicates: append([]predicate.FieldType{}, ftq.predicates...),
 		// clone intermediate query.
-		sql:  ftq.sql.Clone(),
-		path: ftq.path,
+		sql:    ftq.sql.Clone(),
+		path:   ftq.path,
+		unique: ftq.unique,
 	}
 }
 

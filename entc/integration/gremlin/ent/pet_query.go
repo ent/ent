@@ -283,6 +283,7 @@ func (pq *PetQuery) Clone() *PetQuery {
 		// clone intermediate query.
 		gremlin: pq.gremlin.Clone(),
 		path:    pq.path,
+		unique:  pq.unique,
 	}
 }
 
