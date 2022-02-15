@@ -1,5 +1,5 @@
 ---
-title: Announcing "ogent" - An Extension to Automatically Generate a Server Implementation for "entoas" generated OpenAPI Specification Documents 
+title: Auto generate REST CRUD with Ent and ogen 
 author: MasseElch 
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
