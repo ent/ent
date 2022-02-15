@@ -133,6 +133,11 @@ var (
 			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
 		},
 		{
+			Name:   "main",
+			Format: "migrate/main.go",
+			Skip:   func(g *Graph) bool { return !g.SupportMigrate() },
+		},
+		{
 			Name:   "predicate",
 			Format: "predicate/predicate.go",
 		},
