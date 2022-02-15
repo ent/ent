@@ -24,6 +24,13 @@ The extension presented in this post serves as a bridge between Ent and the code
 by [`ogen`](https://github.com/ogen-go/ogen). It uses the configuration of `entoas` to generate the missing parts of
 the `ogen` code.
 
+The following diagram shows how Ent interacts with both the extensions `entoas` and `ogent` and how `ogen` is involved. 
+
+<div style={{textAlign: 'center'}}>
+  <img alt="Diagram" src="diagram.png" />
+  <p style={{fontSize: 12}}>Diagram</p>
+</div>
+
 If you are new to Ent and want to learn more about it, how to connect to different types of databases, run migrations or
 work with entities, then head over to the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/)
 
