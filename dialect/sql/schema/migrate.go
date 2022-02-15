@@ -7,6 +7,7 @@ package schema
 import (
 	"context"
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"math"
 
@@ -163,6 +164,9 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 // Diff compares the state read from the StateReader with the state defined by Ent.
 // Changes will be written to migration files by the configures Planner.
 func (m *Migrate) Diff(ctx context.Context, tables ...*Table) error {
+	if m.atlas.dir == nil {
+		return errors.New("no migration directory given")
+	}
 	plan, err := m.atDiff(ctx, m, tables...)
 	if err != nil {
 		return err
