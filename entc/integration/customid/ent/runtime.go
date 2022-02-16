@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"github.com/google/uuid"
 )
@@ -25,6 +27,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	accountFields := schema.Account{}.Fields()
+	_ = accountFields
+	// accountDescEmail is the schema descriptor for email field.
+	accountDescEmail := accountFields[1].Descriptor()
+	// account.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	account.EmailValidator = accountDescEmail.Validators[0].(func(string) error)
+	// accountDescID is the schema descriptor for id field.
+	accountDescID := accountFields[0].Descriptor()
+	// account.DefaultID holds the default value on creation for the id field.
+	account.DefaultID = accountDescID.Default.(func() sid.ID)
 	blobFields := schema.Blob{}.Fields()
 	_ = blobFields
 	// blobDescUUID is the schema descriptor for uuid field.
@@ -153,4 +165,14 @@ func init() {
 	session.DefaultID = sessionDescID.Default.(func() schema.ID)
 	// session.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	session.IDValidator = sessionDescID.Validators[0].(func([]byte) error)
+	tokenFields := schema.Token{}.Fields()
+	_ = tokenFields
+	// tokenDescBody is the schema descriptor for body field.
+	tokenDescBody := tokenFields[1].Descriptor()
+	// token.BodyValidator is a validator for the "body" field. It is called by the builders before save.
+	token.BodyValidator = tokenDescBody.Validators[0].(func(string) error)
+	// tokenDescID is the schema descriptor for id field.
+	tokenDescID := tokenFields[0].Descriptor()
+	// token.DefaultID holds the default value on creation for the id field.
+	token.DefaultID = tokenDescID.Default.(func() sid.ID)
 }

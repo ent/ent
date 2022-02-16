@@ -36,7 +36,7 @@ func (i *ID) Scan(src interface{}) error {
 		*i = ID(fmt.Sprint(v))
 		return nil
 	}
-	return errors.New("not a valid base62")
+	return errors.New("not a valid ID")
 }
 
 func New() ID {
@@ -47,7 +47,7 @@ func NewLength(l int) ID {
 	var out string
 	for len(out) < l {
 		result, _ := rand.Int(rand.Reader, big.NewInt(100))
-		out += fmt.Sprint(result)
+		out += fmt.Sprint(result.Uint64() + 1)
 	}
 	return ID(out[:l])
 }

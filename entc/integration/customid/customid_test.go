@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/schema/field"
@@ -198,12 +199,25 @@ func CustomID(t *testing.T, client *ent.Client) {
 		require.Equal(t, "Hello World", client.Doc.GetX(ctx, d.ID).Text)
 	})
 
-	t.Run("OtherID", func(t *testing.T) {
-		other := client.Other.Create().SaveX(ctx)
-		require.NotEmpty(t, other.ID.String())
+	t.Run("Other ID", func(t *testing.T) {
+		o := client.Other.Create().SaveX(ctx)
+		require.NotEmpty(t, o.ID.String())
 
-		other = client.Other.Create().SetID(sid.NewLength(15)).SaveX(ctx)
-		require.NotEmpty(t, other.ID.String())
+		o = client.Other.Create().SetID(sid.NewLength(15)).SaveX(ctx)
+		require.NotEmpty(t, o.ID.String())
+	})
+
+	t.Run("CustomID edge", func(t *testing.T) {
+		a := client.Account.Create().SetEmail("test@example.org").SaveX(ctx)
+		require.NotEmpty(t, a.ID)
+
+		tk := client.Token.Create().SetAccountID(a.ID).SetBody("token").SaveX(ctx)
+		require.NotEmpty(t, tk.ID)
+
+		ta := client.Token.Query().Where(token.Body("token")).WithAccount().FirstX(ctx)
+		require.Equal(t, tk.ID, ta.ID)
+		require.NotNil(t, ta.Edges.Account)
+		require.Equal(t, a.ID, ta.Edges.Account.ID)
 	})
 }
 
@@ -220,7 +234,7 @@ func BytesID(t *testing.T, client *ent.Client) {
 // clearDefault clears the id's default for non-postgres dialects.
 func clearDefault(c schema.Creator) schema.Creator {
 	return schema.CreateFunc(func(ctx context.Context, tables ...*schema.Table) error {
-		tables[0].Columns[0].Default = nil
+		tables[1].Columns[0].Default = nil
 		return c.Create(ctx, tables...)
 	})
 }
