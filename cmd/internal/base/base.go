@@ -161,8 +161,8 @@ func DiffCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&dir, "dir", "migrations", "path/to/migration/files")
 	cmd.PersistentFlags().StringVar(&dsn, "dsn", "", "dsn of the dev database")
 	cmd.PersistentFlags().StringVar(&drv, "driver", "", "driver to use")
-	cmd.MarkPersistentFlagRequired("driver")
-	cmd.MarkPersistentFlagRequired("dsn")
+	panicOnErr(cmd.MarkPersistentFlagRequired("driver"))
+	panicOnErr(cmd.MarkPersistentFlagRequired("dsn"))
 	return cmd
 }
 
@@ -313,4 +313,10 @@ func examples(ex ...string) string {
 		ex[i] = "  " + ex[i] // indent each row with 2 spaces.
 	}
 	return strings.Join(ex, "\n")
+}
+
+func panicOnErr(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
