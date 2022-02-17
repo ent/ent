@@ -12,6 +12,17 @@ import (
 )
 
 var (
+	// AccountsColumns holds the columns for the "accounts" table.
+	AccountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeOther, SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint", "sqlite3": "integer"}},
+		{Name: "email", Type: field.TypeString},
+	}
+	// AccountsTable holds the schema information for the "accounts" table.
+	AccountsTable = &schema.Table{
+		Name:       "accounts",
+		Columns:    AccountsColumns,
+		PrimaryKey: []*schema.Column{AccountsColumns[0]},
+	}
 	// BlobsColumns holds the columns for the "blobs" table.
 	BlobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true, Default: "uuid_generate_v4()"},
@@ -213,6 +224,26 @@ var (
 			},
 		},
 	}
+	// TokensColumns holds the columns for the "tokens" table.
+	TokensColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeOther, SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint", "sqlite3": "integer"}},
+		{Name: "body", Type: field.TypeString},
+		{Name: "account_token", Type: field.TypeOther, SchemaType: map[string]string{"mysql": "bigint", "postgres": "bigint", "sqlite3": "integer"}},
+	}
+	// TokensTable holds the schema information for the "tokens" table.
+	TokensTable = &schema.Table{
+		Name:       "tokens",
+		Columns:    TokensColumns,
+		PrimaryKey: []*schema.Column{TokensColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tokens_accounts_token",
+				Columns:    []*schema.Column{TokensColumns[2]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "oid", Type: field.TypeInt, Increment: true},
@@ -309,6 +340,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AccountsTable,
 		BlobsTable,
 		CarsTable,
 		DevicesTable,
@@ -319,6 +351,7 @@ var (
 		OthersTable,
 		PetsTable,
 		SessionsTable,
+		TokensTable,
 		UsersTable,
 		BlobLinksTable,
 		GroupUsersTable,
@@ -335,6 +368,7 @@ func init() {
 	PetsTable.ForeignKeys[0].RefTable = PetsTable
 	PetsTable.ForeignKeys[1].RefTable = UsersTable
 	SessionsTable.ForeignKeys[0].RefTable = DevicesTable
+	TokensTable.ForeignKeys[0].RefTable = AccountsTable
 	UsersTable.ForeignKeys[0].RefTable = UsersTable
 	BlobLinksTable.ForeignKeys[0].RefTable = BlobsTable
 	BlobLinksTable.ForeignKeys[1].RefTable = BlobsTable

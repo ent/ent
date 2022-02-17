@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
@@ -22,6 +23,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 )
 
@@ -43,6 +45,7 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		account.Table: account.ValidColumn,
 		blob.Table:    blob.ValidColumn,
 		car.Table:     car.ValidColumn,
 		device.Table:  device.ValidColumn,
@@ -53,6 +56,7 @@ func columnChecker(table string) func(string) error {
 		other.Table:   other.ValidColumn,
 		pet.Table:     pet.ValidColumn,
 		session.Table: session.ValidColumn,
+		token.Table:   token.ValidColumn,
 		user.Table:    user.ValidColumn,
 	}
 	check, ok := checks[table]

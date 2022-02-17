@@ -10,6 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Account is the predicate function for account builders.
+type Account func(*sql.Selector)
+
 // Blob is the predicate function for blob builders.
 type Blob func(*sql.Selector)
 
@@ -39,6 +42,9 @@ type Pet func(*sql.Selector)
 
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
+
+// Token is the predicate function for token builders.
+type Token func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
