@@ -17,7 +17,7 @@ import (
 	"text/template"
 	"unicode"
 
-	migrate2 "ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/cmd/internal/printer"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -140,7 +140,7 @@ func DiffCmd() *cobra.Command {
 				if err != nil {
 					log.Fatalln(err)
 				}
-				d, err := migrate2.NewLocalDir(dir)
+				d, err := migrate.NewLocalDir(dir)
 				if err != nil {
 					log.Fatalln(err)
 				}
