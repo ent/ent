@@ -47,8 +47,7 @@ func TestCmd(t *testing.T) {
 		"migrate", "diff",
 		"./ent/schema",
 		"--dir", "migrations",
-		"--dsn", "file:ent?mode=memory&_fk=1",
-		"--driver", "sqlite3",
+		"--dsn", "sqlite://file:ent?mode=memory&_fk=1",
 	)
 	stderr = bytes.NewBuffer(nil)
 	cmd.Stderr = stderr

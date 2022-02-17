@@ -38,7 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	s := strings.SplitN(dsn, "://", 1)
+	s := strings.SplitN(dsn, "://", 2)
 	if len(s) != 2 {
 		log.Fatalln("bad dsn: " + dsn)
 	}

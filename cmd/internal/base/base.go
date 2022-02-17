@@ -144,6 +144,19 @@ func DiffCmd() *cobra.Command {
 				if err != nil {
 					log.Fatalln(err)
 				}
+				s := strings.SplitN(dsn, "://", 2)
+				if len(s) != 2 {
+					log.Fatalln("bad dsn: " + dsn)
+				}
+				dsn = s[1]
+				switch s[0] {
+				case "sqlite":
+					drv = "sqlite3"
+				case "mysql", "postgres":
+					drv = s[0]
+				default:
+					log.Fatalln("unknown driver: " + s[0])
+				}
 				dlct, err := sql.Open(drv, dsn)
 				if err != nil {
 					log.Fatalln(err)
@@ -160,8 +173,6 @@ func DiffCmd() *cobra.Command {
 	)
 	cmd.PersistentFlags().StringVar(&dir, "dir", "migrations", "path/to/migration/files")
 	cmd.PersistentFlags().StringVar(&dsn, "dsn", "", "dsn of the dev database")
-	cmd.PersistentFlags().StringVar(&drv, "driver", "", "driver to use")
-	panicOnErr(cmd.MarkPersistentFlagRequired("driver"))
 	panicOnErr(cmd.MarkPersistentFlagRequired("dsn"))
 	return cmd
 }
