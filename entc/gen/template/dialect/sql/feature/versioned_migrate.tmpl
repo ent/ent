@@ -6,7 +6,19 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
 
-{{ define "main" }}
+{{ define "migrate/diff" }}
+// Diff creates a migration file containing the statements to resolve the diff
+// between the Ent schema and the connected database.
+func (s *Schema) Diff(ctx context.Context, opts ...schema.MigrateOption) error {
+    migrate, err := schema.NewMigrate(s.drv, opts...)
+    if err != nil {
+        return fmt.Errorf("ent/migrate: %w", err)
+    }
+    return migrate.Diff(ctx, Tables...)
+}
+{{ end }}
+
+{{ define "migrate/main" }}
     {{- with extend $ "Package" "main" -}}
         {{ template "header" . }}
     {{ end }}
@@ -28,11 +40,10 @@ in the LICENSE file in the root directory of this source tree.
 
     func main() {
         var (
-            drv string
             dsn string
             dir string
+            drv string
         )
-        flag.StringVar(&drv, "driver", "", "driver to use")
         flag.StringVar(&dsn, "dsn", "", "dsn of development DB to connect to")
         flag.StringVar(&dir, "dir", "migrations", "path/to/migration/files")
         flag.Parse()
@@ -41,8 +52,21 @@ in the LICENSE file in the root directory of this source tree.
         if err != nil {
             log.Fatalln(err)
         }
+        s := strings.SplitN(dsn, "://", 1)
+        if len(s) != 2 {
+            log.Fatalln("bad dsn: "+dsn)
+        }
+        dsn = s[1]
+        switch s[0] {
+        case "sqlite":
+            drv = "sqlite3"
+        case "mysql", "postgres":
+            drv = s[0]
+        default:
+            log.Fatalln("unknown driver: "+s[0])
+        }
         // Create the client.
-        client, err := entv1.Open(drv, dsn)
+        client, err := {{ base .Config.Package }}.Open(drv, dsn)
         if err != nil {
             log.Fatalln(err)
         }
