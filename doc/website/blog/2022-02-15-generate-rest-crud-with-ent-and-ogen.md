@@ -3,7 +3,7 @@ title: Auto generate REST CRUD with Ent and ogen
 author: MasseElch 
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
-image: "https://entgo.io/images/assets/elkopa/entoas-code.png"
+image: "https://entgo.io/images/assets/ogent/1.png"
 ---
 
 In the end of 2021 we announced that [Ent](https://entgo.io) got a new official extension to generate a fully
