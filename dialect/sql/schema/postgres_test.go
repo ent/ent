@@ -259,7 +259,13 @@ func TestPostgres_Create(t *testing.T) {
 						{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{dialect.MySQL: "date"}, Nullable: true},
 						{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 						{Name: "cidr", Type: field.TypeString, SchemaType: map[string]string{dialect.Postgres: "cidr"}},
-						{Name: "inet", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "inet"}},
+						{Name: "point", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "point"}},
+						{Name: "line", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "line"}},
+						{Name: "lseg", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "lseg"}},
+						{Name: "box", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "box"}},
+						{Name: "path", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "path"}},
+						{Name: "polygon", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "polygon"}},
+						{Name: "circle", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "circle"}},
 						{Name: "macaddr", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "macaddr"}},
 						{Name: "macaddr8", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{dialect.Postgres: "macaddr8"}},
 						{Name: "strings", Type: field.TypeOther, SchemaType: map[string]string{dialect.Postgres: "text[]"}, Nullable: true},
@@ -284,6 +290,13 @@ func TestPostgres_Create(t *testing.T) {
 						AddRow("text", "text", "YES", "NULL", "text", nil, nil, nil).
 						AddRow("cidr", "cidr", "NO", "NULL", "cidr", nil, nil, nil).
 						AddRow("inet", "inet", "YES", "NULL", "inet", nil, nil, nil).
+						AddRow("point", "point", "YES", "NULL", "point", nil, nil, nil).
+						AddRow("line", "line", "YES", "NULL", "line", nil, nil, nil).
+						AddRow("lseg", "lseg", "YES", "NULL", "lseg", nil, nil, nil).
+						AddRow("box", "box", "YES", "NULL", "box", nil, nil, nil).
+						AddRow("path", "path", "YES", "NULL", "path", nil, nil, nil).
+						AddRow("polygon", "polygon", "YES", "NULL", "polygon", nil, nil, nil).
+						AddRow("circle", "circle", "YES", "NULL", "circle", nil, nil, nil).
 						AddRow("macaddr", "macaddr", "YES", "NULL", "macaddr", nil, nil, nil).
 						AddRow("macaddr8", "macaddr8", "YES", "NULL", "macaddr8", nil, nil, nil).
 						AddRow("strings", "ARRAY", "YES", "NULL", "_text", nil, nil, nil))

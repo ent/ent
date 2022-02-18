@@ -286,6 +286,8 @@ func (d *Postgres) scanColumn(c *Column, rows *sql.Rows) error {
 		c.Type = field.TypeUUID
 	case "cidr", "inet", "macaddr", "macaddr8":
 		c.Type = field.TypeOther
+	case "point", "line", "lseg", "box", "path", "polygon", "circle":
+		c.Type = field.TypeOther
 	case "ARRAY":
 		c.Type = field.TypeOther
 		if !udt.Valid {
