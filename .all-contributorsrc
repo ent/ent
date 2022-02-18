@@ -744,6 +744,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "tprebs",
+      "name": "Thomas Prebble",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6523587?v=4",
+      "profile": "https://github.com/tprebs",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
