@@ -97,15 +97,6 @@ var (
 		Stage:       Experimental,
 		Default:     false,
 		Description: "Allows users to work with versioned migrations / migration files",
-		GraphTemplates: []GraphTemplate{
-			{
-				Name:   "migrate/main",
-				Format: "migrate/main.go",
-			},
-		},
-		cleanup: func(c *Config) error {
-			return remove(filepath.Join(c.Target, "migrate"), "main.go")
-		},
 	}
 
 	// AllFeatures holds a list of all feature-flags.
