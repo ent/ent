@@ -35,14 +35,14 @@ import (
 	"log"
 	
 	"entgo.io/ent/entc"
-    "entgo.io/ent/entc/gen"
+	"entgo.io/ent/entc/gen"
 )
 
 func main() {
 	err := entc.Generate("./schema", &gen.Config{}, entc.FeatureNames("sql/versioned-migrations"))
 	if err != nil {
-       log.Fatalf("running ent codegen: %v", err)
-    }
+		log.Fatalf("running ent codegen: %v", err)
+	}
 }
 ```
 
@@ -68,22 +68,22 @@ import (
 )
 
 func main() {
-    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
-    if err != nil {
-        log.Fatalf("failed connecting to mysql: %v", err)
-    }
-    defer client.Close()
-    ctx := context.Background()
+	client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+	if err != nil {
+		log.Fatalf("failed connecting to mysql: %v", err)
+	}
+	defer client.Close()
+	ctx := context.Background()
 	// Create a local migration directory.
 	dir, err := migrate.NewLocalDir("migrations")
 	if err != nil {
-        log.Fatalf("failed creating atlas migration directory: %v", err)
-    }
-    // Run migration.
-    err = client.Schema.Diff(ctx, schema.WithDir(dir))
-    if err != nil {
-        log.Fatalf("failed creating schema resources: %v", err)
-    }
+		log.Fatalf("failed creating atlas migration directory: %v", err)
+	}
+	// Write migration diff.
+	err = client.Schema.Diff(ctx, schema.WithDir(dir))
+	if err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
 }
 ```
 
