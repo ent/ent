@@ -15,13 +15,13 @@ tool you like (like golang-migrate, Flyway, liquibase).
 In order to have Ent make the necessary changes to your code, you have to enable this feature with one of the two
 options:
 
-1. If you are using the default go generate configuration, simply add the `--feature sql/versioned-migrations` to
+1. If you are using the default go generate configuration, simply add the `--feature sql/versioned-migration` to
    the `ent/generate.go` file as follows:
 
 ```go
 package ent
 
-//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature sql/versioned-migrations ./schema
+//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature sql/versioned-migration ./schema
 ```
 
 2. If you are using the code generation package (e.g. if you are using an Ent extension), add the feature flag as
@@ -40,7 +40,7 @@ import (
 )
 
 func main() {
-	err := entc.Generate("./schema", &gen.Config{}, entc.FeatureNames("sql/versioned-migrations"))
+	err := entc.Generate("./schema", &gen.Config{}, entc.FeatureNames("sql/versioned-migration"))
 	if err != nil {
 		log.Fatalf("running ent codegen: %v", err)
 	}
