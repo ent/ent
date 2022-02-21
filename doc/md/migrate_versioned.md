@@ -106,7 +106,7 @@ import (
 )
 
 func main() {
-	// Load the graph.
+    // Load the graph.
     graph, err := entc.LoadGraph("/.schema", &gen.Config{})
     if err != nil {
         log.Fatalln(err)
@@ -120,12 +120,12 @@ func main() {
     if err != nil {
         log.Fatalln(err)
     }
-	// Open connection to the database.
+    // Open connection to the database.
     dlct, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
     if err != nil {
         log.Fatalln(err)
     }
-	// Inspect it and compare it with the graph.
+    // Inspect it and compare it with the graph.
     m, err := schema.NewMigrate(dlct, schema.WithDir(d))
     if err != nil {
         log.Fatalln(err)
