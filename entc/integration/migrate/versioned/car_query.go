@@ -273,8 +273,9 @@ func (cq *CarQuery) Clone() *CarQuery {
 		predicates: append([]predicate.Car{}, cq.predicates...),
 		withOwner:  cq.withOwner.Clone(),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:    cq.sql.Clone(),
+		path:   cq.path,
+		unique: cq.unique,
 	}
 }
 
