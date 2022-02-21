@@ -848,6 +848,7 @@ html[data-theme='dark'] .navbar__logo {
 
 :root {
   --site-primary-hue-saturation: 217, 73%, 78%;
+  --ifm-footer-title-color: white;
 }
 
 div[class^='announcementBar_'] {
