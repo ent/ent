@@ -92,6 +92,13 @@ var (
 		Description: "Allows users to configure the `ON CONFLICT`/`ON DUPLICATE KEY` clause for `INSERT` statements",
 	}
 
+	FeatureVersionedMigrations = Feature{
+		Name:        "sql/versioned-migrations",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Allows users to work with versioned migrations / migration files",
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
@@ -101,6 +108,7 @@ var (
 		FeatureLock,
 		FeatureModifier,
 		FeatureUpsert,
+		FeatureVersionedMigrations,
 	}
 )
 
