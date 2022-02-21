@@ -3,7 +3,11 @@ id: migrate_versioned
 title: Versioned Migrations
 ---
 
-If you are using the Atlas migration engine you are able to use the versioned migrations feature of it. 
+If you are using the Atlas migration engine you are able to use the versioned migrations feature of it. Instead of
+applying the computed changes directly to the database, it will generate a set of migration files containing the
+necessary SQL statements to migrate the database. The 
+
+![atlas-versioned-migration-process](https://entgo.io/images/assets/migrate-atlas-versioned.png)
 
 ## Configuration
 
