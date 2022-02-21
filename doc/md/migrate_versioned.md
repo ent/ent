@@ -87,9 +87,12 @@ func main() {
 }
 ```
 
+You can then create a new set of migration files by simply calling `go run -mod=mod main.go`.
+
 ### From Graph
 
-You can also generate new migration files without an instantiated Ent client. 
+You can also generate new migration files without an instantiated Ent client. This can be useful if you want to make the
+migration file creation part of a go generate workflow.
 
 ```go
 package main
