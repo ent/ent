@@ -44,8 +44,11 @@ func main() {
 
 ## Generating Versioned Migration Files
 
-This will add an extra `Diff` method to the Ent client that you can use to inspect the connected database, compare it
-with the schema definitions and create sql statements needed to migrate the database to the graph.
+### From Client 
+
+After regenerating the project, there will be an extra `Diff` method on the Ent client that you can use to inspect the
+connected database, compare it with the schema definitions and create sql statements needed to migrate the database to
+the graph.
 
 ```go
 package main
@@ -76,6 +79,55 @@ func main() {
     err = client.Schema.Diff(ctx, schema.WithDir(dir))
     if err != nil {
         log.Fatalf("failed creating schema resources: %v", err)
+    }
+}
+```
+
+### From Graph
+
+You can also generate new migration files without an instantiated Ent client. 
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+
+    "ariga.io/atlas/sql/migrate"
+    "entgo.io/ent/dialect/sql"
+    "entgo.io/ent/dialect/sql/schema"
+    "entgo.io/ent/entc"
+    "entgo.io/ent/entc/gen"
+)
+
+func main() {
+	// Load the graph.
+    graph, err := entc.LoadGraph("/.schema", &gen.Config{})
+    if err != nil {
+        log.Fatalln(err)
+    }
+    tbls, err := graph.Tables()
+    if err != nil {
+        log.Fatalln(err)
+    }
+    // Create a local migration directory.
+    d, err := migrate.NewLocalDir("migrations")
+    if err != nil {
+        log.Fatalln(err)
+    }
+	// Open connection to the database.
+    dlct, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalln(err)
+    }
+	// Inspect it and compare it with the graph.
+    m, err := schema.NewMigrate(dlct, schema.WithDir(d))
+    if err != nil {
+        log.Fatalln(err)
+    }
+    if err := m.Diff(context.Background(), tbls...); err != nil {
+        log.Fatalln(err)
     }
 }
 ```
