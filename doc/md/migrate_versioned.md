@@ -146,3 +146,24 @@ execute the generated migration files, you have to rely on an external tool (or 
 generates one "up" and one "down" migration file for the computed diff. These files are compatible with the popular
 [golang-migrate/migrate](https://github.com/golang-migrate/migrate) package, and you can use that tool to manage the
 migrations in you deployments.
+
+```shell
+migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306)/test up
+```
+
+## Moving from Auto-Migration to Versioned Migrations
+
+In case you already have an Ent application in production and want to switch over from auto migration to the new
+versioned migration, you need to take some extra steps. 
+
+1. Create an initial migration file (or several files if you want) reflecting the currently deployed state.
+
+   To do this make sure your schema definition is in sync with your deployed version. Then spin up an empty database and
+   run the diff command once as described above. This will create the statements needed to create the current state of
+   your schema graph.
+
+2. Configure the tool you use to manage migrations to consider this file as **applied**. 
+
+   In case of `golang-migrate` this can be done by forcing your database version as
+   described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
+
