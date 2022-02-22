@@ -170,6 +170,16 @@ var (
 					Desc: true,
 				},
 			},
+			{
+				Name:    "user_nickname",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					Types: map[string]string{
+						"mysql": "FULLTEXT",
+					},
+				},
+			},
 		},
 	}
 	// FriendsColumns holds the columns for the "friends" table.

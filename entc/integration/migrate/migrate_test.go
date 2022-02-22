@@ -51,6 +51,7 @@ func TestMySQL(t *testing.T) {
 			if version == "8" {
 				CheckConstraint(t, clientv2)
 			}
+			NicknameSearch(t, clientv2)
 		})
 	}
 }
@@ -345,6 +346,21 @@ func CheckConstraint(t *testing.T, client *entv2.Client) {
 	require.Error(t, err)
 	err = client.Media.Create().SetSourceURI("entgo.io").Exec(ctx)
 	require.Error(t, err)
+}
+
+func NicknameSearch(t *testing.T, client *entv2.Client) {
+	ctx := context.Background()
+	names := client.User.Query().
+		Where(func(s *sql.Selector) {
+			s.Where(sql.P(func(b *sql.Builder) {
+				b.WriteString("MATCH(").Ident(user.FieldNickname).WriteString(") AGAINST(").Arg("nick_bar | nick_foo").WriteString(")")
+			}))
+		}).
+		Unique(true).
+		Order(entv2.Asc(user.FieldNickname)).
+		Select(user.FieldNickname).
+		StringsX(ctx)
+	require.Equal(t, []string{"nick_bar", "nick_foo"}, names)
 }
 
 func EqualFold(t *testing.T, client *entv2.Client) {
