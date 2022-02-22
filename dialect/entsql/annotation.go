@@ -224,6 +224,30 @@ type IndexAnnotation struct {
 	//	CREATE INDEX `table_c1_c2_c3` ON `table`(`c1` DESC, `c2` DESC, `c3`)
 	//
 	DescColumns map[string]bool
+
+	// Type defines the type of the index.
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("c1").
+	//		Annotation(
+	//			entsql.IndexType("FULLTEXT"),
+	//		)
+	//
+	//	CREATE FULLTEXT INDEX `table_c1` ON `table`(`c1`)
+	//
+	Type string
+
+	// Types is like the Type option but allows mapping an index-type per dialect.
+	//
+	//	index.Fields("c1").
+	//		Annotation(
+	//			entsql.IndexTypes(map[string]string{
+	//				dialect.MySQL:		"FULLTEXT",
+	//				dialect.Postgres:	"GIN",
+	//			}),
+	//		)
+	//
+	Types map[string]string
 }
 
 // Prefix returns a new index annotation with a single string column index.
@@ -293,6 +317,34 @@ func DescColumns(names ...string) *IndexAnnotation {
 	return ant
 }
 
+// Type defines the type of the index.
+// In MySQL, the following annotation maps to:
+//
+//	index.Fields("c1").
+//		Annotation(
+//			entsql.IndexType("FULLTEXT"),
+//		)
+//
+//	CREATE FULLTEXT INDEX `table_c1` ON `table`(`c1`)
+//
+func IndexType(t string) *IndexAnnotation {
+	return &IndexAnnotation{Type: t}
+}
+
+// Types is like the Type option but allows mapping an index-type per dialect.
+//
+//	index.Fields("c1").
+//		Annotations(
+//			entsql.IndexTypes(map[string]string{
+//				dialect.MySQL:    "FULLTEXT",
+//				dialect.Postgres: "GIN",
+//			}),
+//		)
+//
+func IndexTypes(types map[string]string) *IndexAnnotation {
+	return &IndexAnnotation{Types: types}
+}
+
 // Name describes the annotation name.
 func (IndexAnnotation) Name() string {
 	return "EntSQLIndexes"
@@ -332,6 +384,12 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		for column, desc := range ant.DescColumns {
 			a.DescColumns[column] = desc
 		}
+	}
+	if ant.Type != "" {
+		a.Type = ant.Type
+	}
+	if ant.Types != nil {
+		a.Types = ant.Types
 	}
 	return a
 }

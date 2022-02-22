@@ -7,6 +7,8 @@ package schema
 import (
 	"time"
 
+	"entgo.io/ent/dialect"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
@@ -126,6 +128,13 @@ func (User) Indexes() []ent.Index {
 			Unique(),
 		index.Fields("age").
 			Annotations(entsql.Desc()),
+		index.Fields("nickname").
+			Annotations(
+				entsql.IndexTypes(map[string]string{
+					dialect.MySQL:    "FULLTEXT",
+					dialect.Postgres: "GIN",
+				}),
+			),
 	}
 }
 

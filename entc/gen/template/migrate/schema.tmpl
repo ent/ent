@@ -130,6 +130,16 @@ var (
 										{{- end }}
 										},
 									{{- end }}
+									{{- with $ant.Type }}
+										Type: "{{ . }}",
+									{{- end }}
+									{{- with $keys := keys $ant.Types }}
+										Types: map[string]string{
+											{{- range $k := $keys }}
+												"{{ $k }}": "{{ index $ant.Types $k }}",
+											{{- end }}
+										},
+									{{- end }}
 								},
 							{{- end }}
 						},

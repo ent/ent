@@ -779,5 +779,8 @@ func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) er
 		}
 		idx2.AddParts(&schema.IndexPart{C: c2})
 	}
+	if t, ok := indexType(idx1, dialect.Postgres); ok {
+		idx2.AddAttrs(&postgres.IndexType{T: t})
+	}
 	return nil
 }
