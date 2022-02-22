@@ -951,5 +951,22 @@ func (d *MySQL) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) error
 		}
 		idx2.AddParts(part)
 	}
+	if t, ok := indexType(idx1, dialect.MySQL); ok {
+		idx2.AddAttrs(&mysql.IndexType{T: t})
+	}
 	return nil
+}
+
+func indexType(idx *Index, d string) (string, bool) {
+	ant := idx.Annotation
+	if ant == nil {
+		return "", false
+	}
+	if ant.Type != "" {
+		return idx.Annotation.Type, true
+	}
+	if ant.Types != nil && ant.Types[d] != "" {
+		return ant.Types[d], true
+	}
+	return "", false
 }
