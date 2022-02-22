@@ -212,6 +212,49 @@ CREATE INDEX `users_description` ON `users`(`description`(128))
 CREATE INDEX `users_c1_c2_c3` ON `users`(`c1`(100), `c2`(200), `c3`)
 ```
 
+## Atlas Support
+
+Starting with v0.10, Ent supports running migration with [Atlas](migrate.md#atlas-integration). This option provides
+more control on indexes such as, configuring their types or define indexes in a reverse order.
+```go
+func (User) Indexes() []ent.Index {
+    return []ent.Index{
+        index.Fields("c1").
+            Annotations(entsql.Desc()),
+        index.Fields("c1", "c2", "c3").
+            Annotation(entsql.DescColumns("c1", "c2")),
+        index.Fields("c4").
+            Annotations(entsql.IndexType("HASH")),
+        // Enable FULLTEXT search on MySQL,
+        // and GIN on PostgreSQL.
+        index.Fields("c5").
+            Annotations(
+                entsql.IndexTypes(map[string]string{
+                    dialect.MySQL:    "FULLTEXT",
+                    dialect.Postgres: "GIN",
+                }),
+            ),
+    }
+}
+```
+
+The code above generates the following SQL statements:
+
+```sql
+CREATE INDEX `users_c1` ON `users` (`c1` DESC)
+
+CREATE INDEX `users_c1_c2_c3` ON `users` (`c1` DESC, `c2` DESC, `c3`)
+
+CREATE INDEX `users_c4` ON `users` USING HASH (`c4`)
+
+-- MySQL only.
+CREATE FULLTEXT INDEX `users_c5` ON `users` (`c5`)
+
+-- PostgreSQL only.
+CREATE INDEX `users_c5` ON `users` USING GIN (`c5`)
+```
+
+
 ## Storage Key
 
 Like Fields, custom index name can be configured using the `StorageKey` method.
