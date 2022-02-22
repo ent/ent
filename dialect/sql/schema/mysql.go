@@ -962,11 +962,11 @@ func indexType(idx *Index, d string) (string, bool) {
 	if ant == nil {
 		return "", false
 	}
-	if ant.Type != "" {
-		return idx.Annotation.Type, true
-	}
 	if ant.Types != nil && ant.Types[d] != "" {
 		return ant.Types[d], true
+	}
+	if ant.Type != "" {
+		return ant.Type, true
 	}
 	return "", false
 }

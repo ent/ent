@@ -7,9 +7,8 @@ package schema
 import (
 	"time"
 
-	"entgo.io/ent/dialect"
-
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -128,11 +127,12 @@ func (User) Indexes() []ent.Index {
 			Unique(),
 		index.Fields("age").
 			Annotations(entsql.Desc()),
+		// Enable FULLTEXT search on "nickname"
+		// field only in MySQL.
 		index.Fields("nickname").
 			Annotations(
 				entsql.IndexTypes(map[string]string{
-					dialect.MySQL:    "FULLTEXT",
-					dialect.Postgres: "GIN",
+					dialect.MySQL: "FULLTEXT",
 				}),
 			),
 	}
