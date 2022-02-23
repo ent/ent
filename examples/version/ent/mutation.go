@@ -277,6 +277,20 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *UserMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldVersion:
+		if user.DefaultVersion == nil {
+			return nil, true
+		}
+		return user.DefaultVersion(), true
+	}
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.

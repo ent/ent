@@ -411,6 +411,28 @@ func (m *{{ $mutation }}) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *{{ $mutation }}) FieldDefault(name string) (ent.Value, bool) {
+	{{- with $n.Fields }}
+		switch name {
+		{{- range $f := $n.Fields }}
+			{{- if $f.Default }}
+				{{- $const := print $n.Package "." $f.Constant }}
+				case {{ $const }}:
+					{{- if $f.DefaultFunc }}
+						if {{ $n.Package }}.{{ $f.DefaultName }} == nil {
+							return nil, true
+						}
+					{{- end }}
+					return {{ $n.Package }}.{{ $f.DefaultName }}{{ if $f.DefaultFunc }}(){{ end }}, true
+			{{- end }}
+		{{- end }}
+		}
+	{{- end }}
+	return nil, false
+}
 
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the

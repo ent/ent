@@ -223,6 +223,13 @@ func (m *CarMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *CarMutation) FieldDefault(name string) (ent.Value, bool) {
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -997,6 +1004,15 @@ func (m *ConversionMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *ConversionMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -1474,6 +1490,15 @@ func (m *CustomTypeMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *CustomTypeMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -1747,6 +1772,13 @@ func (m *GroupMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *GroupMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *GroupMutation) FieldDefault(name string) (ent.Value, bool) {
 	return nil, false
 }
 
@@ -2166,6 +2198,15 @@ func (m *MediaMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *MediaMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -2516,6 +2557,13 @@ func (m *PetMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *PetMutation) Field(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *PetMutation) FieldDefault(name string) (ent.Value, bool) {
 	return nil, false
 }
 
@@ -3697,6 +3745,33 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Workplace()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
+	}
+	return nil, false
+}
+
+// FieldDefault returns the default value of a field with the given name. The
+// second boolean return value indicates that the field has a default defined
+// in the schema.
+func (m *UserMutation) FieldDefault(name string) (ent.Value, bool) {
+	switch name {
+	case user.FieldMixedString:
+		return user.DefaultMixedString, true
+	case user.FieldMixedEnum:
+		return user.DefaultMixedEnum, true
+	case user.FieldPhone:
+		return user.DefaultPhone, true
+	case user.FieldBuffer:
+		if user.DefaultBuffer == nil {
+			return nil, true
+		}
+		return user.DefaultBuffer(), true
+	case user.FieldTitle:
+		return user.DefaultTitle, true
+	case user.FieldCreatedAt:
+		if user.DefaultCreatedAt == nil {
+			return nil, true
+		}
+		return user.DefaultCreatedAt(), true
 	}
 	return nil, false
 }
