@@ -45,7 +45,7 @@ described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). First in
 extensions to your Go module:
 
 ```shell
-go get entgo.io/contrib/entoas@master ariga.io/ogent@master
+go get entgo.io/contrib/entoas@master github.com/ariga/ogent@master
 ```
 
 Now follow the next two steps to enable them and to configure Ent to work with the extensions:
