@@ -1,5 +1,5 @@
 ---
-id: migrate_versioned
+id: versioned-migrations
 title: Versioned Migrations
 ---
 
