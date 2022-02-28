@@ -34,6 +34,8 @@ The following diagram shows how Ent interacts with both the extensions `entoas` 
 If you are new to Ent and want to learn more about it, how to connect to different types of databases, run migrations or
 work with entities, then head over to the [Setup Tutorial](https://entgo.io/docs/tutorial-setup/)
 
+The code in this post is available in the modules [examples](https://github.com/ariga/ogent/tree/main/example/todo).
+
 ### Getting Started
 
 :::note 
@@ -45,7 +47,7 @@ described [here](https://entgo.io/docs/code-gen#use-entc-as-a-package). First in
 extensions to your Go module:
 
 ```shell
-go get entgo.io/contrib/entoas@master ariga.io/ogent@master
+go get ariga.io/ogent@main
 ```
 
 Now follow the next two steps to enable them and to configure Ent to work with the extensions:
@@ -261,7 +263,10 @@ func main() {
 		log.Fatal(err)
 	}
 	// Start listening.
-	srv := ogent.NewServer(ogent.NewOgentHandler(client))
+	srv, err := ogent.NewServer(ogent.NewOgentHandler(client))
+	if err != nil {
+		log.Fatal(err)
+	}
 	if err := http.ListenAndServe(":8080", srv); err != nil {
 		log.Fatal(err)
 	}
