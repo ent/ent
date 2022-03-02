@@ -13,7 +13,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - name: Run linters
         uses: golangci/golangci-lint-action@v2.5.2
         with:
@@ -25,7 +25,7 @@ jobs:
       matrix:
         go: ['1.17', '1.16']
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
@@ -54,7 +54,7 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17'
@@ -226,7 +226,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17'
@@ -392,7 +392,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v2
