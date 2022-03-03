@@ -273,18 +273,18 @@ func (m *Migrate) setupAtlas() error {
 	if m.withFixture {
 		return errors.New("sql/schema: WithFixture(true) does not work in Atlas migration")
 	}
-	k := DropIndex | DropColumn
+	skip := DropIndex | DropColumn
 	if m.atlas.skip != NoChange {
-		k = m.atlas.skip
+		skip = m.atlas.skip
 	}
 	if m.dropIndexes {
-		k |= ^DropIndex
+		skip &= ^DropIndex
 	}
 	if m.dropColumns {
-		k |= ^DropColumn
+		skip &= ^DropColumn
 	}
-	if k != NoChange {
-		m.atlas.diff = append(m.atlas.diff, filterChanges(k))
+	if skip != NoChange {
+		m.atlas.diff = append(m.atlas.diff, filterChanges(skip))
 	}
 	if m.atlas.dir != nil && m.atlas.fmt == nil {
 		m.atlas.fmt = migrate.DefaultFormatter
