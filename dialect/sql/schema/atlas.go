@@ -14,6 +14,7 @@ import (
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
@@ -282,7 +283,7 @@ func (m *Migrate) setupAtlas() error {
 	if m.dropColumns {
 		k |= ^DropColumn
 	}
-	if k == NoChange {
+	if k != NoChange {
 		m.atlas.diff = append(m.atlas.diff, filterChanges(k))
 	}
 	if m.atlas.dir != nil && m.atlas.fmt == nil {
