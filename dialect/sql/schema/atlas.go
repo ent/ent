@@ -364,7 +364,7 @@ func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, tables .
 		return nil, err
 	}
 	// Plan changes.
-	return drv.PlanChanges(ctx, "", changes)
+	return drv.PlanChanges(ctx, "changes", changes)
 }
 
 type db struct{ dialect.ExecQuerier }
