@@ -60,10 +60,10 @@ const (
 	// SpouseColumn is the table column denoting the spouse relation/edge.
 	SpouseColumn = "user_spouse"
 	// CarTable is the table that holds the car relation/edge.
-	CarTable = "cars"
+	CarTable = "Car"
 	// CarInverseTable is the table name for the Car entity.
 	// It exists in this package in order to avoid circular dependency with the "car" package.
-	CarInverseTable = "cars"
+	CarInverseTable = "Car"
 	// CarColumn is the table column denoting the car relation/edge.
 	CarColumn = "user_car"
 )

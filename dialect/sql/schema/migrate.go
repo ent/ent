@@ -171,7 +171,7 @@ func (m *Migrate) Diff(ctx context.Context, tables ...*Table) error {
 	if err != nil {
 		return err
 	}
-	return migrate.New(nil, m.atlas.dir, m.atlas.fmt).WritePlan(plan)
+	return migrate.NewPlanner(nil, m.atlas.dir, migrate.WithFormatter(m.atlas.fmt)).WritePlan(plan)
 }
 
 func (m *Migrate) create(ctx context.Context, tables ...*Table) error {
