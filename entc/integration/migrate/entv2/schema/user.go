@@ -7,6 +7,8 @@ package schema
 import (
 	"time"
 
+	"entgo.io/ent/schema"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
@@ -140,6 +142,13 @@ func (User) Indexes() []ent.Index {
 
 type Car struct {
 	ent.Schema
+}
+
+// Annotations of the Car.
+func (Car) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "Car"},
+	}
 }
 
 func (Car) Edges() []ent.Edge {

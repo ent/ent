@@ -16,9 +16,9 @@ const (
 	// UserFieldID holds the string denoting the ID field of the User.
 	UserFieldID = "oid"
 	// Table holds the table name of the car in the database.
-	Table = "cars"
+	Table = "Car"
 	// OwnerTable is the table that holds the owner relation/edge.
-	OwnerTable = "cars"
+	OwnerTable = "Car"
 	// OwnerInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	OwnerInverseTable = "users"
@@ -31,7 +31,7 @@ var Columns = []string{
 	FieldID,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "cars"
+// ForeignKeys holds the SQL foreign-keys that are owned by the "Car"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"user_car",
