@@ -1165,35 +1165,41 @@ func (d *Descriptor) goType(typ interface{}, expectType reflect.Type) {
 			Methods: make(map[string]struct{ In, Out []*RType }, t.NumMethod()),
 		},
 	}
+	methods(t, info.RType)
 	switch t.Kind() {
 	case reflect.Slice, reflect.Ptr, reflect.Map:
 		info.Nillable = true
 	}
 	switch pt := reflect.PtrTo(t); {
-	case pt.Implements(valueScannerType):
-		t = pt
-		fallthrough
-	case t.Implements(valueScannerType):
-		n := t.NumMethod()
-		for i := 0; i < n; i++ {
-			m := t.Method(i)
-			in := make([]*RType, m.Type.NumIn()-1)
-			for j := range in {
-				arg := m.Type.In(j + 1)
-				in[j] = &RType{Name: arg.Name(), Ident: arg.String(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
-			}
-			out := make([]*RType, m.Type.NumOut())
-			for j := range out {
-				ret := m.Type.Out(j)
-				out[j] = &RType{Name: ret.Name(), Ident: ret.String(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
-			}
-			info.RType.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
-		}
-	case t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
+	case pt.Implements(valueScannerType), t.Implements(valueScannerType),
+		t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
 	default:
 		d.Err = fmt.Errorf("GoType must be a %q type or ValueScanner", expectType)
 	}
 	d.Info = info
+}
+
+func methods(t reflect.Type, rtype *RType) {
+	// For type T, add methods with
+	// pointer receiver as well (*T).
+	if t.Kind() != reflect.Ptr {
+		t = reflect.PtrTo(t)
+	}
+	n := t.NumMethod()
+	for i := 0; i < n; i++ {
+		m := t.Method(i)
+		in := make([]*RType, m.Type.NumIn()-1)
+		for j := range in {
+			arg := m.Type.In(j + 1)
+			in[j] = &RType{Name: arg.Name(), Ident: arg.String(), Kind: arg.Kind(), PkgPath: arg.PkgPath()}
+		}
+		out := make([]*RType, m.Type.NumOut())
+		for j := range out {
+			ret := m.Type.Out(j)
+			out[j] = &RType{Name: ret.Name(), Ident: ret.String(), Kind: ret.Kind(), PkgPath: ret.PkgPath()}
+		}
+		rtype.Methods[m.Name] = struct{ In, Out []*RType }{in, out}
+	}
 }
 
 func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {
