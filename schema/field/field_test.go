@@ -8,14 +8,18 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"errors"
+	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
 	"reflect"
 	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
 
@@ -678,6 +682,77 @@ func TestField_Other(t *testing.T) {
 		Default(func() custom { return custom{} }).
 		Descriptor()
 	assert.Error(t, fd.Err, "invalid default value")
+}
+
+type UserRole string
+
+const (
+	Admin   UserRole = "ADMIN"
+	User    UserRole = "USER"
+	Unknown UserRole = "UNKNOWN"
+)
+
+func (UserRole) Values() (roles []string) {
+	for _, r := range []UserRole{Admin, User, Unknown} {
+		roles = append(roles, string(r))
+	}
+	return
+}
+
+func (e UserRole) String() string {
+	return string(e)
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e UserRole) MarshalGQL(w io.Writer) {
+	_, _ = io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *UserRole) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = UserRole(str)
+	switch *e {
+	case Admin, User, Unknown:
+		return nil
+	default:
+		return fmt.Errorf("%s is not a valid Role", str)
+	}
+}
+
+type Scalar struct{}
+
+func (Scalar) MarshalGQL(io.Writer)            {}
+func (*Scalar) UnmarshalGQL(interface{}) error { return nil }
+func (Scalar) Value() (driver.Value, error)    { return nil, nil }
+
+func TestRType_Implements(t *testing.T) {
+	type (
+		marshaler   interface{ MarshalGQL(w io.Writer) }
+		unmarshaler interface{ UnmarshalGQL(v interface{}) error }
+		codec       interface {
+			marshaler
+			unmarshaler
+		}
+	)
+	var (
+		codecType     = reflect.TypeOf((*codec)(nil)).Elem()
+		marshalType   = reflect.TypeOf((*marshaler)(nil)).Elem()
+		unmarshalType = reflect.TypeOf((*unmarshaler)(nil)).Elem()
+	)
+	for _, f := range []ent.Field{
+		field.Enum("role").GoType(Admin),
+		field.Other("scalar", &Scalar{}),
+		field.Other("scalar", Scalar{}),
+	} {
+		fd := f.Descriptor()
+		assert.True(t, fd.Info.RType.Implements(codecType))
+		assert.True(t, fd.Info.RType.Implements(marshalType))
+		assert.True(t, fd.Info.RType.Implements(unmarshalType))
+	}
 }
 
 func TestTypeString(t *testing.T) {

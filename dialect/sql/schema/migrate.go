@@ -171,7 +171,7 @@ func (m *Migrate) Diff(ctx context.Context, tables ...*Table) error {
 	if err != nil {
 		return err
 	}
-	// Skip if the plan has no changes
+	// Skip if the plan has no changes.
 	if len(plan.Changes) == 0 {
 		return nil
 	}
