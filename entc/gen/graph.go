@@ -310,7 +310,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 			ref := e.Ref
 			expect(e.RefName == "", "reference name is derived from the assoc name: %s.%s <-> %s.%s", t.Name, ref.Name, t.Name, e.Name)
 			expect(ref.Type == t.Name, "assoc-inverse edge allowed only as o2o relation of the same type")
-			t.Edges = append(t.Edges, &Edge{
+			from := &Edge{
 				def:         e,
 				Type:        typ,
 				Name:        e.Name,
@@ -320,8 +320,10 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Optional:    !e.Required,
 				StructTag:   structTag(e.Name, e.Tag),
 				Annotations: e.Annotations,
-			}, &Edge{
+			}
+			to := &Edge{
 				def:         ref,
+				Ref:         from,
 				Type:        typ,
 				Owner:       t,
 				Name:        ref.Name,
@@ -329,7 +331,9 @@ func (g *Graph) addEdges(schema *load.Schema) {
 				Optional:    !ref.Required,
 				StructTag:   structTag(ref.Name, ref.Tag),
 				Annotations: ref.Annotations,
-			})
+			}
+			from.Ref = to
+			t.Edges = append(t.Edges, from, to)
 		default:
 			panic(graphError{"edge must be either an assoc or inverse edge"})
 		}
