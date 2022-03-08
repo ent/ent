@@ -123,7 +123,11 @@ func TestNewGraph(t *testing.T) {
 	require.Equal(graph.Nodes[0], e1.Type)
 
 	require.Equal("t2_m2m_from", t2.Edges[5].Name)
+	require.Equal("t2_m2m_to", t2.Edges[5].Inverse)
 	require.Equal("t2_m2m_to", t2.Edges[6].Name)
+	require.Empty(t2.Edges[6].Inverse)
+	require.Equal(t2.Edges[6], t2.Edges[5].Ref)
+	require.Equal(t2.Edges[5], t2.Edges[6].Ref)
 	require.Equal(map[string]string{"Name": "From"}, t2.Edges[5].Annotations["GQL"])
 	require.Equal(map[string]string{"Name": "To"}, t2.Edges[6].Annotations["GQL"])
 }
