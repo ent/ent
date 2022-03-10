@@ -308,7 +308,7 @@ func (m *Migrate) atCreate(ctx context.Context, tables ...*Table) error {
 				return err
 			}
 		}
-		plan, err := m.atDiff(ctx, tx, tables...)
+		plan, err := m.atDiff(ctx, tx, "", tables...)
 		if err != nil {
 			return err
 		}
@@ -334,7 +334,7 @@ func (m *Migrate) atCreate(ctx context.Context, tables ...*Table) error {
 	return tx.Commit()
 }
 
-func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, tables ...*Table) (*migrate.Plan, error) {
+func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, name string, tables ...*Table) (*migrate.Plan, error) {
 	drv, err := m.atOpen(conn)
 	if err != nil {
 		return nil, err
@@ -364,7 +364,7 @@ func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, tables .
 		return nil, err
 	}
 	// Plan changes.
-	return drv.PlanChanges(ctx, "changes", changes)
+	return drv.PlanChanges(ctx, name, changes)
 }
 
 type db struct{ dialect.ExecQuerier }
