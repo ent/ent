@@ -68,7 +68,7 @@ func (s *Schema) Diff(ctx context.Context, opts ...schema.MigrateOption) error {
 
 // NamedDiff creates a named migration file containing the statements to resolve the diff
 // between the Ent schema and the connected database.
-func (s *Schema) Diff(ctx context.Context, name string, opts ...schema.MigrateOption) error {
+func (s *Schema) NamedDiff(ctx context.Context, name string, opts ...schema.MigrateOption) error {
 	migrate, err := schema.NewMigrate(s.drv, opts...)
 	if err != nil {
 		return fmt.Errorf("ent/migrate: %w", err)
