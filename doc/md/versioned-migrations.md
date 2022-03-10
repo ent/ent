@@ -139,7 +139,7 @@ func main() {
     if err := m.Diff(context.Background(), tbls...); err != nil {
         log.Fatalln(err)
     }
-	// You can use the following method to give the migration files a name.
+    // You can use the following method to give the migration files a name.
     // if err := m.NamedDiff(context.Background(), "migration_name", tbls...); err != nil {
     //     log.Fatalln(err)
     // }
