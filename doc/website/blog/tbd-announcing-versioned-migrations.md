@@ -40,6 +40,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // User holds the schema definition for the User entity.
@@ -50,10 +51,17 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name"),
-		field.String("email").Unique(),
+		field.String("username"),
 	}
 }
+
+// Indexes of the User.
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("username").Unique(),
+	}
+}
+
 ```
 
 As I told you earlier, wa want to use the parsed schema graph to compute the difference between our schema and the
@@ -127,12 +135,204 @@ go run -mod=mod main.go initial
 ```
 
 You will now see two new files in the `migrations` directory: `<timestamp>_initial.down.sql`
-and `<timestamp>_initial.up.sql`.
+and `<timestamp>_initial.up.sql`. The `x.up.sql` files are used to create the database version `x` and `x.down.sql` to
+roll back to the previous version.
 
+```sql title="<timestamp>_initial.down.sql"
+DROP TABLE `users`;
+```
+
+```sql title="<timestamp>_initial.up.sql"
+CREATE TABLE `users` (`id` bigint NOT NULL AUTO_INCREMENT, `username` varchar(191) NOT NULL, PRIMARY KEY (`id`), UNIQUE INDEX `user_username` (`username`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+```
+
+### Applying Migrations
+
+To apply those migrations on your database, install the `golang-migrate/migrate` tool as described in
+their [README](https://github.com/golang-migrate/migrate/blob/master/cmd/migrate/README.md). Then run the following
+command to check if everything went as it should.
+
+```shell
+migrate -help
+```
+```text
+Usage: migrate OPTIONS COMMAND [arg...]
+       migrate [ -version | -help ]
+
+Options:
+  -source          Location of the migrations (driver://url)
+  -path            Shorthand for -source=file://path
+  -database        Run migrations against this database (driver://url)
+  -prefetch N      Number of migrations to load in advance before executing (default 10)
+  -lock-timeout N  Allow N seconds to acquire database lock (default 15)
+  -verbose         Print verbose logging
+  -version         Print version
+  -help            Print usage
+
+Commands:
+  create [-ext E] [-dir D] [-seq] [-digits N] [-format] NAME
+               Create a set of timestamped up/down migrations titled NAME, in directory D with extension E.
+               Use -seq option to generate sequential up/down migrations with N digits.
+               Use -format option to specify a Go time format string.
+  goto V       Migrate to version V
+  up [N]       Apply all or N up migrations
+  down [N]     Apply all or N down migrations
+  drop         Drop everything inside database
+  force V      Set version V but don't run migration (ignores dirty state)
+  version      Print current migration version
+```
+
+Now we can execute our initial migration and sync the database with our schema:
+
+```shell
+migrate -source 'file://migrations' -database 'mysql://root:pass@tcp(localhost:3306)/ent' up
+```
+```text
+<timestamp>/u initial (349.256951ms)
+```
+
+### Workflow
+
+Using versioned migrations is especially useful, if you have to execute advanced SQL statements, need to create data
+dependant migration steps or need to ship some seeding data with a change. To show an example of the latter, we create a
+new migration, that adds a Group schema and an admin user in the database. We do it in two steps:
+
+1. Add a Group schema and an edge to the User
+2. Create an admin Group, an admin User and the connection between them
+
+```go title="ent/schema/user.go" {22-28}
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+)
+
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("username"),
+	}
+}
+
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("groups", Group.Type).
+			Ref("users"),
+	}
+}
+
+// Indexes of the User.
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("username").Unique(),
+	}
+}
+```
+
+```go title="ent/schema/group.go"
+package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
+)
+
+// Group holds the schema definition for the Group entity.
+type Group struct {
+	ent.Schema
+}
+
+// Fields of the Group.
+func (Group) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+	}
+}
+
+// Edges of the Group.
+func (Group) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("users", User.Type),
+	}
+}
+
+// Indexes of the Group.
+func (Group) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name").Unique(),
+	}
+}
+```
+Once the schema is updated, create a new set of migration files.
+
+```shell
+go run -mod=mod main.go add_group_schema
+```
+
+Once again there will bew two new files in the `migrations` directory: `<timestamp>_add_group_schema.down.sql`
+and `<timestamp>_add_group_schema.up.sql`.
+
+```sql title="<timestamp>_add_group_schema.down.sql"
+DROP TABLE `group_users`;
+DROP TABLE `groups`;
+```
+
+```sql title="<timestamp>_add_group_schema.up.sql"
+CREATE TABLE `groups` (`id` bigint NOT NULL AUTO_INCREMENT, `name` varchar(191) NOT NULL, PRIMARY KEY (`id`), UNIQUE INDEX `group_name` (`name`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+CREATE TABLE `group_users` (`group_id` bigint NOT NULL, `user_id` bigint NOT NULL, PRIMARY KEY (`group_id`, `user_id`), CONSTRAINT `group_users_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE, CONSTRAINT `group_users_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+```
+
+You can now either edit the generated files to add the seed data or create new files for it. I chose the latter:
+
+```shell
+migrate create -format unix -ext sql -dir migrations seed_admin
+```
+```text
+[...]/ent-versioned-migrations/migrations/<timestamp>_seed_admin.up.sql
+[...]/ent-versioned-migrations/migrations/<timestamp>_seed_admin.down.sql
+```
+
+You can now edit those files and adds statements to create an admin Group and User.
+
+```sql title="migrations/<timestamp>_seed_admin.up.sql"
+INSERT INTO `groups` (`id`, `name`) VALUES (1, 'Admins');
+INSERT INTO `users` (`id`, `username`) VALUES (1, 'admin');
+INSERT INTO `group_users` (`group_id`, `user_id`) VALUES (1, 1);
+```
+
+```sql title="migrations/<timestamp>_seed_admin.down.sql"
+DELETE FROM `group_users` where `group_id` = 1 and `user_id` = 1;
+DELETE FROM `groups` where id = 1;
+DELETE FROM `users` where id = 1;
+```
+
+Apply the migrations once more, and you are done:
+
+```shell
+migrate -source file://migrations -database 'mysql://root:pass@tcp(localhost:3306)/ent' up
+```
+
+```text
+<timestamp>/u add_group_schema (417.434415ms)
+<timestamp>/u seed_admin (674.189872ms)
+```
 
 ### Wrapping Up
 
- -- TODO
+In this post, we demonstrated the general workflow when using Ent Versioned Migrations with `golang-migate/migrate`. We
+created a small example schema, generated the migration files for it and learned how to apply them. We now know the
+workflow and how to add custom migration files. 
 
 Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
 
