@@ -14,8 +14,8 @@ tool you like (like golang-migrate, Flyway, liquibase).
 
 ### From Client 
 
-If you want to use and instantiated Ent client to create new migration files, you have to enable the versioned
-migrations feature flag in order to have Ent make the necessary changes to the generated code. Dependent on how you
+If you want to use an instantiated Ent client to create new migration files, you have to enable the versioned
+migrations feature flag in order to have Ent make the necessary changes to the generated code. Depending on how you
 execute the Ent code generator, you have to use one of the two options:
 
 1. If you are using the default go generate configuration, simply add the `--feature sql/versioned-migration` to
@@ -51,7 +51,7 @@ func main() {
 ```
 
 After regenerating the project, there will be an extra `Diff` method on the Ent client that you can use to inspect the
-connected database, compare it with the schema definitions and create sql statements needed to migrate the database to
+connected database, compare it with the schema definitions and create SQL statements needed to migrate the database to
 the graph.
 
 ```go

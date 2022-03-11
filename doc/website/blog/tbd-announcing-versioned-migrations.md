@@ -6,9 +6,9 @@ authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
 image: tbd
 ---
 
-When [Ariel](https://github.com/a8m) released Ent v0.10.0 end of January,
+When [Ariel](https://github.com/a8m) released Ent v0.10.0 at the end of January,
 he [introduced](2022-01-20-announcing-new-migration-engine.md) a new migration engine for Ent based on another
-OpenSource tool called [Atlas](https://github.com/ariga/atlas). A month ago we added support for Atlas to generate
+open-source tool called [Atlas](https://github.com/ariga/atlas). A month ago we added support for Atlas to generate
 versioned migration files to be used with popular migration management solutions
 like [golang-migrate/migrate](https://github.com/golang-migrate/migrate), [Flyway](https://flywaydb.org/)
 or [Liquibase](https://liquibase.org/).
@@ -64,16 +64,16 @@ func (User) Indexes() []ent.Index {
 
 ```
 
-As I told you earlier, wa want to use the parsed schema graph to compute the difference between our schema and the
+As I stated before, we want to use the parsed schema graph to compute the difference between our schema and the
 connected database. Here is an example of a (semi-)persistent MySQL docker container to use if you want to follow along:
 
 ```shell
 docker run --rm --name ent-versioned-migrations --detach --env MYSQL_ROOT_PASSWORD=pass --env MYSQL_DATABASE=ent -p 3306:3306 mysql
 ```
 
-Once you are done you can shut down the container and remove all resources with `docker stop ent-versioned-migrations`.
+Once you are done, you can shut down the container and remove all resources with `docker stop ent-versioned-migrations`.
 
-Now, let's create a small function, that loads the schema graph and generates the migration files. Create a new Go file
+Now, let's create a small function that loads the schema graph and generates the migration files. Create a new Go file
 named `main.go` and copy the following contents:
 
 ```go title="main.go"
@@ -127,7 +127,7 @@ func main() {
 }
 ```
 
-Everything we have to do now is creating the migration directory and executing the above Go file:
+All we have to do now is create the migration directory and execute the above Go file:
 
 ```shell
 mkdir migrations
@@ -148,7 +148,7 @@ CREATE TABLE `users` (`id` bigint NOT NULL AUTO_INCREMENT, `username` varchar(19
 
 ### Applying Migrations
 
-To apply those migrations on your database, install the `golang-migrate/migrate` tool as described in
+To apply these migrations to your database, install the `golang-migrate/migrate` tool as described in
 their [README](https://github.com/golang-migrate/migrate/blob/master/cmd/migrate/README.md). Then run the following
 command to check if everything went as it should.
 
@@ -193,9 +193,9 @@ migrate -source 'file://migrations' -database 'mysql://root:pass@tcp(localhost:3
 
 ### Workflow
 
-Using versioned migrations is especially useful, if you have to execute advanced SQL statements, need to create data
-dependant migration steps or need to ship some seeding data with a change. To show an example of the latter, we create a
-new migration, that adds a Group schema and an admin user in the database. We do it in two steps:
+Using versioned migrations is especially useful if you have to execute advanced SQL statements, need to create data
+dependent migration steps, or need to ship some seeding data with a change. To show an example of the latter, we create a
+new migration, that adds a Group schema and an admin user in the database. We will do this in two steps:
 
 1. Add a Group schema and an edge to the User
 2. Create an admin Group, an admin User and the connection between them
@@ -293,7 +293,7 @@ CREATE TABLE `groups` (`id` bigint NOT NULL AUTO_INCREMENT, `name` varchar(191) 
 CREATE TABLE `group_users` (`group_id` bigint NOT NULL, `user_id` bigint NOT NULL, PRIMARY KEY (`group_id`, `user_id`), CONSTRAINT `group_users_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE, CONSTRAINT `group_users_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 ```
 
-You can now either edit the generated files to add the seed data or create new files for it. I chose the latter:
+Now you can either edit the generated files to add the seed data or create new files for it. I chose the latter:
 
 ```shell
 migrate create -format unix -ext sql -dir migrations seed_admin
@@ -303,7 +303,7 @@ migrate create -format unix -ext sql -dir migrations seed_admin
 [...]/ent-versioned-migrations/migrations/<timestamp>_seed_admin.down.sql
 ```
 
-You can now edit those files and adds statements to create an admin Group and User.
+You can now edit those files and add statements to create an admin Group and User.
 
 ```sql title="migrations/<timestamp>_seed_admin.up.sql"
 INSERT INTO `groups` (`id`, `name`) VALUES (1, 'Admins');
