@@ -13,8 +13,10 @@ versioned migration files to be used with popular migration management solutions
 like [golang-migrate/migrate](https://github.com/golang-migrate/migrate), [Flyway](https://flywaydb.org/)
 or [Liquibase](https://liquibase.org/).
 
-In this post I want to show you how to configure Ent to generate versioned migration files for both existing and new
-projects. Furthermore, I will demonstrate the workflow with `golang-migrate/migrate`. 
+Using versioned migrations is especially useful if you have to execute advanced SQL statements, need to create data
+dependent migration steps, or need to ship some seeding data with a change. In this post I want to show you how to
+configure Ent to generate versioned migration files for both existing and new projects. Furthermore, I will demonstrate
+the workflow with `golang-migrate/migrate`. 
 
 ### Getting Started
 
@@ -148,7 +150,7 @@ CREATE TABLE `users` (`id` bigint NOT NULL AUTO_INCREMENT, `username` varchar(19
 
 ### Applying Migrations
 
-To apply these migrations to your database, install the `golang-migrate/migrate` tool as described in
+To apply these migrations on your database, install the `golang-migrate/migrate` tool as described in
 their [README](https://github.com/golang-migrate/migrate/blob/master/cmd/migrate/README.md). Then run the following
 command to check if everything went as it should.
 
@@ -193,12 +195,10 @@ migrate -source 'file://migrations' -database 'mysql://root:pass@tcp(localhost:3
 
 ### Workflow
 
-Using versioned migrations is especially useful if you have to execute advanced SQL statements, need to create data
-dependent migration steps, or need to ship some seeding data with a change. To show an example of the latter, we create a
-new migration, that adds a Group schema and an admin user in the database. We will do this in two steps:
-
-1. Add a Group schema and an edge to the User
-2. Create an admin Group, an admin User and the connection between them
+To demonstrate the usual workflow when using versioned migrations we will both edit our schema graph and generate the
+migration changes for it, and manually create a set of migration files to seed the database with some data. First, we
+will add a Group schema and a many-to-many relation to the existing User schema, next create an admin Group with an
+admin User in it. Go ahead and make the following changes:
 
 ```go title="ent/schema/user.go" {22-28}
 package schema
