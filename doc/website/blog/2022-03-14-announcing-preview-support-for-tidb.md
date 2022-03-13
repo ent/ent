@@ -8,28 +8,23 @@ authorTwitter: itsamitush
 
 Dear community,
 
-We [previously announced](https://entgo.io/blog/2022/01/20/announcing-new-migration-engine) the new migration engine `Atlas`.
+We [previously announced](https://entgo.io/blog/2022/01/20/announcing-new-migration-engine) the new migration engine - `Atlas`.
 With `Atlas`'s new design, it became easier than ever to add support for new databases for Ent.
-Today, I am happy to announce that a preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using `ent@master` and `Atlas` enabled.  
-  
+Today, I am happy to announce that a preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
 For a quick `Hello World` with `Ent`+`TiDB`, follow the following steps:  
-1. Spin up a local TiDB server by using [`TiUP`](https://tiup.io/):
- ```bash
- curl --proto '=https' --tlsv1.2 -sSf https://tiup-mirrors.pingcap.com/install.sh | sh
- ```
- followed by:
- ```
- tiup playground v5.4.0
+1. Spin up a local TiDB server by using Docker:
+ ```shell
+ docker run -p 4000:4000 pingcap/tidb
  ```
  You should now have a running instance of TiDB listening on port 4000.
 
-2. Clone the example hello world repository:
- ```bash
- git clone github.com/hedwigz/tidb-hello-world
+2. Clone the example [`hello world` repository](https://github.com/hedwigz/tidb-hello-world):
+ ```shell
+ git clone https://github.com/hedwigz/tidb-hello-world.git
  ```
  
  Connecting Ent with TiDB is easy, just peek at `main.go`
- ```go {1,7}
+ ```go {1,7} title="main.go"
  client, err := ent.Open("mysql", "root@tcp(localhost:4000)/test?parseTime=true")
  if err != nil {
  	log.Fatalf("failed opening connection to sqlite: %v", err)
@@ -40,9 +35,9 @@ For a quick `Hello World` with `Ent`+`TiDB`, follow the following steps:
  	log.Fatalf("failed printing schema changes: %v", err)
  }
  ```
- Note that in line 1 we connect to the TiDB server using a `mysql` dialect. This is due to the fact that TiDB is MySQL compatible, and it does not require any special driver.  
+ Note that in line `1` we connect to the TiDB server using a `mysql` dialect. This is due to the fact that TiDB is [MySQL compatible](https://docs.pingcap.com/tidb/stable/mysql-compatibility#:~:text=TiDB%20is%20highly%20compatible%20with,can%20be%20used%20for%20TiDB.), and it does not require any proprietary driver.  
  With that said, `Atlas` automatically detects when it is connected to `TiDB` and handles that accordingly.  
- In addition to that, note that in line 7 we used `schema.WithAtlas(true)`, which flags Ent to use `Atlas` as its 
+ In addition to that, note that in line `7` we used `schema.WithAtlas(true)`, which flags Ent to use `Atlas` as its 
  migration engine.  
   
 You can now run the example program:
@@ -50,14 +45,11 @@ You can now run the example program:
 go run main.go
 ```
 and get the following output:
-```bash
+```shell
 the user: hedwigz is 30 years old
 ```
 
-
-<!-- TODO: call for action to subscribe to ariga blog for more content about this announcement -->
-
-Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+For more in-depth content about this, and future databases support - subscribe to our [Newsletter](https://www.getrevue.co/profile/ariga)
 
 :::note For more Ent news and updates:
 
