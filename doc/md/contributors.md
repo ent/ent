@@ -114,6 +114,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://pedro.dev.br"><img src="https://avatars.githubusercontent.com/u/1251151?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pedro Henrique</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=crossworth" title="Code">💻</a></td>
     <td align="center"><a href="https://2jp.de"><img src="https://avatars.githubusercontent.com/u/7414374?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MrParano1d</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=MrParano1d" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/tprebs"><img src="https://avatars.githubusercontent.com/u/6523587?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thomas Prebble</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=tprebs" title="Code">💻</a></td>
+    <td align="center"><a href="https://huytq.com"><img src="https://avatars.githubusercontent.com/u/5723282?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Huy TQ</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=imhuytq" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/maorlipchuk"><img src="https://avatars.githubusercontent.com/u/7034637?v=4?s=100" width="100px;" alt=""/><br /><sub><b>maorlipchuk</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=maorlipchuk" title="Code">💻</a></td>
   </tr>
 </table>
 

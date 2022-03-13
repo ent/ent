@@ -14,6 +14,7 @@ import (
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
@@ -272,18 +273,18 @@ func (m *Migrate) setupAtlas() error {
 	if m.withFixture {
 		return errors.New("sql/schema: WithFixture(true) does not work in Atlas migration")
 	}
-	k := DropIndex | DropColumn
+	skip := DropIndex | DropColumn
 	if m.atlas.skip != NoChange {
-		k = m.atlas.skip
+		skip = m.atlas.skip
 	}
 	if m.dropIndexes {
-		k |= ^DropIndex
+		skip &= ^DropIndex
 	}
 	if m.dropColumns {
-		k |= ^DropColumn
+		skip &= ^DropColumn
 	}
-	if k == NoChange {
-		m.atlas.diff = append(m.atlas.diff, filterChanges(k))
+	if skip != NoChange {
+		m.atlas.diff = append(m.atlas.diff, filterChanges(skip))
 	}
 	if m.atlas.dir != nil && m.atlas.fmt == nil {
 		m.atlas.fmt = migrate.DefaultFormatter
@@ -307,7 +308,7 @@ func (m *Migrate) atCreate(ctx context.Context, tables ...*Table) error {
 				return err
 			}
 		}
-		plan, err := m.atDiff(ctx, tx, tables...)
+		plan, err := m.atDiff(ctx, tx, "", tables...)
 		if err != nil {
 			return err
 		}
@@ -333,7 +334,7 @@ func (m *Migrate) atCreate(ctx context.Context, tables ...*Table) error {
 	return tx.Commit()
 }
 
-func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, tables ...*Table) (*migrate.Plan, error) {
+func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, name string, tables ...*Table) (*migrate.Plan, error) {
 	drv, err := m.atOpen(conn)
 	if err != nil {
 		return nil, err
@@ -363,7 +364,7 @@ func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, tables .
 		return nil, err
 	}
 	// Plan changes.
-	return drv.PlanChanges(ctx, "", changes)
+	return drv.PlanChanges(ctx, name, changes)
 }
 
 type db struct{ dialect.ExecQuerier }

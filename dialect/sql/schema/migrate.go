@@ -164,14 +164,24 @@ func (m *Migrate) Create(ctx context.Context, tables ...*Table) error {
 // Diff compares the state read from the StateReader with the state defined by Ent.
 // Changes will be written to migration files by the configures Planner.
 func (m *Migrate) Diff(ctx context.Context, tables ...*Table) error {
+	return m.NamedDiff(ctx, "changes", tables...)
+}
+
+// NamedDiff compares the state read from the StateReader with the state defined by Ent.
+// Changes will be written to migration files by the configures Planner.
+func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) error {
 	if m.atlas.dir == nil {
 		return errors.New("no migration directory given")
 	}
-	plan, err := m.atDiff(ctx, m, tables...)
+	plan, err := m.atDiff(ctx, m, name, tables...)
 	if err != nil {
 		return err
 	}
-	return migrate.New(nil, m.atlas.dir, m.atlas.fmt).WritePlan(plan)
+	// Skip if the plan has no changes.
+	if len(plan.Changes) == 0 {
+		return nil
+	}
+	return migrate.NewPlanner(nil, m.atlas.dir, migrate.WithFormatter(m.atlas.fmt)).WritePlan(plan)
 }
 
 func (m *Migrate) create(ctx context.Context, tables ...*Table) error {

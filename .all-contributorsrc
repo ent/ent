@@ -753,6 +753,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "imhuytq",
+      "name": "Huy TQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5723282?v=4",
+      "profile": "https://huytq.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "maorlipchuk",
+      "name": "maorlipchuk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7034637?v=4",
+      "profile": "https://github.com/maorlipchuk",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

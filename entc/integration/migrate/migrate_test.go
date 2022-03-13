@@ -98,6 +98,7 @@ func TestSQLite(t *testing.T) {
 			ctx,
 			migratev2.WithGlobalUniqueID(true),
 			migratev2.WithDropIndex(true),
+			migratev2.WithDropColumn(true),
 			schema.WithDiffHook(func(next schema.Differ) schema.Differ {
 				return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
 					// Example to hook into the diff process.
@@ -162,7 +163,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 
 	// Run migration and execute queries on v2.
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)))
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
 
 	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
