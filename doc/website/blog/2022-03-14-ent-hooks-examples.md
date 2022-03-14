@@ -418,7 +418,7 @@ In this post we reviewed a few examples for using hooks to embed three types of 
 2. Validating rules over our data  before saving in our DB.
 3. Offloading heavy computes and store in cache.
 
-I hope this will help you next time you approach this type of problems using ent.
+I hope this will help you next time you approach these type of problems while using Ent.
 
 Have questions? Need help with getting started? Feel free to join our [Ent Discord Server](https://discord.gg/qZmPgTE6RX).
 
