@@ -6,8 +6,6 @@ authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
 authorTwitter: itsamitush
 ---
 
-Dear community,
-
 We [previously announced](https://entgo.io/blog/2022/01/20/announcing-new-migration-engine) the new migration engine - `Atlas`.
 With `Atlas`'s new design, it became easier than ever to add support for new databases for Ent.
 Today, I am happy to announce that a preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
