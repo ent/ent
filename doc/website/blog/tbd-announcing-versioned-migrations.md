@@ -21,18 +21,18 @@ For this reason, most industry standard solutions, like [Flyway](https://flywayd
 , [Liquibase](https://liquibase.org/), or [golang-migrate/migrate](https://github.com/golang-migrate/migrate) (which is
 common in the Go ecosystem), support a workflow that they call "versioned migrations".
 
-With versioned migrations (sometimes called "change base migrations") instead of describing the desired state ("what is
-my state"), you describe the changes itself ("how to reach the state"). Most of the time this is one by creating a set
-of SQL files containing the statements needed. Each of the files is assigned a unique version and a description of the
-changes. Tools like the ones mentioned earlier are then able to interpret the migration files and to apply (some of) them
-in the correct order to transition to the desired database structure.
+With versioned migrations (sometimes called "change base migrations") instead of describing the desired state ("what the
+database should look like"), you describe the changes itself ("how to reach the state"). Most of the time this is done 
+by creating a set of SQL files containing the statements needed. Each of the files is assigned a unique version and a
+description of the changes. Tools like the ones mentioned earlier are then able to interpret the migration files and to
+apply (some of) them in the correct order to transition to the desired database structure.
 
 In this post, I want to showcase a new kind of migration workflow that has recently been added to Atlas and Ent. We call
 it "versioned migration authoring" and it's an attempt to combine the simplicity and expressiveness of the declarative
 approach with the safety and explicitness of versioned migrations. With versioned migration authoring, users still
 declare their desired state and use the Atlas engine to plan a safe migration from the existing to the new state.
-However, instead of coupling the planning and execution, it is instead written into a file which can be
-checked into source control, fine-tuned manually and reviewed in normal code review processes. 
+However, instead of coupling the planning and execution, it is instead written into a file which can be checked into
+source control, fine-tuned manually and reviewed in normal code review processes.
 
 As an example, I will demonstrate the workflow with `golang-migrate/migrate`. 
 
