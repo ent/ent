@@ -11,7 +11,7 @@ Hooks are a popular subject in our blog posts
 [sync-to-external-data-systems-using-hooks](https://entgo.io/blog/2021/11/1/sync-to-external-data-systems-using-hooks)
 but their reactive nature makes them a tool that is usually affiliated with more advanced users.
 My goal in this blog post is to show you a few use cases that hooks can help you solve when building servers and provide you with a few go-to recipes.
-All this examples can be later reviewed in this [repo](https://github.com/yonidavidson/ent-hooks-examples).
+These examples can be later reviewed in this [repo](https://github.com/yonidavidson/ent-hooks-examples).
 
 ### So first, let us review in a few words what are hooks?
 
