@@ -57,7 +57,7 @@ For a quick "Hello World" application with Ent+TiDB, follow these steps:
 	```
  Note that in line `1` we connect to the TiDB server using a `mysql` dialect. This is possible due to the fact that TiDB is [MySQL compatible](https://docs.pingcap.com/tidb/stable/mysql-compatibility), and it does not require any special driver.  
  Having said that, there are some differences between TiDB and MySQL, especially when pertaining to schema migrations, such as information schema inspection and migration planning. For this reason, `Atlas` automatically detects if it is connected to `TiDB` and handles the migration accordingly.  
- In addition to that, note that in line `7` we used `schema.WithAtlas(true)`, which flags Ent to use `Atlas` as its 
+ In addition, note that in line `7` we used `schema.WithAtlas(true)`, which flags Ent to use `Atlas` as its 
  migration engine.  
    
  Finally, we create a user and save that record to TiDB to later be queried and printed.
