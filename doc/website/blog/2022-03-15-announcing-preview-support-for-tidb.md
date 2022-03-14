@@ -26,7 +26,7 @@ For a quick "Hello World" application with Ent+TiDB, follow these steps:
  ```shell
  docker run -p 4000:4000 pingcap/tidb
  ```
- You should now have a running instance of TiDB listening on port 4000.
+ Now you should have a running instance of TiDB listening on port 4000.
 
 2. Clone the example [`hello world` repository](https://github.com/hedwigz/tidb-hello-world):
  ```shell
