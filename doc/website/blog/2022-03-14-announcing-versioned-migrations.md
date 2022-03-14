@@ -1,9 +1,9 @@
 ---
-title: Announcing Versioned Migrations
+title: Announcing Versioned Migrations Authoring
 author: MasseElch
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
-image: tbd
+image: "https://entgo.io/images/assets/migrate/versioned-share.png"
 ---
 
 When [Ariel](https://github.com/a8m) released Ent v0.10.0 at the end of January,
@@ -158,12 +158,12 @@ You will now see two new files in the `migrations` directory: `<timestamp>_initi
 and `<timestamp>_initial.up.sql`. The `x.up.sql` files are used to create the database version `x` and `x.down.sql` to
 roll back to the previous version.
 
-```sql title="<timestamp>_initial.down.sql"
-DROP TABLE `users`;
-```
-
 ```sql title="<timestamp>_initial.up.sql"
 CREATE TABLE `users` (`id` bigint NOT NULL AUTO_INCREMENT, `username` varchar(191) NOT NULL, PRIMARY KEY (`id`), UNIQUE INDEX `user_username` (`username`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+```
+
+```sql title="<timestamp>_initial.down.sql"
+DROP TABLE `users`;
 ```
 
 ### Applying Migrations
@@ -298,17 +298,17 @@ Once the schema is updated, create a new set of migration files.
 go run -mod=mod main.go add_group_schema
 ```
 
-Once again there will bew two new files in the `migrations` directory: `<timestamp>_add_group_schema.down.sql`
+Once again there will be two new files in the `migrations` directory: `<timestamp>_add_group_schema.down.sql`
 and `<timestamp>_add_group_schema.up.sql`.
-
-```sql title="<timestamp>_add_group_schema.down.sql"
-DROP TABLE `group_users`;
-DROP TABLE `groups`;
-```
 
 ```sql title="<timestamp>_add_group_schema.up.sql"
 CREATE TABLE `groups` (`id` bigint NOT NULL AUTO_INCREMENT, `name` varchar(191) NOT NULL, PRIMARY KEY (`id`), UNIQUE INDEX `group_name` (`name`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 CREATE TABLE `group_users` (`group_id` bigint NOT NULL, `user_id` bigint NOT NULL, PRIMARY KEY (`group_id`, `user_id`), CONSTRAINT `group_users_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE, CONSTRAINT `group_users_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+```
+
+```sql title="<timestamp>_add_group_schema.down.sql"
+DROP TABLE `group_users`;
+DROP TABLE `groups`;
 ```
 
 Now you can either edit the generated files to add the seed data or create new files for it. I chose the latter:
