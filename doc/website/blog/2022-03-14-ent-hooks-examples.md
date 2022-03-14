@@ -339,7 +339,7 @@ This test is a bit more complicated so lets review it line by line:
 First, I create a new ```cache syncer``` (remember we have a cache entity in our schema).
 
 This ```Cache Syncer``` can do heavy computations  while running in a different  context.
-We create an ent client and inject our ```Cache Syncer```, it is disabled on default.
+We create an ent client and inject our ```Cache Syncer```, it is disabled by default.
 After that, we start it and provide it with the ent client, the reason for that is to allow it to change our data (modify our cache entity).
 We create a few entities and update the dog's name, that will trigger a cache sync.
 Finally, we close the ```Cache Syncer```, this will block until all pending hooks are completed.
