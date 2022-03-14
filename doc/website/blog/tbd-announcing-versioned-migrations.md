@@ -8,15 +8,38 @@ image: tbd
 
 When [Ariel](https://github.com/a8m) released Ent v0.10.0 at the end of January,
 he [introduced](2022-01-20-announcing-new-migration-engine.md) a new migration engine for Ent based on another
-open-source tool called [Atlas](https://github.com/ariga/atlas). A month ago we added support for Atlas to generate
-versioned migration files to be used with popular migration management solutions
-like [golang-migrate/migrate](https://github.com/golang-migrate/migrate), [Flyway](https://flywaydb.org/)
-or [Liquibase](https://liquibase.org/).
+open-source project called [Atlas](https://github.com/ariga/atlas). 
 
-Using versioned migrations is especially useful if you have to execute advanced SQL statements, need to create data
-dependent migration steps, or need to ship some seeding data with a change. In this post I want to show you how to
-configure Ent to generate versioned migration files for both existing and new projects. Furthermore, I will demonstrate
-the workflow with `golang-migrate/migrate`. 
+Initially, Atlas supported a style of managing database schemas that we call "declarative migrations". With declarative
+migrations, the desired state of the database schema is given as input to the migration engine, which plans and executes
+a set of actions to change the database to its desired state. This approach has been popularized in the field of
+cloud native infrastructure by projects such as Kubernetes and Terraform. It works great in many cases, in
+fact it has served the Ent framework very well in the past few years. However, database migrations are a very sensitive
+topic, and many projects require a more controlled approach.
+
+For this reason, most industry standard solutions, like [Flyway](https://flywaydb.org/)
+, [Liquibase](https://liquibase.org/), or [golang-migrate/migrate](https://github.com/golang-migrate/migrate) (which is
+common in the Go ecosystem), support a workflow that they call "versioned migrations".
+
+With versioned migrations, you assign each migration (commonly a set of SQL files) a unique version and a description
+and check those files into version control together with your application code. Versioned migrations are then applied in
+order exactly once on your database.
+
+> Liquibase is an open-source database schema change management solution which enables you to manage revisions of your 
+> database changes easily. Liquibase makes it easy for anyone involved in the application release process to:
+>
+> - Eliminate errors and delays when releasing databases.
+> - Deploy and roll back changes for specific versions without needing to know what has already been deployed.
+> - Deploy database and application changes together so they always stay in sync.
+
+In this post, I want to showcase a new kind of migration workflow that has recently been added to Atlas and Ent. We call
+it "versioned migration authoring" and it's an attempt to combine the simplicity and expressiveness of the declarative
+approach with the safety and explicitness of versioned migrations. With versioned migration authoring, users still
+declare their desired state and use the Atlas engine to plan a safe migration from the existing to the new state.
+However, instead of coupling the planning and execution , it is instead written into a file which can be
+checked into source control, fine tuned manually and reviewed in normal code review processes. 
+
+As an example, I will demonstrate the workflow with `golang-migrate/migrate`. 
 
 ### Getting Started
 
