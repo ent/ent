@@ -60,7 +60,7 @@ For a quick "Hello World" application with Ent+TiDB, follow these steps:
  In addition, note that in line `7` we used `schema.WithAtlas(true)`, which flags Ent to use `Atlas` as its 
  migration engine.  
    
- Finally, we create a user and save that record to TiDB to later be queried and printed.
+ Finally, we create a user and save the record to TiDB to later be queried and printed.
  ```go title="main.go"
  client.User.Create().
 		SetAge(30).
