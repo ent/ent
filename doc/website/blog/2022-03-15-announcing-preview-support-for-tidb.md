@@ -1,0 +1,95 @@
+---
+title: Announcing preview support for TiDB
+author: Amit Shani
+authorURL: "https://github.com/hedwigz"
+authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
+authorTwitter: itsamitush
+---
+
+We [previously announced](https://entgo.io/blog/2022/01/20/announcing-new-migration-engine) the new migration engine - `Atlas`.
+With `Atlas`'s new design, it became easier than ever to add support for new databases for Ent.
+Today, I am happy to announce that preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
+
+### TiDB and NewSQL
+[TiDB](https://en.pingcap.com/tidb/) is an [open-source](https://github.com/pingcap/tidb) [NewSQL](https://en.wikipedia.org/wiki/NewSQL) database. It provides many features that traditional databases don't, such as:
+1. MySQL compatibility
+2. Horizontal scaling
+3. Real-Time HTAP
+4. Pre-packed monitoring w/ Prometheus+Grafana
+  
+To read more about it, check out the official [TiDB Introduction](https://docs.pingcap.com/tidb/stable).
+
+### Hello World with TiDB
+
+For a quick "Hello World" application with Ent+TiDB, follow the following steps:  
+1. Spin up a local TiDB server by using Docker:
+ ```shell
+ docker run -p 4000:4000 pingcap/tidb
+ ```
+ You should now have a running instance of TiDB listening on port 4000.
+
+2. Clone the example [`hello world` repository](https://github.com/hedwigz/tidb-hello-world):
+ ```shell
+ git clone https://github.com/hedwigz/tidb-hello-world.git
+ ```
+ In this example repository we defined a simple schema `User`:
+ ```go title="ent/schema/user.go"
+ func (User) Fields() []ent.Field {
+ 	  return []ent.Field{
+  		field.Time("created_at").
+	  		Default(time.Now),
+		  field.String("name"),
+		  field.Int("age"),
+	  }
+ }
+ ```
+ we then connected Ent with TiDB:
+ ```go title="main.go"
+ client, err := ent.Open("mysql", "root@tcp(localhost:4000)/test?parseTime=true")
+ if err != nil {
+ 	log.Fatalf("failed opening connection to sqlite: %v", err)
+ }
+ defer client.Close()
+ // Run the auto migration tool, with Atlas.
+ if err := client.Schema.Create(context.Background(), schema.WithAtlas(true)); err != nil {
+ 	log.Fatalf("failed printing schema changes: %v", err)
+ }
+	```
+ Note that in line `1` we connect to the TiDB server using a `mysql` dialect. This is possible due to the fact that TiDB is [MySQL compatible](https://docs.pingcap.com/tidb/stable/mysql-compatibility), and it does not require any special driver.  
+ Having said that, there are some differences between TiDB and MySQL, especially around things relevant to schema migrations, such as information schema inspection and migration planning. For this reason, `Atlas` automatically detects if it is connected to `TiDB` and handles that accordingly.  
+ In addition to that, note that in line `7` we used `schema.WithAtlas(true)`, which flags Ent to use `Atlas` as its 
+ migration engine.  
+   
+ Finally, we create a user and save that record to TiDB to later be queried and printed.
+ ```go title="main.go"
+ client.User.Create().
+		SetAge(30).
+		SetName("hedwigz").
+		SaveX(context.Background())
+ user := client.User.Query().FirstX(context.Background())
+ fmt.Printf("the user: %s is %d years old\n", user.Name, user.Age)
+ ```
+ 3. Run the example program:
+ ```go
+ $ go run main.go
+ the user: hedwigz is 30 years old
+ ```
+
+Woohoo! In this quick walk-through we managed to:
+* Spin up a local instance of TiDB.
+* Connect Ent with TiDB.
+* Migrate our Ent schema with Atlas.
+* Insert and Query from TiDB using Ent.
+
+### Preview support
+The integration of Atlas with TiDB is well tested with TiDB version `v5.4.0` (currently, latest) and we will extend that in the future.
+If you're using other versions of TiDB or having troubles, don't hesitate to [file an issue](https://github.com/ariga/atlas/issues) or join our [Discord channel](https://discord.gg/zZ6sWVg6NT).
+
+:::note For more Ent news and updates:
+
+- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Follow us on [Twitter](https://twitter.com/entgo_io)
+- Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
+
+:::
