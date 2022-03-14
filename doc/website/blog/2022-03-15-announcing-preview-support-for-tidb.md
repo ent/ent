@@ -79,7 +79,7 @@ Woohoo! In this quick walk-through we managed to:
 * Spin up a local instance of TiDB.
 * Connect Ent with TiDB.
 * Migrate our Ent schema with Atlas.
-* Insert and Query from TiDB using Ent.
+* Insert and query from TiDB using Ent.
 
 ### Preview support
 The integration of Atlas with TiDB is well tested with TiDB version `v5.4.0` (currently, latest) and we will extend that in the future.
