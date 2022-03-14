@@ -35,7 +35,7 @@ For a quick `Hello World` with `Ent`+`TiDB`, follow the following steps:
  	log.Fatalf("failed printing schema changes: %v", err)
  }
  ```
- Note that in line `1` we connect to the TiDB server using a `mysql` dialect. This is due to the fact that TiDB is [MySQL compatible](https://docs.pingcap.com/tidb/stable/mysql-compatibility#:~:text=TiDB%20is%20highly%20compatible%20with,can%20be%20used%20for%20TiDB.), and it does not require any proprietary driver.  
+ Note that in line `1` we connect to the TiDB server using a `mysql` dialect. This is possible due to the fact that TiDB is [MySQL compatible](https://docs.pingcap.com/tidb/stable/mysql-compatibility), and it does not require any special driver.  
  With that said, `Atlas` automatically detects when it is connected to `TiDB` and handles that accordingly.  
  In addition to that, note that in line `7` we used `schema.WithAtlas(true)`, which flags Ent to use `Atlas` as its 
  migration engine.  
