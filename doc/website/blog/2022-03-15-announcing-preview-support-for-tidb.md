@@ -21,7 +21,7 @@ To read more about it, check out the official [TiDB Introduction](https://docs.p
 
 ### Hello World with TiDB
 
-For a quick "Hello World" application with Ent+TiDB, follow the following steps:  
+For a quick "Hello World" application with Ent+TiDB, follow these steps:  
 1. Spin up a local TiDB server by using Docker:
  ```shell
  docker run -p 4000:4000 pingcap/tidb
