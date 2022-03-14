@@ -43,7 +43,7 @@ For a quick "Hello World" application with Ent+TiDB, follow these steps:
 	  }
  }
  ```
- we then connected Ent with TiDB:
+ Then, we connected Ent with TiDB:
  ```go title="main.go"
  client, err := ent.Open("mysql", "root@tcp(localhost:4000)/test?parseTime=true")
  if err != nil {
