@@ -413,7 +413,7 @@ Full code for the cache syncer can be found [here](https://github.com/yonidavids
 
 ### Wrapping Up
 
-In this post we reviewed a few examples for using hooks to embed 3 types of known problems we have when writing servers:
+In this post we reviewed a few examples for using hooks to embed three types of known problems we have when writing servers:
 1. Keeping secrets safe.
 2. Validating rules over our data  before saving in our DB.
 3. Offloading heavy computes and store in cache.
