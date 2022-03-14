@@ -28,7 +28,6 @@ There are 5 types of mutations:
 Hooks are functions that get an [ent.Mutator](https://pkg.go.dev/entgo.io/ent#Mutator) and return a mutator back.
 They function similar to the popular [HTTP middleware pattern](https://github.com/go-chi/chi#middleware-handlers).
 
-
 ```go
 package example
 
