@@ -1,30 +1,22 @@
 ---
-title: A few examples for Ent hooks  
+title: How I use Ent Schema Hooks
 author: Yoni Davidson
 authorURL: "https://github.com/yonidavidson"
 authorImageURL: "https://avatars0.githubusercontent.com/u/5472778"
 authorTwitter: yonidavidson
 ---
-Hooks are a popular subject in our blog posts
+Despite being one of the most powerful features of Ent, Schema [Hooks](https://entgo.io/docs/hooks) 
+are often overlooked by many users. We've covered hooks in previous blog posts (such as 
 [Building Observable Ent Applications with Prometheus](/blog/2021/08/12/building-observable-ent-application-with-prometheus)
-[Sync Changes to External Data Systems using Ent Hooks](/blog/2021/11/1/sync-to-external-data-systems-using-hooks)
-but their reactive nature makes them a tool that is usually affiliated with more advanced users.
-My goal in this blog post is to show you a few use cases that hooks can help you solve when building servers and provide you with a few go-to recipes.
-These examples can be later reviewed in this [repo](https://github.com/yonidavidson/ent-hooks-examples).
+and [Sync Changes to External Data Systems using Ent Hooks](/blog/2021/11/1/sync-to-external-data-systems-using-hooks)),
+but learning from my personal experience building real applications with Ent, I thought it would be
+beneficial to put them in the spotlight once more.
 
-### So first, let us review in a few words what are hooks?
+### What are hooks?
 
 [Hooks](https://entgo.io/docs/hooks) are a feature of Ent that allows adding custom logic before and after operations that change the data entities.
 
-A mutation is an operation that changes something in the database.
-There are 5 types of mutations:
-1. Create.
-2. UpdateOne.
-3. Update.
-4. DeleteOne.
-5. Delete.
-
-Hooks are functions that get an [ent.Mutator](https://pkg.go.dev/entgo.io/ent#Mutator) and return a mutator back.
+Hooks are functions that get and return an [ent.Mutator](https://pkg.go.dev/entgo.io/ent#Mutator).
 They function similar to the popular [HTTP middleware pattern](https://github.com/go-chi/chi#middleware-handlers).
 
 ```go
@@ -37,7 +29,6 @@ import (
 )
 
 func exampleHook() ent.Hook {
-	//use this to init your hook
 	return func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 			// Do something before mutation.
@@ -58,32 +49,30 @@ to define more global logic for adding things like logging, metrics, tracing, et
 
 In this post, I will focus mainly on schemas hooks.
 
-### So why use them?
+### Schema as code
 
-In ent, we try and push the entity's logic down to the schema level, this allows us to define everything about an entity close to its creation. Entity properties could be:
-1. Valid values.
-2. Types.
-3. Allowed mutations.
-4. Privacy.
-5. Required Side effect (heavy compute for example).
-
+In Ent, we try and push the entity's logic down to the schema level, this allows us to define everything about an entity close to its definition. Entity properties could be:
+1. Valid values
+2. Type
+3. Allowed mutations
+4. Privacy
+5. Required Side effect (heavy compute for example)
 ---
-Many times, it’s more comfortable to define that in the RPC level, a controller provides a context and all the mutations
+Oftentimes, it’s more comfortable to define these properties in the RPC level, a controller provides a context and all the mutations
 and validation are done before changing the value.
-Yet, as the system gets bigger and more developers are working on it making sure that these validations and calculations are done
-whenever the entity is changing becomes harder and requires more pre-known knowledge about each entity to work with and
+Yet, as the system grows and more developers are working on it simultaneously, making sure that these validations and calculations are done
+whenever the entity is changing becomes much more challenging. This requires more pre-known knowledge about each entity and
 can cause unintentional bugs or inconsistencies in the data that are only discovered in runtime.
-The way ent, based on the experience of bigger companies like Facebook, decided to handle it is to keep this information
-as close as possible to the entity, therefore hooks are just that, a piece of code that runs before and after an entity 
-is changing and defines that additional behavior.
+Inspired by the experience of bigger companies like Facebook, Ent decided to handle this by keeping this information
+as close as possible to the entity. Therefore hooks are just that - a piece of code that runs before and after an entity 
+is changing and that defines additional behavior.
 
-## Let us do some examples
+## Let's do some examples
 
-For this examples we use a simple schema of users and dogs.
+For our examples we use a simple schema of Users and Dogs.
 Each user can have multiple pets and each pet has an owner.
-We have also added a cache entity that will be used later.
 as can be seen here:
-```go
+```go title="ent/schema/user.go"
 // User holds the schema definition for the User entity.
 type User struct {
 	ent.Schema
@@ -110,7 +99,7 @@ func (User) Edges() []ent.Edge {
 	}
 }
 ```
-```go
+```go title="ent/schema/dog.go"
 // Dog holds the schema definition for the Dog entity.
 type Dog struct {
 	ent.Schema
@@ -136,32 +125,17 @@ func (Dog) Edges() []ent.Edge {
 	}
 }
 ```
-```go
-// Cache holds the schema definition for the Cache entity.
-type Cache struct {
-	ent.Schema
-}
 
-// Fields of the Cache.
-func (Cache) Fields() []ent.Field {
-	return []ent.Field{
-		field.Int("walks"),
-	}
-}
-
-
-```
-
-During each example I'll provide a test and a recipe, I really suggest starting with a test to see that the hook does what you need it to do,
+For each example I'll provide a test and a recipe, I highly suggest starting with a test to see that the hook does what you need it to do.
 Unlike many other parts of the codebase, hooks do one thing only and should be simple to test.
 
 ### Keeping our secrets safe:
 
 Many times, we need to store strings that include secrets, a good example can be a connection
-string to a database, usually in the form of ```mysql://root:pass@localhost:3306)```, here, for example, it’s very
-easy to see  that we don't want the password to unintentionally be retrieved by a query unless required by the server
+string to a database, usually in the form of `mysql://root:pass@localhost:3306)`. Here, for example, it’s very
+easy to see that we don't want the password to unintentionally be retrieved by a query unless required by the server
 (for example to connect to a database).
-The required behavior is best described by this test:
+The expected behavior is best described by this test:
 ```go
 func TestUserConnectionStringHook(t *testing.T) {
 	ctx := context.Background()
@@ -176,8 +150,8 @@ func TestUserConnectionStringHook(t *testing.T) {
 ```
 
 As you can see, inserting a connection string updates the string to have `****` instead of the password and stores the 
-password in the ```Password``` field that is defined as [sensitive](https://entgo.io/docs/schema-fields#sensitive-fields).
-To have  the connection string in full valid form we created a utility function ```FullConnectionString()```.
+password in the `Password` field that is defined as [sensitive](https://entgo.io/docs/schema-fields#sensitive-fields).
+To have the connection string in full valid form we created a utility function `FullConnectionString()`.
 
 #### Recipe:
 
@@ -194,8 +168,8 @@ func (User) Hooks() []ent.Hook {
 ```
 * Do not forget to run go generate or the hook will not be registered.
 
-A few hook helpers are used here, ```clearConnectionString``` is the name of the hook function, and it will run if a user 
-is Updated or Created and the mutation has the field ```connection_string``` (if we change only the name of the user there is no need to do anything right?).
+A few hook helpers are used here, `clearConnectionString` is the name of the hook function, and it will run if a user 
+is updated or created and the mutation has the field `connection_string` (if we change only the name of the user there is no need to do anything right?).
 
 The hook:
 ```go
@@ -221,8 +195,8 @@ func clearConnectionString(next ent.Mutator) ent.Mutator {
 } 
 ```
 We validate that the mutation has a connection string (if not just let the mutation continue).
-A bit of string acrobatics, and we have the password extracted from the string, we store it in another field - the ```password``` and
-change the ```connection_string``` with a masked version. 
+A bit of string acrobatics, and we have the password extracted from the string. We store it in another field - the `password` and
+change the `connection_string` with a masked version. 
 
 To get the full connection string we add a utility function 
 ```go
@@ -236,16 +210,16 @@ func (u *User) FullConnectionString() string {
 }
 ```
 
-BTW, you can see that it's OK to add files to the ent directory (not only in schema folder) since the ent generate command only appends/changes ent
+BTW, you can see that it's OK to add files to the Ent directory (not only in schema folder) since the Ent generate command only appends/changes Ent
 generated files.
 
 
 ### Special Validators:
 
 Ent provides [validators](https://entgo.io/docs/schema-fields#validators) for fields, yet sometimes the logic can contain
-dependencies that are more applicative and require a broader context.
-For example, in our use case, we would like to make sure that dogs names don’t start with the first 2 letters of the owners name 
-(Best practice when you don't want your dog to run in circles every time someone calls your name).
+dependencies that are more applicative and require broader context.
+For example, in our use case, we would like to make sure that dog's names don’t start with the first 2 letters of the owner's name 
+(best practice when you don't want your dog to run in circles every time someone calls your name).
 
 We start with a simple test
 ```go
@@ -279,7 +253,7 @@ func (Dog) Hooks() []ent.Hook {
 ```
 
 Since we want our hook to call every time we change the owner (to make sure the name is matched against), I am using an
-[edge field](https://entgo.io/docs/schema-edges#edge-field), this provides the hooks a trigger on when the edge's id changes.
+[edge field](https://entgo.io/docs/schema-edges#edge-field). This provides the hooks a trigger when the edge's ID changes.
 
 The hook:
 ```go
@@ -304,11 +278,11 @@ func validateName(next ent.Mutator) ent.Mutator {
 	})
 }
 ```
-A simple name validator and if we see a problem we cancel the mutation by returning an error before ```next.Mutate(ctx,m)```.
+A simple name validator and if we see a problem we cancel the mutation by returning an error before `next.Mutate(ctx,m)`.
 
 ### Offloading Long Computations:
 
-Some cases, we have fields in our database that require long computation, we would like to make sure that this data is always updated once
+In some cases, we have fields in our database that require long computation, we would like to make sure that this data is always updated once
 a change in the data requires it.
 
 A test for it will look like this:
@@ -334,19 +308,34 @@ func TestCacheHook(t *testing.T) {
 	require.True(t, cl.Walks > 0)
 }
 ```
-This test is a bit more complicated so lets review it line by line:
+This test is a bit more complicated, so let's review it line by line:
 First, I create a new ```cache syncer``` (remember we have a cache entity in our schema).
 
-This ```Cache Syncer``` can do heavy computations  while running in a different  context.
-We create an ent client and inject our ```Cache Syncer```, it is disabled by default.
-After that, we start it and provide it with the ent client, the reason for that is to allow it to change our data (modify our cache entity).
+This `Cache Syncer` can do heavy computations while running in a different context.
+We create an Ent client and inject our `Cache Syncer`, it is disabled by default.
+After that, we start it and provide it with the Ent client, the reason for that is to allow it to change our data (modify our cache entity).
 We create a few entities and update the dog's name, that will trigger a cache sync.
-Finally, we close the ```Cache Syncer```, this will block until all pending hooks are completed.
+Finally, we close the `Cache Syncer`, this will block until all pending hooks are completed.
 The assertion validates a value of "walks" larger than 0 (not -1).
 
 #### Recipe:
 
-First, add a hook:
+Let's add a cache layer for our calculations:
+```go title="ent/schema/cache.go"
+// Cache holds the schema definition for the Cache entity.
+type Cache struct {
+	ent.Schema
+}
+
+// Fields of the Cache.
+func (Cache) Fields() []ent.Field {
+	return []ent.Field{
+		field.Int("walks"),
+	}
+}
+```
+
+Now the hook:
 ```go
 // Hooks of the Dog.
 func (Dog) Hooks() []ent.Hook {
@@ -360,25 +349,8 @@ func (Dog) Hooks() []ent.Hook {
 
 The Sync cache will trigger once a dog is updated.
 
-The hooks itself will query for the owners cache ID and call the ```Cache Syncer``` with that ID:
-```go
-func syncCache(next ent.Mutator) ent.Mutator {
-	return hook.DogFunc(func(ctx context.Context, m *gen.DogMutation) (ent.Value, error) {
-		cacheID, err := m.Client().Dog.Query().QueryOwner().QueryCache().OnlyID(ctx)
-		if err != nil {
-			return next.Mutate(ctx, m)
-		}
-		v, err := next.Mutate(ctx, m)
-		if err == nil {
-			m.Client().CacheSyncer.Sync(ctx, cacheID)
-		}
-		return v, err
-	})
-}
-```
-
 For injecting the dependency in ent we follow [injecting external dependencies](https://entgo.io/docs/code-gen#external-dependencies)
-section and update our  ```entc.go```:
+section and update our  `entc.go`:
 
 ```go
 func main() {
@@ -405,6 +377,24 @@ import "context"
 
 type Syncer interface {
 	Sync(ctx context.Context, cacheID int)
+}
+```
+
+
+The hooks themselves will query for the owner's cache ID and call the `Cache Syncer` with that ID:
+```go
+func syncCache(next ent.Mutator) ent.Mutator {
+	return hook.DogFunc(func(ctx context.Context, m *gen.DogMutation) (ent.Value, error) {
+		cacheID, err := m.Client().Dog.Query().QueryOwner().QueryCache().OnlyID(ctx)
+		if err != nil {
+			return next.Mutate(ctx, m)
+		}
+		v, err := next.Mutate(ctx, m)
+		if err == nil {
+			m.Client().CacheSyncer.Sync(ctx, cacheID)
+		}
+		return v, err
+	})
 }
 ```
 
