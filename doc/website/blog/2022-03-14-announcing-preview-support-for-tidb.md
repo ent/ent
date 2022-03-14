@@ -8,7 +8,7 @@ authorTwitter: itsamitush
 
 We [previously announced](https://entgo.io/blog/2022/01/20/announcing-new-migration-engine) the new migration engine - `Atlas`.
 With `Atlas`'s new design, it became easier than ever to add support for new databases for Ent.
-Today, I am happy to announce that a preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
+Today, I am happy to announce that preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
 For a quick `Hello World` with `Ent`+`TiDB`, follow the following steps:  
 1. Spin up a local TiDB server by using Docker:
  ```shell
@@ -33,8 +33,8 @@ For a quick `Hello World` with `Ent`+`TiDB`, follow the following steps:
  	log.Fatalf("failed printing schema changes: %v", err)
  }
  ```
- Note that in line `1` we connect to the TiDB server using a `mysql` dialect. This is due to the fact that TiDB is [MySQL compatible](https://docs.pingcap.com/tidb/stable/mysql-compatibility#:~:text=TiDB%20is%20highly%20compatible%20with,can%20be%20used%20for%20TiDB.), and it does not require any proprietary driver.  
- With that said, `Atlas` automatically detects when it is connected to `TiDB` and handles that accordingly.  
+ Note that in line `1` we connect to the TiDB server using a `mysql` dialect. This is possible due to the fact that TiDB is [MySQL compatible](https://docs.pingcap.com/tidb/stable/mysql-compatibility), and it does not require any special driver.  
+ Having said that, there are many differences between TiDB and MySQL, especially around things relevant to schema migrations, such as information schema inspection and migration planning. For this reason, `Atlas` automatically detects when it is connected to `TiDB` and handles that accordingly.  
  In addition to that, note that in line `7` we used `schema.WithAtlas(true)`, which flags Ent to use `Atlas` as its 
  migration engine.  
   
