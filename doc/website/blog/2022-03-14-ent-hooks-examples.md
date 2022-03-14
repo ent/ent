@@ -4,11 +4,10 @@ author: Yoni Davidson
 authorURL: "https://github.com/yonidavidson"
 authorImageURL: "https://avatars0.githubusercontent.com/u/5472778"
 authorTwitter: yonidavidson
-image: "https://entgo.io/images/assets/ogent/1.png"
 ---
 Hooks are a popular subject in our blog posts
-[building-observable-ent-application-with-prometheus](https://entgo.io/blog/2021/08/12/building-observable-ent-application-with-prometheus)
-[sync-to-external-data-systems-using-hooks](https://entgo.io/blog/2021/11/1/sync-to-external-data-systems-using-hooks)
+[Building Observable Ent Applications with Prometheus](/blog/2021/08/12/building-observable-ent-application-with-prometheus)
+[Sync Changes to External Data Systems using Ent Hooks](/blog/2021/11/1/sync-to-external-data-systems-using-hooks)
 but their reactive nature makes them a tool that is usually affiliated with more advanced users.
 My goal in this blog post is to show you a few use cases that hooks can help you solve when building servers and provide you with a few go-to recipes.
 These examples can be later reviewed in this [repo](https://github.com/yonidavidson/ent-hooks-examples).
