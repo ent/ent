@@ -6,12 +6,22 @@ authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
 authorTwitter: itsamitush
 ---
 
-We [previously announced](https://entgo.io/blog/2022/01/20/announcing-new-migration-engine) the new migration engine - `Atlas`.
+We [previously announced](2022-01-20-announcing-new-migration-engine.md) the new migration engine - `Atlas`.
 With `Atlas`'s new design, it has become easier than ever to add support for new databases in Ent.
 Today, I am happy to announce that preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
 
-### TiDB and NewSQL
-[TiDB](https://en.pingcap.com/tidb/) is an [open-source](https://github.com/pingcap/tidb) [NewSQL](https://en.wikipedia.org/wiki/NewSQL) database. It provides many features that traditional databases don't, such as:
+Ent is a powerful Entity framework that helps developers build large applications in a breeze. Just by defining the data model of your application, Ent provides you the tools to:
+1. Generate feature rich, performant and clean:
+	* [GraphQL server](https://entgo.io/docs/tutorial-todo-gql).
+	* [REST server](2022-02-15-generate-rest-crud-with-ent-and-ogen.md).
+	* [GRPC server](https://entgo.io/docs/grpc-intro).
+1. [Traverse](https://entgo.io/docs/traversals) your data graph.
+1. Perform safe DB [migrations](https://entgo.io/blog/2022/03/14/announcing-versioned-migrations).
+  
+When your application grows and your database loads increase as a result, scaling your database becomes essential. This is where [NewSQL](https://en.wikipedia.org/wiki/NewSQL) databases come in.
+
+### TiDB
+[TiDB](https://en.pingcap.com/tidb/) is an [open-source](https://github.com/pingcap/tidb) NewSQL database. It provides many features that traditional databases don't, such as:
 1. MySQL compatibility
 2. Horizontal scaling
 3. Real-Time HTAP
