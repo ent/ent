@@ -6,11 +6,19 @@ package schema
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"strconv"
 	"testing"
+	"time"
 
+	"ariga.io/atlas/sql/migrate"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/require"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestMigrateHookOmitTable(t *testing.T) {
@@ -25,13 +33,13 @@ func TestMigrateHookOmitTable(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
-	migrate, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
+	m, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
 		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
 			return next.Create(ctx, tables[1])
 		})
 	}))
 	require.NoError(t, err)
-	err = migrate.Create(context.Background(), tables...)
+	err = m.Create(context.Background(), tables...)
 	require.NoError(t, err)
 }
 
@@ -50,12 +58,34 @@ func TestMigrateHookAddTable(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(0, 1))
 	mock.ExpectCommit()
 
-	migrate, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
+	m, err := NewMigrate(sql.OpenDB("mysql", db), WithHooks(func(next Creator) Creator {
 		return CreateFunc(func(ctx context.Context, tables ...*Table) error {
 			return next.Create(ctx, tables[0], &Table{Name: "pets"})
 		})
 	}))
 	require.NoError(t, err)
-	err = migrate.Create(context.Background(), tables...)
+	err = m.Create(context.Background(), tables...)
 	require.NoError(t, err)
+}
+
+func TestMigrate_Diff(t *testing.T) {
+	db, err := sql.Open(dialect.SQLite, "file:test?mode=memory&_fk=1")
+	require.NoError(t, err)
+
+	p := t.TempDir()
+	d, err := migrate.NewLocalDir(p)
+	require.NoError(t, err)
+
+	m, err := NewMigrate(db, WithDir(d))
+	require.NoError(t, m.Diff(context.Background(), &Table{Name: "users"}))
+	v := strconv.FormatInt(time.Now().Unix(), 10)
+	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "CREATE TABLE `users` (, PRIMARY KEY ());\n")
+	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "DROP TABLE `users`;\n")
+	require.NoFileExists(t, filepath.Join(p, "atlas.sum"))
+}
+
+func requireFileEqual(t *testing.T, name, contents string) {
+	c, err := os.ReadFile(name)
+	require.NoError(t, err)
+	require.Equal(t, contents, string(c))
 }
