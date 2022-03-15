@@ -1316,6 +1316,30 @@ func And(preds ...*Predicate) *Predicate {
 	})
 }
 
+// IsTrue appends a predicate that checks if the column value is truthy.
+func IsTrue(col string) *Predicate {
+	return P().IsTrue(col)
+}
+
+// IsTrue appends a predicate that checks if the column value is truthy.
+func (p *Predicate) IsTrue(col string) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.Ident(col)
+	})
+}
+
+// IsFalse appends a predicate that checks if the column value is falsey.
+func IsFalse(col string) *Predicate {
+	return P().IsFalse(col)
+}
+
+// IsFalse appends a predicate that checks if the column value is falsey.
+func (p *Predicate) IsFalse(col string) *Predicate {
+	return p.Append(func(b *Builder) {
+		b.WriteString("NOT ").Ident(col)
+	})
+}
+
 // EQ returns a "=" predicate.
 func EQ(col string, value interface{}) *Predicate {
 	return P().EQ(col, value)
@@ -1323,11 +1347,21 @@ func EQ(col string, value interface{}) *Predicate {
 
 // EQ appends a "=" predicate.
 func (p *Predicate) EQ(col string, arg interface{}) *Predicate {
-	return p.Append(func(b *Builder) {
-		b.Ident(col)
-		b.WriteOp(OpEQ)
-		p.arg(b, arg)
-	})
+	// A small optimization to avoid passing
+	// arguments when it can be avoided.
+	switch arg := arg.(type) {
+	case bool:
+		if arg {
+			return IsTrue(col)
+		}
+		return IsFalse(col)
+	default:
+		return p.Append(func(b *Builder) {
+			b.Ident(col)
+			b.WriteOp(OpEQ)
+			p.arg(b, arg)
+		})
+	}
 }
 
 // ColumnsEQ appends a "=" predicate between 2 columns.
@@ -1347,11 +1381,21 @@ func NEQ(col string, value interface{}) *Predicate {
 
 // NEQ appends a "<>" predicate.
 func (p *Predicate) NEQ(col string, arg interface{}) *Predicate {
-	return p.Append(func(b *Builder) {
-		b.Ident(col)
-		b.WriteOp(OpNEQ)
-		p.arg(b, arg)
-	})
+	// A small optimization to avoid passing
+	// arguments when it can be avoided.
+	switch arg := arg.(type) {
+	case bool:
+		if arg {
+			return IsFalse(col)
+		}
+		return IsTrue(col)
+	default:
+		return p.Append(func(b *Builder) {
+			b.Ident(col)
+			b.WriteOp(OpNEQ)
+			p.arg(b, arg)
+		})
+	}
 }
 
 // ColumnsNEQ appends a "<>" predicate between 2 columns.

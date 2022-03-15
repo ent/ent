@@ -766,6 +766,14 @@ func Predicate(t *testing.T, client *ent.Client) {
 			).
 			CountX(ctx),
 	)
+
+	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfo(inf).SaveX(ctx)
+	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf).SetActive(false).SaveX(ctx)
+	require.Equal(hub.ID, client.Group.Query().Where(group.Active(true)).OnlyIDX(ctx))
+	require.Equal(lab.ID, client.Group.Query().Where(group.Active(false)).OnlyIDX(ctx))
+	require.Equal(hub.ID, client.Group.Query().Where(group.ActiveNEQ(false)).OnlyIDX(ctx))
+	require.Equal(lab.ID, client.Group.Query().Where(group.ActiveNEQ(true)).OnlyIDX(ctx))
 }
 
 func AddValues(t *testing.T, client *ent.Client) {
