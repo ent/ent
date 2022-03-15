@@ -92,7 +92,7 @@ Woohoo! In this quick walk-through we managed to:
 * Insert and query from TiDB using Ent.
 
 ### Preview support
-The integration of Atlas with TiDB is well tested with TiDB version `v5.4.0` (currently, latest) and we will extend that in the future.
+The integration of Atlas with TiDB is well tested with TiDB version `v5.4.0` (at the time of writing, `latest`) and we will extend that in the future.
 If you're using other versions of TiDB or looking for help, don't hesitate to [file an issue](https://github.com/ariga/atlas/issues) or join our [Discord channel](https://discord.gg/zZ6sWVg6NT).
 
 :::note For more Ent news and updates:
