@@ -65,6 +65,7 @@ import (
 
     "ariga.io/atlas/sql/migrate"
     "entgo.io/ent/dialect/sql/schema"
+   _ "github.com/go-sql-driver/mysql"
 )
 
 func main() {

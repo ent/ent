@@ -117,6 +117,9 @@ var (
 // State defines the type for the "state" enum field.
 type State string
 
+// StateLoggedIn is the default value of the State enum.
+const DefaultState = StateLoggedIn
+
 // State values.
 const (
 	StateLoggedIn  State = "logged_in"
