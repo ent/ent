@@ -38,7 +38,8 @@ func (User) Fields() []ent.Field {
 			MaxLen(255),
 		field.Enum("state").
 			Optional().
-			Values("logged_in", "logged_out"),
+			Values("logged_in", "logged_out").
+			Default("logged_in"),
 		field.String("status").
 			Optional(),
 		field.String("workplace").
