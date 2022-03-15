@@ -77,6 +77,7 @@ func TestMigrate_Diff(t *testing.T) {
 	require.NoError(t, err)
 
 	m, err := NewMigrate(db, WithDir(d))
+	require.NoError(t, err)
 	require.NoError(t, m.Diff(context.Background(), &Table{Name: "users"}))
 	v := strconv.FormatInt(time.Now().Unix(), 10)
 	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "CREATE TABLE `users` (, PRIMARY KEY ());\n")
