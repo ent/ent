@@ -10,10 +10,13 @@ tool you like (like golang-migrate, Flyway, liquibase).
 
 ![atlas-versioned-migration-process](https://entgo.io/images/assets/migrate-atlas-versioned.png)
 
-## Configuration
+## Generating Versioned Migration Files
 
-In order to have Ent make the necessary changes to your code, you have to enable this feature with one of the two
-options:
+### From Client 
+
+If you want to use an instantiated Ent client to create new migration files, you have to enable the versioned
+migrations feature flag in order to have Ent make the necessary changes to the generated code. Depending on how you
+execute the Ent code generator, you have to use one of the two options:
 
 1. If you are using the default go generate configuration, simply add the `--feature sql/versioned-migration` to
    the `ent/generate.go` file as follows:
@@ -47,12 +50,8 @@ func main() {
 }
 ```
 
-## Generating Versioned Migration Files
-
-### From Client 
-
 After regenerating the project, there will be an extra `Diff` method on the Ent client that you can use to inspect the
-connected database, compare it with the schema definitions and create sql statements needed to migrate the database to
+connected database, compare it with the schema definitions and create SQL statements needed to migrate the database to
 the graph.
 
 ```go
@@ -95,7 +94,7 @@ You can then create a new set of migration files by simply calling `go run -mod=
 ### From Graph
 
 You can also generate new migration files without an instantiated Ent client. This can be useful if you want to make the
-migration file creation part of a go generate workflow.
+migration file creation part of a go generate workflow. Note, that in this case enabling the feature flag is optional.
 
 ```go
 package main

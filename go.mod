@@ -3,7 +3,7 @@ module entgo.io/ent
 go 1.17
 
 require (
-	ariga.io/atlas v0.3.7-0.20220303204946-787354f533c3
+	ariga.io/atlas v0.3.8-0.20220313134928-770640fc02bf
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-openapi/inflect v0.19.0
 	github.com/go-sql-driver/mysql v1.6.0
@@ -16,7 +16,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/spf13/cobra v1.3.0
+	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
 	go.opencensus.io v0.23.0
