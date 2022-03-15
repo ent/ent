@@ -14,10 +14,10 @@ beneficial to put them in the spotlight once more.
 
 ### What are hooks?
 
-[Hooks](https://entgo.io/docs/hooks) are a feature of Ent that allows adding custom logic before and after operations that change the data entities.
+[Hooks](https://entgo.io/docs/hooks) are an Ent feature that allow adding custom logic before and after operations that change the data entities.
 
 Hooks are functions that get and return an [ent.Mutator](https://pkg.go.dev/entgo.io/ent#Mutator).
-They function similar to the popular [HTTP middleware pattern](https://github.com/go-chi/chi#middleware-handlers).
+They function similar to the popular HTTP middleware pattern.
 
 ```go
 package example
@@ -43,8 +43,8 @@ func exampleHook() ent.Hook {
 }
 ```
 
-In Ent, there are two types of mutation hooks - schema hooks and runtime hooks. Schema hooks are mainly used for defining
-custom mutation logic on a specific entity type, for example, syncing entity creation to another system. Runtime hooks, on the other hand, are used
+In Ent, [Schema hooks](https://entgo.io/docs/hooks#schema-hooks) are mainly used for defining custom mutation logic on a specific entity type, for example,
+syncing entity creation to another system. Runtime hooks, on the other hand, are used
 to define more global logic for adding things like logging, metrics, tracing, etc.
 
 In this post, I will focus mainly on schemas hooks.
@@ -69,8 +69,7 @@ is changing and that defines additional behavior.
 
 ## Let's do some examples
 
-For our examples we use a simple schema of Users and Dogs.
-Each user can have multiple pets and each pet has an owner.
+For our examples we use a simple schema of Users and Dogs, each user can have multiple pets and each pet has an owner 
 as can be seen here:
 ```go title="ent/schema/user.go"
 // User holds the schema definition for the User entity.
@@ -83,9 +82,9 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name").
 			NotEmpty(),
-		field.String("connection_string").
+		field.String("phone_number").
 			NotEmpty(),
-		field.String("password").
+		field.String("last_digits").
 			Sensitive().
 			NotEmpty(),
 	}
@@ -120,7 +119,7 @@ func (Dog) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
 			Ref("pets").
-			Field("owner_id").
+			Field("owner_id"). // Field is needed later.
 			Unique(),
 	}
 }
@@ -131,82 +130,74 @@ Unlike many other parts of the codebase, hooks do one thing only and should be s
 
 ### Keeping our secrets safe:
 
-Many times, we need to store strings that include secrets, a good example can be a connection
-string to a database, usually in the form of `mysql://root:pass@localhost:3306)`. Here, for example, it’s very
-easy to see that we don't want the password to unintentionally be retrieved by a query unless required by the server
-(for example to connect to a database).
+Many times, we need to store strings that include secrets, a good example can be a phone number.
+In our case the privacy concern is rather simple. We require to hide the last 4 digits of each phone number.
 The expected behavior is best described by this test:
-```go
-func TestUserConnectionStringHook(t *testing.T) {
+```go title="ent/schema/user_test.go"
+func TestUserPhoneNumberHook(t *testing.T) {
 	ctx := context.Background()
-	c := enttest.Open(t, dialect.SQLite,
-		"file:TestSchemaConfHooks?mode=memory&cache=shared&_fk=1",
-	)
-	u := c.User.Create().SetName("Yoni").SetConnectionString("mysql://root:pass@localhost:3306)").SaveX(ctx)
-	require.Equal(t, "mysql://root:****@localhost:3306)", u.ConnectionString)
-	require.Equal(t, "pass", u.Password)
-	require.Equal(t, "mysql://root:pass@localhost:3306)", u.FullConnectionString())
+	c := enttest.Open(t, dialect.SQLite, "file:TestSchemaConfHooks?mode=memory&cache=shared&_fk=1")
+	u := c.User.Create().SetName("Yoni").SetPhoneNumber("315-194-6020").SaveX(ctx)
+	require.Equal(t, "315-194-****", u.PhoneNumber)
+	require.Equal(t, "6020", u.LastDigits)
+	require.Equal(t, "315-194-6020", u.FullPhoneNumber())
 }
 ```
 
-As you can see, inserting a connection string updates the string to have `****` instead of the password and stores the 
-password in the `Password` field that is defined as [sensitive](https://entgo.io/docs/schema-fields#sensitive-fields).
-To have the connection string in full valid form we created a utility function `FullConnectionString()`.
+As you can see, inserting a phone number updates the string to have `****` instead of the last digits and stores them 
+in the `last_digits` field that is defined as [sensitive](https://entgo.io/docs/schema-fields#sensitive-fields).
+To have the full phone number we created a utility function `FullPhoneNumber()`.
 
 #### Recipe:
 
 First thing, add the hook to your schema:
-```go
+```go title="ent/schema/user.go"
 // Hooks of the User.
 func (User) Hooks() []ent.Hook {
 	return []ent.Hook{
-		hook.If(clearConnectionString,
-			hook.And(hook.Or(hook.HasOp(ent.OpUpdateOne), hook.HasOp(ent.OpCreate)), hook.HasFields(user.FieldConnectionString)),
+		hook.If(maskPhoneNumber,
+			hook.And(hook.Or(hook.HasOp(ent.OpUpdateOne), hook.HasOp(ent.OpCreate)), hook.HasFields(user.FieldPhoneNumber)),
 		),
 	}
 }
 ```
-* Do not forget to run go generate or the hook will not be registered.
+* Run `go generate ./ent` or the hook will not be registered.
 
-A few hook helpers are used here, `clearConnectionString` is the name of the hook function, and it will run if a user 
-is updated or created and the mutation has the field `connection_string` (if we change only the name of the user there is no need to do anything right?).
+A few hook helpers are used here, `maskPhoneNumber` is the name of the hook function, and it will run if a user 
+is updated or created and the mutation has the field `phone_number` (if we change only the name of the user there is no need to do anything right?).
 
 The hook:
-```go
-func clearConnectionString(next ent.Mutator) ent.Mutator {
+```go title="ent/schema/user.go"
+func maskPhoneNumber(next ent.Mutator) ent.Mutator {
 	return hook.UserFunc(func(ctx context.Context, m *gen.UserMutation) (ent.Value, error) {
-		cs, ok := m.ConnectionString()
+		cs, ok := m.PhoneNumber()
 		if !ok {
 			return next.Mutate(ctx, m)
 		}
-		sp := strings.Split(cs, "@")
-		if len(sp) != 2 {
-			return next.Mutate(ctx, m)
-		}
-		sp = strings.Split(sp[0], ":")
+		sp := strings.Split(cs, "-")
 		if len(sp) != 3 {
 			return next.Mutate(ctx, m)
 		}
-		pass := sp[2]
-		m.SetPassword(pass)
-		m.SetConnectionString(strings.ReplaceAll(cs, pass, "****"))
+		m.SetLastDigits(sp[2])
+		sp[2] = "****"
+		m.SetPhoneNumber(strings.Join(sp[0:3], "-"))
 		return next.Mutate(ctx, m)
 	})
-} 
+}
 ```
-We validate that the mutation has a connection string (if not just let the mutation continue).
-A bit of string acrobatics, and we have the password extracted from the string. We store it in another field - the `password` and
-change the `connection_string` with a masked version. 
+We validate that the mutation has a `phone_number`(if not just let the mutation continue).
+A bit of string acrobatics, and we have the `last_digits` extracted from the string. We store it in another field - the `last_digits` and
+mask the `phone_number`. 
 
-To get the full connection string we add a utility function 
-```go
+To get the full phone number we add a utility function 
+```go title="ent/user_phone_number.go"
 package ent
 
 import "strings"
 
-// FullConnectionString returns the connection string with an unmasked password.
-func (u *User) FullConnectionString() string {
-	return strings.ReplaceAll(u.ConnectionString, "****", u.Password)
+// FullPhoneNumber returns the phone number unmasked.
+func (u *User) FullPhoneNumber() string {
+	return strings.ReplaceAll(u.PhoneNumber, "****", u.LastDigits)
 }
 ```
 
@@ -222,7 +213,7 @@ For example, in our use case, we would like to make sure that dog's names don’
 (best practice when you don't want your dog to run in circles every time someone calls your name).
 
 We start with a simple test
-```go
+```go title="ent/schema/dog_test.go"
 func TestDogNameValidationHook(t *testing.T) {
 	ctx := context.Background()
 	c := enttest.Open(t, dialect.SQLite,
@@ -241,7 +232,7 @@ In this case, you can see that since "Yoni" and "Yolo" share the same 2 letters 
 #### Recipe:
 
 First, register the hook:
-```go
+```go title="ent/schema/dog.go"
 // Hooks of the Dog.
 func (Dog) Hooks() []ent.Hook {
 	return []ent.Hook{		
@@ -256,7 +247,7 @@ Since we want our hook to call every time we change the owner (to make sure the 
 [edge field](https://entgo.io/docs/schema-edges#edge-field). This provides the hooks a trigger when the edge's ID changes.
 
 The hook:
-```go
+```go title="ent/schema/dog.go"
 func validateName(next ent.Mutator) ent.Mutator {
 	return hook.DogFunc(func(ctx context.Context, m *gen.DogMutation) (ent.Value, error) {
 		owID, ok := m.OwnerID()
@@ -271,7 +262,7 @@ func validateName(next ent.Mutator) ent.Mutator {
 		if !ok {
 			return next.Mutate(ctx, m)
 		}
-		if owner.Name[0:1] == dn[0:1] {
+		if owner.Name[0:2] == dn[0:2] {
 			return nil, errors.New("invalid dog name")
 		}
 		return next.Mutate(ctx, m)
@@ -286,7 +277,7 @@ In some cases, we have fields in our database that require long computation, we 
 a change in the data requires it.
 
 A test for it will look like this:
-```go
+```go title="ent/schema/dog_test.go"
 func TestCacheHook(t *testing.T) {
 	ctx := context.Background()
 	cs := cache.NewSyncer()
