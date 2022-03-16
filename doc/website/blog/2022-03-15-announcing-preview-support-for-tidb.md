@@ -10,7 +10,7 @@ We [previously announced](2022-01-20-announcing-new-migration-engine.md) the new
 With `Atlas`'s new design, it has become easier than ever to add support for new databases in Ent.
 Today, I am happy to announce that preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
 
-Ent is an Entity framework that makes developing build large applications a breeze. Ent was [open-sourced in late 
+Ent is an Entity framework that makes developing large applications a breeze. Ent was [open-sourced in late 
 2019](https://entgo.io/blog/2019/10/03/introducing-ent) and officially [joined the Linux Foundation]
 (https://entgo.io/blog/2021/09/01/ent-joins-the-linux-foundation) last September. By defining the data model of your application, Ent provides you the tools to:
 
