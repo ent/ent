@@ -21,6 +21,8 @@ const (
 	FieldName = "name"
 	// FieldWorth holds the string denoting the worth field in the database.
 	FieldWorth = "worth"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
 	// EdgeCards holds the string denoting the cards edge name in mutations.
 	EdgeCards = "cards"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
@@ -50,6 +52,7 @@ var Columns = []string{
 	FieldVersion,
 	FieldName,
 	FieldWorth,
+	FieldPassword,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"
@@ -86,7 +89,7 @@ func ValidColumn(column string) bool {
 //	import _ "entgo.io/ent/entc/integration/hooks/ent/runtime"
 //
 var (
-	Hooks [1]ent.Hook
+	Hooks [2]ent.Hook
 	// DefaultVersion holds the default value on creation for the "version" field.
 	DefaultVersion int
 )
