@@ -246,11 +246,25 @@ func (SomeMixin) Hooks() []ent.Hook {
     return []ent.Hook{
         // Execute "HookA" only for the UpdateOne and DeleteOne operations.
         hook.On(HookA(), ent.OpUpdateOne|ent.OpDeleteOne),
+
         // Don't execute "HookB" on Create operation.
         hook.Unless(HookB(), ent.OpCreate),
+
         // Execute "HookC" only if the ent.Mutation is changing the "status" field,
         // and clearing the "dirty" field.
         hook.If(HookC(), hook.And(hook.HasFields("status"), hook.HasClearedFields("dirty"))),
+
+        // Disallow changing the "password" field on Update (many) operation.
+        hook.If(
+            hook.FixedError(errors.New("password cannot be edited on update many")),
+            hook.And(
+                hook.HasOp(ent.OpUpdate),
+                hook.Or(
+                	hook.HasFields("password"),
+                	hook.HasClearedFields("password"),
+                ),
+            ),
+        ),
     }
 }
 ```
