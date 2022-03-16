@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/schema"
+
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"github.com/DATA-DOG/go-sqlmock"
@@ -89,4 +91,76 @@ func requireFileEqual(t *testing.T, name, contents string) {
 	c, err := os.ReadFile(name)
 	require.NoError(t, err)
 	require.Equal(t, contents, string(c))
+}
+
+func TestMigrateWithoutForeignKeys(t *testing.T) {
+	tbl := &schema.Table{
+		Name: "tbl",
+		Columns: []*schema.Column{
+			{Name: "id", Type: &schema.ColumnType{Type: &schema.IntegerType{T: "bigint"}}},
+		},
+	}
+	fk := &schema.ForeignKey{
+		Symbol:     "fk",
+		Table:      tbl,
+		Columns:    tbl.Columns[1:],
+		RefTable:   tbl,
+		RefColumns: tbl.Columns[:1],
+		OnUpdate:   schema.NoAction,
+		OnDelete:   schema.Cascade,
+	}
+	tbl.ForeignKeys = append(tbl.ForeignKeys, fk)
+	t.Run("add table", func(t *testing.T) {
+		mdiff := DiffFunc(func(_, _ *schema.Schema) ([]schema.Change, error) {
+			return []schema.Change{
+				&schema.AddTable{
+					T: tbl,
+				},
+			}, nil
+		})
+		df, err := withoutForeignKeys(mdiff).Diff(nil, nil)
+		require.NoError(t, err)
+		require.Len(t, df, 1)
+		actual, ok := df[0].(*schema.AddTable)
+		require.True(t, ok)
+		require.Nil(t, actual.T.ForeignKeys)
+	})
+	t.Run("drop table", func(t *testing.T) {
+		mdiff := DiffFunc(func(_, _ *schema.Schema) ([]schema.Change, error) {
+			return []schema.Change{
+				&schema.DropTable{
+					T: tbl,
+				},
+			}, nil
+		})
+		df, err := withoutForeignKeys(mdiff).Diff(nil, nil)
+		require.NoError(t, err)
+		require.Len(t, df, 1)
+		actual, ok := df[0].(*schema.DropTable)
+		require.True(t, ok)
+		require.Nil(t, actual.T.ForeignKeys)
+	})
+	t.Run("modify table", func(t *testing.T) {
+		mdiff := DiffFunc(func(_, _ *schema.Schema) ([]schema.Change, error) {
+			return []schema.Change{
+				&schema.ModifyTable{
+					T: tbl,
+					Changes: []schema.Change{
+						&schema.DropForeignKey{
+							F: fk,
+						},
+						&schema.AddColumn{
+							C: &schema.Column{Name: "name", Type: &schema.ColumnType{Type: &schema.StringType{T: "varchar(255)"}}},
+						},
+					},
+				},
+			}, nil
+		})
+		df, err := withoutForeignKeys(mdiff).Diff(nil, nil)
+		require.NoError(t, err)
+		require.Len(t, df, 1)
+		actual, ok := df[0].(*schema.AddColumn)
+		require.True(t, ok)
+		require.EqualValues(t, "name", actual.C.Name)
+	})
 }
