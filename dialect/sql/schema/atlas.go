@@ -187,9 +187,7 @@ func withoutForeignKeys(next Differ) Differ {
 				filtered := make([]schema.Change, 0, len(c.Changes))
 				for _, change := range c.Changes {
 					switch change.(type) {
-					case *schema.AddForeignKey,
-						*schema.DropForeignKey,
-						*schema.ModifyForeignKey:
+					case *schema.AddForeignKey, *schema.DropForeignKey, *schema.ModifyForeignKey:
 						continue
 					default:
 						filtered = append(filtered, change)
