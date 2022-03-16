@@ -110,7 +110,7 @@ func TestMigrateWithoutForeignKeys(t *testing.T) {
 		OnDelete:   schema.Cascade,
 	}
 	tbl.ForeignKeys = append(tbl.ForeignKeys, fk)
-	t.Run("add table", func(t *testing.T) {
+	t.Run("AddTable", func(t *testing.T) {
 		mdiff := DiffFunc(func(_, _ *schema.Schema) ([]schema.Change, error) {
 			return []schema.Change{
 				&schema.AddTable{
@@ -125,29 +125,30 @@ func TestMigrateWithoutForeignKeys(t *testing.T) {
 		require.True(t, ok)
 		require.Nil(t, actual.T.ForeignKeys)
 	})
-	t.Run("drop table", func(t *testing.T) {
-		mdiff := DiffFunc(func(_, _ *schema.Schema) ([]schema.Change, error) {
-			return []schema.Change{
-				&schema.DropTable{
-					T: tbl,
-				},
-			}, nil
-		})
-		df, err := withoutForeignKeys(mdiff).Diff(nil, nil)
-		require.NoError(t, err)
-		require.Len(t, df, 1)
-		actual, ok := df[0].(*schema.DropTable)
-		require.True(t, ok)
-		require.Nil(t, actual.T.ForeignKeys)
-	})
-	t.Run("modify table", func(t *testing.T) {
+	t.Run("ModifyTable", func(t *testing.T) {
 		mdiff := DiffFunc(func(_, _ *schema.Schema) ([]schema.Change, error) {
 			return []schema.Change{
 				&schema.ModifyTable{
 					T: tbl,
 					Changes: []schema.Change{
+						&schema.AddIndex{
+							I: &schema.Index{
+								Name: "id_key",
+								Parts: []*schema.IndexPart{
+									{C: tbl.Columns[0]},
+								},
+							},
+						},
 						&schema.DropForeignKey{
 							F: fk,
+						},
+						&schema.AddForeignKey{
+							F: fk,
+						},
+						&schema.ModifyForeignKey{
+							From:   fk,
+							To:     fk,
+							Change: schema.ChangeRefColumn,
 						},
 						&schema.AddColumn{
 							C: &schema.Column{Name: "name", Type: &schema.ColumnType{Type: &schema.StringType{T: "varchar(255)"}}},
@@ -161,9 +162,12 @@ func TestMigrateWithoutForeignKeys(t *testing.T) {
 		require.Len(t, df, 1)
 		actual, ok := df[0].(*schema.ModifyTable)
 		require.True(t, ok)
-		require.Len(t, actual.Changes, 1)
-		actualChange, ok := actual.Changes[0].(*schema.AddColumn)
+		require.Len(t, actual.Changes, 2)
+		addIndex, ok := actual.Changes[0].(*schema.AddIndex)
 		require.True(t, ok)
-		require.EqualValues(t, "name", actualChange.C.Name)
+		require.EqualValues(t, "id_key", addIndex.I.Name)
+		addColumn, ok := actual.Changes[1].(*schema.AddColumn)
+		require.True(t, ok)
+		require.EqualValues(t, "name", addColumn.C.Name)
 	})
 }

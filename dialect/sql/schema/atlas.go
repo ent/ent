@@ -159,7 +159,7 @@ func filterChanges(skip ChangeKind) DiffHook {
 						keep = append(keep, c)
 					}
 				}
-				return keep
+				return
 			}
 			changes, err := next.Diff(current, desired)
 			if err != nil {
@@ -179,8 +179,6 @@ func withoutForeignKeys(next Differ) Differ {
 		for _, c := range changes {
 			switch c := c.(type) {
 			case *schema.AddTable:
-				c.T.ForeignKeys = nil
-			case *schema.DropTable:
 				c.T.ForeignKeys = nil
 			case *schema.ModifyTable:
 				c.T.ForeignKeys = nil
