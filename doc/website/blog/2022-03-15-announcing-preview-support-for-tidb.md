@@ -9,18 +9,6 @@ authorTwitter: itsamitush
 We [previously announced](2022-01-20-announcing-new-migration-engine.md) the new migration engine - `Atlas`.
 With `Atlas`'s new design, it has become easier than ever to add support for new databases in Ent.
 Today, I am happy to announce that preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
-
-Ent is an Entity framework that makes developing large applications a breeze. Ent was [open-sourced in late 
-2019](https://entgo.io/blog/2019/10/03/introducing-ent) and officially [joined the Linux Foundation]
-(https://entgo.io/blog/2021/09/01/ent-joins-the-linux-foundation) last September. By defining the data model of your application, Ent provides you the tools to:
-
-1. Generate a type-safe, explicit API for accessing your database.
-2. Automatically generate feature-rich, performant, and clean: 
-  * [GraphQL server](https://entgo.io/docs/tutorial-todo-gql).
-  * [REST server](2022-02-15-generate-rest-crud-with-ent-and-ogen.md).
-  * [gRPC server](https://entgo.io/docs/grpc-intro).
-3. [Traverse](https://entgo.io/docs/traversals) your data using graph semantics.
-4. Perform safe DB [migrations](https://entgo.io/blog/2022/03/14/announcing-versioned-migrations).
   
 Ent can be used to access data in many types of databases, both Graph-oriented and relational.  Most commonly, users have been using standard open-source relational databases such as MySQL, MariaDB, and PostgreSQL.  As teams building Ent-based applications become more successful and need to deal with larger scales, these single-node databases often become the bottleneck for scaling out. For this reason, many members of the Ent community have requested support [NewSQL](https://en.wikipedia.org/wiki/NewSQL) databases such as TiDB.
 
