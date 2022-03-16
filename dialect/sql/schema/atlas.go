@@ -184,18 +184,18 @@ func withoutForeignKeys(next Differ) Differ {
 				c.T.ForeignKeys = nil
 			case *schema.ModifyTable:
 				c.T.ForeignKeys = nil
-				nChanges := make([]schema.Change, 0, len(c.Changes))
+				filtered := make([]schema.Change, 0, len(c.Changes))
 				for _, change := range c.Changes {
 					switch change.(type) {
 					case *schema.AddForeignKey,
 						*schema.DropForeignKey,
 						*schema.ModifyForeignKey:
-						change = nil
+						continue
 					default:
-						nChanges = append(nChanges, change)
+						filtered = append(filtered, change)
 					}
 				}
-				return nChanges, nil
+				c.Changes = filtered
 			}
 		}
 		return changes, nil

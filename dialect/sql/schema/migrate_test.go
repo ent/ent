@@ -159,8 +159,11 @@ func TestMigrateWithoutForeignKeys(t *testing.T) {
 		df, err := withoutForeignKeys(mdiff).Diff(nil, nil)
 		require.NoError(t, err)
 		require.Len(t, df, 1)
-		actual, ok := df[0].(*schema.AddColumn)
+		actual, ok := df[0].(*schema.ModifyTable)
 		require.True(t, ok)
-		require.EqualValues(t, "name", actual.C.Name)
+		require.Len(t, actual.Changes, 1)
+		actualChange, ok := actual.Changes[0].(*schema.AddColumn)
+		require.True(t, ok)
+		require.EqualValues(t, "name", actualChange.C.Name)
 	})
 }
