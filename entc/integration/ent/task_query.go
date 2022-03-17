@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -271,15 +270,17 @@ func (tq *TaskQuery) Clone() *TaskQuery {
 //		Scan(ctx, &v)
 //
 func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
-	group := &TaskGroupBy{config: tq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &TaskGroupBy{config: tq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return tq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = enttask.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -297,7 +298,10 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 //
 func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
 	tq.fields = append(tq.fields, fields...)
-	return &TaskSelect{TaskQuery: tq}
+	selbuild := &TaskSelect{TaskQuery: tq}
+	selbuild.label = enttask.Label
+	selbuild.flds, selbuild.scan = &tq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
@@ -483,6 +487,7 @@ func (tq *TaskQuery) Modify(modifiers ...func(s *sql.Selector)) *TaskSelect {
 // TaskGroupBy is the group-by builder for Task entities.
 type TaskGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -504,209 +509,6 @@ func (tgb *TaskGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	tgb.sql = query
 	return tgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (tgb *TaskGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := tgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TaskGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TaskGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (tgb *TaskGroupBy) StringsX(ctx context.Context) []string {
-	v, err := tgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TaskGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = tgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{enttask.Label}
-	default:
-		err = fmt.Errorf("ent: TaskGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (tgb *TaskGroupBy) StringX(ctx context.Context) string {
-	v, err := tgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TaskGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TaskGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (tgb *TaskGroupBy) IntsX(ctx context.Context) []int {
-	v, err := tgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TaskGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = tgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{enttask.Label}
-	default:
-		err = fmt.Errorf("ent: TaskGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (tgb *TaskGroupBy) IntX(ctx context.Context) int {
-	v, err := tgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TaskGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TaskGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (tgb *TaskGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := tgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TaskGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = tgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{enttask.Label}
-	default:
-		err = fmt.Errorf("ent: TaskGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (tgb *TaskGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := tgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TaskGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TaskGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (tgb *TaskGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := tgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TaskGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = tgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{enttask.Label}
-	default:
-		err = fmt.Errorf("ent: TaskGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (tgb *TaskGroupBy) BoolX(ctx context.Context) bool {
-	v, err := tgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (tgb *TaskGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -750,6 +552,7 @@ func (tgb *TaskGroupBy) sqlQuery() *sql.Selector {
 // TaskSelect is the builder for selecting fields of Task entities.
 type TaskSelect struct {
 	*TaskQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -761,201 +564,6 @@ func (ts *TaskSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ts.sql = ts.TaskQuery.sqlQuery(ctx)
 	return ts.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ts *TaskSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ts.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ts *TaskSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TaskSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ts *TaskSelect) StringsX(ctx context.Context) []string {
-	v, err := ts.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ts *TaskSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ts.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{enttask.Label}
-	default:
-		err = fmt.Errorf("ent: TaskSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ts *TaskSelect) StringX(ctx context.Context) string {
-	v, err := ts.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ts *TaskSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TaskSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ts *TaskSelect) IntsX(ctx context.Context) []int {
-	v, err := ts.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ts *TaskSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ts.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{enttask.Label}
-	default:
-		err = fmt.Errorf("ent: TaskSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ts *TaskSelect) IntX(ctx context.Context) int {
-	v, err := ts.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ts *TaskSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TaskSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ts *TaskSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ts.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ts *TaskSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ts.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{enttask.Label}
-	default:
-		err = fmt.Errorf("ent: TaskSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ts *TaskSelect) Float64X(ctx context.Context) float64 {
-	v, err := ts.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ts *TaskSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TaskSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ts *TaskSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ts.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ts *TaskSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ts.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{enttask.Label}
-	default:
-		err = fmt.Errorf("ent: TaskSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ts *TaskSelect) BoolX(ctx context.Context) bool {
-	v, err := ts.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ts *TaskSelect) sqlScan(ctx context.Context, v interface{}) error {

@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 
@@ -376,15 +375,17 @@ func (mq *MetadataQuery) WithParent(opts ...func(*MetadataQuery)) *MetadataQuery
 //		Scan(ctx, &v)
 //
 func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupBy {
-	group := &MetadataGroupBy{config: mq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &MetadataGroupBy{config: mq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return mq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = metadata.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -402,7 +403,10 @@ func (mq *MetadataQuery) GroupBy(field string, fields ...string) *MetadataGroupB
 //
 func (mq *MetadataQuery) Select(fields ...string) *MetadataSelect {
 	mq.fields = append(mq.fields, fields...)
-	return &MetadataSelect{MetadataQuery: mq}
+	selbuild := &MetadataSelect{MetadataQuery: mq}
+	selbuild.label = metadata.Label
+	selbuild.flds, selbuild.scan = &mq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (mq *MetadataQuery) prepareQuery(ctx context.Context) error {
@@ -631,6 +635,7 @@ func (mq *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // MetadataGroupBy is the group-by builder for Metadata entities.
 type MetadataGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -652,209 +657,6 @@ func (mgb *MetadataGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	mgb.sql = query
 	return mgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (mgb *MetadataGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := mgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (mgb *MetadataGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(mgb.fields) > 1 {
-		return nil, errors.New("ent: MetadataGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := mgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (mgb *MetadataGroupBy) StringsX(ctx context.Context) []string {
-	v, err := mgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (mgb *MetadataGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = mgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{metadata.Label}
-	default:
-		err = fmt.Errorf("ent: MetadataGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (mgb *MetadataGroupBy) StringX(ctx context.Context) string {
-	v, err := mgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (mgb *MetadataGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(mgb.fields) > 1 {
-		return nil, errors.New("ent: MetadataGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := mgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (mgb *MetadataGroupBy) IntsX(ctx context.Context) []int {
-	v, err := mgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (mgb *MetadataGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = mgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{metadata.Label}
-	default:
-		err = fmt.Errorf("ent: MetadataGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (mgb *MetadataGroupBy) IntX(ctx context.Context) int {
-	v, err := mgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (mgb *MetadataGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(mgb.fields) > 1 {
-		return nil, errors.New("ent: MetadataGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := mgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (mgb *MetadataGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := mgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (mgb *MetadataGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = mgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{metadata.Label}
-	default:
-		err = fmt.Errorf("ent: MetadataGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (mgb *MetadataGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := mgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (mgb *MetadataGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(mgb.fields) > 1 {
-		return nil, errors.New("ent: MetadataGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := mgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (mgb *MetadataGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := mgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (mgb *MetadataGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = mgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{metadata.Label}
-	default:
-		err = fmt.Errorf("ent: MetadataGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (mgb *MetadataGroupBy) BoolX(ctx context.Context) bool {
-	v, err := mgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (mgb *MetadataGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -898,6 +700,7 @@ func (mgb *MetadataGroupBy) sqlQuery() *sql.Selector {
 // MetadataSelect is the builder for selecting fields of Metadata entities.
 type MetadataSelect struct {
 	*MetadataQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -909,201 +712,6 @@ func (ms *MetadataSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ms.sql = ms.MetadataQuery.sqlQuery(ctx)
 	return ms.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ms *MetadataSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ms.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ms *MetadataSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ms.fields) > 1 {
-		return nil, errors.New("ent: MetadataSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ms.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ms *MetadataSelect) StringsX(ctx context.Context) []string {
-	v, err := ms.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ms *MetadataSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ms.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{metadata.Label}
-	default:
-		err = fmt.Errorf("ent: MetadataSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ms *MetadataSelect) StringX(ctx context.Context) string {
-	v, err := ms.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ms *MetadataSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ms.fields) > 1 {
-		return nil, errors.New("ent: MetadataSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ms.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ms *MetadataSelect) IntsX(ctx context.Context) []int {
-	v, err := ms.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ms *MetadataSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ms.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{metadata.Label}
-	default:
-		err = fmt.Errorf("ent: MetadataSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ms *MetadataSelect) IntX(ctx context.Context) int {
-	v, err := ms.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ms *MetadataSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ms.fields) > 1 {
-		return nil, errors.New("ent: MetadataSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ms.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ms *MetadataSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ms.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ms *MetadataSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ms.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{metadata.Label}
-	default:
-		err = fmt.Errorf("ent: MetadataSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ms *MetadataSelect) Float64X(ctx context.Context) float64 {
-	v, err := ms.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ms *MetadataSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ms.fields) > 1 {
-		return nil, errors.New("ent: MetadataSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ms.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ms *MetadataSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ms.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ms *MetadataSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ms.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{metadata.Label}
-	default:
-		err = fmt.Errorf("ent: MetadataSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ms *MetadataSelect) BoolX(ctx context.Context) bool {
-	v, err := ms.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ms *MetadataSelect) sqlScan(ctx context.Context, v interface{}) error {

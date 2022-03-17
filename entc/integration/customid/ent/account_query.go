@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 
@@ -307,15 +306,17 @@ func (aq *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
 //		Scan(ctx, &v)
 //
 func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy {
-	group := &AccountGroupBy{config: aq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &AccountGroupBy{config: aq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return aq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = account.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -333,7 +334,10 @@ func (aq *AccountQuery) GroupBy(field string, fields ...string) *AccountGroupBy 
 //
 func (aq *AccountQuery) Select(fields ...string) *AccountSelect {
 	aq.fields = append(aq.fields, fields...)
-	return &AccountSelect{AccountQuery: aq}
+	selbuild := &AccountSelect{AccountQuery: aq}
+	selbuild.label = account.Label
+	selbuild.flds, selbuild.scan = &aq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (aq *AccountQuery) prepareQuery(ctx context.Context) error {
@@ -512,6 +516,7 @@ func (aq *AccountQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // AccountGroupBy is the group-by builder for Account entities.
 type AccountGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -533,209 +538,6 @@ func (agb *AccountGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	agb.sql = query
 	return agb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (agb *AccountGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := agb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (agb *AccountGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(agb.fields) > 1 {
-		return nil, errors.New("ent: AccountGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := agb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (agb *AccountGroupBy) StringsX(ctx context.Context) []string {
-	v, err := agb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (agb *AccountGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = agb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{account.Label}
-	default:
-		err = fmt.Errorf("ent: AccountGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (agb *AccountGroupBy) StringX(ctx context.Context) string {
-	v, err := agb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (agb *AccountGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(agb.fields) > 1 {
-		return nil, errors.New("ent: AccountGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := agb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (agb *AccountGroupBy) IntsX(ctx context.Context) []int {
-	v, err := agb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (agb *AccountGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = agb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{account.Label}
-	default:
-		err = fmt.Errorf("ent: AccountGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (agb *AccountGroupBy) IntX(ctx context.Context) int {
-	v, err := agb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (agb *AccountGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(agb.fields) > 1 {
-		return nil, errors.New("ent: AccountGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := agb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (agb *AccountGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := agb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (agb *AccountGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = agb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{account.Label}
-	default:
-		err = fmt.Errorf("ent: AccountGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (agb *AccountGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := agb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (agb *AccountGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(agb.fields) > 1 {
-		return nil, errors.New("ent: AccountGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := agb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (agb *AccountGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := agb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (agb *AccountGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = agb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{account.Label}
-	default:
-		err = fmt.Errorf("ent: AccountGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (agb *AccountGroupBy) BoolX(ctx context.Context) bool {
-	v, err := agb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (agb *AccountGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -779,6 +581,7 @@ func (agb *AccountGroupBy) sqlQuery() *sql.Selector {
 // AccountSelect is the builder for selecting fields of Account entities.
 type AccountSelect struct {
 	*AccountQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -790,201 +593,6 @@ func (as *AccountSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	as.sql = as.AccountQuery.sqlQuery(ctx)
 	return as.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (as *AccountSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := as.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (as *AccountSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(as.fields) > 1 {
-		return nil, errors.New("ent: AccountSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := as.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (as *AccountSelect) StringsX(ctx context.Context) []string {
-	v, err := as.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (as *AccountSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = as.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{account.Label}
-	default:
-		err = fmt.Errorf("ent: AccountSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (as *AccountSelect) StringX(ctx context.Context) string {
-	v, err := as.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (as *AccountSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(as.fields) > 1 {
-		return nil, errors.New("ent: AccountSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := as.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (as *AccountSelect) IntsX(ctx context.Context) []int {
-	v, err := as.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (as *AccountSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = as.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{account.Label}
-	default:
-		err = fmt.Errorf("ent: AccountSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (as *AccountSelect) IntX(ctx context.Context) int {
-	v, err := as.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (as *AccountSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(as.fields) > 1 {
-		return nil, errors.New("ent: AccountSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := as.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (as *AccountSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := as.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (as *AccountSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = as.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{account.Label}
-	default:
-		err = fmt.Errorf("ent: AccountSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (as *AccountSelect) Float64X(ctx context.Context) float64 {
-	v, err := as.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (as *AccountSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(as.fields) > 1 {
-		return nil, errors.New("ent: AccountSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := as.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (as *AccountSelect) BoolsX(ctx context.Context) []bool {
-	v, err := as.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (as *AccountSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = as.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{account.Label}
-	default:
-		err = fmt.Errorf("ent: AccountSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (as *AccountSelect) BoolX(ctx context.Context) bool {
-	v, err := as.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (as *AccountSelect) sqlScan(ctx context.Context, v interface{}) error {

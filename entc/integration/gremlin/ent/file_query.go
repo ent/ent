@@ -8,8 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -353,15 +351,17 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 //		Scan(ctx, &v)
 //
 func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
-	group := &FileGroupBy{config: fq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+	grbuild := &FileGroupBy{config: fq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return fq.gremlinQuery(ctx), nil
 	}
-	return group
+	grbuild.label = file.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -379,7 +379,10 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //
 func (fq *FileQuery) Select(fields ...string) *FileSelect {
 	fq.fields = append(fq.fields, fields...)
-	return &FileSelect{FileQuery: fq}
+	selbuild := &FileSelect{FileQuery: fq}
+	selbuild.label = file.Label
+	selbuild.flds, selbuild.scan = &fq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (fq *FileQuery) prepareQuery(ctx context.Context) error {
@@ -466,6 +469,7 @@ func (fq *FileQuery) gremlinQuery(context.Context) *dsl.Traversal {
 // FileGroupBy is the group-by builder for File entities.
 type FileGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -487,209 +491,6 @@ func (fgb *FileGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	fgb.gremlin = query
 	return fgb.gremlinScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (fgb *FileGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := fgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (fgb *FileGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(fgb.fields) > 1 {
-		return nil, errors.New("ent: FileGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := fgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (fgb *FileGroupBy) StringsX(ctx context.Context) []string {
-	v, err := fgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (fgb *FileGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = fgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{file.Label}
-	default:
-		err = fmt.Errorf("ent: FileGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (fgb *FileGroupBy) StringX(ctx context.Context) string {
-	v, err := fgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (fgb *FileGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(fgb.fields) > 1 {
-		return nil, errors.New("ent: FileGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := fgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (fgb *FileGroupBy) IntsX(ctx context.Context) []int {
-	v, err := fgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (fgb *FileGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = fgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{file.Label}
-	default:
-		err = fmt.Errorf("ent: FileGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (fgb *FileGroupBy) IntX(ctx context.Context) int {
-	v, err := fgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (fgb *FileGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(fgb.fields) > 1 {
-		return nil, errors.New("ent: FileGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := fgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (fgb *FileGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := fgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (fgb *FileGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = fgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{file.Label}
-	default:
-		err = fmt.Errorf("ent: FileGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (fgb *FileGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := fgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (fgb *FileGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(fgb.fields) > 1 {
-		return nil, errors.New("ent: FileGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := fgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (fgb *FileGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := fgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (fgb *FileGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = fgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{file.Label}
-	default:
-		err = fmt.Errorf("ent: FileGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (fgb *FileGroupBy) BoolX(ctx context.Context) bool {
-	v, err := fgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (fgb *FileGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
@@ -732,6 +533,7 @@ func (fgb *FileGroupBy) gremlinQuery() *dsl.Traversal {
 // FileSelect is the builder for selecting fields of File entities.
 type FileSelect struct {
 	*FileQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 }
@@ -743,201 +545,6 @@ func (fs *FileSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	fs.gremlin = fs.FileQuery.gremlinQuery(ctx)
 	return fs.gremlinScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (fs *FileSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := fs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (fs *FileSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(fs.fields) > 1 {
-		return nil, errors.New("ent: FileSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := fs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (fs *FileSelect) StringsX(ctx context.Context) []string {
-	v, err := fs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (fs *FileSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = fs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{file.Label}
-	default:
-		err = fmt.Errorf("ent: FileSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (fs *FileSelect) StringX(ctx context.Context) string {
-	v, err := fs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (fs *FileSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(fs.fields) > 1 {
-		return nil, errors.New("ent: FileSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := fs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (fs *FileSelect) IntsX(ctx context.Context) []int {
-	v, err := fs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (fs *FileSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = fs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{file.Label}
-	default:
-		err = fmt.Errorf("ent: FileSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (fs *FileSelect) IntX(ctx context.Context) int {
-	v, err := fs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (fs *FileSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(fs.fields) > 1 {
-		return nil, errors.New("ent: FileSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := fs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (fs *FileSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := fs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (fs *FileSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = fs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{file.Label}
-	default:
-		err = fmt.Errorf("ent: FileSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (fs *FileSelect) Float64X(ctx context.Context) float64 {
-	v, err := fs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (fs *FileSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(fs.fields) > 1 {
-		return nil, errors.New("ent: FileSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := fs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (fs *FileSelect) BoolsX(ctx context.Context) []bool {
-	v, err := fs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (fs *FileSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = fs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{file.Label}
-	default:
-		err = fmt.Errorf("ent: FileSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (fs *FileSelect) BoolX(ctx context.Context) bool {
-	v, err := fs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (fs *FileSelect) gremlinScan(ctx context.Context, v interface{}) error {
