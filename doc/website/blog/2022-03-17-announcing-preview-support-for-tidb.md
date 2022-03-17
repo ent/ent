@@ -10,7 +10,7 @@ We [previously announced](2022-01-20-announcing-new-migration-engine.md) the new
 With `Atlas`'s new design, it has become easier than ever to add support for new databases in Ent.
 Today, I am happy to announce that preview support for [TiDB](https://en.pingcap.com/tidb/) is now available, using the latest version of Ent with `Atlas` enabled.  
   
-Ent can be used to access data in many types of databases, both Graph-oriented and relational.  Most commonly, users have been using standard open-source relational databases such as MySQL, MariaDB, and PostgreSQL.  As teams building Ent-based applications become more successful and need to deal with larger scales, these single-node databases often become the bottleneck for scaling out. For this reason, many members of the Ent community have requested support [NewSQL](https://en.wikipedia.org/wiki/NewSQL) databases such as TiDB.
+Ent can be used to access data in many types of databases, both graph-oriented and relational.  Most commonly, users have been using standard open-source relational databases such as MySQL, MariaDB, and PostgreSQL.  As teams building Ent-based applications become more successful and need to deal with larger scales, these single-node databases often become the bottleneck for scaling out. For this reason, many members of the Ent community have requested support [NewSQL](https://en.wikipedia.org/wiki/NewSQL) databases such as TiDB.
 
 ### TiDB
 [TiDB](https://en.pingcap.com/tidb/) is an [open-source](https://github.com/pingcap/tidb) NewSQL database. It provides many features that traditional databases don't, such as:
