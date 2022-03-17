@@ -14,9 +14,9 @@ Ent can be used to access data in many types of databases, both Graph-oriented a
 
 ### TiDB
 [TiDB](https://en.pingcap.com/tidb/) is an [open-source](https://github.com/pingcap/tidb) NewSQL database. It provides many features that traditional databases don't, such as:
-1. Horizontal scaling - for many years software architects needed to choose between the familiarity and guarantees that relational databases provide and the scaling-out capability of _NoSQL_ databases (such as MongoDB or Cassandra). TiDB supports horizontal scaling while maintaining good compatibility with MySQL features. 
-2. HTAP (Hybrid transactional/analytical processing) - In addition, databases are traditionally divided into analytical (OLAP) and transactional (OLTP) databases. TiDB breaks this dichotomy by enabling both analytics and transactional workloads on the same database. 
-3. Pre-packed monitoring w/ Prometheus+Grafana - TiDB is built on Cloud-native paradigms from the ground up, and natively supports the standard CNCF observability stack. 
+1. **Horizontal scaling** - for many years software architects needed to choose between the familiarity and guarantees that relational databases provide and the scaling-out capability of _NoSQL_ databases (such as MongoDB or Cassandra). TiDB supports horizontal scaling while maintaining good compatibility with MySQL features. 
+2. **HTAP (Hybrid transactional/analytical processing)** - In addition, databases are traditionally divided into analytical (OLAP) and transactional (OLTP) databases. TiDB breaks this dichotomy by enabling both analytics and transactional workloads on the same database. 
+3. **Pre-packed monitoring** w/ Prometheus+Grafana - TiDB is built on Cloud-native paradigms from the ground up, and natively supports the standard CNCF observability stack. 
   
 To read more about it, check out the official [TiDB Introduction](https://docs.pingcap.com/tidb/stable).
 
