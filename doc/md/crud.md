@@ -14,7 +14,7 @@ will generate the following assets:
 
 ## Create A New Client
 
-**MySQL/TiDB**
+**MySQL**
 
 ```go
 package main
