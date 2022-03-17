@@ -48,7 +48,7 @@ For a quick "Hello World" application with Ent+TiDB, follow these steps:
  ```go title="main.go"
  client, err := ent.Open("mysql", "root@tcp(localhost:4000)/test?parseTime=true")
  if err != nil {
- 	log.Fatalf("failed opening connection to sqlite: %v", err)
+ 	log.Fatalf("failed opening connection to tidb: %v", err)
  }
  defer client.Close()
  // Run the auto migration tool, with Atlas.
