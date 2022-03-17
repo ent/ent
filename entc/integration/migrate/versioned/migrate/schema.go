@@ -42,7 +42,7 @@ var (
 		{Name: "address", Type: field.TypeString, Nullable: true},
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 255},
-		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out"}},
+		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out"}, Default: "logged_in"},
 		{Name: "status", Type: field.TypeString, Nullable: true},
 		{Name: "workplace", Type: field.TypeString, Nullable: true, Size: 30},
 		{Name: "user_children", Type: field.TypeInt, Nullable: true},

@@ -181,7 +181,11 @@ func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) 
 	if len(plan.Changes) == 0 {
 		return nil
 	}
-	return migrate.NewPlanner(nil, m.atlas.dir, migrate.WithFormatter(m.atlas.fmt)).WritePlan(plan)
+	opts := []migrate.PlannerOption{
+		migrate.WithFormatter(m.atlas.fmt),
+		migrate.DisableChecksum(),
+	}
+	return migrate.NewPlanner(nil, m.atlas.dir, opts...).WritePlan(plan)
 }
 
 func (m *Migrate) create(ctx context.Context, tables ...*Table) error {

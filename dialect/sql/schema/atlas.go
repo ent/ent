@@ -23,7 +23,7 @@ import (
 type (
 	// Differ is the interface that wraps the Diff method.
 	Differ interface {
-		// Diff creates the given tables in the database.
+		// Diff returns a list of changes that construct a migration plan.
 		Diff(current, desired *schema.Schema) ([]schema.Change, error)
 	}
 
@@ -98,7 +98,7 @@ const (
 	DropCheck
 )
 
-// Is reports whether c is match the given change king.
+// Is reports whether c is match the given change kind.
 func (k ChangeKind) Is(c ChangeKind) bool {
 	return k == c || k&c != 0
 }
@@ -168,6 +168,34 @@ func filterChanges(skip ChangeKind) DiffHook {
 			return f(changes), nil
 		})
 	}
+}
+
+func withoutForeignKeys(next Differ) Differ {
+	return DiffFunc(func(current, desired *schema.Schema) ([]schema.Change, error) {
+		changes, err := next.Diff(current, desired)
+		if err != nil {
+			return nil, err
+		}
+		for _, c := range changes {
+			switch c := c.(type) {
+			case *schema.AddTable:
+				c.T.ForeignKeys = nil
+			case *schema.ModifyTable:
+				c.T.ForeignKeys = nil
+				filtered := make([]schema.Change, 0, len(c.Changes))
+				for _, change := range c.Changes {
+					switch change.(type) {
+					case *schema.AddForeignKey, *schema.DropForeignKey, *schema.ModifyForeignKey:
+						continue
+					default:
+						filtered = append(filtered, change)
+					}
+				}
+				c.Changes = filtered
+			}
+		}
+		return changes, nil
+	})
 }
 
 type (
@@ -267,9 +295,6 @@ func (m *Migrate) setupAtlas() error {
 	if !m.atlas.enabled {
 		return nil
 	}
-	if !m.withForeignKeys {
-		return errors.New("sql/schema: WithForeignKeys(false) does not work in Atlas migration")
-	}
 	if m.withFixture {
 		return errors.New("sql/schema: WithFixture(true) does not work in Atlas migration")
 	}
@@ -285,6 +310,9 @@ func (m *Migrate) setupAtlas() error {
 	}
 	if skip != NoChange {
 		m.atlas.diff = append(m.atlas.diff, filterChanges(skip))
+	}
+	if !m.withForeignKeys {
+		m.atlas.diff = append(m.atlas.diff, withoutForeignKeys)
 	}
 	if m.atlas.dir != nil && m.atlas.fmt == nil {
 		m.atlas.fmt = migrate.DefaultFormatter

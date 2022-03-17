@@ -81,7 +81,8 @@ func (User) Fields() []ent.Field {
 		// adding enum to the `state` column.
 		field.Enum("state").
 			Optional().
-			Values("logged_in", "logged_out", "online"),
+			Values("logged_in", "logged_out", "online").
+			Default("logged_in"),
 		// convert string to enum.
 		field.Enum("status").
 			Optional().

@@ -1,7 +1,5 @@
-ariga.io/atlas v0.3.7-0.20220303204946-787354f533c3 h1:fjG4oFCQEfGrRi0QoxWcH2OO28CE6VYa6DkIr3yDySU=
-ariga.io/atlas v0.3.7-0.20220303204946-787354f533c3/go.mod h1:yWGf4VPiD4SW83+kAqzD624txN9VKoJC+bpVXr2pKJA=
-ariga.io/atlas v0.3.8-0.20220313134928-770640fc02bf h1:bAt5AUvr91QI8yXHME6qTsMTNM4BtfSB3M9o1cmt51E=
-ariga.io/atlas v0.3.8-0.20220313134928-770640fc02bf/go.mod h1:ipw7dUlFanAylr9nvs8lCvOUC8hFG6PGd/gtr+uJMvk=
+ariga.io/atlas v0.3.8-0.20220314111236-b2171e04c5b2 h1:qbH+CDPAMsV1FIKkHGYzy2aWP9k5QAqPbi9PYZGqz60=
+ariga.io/atlas v0.3.8-0.20220314111236-b2171e04c5b2/go.mod h1:ipw7dUlFanAylr9nvs8lCvOUC8hFG6PGd/gtr+uJMvk=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=
@@ -278,7 +276,6 @@ github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348 h1:MtvEpTB6LX3vkb4ax0b5D2DHbNAUsen0Gx5wZoq3lV4=
 github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348/go.mod h1:B69LEHPfb2qLo0BaaOLcbitczOKLWTsrBG9LczfCD4k=
-github.com/lib/pq v1.10.3/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 github.com/lib/pq v1.10.4 h1:SO9z7FRPzA03QhHKJrH5BXA6HU1rS4V2nIVrrNC1iYk=
 github.com/lib/pq v1.10.4/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
 github.com/lyft/protoc-gen-star v0.5.3/go.mod h1:V0xaHgaf5oCCqmcxYcWiDfTiKsZsRc87/1qhoTACD8w=
