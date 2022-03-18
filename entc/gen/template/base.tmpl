@@ -190,6 +190,72 @@ func IsConstraintError(err error) bool {
 	return errors.As(err, &e)
 }
 
+
+// selector embedded by the different Select/GroupBy builders.
+type selector struct {
+    label string
+    flds *[]string
+    scan func (context.Context, interface{}) error
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (s *selector) ScanX(ctx context.Context, v interface{}) {
+	if err := s.scan(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+{{ range $t := primitives }}
+	{{ $plural := pascal $t | plural }}
+	// {{ $plural }} returns list of {{ plural $t }} from a selector. It is only allowed when selecting one field.
+	func (s *selector) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
+		if len(*s.flds) > 1 {
+			return nil, errors.New("{{ $pkg }}: {{ $plural }} is not achievable when selecting more than 1 field")
+		}
+		var v []{{ $t }}
+		if err := s.scan(ctx, &v); err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+
+	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
+	func (s *selector) {{ $plural }}X(ctx context.Context) []{{ $t }} {
+		v, err := s.{{ $plural }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+
+	{{ $singular := pascal $t -}}
+	// {{ $singular }} returns a single {{ $t }} from a selector. It is only allowed when selecting one field.
+	func (s *selector) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
+		var v []{{ $t }}
+		if v, err = s.{{ $plural }}(ctx); err != nil {
+			return
+		}
+		switch len(v) {
+		case 1:
+			return v[0], nil
+		case 0:
+			err = &NotFoundError{s.label}
+		default:
+			err = fmt.Errorf("{{ $pkg }}: {{ $plural }} returned %d results when one was expected", len(v))
+		}
+		return
+	}
+	
+	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
+	func (s *selector) {{ $singular }}X(ctx context.Context) {{ $t }} {
+		v, err := s.{{ $singular }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+{{ end }}
+
 {{/* expand error types and global helpers. */}}
 {{ $tmpl = printf "dialect/%s/errors" $.Storage }}
 {{ if hasTemplate $tmpl }}

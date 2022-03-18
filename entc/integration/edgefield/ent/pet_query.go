@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -305,15 +304,17 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //		Scan(ctx, &v)
 //
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
-	group := &PetGroupBy{config: pq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &PetGroupBy{config: pq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return pq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = pet.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -331,7 +332,10 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	pq.fields = append(pq.fields, fields...)
-	return &PetSelect{PetQuery: pq}
+	selbuild := &PetSelect{PetQuery: pq}
+	selbuild.label = pet.Label
+	selbuild.flds, selbuild.scan = &pq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (pq *PetQuery) prepareQuery(ctx context.Context) error {
@@ -507,6 +511,7 @@ func (pq *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // PetGroupBy is the group-by builder for Pet entities.
 type PetGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -528,209 +533,6 @@ func (pgb *PetGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	pgb.sql = query
 	return pgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (pgb *PetGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := pgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (pgb *PetGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(pgb.fields) > 1 {
-		return nil, errors.New("ent: PetGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := pgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (pgb *PetGroupBy) StringsX(ctx context.Context) []string {
-	v, err := pgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (pgb *PetGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = pgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{pet.Label}
-	default:
-		err = fmt.Errorf("ent: PetGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (pgb *PetGroupBy) StringX(ctx context.Context) string {
-	v, err := pgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (pgb *PetGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(pgb.fields) > 1 {
-		return nil, errors.New("ent: PetGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := pgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (pgb *PetGroupBy) IntsX(ctx context.Context) []int {
-	v, err := pgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (pgb *PetGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = pgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{pet.Label}
-	default:
-		err = fmt.Errorf("ent: PetGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (pgb *PetGroupBy) IntX(ctx context.Context) int {
-	v, err := pgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (pgb *PetGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(pgb.fields) > 1 {
-		return nil, errors.New("ent: PetGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := pgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (pgb *PetGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := pgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (pgb *PetGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = pgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{pet.Label}
-	default:
-		err = fmt.Errorf("ent: PetGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (pgb *PetGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := pgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (pgb *PetGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(pgb.fields) > 1 {
-		return nil, errors.New("ent: PetGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := pgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (pgb *PetGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := pgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (pgb *PetGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = pgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{pet.Label}
-	default:
-		err = fmt.Errorf("ent: PetGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (pgb *PetGroupBy) BoolX(ctx context.Context) bool {
-	v, err := pgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (pgb *PetGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -774,6 +576,7 @@ func (pgb *PetGroupBy) sqlQuery() *sql.Selector {
 // PetSelect is the builder for selecting fields of Pet entities.
 type PetSelect struct {
 	*PetQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -785,201 +588,6 @@ func (ps *PetSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ps.sql = ps.PetQuery.sqlQuery(ctx)
 	return ps.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ps *PetSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ps.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ps *PetSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ps.fields) > 1 {
-		return nil, errors.New("ent: PetSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ps.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ps *PetSelect) StringsX(ctx context.Context) []string {
-	v, err := ps.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ps *PetSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ps.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{pet.Label}
-	default:
-		err = fmt.Errorf("ent: PetSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ps *PetSelect) StringX(ctx context.Context) string {
-	v, err := ps.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ps *PetSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ps.fields) > 1 {
-		return nil, errors.New("ent: PetSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ps.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ps *PetSelect) IntsX(ctx context.Context) []int {
-	v, err := ps.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ps *PetSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ps.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{pet.Label}
-	default:
-		err = fmt.Errorf("ent: PetSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ps *PetSelect) IntX(ctx context.Context) int {
-	v, err := ps.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ps *PetSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ps.fields) > 1 {
-		return nil, errors.New("ent: PetSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ps.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ps *PetSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ps.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ps *PetSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ps.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{pet.Label}
-	default:
-		err = fmt.Errorf("ent: PetSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ps *PetSelect) Float64X(ctx context.Context) float64 {
-	v, err := ps.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ps *PetSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ps.fields) > 1 {
-		return nil, errors.New("ent: PetSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ps.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ps *PetSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ps.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ps *PetSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ps.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{pet.Label}
-	default:
-		err = fmt.Errorf("ent: PetSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ps *PetSelect) BoolX(ctx context.Context) bool {
-	v, err := ps.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ps *PetSelect) sqlScan(ctx context.Context, v interface{}) error {

@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -307,15 +306,17 @@ func (tq *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
 //		Scan(ctx, &v)
 //
 func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
-	group := &TokenGroupBy{config: tq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &TokenGroupBy{config: tq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return tq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = token.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -333,7 +334,10 @@ func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
 //
 func (tq *TokenQuery) Select(fields ...string) *TokenSelect {
 	tq.fields = append(tq.fields, fields...)
-	return &TokenSelect{TokenQuery: tq}
+	selbuild := &TokenSelect{TokenQuery: tq}
+	selbuild.label = token.Label
+	selbuild.flds, selbuild.scan = &tq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (tq *TokenQuery) prepareQuery(ctx context.Context) error {
@@ -519,6 +523,7 @@ func (tq *TokenQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // TokenGroupBy is the group-by builder for Token entities.
 type TokenGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -540,209 +545,6 @@ func (tgb *TokenGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	tgb.sql = query
 	return tgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (tgb *TokenGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := tgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TokenGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TokenGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (tgb *TokenGroupBy) StringsX(ctx context.Context) []string {
-	v, err := tgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TokenGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = tgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{token.Label}
-	default:
-		err = fmt.Errorf("ent: TokenGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (tgb *TokenGroupBy) StringX(ctx context.Context) string {
-	v, err := tgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TokenGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TokenGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (tgb *TokenGroupBy) IntsX(ctx context.Context) []int {
-	v, err := tgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TokenGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = tgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{token.Label}
-	default:
-		err = fmt.Errorf("ent: TokenGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (tgb *TokenGroupBy) IntX(ctx context.Context) int {
-	v, err := tgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TokenGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TokenGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (tgb *TokenGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := tgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TokenGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = tgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{token.Label}
-	default:
-		err = fmt.Errorf("ent: TokenGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (tgb *TokenGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := tgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TokenGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TokenGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (tgb *TokenGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := tgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TokenGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = tgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{token.Label}
-	default:
-		err = fmt.Errorf("ent: TokenGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (tgb *TokenGroupBy) BoolX(ctx context.Context) bool {
-	v, err := tgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (tgb *TokenGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -786,6 +588,7 @@ func (tgb *TokenGroupBy) sqlQuery() *sql.Selector {
 // TokenSelect is the builder for selecting fields of Token entities.
 type TokenSelect struct {
 	*TokenQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -797,201 +600,6 @@ func (ts *TokenSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ts.sql = ts.TokenQuery.sqlQuery(ctx)
 	return ts.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ts *TokenSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ts.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ts *TokenSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TokenSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ts *TokenSelect) StringsX(ctx context.Context) []string {
-	v, err := ts.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ts *TokenSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ts.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{token.Label}
-	default:
-		err = fmt.Errorf("ent: TokenSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ts *TokenSelect) StringX(ctx context.Context) string {
-	v, err := ts.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ts *TokenSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TokenSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ts *TokenSelect) IntsX(ctx context.Context) []int {
-	v, err := ts.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ts *TokenSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ts.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{token.Label}
-	default:
-		err = fmt.Errorf("ent: TokenSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ts *TokenSelect) IntX(ctx context.Context) int {
-	v, err := ts.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ts *TokenSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TokenSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ts *TokenSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ts.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ts *TokenSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ts.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{token.Label}
-	default:
-		err = fmt.Errorf("ent: TokenSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ts *TokenSelect) Float64X(ctx context.Context) float64 {
-	v, err := ts.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ts *TokenSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TokenSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ts *TokenSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ts.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ts *TokenSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ts.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{token.Label}
-	default:
-		err = fmt.Errorf("ent: TokenSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ts *TokenSelect) BoolX(ctx context.Context) bool {
-	v, err := ts.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ts *TokenSelect) sqlScan(ctx context.Context, v interface{}) error {

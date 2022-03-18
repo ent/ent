@@ -8,8 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -284,22 +282,27 @@ func (sq *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
-	group := &SpecGroupBy{config: sq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+	grbuild := &SpecGroupBy{config: sq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return sq.gremlinQuery(ctx), nil
 	}
-	return group
+	grbuild.label = spec.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
 	sq.fields = append(sq.fields, fields...)
-	return &SpecSelect{SpecQuery: sq}
+	selbuild := &SpecSelect{SpecQuery: sq}
+	selbuild.label = spec.Label
+	selbuild.flds, selbuild.scan = &sq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
@@ -386,6 +389,7 @@ func (sq *SpecQuery) gremlinQuery(context.Context) *dsl.Traversal {
 // SpecGroupBy is the group-by builder for Spec entities.
 type SpecGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -407,209 +411,6 @@ func (sgb *SpecGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	sgb.gremlin = query
 	return sgb.gremlinScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (sgb *SpecGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := sgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SpecGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(sgb.fields) > 1 {
-		return nil, errors.New("ent: SpecGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := sgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (sgb *SpecGroupBy) StringsX(ctx context.Context) []string {
-	v, err := sgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SpecGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = sgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{spec.Label}
-	default:
-		err = fmt.Errorf("ent: SpecGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (sgb *SpecGroupBy) StringX(ctx context.Context) string {
-	v, err := sgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SpecGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(sgb.fields) > 1 {
-		return nil, errors.New("ent: SpecGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := sgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (sgb *SpecGroupBy) IntsX(ctx context.Context) []int {
-	v, err := sgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SpecGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = sgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{spec.Label}
-	default:
-		err = fmt.Errorf("ent: SpecGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (sgb *SpecGroupBy) IntX(ctx context.Context) int {
-	v, err := sgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SpecGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(sgb.fields) > 1 {
-		return nil, errors.New("ent: SpecGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := sgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (sgb *SpecGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := sgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SpecGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = sgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{spec.Label}
-	default:
-		err = fmt.Errorf("ent: SpecGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (sgb *SpecGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := sgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SpecGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(sgb.fields) > 1 {
-		return nil, errors.New("ent: SpecGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := sgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (sgb *SpecGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := sgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SpecGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = sgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{spec.Label}
-	default:
-		err = fmt.Errorf("ent: SpecGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (sgb *SpecGroupBy) BoolX(ctx context.Context) bool {
-	v, err := sgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (sgb *SpecGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
@@ -652,6 +453,7 @@ func (sgb *SpecGroupBy) gremlinQuery() *dsl.Traversal {
 // SpecSelect is the builder for selecting fields of Spec entities.
 type SpecSelect struct {
 	*SpecQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 }
@@ -663,201 +465,6 @@ func (ss *SpecSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ss.gremlin = ss.SpecQuery.gremlinQuery(ctx)
 	return ss.gremlinScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ss *SpecSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ss.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ss *SpecSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ss.fields) > 1 {
-		return nil, errors.New("ent: SpecSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ss.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ss *SpecSelect) StringsX(ctx context.Context) []string {
-	v, err := ss.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ss *SpecSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ss.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{spec.Label}
-	default:
-		err = fmt.Errorf("ent: SpecSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ss *SpecSelect) StringX(ctx context.Context) string {
-	v, err := ss.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ss *SpecSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ss.fields) > 1 {
-		return nil, errors.New("ent: SpecSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ss.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ss *SpecSelect) IntsX(ctx context.Context) []int {
-	v, err := ss.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ss *SpecSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ss.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{spec.Label}
-	default:
-		err = fmt.Errorf("ent: SpecSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ss *SpecSelect) IntX(ctx context.Context) int {
-	v, err := ss.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ss *SpecSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ss.fields) > 1 {
-		return nil, errors.New("ent: SpecSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ss.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ss *SpecSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ss.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ss *SpecSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ss.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{spec.Label}
-	default:
-		err = fmt.Errorf("ent: SpecSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ss *SpecSelect) Float64X(ctx context.Context) float64 {
-	v, err := ss.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ss *SpecSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ss.fields) > 1 {
-		return nil, errors.New("ent: SpecSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ss.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ss *SpecSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ss.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ss *SpecSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ss.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{spec.Label}
-	default:
-		err = fmt.Errorf("ent: SpecSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ss *SpecSelect) BoolX(ctx context.Context) bool {
-	v, err := ss.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ss *SpecSelect) gremlinScan(ctx context.Context, v interface{}) error {

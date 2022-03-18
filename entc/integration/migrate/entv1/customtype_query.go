@@ -8,7 +8,6 @@ package entv1
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -268,15 +267,17 @@ func (ctq *CustomTypeQuery) Clone() *CustomTypeQuery {
 //		Scan(ctx, &v)
 //
 func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeGroupBy {
-	group := &CustomTypeGroupBy{config: ctq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &CustomTypeGroupBy{config: ctq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := ctq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return ctq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = customtype.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -294,7 +295,10 @@ func (ctq *CustomTypeQuery) GroupBy(field string, fields ...string) *CustomTypeG
 //
 func (ctq *CustomTypeQuery) Select(fields ...string) *CustomTypeSelect {
 	ctq.fields = append(ctq.fields, fields...)
-	return &CustomTypeSelect{CustomTypeQuery: ctq}
+	selbuild := &CustomTypeSelect{CustomTypeQuery: ctq}
+	selbuild.label = customtype.Label
+	selbuild.flds, selbuild.scan = &ctq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (ctq *CustomTypeQuery) prepareQuery(ctx context.Context) error {
@@ -439,6 +443,7 @@ func (ctq *CustomTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // CustomTypeGroupBy is the group-by builder for CustomType entities.
 type CustomTypeGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -460,209 +465,6 @@ func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	ctgb.sql = query
 	return ctgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := ctgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ctgb *CustomTypeGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(ctgb.fields) > 1 {
-		return nil, errors.New("entv1: CustomTypeGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := ctgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) StringsX(ctx context.Context) []string {
-	v, err := ctgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ctgb *CustomTypeGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ctgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{customtype.Label}
-	default:
-		err = fmt.Errorf("entv1: CustomTypeGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) StringX(ctx context.Context) string {
-	v, err := ctgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ctgb *CustomTypeGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(ctgb.fields) > 1 {
-		return nil, errors.New("entv1: CustomTypeGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := ctgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) IntsX(ctx context.Context) []int {
-	v, err := ctgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ctgb *CustomTypeGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ctgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{customtype.Label}
-	default:
-		err = fmt.Errorf("entv1: CustomTypeGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) IntX(ctx context.Context) int {
-	v, err := ctgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ctgb *CustomTypeGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ctgb.fields) > 1 {
-		return nil, errors.New("entv1: CustomTypeGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := ctgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := ctgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ctgb *CustomTypeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ctgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{customtype.Label}
-	default:
-		err = fmt.Errorf("entv1: CustomTypeGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := ctgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ctgb *CustomTypeGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(ctgb.fields) > 1 {
-		return nil, errors.New("entv1: CustomTypeGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := ctgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := ctgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ctgb *CustomTypeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ctgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{customtype.Label}
-	default:
-		err = fmt.Errorf("entv1: CustomTypeGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ctgb *CustomTypeGroupBy) BoolX(ctx context.Context) bool {
-	v, err := ctgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -706,6 +508,7 @@ func (ctgb *CustomTypeGroupBy) sqlQuery() *sql.Selector {
 // CustomTypeSelect is the builder for selecting fields of CustomType entities.
 type CustomTypeSelect struct {
 	*CustomTypeQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -717,201 +520,6 @@ func (cts *CustomTypeSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	cts.sql = cts.CustomTypeQuery.sqlQuery(ctx)
 	return cts.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cts *CustomTypeSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := cts.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (cts *CustomTypeSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(cts.fields) > 1 {
-		return nil, errors.New("entv1: CustomTypeSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := cts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cts *CustomTypeSelect) StringsX(ctx context.Context) []string {
-	v, err := cts.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (cts *CustomTypeSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cts.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{customtype.Label}
-	default:
-		err = fmt.Errorf("entv1: CustomTypeSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cts *CustomTypeSelect) StringX(ctx context.Context) string {
-	v, err := cts.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (cts *CustomTypeSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(cts.fields) > 1 {
-		return nil, errors.New("entv1: CustomTypeSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := cts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cts *CustomTypeSelect) IntsX(ctx context.Context) []int {
-	v, err := cts.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (cts *CustomTypeSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cts.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{customtype.Label}
-	default:
-		err = fmt.Errorf("entv1: CustomTypeSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cts *CustomTypeSelect) IntX(ctx context.Context) int {
-	v, err := cts.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (cts *CustomTypeSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cts.fields) > 1 {
-		return nil, errors.New("entv1: CustomTypeSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := cts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cts *CustomTypeSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := cts.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (cts *CustomTypeSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cts.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{customtype.Label}
-	default:
-		err = fmt.Errorf("entv1: CustomTypeSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cts *CustomTypeSelect) Float64X(ctx context.Context) float64 {
-	v, err := cts.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (cts *CustomTypeSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(cts.fields) > 1 {
-		return nil, errors.New("entv1: CustomTypeSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := cts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cts *CustomTypeSelect) BoolsX(ctx context.Context) []bool {
-	v, err := cts.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (cts *CustomTypeSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cts.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{customtype.Label}
-	default:
-		err = fmt.Errorf("entv1: CustomTypeSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cts *CustomTypeSelect) BoolX(ctx context.Context) bool {
-	v, err := cts.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cts *CustomTypeSelect) sqlScan(ctx context.Context, v interface{}) error {
