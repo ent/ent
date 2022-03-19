@@ -174,3 +174,40 @@ versioned migration, you need to take some extra steps.
    In case of `golang-migrate` this can be done by forcing your database version as
    described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
 
+## Use a custom formatter
+
+It is possible to use another tool for migration management instead of `golang-migrate/migrate`. For example, you can define and use the following formatter to use [pressly/goose](https://github.com/pressly/goose).
+
+```go
+var (
+	templateFuncs = template.FuncMap{
+		"now": time.Now,
+		"sem": ensureSemicolonSuffix,
+		"rev": reverse,
+	}
+	// gooseFormatter is an implementation for compatible formatter with goose.
+	// https://github.com/pressly/goose/blob/205faf5cd314dcc76f2687bac7cfe0534a4bd5a9/create.go#L90-L99
+	gooseFormatter, _ = migrate.NewTemplateFormatter(
+		template.Must(
+			template.New("").
+				Funcs(templateFuncs).
+				Parse(`{{now.Format "20060102150405"}}_{{.Name}}.sql`),
+		),
+		template.Must(template.New("").Funcs(templateFuncs).Parse(`-- +goose Up
+-- +goose StatementBegin
+{{ range .Changes }}{{ println (sem .Cmd) }}{{ end -}}
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+{{ range rev .Changes }}{{ with .Reverse }}{{ println (sem .) }}{{ end }}{{ end -}}
+-- +goose StatementEnd`)),
+	)
+)
+```
+
+This formatter replaces `migrate.DefaultFormatter` to output migration files compatible with `goose`.
+
+```go
+migrate.DefaultFormatter = gooseFormatter
+```
