@@ -29,7 +29,7 @@ go mod init <project>
 ## Installation
 
 ```console
-go get -d entgo.io/ent/cmd/ent
+go install entgo.io/ent/cmd/ent@latest
 ```
 
 After installing `ent` codegen tool, you should have it in your `PATH`.
