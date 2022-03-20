@@ -331,7 +331,7 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
+func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, error) {
 	var (
 		nodes       = []*Pet{}
 		withFKs     = pq.withFKs
@@ -347,17 +347,16 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Pet{config: pq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Pet).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("entv2: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Pet{config: pq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err

@@ -317,22 +317,21 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
+func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
 	var (
 		nodes = []*User{}
 		_spec = uq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &User{config: uq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*User).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &User{config: uq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, uq.driver, _spec); err != nil {
 		return nil, err

@@ -320,7 +320,7 @@ func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
+func (ftq *FieldTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*FieldType, error) {
 	var (
 		nodes   = []*FieldType{}
 		withFKs = ftq.withFKs
@@ -330,19 +330,18 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context) ([]*FieldType, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &FieldType{config: ftq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*FieldType).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &FieldType{config: ftq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	if len(ftq.modifiers) > 0 {
 		_spec.Modifiers = ftq.modifiers
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, ftq.driver, _spec); err != nil {
 		return nil, err

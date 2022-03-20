@@ -389,7 +389,7 @@ func (fq *FileQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
+func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, error) {
 	var (
 		nodes       = []*File{}
 		_spec       = fq.querySpec()
@@ -399,17 +399,16 @@ func (fq *FileQuery) sqlAll(ctx context.Context) ([]*File, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &File{config: fq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*File).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &File{config: fq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, fq.driver, _spec); err != nil {
 		return nil, err

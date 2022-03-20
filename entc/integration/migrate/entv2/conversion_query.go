@@ -317,22 +317,21 @@ func (cq *ConversionQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (cq *ConversionQuery) sqlAll(ctx context.Context) ([]*Conversion, error) {
+func (cq *ConversionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Conversion, error) {
 	var (
 		nodes = []*Conversion{}
 		_spec = cq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Conversion{config: cq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Conversion).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("entv2: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Conversion{config: cq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err

@@ -317,22 +317,21 @@ func (mq *MediaQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (mq *MediaQuery) sqlAll(ctx context.Context) ([]*Media, error) {
+func (mq *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media, error) {
 	var (
 		nodes = []*Media{}
 		_spec = mq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Media{config: mq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Media).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("entv2: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Media{config: mq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, mq.driver, _spec); err != nil {
 		return nil, err

@@ -355,7 +355,7 @@ func (sq *StreetQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
+func (sq *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Street, error) {
 	var (
 		nodes       = []*Street{}
 		withFKs     = sq.withFKs
@@ -371,17 +371,16 @@ func (sq *StreetQuery) sqlAll(ctx context.Context) ([]*Street, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, street.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Street{config: sq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Street).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Street{config: sq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
 		return nil, err

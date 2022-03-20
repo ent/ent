@@ -295,25 +295,24 @@ func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (gq *GoodsQuery) sqlAll(ctx context.Context) ([]*Goods, error) {
+func (gq *GoodsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Goods, error) {
 	var (
 		nodes = []*Goods{}
 		_spec = gq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Goods{config: gq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Goods).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Goods{config: gq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	if len(gq.modifiers) > 0 {
 		_spec.Modifiers = gq.modifiers
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err

@@ -356,7 +356,7 @@ func (tq *TokenQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (tq *TokenQuery) sqlAll(ctx context.Context) ([]*Token, error) {
+func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token, error) {
 	var (
 		nodes       = []*Token{}
 		withFKs     = tq.withFKs
@@ -372,17 +372,16 @@ func (tq *TokenQuery) sqlAll(ctx context.Context) ([]*Token, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, token.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Token{config: tq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Token).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Token{config: tq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
 		return nil, err

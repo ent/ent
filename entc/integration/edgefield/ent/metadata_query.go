@@ -425,7 +425,7 @@ func (mq *MetadataQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (mq *MetadataQuery) sqlAll(ctx context.Context) ([]*Metadata, error) {
+func (mq *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Metadata, error) {
 	var (
 		nodes       = []*Metadata{}
 		_spec       = mq.querySpec()
@@ -436,17 +436,16 @@ func (mq *MetadataQuery) sqlAll(ctx context.Context) ([]*Metadata, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Metadata{config: mq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Metadata).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Metadata{config: mq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, mq.driver, _spec); err != nil {
 		return nil, err

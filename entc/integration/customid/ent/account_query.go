@@ -356,7 +356,7 @@ func (aq *AccountQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (aq *AccountQuery) sqlAll(ctx context.Context) ([]*Account, error) {
+func (aq *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Account, error) {
 	var (
 		nodes       = []*Account{}
 		_spec       = aq.querySpec()
@@ -365,17 +365,16 @@ func (aq *AccountQuery) sqlAll(ctx context.Context) ([]*Account, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Account{config: aq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Account).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Account{config: aq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, aq.driver, _spec); err != nil {
 		return nil, err

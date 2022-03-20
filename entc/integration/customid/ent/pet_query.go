@@ -438,7 +438,7 @@ func (pq *PetQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
+func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, error) {
 	var (
 		nodes       = []*Pet{}
 		withFKs     = pq.withFKs
@@ -457,17 +457,16 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Pet{config: pq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Pet).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Pet{config: pq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
 		return nil, err
@@ -535,66 +534,54 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 	}
 
 	if query := pq.withFriends; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[string]*Pet, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[string]*Pet)
+		nids := make(map[string]map[*Pet]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
 			node.Edges.Friends = []*Pet{}
 		}
-		var (
-			edgeids []string
-			edges   = make(map[string][]*Pet)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: false,
-				Table:   pet.FriendsTable,
-				Columns: pet.FriendsPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(pet.FriendsPrimaryKey[0], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(sql.NullString), new(sql.NullString)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullString)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(pet.FriendsTable)
+			s.Join(joinT).On(s.C(pet.FieldID), joinT.C(pet.FriendsPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(pet.FriendsPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(pet.FriendsPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
 				}
-				ein, ok := in.(*sql.NullString)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
+				return append([]interface{}{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Pet]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
 				}
-				outValue := eout.String
-				inValue := ein.String
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
+				nids[inValue][byid[outValue]] = struct{}{}
 				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, pq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "friends": %w`, err)
-		}
-		query.Where(pet.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			nodes, ok := nids[n.ID]
 			if !ok {
 				return nil, fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Friends = append(nodes[i].Edges.Friends, n)
+			for kn := range nodes {
+				kn.Edges.Friends = append(kn.Edges.Friends, n)
 			}
 		}
 	}

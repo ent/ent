@@ -354,7 +354,7 @@ func (iq *InfoQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (iq *InfoQuery) sqlAll(ctx context.Context) ([]*Info, error) {
+func (iq *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, error) {
 	var (
 		nodes       = []*Info{}
 		_spec       = iq.querySpec()
@@ -363,17 +363,16 @@ func (iq *InfoQuery) sqlAll(ctx context.Context) ([]*Info, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Info{config: iq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Info).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Info{config: iq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, iq.driver, _spec); err != nil {
 		return nil, err

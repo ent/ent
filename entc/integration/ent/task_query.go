@@ -320,25 +320,24 @@ func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (tq *TaskQuery) sqlAll(ctx context.Context) ([]*Task, error) {
+func (tq *TaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Task, error) {
 	var (
 		nodes = []*Task{}
 		_spec = tq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Task{config: tq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Task).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Task{config: tq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	if len(tq.modifiers) > 0 {
 		_spec.Modifiers = tq.modifiers
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
 		return nil, err

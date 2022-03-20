@@ -317,22 +317,21 @@ func (ctq *CustomTypeQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (ctq *CustomTypeQuery) sqlAll(ctx context.Context) ([]*CustomType, error) {
+func (ctq *CustomTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CustomType, error) {
 	var (
 		nodes = []*CustomType{}
 		_spec = ctq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &CustomType{config: ctq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*CustomType).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("entv1: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &CustomType{config: ctq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, ctq.driver, _spec); err != nil {
 		return nil, err
