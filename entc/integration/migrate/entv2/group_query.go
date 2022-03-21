@@ -293,22 +293,21 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
+func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group, error) {
 	var (
 		nodes = []*Group{}
 		_spec = gq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Group{config: gq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Group).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("entv2: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Group{config: gq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err

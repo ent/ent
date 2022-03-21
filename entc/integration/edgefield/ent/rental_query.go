@@ -391,7 +391,7 @@ func (rq *RentalQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (rq *RentalQuery) sqlAll(ctx context.Context) ([]*Rental, error) {
+func (rq *RentalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Rental, error) {
 	var (
 		nodes       = []*Rental{}
 		_spec       = rq.querySpec()
@@ -401,17 +401,16 @@ func (rq *RentalQuery) sqlAll(ctx context.Context) ([]*Rental, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Rental{config: rq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Rental).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Rental{config: rq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, rq.driver, _spec); err != nil {
 		return nil, err

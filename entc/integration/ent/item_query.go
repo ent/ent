@@ -319,25 +319,24 @@ func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
+func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, error) {
 	var (
 		nodes = []*Item{}
 		_spec = iq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Item{config: iq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Item).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Item{config: iq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	if len(iq.modifiers) > 0 {
 		_spec.Modifiers = iq.modifiers
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, iq.driver, _spec); err != nil {
 		return nil, err

@@ -1626,6 +1626,23 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		g1, g2 := users[0].Edges.Groups[0], users[0].Edges.Groups[1]
 		require.Equal(lab.Name, g1.Name)
 		require.Equal(hub.Name, g2.Name)
+
+		groups := client.Group.
+			Query().
+			WithUsers(func(q *ent.UserQuery) {
+				q.Order(ent.Asc(user.FieldName))
+			}).
+			Order(ent.Asc(group.FieldName)).
+			AllX(ctx)
+		require.Len(groups, 2)
+		g1, g2 = groups[0], groups[1]
+		require.Equal(hub.Name, g1.Name)
+		require.Equal(lab.Name, g2.Name)
+		require.Equal(a8m.Name, g1.Edges.Users[0].Name)
+		require.Equal(alex.Name, g1.Edges.Users[1].Name)
+		require.Equal(a8m.Name, g2.Edges.Users[0].Name)
+		require.Equal(nati.Name, g2.Edges.Users[1].Name)
+		require.Equal(g1.Edges.Users[0], g2.Edges.Users[0], "should share the same object")
 	})
 
 	t.Run("Graph", func(t *testing.T) {

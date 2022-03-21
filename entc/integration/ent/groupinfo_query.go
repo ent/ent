@@ -357,7 +357,7 @@ func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
+func (giq *GroupInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*GroupInfo, error) {
 	var (
 		nodes       = []*GroupInfo{}
 		_spec       = giq.querySpec()
@@ -366,20 +366,19 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context) ([]*GroupInfo, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &GroupInfo{config: giq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*GroupInfo).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &GroupInfo{config: giq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(giq.modifiers) > 0 {
 		_spec.Modifiers = giq.modifiers
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, giq.driver, _spec); err != nil {
 		return nil, err

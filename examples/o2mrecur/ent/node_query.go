@@ -390,7 +390,7 @@ func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
+func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, error) {
 	var (
 		nodes       = []*Node{}
 		withFKs     = nq.withFKs
@@ -407,17 +407,16 @@ func (nq *NodeQuery) sqlAll(ctx context.Context) ([]*Node, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, node.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Node{config: nq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Node).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Node{config: nq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, nq.driver, _spec); err != nil {
 		return nil, err

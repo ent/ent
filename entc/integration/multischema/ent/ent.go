@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
@@ -468,3 +469,6 @@ func (s *selector) BoolX(ctx context.Context) bool {
 	}
 	return v
 }
+
+// queryHook describes an internal hook for the different sqlAll methods.
+type queryHook func(context.Context, *sqlgraph.QuerySpec)
