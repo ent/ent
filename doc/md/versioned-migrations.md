@@ -174,7 +174,7 @@ versioned migration, you need to take some extra steps.
    In case of `golang-migrate` this can be done by forcing your database version as
    described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
 
-## Use a custom formatter
+## Use a Custom Formatter
 
 It is possible to use another tool for migration management instead of `golang-migrate/migrate`. For example, you can define and use the following formatter to use [pressly/goose](https://github.com/pressly/goose).
 
