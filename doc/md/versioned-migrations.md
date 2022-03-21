@@ -176,7 +176,7 @@ versioned migration, you need to take some extra steps.
 
 ## Use a Custom Formatter
 
-It is possible to use another tool for migration management instead of `golang-migrate/migrate`. For example, you can define and use the following formatter to use [pressly/goose](https://github.com/pressly/goose).
+Atlas' migration engine comes with great customizability. By the use of a custom `Formatter` you can generate the migration files in a format compatible with another tool for migration management: [pressly/goose](https://github.com/pressly/goose).
 
 ```go
 var (
