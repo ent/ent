@@ -179,14 +179,30 @@ versioned migration, you need to take some extra steps.
 Atlas' migration engine comes with great customizability. By the use of a custom `Formatter` you can generate the migration files in a format compatible with another tool for migration management: [pressly/goose](https://github.com/pressly/goose).
 
 ```go
+package main
+
+import (
+    "context"
+    "log"
+	"strings"
+	"text/template"
+	"time"
+
+    "ariga.io/atlas/sql/migrate"
+    "entgo.io/ent/dialect/sql"
+    "entgo.io/ent/dialect/sql/schema"
+    "entgo.io/ent/entc"
+    "entgo.io/ent/entc/gen"
+)
+
 var (
 	templateFuncs = template.FuncMap{
 		"now": time.Now,
 		"sem": ensureSemicolonSuffix,
 		"rev": reverse,
 	}
+    // highlight-start
 	// gooseFormatter is an implementation for compatible formatter with goose.
-	// https://github.com/pressly/goose/blob/205faf5cd314dcc76f2687bac7cfe0534a4bd5a9/create.go#L90-L99
 	gooseFormatter, _ = migrate.NewTemplateFormatter(
 		template.Must(
 			template.New("").
@@ -203,11 +219,66 @@ var (
 {{ range rev .Changes }}{{ with .Reverse }}{{ println (sem .) }}{{ end }}{{ end -}}
 -- +goose StatementEnd`)),
 	)
+    // highlight-end
 )
-```
 
-This formatter replaces `migrate.DefaultFormatter` to output migration files compatible with `goose`.
+func reverse(changes []*migrate.Change) []*migrate.Change {
+	n := len(changes)
+	rev := make([]*migrate.Change, n)
+	if n%2 == 1 {
+		rev[n/2] = changes[n/2]
+	}
+	for i, j := 0, n-1; i < j; i, j = i+1, j-1 {
+		rev[i], rev[j] = changes[j], changes[i]
+	}
+	return rev
+}
 
-```go
-migrate.DefaultFormatter = gooseFormatter
+func ensureSemicolonSuffix(s string) string {
+	if !strings.HasSuffix(s, ";") {
+		return s + ";"
+	}
+	return s
+}
+
+func init() {
+    // highlight-start
+    // Replace the formatter to output migration files compatible with `goose`.
+    migrate.DefaultFormatter = gooseFormatter
+    // highlight-end
+}
+
+func main() {
+    // Load the graph.
+    graph, err := entc.LoadGraph("/.schema", &gen.Config{})
+    if err != nil {
+        log.Fatalln(err)
+    }
+    tbls, err := graph.Tables()
+    if err != nil {
+        log.Fatalln(err)
+    }
+    // Create a local migration directory.
+    d, err := migrate.NewLocalDir("migrations")
+    if err != nil {
+        log.Fatalln(err)
+    }
+    // Open connection to the database.
+    dlct, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalln(err)
+    }
+    // Inspect it and compare it with the graph.
+    m, err := schema.NewMigrate(dlct, schema.WithDir(d))
+    if err != nil {
+        log.Fatalln(err)
+    }
+    if err := m.Diff(context.Background(), tbls...); err != nil {
+        log.Fatalln(err)
+    }
+    // You can use the following method to give the migration files a name.
+    // if err := m.NamedDiff(context.Background(), "migration_name", tbls...); err != nil {
+    //     log.Fatalln(err)
+    // }
+}
 ```
