@@ -214,7 +214,6 @@ go run entgo.io/ent/cmd/ent init Car Group
 And then we add the rest of the fields manually:
 
 ```go title="<project>/ent/schema/car.go"
-
 // Fields of the Car.
 func (Car) Fields() []ent.Field {
 	return []ent.Field{
@@ -225,7 +224,6 @@ func (Car) Fields() []ent.Field {
 ```
 
 ```go title="<project>/ent/schema/group.go"
-
 // Fields of the Group.
 func (Group) Fields() []ent.Field {
 	return []ent.Field{
@@ -304,7 +302,6 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 But what about querying the `cars` edge (relation)? Here's how we do it:
 
 ```go title="<project>/start/start.go"
-
 import (
 	"log"
 
@@ -345,7 +342,6 @@ Let's add an inverse edge named `owner` to the `Car` schema, reference it to the
 in the `User` schema, and run `go generate ./ent`.
 
 ```go title="<project>/ent/schema/car.go"
-
 // Edges of the Car.
 func (Car) Edges() []ent.Edge {
 	return []ent.Edge{
@@ -363,7 +359,6 @@ func (Car) Edges() []ent.Edge {
 We'll continue the user/cars example above by querying the inverse edge.
 
 ```go title="<project>/start/start.go"
-
 import (
 	"fmt"
 	"log"
@@ -378,12 +373,12 @@ func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 		return fmt.Errorf("failed querying user cars: %w", err)
 	}
 	// Query the inverse edge.
-	for _, ca := range cars {
-		owner, err := ca.QueryOwner().Only(ctx)
+	for _, c := range cars {
+		owner, err := c.QueryOwner().Only(ctx)
 		if err != nil {
-			return fmt.Errorf("failed querying car %q owner: %w", ca.Model, err)
+			return fmt.Errorf("failed querying car %q owner: %w", c.Model, err)
 		}
-		log.Printf("car %q owner: %q\n", ca.Model, owner.Name)
+		log.Printf("car %q owner: %q\n", c.Model, owner.Name)
 	}
 	return nil
 }
@@ -401,7 +396,6 @@ of the `users` edge (relation), and the `User` entity has a back-reference/inver
 relationship named `groups`. Let's define this relationship in our schemas:
 
 ```go title="<project>/ent/schema/group.go"
-
 // Edges of the Group.
 func (Group) Edges() []ent.Edge {
    return []ent.Edge{
@@ -411,7 +405,6 @@ func (Group) Edges() []ent.Edge {
 ```
 
 ```go title="<project>/ent/schema/user.go"
-
 // Edges of the User.
 func (User) Edges() []ent.Edge {
    return []ent.Edge{
@@ -439,7 +432,6 @@ entities and relations). Let's create the following graph using the framework:
 
 
 ```go title="<project>/start/start.go"
-
 func CreateGraph(ctx context.Context, client *ent.Client) error {
 	// First, create the users.
 	a8m, err := client.User.
@@ -458,12 +450,13 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	// Then, create the cars, and attach them to the users in the creation.
+	// Then, create the cars, and attach them to the users created above.
 	err = client.Car.
 		Create().
 		SetModel("Tesla").
-		SetRegisteredAt(time.Now()). // ignore the time in the graph.
-		SetOwner(a8m).               // attach this graph to Ariel.
+		SetRegisteredAt(time.Now()).
+		// Attach this car to Ariel.
+		SetOwner(a8m).
 		Exec(ctx)
 	if err != nil {
 		return err
@@ -471,8 +464,9 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	err = client.Car.
 		Create().
 		SetModel("Mazda").
-		SetRegisteredAt(time.Now()). // ignore the time in the graph.
-		SetOwner(a8m).               // attach this graph to Ariel.
+		SetRegisteredAt(time.Now()).
+		// Attach this car to Ariel.
+		SetOwner(a8m).
 		Exec(ctx)
 	if err != nil {
 		return err
@@ -480,8 +474,9 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	err = client.Car.
 		Create().
 		SetModel("Ford").
-		SetRegisteredAt(time.Now()). // ignore the time in the graph.
-		SetOwner(neta).              // attach this graph to Neta.
+		SetRegisteredAt(time.Now()).
+		// Attach this graph to Neta.
+		SetOwner(neta).
 		Exec(ctx)
 	if err != nil {
 		return err
@@ -513,7 +508,6 @@ Now when we have a graph with data, we can run a few queries on it:
 1. Get all user's cars within the group named "GitHub":
 
 	```go title="<project>/start/start.go"
- 
 	import (
 		"log"
 		
@@ -540,7 +534,6 @@ Now when we have a graph with data, we can run a few queries on it:
 2. Change the query above, so that the source of the traversal is the user *Ariel*:
    
 	```go title="<project>/start/start.go"
- 
 	import (
 		"log"
 		
@@ -579,7 +572,6 @@ Now when we have a graph with data, we can run a few queries on it:
 3. Get all groups that have users (query with a look-aside predicate):
 
 	```go title="<project>/start/start.go"
-
 	import (
 		"log"
 		
