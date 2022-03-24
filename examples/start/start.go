@@ -25,7 +25,7 @@ func main() {
 	}
 	defer client.Close()
 	ctx := context.Background()
-	// run the auto migration tool.
+	// Run the auto migration tool.
 	if err := client.Schema.Create(ctx); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
@@ -87,7 +87,7 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 }
 
 func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
-	// creating new car with model "Tesla".
+	// Create a new car with model "Tesla".
 	tesla, err := client.Car.
 		Create().
 		SetModel("Tesla").
@@ -97,7 +97,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 		return nil, fmt.Errorf("failed creating car: %w", err)
 	}
 
-	// creating new car with model "Ford".
+	// Create a new car with model "Ford".
 	ford, err := client.Car.
 		Create().
 		SetModel("Ford").
@@ -108,7 +108,7 @@ func CreateCars(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	}
 	log.Println("car was created: ", ford)
 
-	// create a new user, and add it the 2 cars.
+	// Create a new user, and add it the 2 cars.
 	a8m, err := client.User.
 		Create().
 		SetAge(30).
@@ -129,7 +129,7 @@ func QueryCars(ctx context.Context, a8m *ent.User) error {
 	}
 	log.Println("returned cars:", cars)
 
-	// what about filtering specific cars.
+	// What about filtering specific cars.
 	ford, err := a8m.QueryCars().
 		Where(car.ModelEQ("Ford")).
 		Only(ctx)
@@ -146,13 +146,13 @@ func QueryCarUsers(ctx context.Context, a8m *ent.User) error {
 		return fmt.Errorf("failed querying user cars: %w", err)
 	}
 
-	// query the inverse edge.
-	for _, ca := range cars {
-		owner, err := ca.QueryOwner().Only(ctx)
+	// Query the inverse edge.
+	for _, c := range cars {
+		owner, err := c.QueryOwner().Only(ctx)
 		if err != nil {
-			return fmt.Errorf("failed querying car %q owner: %w", ca.Model, err)
+			return fmt.Errorf("failed querying car %q owner: %w", c.Model, err)
 		}
-		log.Printf("car %q owner: %q\n", ca.Model, owner.Name)
+		log.Printf("car %q owner: %q\n", c.Model, owner.Name)
 	}
 	return nil
 }
@@ -175,12 +175,13 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	if err != nil {
 		return err
 	}
-	// Then, create the cars, and attach them to the users in the creation.
+	// Then, create the cars, and attach them to the users created above.
 	err = client.Car.
 		Create().
 		SetModel("Tesla").
-		SetRegisteredAt(time.Now()). // ignore the time in the graph.
-		SetOwner(a8m).               // attach this graph to Ariel.
+		SetRegisteredAt(time.Now()).
+		// Attach this car to Ariel.
+		SetOwner(a8m).
 		Exec(ctx)
 	if err != nil {
 		return err
@@ -188,8 +189,9 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	err = client.Car.
 		Create().
 		SetModel("Mazda").
-		SetRegisteredAt(time.Now()). // ignore the time in the graph.
-		SetOwner(a8m).               // attach this graph to Ariel.
+		SetRegisteredAt(time.Now()).
+		// Attach this car to Ariel.
+		SetOwner(a8m).
 		Exec(ctx)
 	if err != nil {
 		return err
@@ -197,8 +199,9 @@ func CreateGraph(ctx context.Context, client *ent.Client) error {
 	err = client.Car.
 		Create().
 		SetModel("Ford").
-		SetRegisteredAt(time.Now()). // ignore the time in the graph.
-		SetOwner(neta).              // attach this graph to Neta.
+		SetRegisteredAt(time.Now()).
+		// Attach this cat to Neta.
+		SetOwner(neta).
 		Exec(ctx)
 	if err != nil {
 		return err

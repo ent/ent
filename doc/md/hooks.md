@@ -82,7 +82,7 @@ func main() {
 	})
     client.User.Create().SetName("a8m").SaveX(ctx)
     // Output:
-    // 2020/03/21 10:59:10 Op=Create	Type=Card	Time=46.23µs	ConcreteType=*ent.UserMutation
+    // 2020/03/21 10:59:10 Op=Create	Type=User	Time=46.23µs	ConcreteType=*ent.UserMutation
 }
 ```
 
