@@ -490,7 +490,7 @@ func (m *Migrate) aColumns(b atBuilder, t1 *Table, t2 *schema.Table) error {
 			}
 			c2.SetDefault(&schema.RawExpr{X: x})
 		}
-		if c1.Unique {
+		if c1.Unique && (len(t1.PrimaryKey) != 1 || t1.PrimaryKey[0] != c1) {
 			b.atUniqueC(t1, c1, t2, c2)
 		}
 		if c1.Increment {
