@@ -36,12 +36,12 @@ For a quick "Hello World" application with Ent+TiDB, follow these steps:
  In this example repository we defined a simple schema `User`:
  ```go title="ent/schema/user.go"
  func (User) Fields() []ent.Field {
- 	  return []ent.Field{
-  		field.Time("created_at").
-	  		Default(time.Now),
-		  field.String("name"),
-		  field.Int("age"),
-	  }
+ 	return []ent.Field{
+ 		field.Time("created_at").
+ 			Default(time.Now),
+ 		field.String("name"),
+ 		field.Int("age"),
+ 	}
  }
  ```
  Then, we connected Ent with TiDB:
