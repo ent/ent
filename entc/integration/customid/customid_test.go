@@ -13,7 +13,6 @@ import (
 	"testing"
 
 	"entgo.io/ent/dialect"
-
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/customid/ent"
@@ -25,6 +24,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/schema/field"
 
+	atlas "ariga.io/atlas/sql/schema"
 	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
@@ -74,7 +74,7 @@ func TestPostgres(t *testing.T) {
 			defer db.Exec("DROP SCHEMA custom_id CASCADE")
 
 			client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, db)))
-			err = client.Schema.Create(context.Background(), schema.WithAtlas(true))
+			err = client.Schema.Create(context.Background(), schema.WithAtlas(true), schema.WithDiffHook(expectOnePetsIndex))
 			require.NoError(t, err)
 			CustomID(t, client)
 			BytesID(t, client)
@@ -261,5 +261,22 @@ func skipBytesID(c schema.Creator) schema.Creator {
 			t = append(t, tables[i])
 		}
 		return c.Create(ctx, t...)
+	})
+}
+
+// expectOnePetsIndex expects that pets table contains only one index.
+func expectOnePetsIndex(next schema.Differ) schema.Differ {
+	return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+		changes, err := next.Diff(current, desired)
+		for _, c := range changes {
+			addT, ok := c.(*atlas.AddTable)
+			if !ok || addT.T.Name != pet.Table {
+				continue
+			}
+			if n := len(addT.T.Indexes); n != 1 {
+				return nil, fmt.Errorf("expect only one index, but got: %d", n)
+			}
+		}
+		return changes, err
 	})
 }
