@@ -241,13 +241,6 @@ func ensureSemicolonSuffix(s string) string {
 	return s
 }
 
-func init() {
-    // highlight-start
-    // Replace the formatter to output migration files compatible with `goose`.
-    migrate.DefaultFormatter = gooseFormatter
-    // highlight-end
-}
-
 func main() {
     // Load the graph.
     graph, err := entc.LoadGraph("/.schema", &gen.Config{})
