@@ -174,3 +174,102 @@ versioned migration, you need to take some extra steps.
    In case of `golang-migrate` this can be done by forcing your database version as
    described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
 
+## Use a Custom Formatter
+
+Atlas' migration engine comes with great customizability. By the use of a custom `Formatter` you can generate the migration files in a format compatible with another tool for migration management: [pressly/goose](https://github.com/pressly/goose).
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+	"strings"
+	"text/template"
+	"time"
+
+    "ariga.io/atlas/sql/migrate"
+    "entgo.io/ent/dialect/sql"
+    "entgo.io/ent/dialect/sql/schema"
+    "entgo.io/ent/entc"
+    "entgo.io/ent/entc/gen"
+)
+
+var (
+	templateFuncs = template.FuncMap{
+		"now": time.Now,
+		"sem": ensureSemicolonSuffix,
+		"rev": reverse,
+	}
+    // highlight-start
+	// gooseFormatter is an implementation for compatible formatter with goose.
+	gooseFormatter, _ = migrate.NewTemplateFormatter(
+		template.Must(
+			template.New("").
+				Funcs(templateFuncs).
+				Parse(`{{now.Format "20060102150405"}}_{{.Name}}.sql`),
+		),
+		template.Must(template.New("").Funcs(templateFuncs).Parse(`-- +goose Up
+-- +goose StatementBegin
+{{ range .Changes }}{{ println (sem .Cmd) }}{{ end -}}
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+{{ range rev .Changes }}{{ with .Reverse }}{{ println (sem .) }}{{ end }}{{ end -}}
+-- +goose StatementEnd`)),
+	)
+    // highlight-end
+)
+
+func reverse(changes []*migrate.Change) []*migrate.Change {
+	n := len(changes)
+	rev := make([]*migrate.Change, n)
+	if n%2 == 1 {
+		rev[n/2] = changes[n/2]
+	}
+	for i, j := 0, n-1; i < j; i, j = i+1, j-1 {
+		rev[i], rev[j] = changes[j], changes[i]
+	}
+	return rev
+}
+
+func ensureSemicolonSuffix(s string) string {
+	if !strings.HasSuffix(s, ";") {
+		return s + ";"
+	}
+	return s
+}
+
+func main() {
+    // Load the graph.
+    graph, err := entc.LoadGraph("/.schema", &gen.Config{})
+    if err != nil {
+        log.Fatalln(err)
+    }
+    tbls, err := graph.Tables()
+    if err != nil {
+        log.Fatalln(err)
+    }
+    // Create a local migration directory.
+    d, err := migrate.NewLocalDir("migrations")
+    if err != nil {
+        log.Fatalln(err)
+    }
+    // Open connection to the database.
+    dlct, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalln(err)
+    }
+    // Inspect it and compare it with the graph.
+    // highlight-start
+    m, err := schema.NewMigrate(dlct, schema.WithDir(d), schema.WithFormatter(gooseFormatter))
+    // highlight-end
+    if err != nil {
+        log.Fatalln(err)
+    }
+    if err := m.Diff(context.Background(), tbls...); err != nil {
+        log.Fatalln(err)
+    }
+}
+```
