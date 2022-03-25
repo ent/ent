@@ -269,7 +269,9 @@ func main() {
         log.Fatalln(err)
     }
     // Inspect it and compare it with the graph.
-    m, err := schema.NewMigrate(dlct, schema.WithDir(d))
+    // highlight-start
+    m, err := schema.NewMigrate(dlct, schema.WithDir(d), schema.WithFormatter(gooseFormatter))
+    // highlight-end
     if err != nil {
         log.Fatalln(err)
     }
