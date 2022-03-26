@@ -73,7 +73,7 @@ and for the node(s) API.
 Before we go over the example, we change the `ent.Client` to run in debug mode in the `Todos` resolver and restart
 our GraphQL server:
 
-```diff
+```diff title="todo.resolvers.go"
 func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder) (*ent.TodoConnection, error) {
 -	return r.client.Todo.Query().
 +	return r.client.Debug().Todo.Query().
@@ -123,7 +123,7 @@ SELECT DISTINCT `todos`.`id`, `todos`.`text`, `todos`.`created_at`, `todos`.`sta
 Let's see how Ent can automatically solve our problem. All we need to do is to add the following
 `entql` annotations to our edges:
 
-```diff
+```diff title="ent/schema/todo.go"
 func (Todo) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("parent", Todo.Type).
@@ -139,9 +139,9 @@ The `Bind()` annotation is now enabled by default, use `Unbind()` to opt-out.
 :::
 
 After adding these annotations, `entgql` will do the binding mentioned in the [section](#ent-solution) above. Additionally, it
-will also generate edge-resolvers for the nodes under the `edge.go` file:
+will also generate edge-resolvers for the nodes under the `gql_edge.go` file:
 
-```go
+```go title="ent/gql_edge.go"
 func (t *Todo) Children(ctx context.Context) ([]*Todo, error) {
 	result, err := t.Edges.ChildrenOrErr()
 	if IsNotLoaded(err) {

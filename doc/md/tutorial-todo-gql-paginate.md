@@ -54,7 +54,7 @@ Ordering can be defined on any comparable field of ent by annotating it with `en
 Note that the given `OrderField` name must match its enum value in GraphQL schema (see
 [next section](#define-ordering-types-in-graphql-schema) below).
 
-```go
+```go title="ent/schema/todo.go"
 func (Todo) Fields() []ent.Field {
     return []ent.Field{
 		field.Text("text").
@@ -91,7 +91,7 @@ func (Todo) Fields() []ent.Field {
 Next, we need to define the ordering types along with the [Relay Connection Types](https://relay.dev/graphql/connections.htm#sec-Connection-Types)
 in the GraphQL schema:
 
-```graphql
+```graphql title="todo.graphql"
 # Define a Relay Cursor type:
 # https://relay.dev/graphql/connections.htm#sec-Cursor
 scalar Cursor
@@ -161,7 +161,7 @@ go generate ./...
 
 Head over to the `Todos` resolver and update it to pass `orderBy` argument to `.Paginate()` call:
 
-```go
+```go title="todo.resolvers.go"
 func (r *queryResolver) Todos(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, orderBy *ent.TodoOrder) (*ent.TodoConnection, error) {
 	return r.client.Todo.Query().
 		Paginate(ctx, after, first, before, last,
