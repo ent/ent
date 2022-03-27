@@ -2026,3 +2026,38 @@ func TestBoolPredicates(t *testing.T) {
 	require.Nil(t, args)
 	require.Equal(t, "SELECT * FROM `users` JOIN `posts` AS `t1` ON `users`.`id` = `t1`.`author_id` WHERE `users`.`active` AND NOT `t1`.`deleted`", query)
 }
+
+func TestWindowFunction(t *testing.T) {
+	posts := Table("posts")
+	base := Select(posts.Columns("id", "content", "author_id")...).
+		From(posts).
+		Where(EQ("active", true))
+	with := With("active_posts").
+		As(base).
+		With("selected_posts").
+		As(
+			Select().
+				AppendSelect("*").
+				AppendSelectExprAs(
+					RowNumber().PartitionBy("author_id").OrderBy("id"),
+					"row_number",
+				).
+				From(Table("active_posts")),
+		)
+	query, args := Select("*").From(Table("selected_posts")).Where(LTE("row_number", 2)).Prefix(with).Query()
+	require.Equal(t, "WITH `active_posts` AS (SELECT `posts`.`id`, `posts`.`content`, `posts`.`author_id` FROM `posts` WHERE `active`), `selected_posts` AS (SELECT *, (ROW_NUMBER() OVER (PARTITION BY `author_id` ORDER BY `id`)) AS `row_number` FROM `active_posts`) SELECT * FROM `selected_posts` WHERE `row_number` <= ?", query)
+	require.Equal(t, []interface{}{2}, args)
+}
+
+func TestSelector_UnqualifiedColumns(t *testing.T) {
+	t1, t2 := Table("t1"), Table("t2")
+	s := Select(t1.C("a"), t2.C("b"))
+	require.Equal(t, []string{"`t1`.`a`", "`t2`.`b`"}, s.SelectedColumns())
+	require.Equal(t, []string{"a", "b"}, s.UnqualifiedColumns())
+
+	d := Dialect(dialect.Postgres)
+	t1, t2 = d.Table("t1"), d.Table("t2")
+	s = d.Select(t1.C("a"), t2.C("b"))
+	require.Equal(t, []string{`"t1"."a"`, `"t2"."b"`}, s.SelectedColumns())
+	require.Equal(t, []string{"a", "b"}, s.UnqualifiedColumns())
+}
