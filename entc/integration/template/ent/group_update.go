@@ -31,6 +31,14 @@ func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return gu
 }
 
+// WhereIf appends a list predicates to the GroupUpdate builder if b is true.
+func (gu *GroupUpdate) WhereIf(b bool, ps ...predicate.Group) *GroupUpdate {
+	if b {
+		gu.mutation.Where(ps...)
+	}
+	return gu
+}
+
 // SetMaxUsers sets the "max_users" field.
 func (gu *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
 	gu.mutation.ResetMaxUsers()

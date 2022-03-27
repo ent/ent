@@ -30,6 +30,14 @@ func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
 	return ftd
 }
 
+// WhereIf appends a list predicates to the FileTypeDelete builder if b is true.
+func (ftd *FileTypeDelete) WhereIf(b bool, ps ...predicate.FileType) *FileTypeDelete {
+	if b {
+		ftd.mutation.Where(ps...)
+	}
+	return ftd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
 	var (

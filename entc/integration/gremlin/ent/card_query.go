@@ -43,6 +43,14 @@ func (cq *CardQuery) Where(ps ...predicate.Card) *CardQuery {
 	return cq
 }
 
+// WhereIf adds a new predicates to the CardQuery builder if b is true.
+func (cq *CardQuery) WhereIf(b bool, ps ...predicate.Card) *CardQuery {
+	if b {
+		cq.predicates = append(cq.predicates, ps...)
+	}
+	return cq
+}
+
 // Limit adds a limit step to the query.
 func (cq *CardQuery) Limit(limit int) *CardQuery {
 	cq.limit = &limit

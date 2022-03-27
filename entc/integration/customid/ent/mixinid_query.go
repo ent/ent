@@ -39,6 +39,14 @@ func (miq *MixinIDQuery) Where(ps ...predicate.MixinID) *MixinIDQuery {
 	return miq
 }
 
+// WhereIf adds a new predicates to the MixinIDQuery builder if b is true.
+func (miq *MixinIDQuery) WhereIf(b bool, ps ...predicate.MixinID) *MixinIDQuery {
+	if b {
+		miq.predicates = append(miq.predicates, ps...)
+	}
+	return miq
+}
+
 // Limit adds a limit step to the query.
 func (miq *MixinIDQuery) Limit(limit int) *MixinIDQuery {
 	miq.limit = &limit

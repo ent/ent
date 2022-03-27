@@ -30,6 +30,14 @@ func (dd *DocDelete) Where(ps ...predicate.Doc) *DocDelete {
 	return dd
 }
 
+// WhereIf appends a list predicates to the DocDelete builder if b is true.
+func (dd *DocDelete) WhereIf(b bool, ps ...predicate.Doc) *DocDelete {
+	if b {
+		dd.mutation.Where(ps...)
+	}
+	return dd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (dd *DocDelete) Exec(ctx context.Context) (int, error) {
 	var (

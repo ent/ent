@@ -31,6 +31,14 @@ func (ctu *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate
 	return ctu
 }
 
+// WhereIf appends a list predicates to the CustomTypeUpdate builder if b is true.
+func (ctu *CustomTypeUpdate) WhereIf(b bool, ps ...predicate.CustomType) *CustomTypeUpdate {
+	if b {
+		ctu.mutation.Where(ps...)
+	}
+	return ctu
+}
+
 // SetCustom sets the "custom" field.
 func (ctu *CustomTypeUpdate) SetCustom(s string) *CustomTypeUpdate {
 	ctu.mutation.SetCustom(s)

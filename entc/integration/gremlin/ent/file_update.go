@@ -35,6 +35,14 @@ func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	return fu
 }
 
+// WhereIf appends a list predicates to the FileUpdate builder if b is true.
+func (fu *FileUpdate) WhereIf(b bool, ps ...predicate.File) *FileUpdate {
+	if b {
+		fu.mutation.Where(ps...)
+	}
+	return fu
+}
+
 // SetSize sets the "size" field.
 func (fu *FileUpdate) SetSize(i int) *FileUpdate {
 	fu.mutation.ResetSize()

@@ -30,6 +30,14 @@ func (nd *NoteDelete) Where(ps ...predicate.Note) *NoteDelete {
 	return nd
 }
 
+// WhereIf appends a list predicates to the NoteDelete builder if b is true.
+func (nd *NoteDelete) WhereIf(b bool, ps ...predicate.Note) *NoteDelete {
+	if b {
+		nd.mutation.Where(ps...)
+	}
+	return nd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (nd *NoteDelete) Exec(ctx context.Context) (int, error) {
 	var (

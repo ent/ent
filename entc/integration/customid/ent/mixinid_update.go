@@ -31,6 +31,14 @@ func (miu *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
 	return miu
 }
 
+// WhereIf appends a list predicates to the MixinIDUpdate builder if b is true.
+func (miu *MixinIDUpdate) WhereIf(b bool, ps ...predicate.MixinID) *MixinIDUpdate {
+	if b {
+		miu.mutation.Where(ps...)
+	}
+	return miu
+}
+
 // SetSomeField sets the "some_field" field.
 func (miu *MixinIDUpdate) SetSomeField(s string) *MixinIDUpdate {
 	miu.mutation.SetSomeField(s)

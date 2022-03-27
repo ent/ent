@@ -30,6 +30,14 @@ func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
 	return pd
 }
 
+// WhereIf appends a list predicates to the PetDelete builder if b is true.
+func (pd *PetDelete) WhereIf(b bool, ps ...predicate.Pet) *PetDelete {
+	if b {
+		pd.mutation.Where(ps...)
+	}
+	return pd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
 	var (

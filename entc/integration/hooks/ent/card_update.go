@@ -33,6 +33,14 @@ func (cu *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return cu
 }
 
+// WhereIf appends a list predicates to the CardUpdate builder if b is true.
+func (cu *CardUpdate) WhereIf(b bool, ps ...predicate.Card) *CardUpdate {
+	if b {
+		cu.mutation.Where(ps...)
+	}
+	return cu
+}
+
 // SetName sets the "name" field.
 func (cu *CardUpdate) SetName(s string) *CardUpdate {
 	cu.mutation.SetName(s)

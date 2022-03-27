@@ -34,6 +34,14 @@ func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 	return tu
 }
 
+// WhereIf appends a list predicates to the TaskUpdate builder if b is true.
+func (tu *TaskUpdate) WhereIf(b bool, ps ...predicate.Task) *TaskUpdate {
+	if b {
+		tu.mutation.Where(ps...)
+	}
+	return tu
+}
+
 // SetTitle sets the "title" field.
 func (tu *TaskUpdate) SetTitle(s string) *TaskUpdate {
 	tu.mutation.SetTitle(s)

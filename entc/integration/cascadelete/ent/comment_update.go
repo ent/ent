@@ -32,6 +32,14 @@ func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	return cu
 }
 
+// WhereIf appends a list predicates to the CommentUpdate builder if b is true.
+func (cu *CommentUpdate) WhereIf(b bool, ps ...predicate.Comment) *CommentUpdate {
+	if b {
+		cu.mutation.Where(ps...)
+	}
+	return cu
+}
+
 // SetText sets the "text" field.
 func (cu *CommentUpdate) SetText(s string) *CommentUpdate {
 	cu.mutation.SetText(s)

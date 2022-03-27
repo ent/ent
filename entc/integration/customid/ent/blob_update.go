@@ -32,6 +32,14 @@ func (bu *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
 	return bu
 }
 
+// WhereIf appends a list predicates to the BlobUpdate builder if b is true.
+func (bu *BlobUpdate) WhereIf(b bool, ps ...predicate.Blob) *BlobUpdate {
+	if b {
+		bu.mutation.Where(ps...)
+	}
+	return bu
+}
+
 // SetUUID sets the "uuid" field.
 func (bu *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
 	bu.mutation.SetUUID(u)

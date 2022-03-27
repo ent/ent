@@ -33,6 +33,14 @@ func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 	return nu
 }
 
+// WhereIf appends a list predicates to the NodeUpdate builder if b is true.
+func (nu *NodeUpdate) WhereIf(b bool, ps ...predicate.Node) *NodeUpdate {
+	if b {
+		nu.mutation.Where(ps...)
+	}
+	return nu
+}
+
 // SetValue sets the "value" field.
 func (nu *NodeUpdate) SetValue(i int) *NodeUpdate {
 	nu.mutation.ResetValue()

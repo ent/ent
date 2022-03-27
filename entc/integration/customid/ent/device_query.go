@@ -45,6 +45,14 @@ func (dq *DeviceQuery) Where(ps ...predicate.Device) *DeviceQuery {
 	return dq
 }
 
+// WhereIf adds a new predicates to the DeviceQuery builder if b is true.
+func (dq *DeviceQuery) WhereIf(b bool, ps ...predicate.Device) *DeviceQuery {
+	if b {
+		dq.predicates = append(dq.predicates, ps...)
+	}
+	return dq
+}
+
 // Limit adds a limit step to the query.
 func (dq *DeviceQuery) Limit(limit int) *DeviceQuery {
 	dq.limit = &limit

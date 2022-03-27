@@ -47,6 +47,14 @@ func (pq *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
 	return pq
 }
 
+// WhereIf adds a new predicates to the PetQuery builder if b is true.
+func (pq *PetQuery) WhereIf(b bool, ps ...predicate.Pet) *PetQuery {
+	if b {
+		pq.predicates = append(pq.predicates, ps...)
+	}
+	return pq
+}
+
 // Limit adds a limit step to the query.
 func (pq *PetQuery) Limit(limit int) *PetQuery {
 	pq.limit = &limit

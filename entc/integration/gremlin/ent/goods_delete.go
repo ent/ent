@@ -31,6 +31,14 @@ func (gd *GoodsDelete) Where(ps ...predicate.Goods) *GoodsDelete {
 	return gd
 }
 
+// WhereIf appends a list predicates to the GoodsDelete builder if b is true.
+func (gd *GoodsDelete) WhereIf(b bool, ps ...predicate.Goods) *GoodsDelete {
+	if b {
+		gd.mutation.Where(ps...)
+	}
+	return gd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (gd *GoodsDelete) Exec(ctx context.Context) (int, error) {
 	var (

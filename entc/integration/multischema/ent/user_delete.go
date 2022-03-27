@@ -31,6 +31,14 @@ func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
 	return ud
 }
 
+// WhereIf appends a list predicates to the UserDelete builder if b is true.
+func (ud *UserDelete) WhereIf(b bool, ps ...predicate.User) *UserDelete {
+	if b {
+		ud.mutation.Where(ps...)
+	}
+	return ud
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
 	var (

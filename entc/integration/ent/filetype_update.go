@@ -32,6 +32,14 @@ func (ftu *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 	return ftu
 }
 
+// WhereIf appends a list predicates to the FileTypeUpdate builder if b is true.
+func (ftu *FileTypeUpdate) WhereIf(b bool, ps ...predicate.FileType) *FileTypeUpdate {
+	if b {
+		ftu.mutation.Where(ps...)
+	}
+	return ftu
+}
+
 // SetName sets the "name" field.
 func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
 	ftu.mutation.SetName(s)

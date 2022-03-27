@@ -44,6 +44,14 @@ func (gq *GroupQuery) Where(ps ...predicate.Group) *GroupQuery {
 	return gq
 }
 
+// WhereIf adds a new predicates to the GroupQuery builder if b is true.
+func (gq *GroupQuery) WhereIf(b bool, ps ...predicate.Group) *GroupQuery {
+	if b {
+		gq.predicates = append(gq.predicates, ps...)
+	}
+	return gq
+}
+
 // Limit adds a limit step to the query.
 func (gq *GroupQuery) Limit(limit int) *GroupQuery {
 	gq.limit = &limit

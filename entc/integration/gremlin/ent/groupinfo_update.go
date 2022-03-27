@@ -34,6 +34,14 @@ func (giu *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
 	return giu
 }
 
+// WhereIf appends a list predicates to the GroupInfoUpdate builder if b is true.
+func (giu *GroupInfoUpdate) WhereIf(b bool, ps ...predicate.GroupInfo) *GroupInfoUpdate {
+	if b {
+		giu.mutation.Where(ps...)
+	}
+	return giu
+}
+
 // SetDesc sets the "desc" field.
 func (giu *GroupInfoUpdate) SetDesc(s string) *GroupInfoUpdate {
 	giu.mutation.SetDesc(s)

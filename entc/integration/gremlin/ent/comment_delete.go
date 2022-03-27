@@ -31,6 +31,14 @@ func (cd *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
 	return cd
 }
 
+// WhereIf appends a list predicates to the CommentDelete builder if b is true.
+func (cd *CommentDelete) WhereIf(b bool, ps ...predicate.Comment) *CommentDelete {
+	if b {
+		cd.mutation.Where(ps...)
+	}
+	return cd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CommentDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -38,6 +38,14 @@ func (ctq *CustomTypeQuery) Where(ps ...predicate.CustomType) *CustomTypeQuery {
 	return ctq
 }
 
+// WhereIf adds a new predicates to the CustomTypeQuery builder if b is true.
+func (ctq *CustomTypeQuery) WhereIf(b bool, ps ...predicate.CustomType) *CustomTypeQuery {
+	if b {
+		ctq.predicates = append(ctq.predicates, ps...)
+	}
+	return ctq
+}
+
 // Limit adds a limit step to the query.
 func (ctq *CustomTypeQuery) Limit(limit int) *CustomTypeQuery {
 	ctq.limit = &limit

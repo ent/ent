@@ -30,6 +30,14 @@ func (cd *CarDelete) Where(ps ...predicate.Car) *CarDelete {
 	return cd
 }
 
+// WhereIf appends a list predicates to the CarDelete builder if b is true.
+func (cd *CarDelete) WhereIf(b bool, ps ...predicate.Car) *CarDelete {
+	if b {
+		cd.mutation.Where(ps...)
+	}
+	return cd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cd *CarDelete) Exec(ctx context.Context) (int, error) {
 	var (

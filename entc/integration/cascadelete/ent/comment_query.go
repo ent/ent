@@ -41,6 +41,14 @@ func (cq *CommentQuery) Where(ps ...predicate.Comment) *CommentQuery {
 	return cq
 }
 
+// WhereIf adds a new predicates to the CommentQuery builder if b is true.
+func (cq *CommentQuery) WhereIf(b bool, ps ...predicate.Comment) *CommentQuery {
+	if b {
+		cq.predicates = append(cq.predicates, ps...)
+	}
+	return cq
+}
+
 // Limit adds a limit step to the query.
 func (cq *CommentQuery) Limit(limit int) *CommentQuery {
 	cq.limit = &limit

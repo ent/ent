@@ -33,6 +33,14 @@ func (iu *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate {
 	return iu
 }
 
+// WhereIf appends a list predicates to the InfoUpdate builder if b is true.
+func (iu *InfoUpdate) WhereIf(b bool, ps ...predicate.Info) *InfoUpdate {
+	if b {
+		iu.mutation.Where(ps...)
+	}
+	return iu
+}
+
 // SetContent sets the "content" field.
 func (iu *InfoUpdate) SetContent(jm json.RawMessage) *InfoUpdate {
 	iu.mutation.SetContent(jm)

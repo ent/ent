@@ -44,6 +44,14 @@ func (bq *BlobQuery) Where(ps ...predicate.Blob) *BlobQuery {
 	return bq
 }
 
+// WhereIf adds a new predicates to the BlobQuery builder if b is true.
+func (bq *BlobQuery) WhereIf(b bool, ps ...predicate.Blob) *BlobQuery {
+	if b {
+		bq.predicates = append(bq.predicates, ps...)
+	}
+	return bq
+}
+
 // Limit adds a limit step to the query.
 func (bq *BlobQuery) Limit(limit int) *BlobQuery {
 	bq.limit = &limit

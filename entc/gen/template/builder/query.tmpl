@@ -53,6 +53,14 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 	return {{ $receiver }}
 }
 
+// WhereIf adds a new predicates to the {{ $builder }} builder if b is true.
+func ({{ $receiver }} *{{ $builder }}) WhereIf(b bool, ps ...predicate.{{ $.Name }}) *{{ $builder }} {
+	if b {
+	    {{ $receiver}}.predicates = append({{ $receiver }}.predicates, ps...)
+	}
+	return {{ $receiver }}
+}
+
 // Limit adds a limit step to the query.
 func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} {
 	{{ $receiver }}.limit = &limit

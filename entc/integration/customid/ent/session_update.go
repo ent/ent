@@ -33,6 +33,14 @@ func (su *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
 	return su
 }
 
+// WhereIf appends a list predicates to the SessionUpdate builder if b is true.
+func (su *SessionUpdate) WhereIf(b bool, ps ...predicate.Session) *SessionUpdate {
+	if b {
+		su.mutation.Where(ps...)
+	}
+	return su
+}
+
 // SetDeviceID sets the "device" edge to the Device entity by ID.
 func (su *SessionUpdate) SetDeviceID(id schema.ID) *SessionUpdate {
 	su.mutation.SetDeviceID(id)

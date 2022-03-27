@@ -38,6 +38,14 @@ func (ftq *FieldTypeQuery) Where(ps ...predicate.FieldType) *FieldTypeQuery {
 	return ftq
 }
 
+// WhereIf adds a new predicates to the FieldTypeQuery builder if b is true.
+func (ftq *FieldTypeQuery) WhereIf(b bool, ps ...predicate.FieldType) *FieldTypeQuery {
+	if b {
+		ftq.predicates = append(ftq.predicates, ps...)
+	}
+	return ftq
+}
+
 // Limit adds a limit step to the query.
 func (ftq *FieldTypeQuery) Limit(limit int) *FieldTypeQuery {
 	ftq.limit = &limit

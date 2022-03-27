@@ -30,6 +30,14 @@ func (id *InfoDelete) Where(ps ...predicate.Info) *InfoDelete {
 	return id
 }
 
+// WhereIf appends a list predicates to the InfoDelete builder if b is true.
+func (id *InfoDelete) WhereIf(b bool, ps ...predicate.Info) *InfoDelete {
+	if b {
+		id.mutation.Where(ps...)
+	}
+	return id
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (id *InfoDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -32,6 +32,14 @@ func (nu *NoteUpdate) Where(ps ...predicate.Note) *NoteUpdate {
 	return nu
 }
 
+// WhereIf appends a list predicates to the NoteUpdate builder if b is true.
+func (nu *NoteUpdate) WhereIf(b bool, ps ...predicate.Note) *NoteUpdate {
+	if b {
+		nu.mutation.Where(ps...)
+	}
+	return nu
+}
+
 // SetText sets the "text" field.
 func (nu *NoteUpdate) SetText(s string) *NoteUpdate {
 	nu.mutation.SetText(s)

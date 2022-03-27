@@ -32,6 +32,14 @@ func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
 	return su
 }
 
+// WhereIf appends a list predicates to the SpecUpdate builder if b is true.
+func (su *SpecUpdate) WhereIf(b bool, ps ...predicate.Spec) *SpecUpdate {
+	if b {
+		su.mutation.Where(ps...)
+	}
+	return su
+}
+
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (su *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
 	su.mutation.AddCardIDs(ids...)

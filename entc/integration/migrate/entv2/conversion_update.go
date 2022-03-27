@@ -31,6 +31,14 @@ func (cu *ConversionUpdate) Where(ps ...predicate.Conversion) *ConversionUpdate 
 	return cu
 }
 
+// WhereIf appends a list predicates to the ConversionUpdate builder if b is true.
+func (cu *ConversionUpdate) WhereIf(b bool, ps ...predicate.Conversion) *ConversionUpdate {
+	if b {
+		cu.mutation.Where(ps...)
+	}
+	return cu
+}
+
 // SetName sets the "name" field.
 func (cu *ConversionUpdate) SetName(s string) *ConversionUpdate {
 	cu.mutation.SetName(s)

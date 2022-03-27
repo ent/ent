@@ -30,6 +30,14 @@ func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
 	return ftd
 }
 
+// WhereIf appends a list predicates to the FieldTypeDelete builder if b is true.
+func (ftd *FieldTypeDelete) WhereIf(b bool, ps ...predicate.FieldType) *FieldTypeDelete {
+	if b {
+		ftd.mutation.Where(ps...)
+	}
+	return ftd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (ftd *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
 	var (

@@ -30,6 +30,14 @@ func (rd *RentalDelete) Where(ps ...predicate.Rental) *RentalDelete {
 	return rd
 }
 
+// WhereIf appends a list predicates to the RentalDelete builder if b is true.
+func (rd *RentalDelete) WhereIf(b bool, ps ...predicate.Rental) *RentalDelete {
+	if b {
+		rd.mutation.Where(ps...)
+	}
+	return rd
+}
+
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rd *RentalDelete) Exec(ctx context.Context) (int, error) {
 	var (

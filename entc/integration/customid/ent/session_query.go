@@ -43,6 +43,14 @@ func (sq *SessionQuery) Where(ps ...predicate.Session) *SessionQuery {
 	return sq
 }
 
+// WhereIf adds a new predicates to the SessionQuery builder if b is true.
+func (sq *SessionQuery) WhereIf(b bool, ps ...predicate.Session) *SessionQuery {
+	if b {
+		sq.predicates = append(sq.predicates, ps...)
+	}
+	return sq
+}
+
 // Limit adds a limit step to the query.
 func (sq *SessionQuery) Limit(limit int) *SessionQuery {
 	sq.limit = &limit

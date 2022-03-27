@@ -32,6 +32,14 @@ func (du *DocUpdate) Where(ps ...predicate.Doc) *DocUpdate {
 	return du
 }
 
+// WhereIf appends a list predicates to the DocUpdate builder if b is true.
+func (du *DocUpdate) WhereIf(b bool, ps ...predicate.Doc) *DocUpdate {
+	if b {
+		du.mutation.Where(ps...)
+	}
+	return du
+}
+
 // SetText sets the "text" field.
 func (du *DocUpdate) SetText(s string) *DocUpdate {
 	du.mutation.SetText(s)
