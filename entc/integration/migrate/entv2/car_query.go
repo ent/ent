@@ -291,6 +291,19 @@ func (cq *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Car.Query().
+//		GroupBy(car.FieldName).
+//		Aggregate(entv2.Count()).
+//		Scan(ctx, &v)
+//
 func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 	grbuild := &CarGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -307,6 +320,17 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Car.Query().
+//		Select(car.FieldName).
+//		Scan(ctx, &v)
+//
 func (cq *CarQuery) Select(fields ...string) *CarSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &CarSelect{CarQuery: cq}

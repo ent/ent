@@ -32,6 +32,26 @@ func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 	return cu
 }
 
+// SetName sets the "name" field.
+func (cu *CarUpdate) SetName(s string) *CarUpdate {
+	cu.mutation.SetName(s)
+	return cu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (cu *CarUpdate) SetNillableName(s *string) *CarUpdate {
+	if s != nil {
+		cu.SetName(*s)
+	}
+	return cu
+}
+
+// ClearName clears the value of the "name" field.
+func (cu *CarUpdate) ClearName() *CarUpdate {
+	cu.mutation.ClearName()
+	return cu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cu *CarUpdate) SetOwnerID(id int) *CarUpdate {
 	cu.mutation.SetOwnerID(id)
@@ -140,6 +160,19 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := cu.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: car.FieldName,
+		})
+	}
+	if cu.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: car.FieldName,
+		})
+	}
 	if cu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -192,6 +225,26 @@ type CarUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CarMutation
+}
+
+// SetName sets the "name" field.
+func (cuo *CarUpdateOne) SetName(s string) *CarUpdateOne {
+	cuo.mutation.SetName(s)
+	return cuo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (cuo *CarUpdateOne) SetNillableName(s *string) *CarUpdateOne {
+	if s != nil {
+		cuo.SetName(*s)
+	}
+	return cuo
+}
+
+// ClearName clears the value of the "name" field.
+func (cuo *CarUpdateOne) ClearName() *CarUpdateOne {
+	cuo.mutation.ClearName()
+	return cuo
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
@@ -325,6 +378,19 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := cuo.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: car.FieldName,
+		})
+	}
+	if cuo.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: car.FieldName,
+		})
 	}
 	if cuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

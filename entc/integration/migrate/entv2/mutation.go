@@ -48,6 +48,7 @@ type CarMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	name          *string
 	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
@@ -154,6 +155,55 @@ func (m *CarMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetName sets the "name" field.
+func (m *CarMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CarMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Car entity.
+// If the Car object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CarMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *CarMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[car.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *CarMutation) NameCleared() bool {
+	_, ok := m.clearedFields[car.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CarMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, car.FieldName)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *CarMutation) SetOwnerID(id int) {
 	m.owner = &id
@@ -212,7 +262,10 @@ func (m *CarMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CarMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 1)
+	if m.name != nil {
+		fields = append(fields, car.FieldName)
+	}
 	return fields
 }
 
@@ -220,6 +273,10 @@ func (m *CarMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *CarMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case car.FieldName:
+		return m.Name()
+	}
 	return nil, false
 }
 
@@ -227,6 +284,10 @@ func (m *CarMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *CarMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case car.FieldName:
+		return m.OldName(ctx)
+	}
 	return nil, fmt.Errorf("unknown Car field %s", name)
 }
 
@@ -235,6 +296,13 @@ func (m *CarMutation) OldField(ctx context.Context, name string) (ent.Value, err
 // type.
 func (m *CarMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case car.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Car field %s", name)
 }
@@ -256,13 +324,19 @@ func (m *CarMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *CarMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Car numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CarMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(car.FieldName) {
+		fields = append(fields, car.FieldName)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -275,12 +349,22 @@ func (m *CarMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CarMutation) ClearField(name string) error {
+	switch name {
+	case car.FieldName:
+		m.ClearName()
+		return nil
+	}
 	return fmt.Errorf("unknown Car nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *CarMutation) ResetField(name string) error {
+	switch name {
+	case car.FieldName:
+		m.ResetName()
+		return nil
+	}
 	return fmt.Errorf("unknown Car field %s", name)
 }
 
@@ -2344,6 +2428,7 @@ type PetMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	name          *string
 	clearedFields map[string]struct{}
 	owner         *int
 	clearedowner  bool
@@ -2450,6 +2535,55 @@ func (m *PetMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetName sets the "name" field.
+func (m *PetMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *PetMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Pet entity.
+// If the Pet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PetMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *PetMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[pet.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *PetMutation) NameCleared() bool {
+	_, ok := m.clearedFields[pet.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *PetMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, pet.FieldName)
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *PetMutation) SetOwnerID(id int) {
 	m.owner = &id
@@ -2508,7 +2642,10 @@ func (m *PetMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PetMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 1)
+	if m.name != nil {
+		fields = append(fields, pet.FieldName)
+	}
 	return fields
 }
 
@@ -2516,6 +2653,10 @@ func (m *PetMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *PetMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case pet.FieldName:
+		return m.Name()
+	}
 	return nil, false
 }
 
@@ -2523,6 +2664,10 @@ func (m *PetMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case pet.FieldName:
+		return m.OldName(ctx)
+	}
 	return nil, fmt.Errorf("unknown Pet field %s", name)
 }
 
@@ -2531,6 +2676,13 @@ func (m *PetMutation) OldField(ctx context.Context, name string) (ent.Value, err
 // type.
 func (m *PetMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case pet.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Pet field %s", name)
 }
@@ -2552,13 +2704,19 @@ func (m *PetMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *PetMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Pet numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PetMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(pet.FieldName) {
+		fields = append(fields, pet.FieldName)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2571,12 +2729,22 @@ func (m *PetMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PetMutation) ClearField(name string) error {
+	switch name {
+	case pet.FieldName:
+		m.ClearName()
+		return nil
+	}
 	return fmt.Errorf("unknown Pet nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *PetMutation) ResetField(name string) error {
+	switch name {
+	case pet.FieldName:
+		m.ResetName()
+		return nil
+	}
 	return fmt.Errorf("unknown Pet field %s", name)
 }
 
