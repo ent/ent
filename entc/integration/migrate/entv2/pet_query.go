@@ -291,6 +291,19 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Pet.Query().
+//		GroupBy(pet.FieldName).
+//		Aggregate(entv2.Count()).
+//		Scan(ctx, &v)
+//
 func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 	grbuild := &PetGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -307,6 +320,17 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Pet.Query().
+//		Select(pet.FieldName).
+//		Scan(ctx, &v)
+//
 func (pq *PetQuery) Select(fields ...string) *PetSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &PetSelect{PetQuery: pq}

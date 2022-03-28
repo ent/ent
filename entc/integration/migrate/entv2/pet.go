@@ -17,9 +17,11 @@ import (
 
 // Pet is the model entity for the Pet schema.
 type Pet struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PetQuery when eager-loading is set.
 	Edges    PetEdges `json:"edges"`
@@ -56,6 +58,8 @@ func (*Pet) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case pet.FieldID:
 			values[i] = new(sql.NullInt64)
+		case pet.FieldName:
+			values[i] = new(sql.NullString)
 		case pet.ForeignKeys[0]: // owner_id
 			values[i] = new(sql.NullInt64)
 		default:
@@ -79,6 +83,12 @@ func (pe *Pet) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pe.ID = int(value.Int64)
+		case pet.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				pe.Name = value.String
+			}
 		case pet.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field owner_id", value)
@@ -119,6 +129,8 @@ func (pe *Pet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Pet(")
 	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
+	builder.WriteString(", name=")
+	builder.WriteString(pe.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

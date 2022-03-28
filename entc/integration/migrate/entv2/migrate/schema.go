@@ -16,6 +16,7 @@ var (
 	// CarColumns holds the columns for the "Car" table.
 	CarColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "user_car", Type: field.TypeInt},
 	}
 	// CarTable holds the schema information for the "Car" table.
@@ -26,7 +27,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "Car_users_car",
-				Columns:    []*schema.Column{CarColumns[1]},
+				Columns:    []*schema.Column{CarColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -108,6 +109,7 @@ var (
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
@@ -118,7 +120,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "user_pet_id",
-				Columns:    []*schema.Column{PetsColumns[1]},
+				Columns:    []*schema.Column{PetsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

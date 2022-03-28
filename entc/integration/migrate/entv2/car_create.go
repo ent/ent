@@ -24,6 +24,20 @@ type CarCreate struct {
 	hooks    []Hook
 }
 
+// SetName sets the "name" field.
+func (cc *CarCreate) SetName(s string) *CarCreate {
+	cc.mutation.SetName(s)
+	return cc
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (cc *CarCreate) SetNillableName(s *string) *CarCreate {
+	if s != nil {
+		cc.SetName(*s)
+	}
+	return cc
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (cc *CarCreate) SetOwnerID(id int) *CarCreate {
 	cc.mutation.SetOwnerID(id)
@@ -135,6 +149,14 @@ func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := cc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: car.FieldName,
+		})
+		_node.Name = value
+	}
 	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
