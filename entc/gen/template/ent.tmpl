@@ -50,7 +50,7 @@ type {{ $.Name }} struct {
 		{{- xtemplate $tmpl . }}
 	{{- end }}
 	{{- /* Additional fields to add by the user. */}}
-	{{ template "model/fields/additional" $ }}
+	{{- template "model/fields/additional" $ }}
 }
 
 {{- with $.Edges }}
@@ -63,6 +63,8 @@ type {{ $.Name }}Edges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [{{ len . }}]bool
+	{{- /* Additional fields to add by the user. */}}
+	{{- template "model/edges/fields/additional" $ }}
 }
 
 {{- range $i, $e := . }}
@@ -206,7 +208,7 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	{{- end }}
 {{- end }}
 
-{{/* A template for adding additional methods or helpers for the generated model.*/}}
+{{/* A template for adding additional methods or helpers for the generated model. */}}
 {{ define "model/additional" }}
 	{{- with $tmpls := matchTemplate "model/additional/*"  }}
 		{{- range $tmpl := $tmpls }}
@@ -215,6 +217,21 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	{{- end }}
 
 	{{- with $tmpls := matchTemplate (printf "dialect/%s/model/additional/*" $.Storage) }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{ end }}
+
+{{/* A template for adding additional fields for the Edges object of the generated model. */}}
+{{ define "model/edges/fields/additional" }}
+	{{- with $tmpls := matchTemplate "model/edges/fields/additional/*"  }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+
+	{{- with $tmpls := matchTemplate (printf "dialect/%s/model/edges/fields/additional/*" $.Storage) }}
 		{{- range $tmpl := $tmpls }}
 			{{- xtemplate $tmpl $ }}
 		{{- end }}

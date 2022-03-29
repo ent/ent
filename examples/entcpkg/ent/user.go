@@ -24,7 +24,6 @@ type User struct {
 	Name string `json:"name"`
 	// Age holds the value of the "age" field.
 	Age int `json:"age"`
-
 	// StaticField defined by templates (titled STATICFIELD).
 	StaticField string `json:"static_field,omitempty" rql:"static_field"`
 }

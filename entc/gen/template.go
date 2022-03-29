@@ -182,6 +182,8 @@ var (
 		"dialect/sql/create/additional/*",
 		"dialect/sql/create_bulk/additional/*",
 		"dialect/sql/model/additional/*",
+		"dialect/sql/model/edges/*",
+		"dialect/sql/model/edges/fields/additional/*",
 		"dialect/sql/model/fields/*",
 		"dialect/sql/select/additional/*",
 		"dialect/sql/predicate/edge/*/*",
@@ -191,6 +193,7 @@ var (
 		"import/additional/*",
 		"model/additional/*",
 		"model/comment/additional/*",
+		"model/edges/fields/additional/*",
 		"update/additional/*",
 		"query/additional/*",
 	}
