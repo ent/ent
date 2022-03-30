@@ -43,7 +43,7 @@ func (User) Edges() []ent.Edge {
 	}
 }
 
-func (User) Index() []ent.Index {
+func (User) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("age", "name").
 			Unique(),

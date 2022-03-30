@@ -766,6 +766,14 @@ func Predicate(t *testing.T, client *ent.Client) {
 			).
 			CountX(ctx),
 	)
+
+	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfo(inf).SaveX(ctx)
+	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfo(inf).SetActive(false).SaveX(ctx)
+	require.Equal(hub.ID, client.Group.Query().Where(group.Active(true)).OnlyIDX(ctx))
+	require.Equal(lab.ID, client.Group.Query().Where(group.Active(false)).OnlyIDX(ctx))
+	require.Equal(hub.ID, client.Group.Query().Where(group.ActiveNEQ(false)).OnlyIDX(ctx))
+	require.Equal(lab.ID, client.Group.Query().Where(group.ActiveNEQ(true)).OnlyIDX(ctx))
 }
 
 func AddValues(t *testing.T, client *ent.Client) {
@@ -1400,9 +1408,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		require.NoError(t, tx.Rollback())
 	})
 	t.Run("TxOptions Rollback", func(t *testing.T) {
-		if client.Dialect() == dialect.SQLite {
-			t.Skip("Skipping SQLite")
-		}
+		skip(t, "SQLite")
 		tx, err := client.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
 		require.NoError(t, err)
 		var m mocker
@@ -1421,9 +1427,7 @@ func Tx(t *testing.T, client *ent.Client) {
 		require.NoError(t, tx.Rollback())
 	})
 	t.Run("TxOptions Commit", func(t *testing.T) {
-		if client.Dialect() == dialect.SQLite {
-			t.Skip("Skipping SQLite")
-		}
+		skip(t, "SQLite")
 		tx, err := client.BeginTx(ctx, &sql.TxOptions{Isolation: stdsql.LevelReadCommitted})
 		require.NoError(t, err)
 		var m mocker
@@ -1618,6 +1622,23 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		g1, g2 := users[0].Edges.Groups[0], users[0].Edges.Groups[1]
 		require.Equal(lab.Name, g1.Name)
 		require.Equal(hub.Name, g2.Name)
+
+		groups := client.Group.
+			Query().
+			WithUsers(func(q *ent.UserQuery) {
+				q.Order(ent.Asc(user.FieldName))
+			}).
+			Order(ent.Asc(group.FieldName)).
+			AllX(ctx)
+		require.Len(groups, 2)
+		g1, g2 = groups[0], groups[1]
+		require.Equal(hub.Name, g1.Name)
+		require.Equal(lab.Name, g2.Name)
+		require.Equal(a8m.Name, g1.Edges.Users[0].Name)
+		require.Equal(alex.Name, g1.Edges.Users[1].Name)
+		require.Equal(a8m.Name, g2.Edges.Users[0].Name)
+		require.Equal(nati.Name, g2.Edges.Users[1].Name)
+		require.Equal(g1.Edges.Users[0], g2.Edges.Users[0], "should share the same object")
 	})
 
 	t.Run("Graph", func(t *testing.T) {
@@ -1660,6 +1681,117 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 			require.Equal(typ.Name, f.Edges.Type.Name)
 		}
 	})
+
+	t.Run("LimitRows/O2M", func(t *testing.T) {
+		skip(t, "MySQL/5")
+		client.Pet.Delete().ExecX(ctx)
+		client.Pet.Create().SetName("nala").SetOwner(nati).ExecX(ctx)
+		client.Pet.Create().SetName("xabi3").SetOwner(a8m).ExecX(ctx)
+		client.Pet.Create().SetName("xabi2").SetOwner(a8m).ExecX(ctx)
+		client.Pet.Create().SetName("xabi1").SetOwner(a8m).ExecX(ctx)
+		client.Pet.Create().SetName("lola4").SetOwner(alex).ExecX(ctx)
+		client.Pet.Create().SetName("lola3").SetOwner(alex).ExecX(ctx)
+		client.Pet.Create().SetName("lola2").SetOwner(alex).ExecX(ctx)
+		client.Pet.Create().SetName("lola1").SetOwner(alex).ExecX(ctx)
+
+		users := client.User.Query().WithPets().Order(ent.Asc(user.FieldID)).AllX(ctx)
+		require.Len(users[0].Edges.Pets, 3)
+		require.Len(users[1].Edges.Pets, 1)
+		require.Len(users[2].Edges.Pets, 4)
+
+		users = client.User.
+			Query().
+			WithPets(func(q *ent.PetQuery) {
+				q.Modify(limitRows(pet.OwnerColumn, 2))
+			}).
+			Order(ent.Asc(user.FieldID)).
+			AllX(ctx)
+		require.Len(users[0].Edges.Pets, 2)
+		require.Equal(users[0].Edges.Pets[0].Name, "xabi3")
+		require.Equal(users[0].Edges.Pets[1].Name, "xabi2")
+		require.Len(users[1].Edges.Pets, 1)
+		require.Equal(users[1].Edges.Pets[0].Name, "nala")
+		require.Len(users[2].Edges.Pets, 2)
+		require.Equal(users[2].Edges.Pets[0].Name, "lola4")
+		require.Equal(users[2].Edges.Pets[1].Name, "lola3")
+
+		users = client.User.
+			Query().
+			WithPets(func(q *ent.PetQuery) {
+				q.Modify(limitRows(pet.OwnerColumn, 1, pet.FieldName))
+			}).
+			Order(ent.Asc(user.FieldID)).
+			AllX(ctx)
+		require.Len(users[0].Edges.Pets, 1)
+		require.Equal(users[0].Edges.Pets[0].Name, "xabi1")
+		require.Len(users[1].Edges.Pets, 1)
+		require.Equal(users[1].Edges.Pets[0].Name, "nala")
+		require.Len(users[2].Edges.Pets, 1)
+		require.Equal(users[2].Edges.Pets[0].Name, "lola1")
+	})
+
+	t.Run("LimitRows/M2M", func(t *testing.T) {
+		skip(t, "MySQL/5")
+		users := client.User.Query().WithGroups().Order(ent.Asc(user.FieldID)).AllX(ctx)
+		require.Len(users[0].Edges.Groups, 2)
+		require.Len(users[1].Edges.Groups, 1)
+		require.Len(users[2].Edges.Groups, 1)
+
+		users = client.User.
+			Query().
+			WithGroups(func(q *ent.GroupQuery) {
+				q.Modify(limitRows(user.GroupsPrimaryKey[0], 1))
+			}).
+			Order(ent.Asc(user.FieldID)).
+			AllX(ctx)
+		require.Len(users[0].Edges.Groups, 1)
+		require.Equal(users[0].Edges.Groups[0].Name, "GitHub")
+		require.Len(users[1].Edges.Groups, 1)
+		require.Equal(users[1].Edges.Groups[0].Name, "GitLab")
+		require.Len(users[2].Edges.Groups, 1)
+		require.Equal(users[2].Edges.Groups[0].Name, "GitHub")
+
+		client.Group.Create().SetName("BitBucket").SetExpire(time.Now()).AddUsers(alex, a8m).SetInfo(inf).SaveX(ctx)
+		users = client.User.
+			Query().
+			WithGroups(func(q *ent.GroupQuery) {
+				q.Modify(limitRows(user.GroupsPrimaryKey[0], 1, group.FieldName))
+			}).
+			Order(ent.Asc(user.FieldID)).
+			AllX(ctx)
+		require.Len(users[0].Edges.Groups, 1)
+		require.Equal(users[0].Edges.Groups[0].Name, "BitBucket")
+		require.Len(users[1].Edges.Groups, 1)
+		require.Equal(users[1].Edges.Groups[0].Name, "GitLab")
+		require.Len(users[2].Edges.Groups, 1)
+		require.Equal(users[2].Edges.Groups[0].Name, "BitBucket")
+	})
+}
+
+func limitRows(partitionBy string, limit int, orderBy ...string) func(s *sql.Selector) {
+	return func(s *sql.Selector) {
+		d := sql.Dialect(s.Dialect())
+		s.SetDistinct(false)
+		if len(orderBy) == 0 {
+			orderBy = append(orderBy, "id")
+		}
+		with := d.With("src_query").
+			As(s.Clone()).
+			With("limited_query").
+			As(
+				d.Select("*").
+					AppendSelectExprAs(
+						sql.RowNumber().PartitionBy(partitionBy).OrderBy(orderBy...),
+						"row_number",
+					).
+					From(d.Table("src_query")),
+			)
+		t := d.Table("limited_query").As(s.TableName())
+		*s = *d.Select(s.UnqualifiedColumns()...).
+			From(t).
+			Where(sql.LTE(t.C("row_number"), limit)).
+			Prefix(with)
+	}
 }
 
 // writerFunc is an io.Writer implemented by the underlying func.
@@ -1826,11 +1958,7 @@ func ConstraintChecks(t *testing.T, client *ent.Client) {
 }
 
 func Lock(t *testing.T, client *ent.Client) {
-	for _, d := range []string{"SQLite", "MySQL/5", "Maria/10.2"} {
-		if strings.Contains(t.Name(), d) {
-			t.Skip("unsupported version")
-		}
-	}
+	skip(t, "SQLite", "MySQL/5", "Maria/10.2")
 	ctx := context.Background()
 	xabi := client.Pet.Create().SetName("Xabi").SaveX(ctx)
 
@@ -1865,9 +1993,7 @@ func Lock(t *testing.T, client *ent.Client) {
 	})
 
 	t.Run("ForShare", func(t *testing.T) {
-		if strings.Contains(t.Name(), "Maria") {
-			t.Skip("unsupported version")
-		}
+		skip(t, "Maria")
 		tx1, err := client.Tx(ctx)
 		require.NoError(t, err)
 		tx2, err := client.Tx(ctx)
@@ -1888,6 +2014,14 @@ func Lock(t *testing.T, client *ent.Client) {
 		require.NoError(t, tx2.Rollback())
 		require.NoError(t, tx3.Rollback())
 	})
+}
+
+func skip(t *testing.T, names ...string) {
+	for _, n := range names {
+		if strings.Contains(t.Name(), n) {
+			t.Skipf("skip %s", n)
+		}
+	}
 }
 
 func drop(t *testing.T, client *ent.Client) {

@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -270,15 +269,17 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 //		Scan(ctx, &v)
 //
 func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
-	group := &ItemGroupBy{config: iq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &ItemGroupBy{config: iq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := iq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return iq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = item.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -296,7 +297,10 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 //
 func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
 	iq.fields = append(iq.fields, fields...)
-	return &ItemSelect{ItemQuery: iq}
+	selbuild := &ItemSelect{ItemQuery: iq}
+	selbuild.label = item.Label
+	selbuild.flds, selbuild.scan = &iq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
@@ -315,25 +319,24 @@ func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (iq *ItemQuery) sqlAll(ctx context.Context) ([]*Item, error) {
+func (iq *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, error) {
 	var (
 		nodes = []*Item{}
 		_spec = iq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Item{config: iq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Item).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Item{config: iq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	if len(iq.modifiers) > 0 {
 		_spec.Modifiers = iq.modifiers
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, iq.driver, _spec); err != nil {
 		return nil, err
@@ -482,6 +485,7 @@ func (iq *ItemQuery) Modify(modifiers ...func(s *sql.Selector)) *ItemSelect {
 // ItemGroupBy is the group-by builder for Item entities.
 type ItemGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -503,209 +507,6 @@ func (igb *ItemGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	igb.sql = query
 	return igb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (igb *ItemGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := igb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (igb *ItemGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(igb.fields) > 1 {
-		return nil, errors.New("ent: ItemGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := igb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (igb *ItemGroupBy) StringsX(ctx context.Context) []string {
-	v, err := igb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (igb *ItemGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = igb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{item.Label}
-	default:
-		err = fmt.Errorf("ent: ItemGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (igb *ItemGroupBy) StringX(ctx context.Context) string {
-	v, err := igb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (igb *ItemGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(igb.fields) > 1 {
-		return nil, errors.New("ent: ItemGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := igb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (igb *ItemGroupBy) IntsX(ctx context.Context) []int {
-	v, err := igb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (igb *ItemGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = igb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{item.Label}
-	default:
-		err = fmt.Errorf("ent: ItemGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (igb *ItemGroupBy) IntX(ctx context.Context) int {
-	v, err := igb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (igb *ItemGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(igb.fields) > 1 {
-		return nil, errors.New("ent: ItemGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := igb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (igb *ItemGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := igb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (igb *ItemGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = igb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{item.Label}
-	default:
-		err = fmt.Errorf("ent: ItemGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (igb *ItemGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := igb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (igb *ItemGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(igb.fields) > 1 {
-		return nil, errors.New("ent: ItemGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := igb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (igb *ItemGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := igb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (igb *ItemGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = igb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{item.Label}
-	default:
-		err = fmt.Errorf("ent: ItemGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (igb *ItemGroupBy) BoolX(ctx context.Context) bool {
-	v, err := igb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (igb *ItemGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -749,6 +550,7 @@ func (igb *ItemGroupBy) sqlQuery() *sql.Selector {
 // ItemSelect is the builder for selecting fields of Item entities.
 type ItemSelect struct {
 	*ItemQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -760,201 +562,6 @@ func (is *ItemSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	is.sql = is.ItemQuery.sqlQuery(ctx)
 	return is.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (is *ItemSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := is.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (is *ItemSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(is.fields) > 1 {
-		return nil, errors.New("ent: ItemSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := is.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (is *ItemSelect) StringsX(ctx context.Context) []string {
-	v, err := is.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (is *ItemSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = is.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{item.Label}
-	default:
-		err = fmt.Errorf("ent: ItemSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (is *ItemSelect) StringX(ctx context.Context) string {
-	v, err := is.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (is *ItemSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(is.fields) > 1 {
-		return nil, errors.New("ent: ItemSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := is.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (is *ItemSelect) IntsX(ctx context.Context) []int {
-	v, err := is.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (is *ItemSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = is.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{item.Label}
-	default:
-		err = fmt.Errorf("ent: ItemSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (is *ItemSelect) IntX(ctx context.Context) int {
-	v, err := is.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (is *ItemSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(is.fields) > 1 {
-		return nil, errors.New("ent: ItemSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := is.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (is *ItemSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := is.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (is *ItemSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = is.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{item.Label}
-	default:
-		err = fmt.Errorf("ent: ItemSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (is *ItemSelect) Float64X(ctx context.Context) float64 {
-	v, err := is.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (is *ItemSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(is.fields) > 1 {
-		return nil, errors.New("ent: ItemSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := is.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (is *ItemSelect) BoolsX(ctx context.Context) []bool {
-	v, err := is.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (is *ItemSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = is.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{item.Label}
-	default:
-		err = fmt.Errorf("ent: ItemSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (is *ItemSelect) BoolX(ctx context.Context) bool {
-	v, err := is.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (is *ItemSelect) sqlScan(ctx context.Context, v interface{}) error {

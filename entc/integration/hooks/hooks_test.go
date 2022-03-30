@@ -29,7 +29,7 @@ func TestSchemaHooks(t *testing.T) {
 	require.EqualError(t, err, "card number is too short", "error is returned from hook")
 	crd := client.Card.Create().SetNumber("1234").SaveX(ctx)
 	require.Equal(t, "unknown", crd.Name, "name was set by hook")
-	client.Use(func(next ent.Mutator) ent.Mutator {
+	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
 			name, ok := m.Name()
 			require.True(t, !ok && name == "", "should be the first hook to execute")
@@ -39,6 +39,11 @@ func TestSchemaHooks(t *testing.T) {
 	client.Card.Create().SetNumber("1234").SaveX(ctx)
 	err = client.Card.Update().Exec(ctx)
 	require.EqualError(t, err, "OpUpdate operation is not allowed")
+
+	err = client.User.Update().SetPassword("pass").Exec(ctx)
+	require.EqualError(t, err, "password cannot be edited on update-many")
+	err = client.User.Update().ClearPassword().Exec(ctx)
+	require.EqualError(t, err, "password cannot be edited on update-many")
 }
 
 func TestRuntimeHooks(t *testing.T) {

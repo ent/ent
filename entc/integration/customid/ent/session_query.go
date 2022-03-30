@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -294,22 +293,27 @@ func (sq *SessionQuery) WithDevice(opts ...func(*DeviceQuery)) *SessionQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (sq *SessionQuery) GroupBy(field string, fields ...string) *SessionGroupBy {
-	group := &SessionGroupBy{config: sq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &SessionGroupBy{config: sq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := sq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return sq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = session.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (sq *SessionQuery) Select(fields ...string) *SessionSelect {
 	sq.fields = append(sq.fields, fields...)
-	return &SessionSelect{SessionQuery: sq}
+	selbuild := &SessionSelect{SessionQuery: sq}
+	selbuild.label = session.Label
+	selbuild.flds, selbuild.scan = &sq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (sq *SessionQuery) prepareQuery(ctx context.Context) error {
@@ -328,7 +332,7 @@ func (sq *SessionQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (sq *SessionQuery) sqlAll(ctx context.Context) ([]*Session, error) {
+func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Session, error) {
 	var (
 		nodes       = []*Session{}
 		withFKs     = sq.withFKs
@@ -344,17 +348,16 @@ func (sq *SessionQuery) sqlAll(ctx context.Context) ([]*Session, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, session.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Session{config: sq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Session).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Session{config: sq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
 		return nil, err
@@ -495,6 +498,7 @@ func (sq *SessionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // SessionGroupBy is the group-by builder for Session entities.
 type SessionGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -516,209 +520,6 @@ func (sgb *SessionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	sgb.sql = query
 	return sgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (sgb *SessionGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := sgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SessionGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(sgb.fields) > 1 {
-		return nil, errors.New("ent: SessionGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := sgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (sgb *SessionGroupBy) StringsX(ctx context.Context) []string {
-	v, err := sgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SessionGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = sgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{session.Label}
-	default:
-		err = fmt.Errorf("ent: SessionGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (sgb *SessionGroupBy) StringX(ctx context.Context) string {
-	v, err := sgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SessionGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(sgb.fields) > 1 {
-		return nil, errors.New("ent: SessionGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := sgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (sgb *SessionGroupBy) IntsX(ctx context.Context) []int {
-	v, err := sgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SessionGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = sgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{session.Label}
-	default:
-		err = fmt.Errorf("ent: SessionGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (sgb *SessionGroupBy) IntX(ctx context.Context) int {
-	v, err := sgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SessionGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(sgb.fields) > 1 {
-		return nil, errors.New("ent: SessionGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := sgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (sgb *SessionGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := sgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SessionGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = sgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{session.Label}
-	default:
-		err = fmt.Errorf("ent: SessionGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (sgb *SessionGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := sgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SessionGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(sgb.fields) > 1 {
-		return nil, errors.New("ent: SessionGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := sgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (sgb *SessionGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := sgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (sgb *SessionGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = sgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{session.Label}
-	default:
-		err = fmt.Errorf("ent: SessionGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (sgb *SessionGroupBy) BoolX(ctx context.Context) bool {
-	v, err := sgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (sgb *SessionGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -762,6 +563,7 @@ func (sgb *SessionGroupBy) sqlQuery() *sql.Selector {
 // SessionSelect is the builder for selecting fields of Session entities.
 type SessionSelect struct {
 	*SessionQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -773,201 +575,6 @@ func (ss *SessionSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ss.sql = ss.SessionQuery.sqlQuery(ctx)
 	return ss.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ss *SessionSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ss.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ss *SessionSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ss.fields) > 1 {
-		return nil, errors.New("ent: SessionSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ss.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ss *SessionSelect) StringsX(ctx context.Context) []string {
-	v, err := ss.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ss *SessionSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ss.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{session.Label}
-	default:
-		err = fmt.Errorf("ent: SessionSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ss *SessionSelect) StringX(ctx context.Context) string {
-	v, err := ss.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ss *SessionSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ss.fields) > 1 {
-		return nil, errors.New("ent: SessionSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ss.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ss *SessionSelect) IntsX(ctx context.Context) []int {
-	v, err := ss.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ss *SessionSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ss.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{session.Label}
-	default:
-		err = fmt.Errorf("ent: SessionSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ss *SessionSelect) IntX(ctx context.Context) int {
-	v, err := ss.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ss *SessionSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ss.fields) > 1 {
-		return nil, errors.New("ent: SessionSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ss.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ss *SessionSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ss.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ss *SessionSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ss.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{session.Label}
-	default:
-		err = fmt.Errorf("ent: SessionSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ss *SessionSelect) Float64X(ctx context.Context) float64 {
-	v, err := ss.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ss *SessionSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ss.fields) > 1 {
-		return nil, errors.New("ent: SessionSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ss.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ss *SessionSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ss.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ss *SessionSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ss.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{session.Label}
-	default:
-		err = fmt.Errorf("ent: SessionSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ss *SessionSelect) BoolX(ctx context.Context) bool {
-	v, err := ss.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ss *SessionSelect) sqlScan(ctx context.Context, v interface{}) error {

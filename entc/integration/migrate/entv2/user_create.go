@@ -342,6 +342,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultTitle
 		uc.mutation.SetTitle(v)
 	}
+	if _, ok := uc.mutation.State(); !ok {
+		v := user.DefaultState
+		uc.mutation.SetState(v)
+	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		v := user.DefaultCreatedAt()
 		uc.mutation.SetCreatedAt(v)

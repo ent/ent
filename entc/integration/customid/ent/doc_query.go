@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 
@@ -342,15 +341,17 @@ func (dq *DocQuery) WithChildren(opts ...func(*DocQuery)) *DocQuery {
 //		Scan(ctx, &v)
 //
 func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
-	group := &DocGroupBy{config: dq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &DocGroupBy{config: dq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := dq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return dq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = doc.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -368,7 +369,10 @@ func (dq *DocQuery) GroupBy(field string, fields ...string) *DocGroupBy {
 //
 func (dq *DocQuery) Select(fields ...string) *DocSelect {
 	dq.fields = append(dq.fields, fields...)
-	return &DocSelect{DocQuery: dq}
+	selbuild := &DocSelect{DocQuery: dq}
+	selbuild.label = doc.Label
+	selbuild.flds, selbuild.scan = &dq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (dq *DocQuery) prepareQuery(ctx context.Context) error {
@@ -387,7 +391,7 @@ func (dq *DocQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (dq *DocQuery) sqlAll(ctx context.Context) ([]*Doc, error) {
+func (dq *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, error) {
 	var (
 		nodes       = []*Doc{}
 		withFKs     = dq.withFKs
@@ -404,17 +408,16 @@ func (dq *DocQuery) sqlAll(ctx context.Context) ([]*Doc, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, doc.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Doc{config: dq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Doc).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Doc{config: dq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, dq.driver, _spec); err != nil {
 		return nil, err
@@ -584,6 +587,7 @@ func (dq *DocQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // DocGroupBy is the group-by builder for Doc entities.
 type DocGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -605,209 +609,6 @@ func (dgb *DocGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	dgb.sql = query
 	return dgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (dgb *DocGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := dgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DocGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(dgb.fields) > 1 {
-		return nil, errors.New("ent: DocGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := dgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (dgb *DocGroupBy) StringsX(ctx context.Context) []string {
-	v, err := dgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DocGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = dgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{doc.Label}
-	default:
-		err = fmt.Errorf("ent: DocGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (dgb *DocGroupBy) StringX(ctx context.Context) string {
-	v, err := dgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DocGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(dgb.fields) > 1 {
-		return nil, errors.New("ent: DocGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := dgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (dgb *DocGroupBy) IntsX(ctx context.Context) []int {
-	v, err := dgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DocGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = dgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{doc.Label}
-	default:
-		err = fmt.Errorf("ent: DocGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (dgb *DocGroupBy) IntX(ctx context.Context) int {
-	v, err := dgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DocGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(dgb.fields) > 1 {
-		return nil, errors.New("ent: DocGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := dgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (dgb *DocGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := dgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DocGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = dgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{doc.Label}
-	default:
-		err = fmt.Errorf("ent: DocGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (dgb *DocGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := dgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DocGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(dgb.fields) > 1 {
-		return nil, errors.New("ent: DocGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := dgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (dgb *DocGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := dgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DocGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = dgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{doc.Label}
-	default:
-		err = fmt.Errorf("ent: DocGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (dgb *DocGroupBy) BoolX(ctx context.Context) bool {
-	v, err := dgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (dgb *DocGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -851,6 +652,7 @@ func (dgb *DocGroupBy) sqlQuery() *sql.Selector {
 // DocSelect is the builder for selecting fields of Doc entities.
 type DocSelect struct {
 	*DocQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -862,201 +664,6 @@ func (ds *DocSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ds.sql = ds.DocQuery.sqlQuery(ctx)
 	return ds.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ds *DocSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ds.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ds *DocSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ds.fields) > 1 {
-		return nil, errors.New("ent: DocSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ds.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ds *DocSelect) StringsX(ctx context.Context) []string {
-	v, err := ds.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ds *DocSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ds.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{doc.Label}
-	default:
-		err = fmt.Errorf("ent: DocSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ds *DocSelect) StringX(ctx context.Context) string {
-	v, err := ds.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ds *DocSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ds.fields) > 1 {
-		return nil, errors.New("ent: DocSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ds.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ds *DocSelect) IntsX(ctx context.Context) []int {
-	v, err := ds.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ds *DocSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ds.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{doc.Label}
-	default:
-		err = fmt.Errorf("ent: DocSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ds *DocSelect) IntX(ctx context.Context) int {
-	v, err := ds.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ds *DocSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ds.fields) > 1 {
-		return nil, errors.New("ent: DocSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ds.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ds *DocSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ds.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ds *DocSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ds.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{doc.Label}
-	default:
-		err = fmt.Errorf("ent: DocSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ds *DocSelect) Float64X(ctx context.Context) float64 {
-	v, err := ds.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ds *DocSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ds.fields) > 1 {
-		return nil, errors.New("ent: DocSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ds.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ds *DocSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ds.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ds *DocSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ds.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{doc.Label}
-	default:
-		err = fmt.Errorf("ent: DocSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ds *DocSelect) BoolX(ctx context.Context) bool {
-	v, err := ds.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ds *DocSelect) sqlScan(ctx context.Context, v interface{}) error {

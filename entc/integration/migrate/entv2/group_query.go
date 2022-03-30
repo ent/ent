@@ -8,7 +8,6 @@ package entv2
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -255,22 +254,27 @@ func (gq *GroupQuery) Clone() *GroupQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (gq *GroupQuery) GroupBy(field string, fields ...string) *GroupGroupBy {
-	group := &GroupGroupBy{config: gq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &GroupGroupBy{config: gq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return gq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = group.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (gq *GroupQuery) Select(fields ...string) *GroupSelect {
 	gq.fields = append(gq.fields, fields...)
-	return &GroupSelect{GroupQuery: gq}
+	selbuild := &GroupSelect{GroupQuery: gq}
+	selbuild.label = group.Label
+	selbuild.flds, selbuild.scan = &gq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
@@ -289,22 +293,21 @@ func (gq *GroupQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (gq *GroupQuery) sqlAll(ctx context.Context) ([]*Group, error) {
+func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group, error) {
 	var (
 		nodes = []*Group{}
 		_spec = gq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Group{config: gq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Group).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("entv2: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Group{config: gq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err
@@ -415,6 +418,7 @@ func (gq *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // GroupGroupBy is the group-by builder for Group entities.
 type GroupGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -436,209 +440,6 @@ func (ggb *GroupGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	ggb.sql = query
 	return ggb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ggb *GroupGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := ggb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GroupGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(ggb.fields) > 1 {
-		return nil, errors.New("entv2: GroupGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := ggb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ggb *GroupGroupBy) StringsX(ctx context.Context) []string {
-	v, err := ggb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GroupGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ggb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{group.Label}
-	default:
-		err = fmt.Errorf("entv2: GroupGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ggb *GroupGroupBy) StringX(ctx context.Context) string {
-	v, err := ggb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GroupGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(ggb.fields) > 1 {
-		return nil, errors.New("entv2: GroupGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := ggb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ggb *GroupGroupBy) IntsX(ctx context.Context) []int {
-	v, err := ggb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GroupGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ggb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{group.Label}
-	default:
-		err = fmt.Errorf("entv2: GroupGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ggb *GroupGroupBy) IntX(ctx context.Context) int {
-	v, err := ggb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GroupGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ggb.fields) > 1 {
-		return nil, errors.New("entv2: GroupGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := ggb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ggb *GroupGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := ggb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GroupGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ggb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{group.Label}
-	default:
-		err = fmt.Errorf("entv2: GroupGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ggb *GroupGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := ggb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GroupGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(ggb.fields) > 1 {
-		return nil, errors.New("entv2: GroupGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := ggb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ggb *GroupGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := ggb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GroupGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ggb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{group.Label}
-	default:
-		err = fmt.Errorf("entv2: GroupGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ggb *GroupGroupBy) BoolX(ctx context.Context) bool {
-	v, err := ggb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ggb *GroupGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -682,6 +483,7 @@ func (ggb *GroupGroupBy) sqlQuery() *sql.Selector {
 // GroupSelect is the builder for selecting fields of Group entities.
 type GroupSelect struct {
 	*GroupQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -693,201 +495,6 @@ func (gs *GroupSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	gs.sql = gs.GroupQuery.sqlQuery(ctx)
 	return gs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (gs *GroupSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := gs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (gs *GroupSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(gs.fields) > 1 {
-		return nil, errors.New("entv2: GroupSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := gs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (gs *GroupSelect) StringsX(ctx context.Context) []string {
-	v, err := gs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (gs *GroupSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = gs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{group.Label}
-	default:
-		err = fmt.Errorf("entv2: GroupSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (gs *GroupSelect) StringX(ctx context.Context) string {
-	v, err := gs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (gs *GroupSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(gs.fields) > 1 {
-		return nil, errors.New("entv2: GroupSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := gs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (gs *GroupSelect) IntsX(ctx context.Context) []int {
-	v, err := gs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (gs *GroupSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = gs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{group.Label}
-	default:
-		err = fmt.Errorf("entv2: GroupSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (gs *GroupSelect) IntX(ctx context.Context) int {
-	v, err := gs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (gs *GroupSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(gs.fields) > 1 {
-		return nil, errors.New("entv2: GroupSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := gs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (gs *GroupSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := gs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (gs *GroupSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = gs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{group.Label}
-	default:
-		err = fmt.Errorf("entv2: GroupSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (gs *GroupSelect) Float64X(ctx context.Context) float64 {
-	v, err := gs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (gs *GroupSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(gs.fields) > 1 {
-		return nil, errors.New("entv2: GroupSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := gs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (gs *GroupSelect) BoolsX(ctx context.Context) []bool {
-	v, err := gs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (gs *GroupSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = gs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{group.Label}
-	default:
-		err = fmt.Errorf("entv2: GroupSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (gs *GroupSelect) BoolX(ctx context.Context) bool {
-	v, err := gs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (gs *GroupSelect) sqlScan(ctx context.Context, v interface{}) error {

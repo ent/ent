@@ -32,6 +32,26 @@ func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return pu
 }
 
+// SetName sets the "name" field.
+func (pu *PetUpdate) SetName(s string) *PetUpdate {
+	pu.mutation.SetName(s)
+	return pu
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (pu *PetUpdate) SetNillableName(s *string) *PetUpdate {
+	if s != nil {
+		pu.SetName(*s)
+	}
+	return pu
+}
+
+// ClearName clears the value of the "name" field.
+func (pu *PetUpdate) ClearName() *PetUpdate {
+	pu.mutation.ClearName()
+	return pu
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pu *PetUpdate) SetOwnerID(id int) *PetUpdate {
 	pu.mutation.SetOwnerID(id)
@@ -134,6 +154,19 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := pu.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: pet.FieldName,
+		})
+	}
+	if pu.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: pet.FieldName,
+		})
+	}
 	if pu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -186,6 +219,26 @@ type PetUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PetMutation
+}
+
+// SetName sets the "name" field.
+func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
+	puo.mutation.SetName(s)
+	return puo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (puo *PetUpdateOne) SetNillableName(s *string) *PetUpdateOne {
+	if s != nil {
+		puo.SetName(*s)
+	}
+	return puo
+}
+
+// ClearName clears the value of the "name" field.
+func (puo *PetUpdateOne) ClearName() *PetUpdateOne {
+	puo.mutation.ClearName()
+	return puo
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
@@ -313,6 +366,19 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.Name(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: pet.FieldName,
+		})
+	}
+	if puo.mutation.NameCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: pet.FieldName,
+		})
 	}
 	if puo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

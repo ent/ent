@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 
@@ -306,15 +305,17 @@ func (cq *CityQuery) WithStreets(opts ...func(*StreetQuery)) *CityQuery {
 //		Scan(ctx, &v)
 //
 func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
-	group := &CityGroupBy{config: cq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &CityGroupBy{config: cq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return cq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = city.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -332,7 +333,10 @@ func (cq *CityQuery) GroupBy(field string, fields ...string) *CityGroupBy {
 //
 func (cq *CityQuery) Select(fields ...string) *CitySelect {
 	cq.fields = append(cq.fields, fields...)
-	return &CitySelect{CityQuery: cq}
+	selbuild := &CitySelect{CityQuery: cq}
+	selbuild.label = city.Label
+	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (cq *CityQuery) prepareQuery(ctx context.Context) error {
@@ -351,7 +355,7 @@ func (cq *CityQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
+func (cq *CityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*City, error) {
 	var (
 		nodes       = []*City{}
 		_spec       = cq.querySpec()
@@ -360,17 +364,16 @@ func (cq *CityQuery) sqlAll(ctx context.Context) ([]*City, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &City{config: cq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*City).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &City{config: cq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
@@ -511,6 +514,7 @@ func (cq *CityQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // CityGroupBy is the group-by builder for City entities.
 type CityGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -532,209 +536,6 @@ func (cgb *CityGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	cgb.sql = query
 	return cgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cgb *CityGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := cgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CityGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CityGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cgb *CityGroupBy) StringsX(ctx context.Context) []string {
-	v, err := cgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CityGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{city.Label}
-	default:
-		err = fmt.Errorf("ent: CityGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cgb *CityGroupBy) StringX(ctx context.Context) string {
-	v, err := cgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CityGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CityGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cgb *CityGroupBy) IntsX(ctx context.Context) []int {
-	v, err := cgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CityGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{city.Label}
-	default:
-		err = fmt.Errorf("ent: CityGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cgb *CityGroupBy) IntX(ctx context.Context) int {
-	v, err := cgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CityGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CityGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cgb *CityGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := cgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CityGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{city.Label}
-	default:
-		err = fmt.Errorf("ent: CityGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cgb *CityGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := cgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CityGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CityGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cgb *CityGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := cgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CityGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{city.Label}
-	default:
-		err = fmt.Errorf("ent: CityGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cgb *CityGroupBy) BoolX(ctx context.Context) bool {
-	v, err := cgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cgb *CityGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -778,6 +579,7 @@ func (cgb *CityGroupBy) sqlQuery() *sql.Selector {
 // CitySelect is the builder for selecting fields of City entities.
 type CitySelect struct {
 	*CityQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -789,201 +591,6 @@ func (cs *CitySelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	cs.sql = cs.CityQuery.sqlQuery(ctx)
 	return cs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cs *CitySelect) ScanX(ctx context.Context, v interface{}) {
-	if err := cs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (cs *CitySelect) Strings(ctx context.Context) ([]string, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CitySelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cs *CitySelect) StringsX(ctx context.Context) []string {
-	v, err := cs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (cs *CitySelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{city.Label}
-	default:
-		err = fmt.Errorf("ent: CitySelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cs *CitySelect) StringX(ctx context.Context) string {
-	v, err := cs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (cs *CitySelect) Ints(ctx context.Context) ([]int, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CitySelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cs *CitySelect) IntsX(ctx context.Context) []int {
-	v, err := cs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (cs *CitySelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{city.Label}
-	default:
-		err = fmt.Errorf("ent: CitySelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cs *CitySelect) IntX(ctx context.Context) int {
-	v, err := cs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (cs *CitySelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CitySelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cs *CitySelect) Float64sX(ctx context.Context) []float64 {
-	v, err := cs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (cs *CitySelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{city.Label}
-	default:
-		err = fmt.Errorf("ent: CitySelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cs *CitySelect) Float64X(ctx context.Context) float64 {
-	v, err := cs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (cs *CitySelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CitySelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cs *CitySelect) BoolsX(ctx context.Context) []bool {
-	v, err := cs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (cs *CitySelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{city.Label}
-	default:
-		err = fmt.Errorf("ent: CitySelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cs *CitySelect) BoolX(ctx context.Context) bool {
-	v, err := cs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cs *CitySelect) sqlScan(ctx context.Context, v interface{}) error {

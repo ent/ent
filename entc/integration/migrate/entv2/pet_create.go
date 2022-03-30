@@ -23,6 +23,20 @@ type PetCreate struct {
 	hooks    []Hook
 }
 
+// SetName sets the "name" field.
+func (pc *PetCreate) SetName(s string) *PetCreate {
+	pc.mutation.SetName(s)
+	return pc
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (pc *PetCreate) SetNillableName(s *string) *PetCreate {
+	if s != nil {
+		pc.SetName(*s)
+	}
+	return pc
+}
+
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (pc *PetCreate) SetOwnerID(id int) *PetCreate {
 	pc.mutation.SetOwnerID(id)
@@ -139,6 +153,14 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := pc.mutation.Name(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: pet.FieldName,
+		})
+		_node.Name = value
+	}
 	if nodes := pc.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,

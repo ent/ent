@@ -771,6 +771,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "iwata",
+      "name": "Motonori Iwata",
+      "avatar_url": "https://avatars.githubusercontent.com/u/121048?v=4",
+      "profile": "https://mobcov.hatenadiary.org/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

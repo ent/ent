@@ -81,7 +81,8 @@ func (User) Fields() []ent.Field {
 		// adding enum to the `state` column.
 		field.Enum("state").
 			Optional().
-			Values("logged_in", "logged_out", "online"),
+			Values("logged_in", "logged_out", "online").
+			Default("logged_in"),
 		// convert string to enum.
 		field.Enum("status").
 			Optional().
@@ -151,6 +152,14 @@ func (Car) Annotations() []schema.Annotation {
 	}
 }
 
+func (Car) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Optional().
+			Unique(),
+	}
+}
+
 func (Car) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
@@ -168,6 +177,14 @@ type Group struct{ ent.Schema }
 // Pet schema.
 type Pet struct {
 	ent.Schema
+}
+
+func (Pet) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Optional().
+			Unique(),
+	}
 }
 
 func (Pet) Edges() []ent.Edge {

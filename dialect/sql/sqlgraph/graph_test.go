@@ -655,8 +655,7 @@ func TestHasNeighborsWith(t *testing.T) {
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("expired", false))
 			},
-			wantQuery: `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "cards"."owner_id" FROM "cards" WHERE "expired" = $1)`,
-			wantArgs:  []interface{}{false},
+			wantQuery: `SELECT * FROM "users" WHERE "users"."id" IN (SELECT "cards"."owner_id" FROM "cards" WHERE NOT "expired")`,
 		},
 		{
 			name: "O2O/inverse",
@@ -779,8 +778,7 @@ WHERE "groups"."id" IN
 			predicate: func(s *sql.Selector) {
 				s.Where(sql.EQ("expired", false))
 			},
-			wantQuery: `SELECT * FROM "s1"."users" WHERE "s1"."users"."id" IN (SELECT "s2"."cards"."owner_id" FROM "s2"."cards" WHERE "expired" = $1)`,
-			wantArgs:  []interface{}{false},
+			wantQuery: `SELECT * FROM "s1"."users" WHERE "s1"."users"."id" IN (SELECT "s2"."cards"."owner_id" FROM "s2"."cards" WHERE NOT "expired")`,
 		},
 		{
 			name: "schema/O2M",
@@ -1549,11 +1547,11 @@ func TestUpdateNode(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND `deleted` = ?")).
-					WithArgs(1, 1, false).
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND NOT `deleted`")).
+					WithArgs(1, 1).
 					WillReturnResult(sqlmock.NewResult(1, 1))
-				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ? AND `deleted` = ?")).
-					WithArgs(1, false).
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ? AND NOT `deleted`")).
+					WithArgs(1).
 					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
 						AddRow(1, 31, nil))
 				mock.ExpectCommit()

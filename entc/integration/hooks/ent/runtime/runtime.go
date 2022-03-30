@@ -38,7 +38,9 @@ func init() {
 	card.DefaultCreatedAt = cardDescCreatedAt.Default.(func() time.Time)
 	userMixin := schema.User{}.Mixin()
 	userMixinHooks0 := userMixin[0].Hooks()
+	userHooks := schema.User{}.Hooks()
 	user.Hooks[0] = userMixinHooks0[0]
+	user.Hooks[1] = userHooks[0]
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0
 	userFields := schema.User{}.Fields()

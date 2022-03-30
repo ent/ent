@@ -408,15 +408,15 @@ func (d *SQLite) atTypeC(c1 *Column, c2 *schema.Column) error {
 
 func (d *SQLite) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schema.Column) {
 	// For UNIQUE columns, SQLite create an implicit index named
-	// "sqlite_autoindex_<table>_<i>". Ent uses the MySQL approach
-	// in its migration, and name these indexes as the columns.
+	// "sqlite_autoindex_<table>_<i>". Ent uses the PostgreSQL approach
+	// in its migration, and name these indexes as "<table>_<column>_key".
 	for _, idx := range t1.Indexes {
 		// Index also defined explicitly, and will be add in atIndexes.
 		if idx.Unique && d.atImplicitIndexName(idx, t1, c1) {
 			return
 		}
 	}
-	t2.AddIndexes(schema.NewUniqueIndex(c1.Name).AddColumns(c2))
+	t2.AddIndexes(schema.NewUniqueIndex(fmt.Sprintf("%s_%s_key", t2.Name, c1.Name)).AddColumns(c2))
 }
 
 func (d *SQLite) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {

@@ -342,15 +342,17 @@ func (tq *TeamQuery) WithUsers(opts ...func(*UserQuery)) *TeamQuery {
 //		Scan(ctx, &v)
 //
 func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
-	group := &TeamGroupBy{config: tq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &TeamGroupBy{config: tq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return tq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = team.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -368,7 +370,10 @@ func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
 //
 func (tq *TeamQuery) Select(fields ...string) *TeamSelect {
 	tq.fields = append(tq.fields, fields...)
-	return &TeamSelect{TeamQuery: tq}
+	selbuild := &TeamSelect{TeamQuery: tq}
+	selbuild.label = team.Label
+	selbuild.flds, selbuild.scan = &tq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (tq *TeamQuery) prepareQuery(ctx context.Context) error {
@@ -393,7 +398,7 @@ func (tq *TeamQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (tq *TeamQuery) sqlAll(ctx context.Context) ([]*Team, error) {
+func (tq *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, error) {
 	var (
 		nodes       = []*Team{}
 		_spec       = tq.querySpec()
@@ -403,17 +408,16 @@ func (tq *TeamQuery) sqlAll(ctx context.Context) ([]*Team, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Team{config: tq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Team).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Team{config: tq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
 		return nil, err
@@ -423,131 +427,107 @@ func (tq *TeamQuery) sqlAll(ctx context.Context) ([]*Team, error) {
 	}
 
 	if query := tq.withTasks; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Team, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*Team)
+		nids := make(map[int]map[*Team]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
 			node.Edges.Tasks = []*Task{}
 		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*Team)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   team.TasksTable,
-				Columns: team.TasksPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(team.TasksPrimaryKey[1], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(team.TasksTable)
+			s.Join(joinT).On(s.C(task.FieldID), joinT.C(team.TasksPrimaryKey[0]))
+			s.Where(sql.InValues(joinT.C(team.TasksPrimaryKey[1]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(team.TasksPrimaryKey[1]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
 				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Team]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
+				nids[inValue][byid[outValue]] = struct{}{}
 				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, tq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "tasks": %w`, err)
-		}
-		query.Where(task.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			nodes, ok := nids[n.ID]
 			if !ok {
 				return nil, fmt.Errorf(`unexpected "tasks" node returned %v`, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Tasks = append(nodes[i].Edges.Tasks, n)
+			for kn := range nodes {
+				kn.Edges.Tasks = append(kn.Edges.Tasks, n)
 			}
 		}
 	}
 
 	if query := tq.withUsers; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Team, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*Team)
+		nids := make(map[int]map[*Team]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
 			node.Edges.Users = []*User{}
 		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*Team)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   team.UsersTable,
-				Columns: team.UsersPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(team.UsersPrimaryKey[1], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(team.UsersTable)
+			s.Join(joinT).On(s.C(user.FieldID), joinT.C(team.UsersPrimaryKey[0]))
+			s.Where(sql.InValues(joinT.C(team.UsersPrimaryKey[1]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(team.UsersPrimaryKey[1]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
 				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Team]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
+				nids[inValue][byid[outValue]] = struct{}{}
 				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, tq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "users": %w`, err)
-		}
-		query.Where(user.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			nodes, ok := nids[n.ID]
 			if !ok {
 				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Users = append(nodes[i].Edges.Users, n)
+			for kn := range nodes {
+				kn.Edges.Users = append(kn.Edges.Users, n)
 			}
 		}
 	}
@@ -655,6 +635,7 @@ func (tq *TeamQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // TeamGroupBy is the group-by builder for Team entities.
 type TeamGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -676,209 +657,6 @@ func (tgb *TeamGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	tgb.sql = query
 	return tgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (tgb *TeamGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := tgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TeamGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TeamGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (tgb *TeamGroupBy) StringsX(ctx context.Context) []string {
-	v, err := tgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TeamGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = tgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{team.Label}
-	default:
-		err = fmt.Errorf("ent: TeamGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (tgb *TeamGroupBy) StringX(ctx context.Context) string {
-	v, err := tgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TeamGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TeamGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (tgb *TeamGroupBy) IntsX(ctx context.Context) []int {
-	v, err := tgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TeamGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = tgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{team.Label}
-	default:
-		err = fmt.Errorf("ent: TeamGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (tgb *TeamGroupBy) IntX(ctx context.Context) int {
-	v, err := tgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TeamGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TeamGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (tgb *TeamGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := tgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TeamGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = tgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{team.Label}
-	default:
-		err = fmt.Errorf("ent: TeamGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (tgb *TeamGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := tgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TeamGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(tgb.fields) > 1 {
-		return nil, errors.New("ent: TeamGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := tgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (tgb *TeamGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := tgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (tgb *TeamGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = tgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{team.Label}
-	default:
-		err = fmt.Errorf("ent: TeamGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (tgb *TeamGroupBy) BoolX(ctx context.Context) bool {
-	v, err := tgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (tgb *TeamGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -922,6 +700,7 @@ func (tgb *TeamGroupBy) sqlQuery() *sql.Selector {
 // TeamSelect is the builder for selecting fields of Team entities.
 type TeamSelect struct {
 	*TeamQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -933,201 +712,6 @@ func (ts *TeamSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ts.sql = ts.TeamQuery.sqlQuery(ctx)
 	return ts.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ts *TeamSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ts.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ts *TeamSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TeamSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ts *TeamSelect) StringsX(ctx context.Context) []string {
-	v, err := ts.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ts *TeamSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ts.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{team.Label}
-	default:
-		err = fmt.Errorf("ent: TeamSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ts *TeamSelect) StringX(ctx context.Context) string {
-	v, err := ts.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ts *TeamSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TeamSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ts *TeamSelect) IntsX(ctx context.Context) []int {
-	v, err := ts.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ts *TeamSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ts.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{team.Label}
-	default:
-		err = fmt.Errorf("ent: TeamSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ts *TeamSelect) IntX(ctx context.Context) int {
-	v, err := ts.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ts *TeamSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TeamSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ts *TeamSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ts.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ts *TeamSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ts.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{team.Label}
-	default:
-		err = fmt.Errorf("ent: TeamSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ts *TeamSelect) Float64X(ctx context.Context) float64 {
-	v, err := ts.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ts *TeamSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ts.fields) > 1 {
-		return nil, errors.New("ent: TeamSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ts.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ts *TeamSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ts.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ts *TeamSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ts.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{team.Label}
-	default:
-		err = fmt.Errorf("ent: TeamSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ts *TeamSelect) BoolX(ctx context.Context) bool {
-	v, err := ts.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ts *TeamSelect) sqlScan(ctx context.Context, v interface{}) error {
