@@ -5,7 +5,7 @@ authorURL: "https://github.com/yonidavidson"
 authorImageURL: "https://avatars0.githubusercontent.com/u/5472778"
 authorTwitter: yonidavidson
 ---
-Despite being one of the most powerful features of Ent, Schema [Hooks](https://entgo.io/docs/hooks) 
+Despite being one of the most powerful features of Ent, Schema [hooks](https://entgo.io/docs/hooks) 
 are often overlooked by many users. We've covered hooks in previous blog posts (such as 
 [Building Observable Ent Applications with Prometheus](/blog/2021/08/12/building-observable-ent-application-with-prometheus)
 and [Sync Changes to External Data Systems using Ent Hooks](/blog/2021/11/1/sync-to-external-data-systems-using-hooks)),
@@ -43,20 +43,18 @@ func exampleHook() ent.Hook {
 }
 ```
 
-In Ent, [Schema hooks](https://entgo.io/docs/hooks#schema-hooks) are mainly used for defining custom mutation logic on a specific entity type, for example,
-syncing entity creation to another system. Runtime hooks, on the other hand, are used
-to define more global logic for adding things like logging, metrics, tracing, etc.
-
-In this post, I will focus mainly on schemas hooks.
+[Schema hooks](https://entgo.io/docs/hooks#schema-hooks) are mainly used for defining custom mutation logic on a specific entity type, for example,
+syncing entity creation to another system.
 
 ### Schema as code
 
-In Ent, we try and push the entity's logic down to the schema level, this allows us to define everything about an entity close to its definition. Entity properties could be:
-1. Valid values
-2. Type
-3. Allowed mutations
+In Ent, we try and push the entity's logic to the schema level, this way, the logic can be near the schema and not located
+in different places in a system. Entity properties could be:
+1. Field type (Text, Int, Boolean)
+2. Field Valid values ("Not empty","positive")
+3. Immutability status for each field
 4. Privacy
-5. Required Side effect (heavy compute for example)
+5. Required Side effects (heavy compute for example)
 ---
 Oftentimes, it’s more comfortable to define these properties in the RPC level, a controller provides a context and all the mutations
 and validation are done before changing the value.
@@ -65,7 +63,7 @@ whenever the entity is changing becomes much more challenging. This requires mor
 can cause unintentional bugs or inconsistencies in the data that are only discovered in runtime.
 Inspired by the experience of bigger companies like Facebook, Ent decided to handle this by keeping this information
 as close as possible to the entity. Therefore hooks are just that - a piece of code that runs before and after an entity 
-is changing and that defines additional behavior.
+is changing.
 
 ## Let's do some examples
 
@@ -126,7 +124,7 @@ func (Dog) Edges() []ent.Edge {
 ```
 
 For each example I'll provide a test and a recipe, I highly suggest starting with a test to see that the hook does what you need it to do.
-Unlike many other parts of the codebase, hooks do one thing only and should be simple to test.
+Hooks should do one thing only and therfore be simple to test.
 
 ### Keeping our secrets safe:
 
@@ -163,7 +161,7 @@ func (User) Hooks() []ent.Hook {
 ```
 * Run `go generate ./ent` or the hook will not be registered.
 
-A few hook helpers are used here, `maskPhoneNumber` is the name of the hook function, and it will run if a user 
+A few [hook helpers](https://entgo.io/docs/hooks/#hook-helpers) are used here, `maskPhoneNumber` is the name of the hook function, and it will run if a user 
 is updated or created and the mutation has the field `phone_number` (if we change only the name of the user there is no need to do anything right?).
 
 The hook:
@@ -201,7 +199,7 @@ func (u *User) FullPhoneNumber() string {
 }
 ```
 
-BTW, you can see that it's OK to add files to the Ent directory (not only in schema folder) since the Ent generate command only appends/changes Ent
+It's valid to add files to the Ent directory (not only in schema folder) since the Ent generate command only appends/changes Ent
 generated files.
 
 
@@ -300,7 +298,7 @@ func TestCacheHook(t *testing.T) {
 }
 ```
 This test is a bit more complicated, so let's review it line by line:
-First, I create a new ```cache syncer``` (remember we have a cache entity in our schema).
+First, I create a new `cache syncer` (remember we have a cache entity in our schema).
 
 This `Cache Syncer` can do heavy computations while running in a different context.
 We create an Ent client and inject our `Cache Syncer`, it is disabled by default.
@@ -327,7 +325,7 @@ func (Cache) Fields() []ent.Field {
 ```
 
 Now the hook:
-```go
+```go title="ent/schema/dog.go"
 // Hooks of the Dog.
 func (Dog) Hooks() []ent.Hook {
 	return []ent.Hook{
@@ -343,7 +341,7 @@ The Sync cache will trigger once a dog is updated.
 For injecting the dependency in ent we follow [injecting external dependencies](https://entgo.io/docs/code-gen#external-dependencies)
 section and update our  `entc.go`:
 
-```go
+```go title="ent/entc.go"
 func main() {
 	opts := []entc.Option{
 		entc.Dependency(
@@ -361,7 +359,7 @@ func main() {
 ```
 
 The interface just exposes the sync command:
-```go
+```go title="hook/syncer.go"
 package hook
 
 import "context"
@@ -373,7 +371,7 @@ type Syncer interface {
 
 
 The hooks themselves will query for the owner's cache ID and call the `Cache Syncer` with that ID:
-```go
+```go title="ent/schema/dog.go"
 func syncCache(next ent.Mutator) ent.Mutator {
 	return hook.DogFunc(func(ctx context.Context, m *gen.DogMutation) (ent.Value, error) {
 		cacheID, err := m.Client().Dog.Query().QueryOwner().QueryCache().OnlyID(ctx)
@@ -394,9 +392,9 @@ Full code for the cache syncer can be found [here](https://github.com/yonidavids
 ### Wrapping Up
 
 In this post we reviewed a few examples for using hooks to embed three types of known problems we have when writing servers:
-1. Keeping secrets safe.
-2. Validating rules over our data  before saving in our DB.
-3. Offloading heavy computes and store in cache.
+1. Keeping secrets safe
+2. Data validation rules on Create
+3. Offload heavy computation to a background task and store it in cache
 
 I hope this will help you next time you approach these type of problems while using Ent.
 
