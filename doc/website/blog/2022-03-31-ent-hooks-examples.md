@@ -67,7 +67,7 @@ is changing.
 
 ## Let's do some examples
 
-For our examples we use a simple schema of Users and Dogs, each user can have multiple pets and each pet has an owner 
+For our examples, we will use a simple schema of Users and Dogs. Each user can have multiple pets and each pet has a single owner 
 as can be seen here:
 ```go title="ent/schema/user.go"
 // User holds the schema definition for the User entity.
