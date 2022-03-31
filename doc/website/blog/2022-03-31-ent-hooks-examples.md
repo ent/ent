@@ -369,7 +369,6 @@ type Syncer interface {
 }
 ```
 
-
 The hooks themselves will query for the Owner's cache ID and call the `Cache Syncer` with that ID:
 ```go title="ent/schema/dog.go"
 func syncCache(next ent.Mutator) ent.Mutator {
