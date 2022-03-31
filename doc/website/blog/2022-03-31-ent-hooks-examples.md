@@ -210,7 +210,7 @@ dependencies that are more applicative and require broader context.
 For example, in our use case, we would like to make sure that dog's names don’t start with the first 2 letters of the owner's name 
 (best practice when you don't want your dog to run in circles every time someone calls your name).
 
-We start with a simple test
+We start with a simple test:
 ```go title="ent/schema/dog_test.go"
 func TestDogNameValidationHook(t *testing.T) {
 	ctx := context.Background()
