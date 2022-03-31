@@ -358,7 +358,7 @@ func main() {
 }
 ```
 
-The interface just exposes the sync command:
+The interface exposes the sync command:
 ```go title="hook/syncer.go"
 package hook
 
