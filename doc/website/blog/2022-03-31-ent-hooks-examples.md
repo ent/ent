@@ -117,7 +117,7 @@ func (Dog) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).
 			Ref("pets").
-			Field("owner_id"). // Field is needed later.
+			Field("owner_id").
 			Unique(),
 	}
 }
