@@ -49,7 +49,7 @@ syncing entity creation to another system.
 ### Schema as code
 
 In Ent, we try and push the entity's logic to the schema level. This way, the logic can be near the schema and not located
-in different places in a system. Entity properties could be:
+in different places in a system. For example, entity properties could be:
 1. Field type (Text, Int, Boolean)
 2. Field valid values ("Not empty","positive")
 3. Immutability status for each field
