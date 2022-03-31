@@ -123,12 +123,12 @@ func (Dog) Edges() []ent.Edge {
 }
 ```
 
-For each example I'll provide a test and a recipe, I highly suggest starting with a test to see that the hook does what you need it to do.
-Hooks should do one thing only and therfore be simple to test.
+For each example I'll provide a test and a recipe, and I highly suggest starting with a test to see that the hook does what you intend for it to do.
+Hooks are especially simple to test because they are only expected to do one thing.
 
 ### Keeping our secrets safe:
 
-Many times, we need to store strings that include secrets, a good example can be a phone number.
+Oftentimes we need to store strings that include secrets, a good example can be a phone number.
 In our case the privacy concern is rather simple. We require to hide the last 4 digits of each phone number.
 The expected behavior is best described by this test:
 ```go title="ent/schema/user_test.go"
@@ -162,7 +162,7 @@ func (User) Hooks() []ent.Hook {
 * Run `go generate ./ent` or the hook will not be registered.
 
 A few [hook helpers](https://entgo.io/docs/hooks/#hook-helpers) are used here, `maskPhoneNumber` is the name of the hook function, and it will run if a user 
-is updated or created and the mutation has the field `phone_number` (if we change only the name of the user there is no need to do anything right?).
+is updated or created and the mutation has the field `phone_number` (if we change only the name of the user there is no need to do anything, right?).
 
 The hook:
 ```go title="ent/schema/user.go"
@@ -183,11 +183,11 @@ func maskPhoneNumber(next ent.Mutator) ent.Mutator {
 	})
 }
 ```
-We validate that the mutation has a `phone_number`(if not just let the mutation continue).
+We validate that the mutation has a `phone_number`(if not, let the mutation continue).
 A bit of string acrobatics, and we have the `last_digits` extracted from the string. We store it in another field - the `last_digits` and
 mask the `phone_number`. 
 
-To get the full phone number we add a utility function 
+To get the full phone number, we will add a utility function.
 ```go title="ent/user_phone_number.go"
 package ent
 
@@ -267,7 +267,7 @@ func validateName(next ent.Mutator) ent.Mutator {
 	})
 }
 ```
-A simple name validator and if we see a problem we cancel the mutation by returning an error before `next.Mutate(ctx,m)`.
+The above hook acts as a simple name validator. If the name does not comply, we cancel the mutation by returning an error before `next.Mutate(ctx,m)`.
 
 ### Offloading Long Computations:
 
