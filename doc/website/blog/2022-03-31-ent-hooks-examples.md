@@ -54,7 +54,7 @@ in different places in a system. For example, entity properties could be:
 2. Field valid values ("Not empty","positive")
 3. Immutability status for each field
 4. Privacy
-5. Required Side effects (heavy compute for example)
+5. Side effects
 ---
 Oftentimes, it’s more comfortable to define these properties in the RPC level: a controller provides a context and all the mutations
 and validation are done before changing the value.
@@ -338,7 +338,7 @@ func (Dog) Hooks() []ent.Hook {
 
 The sync cache will trigger once a dog is updated.
 
-For injecting the dependency in ent we follow [injecting external dependencies](https://entgo.io/docs/code-gen#external-dependencies)
+For injecting the dependency in Ent we will follow the [injecting external dependencies](https://entgo.io/docs/code-gen#external-dependencies)
 section and update our `entc.go`:
 
 ```go title="ent/entc.go"
