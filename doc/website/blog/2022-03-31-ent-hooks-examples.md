@@ -336,7 +336,7 @@ func (Dog) Hooks() []ent.Hook {
 }
 ```
 
-The Sync cache will trigger once a dog is updated.
+The sync cache will trigger once a dog is updated.
 
 For injecting the dependency in ent we follow [injecting external dependencies](https://entgo.io/docs/code-gen#external-dependencies)
 section and update our `entc.go`:
