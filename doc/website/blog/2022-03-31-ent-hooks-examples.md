@@ -56,7 +56,7 @@ in different places in a system. Entity properties could be:
 4. Privacy
 5. Required Side effects (heavy compute for example)
 ---
-Oftentimes, it’s more comfortable to define these properties in the RPC level, a controller provides a context and all the mutations
+Oftentimes, it’s more comfortable to define these properties in the RPC level: a controller provides a context and all the mutations
 and validation are done before changing the value.
 Yet, as the system grows and more developers are working on it simultaneously, making sure that these validations and calculations are done
 whenever the entity is changing becomes much more challenging. This requires more pre-known knowledge about each entity and
