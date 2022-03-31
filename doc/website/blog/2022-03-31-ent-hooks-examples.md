@@ -62,7 +62,7 @@ Yet, as the system grows and more developers are working on it simultaneously, m
 whenever the entity is changing becomes much more challenging. This requires more pre-known knowledge about each entity and
 can cause unintentional bugs or inconsistencies in the data that are only discovered in runtime.
 Inspired by the experience of bigger companies like Facebook, Ent decided to handle this by keeping this information
-as close as possible to the entity. Therefore hooks are just that - a piece of code that runs before and after an entity 
+as close as possible to the entity definition. Therefore hooks are just that - a piece of code that runs before and after an entity 
 is changing.
 
 ## Let's do some examples
