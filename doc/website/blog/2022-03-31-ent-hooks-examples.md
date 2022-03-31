@@ -153,8 +153,12 @@ First thing, add the hook to your schema:
 // Hooks of the User.
 func (User) Hooks() []ent.Hook {
 	return []ent.Hook{
-		hook.If(maskPhoneNumber,
-			hook.And(hook.Or(hook.HasOp(ent.OpUpdateOne), hook.HasOp(ent.OpCreate)), hook.HasFields(user.FieldPhoneNumber)),
+		hook.If(
+			maskPhoneNumber,
+			hook.And(
+				hook.HasOp(ent.OpUpdateOne|ent.OpCreate),
+				hook.HasFields(user.FieldPhoneNumber),
+			),
 		),
 	}
 }
@@ -234,14 +238,15 @@ First, register the hook:
 // Hooks of the Dog.
 func (Dog) Hooks() []ent.Hook {
 	return []ent.Hook{		
-		hook.If(validateName,
+		hook.If(
+			validateName,
 			hook.HasFields(dog.FieldOwnerID),
 		),
 	}
 }
 ```
 
-Since we want our hook to call every time we change the owner (to make sure the name is matched against), I am using an
+Since we want our hook to be called every time we change the owner (to make sure the name is matched against), I am using an
 [edge field](https://entgo.io/docs/schema-edges#edge-field). This provides the hooks a trigger when the edge's ID changes.
 
 The hook:
@@ -329,9 +334,10 @@ Now the hook:
 // Hooks of the Dog.
 func (Dog) Hooks() []ent.Hook {
 	return []ent.Hook{
-		hook.If(syncCache,
+		hook.If(
+			syncCache,
 			hook.HasOp(ent.OpUpdateOne),
-		),		
+		),
 	}
 }
 ```
@@ -364,6 +370,7 @@ package hook
 
 import "context"
 
+// Syncer is the interface that wraps Sync logic.
 type Syncer interface {
 	Sync(ctx context.Context, cacheID int)
 }
