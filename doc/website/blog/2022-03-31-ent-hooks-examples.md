@@ -271,7 +271,7 @@ A simple name validator and if we see a problem we cancel the mutation by return
 
 ### Offloading Long Computations:
 
-In some cases, we have fields in our database that require long computation, we would like to make sure that this data is always updated once
+In some cases, like when we have fields in our database that require long computation, we would like to make sure that this data is always updated if
 a change in the data requires it.
 
 A test for it will look like this:
