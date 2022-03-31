@@ -199,7 +199,7 @@ func (u *User) FullPhoneNumber() string {
 }
 ```
 
-It's valid to add files to the Ent directory (not only in schema folder) since the Ent generate command only appends/changes Ent
+It's valid to add files to the Ent directory (not only in the schema folder) since the Ent `generate` command only appends/changes Ent
 generated files.
 
 
