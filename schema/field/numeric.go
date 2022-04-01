@@ -262,8 +262,8 @@ func (b *intBuilder) SchemaType(types map[string]string) *intBuilder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *intBuilder) GoType(typ interface{}) *intBuilder {
@@ -431,8 +431,8 @@ func (b *uintBuilder) SchemaType(types map[string]string) *uintBuilder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *uintBuilder) GoType(typ interface{}) *uintBuilder {
@@ -610,8 +610,8 @@ func (b *int8Builder) SchemaType(types map[string]string) *int8Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *int8Builder) GoType(typ interface{}) *int8Builder {
@@ -789,8 +789,8 @@ func (b *int16Builder) SchemaType(types map[string]string) *int16Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *int16Builder) GoType(typ interface{}) *int16Builder {
@@ -968,8 +968,8 @@ func (b *int32Builder) SchemaType(types map[string]string) *int32Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *int32Builder) GoType(typ interface{}) *int32Builder {
@@ -1147,8 +1147,8 @@ func (b *int64Builder) SchemaType(types map[string]string) *int64Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *int64Builder) GoType(typ interface{}) *int64Builder {
@@ -1316,8 +1316,8 @@ func (b *uint8Builder) SchemaType(types map[string]string) *uint8Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *uint8Builder) GoType(typ interface{}) *uint8Builder {
@@ -1485,8 +1485,8 @@ func (b *uint16Builder) SchemaType(types map[string]string) *uint16Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *uint16Builder) GoType(typ interface{}) *uint16Builder {
@@ -1654,8 +1654,8 @@ func (b *uint32Builder) SchemaType(types map[string]string) *uint32Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *uint32Builder) GoType(typ interface{}) *uint32Builder {
@@ -1823,8 +1823,8 @@ func (b *uint64Builder) SchemaType(types map[string]string) *uint64Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *uint64Builder) GoType(typ interface{}) *uint64Builder {
@@ -1992,8 +1992,8 @@ func (b *float64Builder) SchemaType(types map[string]string) *float64Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *float64Builder) GoType(typ interface{}) *float64Builder {
@@ -2145,8 +2145,8 @@ func (b *float32Builder) SchemaType(types map[string]string) *float32Builder {
 // `Add(T) T` method in order to support the `Add<F>` operation
 // in mutations. For example:
 //
-//	func(t1 T) Add(t1 T) T {
-//		return add(t1, t1)
+//	func(t1 T) Add(t2 T) T {
+//		return add(t1, t2)
 //	}
 //
 func (b *float32Builder) GoType(typ interface{}) *float32Builder {
