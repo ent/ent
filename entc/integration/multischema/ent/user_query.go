@@ -34,7 +34,7 @@ type UserQuery struct {
 	// eager-loading edges.
 	withPets   *PetQuery
 	withGroups *GroupQuery
-	modifiers  []func(s *sql.Selector)
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

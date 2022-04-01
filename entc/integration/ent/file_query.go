@@ -37,7 +37,7 @@ type FileQuery struct {
 	withType  *FileTypeQuery
 	withField *FieldTypeQuery
 	withFKs   bool
-	modifiers []func(s *sql.Selector)
+	modifiers []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)

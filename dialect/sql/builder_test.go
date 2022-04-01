@@ -2039,13 +2039,13 @@ func TestWindowFunction(t *testing.T) {
 			Select().
 				AppendSelect("*").
 				AppendSelectExprAs(
-					RowNumber().PartitionBy("author_id").OrderBy("id"),
+					RowNumber().PartitionBy("author_id").OrderBy("id").OrderExpr(Expr("f(`s`)")),
 					"row_number",
 				).
 				From(Table("active_posts")),
 		)
 	query, args := Select("*").From(Table("selected_posts")).Where(LTE("row_number", 2)).Prefix(with).Query()
-	require.Equal(t, "WITH `active_posts` AS (SELECT `posts`.`id`, `posts`.`content`, `posts`.`author_id` FROM `posts` WHERE `active`), `selected_posts` AS (SELECT *, (ROW_NUMBER() OVER (PARTITION BY `author_id` ORDER BY `id`)) AS `row_number` FROM `active_posts`) SELECT * FROM `selected_posts` WHERE `row_number` <= ?", query)
+	require.Equal(t, "WITH `active_posts` AS (SELECT `posts`.`id`, `posts`.`content`, `posts`.`author_id` FROM `posts` WHERE `active`), `selected_posts` AS (SELECT *, (ROW_NUMBER() OVER (PARTITION BY `author_id` ORDER BY `id`, f(`s`))) AS `row_number` FROM `active_posts`) SELECT * FROM `selected_posts` WHERE `row_number` <= ?", query)
 	require.Equal(t, []interface{}{2}, args)
 }
 
