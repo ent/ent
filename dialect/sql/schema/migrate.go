@@ -173,6 +173,9 @@ func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) 
 	if m.atlas.dir == nil {
 		return errors.New("no migration directory given")
 	}
+	if err := m.init(ctx, m); err != nil {
+		return err
+	}
 	plan, err := m.atDiff(ctx, m, name, tables...)
 	if err != nil {
 		return err
