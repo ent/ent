@@ -2711,7 +2711,7 @@ func (s *Selector) Query() (string, []interface{}) {
 		s.joinUnion(&b)
 	}
 	if len(s.order) > 0 {
-		s.joinOrder(&b)
+		joinOrder(s.order, &b)
 	}
 	if s.limit != nil {
 		b.WriteString(" LIMIT ")
@@ -2773,17 +2773,17 @@ func (s *Selector) joinUnion(b *Builder) {
 	}
 }
 
-func (s *Selector) joinOrder(b *Builder) {
+func joinOrder(order []interface{}, b *Builder) {
 	b.WriteString(" ORDER BY ")
-	for i := range s.order {
+	for i := range order {
 		if i > 0 {
 			b.Comma()
 		}
-		switch order := s.order[i].(type) {
+		switch r := order[i].(type) {
 		case string:
-			b.Ident(order)
+			b.Ident(r)
 		case Querier:
-			b.Join(order)
+			b.Join(r)
 		}
 	}
 }
@@ -2908,7 +2908,7 @@ type WindowBuilder struct {
 	Builder
 	fn        string // e.g. ROW_NUMBER(), RANK().
 	partition func(*Builder)
-	order     func(*Builder)
+	order     []interface{}
 }
 
 // RowNumber returns a new window clause with the ROW_NUMBER() as a function.
@@ -2938,8 +2938,17 @@ func (w *WindowBuilder) PartitionExpr(x Querier) *WindowBuilder {
 
 // OrderBy indicates how to sort rows in each partition.
 func (w *WindowBuilder) OrderBy(columns ...string) *WindowBuilder {
-	w.order = func(b *Builder) {
-		b.IdentComma(columns...)
+	for i := range columns {
+		w.order = append(w.order, columns[i])
+	}
+	return w
+}
+
+// OrderExpr appends the `ORDER BY` clause to the window
+// partition with custom list of expressions.
+func (w *WindowBuilder) OrderExpr(exprs ...Querier) *WindowBuilder {
+	for i := range exprs {
+		w.order = append(w.order, exprs[i])
 	}
 	return w
 }
@@ -2954,8 +2963,7 @@ func (w *WindowBuilder) Query() (string, []interface{}) {
 			w.partition(b)
 		}
 		if w.order != nil {
-			b.WriteString(" ORDER BY ")
-			w.order(b)
+			joinOrder(w.order, b)
 		}
 	})
 	return w.Builder.String(), w.args

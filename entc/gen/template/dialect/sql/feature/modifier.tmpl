@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 {{/* Template for adding the "modifiers" field to the query builder. */}}
 {{ define "dialect/sql/query/fields/additional/modify" -}}
     {{- if or ($.FeatureEnabled "sql/lock") ($.FeatureEnabled "sql/modifier") }}
-        modifiers []func(s *sql.Selector)
+        modifiers []func(*sql.Selector)
     {{- end }}
 {{- end -}}
 

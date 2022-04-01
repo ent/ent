@@ -29,7 +29,7 @@ type FieldTypeQuery struct {
 	fields     []string
 	predicates []predicate.FieldType
 	withFKs    bool
-	modifiers  []func(s *sql.Selector)
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
