@@ -28,14 +28,14 @@ func TestType(t *testing.T) {
 			{Name: "foo", Unique: true, Default: true, Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
-	require.EqualError(err, "unique field \"foo\" cannot have default value")
+	require.EqualError(err, "unique field \"foo\" cannot have default value", "unique field can not have default")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Fields: []*load.Field{
 			{Name: "foo", Sensitive: true, Tag: `yaml:"pwd"`, Info: &field.TypeInfo{Type: field.TypeString}},
 		},
 	})
-	require.EqualError(err, "sensitive field \"foo\" cannot have struct tags")
+	require.EqualError(err, "sensitive field \"foo\" cannot have struct tags", "sensitive field cannot have tags")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -44,7 +44,7 @@ func TestType(t *testing.T) {
 			{Name: "foo", Unique: true, Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
-	require.EqualError(err, "field \"foo\" redeclared for type \"T\"")
+	require.EqualError(err, "field \"foo\" redeclared for type \"T\"", "field foo redeclared")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -52,7 +52,7 @@ func TestType(t *testing.T) {
 			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []struct{ N, V string }{{V: "v"}, {V: "v"}}},
 		},
 	})
-	require.EqualError(err, "duplicate values \"v\" for enum field \"enums\"")
+	require.EqualError(err, "duplicate values \"v\" for enum field \"enums\"", "duplicate enums")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -60,7 +60,7 @@ func TestType(t *testing.T) {
 			{Name: "enums", Info: &field.TypeInfo{Type: field.TypeEnum}, Enums: []struct{ N, V string }{{}}},
 		},
 	})
-	require.EqualError(err, "\"enums\" field value cannot be empty")
+	require.EqualError(err, "\"enums\" field value cannot be empty", "empty value for enums")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -68,7 +68,7 @@ func TestType(t *testing.T) {
 			{Name: "", Info: &field.TypeInfo{Type: field.TypeInt}},
 		},
 	})
-	require.EqualError(err, "field name cannot be empty")
+	require.EqualError(err, "field name cannot be empty", "empty field name")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Name: "T",
@@ -76,7 +76,7 @@ func TestType(t *testing.T) {
 			{Name: "id", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
 		},
 	})
-	require.EqualError(err, "id field must not be optional")
+	require.EqualError(err, "id field must not be optional", "id field can't be optional")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Type"})
 	require.EqualError(err, "schema lowercase name conflicts with Go keyword \"type\"")
