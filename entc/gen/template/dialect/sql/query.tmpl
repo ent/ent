@@ -79,12 +79,18 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 			{{ template "dialect/sql/query/eagerloading" . }}
 		{{- end }}
 	{{- end }}
+	{{- /* Allow extensions to inject code using templates to process nodes before they are returned. */}}
+	{{- with $tmpls := matchTemplate "dialect/sql/query/all/nodes/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	return nodes, nil
 }
 
 func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error) {
 	_spec := {{ $receiver }}.querySpec()
-	{{- /* Allow mutating the sqlgraph.QuerySpec by ent extensions or user templates.*/}}
+	{{- /* Allow mutating the sqlgraph.QuerySpec by ent extensions or user templates. */}}
 	{{- with $tmpls := matchTemplate "dialect/sql/query/spec/*" }}
 		{{- range $tmpl := $tmpls }}
 			{{- xtemplate $tmpl $ }}
