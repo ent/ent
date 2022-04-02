@@ -188,6 +188,7 @@ var (
 		"dialect/sql/select/additional/*",
 		"dialect/sql/predicate/edge/*/*",
 		"dialect/sql/query/additional/*",
+		"dialect/sql/query/all/nodes/*",
 		"dialect/sql/query/from/*",
 		"dialect/sql/query/path/*",
 		"import/additional/*",
