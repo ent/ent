@@ -240,7 +240,7 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		// User defined id field.
 		if tf.Name == typ.ID.Name {
 			if tf.Optional {
-				return nil, fmt.Errorf("id field must not be optional")
+				return nil, fmt.Errorf("id field cannot be optional")
 			}
 			typ.ID = tf
 		} else {

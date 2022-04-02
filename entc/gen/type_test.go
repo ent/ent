@@ -76,7 +76,7 @@ func TestType(t *testing.T) {
 			{Name: "id", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
 		},
 	})
-	require.EqualError(err, "id field must not be optional", "id field can't be optional")
+	require.EqualError(err, "id field cannot be optional", "id field cannot be optional")
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Type"})
 	require.EqualError(err, "schema lowercase name conflicts with Go keyword \"type\"")
