@@ -195,6 +195,8 @@ var (
 		"model/additional/*",
 		"model/comment/additional/*",
 		"model/edges/fields/additional/*",
+		"tx/additional/*",
+		"tx/additional/*/*",
 		"update/additional/*",
 		"query/additional/*",
 	}

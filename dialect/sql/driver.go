@@ -62,8 +62,8 @@ func (d *Driver) BeginTx(ctx context.Context, opts *TxOptions) (dialect.Tx, erro
 		return nil, err
 	}
 	return &Tx{
-		ExecQuerier: Conn{tx},
-		Tx:          tx,
+		Conn: Conn{tx},
+		Tx:   tx,
 	}, nil
 }
 
@@ -72,7 +72,7 @@ func (d *Driver) Close() error { return d.DB().Close() }
 
 // Tx implements dialect.Tx interface.
 type Tx struct {
-	dialect.ExecQuerier
+	Conn
 	driver.Tx
 }
 
