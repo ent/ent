@@ -98,7 +98,7 @@ func (c *Car) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field registered_at", values[i])
 			} else if value.Valid {
-				c.RegisteredAt = value.Time
+				c.RegisteredAt = c.timeInTz(value.Time)
 			}
 		case car.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

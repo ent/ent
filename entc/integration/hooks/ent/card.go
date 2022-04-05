@@ -110,7 +110,7 @@ func (c *Card) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				c.CreatedAt = value.Time
+				c.CreatedAt = c.timeInTz(value.Time)
 			}
 		case card.FieldInHook:
 			if value, ok := values[i].(*sql.NullString); !ok {
