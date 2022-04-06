@@ -174,4 +174,10 @@ func (tx *txDriver) Query(ctx context.Context, query string, args, v interface{}
 
 var _ dialect.Driver = (*txDriver)(nil)
 
+{{- with $tmpls := matchTemplate "tx/additional/*" "tx/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 {{ end }}

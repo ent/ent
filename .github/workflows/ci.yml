@@ -14,10 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run linters
-        uses: golangci/golangci-lint-action@v2.5.2
+      - uses: actions/setup-go@v2
         with:
-          version: v1.44.0
+          go-version: 1.17
+      - name: Run linters
+        uses: golangci/golangci-lint-action@v3.1.0
+        with:
+          version: v1.45.2
 
   unit:
     runs-on: ubuntu-latest

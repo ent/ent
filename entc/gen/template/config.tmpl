@@ -108,4 +108,10 @@ func Driver(driver dialect.Driver) Option {
 	{{- end }}
 {{- end }}
 
+{{- with $tmpls := matchTemplate "config/additional/*" "config/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 {{ end }}

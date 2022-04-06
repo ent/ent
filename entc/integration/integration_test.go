@@ -38,6 +38,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/entc/integration/privacy/ent/task"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
@@ -128,6 +129,7 @@ var (
 		Delete,
 		Upsert,
 		Relation,
+		ExecQuery,
 		Predicate,
 		AddValues,
 		ClearEdges,
@@ -678,6 +680,25 @@ func Select(t *testing.T, client *ent.Client) {
 	require.Len(gs, 2)
 	require.Equal(hub.QueryUsers().CountX(ctx), gs[0].UsersCount)
 	require.Equal(lab.QueryUsers().CountX(ctx), gs[1].UsersCount)
+}
+
+func ExecQuery(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	rows, err := client.QueryContext(ctx, "SELECT 1")
+	require.NoError(err)
+	require.True(rows.Next())
+	require.NoError(rows.Close())
+	tx, err := client.Tx(ctx)
+	require.NoError(err)
+	tx.Task.Create().ExecX(ctx)
+	require.Equal(1, tx.Task.Query().CountX(ctx))
+	rows, err = tx.QueryContext(ctx, "SELECT COUNT(*) FROM "+task.Table)
+	require.NoError(err)
+	count, err := sql.ScanInt(rows)
+	require.NoError(err)
+	require.Equal(1, count)
+	require.NoError(tx.Commit())
 }
 
 func Predicate(t *testing.T, client *ent.Client) {
