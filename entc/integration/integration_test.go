@@ -697,6 +697,7 @@ func ExecQuery(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	count, err := sql.ScanInt(rows)
 	require.NoError(err)
+	require.NoError(rows.Close())
 	require.Equal(1, count)
 	require.NoError(tx.Commit())
 }
