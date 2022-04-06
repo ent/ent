@@ -119,6 +119,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   </tr>
   <tr>
     <td align="center"><a href="https://mobcov.hatenadiary.org/"><img src="https://avatars.githubusercontent.com/u/121048?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Motonori Iwata</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=iwata" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/CharlesGe129"><img src="https://avatars.githubusercontent.com/u/20162173?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Charles Ge</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=CharlesGe129" title="Code">💻</a></td>
   </tr>
 </table>
 
