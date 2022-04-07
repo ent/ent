@@ -115,7 +115,7 @@ If you want to play with a pre-release version of Enthistory, I wrote a simple R
 
 ### Wrapping up
 We saw how Ent's modular extension system lets you streamline advanced features as if they were just a package install away. Developing your own extension [is fun, easy and educating](https://entgo.io/blog/2021/12/09/contributing-my-first-feature-to-ent-grpc-plugin)! I invite you to try it yourself!
-In the future, Enthistory will be used to track changes to Edges (aka Foreign keyed tables), generate automatic GraphQL schemas and mapping functions, and provide more methods for its underlying implementation.
+In the future, Enthistory will be used to track changes to Edges (aka foreign-keyed tables), generate automatic GraphQL schemas and mapping functions, and provide more methods for its underlying implementation.
 
 :::note For more Ent news and updates:
 
