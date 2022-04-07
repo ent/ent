@@ -66,7 +66,7 @@ Enthistory hooks into your Ent client to ensure that every CRUD operation to "Tw
 // your transaction on the fly to record this event in the history table
 client.Tweet.Create().SetContent("hello world!").SaveX(ctx)
 
-// querying history changes is as easy as querying any other entity's edge
+// Querying history changes is as easy as querying any other entity's edge.
 t, _ := client.Tweet.Get(ctx, id)
 hs := client.Tweet.QueryHistory(t).WithChanges().AllX(ctx)
 ```
