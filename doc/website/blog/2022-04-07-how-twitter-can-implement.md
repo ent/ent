@@ -87,7 +87,7 @@ Now, assume that we want to allow users to edit the content, and simultaneously 
 
 With a table similar to the one above, we can record changes to the original tweet "1" and if requested, we can show that it was originally tweeted at 12:30:00 with the content "hello world!" and was modified at 13:45:34 to "hello Twitter!".  
 
-To implement this, we will have to change every `UPDATE` statement for "tweets" to include an `INSERT` to "tweets_history". For correctness, we will need to wrap both statements in a transaction to avoid corrupting the history. We'd also need to make sure every `INSERT` to "tweets" is coupled with an `INSERT` to "tweets_history"
+To implement this, we will have to change every `UPDATE` statement for "tweets" to include an `INSERT` to "tweets_history". For correctness, we will need to wrap both statements in a transaction to avoid corrupting the history. in case the first statement succeeds but the subsequent one fails. We'd also need to make sure every `INSERT` to "tweets" is coupled with an `INSERT` to "tweets_history"
 
 ```diff
 # INSERT is logged as "CREATE" history event
