@@ -1,0 +1,113 @@
+---
+title: How to easily implement Twitter edit button with Ent+Enthistory
+author: Amit Shani
+authorURL: "https://github.com/hedwigz"
+authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
+authorTwitter: itsamitush
+---
+
+Twitter's "Edit Button" feature has reached the headlines with Elon Musk's poll tweet asking whether users want the feature or not.
+
+[![Elons Tweet](elon.png)](https://twitter.com/elonmusk/status/1511143607385874434)
+
+Without a doubt, this is one of Twitter's  most requested features.
+
+As a software developer, I immediately begin to think about how I would implement this myself. The tracking/auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its rows (say, the "content" row) there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking.
+But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you plug in features such as this with just a few lines of code.
+
+![Twitter+Edit Button](twitter_with_edit.gif)
+
+<div style={{textAlign: 'center'}}>
+  <p style={{fontSize: 12}}>if only</p>
+</div>
+
+### Introduction to Ent
+Ent is an Entity framework for GO that makes developing large applications a breeze. Ent comes pre-packed with awesome features out of the box, such as:
+* type-safe generated [CRUD API](https://entgo.io/docs/crud)
+* complex [Graph traversals](https://entgo.io/docs/traversals) (SQL joins made easy)
+* [Paging](https://entgo.io/docs/paging)
+* [Authorization (aka privacy)](https://entgo.io/docs/privacy)
+* Safe DB [migrations](https://entgo.io/blog/2022/03/14/announcing-versioned-migrations).
+  
+With Ent's code generation engine and advanced [extensions system](https://entgo.io/blog/2021/09/02/ent-extension-api/), you can easily modularize your Ent's client with advanced features that are usually time-consuming to implement manually. For example:
+* Generate [REST](https://entgo.io/blog/2022/02/15/generate-rest-crud-with-ent-and-ogen), [gRPC](https://entgo.io/docs/grpc-intro), and [GraphQL](https://entgo.io/docs/graphql) server.
+* [Privacy](https://entgo.io/docs/privacy) (aka Authorization).
+* Schema [Visualization](https://github.com/hedwigz/entviz).
+* Monitoring w/ [sqlcommenter](https://entgo.io/blog/2021/10/19/sqlcomment-support-for-ent)
+
+### Enthistory
+Enthistory is an extension that we started developing when we wanted to add an "Activity & History" panel on one of our web pages. The panel's role is to show who changed what and when (aka auditing). In [Atlas](https://atlasgo.io/), a tool for migrating databases using HCL files, we have an entity called "schema" which is essentially a large text blob. Any change to the schema is logged and can later be viewed in the "Activity & History" panel.
+
+![Activity and History](activity_and_history.gif)
+
+<div style={{textAlign: 'center'}}>
+  <p style={{fontSize: 12}}>The "Activity & History" screen in Atlas</p>
+</div>
+
+This feature is very common and can be found in many apps, such as Google docs, GitHub PRs, and Facebook posts, but is unfortunately missing in the very popular and beloved Twitter.
+
+Over 3 Million people voted in favor of adding the "edit button" to Twitter, so let me show you how Twitter can make their users happy without breaking a sweat!
+
+![Twitter+Edit Button](twitter_with_edit.gif)
+
+Enthistory utilizes the extensions subsystem of Ent to let the user declaratively "track" the changes of a certain field. Let's see what you'd have to do if you weren't using Enthistory: For example, consider an app similar to Twitter. It has a table called "tweets" and one of its columns is the tweet content.
+
+| id      | content | created_at | author_id |
+| ----------- | ----------- | ----------- | ----------- |
+| 1      | Hello Twitter!       | 2022-04-06T13:45:34+00:00       | 123       |
+| 2      | Hello Gophers!       | 2022-04-06T14:03:54+00:00       | 456       |
+
+Now, assume that we want to allow users to edit the content, and simultaneously display the changes in the frontend. There are several common approaches for solving this problem, each with its own pros and cons but we will dive into those in another technical post. For now, a possible solution for this is to create a table "tweets_history" which records the changes of a tweet:
+
+| id      | tweet_id | timestamp | event | content |
+| ----------- | ----------- | ----------- | ----------- | ----------- |
+| 1      | 1       | 2022-04-06T12:30:00+00:00       | CREATED       | hello world!       |
+| 2      | 2       | 2022-04-06T13:45:34+00:00       | UPDATED       | hello Twitter!       |
+
+With a table similar to the one above, we can record changes to the original tweet "1" and if requested, we can show that it was originally tweeted at 12:30:00 with the content "hello world!" and was modified at 13:45:34 to "hello Twitter!".  
+
+To implement this, we will have to change every `UPDATE` statement for "tweets" to include an `INSERT` to "tweets_history". For correctness, we will need to wrap both statements in a transaction to avoid corrupting the history.
+
+```diff
+- UPDATE tweets SET `content` = 'Hello World!' WHERE id = 1;
++BEGIN;
++UPDATE tweets SET `content` = 'Hello World!' WHERE id = 1;
++INSERT INTO tweets_history (`content`, `timestamp`, `record_id`, `event`)
++VALUES ('Hello World!', NOW(), 1, 'UPDATE');
++COMMIT;
+```
+
+With Enthistory, instead of bothering with manually executing all of the above, implementing, testing, and more, you could simply annotate your Ent schema like so:
+
+```go
+func (Tweet) Fields() []ent.Field {
+ return []ent.Field{
+    field.String("content").Annotations(enthistory.TrackField()),
+    field.Time("created").Default(time.Now),
+ }
+}
+```
+
+Enthistory automatically hooks into your Ent client to ensure that every CRUD operation to "Tweet" is recorded into the "tweets_history" table, with no code modifications and provides an API to consume these records:
+
+```go
+t, _ := client.Tweet.Get(ctx, id)
+hs := client.Tweet.QueryHistory(t).WithChanges().AllX(ctx)
+```
+
+I wrote a simple React application with GraphQL+Ent+Enthistory to demonstrate how a tweet edit could look like. You can check it out [here](https://github.com/hedwigz/edit-twitter-example-app).
+
+### Next Steps
+We saw how Ent's modular extension system lets you streamline advanced features as if they were just a package install away. Developing your own extension [is fun, easy and educating](https://entgo.io/blog/2021/12/09/contributing-my-first-feature-to-ent-grpc-plugin)! I invite you to try it yourself!
+In the future, Enthistory will be used to track changes to Edges (aka Foreign keyed tables), generate automatic GraphQL schemas and mapping functions, and provide more methods for its underlying implementation.
+Enthistory is still in early design stages and is being internally tested. Therefore, we haven't released it to open-source just yet - but we plan to do so very soon.
+
+
+:::note For more Ent news and updates:
+
+- Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
+- Follow us on [Twitter](https://twitter.com/entgo_io)
+- Join us on #ent on the [Gophers Slack](https://entgo.io/docs/slack)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
+
+:::
