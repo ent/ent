@@ -34,7 +34,7 @@ With Ent's code generation engine and advanced [extensions system](https://entgo
 * Monitoring with [sqlcommenter](https://entgo.io/blog/2021/10/19/sqlcomment-support-for-ent)
 
 ### Enthistory
-Enthistory is an extension that we started developing when we wanted to add an "Activity & History" panel to one of our web services. The panel's role is to show who changed what and when (aka auditing). In [Atlas](https://atlasgo.io/), a tool for managing databases using declarative HCL files, we have an entity called "schema" which is essentially a large text blob. Any change to the schema is logged and can later be viewed in the "Activity & History" panel.
+`enthistory` is an extension that we started developing when we wanted to add an "Activity & History" panel to one of our web services. The panel's role is to show who changed what and when (aka auditing). In [Atlas](https://atlasgo.io/), a tool for managing databases using declarative HCL files, we have an entity called "schema" which is essentially a large text blob. Any change to the schema is logged and can later be viewed in the "Activity & History" panel.
 
 ![Activity and History](https://entgo.io/images/assets/enthistory/enthistory1.gif)
 
