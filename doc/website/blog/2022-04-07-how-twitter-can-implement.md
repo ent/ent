@@ -62,8 +62,8 @@ func (Tweet) Fields() []ent.Field {
 Enthistory hooks into your Ent client to ensure that every CRUD operation to "Tweet" is recorded into the "tweets_history" table, with no code modifications and provides an API to consume these records:
 
 ```go
-// Creating a new Tweet doesn't change - enthistory automatically modifies your transaction on
-// the fly to record this event in the history table
+// Creating a new Tweet doesn't change. enthistory automatically modifies
+// your transaction on the fly to record this event in the history table
 client.Tweet.Create().SetContent("hello world!").SaveX(ctx)
 
 // querying history changes is as easy as querying any other entity's edge
