@@ -110,7 +110,7 @@ To implement this, we will have to change every `UPDATE` statement for "tweets" 
 This method is nice but you'd have to create another table for different entities ("comment_history", "settings_history"). To prevent that, Enthistory creates a single "history" and a single "changes" table and records all the tracked fields there. It also supports many type of fields without needing to add more columns.
 
 ### Pre release
-Enthistory is still in early design stages and is being internally tested. Therefore, we haven't released it to open-source yet - but we plan to do so very soon.
+Enthistory is still in early design stages and is being internally tested. Therefore, we haven't released it to open-source yet, though we plan to do so very soon.
 If you want to play with a pre-release version of Enthistory, I wrote a simple React application with GraphQL+Enthistory to demonstrate how a tweet edit could look like. You can check it out [here](https://github.com/hedwigz/edit-twitter-example-app). Please feel free to share your feedback.
 
 ### Wrapping up
