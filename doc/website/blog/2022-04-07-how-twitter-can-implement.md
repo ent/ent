@@ -31,7 +31,7 @@ Ent is an Entity framework for Go that makes developing large applications a bre
   
 With Ent's code generation engine and advanced [extensions system](https://entgo.io/blog/2021/09/02/ent-extension-api/), you can easily modularize your Ent's client with advanced features that are usually time-consuming to implement manually. For example:
 * Generate [REST](https://entgo.io/blog/2022/02/15/generate-rest-crud-with-ent-and-ogen), [gRPC](https://entgo.io/docs/grpc-intro), and [GraphQL](https://entgo.io/docs/graphql) server.
-* Schema [Visualization](https://github.com/hedwigz/entviz)
+* [Caching](http://entgo.io/blog/2021/10/14/introducing-entcache)
 * Monitoring with [sqlcommenter](https://entgo.io/blog/2021/10/19/sqlcomment-support-for-ent)
 
 ### Enthistory
