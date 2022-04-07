@@ -4,6 +4,7 @@ author: Amit Shani
 authorURL: "https://github.com/hedwigz"
 authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
 authorTwitter: itsamitush
+image: "https://entgo.io/images/assets/enthistory/share.png"
 ---
 
 Twitter's "Edit Button" feature has reached the headlines with Elon Musk's poll tweet asking whether users want the feature or not.
