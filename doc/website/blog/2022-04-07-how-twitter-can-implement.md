@@ -10,10 +10,10 @@ Twitter's "Edit Button" feature has reached the headlines with Elon Musk's poll 
 
 [![Elons Tweet](elon.png)](https://twitter.com/elonmusk/status/1511143607385874434)
 
-Without a doubt, this is one of Twitter's  most requested features.
+Without a doubt, this is one of Twitter's most requested features.
 
-As a software developer, I immediately begin to think about how I would implement this myself. The tracking/auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its rows (say, the "content" row) there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking.
-But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you plug in features such as this with just a few lines of code.
+As a software developer, I immediately began to think about how I would implement this myself. The tracking / auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its rows (say, the "content" row) there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking.
+But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you develop and plug in features like this with just a few lines of code.
 
 ![Twitter+Edit Button](twitter_with_edit.gif)
 
@@ -22,7 +22,7 @@ But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides
 </div>
 
 ### Introduction to Ent
-Ent is an Entity framework for GO that makes developing large applications a breeze. Ent comes pre-packed with awesome features out of the box, such as:
+Ent is an Entity framework for Go that makes developing large applications a breeze. Ent comes pre-packed with awesome features out of the box, such as:
 * type-safe generated [CRUD API](https://entgo.io/docs/crud)
 * complex [Graph traversals](https://entgo.io/docs/traversals) (SQL joins made easy)
 * [Paging](https://entgo.io/docs/paging)
@@ -36,7 +36,7 @@ With Ent's code generation engine and advanced [extensions system](https://entgo
 * Monitoring w/ [sqlcommenter](https://entgo.io/blog/2021/10/19/sqlcomment-support-for-ent)
 
 ### Enthistory
-Enthistory is an extension that we started developing when we wanted to add an "Activity & History" panel on one of our web pages. The panel's role is to show who changed what and when (aka auditing). In [Atlas](https://atlasgo.io/), a tool for migrating databases using HCL files, we have an entity called "schema" which is essentially a large text blob. Any change to the schema is logged and can later be viewed in the "Activity & History" panel.
+Enthistory is an extension that we started developing when we wanted to add an "Activity & History" panel to one of our web services. The panel's role is to show who changed what and when (aka auditing). In [Atlas](https://atlasgo.io/), a tool for managing databases using declarative HCL files, we have an entity called "schema" which is essentially a large text blob. Any change to the schema is logged and can later be viewed in the "Activity & History" panel.
 
 ![Activity and History](activity_and_history.gif)
 
