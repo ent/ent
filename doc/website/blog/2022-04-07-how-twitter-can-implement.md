@@ -12,7 +12,7 @@ Twitter's "Edit Button" feature has reached the headlines with Elon Musk's poll 
 
 Without a doubt, this is one of Twitter's most requested features.
 
-As a software developer, I immediately began to think about how I would implement this myself. The tracking / auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its rows (say, the "content" row) there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking and MariaDB's System Versioned Tables. But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you develop and plug in features like this with just a few lines of code.
+As a software developer, I immediately began to think about how I would implement this myself. The tracking / auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its fields (say, the "content" field) there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking and MariaDB's System Versioned Tables. But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you develop and plug in features like this with just a few lines of code.
 
 ![Twitter+Edit Button](twitter_with_edit.gif)
 
