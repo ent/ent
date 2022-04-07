@@ -12,7 +12,7 @@ Twitter's "Edit Button" feature has reached the headlines with Elon Musk's poll 
 
 Without a doubt, this is one of Twitter's most requested features.
 
-As a software developer, I immediately began to think about how I would implement this myself. The tracking / auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its fields (say, the "content" field), there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking and MariaDB's System Versioned Tables. However, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you develop and plug in features like this with just a few lines of code.
+As a software developer, I immediately began to think about how I would implement this myself. The tracking/auditing problem is very common in many applications. If you have an entity (say, a `Tweet`) and you want to track changes to one of its fields (say, the `content` field), there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking and MariaDB's System Versioned Tables. However, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you develop and plugs in features like this with just a few lines of code.
 
 ![Twitter+Edit Button](https://entgo.io/images/assets/enthistory/enthistory3.gif)
 
@@ -115,7 +115,7 @@ If you want to play with a pre-release version of Enthistory, I wrote a simple R
 
 ### Wrapping up
 We saw how Ent's modular extension system lets you streamline advanced features as if they were just a package install away. Developing your own extension [is fun, easy and educating](https://entgo.io/blog/2021/12/09/contributing-my-first-feature-to-ent-grpc-plugin)! I invite you to try it yourself!
-In the future, Enthistory will be used to track changes to Edges (aka foreign-keyed tables), generate automatic GraphQL schemas and mapping functions, and provide more methods for its underlying implementation.
+In the future, Enthistory will be used to track changes to Edges (aka foreign-keyed tables), integrate with OpenAPI and GraphQL extensions, and provide more methods for its underlying implementation.
 
 :::note For more Ent news and updates:
 
