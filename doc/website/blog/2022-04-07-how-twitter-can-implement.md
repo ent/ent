@@ -89,8 +89,10 @@ With Enthistory, instead of bothering with manually executing all of the above, 
 ```go
 func (Tweet) Fields() []ent.Field {
  return []ent.Field{
-    field.String("content").Annotations(enthistory.TrackField()),
-    field.Time("created").Default(time.Now),
+    field.String("content").
+		  Annotations(enthistory.TrackField()),
+    field.Time("created").
+		  Default(time.Now),
  }
 }
 ```
