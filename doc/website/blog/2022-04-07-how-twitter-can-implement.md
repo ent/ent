@@ -12,8 +12,7 @@ Twitter's "Edit Button" feature has reached the headlines with Elon Musk's poll 
 
 Without a doubt, this is one of Twitter's most requested features.
 
-As a software developer, I immediately began to think about how I would implement this myself. The tracking / auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its rows (say, the "content" row) there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking.
-But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you develop and plug in features like this with just a few lines of code.
+As a software developer, I immediately began to think about how I would implement this myself. The tracking / auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its rows (say, the "content" row) there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking and MariaDB's System Versioned Tables. But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you develop and plug in features like this with just a few lines of code.
 
 ![Twitter+Edit Button](twitter_with_edit.gif)
 
@@ -26,12 +25,11 @@ Ent is an Entity framework for Go that makes developing large applications a bre
 * type-safe generated [CRUD API](https://entgo.io/docs/crud)
 * complex [Graph traversals](https://entgo.io/docs/traversals) (SQL joins made easy)
 * [Paging](https://entgo.io/docs/paging)
-* [Authorization (aka privacy)](https://entgo.io/docs/privacy)
+* [Privacy](https://entgo.io/docs/privacy)
 * Safe DB [migrations](https://entgo.io/blog/2022/03/14/announcing-versioned-migrations).
   
 With Ent's code generation engine and advanced [extensions system](https://entgo.io/blog/2021/09/02/ent-extension-api/), you can easily modularize your Ent's client with advanced features that are usually time-consuming to implement manually. For example:
 * Generate [REST](https://entgo.io/blog/2022/02/15/generate-rest-crud-with-ent-and-ogen), [gRPC](https://entgo.io/docs/grpc-intro), and [GraphQL](https://entgo.io/docs/graphql) server.
-* [Privacy](https://entgo.io/docs/privacy) (aka Authorization).
 * Schema [Visualization](https://github.com/hedwigz/entviz).
 * Monitoring w/ [sqlcommenter](https://entgo.io/blog/2021/10/19/sqlcomment-support-for-ent)
 
@@ -66,9 +64,18 @@ Now, assume that we want to allow users to edit the content, and simultaneously 
 
 With a table similar to the one above, we can record changes to the original tweet "1" and if requested, we can show that it was originally tweeted at 12:30:00 with the content "hello world!" and was modified at 13:45:34 to "hello Twitter!".  
 
-To implement this, we will have to change every `UPDATE` statement for "tweets" to include an `INSERT` to "tweets_history". For correctness, we will need to wrap both statements in a transaction to avoid corrupting the history.
+To implement this, we will have to change every `UPDATE` statement for "tweets" to include an `INSERT` to "tweets_history". For correctness, we will need to wrap both statements in a transaction to avoid corrupting the history. We'd also need to make sure every `INSERT` to "tweets" is coupled with an `INSERT` to "tweets_history"
 
 ```diff
+# INSERT is logged as "CREATE" history event
+- INSERT INTO tweets (`content`) VALUES ('Hello World!');
++BEGIN;
++INSERT INTO tweets (`content`) VALUES ('Hello World!');
++INSERT INTO tweets_history (`content`, `timestamp`, `record_id`, `event`)
++VALUES ('Hello World!', NOW(), 1, 'CREATE');
++COMMIT;
+
+# UPDATE is logged as "UPDATE" history event
 - UPDATE tweets SET `content` = 'Hello World!' WHERE id = 1;
 +BEGIN;
 +UPDATE tweets SET `content` = 'Hello World!' WHERE id = 1;
