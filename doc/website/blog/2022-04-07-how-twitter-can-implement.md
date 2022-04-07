@@ -112,7 +112,7 @@ I wrote a simple React application with GraphQL+Ent+Enthistory to demonstrate ho
 ### Next Steps
 We saw how Ent's modular extension system lets you streamline advanced features as if they were just a package install away. Developing your own extension [is fun, easy and educating](https://entgo.io/blog/2021/12/09/contributing-my-first-feature-to-ent-grpc-plugin)! I invite you to try it yourself!
 In the future, Enthistory will be used to track changes to Edges (aka Foreign keyed tables), generate automatic GraphQL schemas and mapping functions, and provide more methods for its underlying implementation.
-Enthistory is still in early design stages and is being internally tested. Therefore, we haven't released it to open-source just yet - but we plan to do so very soon.
+Enthistory is still in early design stages and is being internally tested. Therefore, we haven't released it to open-source yet - but we plan to do so very soon.
 
 
 :::note For more Ent news and updates:
