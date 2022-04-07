@@ -1,5 +1,5 @@
 ---
-title: How to easily implement Twitter edit button with Ent+Enthistory
+title: How to implement the Twitter edit button with Ent
 author: Amit Shani
 authorURL: "https://github.com/hedwigz"
 authorImageURL: "https://avatars.githubusercontent.com/u/8277210?v=4"
