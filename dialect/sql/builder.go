@@ -1983,7 +1983,7 @@ func Distinct(idents ...string) string {
 	return b.String()
 }
 
-// TableView is a view that returns a table view. Can ne a Table, Selector or a View (WITH statement).
+// TableView is a view that returns a table view. Can be a Table, Selector or a View (WITH statement).
 type TableView interface {
 	view()
 }
