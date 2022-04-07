@@ -8,13 +8,13 @@ authorTwitter: itsamitush
 
 Twitter's "Edit Button" feature has reached the headlines with Elon Musk's poll tweet asking whether users want the feature or not.
 
-[![Elons Tweet](elon.png)](https://twitter.com/elonmusk/status/1511143607385874434)
+[![Elons Tweet](https://entgo.io/images/assets/enthistory/enthistory2.webp)](https://twitter.com/elonmusk/status/1511143607385874434)
 
 Without a doubt, this is one of Twitter's most requested features.
 
 As a software developer, I immediately began to think about how I would implement this myself. The tracking / auditing problem is very common in many applications. If you have an entity (say, a "tweet") and you want to track changes to one of its fields (say, the "content" field) there are many common solutions. Some databases even have proprietary solutions like Microsoft's change tracking and MariaDB's System Versioned Tables. But, in most use-cases you'd have to "stitch" it yourself. Luckily, Ent provides a modular extensions system that lets you develop and plug in features like this with just a few lines of code.
 
-![Twitter+Edit Button](twitter_with_edit.gif)
+![Twitter+Edit Button](https://entgo.io/images/assets/enthistory/enthistory3.gif)
 
 <div style={{textAlign: 'center'}}>
   <p style={{fontSize: 12}}>if only</p>
@@ -36,7 +36,7 @@ With Ent's code generation engine and advanced [extensions system](https://entgo
 ### Enthistory
 Enthistory is an extension that we started developing when we wanted to add an "Activity & History" panel to one of our web services. The panel's role is to show who changed what and when (aka auditing). In [Atlas](https://atlasgo.io/), a tool for managing databases using declarative HCL files, we have an entity called "schema" which is essentially a large text blob. Any change to the schema is logged and can later be viewed in the "Activity & History" panel.
 
-![Activity and History](activity_and_history.gif)
+![Activity and History](https://entgo.io/images/assets/enthistory/enthistory1.gif)
 
 <div style={{textAlign: 'center'}}>
   <p style={{fontSize: 12}}>The "Activity & History" screen in Atlas</p>
