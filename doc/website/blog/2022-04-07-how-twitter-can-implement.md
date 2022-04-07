@@ -46,7 +46,30 @@ This feature is very common and can be found in many apps, such as Google docs, 
 
 Over 3 Million people voted in favor of adding the "edit button" to Twitter, so let me show you how Twitter can make their users happy without breaking a sweat!
 
-![Twitter+Edit Button](twitter_with_edit.gif)
+With Enthistory, all you have to do is simply annotate your Ent schema like so:
+
+```go
+func (Tweet) Fields() []ent.Field {
+ return []ent.Field{
+    field.String("content").
+		  Annotations(enthistory.TrackField()),
+    field.Time("created").
+		  Default(time.Now),
+ }
+}
+```
+
+Enthistory hooks into your Ent client to ensure that every CRUD operation to "Tweet" is recorded into the "tweets_history" table, with no code modifications and provides an API to consume these records:
+
+```go
+// Creating a new Tweet doesn't change - enthistory automatically modifies your transaction on
+// the fly to record this event in the history table
+client.Tweet.Create().SetContent("hello world!").SaveX(ctx)
+
+// querying history changes is as easy as querying any other entity's edge
+t, _ := client.Tweet.Get(ctx, id)
+hs := client.Tweet.QueryHistory(t).WithChanges().AllX(ctx)
+```
 
 Enthistory utilizes the extensions subsystem of Ent to let the user declaratively "track" the changes of a certain field. Let's see what you'd have to do if you weren't using Enthistory: For example, consider an app similar to Twitter. It has a table called "tweets" and one of its columns is the tweet content.
 
@@ -82,26 +105,6 @@ To implement this, we will have to change every `UPDATE` statement for "tweets" 
 +INSERT INTO tweets_history (`content`, `timestamp`, `record_id`, `event`)
 +VALUES ('Hello World!', NOW(), 1, 'UPDATE');
 +COMMIT;
-```
-
-With Enthistory, instead of bothering with manually executing all of the above, implementing, testing, and more, you could simply annotate your Ent schema like so:
-
-```go
-func (Tweet) Fields() []ent.Field {
- return []ent.Field{
-    field.String("content").
-		  Annotations(enthistory.TrackField()),
-    field.Time("created").
-		  Default(time.Now),
- }
-}
-```
-
-Enthistory automatically hooks into your Ent client to ensure that every CRUD operation to "Tweet" is recorded into the "tweets_history" table, with no code modifications and provides an API to consume these records:
-
-```go
-t, _ := client.Tweet.Get(ctx, id)
-hs := client.Tweet.QueryHistory(t).WithChanges().AllX(ctx)
 ```
 
 I wrote a simple React application with GraphQL+Ent+Enthistory to demonstrate how a tweet edit could look like. You can check it out [here](https://github.com/hedwigz/edit-twitter-example-app).
