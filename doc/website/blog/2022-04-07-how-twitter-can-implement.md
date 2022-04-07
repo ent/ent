@@ -71,7 +71,7 @@ t, _ := client.Tweet.Get(ctx, id)
 hs := client.Tweet.QueryHistory(t).WithChanges().AllX(ctx)
 ```
 
-Enthistory utilizes the extensions subsystem of Ent to let the user declaratively "track" the changes of a certain field. Let's see what you'd have to do if you weren't using Enthistory: For example, consider an app similar to Twitter. It has a table called "tweets" and one of its columns is the tweet content.
+Let's see what you'd have to do if you weren't using Enthistory: For example, consider an app similar to Twitter. It has a table called "tweets" and one of its columns is the tweet content.
 
 | id      | content | created_at | author_id |
 | ----------- | ----------- | ----------- | ----------- |
@@ -107,13 +107,15 @@ To implement this, we will have to change every `UPDATE` statement for "tweets" 
 +COMMIT;
 ```
 
-I wrote a simple React application with GraphQL+Ent+Enthistory to demonstrate how a tweet edit could look like. You can check it out [here](https://github.com/hedwigz/edit-twitter-example-app).
+This method is nice but you'd have to create another table for different entities ("comment_history", "settings_history"). To prevent that, Enthistory creates a single "history" and a single "changes" table and records all the tracked fields there. It also supports many type of fields without needing to add more columns.
 
-### Next Steps
+### Pre release
+Enthistory is still in early design stages and is being internally tested. Therefore, we haven't released it to open-source yet - but we plan to do so very soon.
+If you want to play with a pre-release version of Enthistory, I wrote a simple React application with GraphQL+Enthistory to demonstrate how a tweet edit could look like. You can check it out [here](https://github.com/hedwigz/edit-twitter-example-app). please feel free to share your feedback.
+
+### Wrapping up
 We saw how Ent's modular extension system lets you streamline advanced features as if they were just a package install away. Developing your own extension [is fun, easy and educating](https://entgo.io/blog/2021/12/09/contributing-my-first-feature-to-ent-grpc-plugin)! I invite you to try it yourself!
 In the future, Enthistory will be used to track changes to Edges (aka Foreign keyed tables), generate automatic GraphQL schemas and mapping functions, and provide more methods for its underlying implementation.
-Enthistory is still in early design stages and is being internally tested. Therefore, we haven't released it to open-source yet - but we plan to do so very soon.
-
 
 :::note For more Ent news and updates:
 
