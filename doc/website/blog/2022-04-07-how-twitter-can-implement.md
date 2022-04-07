@@ -50,12 +50,12 @@ With Enthistory, all you have to do is simply annotate your Ent schema like so:
 
 ```go
 func (Tweet) Fields() []ent.Field {
- return []ent.Field{
-    field.String("content").
-		  Annotations(enthistory.TrackField()),
-    field.Time("created").
-		  Default(time.Now),
- }
+	return []ent.Field{
+		field.String("content").
+			Annotations(enthistory.TrackField()),
+		field.Time("created").
+			Default(time.Now),
+	}
 }
 ```
 
