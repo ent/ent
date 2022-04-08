@@ -56,6 +56,8 @@ var (
 	CustomTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "custom", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "customtype"}},
+		{Name: "tz0", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "timestamp(0)", "postgres": "timestamptz(0)"}},
+		{Name: "tz3", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "timestamp(3)", "postgres": "timestamptz(3)"}},
 	}
 	// CustomTypesTable holds the schema information for the "custom_types" table.
 	CustomTypesTable = &schema.Table{

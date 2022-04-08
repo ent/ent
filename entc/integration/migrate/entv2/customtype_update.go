@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -48,6 +49,46 @@ func (ctu *CustomTypeUpdate) SetNillableCustom(s *string) *CustomTypeUpdate {
 // ClearCustom clears the value of the "custom" field.
 func (ctu *CustomTypeUpdate) ClearCustom() *CustomTypeUpdate {
 	ctu.mutation.ClearCustom()
+	return ctu
+}
+
+// SetTz0 sets the "tz0" field.
+func (ctu *CustomTypeUpdate) SetTz0(t time.Time) *CustomTypeUpdate {
+	ctu.mutation.SetTz0(t)
+	return ctu
+}
+
+// SetNillableTz0 sets the "tz0" field if the given value is not nil.
+func (ctu *CustomTypeUpdate) SetNillableTz0(t *time.Time) *CustomTypeUpdate {
+	if t != nil {
+		ctu.SetTz0(*t)
+	}
+	return ctu
+}
+
+// ClearTz0 clears the value of the "tz0" field.
+func (ctu *CustomTypeUpdate) ClearTz0() *CustomTypeUpdate {
+	ctu.mutation.ClearTz0()
+	return ctu
+}
+
+// SetTz3 sets the "tz3" field.
+func (ctu *CustomTypeUpdate) SetTz3(t time.Time) *CustomTypeUpdate {
+	ctu.mutation.SetTz3(t)
+	return ctu
+}
+
+// SetNillableTz3 sets the "tz3" field if the given value is not nil.
+func (ctu *CustomTypeUpdate) SetNillableTz3(t *time.Time) *CustomTypeUpdate {
+	if t != nil {
+		ctu.SetTz3(*t)
+	}
+	return ctu
+}
+
+// ClearTz3 clears the value of the "tz3" field.
+func (ctu *CustomTypeUpdate) ClearTz3() *CustomTypeUpdate {
+	ctu.mutation.ClearTz3()
 	return ctu
 }
 
@@ -141,6 +182,32 @@ func (ctu *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: customtype.FieldCustom,
 		})
 	}
+	if value, ok := ctu.mutation.Tz0(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: customtype.FieldTz0,
+		})
+	}
+	if ctu.mutation.Tz0Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: customtype.FieldTz0,
+		})
+	}
+	if value, ok := ctu.mutation.Tz3(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: customtype.FieldTz3,
+		})
+	}
+	if ctu.mutation.Tz3Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: customtype.FieldTz3,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ctu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{customtype.Label}
@@ -177,6 +244,46 @@ func (ctuo *CustomTypeUpdateOne) SetNillableCustom(s *string) *CustomTypeUpdateO
 // ClearCustom clears the value of the "custom" field.
 func (ctuo *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
 	ctuo.mutation.ClearCustom()
+	return ctuo
+}
+
+// SetTz0 sets the "tz0" field.
+func (ctuo *CustomTypeUpdateOne) SetTz0(t time.Time) *CustomTypeUpdateOne {
+	ctuo.mutation.SetTz0(t)
+	return ctuo
+}
+
+// SetNillableTz0 sets the "tz0" field if the given value is not nil.
+func (ctuo *CustomTypeUpdateOne) SetNillableTz0(t *time.Time) *CustomTypeUpdateOne {
+	if t != nil {
+		ctuo.SetTz0(*t)
+	}
+	return ctuo
+}
+
+// ClearTz0 clears the value of the "tz0" field.
+func (ctuo *CustomTypeUpdateOne) ClearTz0() *CustomTypeUpdateOne {
+	ctuo.mutation.ClearTz0()
+	return ctuo
+}
+
+// SetTz3 sets the "tz3" field.
+func (ctuo *CustomTypeUpdateOne) SetTz3(t time.Time) *CustomTypeUpdateOne {
+	ctuo.mutation.SetTz3(t)
+	return ctuo
+}
+
+// SetNillableTz3 sets the "tz3" field if the given value is not nil.
+func (ctuo *CustomTypeUpdateOne) SetNillableTz3(t *time.Time) *CustomTypeUpdateOne {
+	if t != nil {
+		ctuo.SetTz3(*t)
+	}
+	return ctuo
+}
+
+// ClearTz3 clears the value of the "tz3" field.
+func (ctuo *CustomTypeUpdateOne) ClearTz3() *CustomTypeUpdateOne {
+	ctuo.mutation.ClearTz3()
 	return ctuo
 }
 
@@ -292,6 +399,32 @@ func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: customtype.FieldCustom,
+		})
+	}
+	if value, ok := ctuo.mutation.Tz0(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: customtype.FieldTz0,
+		})
+	}
+	if ctuo.mutation.Tz0Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: customtype.FieldTz0,
+		})
+	}
+	if value, ok := ctuo.mutation.Tz3(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: customtype.FieldTz3,
+		})
+	}
+	if ctuo.mutation.Tz3Cleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: customtype.FieldTz3,
 		})
 	}
 	_node = &CustomType{config: ctuo.config}

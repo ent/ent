@@ -737,10 +737,10 @@ func (d *Postgres) atTypeC(c1 *Column, c2 *schema.Column) error {
 }
 
 func (d *Postgres) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schema.Column) {
-	// For UNIQUE columns, PostgreSQL create an implicit index named
+	// For UNIQUE columns, PostgreSQL creates an implicit index named
 	// "<table>_<column>_key<i>".
 	for _, idx := range t1.Indexes {
-		// Index also defined explicitly, and will be add in atIndexes.
+		// Index also defined explicitly, and will be added in atIndexes.
 		if idx.Unique && d.atImplicitIndexName(idx, t1, c1) {
 			return
 		}
