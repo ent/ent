@@ -20,6 +20,7 @@ import (
 	userv1 "entgo.io/ent/entc/integration/migrate/entv1/user"
 	"entgo.io/ent/entc/integration/migrate/entv2"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
+	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 
@@ -52,6 +53,7 @@ func TestMySQL(t *testing.T) {
 				CheckConstraint(t, clientv2)
 			}
 			NicknameSearch(t, clientv2)
+			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
 		})
 	}
 }
@@ -81,6 +83,7 @@ func TestPostgres(t *testing.T) {
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			CheckConstraint(t, clientv2)
+			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
 		})
 	}
 }
@@ -379,6 +382,22 @@ func ContainsFold(t *testing.T, client *entv2.Client) {
 	require.Zero(t, client.User.Query().Where(user.NameContains("mash")).CountX(ctx))
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("mash")).CountX(ctx))
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("Raki")).CountX(ctx))
+}
+
+func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, customtype.Table, customtype.FieldTz0)
+	require.NoError(t, err)
+	p, err := sql.ScanInt(rows)
+	require.NoError(t, err)
+	require.Zerof(t, p, "custom_types field %q", customtype.FieldTz0)
+	require.NoError(t, rows.Close())
+	rows, err = drv.QueryContext(ctx, query, customtype.Table, customtype.FieldTz3)
+	require.NoError(t, err)
+	p, err = sql.ScanInt(rows)
+	require.NoError(t, err)
+	require.Equalf(t, 3, p, "custom_types field %q", customtype.FieldTz3)
+	require.NoError(t, rows.Close())
 }
 
 func idRange(t *testing.T, id, l, h int) {

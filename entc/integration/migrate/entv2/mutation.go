@@ -1368,6 +1368,8 @@ type CustomTypeMutation struct {
 	typ           string
 	id            *int
 	custom        *string
+	tz0           *time.Time
+	tz3           *time.Time
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*CustomType, error)
@@ -1521,6 +1523,104 @@ func (m *CustomTypeMutation) ResetCustom() {
 	delete(m.clearedFields, customtype.FieldCustom)
 }
 
+// SetTz0 sets the "tz0" field.
+func (m *CustomTypeMutation) SetTz0(t time.Time) {
+	m.tz0 = &t
+}
+
+// Tz0 returns the value of the "tz0" field in the mutation.
+func (m *CustomTypeMutation) Tz0() (r time.Time, exists bool) {
+	v := m.tz0
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTz0 returns the old "tz0" field's value of the CustomType entity.
+// If the CustomType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CustomTypeMutation) OldTz0(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTz0 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTz0 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTz0: %w", err)
+	}
+	return oldValue.Tz0, nil
+}
+
+// ClearTz0 clears the value of the "tz0" field.
+func (m *CustomTypeMutation) ClearTz0() {
+	m.tz0 = nil
+	m.clearedFields[customtype.FieldTz0] = struct{}{}
+}
+
+// Tz0Cleared returns if the "tz0" field was cleared in this mutation.
+func (m *CustomTypeMutation) Tz0Cleared() bool {
+	_, ok := m.clearedFields[customtype.FieldTz0]
+	return ok
+}
+
+// ResetTz0 resets all changes to the "tz0" field.
+func (m *CustomTypeMutation) ResetTz0() {
+	m.tz0 = nil
+	delete(m.clearedFields, customtype.FieldTz0)
+}
+
+// SetTz3 sets the "tz3" field.
+func (m *CustomTypeMutation) SetTz3(t time.Time) {
+	m.tz3 = &t
+}
+
+// Tz3 returns the value of the "tz3" field in the mutation.
+func (m *CustomTypeMutation) Tz3() (r time.Time, exists bool) {
+	v := m.tz3
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTz3 returns the old "tz3" field's value of the CustomType entity.
+// If the CustomType object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CustomTypeMutation) OldTz3(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTz3 is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTz3 requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTz3: %w", err)
+	}
+	return oldValue.Tz3, nil
+}
+
+// ClearTz3 clears the value of the "tz3" field.
+func (m *CustomTypeMutation) ClearTz3() {
+	m.tz3 = nil
+	m.clearedFields[customtype.FieldTz3] = struct{}{}
+}
+
+// Tz3Cleared returns if the "tz3" field was cleared in this mutation.
+func (m *CustomTypeMutation) Tz3Cleared() bool {
+	_, ok := m.clearedFields[customtype.FieldTz3]
+	return ok
+}
+
+// ResetTz3 resets all changes to the "tz3" field.
+func (m *CustomTypeMutation) ResetTz3() {
+	m.tz3 = nil
+	delete(m.clearedFields, customtype.FieldTz3)
+}
+
 // Where appends a list predicates to the CustomTypeMutation builder.
 func (m *CustomTypeMutation) Where(ps ...predicate.CustomType) {
 	m.predicates = append(m.predicates, ps...)
@@ -1540,9 +1640,15 @@ func (m *CustomTypeMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CustomTypeMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 3)
 	if m.custom != nil {
 		fields = append(fields, customtype.FieldCustom)
+	}
+	if m.tz0 != nil {
+		fields = append(fields, customtype.FieldTz0)
+	}
+	if m.tz3 != nil {
+		fields = append(fields, customtype.FieldTz3)
 	}
 	return fields
 }
@@ -1554,6 +1660,10 @@ func (m *CustomTypeMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case customtype.FieldCustom:
 		return m.Custom()
+	case customtype.FieldTz0:
+		return m.Tz0()
+	case customtype.FieldTz3:
+		return m.Tz3()
 	}
 	return nil, false
 }
@@ -1565,6 +1675,10 @@ func (m *CustomTypeMutation) OldField(ctx context.Context, name string) (ent.Val
 	switch name {
 	case customtype.FieldCustom:
 		return m.OldCustom(ctx)
+	case customtype.FieldTz0:
+		return m.OldTz0(ctx)
+	case customtype.FieldTz3:
+		return m.OldTz3(ctx)
 	}
 	return nil, fmt.Errorf("unknown CustomType field %s", name)
 }
@@ -1580,6 +1694,20 @@ func (m *CustomTypeMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCustom(v)
+		return nil
+	case customtype.FieldTz0:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTz0(v)
+		return nil
+	case customtype.FieldTz3:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTz3(v)
 		return nil
 	}
 	return fmt.Errorf("unknown CustomType field %s", name)
@@ -1614,6 +1742,12 @@ func (m *CustomTypeMutation) ClearedFields() []string {
 	if m.FieldCleared(customtype.FieldCustom) {
 		fields = append(fields, customtype.FieldCustom)
 	}
+	if m.FieldCleared(customtype.FieldTz0) {
+		fields = append(fields, customtype.FieldTz0)
+	}
+	if m.FieldCleared(customtype.FieldTz3) {
+		fields = append(fields, customtype.FieldTz3)
+	}
 	return fields
 }
 
@@ -1631,6 +1765,12 @@ func (m *CustomTypeMutation) ClearField(name string) error {
 	case customtype.FieldCustom:
 		m.ClearCustom()
 		return nil
+	case customtype.FieldTz0:
+		m.ClearTz0()
+		return nil
+	case customtype.FieldTz3:
+		m.ClearTz3()
+		return nil
 	}
 	return fmt.Errorf("unknown CustomType nullable field %s", name)
 }
@@ -1641,6 +1781,12 @@ func (m *CustomTypeMutation) ResetField(name string) error {
 	switch name {
 	case customtype.FieldCustom:
 		m.ResetCustom()
+		return nil
+	case customtype.FieldTz0:
+		m.ResetTz0()
+		return nil
+	case customtype.FieldTz3:
+		m.ResetTz3()
 		return nil
 	}
 	return fmt.Errorf("unknown CustomType field %s", name)

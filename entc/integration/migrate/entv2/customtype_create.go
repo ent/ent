@@ -9,6 +9,7 @@ package entv2
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
@@ -32,6 +33,34 @@ func (ctc *CustomTypeCreate) SetCustom(s string) *CustomTypeCreate {
 func (ctc *CustomTypeCreate) SetNillableCustom(s *string) *CustomTypeCreate {
 	if s != nil {
 		ctc.SetCustom(*s)
+	}
+	return ctc
+}
+
+// SetTz0 sets the "tz0" field.
+func (ctc *CustomTypeCreate) SetTz0(t time.Time) *CustomTypeCreate {
+	ctc.mutation.SetTz0(t)
+	return ctc
+}
+
+// SetNillableTz0 sets the "tz0" field if the given value is not nil.
+func (ctc *CustomTypeCreate) SetNillableTz0(t *time.Time) *CustomTypeCreate {
+	if t != nil {
+		ctc.SetTz0(*t)
+	}
+	return ctc
+}
+
+// SetTz3 sets the "tz3" field.
+func (ctc *CustomTypeCreate) SetTz3(t time.Time) *CustomTypeCreate {
+	ctc.mutation.SetTz3(t)
+	return ctc
+}
+
+// SetNillableTz3 sets the "tz3" field if the given value is not nil.
+func (ctc *CustomTypeCreate) SetNillableTz3(t *time.Time) *CustomTypeCreate {
+	if t != nil {
+		ctc.SetTz3(*t)
 	}
 	return ctc
 }
@@ -140,6 +169,22 @@ func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 			Column: customtype.FieldCustom,
 		})
 		_node.Custom = value
+	}
+	if value, ok := ctc.mutation.Tz0(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: customtype.FieldTz0,
+		})
+		_node.Tz0 = value
+	}
+	if value, ok := ctc.mutation.Tz3(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: customtype.FieldTz3,
+		})
+		_node.Tz3 = value
 	}
 	return _node, _spec
 }
