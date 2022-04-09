@@ -331,8 +331,8 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*ent
 Now, creating a todo item should work:
 
 ```graphql
-mutation CreateTodo($todo: TodoInput!) {
-    createTodo(todo: $todo) {
+mutation CreateTodo {
+    createTodo(todo: {text: "Create GraphQL Example", status: IN_PROGRESS, priority: 1}) {
         id
         text
         createdAt
@@ -342,8 +342,6 @@ mutation CreateTodo($todo: TodoInput!) {
         }
     }
 }
-
-# Query Variables: { "todo": { "text": "Create GraphQL Example", "status": "IN_PROGRESS", "priority": 1 } }
 # Output: { "data": { "createTodo": { "id": "2", "text": "Create GraphQL Example", "createdAt": "2021-03-10T15:02:18+02:00", "priority": 1, "parent": null } } }
 ```
 

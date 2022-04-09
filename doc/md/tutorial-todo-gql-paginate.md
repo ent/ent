@@ -88,8 +88,8 @@ func (Todo) Fields() []ent.Field {
 
 ## Define Types In GraphQL Schema
 
-Next, we need to define the ordering types along with the [Relay Connection Types](https://relay.dev/graphql/connections.htm#sec-Connection-Types)
-in the GraphQL schema:
+Next, we need to add the ordering types along with the [Relay Connection Types](https://relay.dev/graphql/connections.htm#sec-Connection-Types)
+to the GraphQL schema:
 
 ```graphql title="todo.graphql"
 # Define a Relay Cursor type:
