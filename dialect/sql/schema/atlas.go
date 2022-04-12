@@ -14,6 +14,7 @@ import (
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqltool"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
@@ -315,7 +316,7 @@ func (m *Migrate) setupAtlas() error {
 		m.atlas.diff = append(m.atlas.diff, withoutForeignKeys)
 	}
 	if m.atlas.dir != nil && m.atlas.fmt == nil {
-		m.atlas.fmt = migrate.DefaultFormatter
+		m.atlas.fmt = sqltool.GolangMigrateFormatter
 	}
 	return nil
 }
