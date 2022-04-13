@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
@@ -167,48 +166,37 @@ func TestStorageKey(t *testing.T) {
 }
 
 func Versioned(t *testing.T, client *versioned.Client) {
-	var (
-		v   = time.Now().Format("20060102150405")
-		ctx = context.Background()
-	)
+	ctx := context.Background()
 
 	p := t.TempDir()
 	dir, err := migrate.NewLocalDir(p)
 	require.NoError(t, err)
 	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir)))
 	require.Equal(t, 2, countFiles(t, dir))
-	require.FileExists(t, filepath.Join(p, v+"_changes.up.sql"))
-	require.FileExists(t, filepath.Join(p, v+"_changes.down.sql"))
 
 	p = t.TempDir()
 	dir, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
 	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.GooseFormatter)))
 	require.Equal(t, 1, countFiles(t, dir))
-	require.FileExists(t, filepath.Join(p, v+"_changes.sql"))
 
 	p = t.TempDir()
 	dir, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
 	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.FlywayFormatter)))
 	require.Equal(t, 2, countFiles(t, dir))
-	require.FileExists(t, filepath.Join(p, "V"+v+"__changes.sql"))
-	require.FileExists(t, filepath.Join(p, "U"+v+"__changes.sql"))
 
 	p = t.TempDir()
 	dir, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
 	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.LiquibaseFormatter)))
 	require.Equal(t, 1, countFiles(t, dir))
-	require.FileExists(t, filepath.Join(p, v+"_changes.sql"))
 
 	p = t.TempDir()
 	dir, err = migrate.NewLocalDir(p)
 	require.NoError(t, err)
-	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.EnableSumFile()))
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithSumFile()))
 	require.Equal(t, 3, countFiles(t, dir))
-	require.FileExists(t, filepath.Join(p, v+"_changes.up.sql"))
-	require.FileExists(t, filepath.Join(p, v+"_changes.down.sql"))
 	require.FileExists(t, filepath.Join(p, "atlas.sum"))
 }
 
