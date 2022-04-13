@@ -8,7 +8,6 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"strconv"
 	"testing"
 	"time"
 
@@ -81,9 +80,9 @@ func TestMigrate_Diff(t *testing.T) {
 	m, err := NewMigrate(db, WithDir(d))
 	require.NoError(t, err)
 	require.NoError(t, m.Diff(context.Background(), &Table{Name: "users"}))
-	v := strconv.FormatInt(time.Now().Unix(), 10)
-	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "CREATE TABLE `users` (, PRIMARY KEY ());\n")
-	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "DROP TABLE `users`;\n")
+	v := time.Now().Format("20060102150405")
+	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
+	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
 	require.NoFileExists(t, filepath.Join(p, "atlas.sum"))
 }
 
