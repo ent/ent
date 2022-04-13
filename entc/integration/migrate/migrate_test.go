@@ -7,11 +7,15 @@ package migrate
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"math"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
+	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -23,6 +27,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/entc/integration/migrate/versioned"
 
 	"ariga.io/atlas/sql/migrate"
 	atlas "ariga.io/atlas/sql/schema"
@@ -54,6 +59,10 @@ func TestMySQL(t *testing.T) {
 			}
 			NicknameSearch(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
+
+			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS migrate", []interface{}{}, new(sql.Result)))
+			Versioned(t, versioned.NewClient(versioned.Driver(drv)))
 		})
 	}
 }
@@ -155,6 +164,52 @@ func TestStorageKey(t *testing.T) {
 	require.Equal(t, "user_pet_id", migratev2.PetsTable.ForeignKeys[0].Symbol)
 	require.Equal(t, "user_friend_id1", migratev2.FriendsTable.ForeignKeys[0].Symbol)
 	require.Equal(t, "user_friend_id2", migratev2.FriendsTable.ForeignKeys[1].Symbol)
+}
+
+func Versioned(t *testing.T, client *versioned.Client) {
+	var (
+		v   = time.Now().Format("20060102150405")
+		ctx = context.Background()
+	)
+
+	p := t.TempDir()
+	dir, err := migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir)))
+	require.Equal(t, 2, countFiles(t, dir))
+	require.FileExists(t, filepath.Join(p, v+"_changes.up.sql"))
+	require.FileExists(t, filepath.Join(p, v+"_changes.down.sql"))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.GooseFormatter)))
+	require.Equal(t, 1, countFiles(t, dir))
+	require.FileExists(t, filepath.Join(p, v+"_changes.sql"))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.FlywayFormatter)))
+	require.Equal(t, 2, countFiles(t, dir))
+	require.FileExists(t, filepath.Join(p, "V"+v+"__changes.sql"))
+	require.FileExists(t, filepath.Join(p, "U"+v+"__changes.sql"))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithFormatter(sqltool.LiquibaseFormatter)))
+	require.Equal(t, 1, countFiles(t, dir))
+	require.FileExists(t, filepath.Join(p, v+"_changes.sql"))
+
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.EnableSumFile()))
+	require.Equal(t, 3, countFiles(t, dir))
+	require.FileExists(t, filepath.Join(p, v+"_changes.up.sql"))
+	require.FileExists(t, filepath.Join(p, v+"_changes.down.sql"))
+	require.FileExists(t, filepath.Join(p, "atlas.sum"))
 }
 
 func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {
@@ -402,4 +457,10 @@ func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
 
 func idRange(t *testing.T, id, l, h int) {
 	require.Truef(t, id > l && id < h, "id %s should be between %d to %d", id, l, h)
+}
+
+func countFiles(t *testing.T, d migrate.Dir) int {
+	files, err := fs.ReadDir(d, "")
+	require.NoError(t, err)
+	return len(files)
 }
