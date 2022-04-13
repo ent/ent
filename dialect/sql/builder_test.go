@@ -1577,6 +1577,181 @@ func TestSelector_OrderByExpr(t *testing.T) {
 	require.Equal(t, []interface{}{28, 1, 2}, args)
 }
 
+func TestSelector_SQLite_Union(t *testing.T) {
+	query, args := Dialect(dialect.SQLite).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Union(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		UnionAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `active` UNION SELECT * FROM `old_users1` WHERE `is_active` AND `age` > ? UNION ALL SELECT * FROM `old_users2` WHERE `is_active` = ? AND `age` < ?", query)
+	require.Equal(t, []interface{}{20, "true", 18}, args)
+
+	t1, t2, t3 := Table("files"), Table("files"), Table("path")
+	n := Queries{
+		WithRecursive("path", "id", "name", "parent_id").
+			As(Select(t1.Columns("id", "name", "parent_id")...).
+				From(t1).
+				Where(
+					And(
+						IsNull(t1.C("parent_id")),
+						EQ(t1.C("deleted"), false),
+					),
+				).
+				UnionAll(
+					Select(t2.Columns("id", "name", "parent_id")...).
+						From(t2).
+						Join(t3).
+						On(t2.C("parent_id"), t3.C("id")).
+						Where(
+							EQ(t2.C("deleted"), false),
+						),
+				),
+			),
+		Select(t3.Columns("id", "name", "parent_id")...).
+			From(t3),
+	}
+	query, args = n.Query()
+	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND NOT `files`.`deleted` UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE NOT `files`.`deleted`) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
+	require.Nil(t, args)
+}
+
+func TestSelector_MySQL_Union(t *testing.T) {
+	query, args := Dialect(dialect.MySQL).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Union(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		UnionAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `active` UNION SELECT * FROM `old_users1` WHERE `is_active` AND `age` > ? UNION ALL SELECT * FROM `old_users2` WHERE `is_active` = ? AND `age` < ?", query)
+	require.Equal(t, []interface{}{20, "true", 18}, args)
+
+	t1, t2, t3 := Table("files"), Table("files"), Table("path")
+	n := Queries{
+		WithRecursive("path", "id", "name", "parent_id").
+			As(Select(t1.Columns("id", "name", "parent_id")...).
+				From(t1).
+				Where(
+					And(
+						IsNull(t1.C("parent_id")),
+						EQ(t1.C("deleted"), false),
+					),
+				).
+				UnionAll(
+					Select(t2.Columns("id", "name", "parent_id")...).
+						From(t2).
+						Join(t3).
+						On(t2.C("parent_id"), t3.C("id")).
+						Where(
+							EQ(t2.C("deleted"), false),
+						),
+				),
+			),
+		Select(t3.Columns("id", "name", "parent_id")...).
+			From(t3),
+	}
+	query, args = n.Query()
+	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND NOT `files`.`deleted` UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE NOT `files`.`deleted`) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
+	require.Nil(t, args)
+}
+
+func TestSelector_PostgreSQL_Union(t *testing.T) {
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("active", true)).
+		Union(
+			Select("*").
+				From(Table("old_users1")).
+				Where(
+					And(
+						EQ("is_active", true),
+						GT("age", 20),
+					),
+				),
+		).
+		UnionAll(
+			Select("*").
+				From(Table("old_users2")).
+				Where(
+					And(
+						EQ("is_active", "true"),
+						LT("age", 18),
+					),
+				),
+		).
+		Query()
+
+	require.Equal(t, `(SELECT * FROM "users" WHERE "active") UNION (SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1) UNION ALL (SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3)`, query)
+	require.Equal(t, []interface{}{20, "true", 18}, args)
+
+	t1, t2, t3 := Table("files"), Table("files"), Table("path")
+	n := Queries{
+		WithRecursive("path", "id", "name", "parent_id").
+			As(Select(t1.Columns("id", "name", "parent_id")...).
+				From(t1).
+				Where(
+					And(
+						IsNull(t1.C("parent_id")),
+						EQ(t1.C("deleted"), false),
+					),
+				).
+				UnionAll(
+					Select(t2.Columns("id", "name", "parent_id")...).
+						From(t2).
+						Join(t3).
+						On(t2.C("parent_id"), t3.C("id")).
+						Where(
+							EQ(t2.C("deleted"), false),
+						),
+				),
+			),
+		Select(t3.Columns("id", "name", "parent_id")...).
+			From(t3),
+	}
+	query, args = n.Query()
+	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND NOT `files`.`deleted` UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE NOT `files`.`deleted`) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
+	require.Nil(t, args)
+}
+
 func TestSelector_SelectExpr(t *testing.T) {
 	query, args := SelectExpr(
 		Expr("?", "a"),
@@ -1609,64 +1784,6 @@ func TestSelector_SelectExpr(t *testing.T) {
 		Query()
 	require.Equal(t, `SELECT "name", age + $1, (similarity("name", $2) + similarity("desc", $3)) AS s, rank + $4 FROM "users"`, query)
 	require.Equal(t, []interface{}{1, "A", "D", 10}, args)
-}
-
-func TestSelector_Union(t *testing.T) {
-	query, args := Dialect(dialect.Postgres).
-		Select("*").
-		From(Table("users")).
-		Where(EQ("active", true)).
-		Union(
-			Select("*").
-				From(Table("old_users1")).
-				Where(
-					And(
-						EQ("is_active", true),
-						GT("age", 20),
-					),
-				),
-		).
-		UnionAll(
-			Select("*").
-				From(Table("old_users2")).
-				Where(
-					And(
-						EQ("is_active", "true"),
-						LT("age", 18),
-					),
-				),
-		).
-		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" WHERE "is_active" AND "age" > $1 UNION ALL SELECT * FROM "old_users2" WHERE "is_active" = $2 AND "age" < $3`, query)
-	require.Equal(t, []interface{}{20, "true", 18}, args)
-
-	t1, t2, t3 := Table("files"), Table("files"), Table("path")
-	n := Queries{
-		WithRecursive("path", "id", "name", "parent_id").
-			As(Select(t1.Columns("id", "name", "parent_id")...).
-				From(t1).
-				Where(
-					And(
-						IsNull(t1.C("parent_id")),
-						EQ(t1.C("deleted"), false),
-					),
-				).
-				UnionAll(
-					Select(t2.Columns("id", "name", "parent_id")...).
-						From(t2).
-						Join(t3).
-						On(t2.C("parent_id"), t3.C("id")).
-						Where(
-							EQ(t2.C("deleted"), false),
-						),
-				),
-			),
-		Select(t3.Columns("id", "name", "parent_id")...).
-			From(t3),
-	}
-	query, args = n.Query()
-	require.Equal(t, "WITH RECURSIVE `path`(`id`, `name`, `parent_id`) AS (SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` WHERE `files`.`parent_id` IS NULL AND NOT `files`.`deleted` UNION ALL SELECT `files`.`id`, `files`.`name`, `files`.`parent_id` FROM `files` JOIN `path` AS `t1` ON `files`.`parent_id` = `t1`.`id` WHERE NOT `files`.`deleted`) SELECT `t1`.`id`, `t1`.`name`, `t1`.`parent_id` FROM `path` AS `t1`", query)
-	require.Nil(t, args)
 }
 
 func TestBuilderContext(t *testing.T) {
@@ -1761,16 +1878,40 @@ func TestSelectWithLock(t *testing.T) {
 	require.EqualError(t, s.Err(), "sql: SELECT .. FOR UPDATE/SHARE not supported in SQLite")
 }
 
-func TestSelector_UnionOrderBy(t *testing.T) {
+func TestSelector_SQLite_UnionOrderBy(t *testing.T) {
+	table := Table("users")
+	query, _ := Dialect(dialect.SQLite).
+		Select("*").
+		From(table).
+		Where(EQ("active", true)).
+		OrderBy(table.C("whenever")).
+		Union(Select("*").From(Table("old_users1")).OrderBy(table.C("whatever"))).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `active` ORDER BY `users`.`whenever` UNION SELECT * FROM `old_users1` ORDER BY `users`.`whatever`", query)
+}
+
+func TestSelector_MySQL_UnionOrderBy(t *testing.T) {
+	table := Table("users")
+	query, _ := Dialect(dialect.MySQL).
+		Select("*").
+		From(table).
+		Where(EQ("active", true)).
+		OrderBy(table.C("whenever")).
+		Union(Select("*").From(Table("old_users1")).OrderBy(table.C("whatever"))).
+		Query()
+	require.Equal(t, "SELECT * FROM `users` WHERE `active` ORDER BY `users`.`whenever` UNION SELECT * FROM `old_users1` ORDER BY `users`.`whatever`", query)
+}
+
+func TestSelector_PostgreSQL_UnionOrderBy(t *testing.T) {
 	table := Table("users")
 	query, _ := Dialect(dialect.Postgres).
 		Select("*").
 		From(table).
 		Where(EQ("active", true)).
-		Union(Select("*").From(Table("old_users1"))).
-		OrderBy(table.C("whatever")).
+		OrderBy(table.C("whenever")).
+		Union(Select("*").From(Table("old_users1")).OrderBy(table.C("whatever"))).
 		Query()
-	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
+	require.Equal(t, `(SELECT * FROM "users" WHERE "active" ORDER BY "users"."whenever") UNION (SELECT * FROM "old_users1" ORDER BY "users"."whatever")`, query)
 }
 
 func TestUpdateBuilder_SetExpr(t *testing.T) {
