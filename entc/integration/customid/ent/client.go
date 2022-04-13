@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/sid"
 	"github.com/google/uuid"
 
+	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/device"
@@ -26,6 +27,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 
 	"entgo.io/ent/dialect"
@@ -38,6 +40,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Account is the client for interacting with the Account builders.
+	Account *AccountClient
 	// Blob is the client for interacting with the Blob builders.
 	Blob *BlobClient
 	// Car is the client for interacting with the Car builders.
@@ -58,6 +62,8 @@ type Client struct {
 	Pet *PetClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// Token is the client for interacting with the Token builders.
+	Token *TokenClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -73,6 +79,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Account = NewAccountClient(c.config)
 	c.Blob = NewBlobClient(c.config)
 	c.Car = NewCarClient(c.config)
 	c.Device = NewDeviceClient(c.config)
@@ -83,6 +90,7 @@ func (c *Client) init() {
 	c.Other = NewOtherClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.Session = NewSessionClient(c.config)
+	c.Token = NewTokenClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -117,6 +125,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:     ctx,
 		config:  cfg,
+		Account: NewAccountClient(cfg),
 		Blob:    NewBlobClient(cfg),
 		Car:     NewCarClient(cfg),
 		Device:  NewDeviceClient(cfg),
@@ -127,6 +136,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Other:   NewOtherClient(cfg),
 		Pet:     NewPetClient(cfg),
 		Session: NewSessionClient(cfg),
+		Token:   NewTokenClient(cfg),
 		User:    NewUserClient(cfg),
 	}, nil
 }
@@ -147,6 +157,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:     ctx,
 		config:  cfg,
+		Account: NewAccountClient(cfg),
 		Blob:    NewBlobClient(cfg),
 		Car:     NewCarClient(cfg),
 		Device:  NewDeviceClient(cfg),
@@ -157,6 +168,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Other:   NewOtherClient(cfg),
 		Pet:     NewPetClient(cfg),
 		Session: NewSessionClient(cfg),
+		Token:   NewTokenClient(cfg),
 		User:    NewUserClient(cfg),
 	}, nil
 }
@@ -164,7 +176,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Blob.
+//		Account.
 //		Query().
 //		Count(ctx)
 //
@@ -187,6 +199,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Account.Use(hooks...)
 	c.Blob.Use(hooks...)
 	c.Car.Use(hooks...)
 	c.Device.Use(hooks...)
@@ -197,7 +210,114 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Other.Use(hooks...)
 	c.Pet.Use(hooks...)
 	c.Session.Use(hooks...)
+	c.Token.Use(hooks...)
 	c.User.Use(hooks...)
+}
+
+// AccountClient is a client for the Account schema.
+type AccountClient struct {
+	config
+}
+
+// NewAccountClient returns a client for the Account from the given config.
+func NewAccountClient(c config) *AccountClient {
+	return &AccountClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `account.Hooks(f(g(h())))`.
+func (c *AccountClient) Use(hooks ...Hook) {
+	c.hooks.Account = append(c.hooks.Account, hooks...)
+}
+
+// Create returns a create builder for Account.
+func (c *AccountClient) Create() *AccountCreate {
+	mutation := newAccountMutation(c.config, OpCreate)
+	return &AccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Account entities.
+func (c *AccountClient) CreateBulk(builders ...*AccountCreate) *AccountCreateBulk {
+	return &AccountCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Account.
+func (c *AccountClient) Update() *AccountUpdate {
+	mutation := newAccountMutation(c.config, OpUpdate)
+	return &AccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AccountClient) UpdateOne(a *Account) *AccountUpdateOne {
+	mutation := newAccountMutation(c.config, OpUpdateOne, withAccount(a))
+	return &AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AccountClient) UpdateOneID(id sid.ID) *AccountUpdateOne {
+	mutation := newAccountMutation(c.config, OpUpdateOne, withAccountID(id))
+	return &AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Account.
+func (c *AccountClient) Delete() *AccountDelete {
+	mutation := newAccountMutation(c.config, OpDelete)
+	return &AccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *AccountClient) DeleteOne(a *Account) *AccountDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *AccountClient) DeleteOneID(id sid.ID) *AccountDeleteOne {
+	builder := c.Delete().Where(account.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AccountDeleteOne{builder}
+}
+
+// Query returns a query builder for Account.
+func (c *AccountClient) Query() *AccountQuery {
+	return &AccountQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Account entity by its id.
+func (c *AccountClient) Get(ctx context.Context, id sid.ID) (*Account, error) {
+	return c.Query().Where(account.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AccountClient) GetX(ctx context.Context, id sid.ID) *Account {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryToken queries the token edge of a Account.
+func (c *AccountClient) QueryToken(a *Account) *TokenQuery {
+	query := &TokenQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(token.Table, token.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.TokenTable, account.TokenColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AccountClient) Hooks() []Hook {
+	return c.hooks.Account
 }
 
 // BlobClient is a client for the Blob schema.
@@ -1338,6 +1458,112 @@ func (c *SessionClient) QueryDevice(s *Session) *DeviceQuery {
 // Hooks returns the client hooks.
 func (c *SessionClient) Hooks() []Hook {
 	return c.hooks.Session
+}
+
+// TokenClient is a client for the Token schema.
+type TokenClient struct {
+	config
+}
+
+// NewTokenClient returns a client for the Token from the given config.
+func NewTokenClient(c config) *TokenClient {
+	return &TokenClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `token.Hooks(f(g(h())))`.
+func (c *TokenClient) Use(hooks ...Hook) {
+	c.hooks.Token = append(c.hooks.Token, hooks...)
+}
+
+// Create returns a create builder for Token.
+func (c *TokenClient) Create() *TokenCreate {
+	mutation := newTokenMutation(c.config, OpCreate)
+	return &TokenCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Token entities.
+func (c *TokenClient) CreateBulk(builders ...*TokenCreate) *TokenCreateBulk {
+	return &TokenCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Token.
+func (c *TokenClient) Update() *TokenUpdate {
+	mutation := newTokenMutation(c.config, OpUpdate)
+	return &TokenUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TokenClient) UpdateOne(t *Token) *TokenUpdateOne {
+	mutation := newTokenMutation(c.config, OpUpdateOne, withToken(t))
+	return &TokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TokenClient) UpdateOneID(id sid.ID) *TokenUpdateOne {
+	mutation := newTokenMutation(c.config, OpUpdateOne, withTokenID(id))
+	return &TokenUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Token.
+func (c *TokenClient) Delete() *TokenDelete {
+	mutation := newTokenMutation(c.config, OpDelete)
+	return &TokenDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TokenClient) DeleteOne(t *Token) *TokenDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TokenClient) DeleteOneID(id sid.ID) *TokenDeleteOne {
+	builder := c.Delete().Where(token.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TokenDeleteOne{builder}
+}
+
+// Query returns a query builder for Token.
+func (c *TokenClient) Query() *TokenQuery {
+	return &TokenQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Token entity by its id.
+func (c *TokenClient) Get(ctx context.Context, id sid.ID) (*Token, error) {
+	return c.Query().Where(token.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TokenClient) GetX(ctx context.Context, id sid.ID) *Token {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAccount queries the account edge of a Token.
+func (c *TokenClient) QueryAccount(t *Token) *AccountQuery {
+	query := &AccountQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(token.Table, token.FieldID, id),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, token.AccountTable, token.AccountColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TokenClient) Hooks() []Hook {
+	return c.hooks.Token
 }
 
 // UserClient is a client for the User schema.

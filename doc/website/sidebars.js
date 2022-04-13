@@ -44,6 +44,7 @@ module.exports = {
       items: [
         'migrate',
         'dialects',
+        'versioned-migrations',
       ],
       collapsed: false,
     },

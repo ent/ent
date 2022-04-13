@@ -58,6 +58,20 @@ func (uc *UserCreate) SetNillableWorth(u *uint) *UserCreate {
 	return uc
 }
 
+// SetPassword sets the "password" field.
+func (uc *UserCreate) SetPassword(s string) *UserCreate {
+	uc.mutation.SetPassword(s)
+	return uc
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
+	if s != nil {
+		uc.SetPassword(*s)
+	}
+	return uc
+}
+
 // AddCardIDs adds the "cards" edge to the Card entity by IDs.
 func (uc *UserCreate) AddCardIDs(ids ...int) *UserCreate {
 	uc.mutation.AddCardIDs(ids...)
@@ -245,6 +259,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldWorth,
 		})
 		_node.Worth = value
+	}
+	if value, ok := uc.mutation.Password(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldPassword,
+		})
+		_node.Password = value
 	}
 	if nodes := uc.mutation.CardsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

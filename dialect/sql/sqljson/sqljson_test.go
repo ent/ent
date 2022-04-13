@@ -81,8 +81,8 @@ func TestWritePath(t *testing.T) {
 						sql.EQ("active", true),
 					),
 				),
-			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null') AND `active` = ?",
-			wantArgs:  []interface{}{100, true},
+			wantQuery: "SELECT * FROM `test` WHERE `id` > ? AND (JSON_EXTRACT(`j`, \"$.a.*.c\") IS NOT NULL OR JSON_TYPE(`j`, \"$.a.*.c\") = 'null') AND `active`",
+			wantArgs:  []interface{}{100},
 		},
 		{
 			input: sql.Dialect(dialect.Postgres).

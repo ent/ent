@@ -7,7 +7,10 @@ package schema
 import (
 	"time"
 
+	"entgo.io/ent/schema"
+
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -78,7 +81,8 @@ func (User) Fields() []ent.Field {
 		// adding enum to the `state` column.
 		field.Enum("state").
 			Optional().
-			Values("logged_in", "logged_out", "online"),
+			Values("logged_in", "logged_out", "online").
+			Default("logged_in"),
 		// convert string to enum.
 		field.Enum("status").
 			Optional().
@@ -126,11 +130,34 @@ func (User) Indexes() []ent.Index {
 			Unique(),
 		index.Fields("age").
 			Annotations(entsql.Desc()),
+		// Enable FULLTEXT search on "nickname"
+		// field only in MySQL.
+		index.Fields("nickname").
+			Annotations(
+				entsql.IndexTypes(map[string]string{
+					dialect.MySQL: "FULLTEXT",
+				}),
+			),
 	}
 }
 
 type Car struct {
 	ent.Schema
+}
+
+// Annotations of the Car.
+func (Car) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "Car"},
+	}
+}
+
+func (Car) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Optional().
+			Unique(),
+	}
 }
 
 func (Car) Edges() []ent.Edge {
@@ -150,6 +177,14 @@ type Group struct{ ent.Schema }
 // Pet schema.
 type Pet struct {
 	ent.Schema
+}
+
+func (Pet) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Optional().
+			Unique(),
+	}
 }
 
 func (Pet) Edges() []ent.Edge {

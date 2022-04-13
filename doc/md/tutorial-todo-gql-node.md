@@ -39,7 +39,7 @@ go run ./cmd/todo/
 
 Ent supports the Node interface through its GraphQL integration. By following a few simple steps you can add support for it in your application. We start by adding the `Node` interface to our GraphQL schema:
 
-```diff
+```diff title="todo.graphql"
 +interface Node {
 +    id: ID!
 +}
@@ -64,7 +64,7 @@ type Query {
 
 Then, we tell gqlgen that Ent provides this interface by editing the `gqlgen.yaml` file as follows:
 
-```diff
+```diff title="gqlgen.yml"
 # This section declares type mapping between the GraphQL and Go type systems.
 models:
   # Defines the ID field as Go 'int'.
@@ -88,7 +88,7 @@ go generate ./...
 Like before, we need to implement the GraphQL resolve in the `todo.resolvers.go` file, but that's simple.
 Let's replace the default resolvers with the following:
 
-```go
+```go title="todo.resolvers.go"
 func (r *queryResolver) Node(ctx context.Context, id int) (ent.Noder, error) {
 	return r.client.Noder(ctx, id)
 }

@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 
@@ -298,8 +297,9 @@ func (bq *BlobQuery) Clone() *BlobQuery {
 		withParent: bq.withParent.Clone(),
 		withLinks:  bq.withLinks.Clone(),
 		// clone intermediate query.
-		sql:  bq.sql.Clone(),
-		path: bq.path,
+		sql:    bq.sql.Clone(),
+		path:   bq.path,
+		unique: bq.unique,
 	}
 }
 
@@ -341,15 +341,17 @@ func (bq *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
 //		Scan(ctx, &v)
 //
 func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
-	group := &BlobGroupBy{config: bq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &BlobGroupBy{config: bq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return bq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = blob.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -367,7 +369,10 @@ func (bq *BlobQuery) GroupBy(field string, fields ...string) *BlobGroupBy {
 //
 func (bq *BlobQuery) Select(fields ...string) *BlobSelect {
 	bq.fields = append(bq.fields, fields...)
-	return &BlobSelect{BlobQuery: bq}
+	selbuild := &BlobSelect{BlobQuery: bq}
+	selbuild.label = blob.Label
+	selbuild.flds, selbuild.scan = &bq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
@@ -386,7 +391,7 @@ func (bq *BlobQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
+func (bq *BlobQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blob, error) {
 	var (
 		nodes       = []*Blob{}
 		withFKs     = bq.withFKs
@@ -403,17 +408,16 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, blob.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Blob{config: bq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Blob).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Blob{config: bq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, bq.driver, _spec); err != nil {
 		return nil, err
@@ -452,66 +456,54 @@ func (bq *BlobQuery) sqlAll(ctx context.Context) ([]*Blob, error) {
 	}
 
 	if query := bq.withLinks; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[uuid.UUID]*Blob, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[uuid.UUID]*Blob)
+		nids := make(map[uuid.UUID]map[*Blob]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
 			node.Edges.Links = []*Blob{}
 		}
-		var (
-			edgeids []uuid.UUID
-			edges   = make(map[uuid.UUID][]*Blob)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: false,
-				Table:   blob.LinksTable,
-				Columns: blob.LinksPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(blob.LinksPrimaryKey[0], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(uuid.UUID), new(uuid.UUID)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*uuid.UUID)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(blob.LinksTable)
+			s.Join(joinT).On(s.C(blob.FieldID), joinT.C(blob.LinksPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(blob.LinksPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(blob.LinksPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
 				}
-				ein, ok := in.(*uuid.UUID)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
+				return append([]interface{}{new(uuid.UUID)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Blob]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
 				}
-				outValue := *eout
-				inValue := *ein
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
+				nids[inValue][byid[outValue]] = struct{}{}
 				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, bq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "links": %w`, err)
-		}
-		query.Where(blob.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			nodes, ok := nids[n.ID]
 			if !ok {
 				return nil, fmt.Errorf(`unexpected "links" node returned %v`, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Links = append(nodes[i].Edges.Links, n)
+			for kn := range nodes {
+				kn.Edges.Links = append(kn.Edges.Links, n)
 			}
 		}
 	}
@@ -619,6 +611,7 @@ func (bq *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // BlobGroupBy is the group-by builder for Blob entities.
 type BlobGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -640,209 +633,6 @@ func (bgb *BlobGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	bgb.sql = query
 	return bgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (bgb *BlobGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := bgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BlobGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(bgb.fields) > 1 {
-		return nil, errors.New("ent: BlobGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := bgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (bgb *BlobGroupBy) StringsX(ctx context.Context) []string {
-	v, err := bgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BlobGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = bgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{blob.Label}
-	default:
-		err = fmt.Errorf("ent: BlobGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (bgb *BlobGroupBy) StringX(ctx context.Context) string {
-	v, err := bgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BlobGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(bgb.fields) > 1 {
-		return nil, errors.New("ent: BlobGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := bgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (bgb *BlobGroupBy) IntsX(ctx context.Context) []int {
-	v, err := bgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BlobGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = bgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{blob.Label}
-	default:
-		err = fmt.Errorf("ent: BlobGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (bgb *BlobGroupBy) IntX(ctx context.Context) int {
-	v, err := bgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BlobGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(bgb.fields) > 1 {
-		return nil, errors.New("ent: BlobGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := bgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (bgb *BlobGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := bgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BlobGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = bgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{blob.Label}
-	default:
-		err = fmt.Errorf("ent: BlobGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (bgb *BlobGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := bgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BlobGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(bgb.fields) > 1 {
-		return nil, errors.New("ent: BlobGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := bgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (bgb *BlobGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := bgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (bgb *BlobGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = bgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{blob.Label}
-	default:
-		err = fmt.Errorf("ent: BlobGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (bgb *BlobGroupBy) BoolX(ctx context.Context) bool {
-	v, err := bgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (bgb *BlobGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -886,6 +676,7 @@ func (bgb *BlobGroupBy) sqlQuery() *sql.Selector {
 // BlobSelect is the builder for selecting fields of Blob entities.
 type BlobSelect struct {
 	*BlobQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -897,201 +688,6 @@ func (bs *BlobSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	bs.sql = bs.BlobQuery.sqlQuery(ctx)
 	return bs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (bs *BlobSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := bs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (bs *BlobSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(bs.fields) > 1 {
-		return nil, errors.New("ent: BlobSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := bs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (bs *BlobSelect) StringsX(ctx context.Context) []string {
-	v, err := bs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (bs *BlobSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = bs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{blob.Label}
-	default:
-		err = fmt.Errorf("ent: BlobSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (bs *BlobSelect) StringX(ctx context.Context) string {
-	v, err := bs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (bs *BlobSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(bs.fields) > 1 {
-		return nil, errors.New("ent: BlobSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := bs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (bs *BlobSelect) IntsX(ctx context.Context) []int {
-	v, err := bs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (bs *BlobSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = bs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{blob.Label}
-	default:
-		err = fmt.Errorf("ent: BlobSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (bs *BlobSelect) IntX(ctx context.Context) int {
-	v, err := bs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (bs *BlobSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(bs.fields) > 1 {
-		return nil, errors.New("ent: BlobSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := bs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (bs *BlobSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := bs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (bs *BlobSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = bs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{blob.Label}
-	default:
-		err = fmt.Errorf("ent: BlobSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (bs *BlobSelect) Float64X(ctx context.Context) float64 {
-	v, err := bs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (bs *BlobSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(bs.fields) > 1 {
-		return nil, errors.New("ent: BlobSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := bs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (bs *BlobSelect) BoolsX(ctx context.Context) []bool {
-	v, err := bs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (bs *BlobSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = bs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{blob.Label}
-	default:
-		err = fmt.Errorf("ent: BlobSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (bs *BlobSelect) BoolX(ctx context.Context) bool {
-	v, err := bs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (bs *BlobSelect) sqlScan(ctx context.Context, v interface{}) error {

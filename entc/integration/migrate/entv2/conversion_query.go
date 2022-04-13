@@ -8,7 +8,6 @@ package entv2
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -246,8 +245,9 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 		order:      append([]OrderFunc{}, cq.order...),
 		predicates: append([]predicate.Conversion{}, cq.predicates...),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:    cq.sql.Clone(),
+		path:   cq.path,
+		unique: cq.unique,
 	}
 }
 
@@ -267,15 +267,17 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 //		Scan(ctx, &v)
 //
 func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGroupBy {
-	group := &ConversionGroupBy{config: cq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &ConversionGroupBy{config: cq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return cq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = conversion.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -293,7 +295,10 @@ func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGr
 //
 func (cq *ConversionQuery) Select(fields ...string) *ConversionSelect {
 	cq.fields = append(cq.fields, fields...)
-	return &ConversionSelect{ConversionQuery: cq}
+	selbuild := &ConversionSelect{ConversionQuery: cq}
+	selbuild.label = conversion.Label
+	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (cq *ConversionQuery) prepareQuery(ctx context.Context) error {
@@ -312,22 +317,21 @@ func (cq *ConversionQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (cq *ConversionQuery) sqlAll(ctx context.Context) ([]*Conversion, error) {
+func (cq *ConversionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Conversion, error) {
 	var (
 		nodes = []*Conversion{}
 		_spec = cq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Conversion{config: cq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Conversion).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("entv2: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Conversion{config: cq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
@@ -438,6 +442,7 @@ func (cq *ConversionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // ConversionGroupBy is the group-by builder for Conversion entities.
 type ConversionGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -459,209 +464,6 @@ func (cgb *ConversionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	cgb.sql = query
 	return cgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cgb *ConversionGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := cgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *ConversionGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("entv2: ConversionGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cgb *ConversionGroupBy) StringsX(ctx context.Context) []string {
-	v, err := cgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *ConversionGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{conversion.Label}
-	default:
-		err = fmt.Errorf("entv2: ConversionGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cgb *ConversionGroupBy) StringX(ctx context.Context) string {
-	v, err := cgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *ConversionGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("entv2: ConversionGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cgb *ConversionGroupBy) IntsX(ctx context.Context) []int {
-	v, err := cgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *ConversionGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{conversion.Label}
-	default:
-		err = fmt.Errorf("entv2: ConversionGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cgb *ConversionGroupBy) IntX(ctx context.Context) int {
-	v, err := cgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *ConversionGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("entv2: ConversionGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cgb *ConversionGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := cgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *ConversionGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{conversion.Label}
-	default:
-		err = fmt.Errorf("entv2: ConversionGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cgb *ConversionGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := cgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *ConversionGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("entv2: ConversionGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cgb *ConversionGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := cgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *ConversionGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{conversion.Label}
-	default:
-		err = fmt.Errorf("entv2: ConversionGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cgb *ConversionGroupBy) BoolX(ctx context.Context) bool {
-	v, err := cgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cgb *ConversionGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -705,6 +507,7 @@ func (cgb *ConversionGroupBy) sqlQuery() *sql.Selector {
 // ConversionSelect is the builder for selecting fields of Conversion entities.
 type ConversionSelect struct {
 	*ConversionQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -716,201 +519,6 @@ func (cs *ConversionSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	cs.sql = cs.ConversionQuery.sqlQuery(ctx)
 	return cs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cs *ConversionSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := cs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (cs *ConversionSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("entv2: ConversionSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cs *ConversionSelect) StringsX(ctx context.Context) []string {
-	v, err := cs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (cs *ConversionSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{conversion.Label}
-	default:
-		err = fmt.Errorf("entv2: ConversionSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cs *ConversionSelect) StringX(ctx context.Context) string {
-	v, err := cs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (cs *ConversionSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("entv2: ConversionSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cs *ConversionSelect) IntsX(ctx context.Context) []int {
-	v, err := cs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (cs *ConversionSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{conversion.Label}
-	default:
-		err = fmt.Errorf("entv2: ConversionSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cs *ConversionSelect) IntX(ctx context.Context) int {
-	v, err := cs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (cs *ConversionSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("entv2: ConversionSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cs *ConversionSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := cs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (cs *ConversionSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{conversion.Label}
-	default:
-		err = fmt.Errorf("entv2: ConversionSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cs *ConversionSelect) Float64X(ctx context.Context) float64 {
-	v, err := cs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (cs *ConversionSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("entv2: ConversionSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cs *ConversionSelect) BoolsX(ctx context.Context) []bool {
-	v, err := cs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (cs *ConversionSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{conversion.Label}
-	default:
-		err = fmt.Errorf("entv2: ConversionSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cs *ConversionSelect) BoolX(ctx context.Context) bool {
-	v, err := cs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cs *ConversionSelect) sqlScan(ctx context.Context, v interface{}) error {

@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -298,8 +297,9 @@ func (rq *RentalQuery) Clone() *RentalQuery {
 		withUser:   rq.withUser.Clone(),
 		withCar:    rq.withCar.Clone(),
 		// clone intermediate query.
-		sql:  rq.sql.Clone(),
-		path: rq.path,
+		sql:    rq.sql.Clone(),
+		path:   rq.path,
+		unique: rq.unique,
 	}
 }
 
@@ -341,15 +341,17 @@ func (rq *RentalQuery) WithCar(opts ...func(*CarQuery)) *RentalQuery {
 //		Scan(ctx, &v)
 //
 func (rq *RentalQuery) GroupBy(field string, fields ...string) *RentalGroupBy {
-	group := &RentalGroupBy{config: rq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &RentalGroupBy{config: rq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return rq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = rental.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -367,7 +369,10 @@ func (rq *RentalQuery) GroupBy(field string, fields ...string) *RentalGroupBy {
 //
 func (rq *RentalQuery) Select(fields ...string) *RentalSelect {
 	rq.fields = append(rq.fields, fields...)
-	return &RentalSelect{RentalQuery: rq}
+	selbuild := &RentalSelect{RentalQuery: rq}
+	selbuild.label = rental.Label
+	selbuild.flds, selbuild.scan = &rq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (rq *RentalQuery) prepareQuery(ctx context.Context) error {
@@ -386,7 +391,7 @@ func (rq *RentalQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (rq *RentalQuery) sqlAll(ctx context.Context) ([]*Rental, error) {
+func (rq *RentalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Rental, error) {
 	var (
 		nodes       = []*Rental{}
 		_spec       = rq.querySpec()
@@ -396,17 +401,16 @@ func (rq *RentalQuery) sqlAll(ctx context.Context) ([]*Rental, error) {
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Rental{config: rq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Rental).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Rental{config: rq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, rq.driver, _spec); err != nil {
 		return nil, err
@@ -570,6 +574,7 @@ func (rq *RentalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // RentalGroupBy is the group-by builder for Rental entities.
 type RentalGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -591,209 +596,6 @@ func (rgb *RentalGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	rgb.sql = query
 	return rgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (rgb *RentalGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := rgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (rgb *RentalGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(rgb.fields) > 1 {
-		return nil, errors.New("ent: RentalGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := rgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (rgb *RentalGroupBy) StringsX(ctx context.Context) []string {
-	v, err := rgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (rgb *RentalGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = rgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{rental.Label}
-	default:
-		err = fmt.Errorf("ent: RentalGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (rgb *RentalGroupBy) StringX(ctx context.Context) string {
-	v, err := rgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (rgb *RentalGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(rgb.fields) > 1 {
-		return nil, errors.New("ent: RentalGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := rgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (rgb *RentalGroupBy) IntsX(ctx context.Context) []int {
-	v, err := rgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (rgb *RentalGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = rgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{rental.Label}
-	default:
-		err = fmt.Errorf("ent: RentalGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (rgb *RentalGroupBy) IntX(ctx context.Context) int {
-	v, err := rgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (rgb *RentalGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(rgb.fields) > 1 {
-		return nil, errors.New("ent: RentalGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := rgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (rgb *RentalGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := rgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (rgb *RentalGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = rgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{rental.Label}
-	default:
-		err = fmt.Errorf("ent: RentalGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (rgb *RentalGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := rgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (rgb *RentalGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(rgb.fields) > 1 {
-		return nil, errors.New("ent: RentalGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := rgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (rgb *RentalGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := rgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (rgb *RentalGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = rgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{rental.Label}
-	default:
-		err = fmt.Errorf("ent: RentalGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (rgb *RentalGroupBy) BoolX(ctx context.Context) bool {
-	v, err := rgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (rgb *RentalGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -837,6 +639,7 @@ func (rgb *RentalGroupBy) sqlQuery() *sql.Selector {
 // RentalSelect is the builder for selecting fields of Rental entities.
 type RentalSelect struct {
 	*RentalQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -848,201 +651,6 @@ func (rs *RentalSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	rs.sql = rs.RentalQuery.sqlQuery(ctx)
 	return rs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (rs *RentalSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := rs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (rs *RentalSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(rs.fields) > 1 {
-		return nil, errors.New("ent: RentalSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := rs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (rs *RentalSelect) StringsX(ctx context.Context) []string {
-	v, err := rs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (rs *RentalSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = rs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{rental.Label}
-	default:
-		err = fmt.Errorf("ent: RentalSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (rs *RentalSelect) StringX(ctx context.Context) string {
-	v, err := rs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (rs *RentalSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(rs.fields) > 1 {
-		return nil, errors.New("ent: RentalSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := rs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (rs *RentalSelect) IntsX(ctx context.Context) []int {
-	v, err := rs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (rs *RentalSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = rs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{rental.Label}
-	default:
-		err = fmt.Errorf("ent: RentalSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (rs *RentalSelect) IntX(ctx context.Context) int {
-	v, err := rs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (rs *RentalSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(rs.fields) > 1 {
-		return nil, errors.New("ent: RentalSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := rs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (rs *RentalSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := rs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (rs *RentalSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = rs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{rental.Label}
-	default:
-		err = fmt.Errorf("ent: RentalSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (rs *RentalSelect) Float64X(ctx context.Context) float64 {
-	v, err := rs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (rs *RentalSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(rs.fields) > 1 {
-		return nil, errors.New("ent: RentalSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := rs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (rs *RentalSelect) BoolsX(ctx context.Context) []bool {
-	v, err := rs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (rs *RentalSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = rs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{rental.Label}
-	default:
-		err = fmt.Errorf("ent: RentalSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (rs *RentalSelect) BoolX(ctx context.Context) bool {
-	v, err := rs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (rs *RentalSelect) sqlScan(ctx context.Context, v interface{}) error {

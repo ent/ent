@@ -20,6 +20,7 @@ import (
 	userv1 "entgo.io/ent/entc/integration/migrate/entv1/user"
 	"entgo.io/ent/entc/integration/migrate/entv2"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
+	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 
@@ -51,6 +52,8 @@ func TestMySQL(t *testing.T) {
 			if version == "8" {
 				CheckConstraint(t, clientv2)
 			}
+			NicknameSearch(t, clientv2)
+			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
 		})
 	}
 }
@@ -80,6 +83,7 @@ func TestPostgres(t *testing.T) {
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			CheckConstraint(t, clientv2)
+			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
 		})
 	}
 }
@@ -97,6 +101,7 @@ func TestSQLite(t *testing.T) {
 			ctx,
 			migratev2.WithGlobalUniqueID(true),
 			migratev2.WithDropIndex(true),
+			migratev2.WithDropColumn(true),
 			schema.WithDiffHook(func(next schema.Differ) schema.Differ {
 				return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
 					// Example to hook into the diff process.
@@ -161,7 +166,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 
 	// Run migration and execute queries on v2.
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)))
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
 
 	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
@@ -347,6 +352,21 @@ func CheckConstraint(t *testing.T, client *entv2.Client) {
 	require.Error(t, err)
 }
 
+func NicknameSearch(t *testing.T, client *entv2.Client) {
+	ctx := context.Background()
+	names := client.User.Query().
+		Where(func(s *sql.Selector) {
+			s.Where(sql.P(func(b *sql.Builder) {
+				b.WriteString("MATCH(").Ident(user.FieldNickname).WriteString(") AGAINST(").Arg("nick_bar | nick_foo").WriteString(")")
+			}))
+		}).
+		Unique(true).
+		Order(entv2.Asc(user.FieldNickname)).
+		Select(user.FieldNickname).
+		StringsX(ctx)
+	require.Equal(t, []string{"nick_bar", "nick_foo"}, names)
+}
+
 func EqualFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing equal-fold on sql specific dialects")
@@ -362,6 +382,22 @@ func ContainsFold(t *testing.T, client *entv2.Client) {
 	require.Zero(t, client.User.Query().Where(user.NameContains("mash")).CountX(ctx))
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("mash")).CountX(ctx))
 	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("Raki")).CountX(ctx))
+}
+
+func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
+	ctx := context.Background()
+	rows, err := drv.QueryContext(ctx, query, customtype.Table, customtype.FieldTz0)
+	require.NoError(t, err)
+	p, err := sql.ScanInt(rows)
+	require.NoError(t, err)
+	require.Zerof(t, p, "custom_types field %q", customtype.FieldTz0)
+	require.NoError(t, rows.Close())
+	rows, err = drv.QueryContext(ctx, query, customtype.Table, customtype.FieldTz3)
+	require.NoError(t, err)
+	p, err = sql.ScanInt(rows)
+	require.NoError(t, err)
+	require.Equalf(t, 3, p, "custom_types field %q", customtype.FieldTz3)
+	require.NoError(t, rows.Close())
 }
 
 func idRange(t *testing.T, id, l, h int) {

@@ -13,20 +13,21 @@ import (
 )
 
 var (
-	// CarsColumns holds the columns for the "cars" table.
-	CarsColumns = []*schema.Column{
+	// CarColumns holds the columns for the "Car" table.
+	CarColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "user_car", Type: field.TypeInt},
 	}
-	// CarsTable holds the schema information for the "cars" table.
-	CarsTable = &schema.Table{
-		Name:       "cars",
-		Columns:    CarsColumns,
-		PrimaryKey: []*schema.Column{CarsColumns[0]},
+	// CarTable holds the schema information for the "Car" table.
+	CarTable = &schema.Table{
+		Name:       "Car",
+		Columns:    CarColumns,
+		PrimaryKey: []*schema.Column{CarColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "cars_users_car",
-				Columns:    []*schema.Column{CarsColumns[1]},
+				Symbol:     "Car_users_car",
+				Columns:    []*schema.Column{CarColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -55,6 +56,8 @@ var (
 	CustomTypesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "custom", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "customtype"}},
+		{Name: "tz0", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "timestamp(0)", "postgres": "timestamptz(0)"}},
+		{Name: "tz3", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "timestamp(3)", "postgres": "timestamptz(3)"}},
 	}
 	// CustomTypesTable holds the schema information for the "custom_types" table.
 	CustomTypesTable = &schema.Table{
@@ -108,6 +111,7 @@ var (
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "owner_id", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PetsTable holds the schema information for the "pets" table.
@@ -118,7 +122,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "user_pet_id",
-				Columns:    []*schema.Column{PetsColumns[1]},
+				Columns:    []*schema.Column{PetsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -138,7 +142,7 @@ var (
 		{Name: "title", Type: field.TypeString, Default: "SWE"},
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
-		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}},
+		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}, Default: "logged_in"},
 		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"done", "pending"}},
 		{Name: "workplace", Type: field.TypeString, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime, Default: "CURRENT_TIMESTAMP"},
@@ -170,6 +174,16 @@ var (
 					Desc: true,
 				},
 			},
+			{
+				Name:    "user_nickname",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[6]},
+				Annotation: &entsql.IndexAnnotation{
+					Types: map[string]string{
+						"mysql": "FULLTEXT",
+					},
+				},
+			},
 		},
 	}
 	// FriendsColumns holds the columns for the "friends" table.
@@ -199,7 +213,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CarsTable,
+		CarTable,
 		ConversionsTable,
 		CustomTypesTable,
 		GroupsTable,
@@ -211,7 +225,10 @@ var (
 )
 
 func init() {
-	CarsTable.ForeignKeys[0].RefTable = UsersTable
+	CarTable.ForeignKeys[0].RefTable = UsersTable
+	CarTable.Annotation = &entsql.Annotation{
+		Table: "Car",
+	}
 	MediaTable.Annotation = &entsql.Annotation{
 		Check: "text <> 'boring'",
 	}

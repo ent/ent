@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -247,8 +246,9 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 		order:      append([]OrderFunc{}, miq.order...),
 		predicates: append([]predicate.MixinID{}, miq.predicates...),
 		// clone intermediate query.
-		sql:  miq.sql.Clone(),
-		path: miq.path,
+		sql:    miq.sql.Clone(),
+		path:   miq.path,
+		unique: miq.unique,
 	}
 }
 
@@ -268,15 +268,17 @@ func (miq *MixinIDQuery) Clone() *MixinIDQuery {
 //		Scan(ctx, &v)
 //
 func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy {
-	group := &MixinIDGroupBy{config: miq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &MixinIDGroupBy{config: miq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := miq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return miq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = mixinid.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -294,7 +296,10 @@ func (miq *MixinIDQuery) GroupBy(field string, fields ...string) *MixinIDGroupBy
 //
 func (miq *MixinIDQuery) Select(fields ...string) *MixinIDSelect {
 	miq.fields = append(miq.fields, fields...)
-	return &MixinIDSelect{MixinIDQuery: miq}
+	selbuild := &MixinIDSelect{MixinIDQuery: miq}
+	selbuild.label = mixinid.Label
+	selbuild.flds, selbuild.scan = &miq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (miq *MixinIDQuery) prepareQuery(ctx context.Context) error {
@@ -313,22 +318,21 @@ func (miq *MixinIDQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (miq *MixinIDQuery) sqlAll(ctx context.Context) ([]*MixinID, error) {
+func (miq *MixinIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*MixinID, error) {
 	var (
 		nodes = []*MixinID{}
 		_spec = miq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &MixinID{config: miq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*MixinID).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &MixinID{config: miq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, miq.driver, _spec); err != nil {
 		return nil, err
@@ -439,6 +443,7 @@ func (miq *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // MixinIDGroupBy is the group-by builder for MixinID entities.
 type MixinIDGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -460,209 +465,6 @@ func (migb *MixinIDGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	migb.sql = query
 	return migb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (migb *MixinIDGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := migb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (migb *MixinIDGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(migb.fields) > 1 {
-		return nil, errors.New("ent: MixinIDGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := migb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (migb *MixinIDGroupBy) StringsX(ctx context.Context) []string {
-	v, err := migb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (migb *MixinIDGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = migb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{mixinid.Label}
-	default:
-		err = fmt.Errorf("ent: MixinIDGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (migb *MixinIDGroupBy) StringX(ctx context.Context) string {
-	v, err := migb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (migb *MixinIDGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(migb.fields) > 1 {
-		return nil, errors.New("ent: MixinIDGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := migb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (migb *MixinIDGroupBy) IntsX(ctx context.Context) []int {
-	v, err := migb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (migb *MixinIDGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = migb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{mixinid.Label}
-	default:
-		err = fmt.Errorf("ent: MixinIDGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (migb *MixinIDGroupBy) IntX(ctx context.Context) int {
-	v, err := migb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (migb *MixinIDGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(migb.fields) > 1 {
-		return nil, errors.New("ent: MixinIDGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := migb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (migb *MixinIDGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := migb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (migb *MixinIDGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = migb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{mixinid.Label}
-	default:
-		err = fmt.Errorf("ent: MixinIDGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (migb *MixinIDGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := migb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (migb *MixinIDGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(migb.fields) > 1 {
-		return nil, errors.New("ent: MixinIDGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := migb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (migb *MixinIDGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := migb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (migb *MixinIDGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = migb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{mixinid.Label}
-	default:
-		err = fmt.Errorf("ent: MixinIDGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (migb *MixinIDGroupBy) BoolX(ctx context.Context) bool {
-	v, err := migb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -706,6 +508,7 @@ func (migb *MixinIDGroupBy) sqlQuery() *sql.Selector {
 // MixinIDSelect is the builder for selecting fields of MixinID entities.
 type MixinIDSelect struct {
 	*MixinIDQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -717,201 +520,6 @@ func (mis *MixinIDSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	mis.sql = mis.MixinIDQuery.sqlQuery(ctx)
 	return mis.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (mis *MixinIDSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := mis.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (mis *MixinIDSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(mis.fields) > 1 {
-		return nil, errors.New("ent: MixinIDSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := mis.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (mis *MixinIDSelect) StringsX(ctx context.Context) []string {
-	v, err := mis.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (mis *MixinIDSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = mis.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{mixinid.Label}
-	default:
-		err = fmt.Errorf("ent: MixinIDSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (mis *MixinIDSelect) StringX(ctx context.Context) string {
-	v, err := mis.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (mis *MixinIDSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(mis.fields) > 1 {
-		return nil, errors.New("ent: MixinIDSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := mis.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (mis *MixinIDSelect) IntsX(ctx context.Context) []int {
-	v, err := mis.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (mis *MixinIDSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = mis.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{mixinid.Label}
-	default:
-		err = fmt.Errorf("ent: MixinIDSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (mis *MixinIDSelect) IntX(ctx context.Context) int {
-	v, err := mis.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (mis *MixinIDSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(mis.fields) > 1 {
-		return nil, errors.New("ent: MixinIDSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := mis.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (mis *MixinIDSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := mis.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (mis *MixinIDSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = mis.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{mixinid.Label}
-	default:
-		err = fmt.Errorf("ent: MixinIDSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (mis *MixinIDSelect) Float64X(ctx context.Context) float64 {
-	v, err := mis.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (mis *MixinIDSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(mis.fields) > 1 {
-		return nil, errors.New("ent: MixinIDSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := mis.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (mis *MixinIDSelect) BoolsX(ctx context.Context) []bool {
-	v, err := mis.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (mis *MixinIDSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = mis.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{mixinid.Label}
-	default:
-		err = fmt.Errorf("ent: MixinIDSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (mis *MixinIDSelect) BoolX(ctx context.Context) bool {
-	v, err := mis.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (mis *MixinIDSelect) sqlScan(ctx context.Context, v interface{}) error {

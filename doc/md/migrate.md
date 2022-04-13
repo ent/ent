@@ -112,6 +112,9 @@ Note that if this option is enabled, the maximum number of possible tables is **
 
 ## Offline Mode
 
+**With Atlas becoming the default migration engine soon, offline migration will be replaced
+by [versioned migrations](versioned-migrations.md).**
+
 Offline mode allows you to write the schema changes to an `io.Writer` before executing them on the database.
 It's useful for verifying the SQL commands before they're executed on the database, or to get an SQL script
 to run manually. 

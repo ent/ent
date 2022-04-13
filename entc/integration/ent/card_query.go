@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 
@@ -36,7 +35,7 @@ type CardQuery struct {
 	withOwner *UserQuery
 	withSpec  *SpecQuery
 	withFKs   bool
-	modifiers []func(s *sql.Selector)
+	modifiers []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -301,8 +300,9 @@ func (cq *CardQuery) Clone() *CardQuery {
 		withOwner:  cq.withOwner.Clone(),
 		withSpec:   cq.withSpec.Clone(),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:    cq.sql.Clone(),
+		path:   cq.path,
+		unique: cq.unique,
 	}
 }
 
@@ -344,15 +344,17 @@ func (cq *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
 //		Scan(ctx, &v)
 //
 func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
-	group := &CardGroupBy{config: cq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &CardGroupBy{config: cq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return cq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = card.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -370,7 +372,10 @@ func (cq *CardQuery) GroupBy(field string, fields ...string) *CardGroupBy {
 //
 func (cq *CardQuery) Select(fields ...string) *CardSelect {
 	cq.fields = append(cq.fields, fields...)
-	return &CardSelect{CardQuery: cq}
+	selbuild := &CardSelect{CardQuery: cq}
+	selbuild.label = card.Label
+	selbuild.flds, selbuild.scan = &cq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (cq *CardQuery) prepareQuery(ctx context.Context) error {
@@ -389,7 +394,7 @@ func (cq *CardQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
+func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, error) {
 	var (
 		nodes       = []*Card{}
 		withFKs     = cq.withFKs
@@ -406,20 +411,19 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, card.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Card{config: cq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Card).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Card{config: cq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(cq.modifiers) > 0 {
 		_spec.Modifiers = cq.modifiers
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
 		return nil, err
@@ -458,66 +462,54 @@ func (cq *CardQuery) sqlAll(ctx context.Context) ([]*Card, error) {
 	}
 
 	if query := cq.withSpec; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Card, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*Card)
+		nids := make(map[int]map[*Card]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
 			node.Edges.Spec = []*Spec{}
 		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*Card)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   card.SpecTable,
-				Columns: card.SpecPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(card.SpecPrimaryKey[1], fks...))
-			},
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(card.SpecTable)
+			s.Join(joinT).On(s.C(spec.FieldID), joinT.C(card.SpecPrimaryKey[0]))
+			s.Where(sql.InValues(joinT.C(card.SpecPrimaryKey[1]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(card.SpecPrimaryKey[1]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
 				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Card]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
 				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				if _, ok := edges[inValue]; !ok {
-					edgeids = append(edgeids, inValue)
-				}
-				edges[inValue] = append(edges[inValue], node)
+				nids[inValue][byid[outValue]] = struct{}{}
 				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "spec": %w`, err)
-		}
-		query.Where(spec.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
+			nodes, ok := nids[n.ID]
 			if !ok {
 				return nil, fmt.Errorf(`unexpected "spec" node returned %v`, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Spec = append(nodes[i].Edges.Spec, n)
+			for kn := range nodes {
+				kn.Edges.Spec = append(kn.Edges.Spec, n)
 			}
 		}
 	}
@@ -663,6 +655,7 @@ func (cq *CardQuery) Modify(modifiers ...func(s *sql.Selector)) *CardSelect {
 // CardGroupBy is the group-by builder for Card entities.
 type CardGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -684,209 +677,6 @@ func (cgb *CardGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	cgb.sql = query
 	return cgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cgb *CardGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := cgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CardGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CardGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cgb *CardGroupBy) StringsX(ctx context.Context) []string {
-	v, err := cgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CardGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{card.Label}
-	default:
-		err = fmt.Errorf("ent: CardGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cgb *CardGroupBy) StringX(ctx context.Context) string {
-	v, err := cgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CardGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CardGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cgb *CardGroupBy) IntsX(ctx context.Context) []int {
-	v, err := cgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CardGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{card.Label}
-	default:
-		err = fmt.Errorf("ent: CardGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cgb *CardGroupBy) IntX(ctx context.Context) int {
-	v, err := cgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CardGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CardGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cgb *CardGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := cgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CardGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{card.Label}
-	default:
-		err = fmt.Errorf("ent: CardGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cgb *CardGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := cgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CardGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CardGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := cgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cgb *CardGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := cgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (cgb *CardGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{card.Label}
-	default:
-		err = fmt.Errorf("ent: CardGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cgb *CardGroupBy) BoolX(ctx context.Context) bool {
-	v, err := cgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cgb *CardGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -930,6 +720,7 @@ func (cgb *CardGroupBy) sqlQuery() *sql.Selector {
 // CardSelect is the builder for selecting fields of Card entities.
 type CardSelect struct {
 	*CardQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -941,201 +732,6 @@ func (cs *CardSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	cs.sql = cs.CardQuery.sqlQuery(ctx)
 	return cs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (cs *CardSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := cs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (cs *CardSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CardSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (cs *CardSelect) StringsX(ctx context.Context) []string {
-	v, err := cs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (cs *CardSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = cs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{card.Label}
-	default:
-		err = fmt.Errorf("ent: CardSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (cs *CardSelect) StringX(ctx context.Context) string {
-	v, err := cs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (cs *CardSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CardSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (cs *CardSelect) IntsX(ctx context.Context) []int {
-	v, err := cs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (cs *CardSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = cs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{card.Label}
-	default:
-		err = fmt.Errorf("ent: CardSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (cs *CardSelect) IntX(ctx context.Context) int {
-	v, err := cs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (cs *CardSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CardSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (cs *CardSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := cs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (cs *CardSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = cs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{card.Label}
-	default:
-		err = fmt.Errorf("ent: CardSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (cs *CardSelect) Float64X(ctx context.Context) float64 {
-	v, err := cs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (cs *CardSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CardSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := cs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (cs *CardSelect) BoolsX(ctx context.Context) []bool {
-	v, err := cs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (cs *CardSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = cs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{card.Label}
-	default:
-		err = fmt.Errorf("ent: CardSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (cs *CardSelect) BoolX(ctx context.Context) bool {
-	v, err := cs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (cs *CardSelect) sqlScan(ctx context.Context, v interface{}) error {

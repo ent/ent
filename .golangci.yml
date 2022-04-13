@@ -1,4 +1,5 @@
 run:
+  go: '1.17'
   timeout: 3m
 
 linters-settings:

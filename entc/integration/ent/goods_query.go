@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -29,7 +28,7 @@ type GoodsQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Goods
-	modifiers  []func(s *sql.Selector)
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -248,30 +247,36 @@ func (gq *GoodsQuery) Clone() *GoodsQuery {
 		order:      append([]OrderFunc{}, gq.order...),
 		predicates: append([]predicate.Goods{}, gq.predicates...),
 		// clone intermediate query.
-		sql:  gq.sql.Clone(),
-		path: gq.path,
+		sql:    gq.sql.Clone(),
+		path:   gq.path,
+		unique: gq.unique,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (gq *GoodsQuery) GroupBy(field string, fields ...string) *GoodsGroupBy {
-	group := &GoodsGroupBy{config: gq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &GoodsGroupBy{config: gq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := gq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return gq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = goods.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (gq *GoodsQuery) Select(fields ...string) *GoodsSelect {
 	gq.fields = append(gq.fields, fields...)
-	return &GoodsSelect{GoodsQuery: gq}
+	selbuild := &GoodsSelect{GoodsQuery: gq}
+	selbuild.label = goods.Label
+	selbuild.flds, selbuild.scan = &gq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
@@ -290,25 +295,24 @@ func (gq *GoodsQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (gq *GoodsQuery) sqlAll(ctx context.Context) ([]*Goods, error) {
+func (gq *GoodsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Goods, error) {
 	var (
 		nodes = []*Goods{}
 		_spec = gq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Goods{config: gq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Goods).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Goods{config: gq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	if len(gq.modifiers) > 0 {
 		_spec.Modifiers = gq.modifiers
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, gq.driver, _spec); err != nil {
 		return nil, err
@@ -457,6 +461,7 @@ func (gq *GoodsQuery) Modify(modifiers ...func(s *sql.Selector)) *GoodsSelect {
 // GoodsGroupBy is the group-by builder for Goods entities.
 type GoodsGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -478,209 +483,6 @@ func (ggb *GoodsGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	ggb.sql = query
 	return ggb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ggb *GoodsGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := ggb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GoodsGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(ggb.fields) > 1 {
-		return nil, errors.New("ent: GoodsGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := ggb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ggb *GoodsGroupBy) StringsX(ctx context.Context) []string {
-	v, err := ggb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GoodsGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ggb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{goods.Label}
-	default:
-		err = fmt.Errorf("ent: GoodsGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ggb *GoodsGroupBy) StringX(ctx context.Context) string {
-	v, err := ggb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GoodsGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(ggb.fields) > 1 {
-		return nil, errors.New("ent: GoodsGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := ggb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ggb *GoodsGroupBy) IntsX(ctx context.Context) []int {
-	v, err := ggb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GoodsGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ggb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{goods.Label}
-	default:
-		err = fmt.Errorf("ent: GoodsGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ggb *GoodsGroupBy) IntX(ctx context.Context) int {
-	v, err := ggb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GoodsGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ggb.fields) > 1 {
-		return nil, errors.New("ent: GoodsGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := ggb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ggb *GoodsGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := ggb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GoodsGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ggb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{goods.Label}
-	default:
-		err = fmt.Errorf("ent: GoodsGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ggb *GoodsGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := ggb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GoodsGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(ggb.fields) > 1 {
-		return nil, errors.New("ent: GoodsGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := ggb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ggb *GoodsGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := ggb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ggb *GoodsGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ggb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{goods.Label}
-	default:
-		err = fmt.Errorf("ent: GoodsGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ggb *GoodsGroupBy) BoolX(ctx context.Context) bool {
-	v, err := ggb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -724,6 +526,7 @@ func (ggb *GoodsGroupBy) sqlQuery() *sql.Selector {
 // GoodsSelect is the builder for selecting fields of Goods entities.
 type GoodsSelect struct {
 	*GoodsQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -735,201 +538,6 @@ func (gs *GoodsSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	gs.sql = gs.GoodsQuery.sqlQuery(ctx)
 	return gs.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (gs *GoodsSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := gs.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (gs *GoodsSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(gs.fields) > 1 {
-		return nil, errors.New("ent: GoodsSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := gs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (gs *GoodsSelect) StringsX(ctx context.Context) []string {
-	v, err := gs.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (gs *GoodsSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = gs.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{goods.Label}
-	default:
-		err = fmt.Errorf("ent: GoodsSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (gs *GoodsSelect) StringX(ctx context.Context) string {
-	v, err := gs.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (gs *GoodsSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(gs.fields) > 1 {
-		return nil, errors.New("ent: GoodsSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := gs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (gs *GoodsSelect) IntsX(ctx context.Context) []int {
-	v, err := gs.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (gs *GoodsSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = gs.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{goods.Label}
-	default:
-		err = fmt.Errorf("ent: GoodsSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (gs *GoodsSelect) IntX(ctx context.Context) int {
-	v, err := gs.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (gs *GoodsSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(gs.fields) > 1 {
-		return nil, errors.New("ent: GoodsSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := gs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (gs *GoodsSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := gs.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (gs *GoodsSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = gs.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{goods.Label}
-	default:
-		err = fmt.Errorf("ent: GoodsSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (gs *GoodsSelect) Float64X(ctx context.Context) float64 {
-	v, err := gs.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (gs *GoodsSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(gs.fields) > 1 {
-		return nil, errors.New("ent: GoodsSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := gs.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (gs *GoodsSelect) BoolsX(ctx context.Context) []bool {
-	v, err := gs.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (gs *GoodsSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = gs.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{goods.Label}
-	default:
-		err = fmt.Errorf("ent: GoodsSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (gs *GoodsSelect) BoolX(ctx context.Context) bool {
-	v, err := gs.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (gs *GoodsSelect) sqlScan(ctx context.Context, v interface{}) error {

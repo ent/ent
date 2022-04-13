@@ -38,8 +38,8 @@ var (
 				{{- with $c.Size }} Size: {{ . }},{{ end }}
 				{{- with $c.Attr }} Attr: "{{ . }}",{{ end }}
 				{{- with $c.Enums }} Enums: []string{ {{ range $e := . }}"{{ $e }}",{{ end }} },{{ end }}
-				{{- if not (isNil $c.Default) }} Default: {{ $c.Default }},{{ end }}
-				{{- if ne (len $c.Collation) 0 }} Collation: {{ $c.Collation }},{{ end }}
+				{{- if not (isNil $c.Default) }} Default: {{ quote $c.Default }},{{ end }}
+				{{- if $c.Collation }} Collation: "{{ $c.Collation }}",{{ end }}
 				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k, $v := . }}"{{ $k }}": "{{ $v }}",{{ end }}}{{ end }}},
 			{{- end }}
 		}
@@ -128,6 +128,16 @@ var (
 												{{ end }}
 											{{- end }}
 										{{- end }}
+										},
+									{{- end }}
+									{{- with $ant.Type }}
+										Type: "{{ . }}",
+									{{- end }}
+									{{- with $keys := keys $ant.Types }}
+										Types: map[string]string{
+											{{- range $k := $keys }}
+												"{{ $k }}": "{{ index $ant.Types $k }}",
+											{{- end }}
 										},
 									{{- end }}
 								},

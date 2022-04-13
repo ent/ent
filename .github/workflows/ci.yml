@@ -13,23 +13,26 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
-      - name: Run linters
-        uses: golangci/golangci-lint-action@v2.5.2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v2
         with:
-          version: v1.44.0
+          go-version: 1.17
+      - name: Run linters
+        uses: golangci/golangci-lint-action@v3.1.0
+        with:
+          version: v1.45.2
 
   unit:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ['1.17', '1.16']
+        go: ['1.17', '1.18']
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -54,11 +57,11 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
-      - uses: actions/cache@v2.1.7
+          go-version: '1.18'
+      - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -226,11 +229,11 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
-      - uses: actions/cache@v2.1.7
+          go-version: '1.18'
+      - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -392,13 +395,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
-      - uses: actions/cache@v2.1.7
+          go-version: '1.18'
+      - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}

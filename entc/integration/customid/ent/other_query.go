@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 
@@ -247,30 +246,36 @@ func (oq *OtherQuery) Clone() *OtherQuery {
 		order:      append([]OrderFunc{}, oq.order...),
 		predicates: append([]predicate.Other{}, oq.predicates...),
 		// clone intermediate query.
-		sql:  oq.sql.Clone(),
-		path: oq.path,
+		sql:    oq.sql.Clone(),
+		path:   oq.path,
+		unique: oq.unique,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (oq *OtherQuery) GroupBy(field string, fields ...string) *OtherGroupBy {
-	group := &OtherGroupBy{config: oq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &OtherGroupBy{config: oq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := oq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return oq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = other.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (oq *OtherQuery) Select(fields ...string) *OtherSelect {
 	oq.fields = append(oq.fields, fields...)
-	return &OtherSelect{OtherQuery: oq}
+	selbuild := &OtherSelect{OtherQuery: oq}
+	selbuild.label = other.Label
+	selbuild.flds, selbuild.scan = &oq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (oq *OtherQuery) prepareQuery(ctx context.Context) error {
@@ -289,22 +294,21 @@ func (oq *OtherQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (oq *OtherQuery) sqlAll(ctx context.Context) ([]*Other, error) {
+func (oq *OtherQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Other, error) {
 	var (
 		nodes = []*Other{}
 		_spec = oq.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Other{config: oq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Other).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Other{config: oq.config}
+		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, oq.driver, _spec); err != nil {
 		return nil, err
@@ -415,6 +419,7 @@ func (oq *OtherQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // OtherGroupBy is the group-by builder for Other entities.
 type OtherGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -436,209 +441,6 @@ func (ogb *OtherGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	ogb.sql = query
 	return ogb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ogb *OtherGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := ogb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ogb *OtherGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(ogb.fields) > 1 {
-		return nil, errors.New("ent: OtherGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := ogb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ogb *OtherGroupBy) StringsX(ctx context.Context) []string {
-	v, err := ogb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ogb *OtherGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ogb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{other.Label}
-	default:
-		err = fmt.Errorf("ent: OtherGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ogb *OtherGroupBy) StringX(ctx context.Context) string {
-	v, err := ogb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ogb *OtherGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(ogb.fields) > 1 {
-		return nil, errors.New("ent: OtherGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := ogb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ogb *OtherGroupBy) IntsX(ctx context.Context) []int {
-	v, err := ogb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ogb *OtherGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ogb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{other.Label}
-	default:
-		err = fmt.Errorf("ent: OtherGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ogb *OtherGroupBy) IntX(ctx context.Context) int {
-	v, err := ogb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ogb *OtherGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ogb.fields) > 1 {
-		return nil, errors.New("ent: OtherGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := ogb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ogb *OtherGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := ogb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ogb *OtherGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ogb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{other.Label}
-	default:
-		err = fmt.Errorf("ent: OtherGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ogb *OtherGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := ogb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ogb *OtherGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(ogb.fields) > 1 {
-		return nil, errors.New("ent: OtherGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := ogb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ogb *OtherGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := ogb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ogb *OtherGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ogb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{other.Label}
-	default:
-		err = fmt.Errorf("ent: OtherGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ogb *OtherGroupBy) BoolX(ctx context.Context) bool {
-	v, err := ogb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ogb *OtherGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -682,6 +484,7 @@ func (ogb *OtherGroupBy) sqlQuery() *sql.Selector {
 // OtherSelect is the builder for selecting fields of Other entities.
 type OtherSelect struct {
 	*OtherQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -693,201 +496,6 @@ func (os *OtherSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	os.sql = os.OtherQuery.sqlQuery(ctx)
 	return os.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (os *OtherSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := os.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (os *OtherSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(os.fields) > 1 {
-		return nil, errors.New("ent: OtherSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := os.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (os *OtherSelect) StringsX(ctx context.Context) []string {
-	v, err := os.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (os *OtherSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = os.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{other.Label}
-	default:
-		err = fmt.Errorf("ent: OtherSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (os *OtherSelect) StringX(ctx context.Context) string {
-	v, err := os.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (os *OtherSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(os.fields) > 1 {
-		return nil, errors.New("ent: OtherSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := os.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (os *OtherSelect) IntsX(ctx context.Context) []int {
-	v, err := os.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (os *OtherSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = os.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{other.Label}
-	default:
-		err = fmt.Errorf("ent: OtherSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (os *OtherSelect) IntX(ctx context.Context) int {
-	v, err := os.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (os *OtherSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(os.fields) > 1 {
-		return nil, errors.New("ent: OtherSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := os.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (os *OtherSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := os.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (os *OtherSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = os.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{other.Label}
-	default:
-		err = fmt.Errorf("ent: OtherSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (os *OtherSelect) Float64X(ctx context.Context) float64 {
-	v, err := os.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (os *OtherSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(os.fields) > 1 {
-		return nil, errors.New("ent: OtherSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := os.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (os *OtherSelect) BoolsX(ctx context.Context) []bool {
-	v, err := os.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (os *OtherSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = os.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{other.Label}
-	default:
-		err = fmt.Errorf("ent: OtherSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (os *OtherSelect) BoolX(ctx context.Context) bool {
-	v, err := os.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (os *OtherSelect) sqlScan(ctx context.Context, v interface{}) error {

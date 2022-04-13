@@ -735,6 +735,60 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "MrParano1d",
+      "name": "MrParano1d",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7414374?v=4",
+      "profile": "https://2jp.de",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "tprebs",
+      "name": "Thomas Prebble",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6523587?v=4",
+      "profile": "https://github.com/tprebs",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "imhuytq",
+      "name": "Huy TQ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5723282?v=4",
+      "profile": "https://huytq.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "maorlipchuk",
+      "name": "maorlipchuk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7034637?v=4",
+      "profile": "https://github.com/maorlipchuk",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "iwata",
+      "name": "Motonori Iwata",
+      "avatar_url": "https://avatars.githubusercontent.com/u/121048?v=4",
+      "profile": "https://mobcov.hatenadiary.org/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "CharlesGe129",
+      "name": "Charles Ge",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20162173?v=4",
+      "profile": "https://github.com/CharlesGe129",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

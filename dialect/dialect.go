@@ -93,10 +93,34 @@ func (d *DebugDriver) Exec(ctx context.Context, query string, args, v interface{
 	return d.Driver.Exec(ctx, query, args, v)
 }
 
+// ExecContext logs its params and calls the underlying driver ExecContext method if it is supported.
+func (d *DebugDriver) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+	drv, ok := d.Driver.(interface {
+		ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Driver.ExecContext is not supported")
+	}
+	d.log(ctx, fmt.Sprintf("driver.ExecContext: query=%v args=%v", query, args))
+	return drv.ExecContext(ctx, query, args...)
+}
+
 // Query logs its params and calls the underlying driver Query method.
 func (d *DebugDriver) Query(ctx context.Context, query string, args, v interface{}) error {
 	d.log(ctx, fmt.Sprintf("driver.Query: query=%v args=%v", query, args))
 	return d.Driver.Query(ctx, query, args, v)
+}
+
+// QueryContext logs its params and calls the underlying driver QueryContext method if it is supported.
+func (d *DebugDriver) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+	drv, ok := d.Driver.(interface {
+		QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Driver.QueryContext is not supported")
+	}
+	d.log(ctx, fmt.Sprintf("driver.QueryContext: query=%v args=%v", query, args))
+	return drv.QueryContext(ctx, query, args...)
 }
 
 // Tx adds an log-id for the transaction and calls the underlying driver Tx command.
@@ -110,7 +134,7 @@ func (d *DebugDriver) Tx(ctx context.Context) (Tx, error) {
 	return &DebugTx{tx, id, d.log, ctx}, nil
 }
 
-// BeginTx adds an log-id for the transaction and calls the underlying driver BeginTx command if it's supported.
+// BeginTx adds an log-id for the transaction and calls the underlying driver BeginTx command if it is supported.
 func (d *DebugDriver) BeginTx(ctx context.Context, opts *sql.TxOptions) (Tx, error) {
 	drv, ok := d.Driver.(interface {
 		BeginTx(context.Context, *sql.TxOptions) (Tx, error)
@@ -141,10 +165,34 @@ func (d *DebugTx) Exec(ctx context.Context, query string, args, v interface{}) e
 	return d.Tx.Exec(ctx, query, args, v)
 }
 
+// ExecContext logs its params and calls the underlying transaction ExecContext method if it is supported.
+func (d *DebugTx) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+	drv, ok := d.Tx.(interface {
+		ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Tx.ExecContext is not supported")
+	}
+	d.log(ctx, fmt.Sprintf("Tx(%s).ExecContext: query=%v args=%v", d.id, query, args))
+	return drv.ExecContext(ctx, query, args...)
+}
+
 // Query logs its params and calls the underlying transaction Query method.
 func (d *DebugTx) Query(ctx context.Context, query string, args, v interface{}) error {
 	d.log(ctx, fmt.Sprintf("Tx(%s).Query: query=%v args=%v", d.id, query, args))
 	return d.Tx.Query(ctx, query, args, v)
+}
+
+// QueryContext logs its params and calls the underlying transaction QueryContext method if it is supported.
+func (d *DebugTx) QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error) {
+	drv, ok := d.Tx.(interface {
+		QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
+	})
+	if !ok {
+		return nil, fmt.Errorf("Tx.QueryContext is not supported")
+	}
+	d.log(ctx, fmt.Sprintf("Tx(%s).QueryContext: query=%v args=%v", d.id, query, args))
+	return drv.QueryContext(ctx, query, args...)
 }
 
 // Commit logs this step and calls the underlying transaction Commit method.

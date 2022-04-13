@@ -13,7 +13,6 @@ import (
 	"path"
 	"reflect"
 	"sort"
-	"strconv"
 	"strings"
 	"unicode"
 
@@ -240,6 +239,9 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		}
 		// User defined id field.
 		if tf.Name == typ.ID.Name {
+			if tf.Optional {
+				return nil, fmt.Errorf("id field cannot be optional")
+			}
 			typ.ID = tf
 		} else {
 			typ.Fields = append(typ.Fields, tf)
@@ -1219,18 +1221,18 @@ func (f Field) Column() *schema.Column {
 		c.Default = f.DefaultValue()
 	case f.Default && (f.IsString() || f.IsEnum()):
 		if s, ok := f.DefaultValue().(string); ok {
-			c.Default = strconv.Quote(s)
+			c.Default = s
 		}
 	}
 	// Override the default-value defined in the
 	// schema if it was provided by an annotation.
 	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
-		c.Default = strconv.Quote(ant.Default)
+		c.Default = ant.Default
 	}
 	// Override the collation defined in the
 	// schema if it was provided by an annotation.
 	if ant := f.EntSQL(); ant != nil && ant.Collation != "" {
-		c.Collation = strconv.Quote(ant.Collation)
+		c.Collation = ant.Collation
 	}
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
@@ -1278,7 +1280,7 @@ func (f Field) PK() *schema.Column {
 	// Override the default-value defined in the
 	// schema if it was provided by an annotation.
 	if ant := f.EntSQL(); ant != nil && ant.Default != "" {
-		c.Default = strconv.Quote(ant.Default)
+		c.Default = ant.Default
 	}
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType

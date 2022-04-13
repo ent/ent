@@ -7,6 +7,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -38,7 +39,8 @@ func (User) Fields() []ent.Field {
 			MaxLen(255),
 		field.Enum("state").
 			Optional().
-			Values("logged_in", "logged_out"),
+			Values("logged_in", "logged_out").
+			Default("logged_in"),
 		field.String("status").
 			Optional(),
 		field.String("workplace").
@@ -70,6 +72,13 @@ func (User) Indexes() []ent.Index {
 
 type Car struct {
 	ent.Schema
+}
+
+// Annotations of the Car.
+func (Car) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{Table: "Car"},
+	}
 }
 
 func (Car) Edges() []ent.Edge {

@@ -13,16 +13,19 @@ import (
 	"testing"
 
 	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/customid/ent"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/schema/field"
-	"github.com/go-sql-driver/mysql"
 
+	atlas "ariga.io/atlas/sql/schema"
+	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -47,7 +50,7 @@ func TestMySQL(t *testing.T) {
 			cfg.DBName = "custom_id"
 			client, err := ent.Open("mysql", cfg.FormatDSN())
 			require.NoError(t, err, "connecting to custom_id database")
-			err = client.Schema.Create(context.Background(), schema.WithHooks(clearDefault, skipBytesID))
+			err = client.Schema.Create(context.Background(), schema.WithHooks(clearDefault, skipBytesID), schema.WithAtlas(true))
 			require.NoError(t, err)
 			CustomID(t, client)
 		})
@@ -57,18 +60,21 @@ func TestMySQL(t *testing.T) {
 func TestPostgres(t *testing.T) {
 	for version, port := range map[string]int{"10": 5430, "11": 5431, "12": 5433, "13": 5434} {
 		t.Run(version, func(t *testing.T) {
-			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable", port)
+			dsn := fmt.Sprintf("host=localhost port=%d user=postgres password=pass sslmode=disable dbname=test", port)
 			db, err := sql.Open(dialect.Postgres, dsn)
 			require.NoError(t, err)
 			defer db.Close()
-			_, err = db.Exec("CREATE DATABASE custom_id")
-			require.NoError(t, err, "creating database")
-			defer db.Exec("DROP DATABASE custom_id")
+			_, err = db.Exec("CREATE SCHEMA IF NOT EXISTS custom_id")
+			require.NoError(t, err, "creating schema")
+			_, err = db.Exec("SET search_path TO custom_id")
+			require.NoError(t, err, "setting schema")
+			_, err = db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA custom_id`)
+			require.NoError(t, err, "creating extension")
+			defer db.Exec(`DROP EXTENSION "uuid-ossp"`)
+			defer db.Exec("DROP SCHEMA custom_id CASCADE")
 
-			client, err := ent.Open(dialect.Postgres, dsn+" dbname=custom_id")
-			require.NoError(t, err, "connecting to custom_id database")
-			defer client.Close()
-			err = client.Schema.Create(context.Background())
+			client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, db)))
+			err = client.Schema.Create(context.Background(), schema.WithAtlas(true), schema.WithDiffHook(expectOnePetsIndex))
 			require.NoError(t, err)
 			CustomID(t, client)
 			BytesID(t, client)
@@ -80,7 +86,7 @@ func TestSQLite(t *testing.T) {
 	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 	require.NoError(t, err)
 	defer client.Close()
-	require.NoError(t, client.Schema.Create(context.Background(), schema.WithHooks(clearDefault)))
+	require.NoError(t, client.Schema.Create(context.Background(), schema.WithHooks(clearDefault)), schema.WithAtlas(true))
 	CustomID(t, client)
 	BytesID(t, client)
 }
@@ -198,12 +204,25 @@ func CustomID(t *testing.T, client *ent.Client) {
 		require.Equal(t, "Hello World", client.Doc.GetX(ctx, d.ID).Text)
 	})
 
-	t.Run("OtherID", func(t *testing.T) {
-		other := client.Other.Create().SaveX(ctx)
-		require.NotEmpty(t, other.ID.String())
+	t.Run("Other ID", func(t *testing.T) {
+		o := client.Other.Create().SaveX(ctx)
+		require.NotEmpty(t, o.ID.String())
 
-		other = client.Other.Create().SetID(sid.NewLength(15)).SaveX(ctx)
-		require.NotEmpty(t, other.ID.String())
+		o = client.Other.Create().SetID(sid.NewLength(15)).SaveX(ctx)
+		require.NotEmpty(t, o.ID.String())
+	})
+
+	t.Run("CustomID edge", func(t *testing.T) {
+		a := client.Account.Create().SetEmail("test@example.org").SaveX(ctx)
+		require.NotEmpty(t, a.ID)
+
+		tk := client.Token.Create().SetAccountID(a.ID).SetBody("token").SaveX(ctx)
+		require.NotEmpty(t, tk.ID)
+
+		ta := client.Token.Query().Where(token.Body("token")).WithAccount().FirstX(ctx)
+		require.Equal(t, tk.ID, ta.ID)
+		require.NotNil(t, ta.Edges.Account)
+		require.Equal(t, a.ID, ta.Edges.Account.ID)
 	})
 }
 
@@ -220,8 +239,14 @@ func BytesID(t *testing.T, client *ent.Client) {
 // clearDefault clears the id's default for non-postgres dialects.
 func clearDefault(c schema.Creator) schema.Creator {
 	return schema.CreateFunc(func(ctx context.Context, tables ...*schema.Table) error {
-		tables[0].Columns[0].Default = nil
-		return c.Create(ctx, tables...)
+		// Drop DEFAULT clause for MySQL without changing the tables.
+		ct := make([]*schema.Table, len(tables))
+		copy(ct, tables)
+		*ct[1] = *tables[1]
+		ct[1].Columns = append([]*schema.Column(nil), tables[1].Columns...)
+		*ct[1].Columns[0] = *tables[1].Columns[0]
+		ct[1].Columns[0].Default = nil
+		return c.Create(ctx, ct...)
 	})
 }
 
@@ -236,5 +261,22 @@ func skipBytesID(c schema.Creator) schema.Creator {
 			t = append(t, tables[i])
 		}
 		return c.Create(ctx, t...)
+	})
+}
+
+// expectOnePetsIndex expects that pets table contains only one index.
+func expectOnePetsIndex(next schema.Differ) schema.Differ {
+	return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+		changes, err := next.Diff(current, desired)
+		for _, c := range changes {
+			addT, ok := c.(*atlas.AddTable)
+			if !ok || addT.T.Name != pet.Table {
+				continue
+			}
+			if n := len(addT.T.Indexes); n != 1 {
+				return nil, fmt.Errorf("expect only one index, but got: %d", n)
+			}
+		}
+		return changes, err
 	})
 }

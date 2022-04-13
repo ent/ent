@@ -61,6 +61,8 @@ func (s *Schema) Create(ctx context.Context, opts ...schema.MigrateOption) error
 	return migrate.Create(ctx, Tables...)
 }
 
+{{ if $.Config.FeatureEnabled "sql/versioned-migration" }}{{ template "migrate/diff" $ }}{{ end }}
+
 // WriteTo writes the schema changes to w instead of running them against the database.
 //
 // 	if err := client.Schema.WriteTo(context.Background(), os.Stdout); err != nil {

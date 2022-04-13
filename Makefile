@@ -21,7 +21,7 @@ gen:
 .PHONY: test-only
 # run tests only
 test-only:
-	go test ./...
+	go test -tags json1 ./...
 
 .PHONY: test
 # start databases if not started then run tests

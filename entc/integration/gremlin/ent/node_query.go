@@ -8,8 +8,6 @@ package ent
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/gremlin"
@@ -282,6 +280,7 @@ func (nq *NodeQuery) Clone() *NodeQuery {
 		// clone intermediate query.
 		gremlin: nq.gremlin.Clone(),
 		path:    nq.path,
+		unique:  nq.unique,
 	}
 }
 
@@ -323,15 +322,17 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 //		Scan(ctx, &v)
 //
 func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
-	group := &NodeGroupBy{config: nq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
+	grbuild := &NodeGroupBy{config: nq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *dsl.Traversal, err error) {
 		if err := nq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return nq.gremlinQuery(ctx), nil
 	}
-	return group
+	grbuild.label = node.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
@@ -349,7 +350,10 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //
 func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
 	nq.fields = append(nq.fields, fields...)
-	return &NodeSelect{NodeQuery: nq}
+	selbuild := &NodeSelect{NodeQuery: nq}
+	selbuild.label = node.Label
+	selbuild.flds, selbuild.scan = &nq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
@@ -436,6 +440,7 @@ func (nq *NodeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 // NodeGroupBy is the group-by builder for Node entities.
 type NodeGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -457,209 +462,6 @@ func (ngb *NodeGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	ngb.gremlin = query
 	return ngb.gremlinScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ngb *NodeGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := ngb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ngb *NodeGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(ngb.fields) > 1 {
-		return nil, errors.New("ent: NodeGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := ngb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ngb *NodeGroupBy) StringsX(ctx context.Context) []string {
-	v, err := ngb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ngb *NodeGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ngb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{node.Label}
-	default:
-		err = fmt.Errorf("ent: NodeGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ngb *NodeGroupBy) StringX(ctx context.Context) string {
-	v, err := ngb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ngb *NodeGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(ngb.fields) > 1 {
-		return nil, errors.New("ent: NodeGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := ngb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ngb *NodeGroupBy) IntsX(ctx context.Context) []int {
-	v, err := ngb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ngb *NodeGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ngb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{node.Label}
-	default:
-		err = fmt.Errorf("ent: NodeGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ngb *NodeGroupBy) IntX(ctx context.Context) int {
-	v, err := ngb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ngb *NodeGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ngb.fields) > 1 {
-		return nil, errors.New("ent: NodeGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := ngb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ngb *NodeGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := ngb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ngb *NodeGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ngb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{node.Label}
-	default:
-		err = fmt.Errorf("ent: NodeGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ngb *NodeGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := ngb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (ngb *NodeGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(ngb.fields) > 1 {
-		return nil, errors.New("ent: NodeGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := ngb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ngb *NodeGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := ngb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (ngb *NodeGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ngb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{node.Label}
-	default:
-		err = fmt.Errorf("ent: NodeGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ngb *NodeGroupBy) BoolX(ctx context.Context) bool {
-	v, err := ngb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ngb *NodeGroupBy) gremlinScan(ctx context.Context, v interface{}) error {
@@ -702,6 +504,7 @@ func (ngb *NodeGroupBy) gremlinQuery() *dsl.Traversal {
 // NodeSelect is the builder for selecting fields of Node entities.
 type NodeSelect struct {
 	*NodeQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	gremlin *dsl.Traversal
 }
@@ -713,201 +516,6 @@ func (ns *NodeSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ns.gremlin = ns.NodeQuery.gremlinQuery(ctx)
 	return ns.gremlinScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ns *NodeSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ns.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ns *NodeSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ns.fields) > 1 {
-		return nil, errors.New("ent: NodeSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ns.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ns *NodeSelect) StringsX(ctx context.Context) []string {
-	v, err := ns.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ns *NodeSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ns.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{node.Label}
-	default:
-		err = fmt.Errorf("ent: NodeSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ns *NodeSelect) StringX(ctx context.Context) string {
-	v, err := ns.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ns *NodeSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ns.fields) > 1 {
-		return nil, errors.New("ent: NodeSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ns.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ns *NodeSelect) IntsX(ctx context.Context) []int {
-	v, err := ns.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ns *NodeSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ns.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{node.Label}
-	default:
-		err = fmt.Errorf("ent: NodeSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ns *NodeSelect) IntX(ctx context.Context) int {
-	v, err := ns.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ns *NodeSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ns.fields) > 1 {
-		return nil, errors.New("ent: NodeSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ns.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ns *NodeSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ns.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ns *NodeSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ns.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{node.Label}
-	default:
-		err = fmt.Errorf("ent: NodeSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ns *NodeSelect) Float64X(ctx context.Context) float64 {
-	v, err := ns.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ns *NodeSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ns.fields) > 1 {
-		return nil, errors.New("ent: NodeSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ns.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ns *NodeSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ns.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ns *NodeSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ns.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{node.Label}
-	default:
-		err = fmt.Errorf("ent: NodeSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ns *NodeSelect) BoolX(ctx context.Context) bool {
-	v, err := ns.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ns *NodeSelect) gremlinScan(ctx context.Context, v interface{}) error {

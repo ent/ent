@@ -12,18 +12,18 @@ import (
 	"sort"
 	"strings"
 
+	"ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/schema"
+
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
-
-	"ariga.io/atlas/sql/migrate"
-	"ariga.io/atlas/sql/schema"
 )
 
 type (
 	// Differ is the interface that wraps the Diff method.
 	Differ interface {
-		// Diff creates the given tables in the database.
+		// Diff returns a list of changes that construct a migration plan.
 		Diff(current, desired *schema.Schema) ([]schema.Change, error)
 	}
 
@@ -61,8 +61,8 @@ func WithDiffHook(hooks ...DiffHook) MigrateOption {
 	}
 }
 
-// SkipChanges allows skipping/filtering list of changes
-// returned by the differ before executing migration planning.
+// WithSkipChanges allows skipping/filtering list of changes
+// returned by the Differ before executing migration planning.
 //
 //	SkipChanges(schema.DropTable|schema.DropColumn)
 //
@@ -72,7 +72,7 @@ func WithSkipChanges(skip ChangeKind) MigrateOption {
 	}
 }
 
-// A Change of schema.
+// A ChangeKind denotes the kind of schema change.
 type ChangeKind uint
 
 // List of change types.
@@ -98,7 +98,7 @@ const (
 	DropCheck
 )
 
-// Is reports whether c is match the given change king.
+// Is reports whether c is match the given change kind.
 func (k ChangeKind) Is(c ChangeKind) bool {
 	return k == c || k&c != 0
 }
@@ -170,18 +170,46 @@ func filterChanges(skip ChangeKind) DiffHook {
 	}
 }
 
+func withoutForeignKeys(next Differ) Differ {
+	return DiffFunc(func(current, desired *schema.Schema) ([]schema.Change, error) {
+		changes, err := next.Diff(current, desired)
+		if err != nil {
+			return nil, err
+		}
+		for _, c := range changes {
+			switch c := c.(type) {
+			case *schema.AddTable:
+				c.T.ForeignKeys = nil
+			case *schema.ModifyTable:
+				c.T.ForeignKeys = nil
+				filtered := make([]schema.Change, 0, len(c.Changes))
+				for _, change := range c.Changes {
+					switch change.(type) {
+					case *schema.AddForeignKey, *schema.DropForeignKey, *schema.ModifyForeignKey:
+						continue
+					default:
+						filtered = append(filtered, change)
+					}
+				}
+				c.Changes = filtered
+			}
+		}
+		return changes, nil
+	})
+}
+
 type (
 	// Applier is the interface that wraps the Apply method.
 	Applier interface {
-		// Diff creates the given tables in the database.
+		// Apply applies the given migrate.Plan on the database.
 		Apply(context.Context, dialect.ExecQuerier, *migrate.Plan) error
 	}
 
 	// The ApplyFunc type is an adapter to allow the use of ordinary function as Applier.
-	// If f is a function with the appropriate signature, ApplyFunc(f) is a Applier that calls f.
+	// If f is a function with the appropriate signature, ApplyFunc(f) is an Applier that calls f.
 	ApplyFunc func(context.Context, dialect.ExecQuerier, *migrate.Plan) error
 
-	// ApplyHook defines the "migration applying middleware". A function that gets a Applier and returns a Applier.
+	// ApplyHook defines the "migration applying middleware". A function that gets an Applier and returns an Applier.
 	ApplyHook func(Applier) Applier
 )
 
@@ -190,7 +218,7 @@ func (f ApplyFunc) Apply(ctx context.Context, conn dialect.ExecQuerier, plan *mi
 	return f(ctx, conn, plan)
 }
 
-// func adds a list of ApplyHook to the schema migration.
+// WithApplyHook adds a list of ApplyHook to the schema migration.
 //
 //	schema.WithApplyHook(func(next schema.Applier) schema.Applier {
 //		return schema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *migrate.Plan) error {
@@ -221,6 +249,20 @@ func WithAtlas(b bool) MigrateOption {
 	}
 }
 
+// WithDir sets the atlas migration directory to use to store migration files.
+func WithDir(dir migrate.Dir) MigrateOption {
+	return func(m *Migrate) {
+		m.atlas.dir = dir
+	}
+}
+
+// WithFormatter sets atlas formatter to use to write changes to migration files.
+func WithFormatter(fmt migrate.Formatter) MigrateOption {
+	return func(m *Migrate) {
+		m.atlas.fmt = fmt
+	}
+}
+
 type (
 	// atlasOptions describes the options for atlas.
 	atlasOptions struct {
@@ -228,6 +270,8 @@ type (
 		diff    []DiffHook
 		apply   []ApplyHook
 		skip    ChangeKind
+		dir     migrate.Dir
+		fmt     migrate.Formatter
 	}
 
 	// atBuilder must be implemented by the different drivers in
@@ -245,30 +289,33 @@ type (
 
 func (m *Migrate) setupAtlas() error {
 	// Using one of the Atlas options, opt-in to Atlas migration.
-	if !m.atlas.enabled && (m.atlas.skip != NoChange || len(m.atlas.diff) > 0 || len(m.atlas.apply) > 0) {
+	if !m.atlas.enabled && (m.atlas.skip != NoChange || len(m.atlas.diff) > 0 || len(m.atlas.apply) > 0) || m.atlas.dir != nil {
 		m.atlas.enabled = true
 	}
 	if !m.atlas.enabled {
 		return nil
 	}
-	if !m.withForeignKeys {
-		return errors.New("sql/schema: WithForeignKeys(false) does not work in Atlas migration")
-	}
 	if m.withFixture {
 		return errors.New("sql/schema: WithFixture(true) does not work in Atlas migration")
 	}
-	k := DropIndex | DropColumn
+	skip := DropIndex | DropColumn
 	if m.atlas.skip != NoChange {
-		k = m.atlas.skip
+		skip = m.atlas.skip
 	}
 	if m.dropIndexes {
-		k |= ^DropIndex
+		skip &= ^DropIndex
 	}
 	if m.dropColumns {
-		k |= ^DropColumn
+		skip &= ^DropColumn
 	}
-	if k == NoChange {
-		m.atlas.diff = append(m.atlas.diff, filterChanges(k))
+	if skip != NoChange {
+		m.atlas.diff = append(m.atlas.diff, filterChanges(skip))
+	}
+	if !m.withForeignKeys {
+		m.atlas.diff = append(m.atlas.diff, withoutForeignKeys)
+	}
+	if m.atlas.dir != nil && m.atlas.fmt == nil {
+		m.atlas.fmt = migrate.DefaultFormatter
 	}
 	return nil
 }
@@ -289,36 +336,7 @@ func (m *Migrate) atCreate(ctx context.Context, tables ...*Table) error {
 				return err
 			}
 		}
-		drv, err := m.atOpen(tx)
-		if err != nil {
-			return err
-		}
-		current, err := drv.InspectSchema(ctx, "", &schema.InspectOptions{
-			Tables: func() (t []string) {
-				for i := range tables {
-					t = append(t, tables[i].Name)
-				}
-				return t
-			}(),
-		})
-		if err != nil {
-			return err
-		}
-		tt, err := m.aTables(ctx, m, tx, tables)
-		if err != nil {
-			return err
-		}
-		// Diff changes.
-		var differ Differ = DiffFunc(drv.SchemaDiff)
-		for i := len(m.atlas.diff) - 1; i >= 0; i-- {
-			differ = m.atlas.diff[i](differ)
-		}
-		changes, err := differ.Diff(current, &schema.Schema{Name: current.Name, Attrs: current.Attrs, Tables: tt})
-		if err != nil {
-			return err
-		}
-		// Plan changes.
-		plan, err := drv.PlanChanges(ctx, "plan", changes)
+		plan, err := m.atDiff(ctx, tx, "", tables...)
 		if err != nil {
 			return err
 		}
@@ -342,6 +360,39 @@ func (m *Migrate) atCreate(ctx context.Context, tables ...*Table) error {
 		return rollback(tx, err)
 	}
 	return tx.Commit()
+}
+
+func (m *Migrate) atDiff(ctx context.Context, conn dialect.ExecQuerier, name string, tables ...*Table) (*migrate.Plan, error) {
+	drv, err := m.atOpen(conn)
+	if err != nil {
+		return nil, err
+	}
+	current, err := drv.InspectSchema(ctx, "", &schema.InspectOptions{
+		Tables: func() (t []string) {
+			for i := range tables {
+				t = append(t, tables[i].Name)
+			}
+			return t
+		}(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	tt, err := m.aTables(ctx, m, conn, tables)
+	if err != nil {
+		return nil, err
+	}
+	// Diff changes.
+	var differ Differ = DiffFunc(drv.SchemaDiff)
+	for i := len(m.atlas.diff) - 1; i >= 0; i-- {
+		differ = m.atlas.diff[i](differ)
+	}
+	changes, err := differ.Diff(current, &schema.Schema{Name: current.Name, Attrs: current.Attrs, Tables: tt})
+	if err != nil {
+		return nil, err
+	}
+	// Plan changes.
+	return drv.PlanChanges(ctx, name, changes)
 }
 
 type db struct{ dialect.ExecQuerier }
@@ -439,7 +490,7 @@ func (m *Migrate) aColumns(b atBuilder, t1 *Table, t2 *schema.Table) error {
 			}
 			c2.SetDefault(&schema.RawExpr{X: x})
 		}
-		if c1.Unique {
+		if c1.Unique && (len(t1.PrimaryKey) != 1 || t1.PrimaryKey[0] != c1) {
 			b.atUniqueC(t1, c1, t2, c2)
 		}
 		if c1.Increment {

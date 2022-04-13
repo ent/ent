@@ -13,6 +13,10 @@ const (
 	FieldID = "id"
 	// FieldCustom holds the string denoting the custom field in the database.
 	FieldCustom = "custom"
+	// FieldTz0 holds the string denoting the tz0 field in the database.
+	FieldTz0 = "tz0"
+	// FieldTz3 holds the string denoting the tz3 field in the database.
+	FieldTz3 = "tz3"
 	// Table holds the table name of the customtype in the database.
 	Table = "custom_types"
 )
@@ -21,6 +25,8 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCustom,
+	FieldTz0,
+	FieldTz3,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

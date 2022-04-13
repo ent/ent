@@ -9,7 +9,6 @@ package ent
 import (
 	"context"
 	"database/sql/driver"
-	"errors"
 	"fmt"
 	"math"
 
@@ -299,8 +298,9 @@ func (dq *DeviceQuery) Clone() *DeviceQuery {
 		withActiveSession: dq.withActiveSession.Clone(),
 		withSessions:      dq.withSessions.Clone(),
 		// clone intermediate query.
-		sql:  dq.sql.Clone(),
-		path: dq.path,
+		sql:    dq.sql.Clone(),
+		path:   dq.path,
+		unique: dq.unique,
 	}
 }
 
@@ -329,22 +329,27 @@ func (dq *DeviceQuery) WithSessions(opts ...func(*SessionQuery)) *DeviceQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (dq *DeviceQuery) GroupBy(field string, fields ...string) *DeviceGroupBy {
-	group := &DeviceGroupBy{config: dq.config}
-	group.fields = append([]string{field}, fields...)
-	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
+	grbuild := &DeviceGroupBy{config: dq.config}
+	grbuild.fields = append([]string{field}, fields...)
+	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := dq.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
 		return dq.sqlQuery(ctx), nil
 	}
-	return group
+	grbuild.label = device.Label
+	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (dq *DeviceQuery) Select(fields ...string) *DeviceSelect {
 	dq.fields = append(dq.fields, fields...)
-	return &DeviceSelect{DeviceQuery: dq}
+	selbuild := &DeviceSelect{DeviceQuery: dq}
+	selbuild.label = device.Label
+	selbuild.flds, selbuild.scan = &dq.fields, selbuild.Scan
+	return selbuild
 }
 
 func (dq *DeviceQuery) prepareQuery(ctx context.Context) error {
@@ -363,7 +368,7 @@ func (dq *DeviceQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (dq *DeviceQuery) sqlAll(ctx context.Context) ([]*Device, error) {
+func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Device, error) {
 	var (
 		nodes       = []*Device{}
 		withFKs     = dq.withFKs
@@ -380,17 +385,16 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context) ([]*Device, error) {
 		_spec.Node.Columns = append(_spec.Node.Columns, device.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Device{config: dq.config}
-		nodes = append(nodes, node)
-		return node.scanValues(columns)
+		return (*Device).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []interface{}) error {
-		if len(nodes) == 0 {
-			return fmt.Errorf("ent: Assign called without calling ScanValues")
-		}
-		node := nodes[len(nodes)-1]
+		node := &Device{config: dq.config}
+		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	for i := range hooks {
+		hooks[i](ctx, _spec)
 	}
 	if err := sqlgraph.QueryNodes(ctx, dq.driver, _spec); err != nil {
 		return nil, err
@@ -560,6 +564,7 @@ func (dq *DeviceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // DeviceGroupBy is the group-by builder for Device entities.
 type DeviceGroupBy struct {
 	config
+	selector
 	fields []string
 	fns    []AggregateFunc
 	// intermediate query (i.e. traversal path).
@@ -581,209 +586,6 @@ func (dgb *DeviceGroupBy) Scan(ctx context.Context, v interface{}) error {
 	}
 	dgb.sql = query
 	return dgb.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (dgb *DeviceGroupBy) ScanX(ctx context.Context, v interface{}) {
-	if err := dgb.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DeviceGroupBy) Strings(ctx context.Context) ([]string, error) {
-	if len(dgb.fields) > 1 {
-		return nil, errors.New("ent: DeviceGroupBy.Strings is not achievable when grouping more than 1 field")
-	}
-	var v []string
-	if err := dgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (dgb *DeviceGroupBy) StringsX(ctx context.Context) []string {
-	v, err := dgb.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DeviceGroupBy) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = dgb.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{device.Label}
-	default:
-		err = fmt.Errorf("ent: DeviceGroupBy.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (dgb *DeviceGroupBy) StringX(ctx context.Context) string {
-	v, err := dgb.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DeviceGroupBy) Ints(ctx context.Context) ([]int, error) {
-	if len(dgb.fields) > 1 {
-		return nil, errors.New("ent: DeviceGroupBy.Ints is not achievable when grouping more than 1 field")
-	}
-	var v []int
-	if err := dgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (dgb *DeviceGroupBy) IntsX(ctx context.Context) []int {
-	v, err := dgb.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DeviceGroupBy) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = dgb.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{device.Label}
-	default:
-		err = fmt.Errorf("ent: DeviceGroupBy.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (dgb *DeviceGroupBy) IntX(ctx context.Context) int {
-	v, err := dgb.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DeviceGroupBy) Float64s(ctx context.Context) ([]float64, error) {
-	if len(dgb.fields) > 1 {
-		return nil, errors.New("ent: DeviceGroupBy.Float64s is not achievable when grouping more than 1 field")
-	}
-	var v []float64
-	if err := dgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (dgb *DeviceGroupBy) Float64sX(ctx context.Context) []float64 {
-	v, err := dgb.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DeviceGroupBy) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = dgb.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{device.Label}
-	default:
-		err = fmt.Errorf("ent: DeviceGroupBy.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (dgb *DeviceGroupBy) Float64X(ctx context.Context) float64 {
-	v, err := dgb.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from group-by.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DeviceGroupBy) Bools(ctx context.Context) ([]bool, error) {
-	if len(dgb.fields) > 1 {
-		return nil, errors.New("ent: DeviceGroupBy.Bools is not achievable when grouping more than 1 field")
-	}
-	var v []bool
-	if err := dgb.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (dgb *DeviceGroupBy) BoolsX(ctx context.Context) []bool {
-	v, err := dgb.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a group-by query.
-// It is only allowed when executing a group-by query with one field.
-func (dgb *DeviceGroupBy) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = dgb.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{device.Label}
-	default:
-		err = fmt.Errorf("ent: DeviceGroupBy.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (dgb *DeviceGroupBy) BoolX(ctx context.Context) bool {
-	v, err := dgb.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (dgb *DeviceGroupBy) sqlScan(ctx context.Context, v interface{}) error {
@@ -827,6 +629,7 @@ func (dgb *DeviceGroupBy) sqlQuery() *sql.Selector {
 // DeviceSelect is the builder for selecting fields of Device entities.
 type DeviceSelect struct {
 	*DeviceQuery
+	selector
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
@@ -838,201 +641,6 @@ func (ds *DeviceSelect) Scan(ctx context.Context, v interface{}) error {
 	}
 	ds.sql = ds.DeviceQuery.sqlQuery(ctx)
 	return ds.sqlScan(ctx, v)
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (ds *DeviceSelect) ScanX(ctx context.Context, v interface{}) {
-	if err := ds.Scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (ds *DeviceSelect) Strings(ctx context.Context) ([]string, error) {
-	if len(ds.fields) > 1 {
-		return nil, errors.New("ent: DeviceSelect.Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := ds.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (ds *DeviceSelect) StringsX(ctx context.Context) []string {
-	v, err := ds.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (ds *DeviceSelect) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = ds.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{device.Label}
-	default:
-		err = fmt.Errorf("ent: DeviceSelect.Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (ds *DeviceSelect) StringX(ctx context.Context) string {
-	v, err := ds.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (ds *DeviceSelect) Ints(ctx context.Context) ([]int, error) {
-	if len(ds.fields) > 1 {
-		return nil, errors.New("ent: DeviceSelect.Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := ds.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (ds *DeviceSelect) IntsX(ctx context.Context) []int {
-	v, err := ds.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (ds *DeviceSelect) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = ds.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{device.Label}
-	default:
-		err = fmt.Errorf("ent: DeviceSelect.Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (ds *DeviceSelect) IntX(ctx context.Context) int {
-	v, err := ds.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (ds *DeviceSelect) Float64s(ctx context.Context) ([]float64, error) {
-	if len(ds.fields) > 1 {
-		return nil, errors.New("ent: DeviceSelect.Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := ds.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (ds *DeviceSelect) Float64sX(ctx context.Context) []float64 {
-	v, err := ds.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (ds *DeviceSelect) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = ds.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{device.Label}
-	default:
-		err = fmt.Errorf("ent: DeviceSelect.Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (ds *DeviceSelect) Float64X(ctx context.Context) float64 {
-	v, err := ds.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (ds *DeviceSelect) Bools(ctx context.Context) ([]bool, error) {
-	if len(ds.fields) > 1 {
-		return nil, errors.New("ent: DeviceSelect.Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := ds.Scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (ds *DeviceSelect) BoolsX(ctx context.Context) []bool {
-	v, err := ds.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (ds *DeviceSelect) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = ds.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{device.Label}
-	default:
-		err = fmt.Errorf("ent: DeviceSelect.Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (ds *DeviceSelect) BoolX(ctx context.Context) bool {
-	v, err := ds.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
 }
 
 func (ds *DeviceSelect) sqlScan(ctx context.Context, v interface{}) error {

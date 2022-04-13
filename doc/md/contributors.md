@@ -112,6 +112,14 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://www.linkedin.com/in/iamnande/"><img src="https://avatars.githubusercontent.com/u/7806510?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nicholas Anderson</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=iamnande" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/hezhizhen"><img src="https://avatars.githubusercontent.com/u/7611700?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Zhizhen He</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=hezhizhen" title="Code">💻</a></td>
     <td align="center"><a href="https://pedro.dev.br"><img src="https://avatars.githubusercontent.com/u/1251151?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Pedro Henrique</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=crossworth" title="Code">💻</a></td>
+    <td align="center"><a href="https://2jp.de"><img src="https://avatars.githubusercontent.com/u/7414374?v=4?s=100" width="100px;" alt=""/><br /><sub><b>MrParano1d</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=MrParano1d" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/tprebs"><img src="https://avatars.githubusercontent.com/u/6523587?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thomas Prebble</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=tprebs" title="Code">💻</a></td>
+    <td align="center"><a href="https://huytq.com"><img src="https://avatars.githubusercontent.com/u/5723282?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Huy TQ</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=imhuytq" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/maorlipchuk"><img src="https://avatars.githubusercontent.com/u/7034637?v=4?s=100" width="100px;" alt=""/><br /><sub><b>maorlipchuk</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=maorlipchuk" title="Code">💻</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://mobcov.hatenadiary.org/"><img src="https://avatars.githubusercontent.com/u/121048?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Motonori Iwata</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=iwata" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/CharlesGe129"><img src="https://avatars.githubusercontent.com/u/20162173?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Charles Ge</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=CharlesGe129" title="Code">💻</a></td>
   </tr>
 </table>
 
