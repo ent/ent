@@ -241,3 +241,115 @@ func main() {
    }
 }
 ```
+
+## Atlas migration directory integrity file
+
+Suppose you have multiple teams develop a feature in parallel and both of them need a migration. If Team A and Team B do
+not check in with each other, they might end up with a broken migration directory since new files do not raise a merge
+conflict in a version control system like git. To prevent concurrent creation of new migration files and guard against
+accidental changes in the migration history, Atlas has a feature called __Migration Directory Integrity File__, which simply is
+another file in your migration directory called `atlas.sum`. 
+
+The `atlas.sum` file contains the checksum of each migration file (implemented by a reverse, one branch merkle hash
+tree), and a sum of all files. Adding new files results in a change to the sum file, which will raise merge conflicts in
+most version controls systems. This is an example of an `atlas.sum` file:
+
+```text
+h1:UtZn3IzU66t05/t1sybK48xAeeEvguhtMuhqsbIGMhs=
+1_initial.sql h1:81KZdrTEWJQ5UuzuOyU8C6R7rcXFOuHfVA4AAhS5OoU=
+```
+
+You can enable this feature by using the `schema.WithSumFile()` option.
+
+```go
+package main
+
+import (
+   "context"
+   "log"
+   "strings"
+   "text/template"
+   "time"
+
+   "ariga.io/atlas/sql/migrate"
+   "ariga.io/atlas/sql/sqltool"
+   "entgo.io/ent/dialect/sql"
+   "entgo.io/ent/dialect/sql/schema"
+   "entgo.io/ent/entc"
+   "entgo.io/ent/entc/gen"
+)
+
+func main() {
+   // Load the graph.
+   graph, err := entc.LoadGraph("/.schema", &gen.Config{})
+   if err != nil {
+      log.Fatalln(err)
+   }
+   tbls, err := graph.Tables()
+   if err != nil {
+      log.Fatalln(err)
+   }
+   // Create a local migration directory.
+   d, err := migrate.NewLocalDir("migrations")
+   if err != nil {
+      log.Fatalln(err)
+   }
+   // Open connection to the database.
+   dlct, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+   if err != nil {
+      log.Fatalln(err)
+   }
+   // Inspect it and compare it with the graph.
+   m, err := schema.NewMigrate(dlct, schema.WithDir(d),
+      // highlight-start
+	  // Enable the Atlas Migration Directory Integrity File.
+      schema.WithSumFile(),
+      // highlight-end
+   )
+   if err != nil {
+      log.Fatalln(err)
+   }
+   if err := m.Diff(context.Background(), tbls...); err != nil {
+      log.Fatalln(err)
+   }
+}
+```
+
+In addition to the usual `.sql` migration files the migration directory will contain another file called `atlas.sum`.
+Every time you let Ent generate a new migration file, this file is updated for you. The integrity file reveals it real
+power, if used alongside the Atlas CLI, which is able to read the file and compare it against your migration directory.
+
+After following the [installation instructions](https://atlasgo.io/cli/getting-started/setting-up#install-the-cli),
+run `atlas migrate validate --dir file://<path-to-your-migration-directory>`:
+
+```shell
+> atlas migrate validate --dir file://<path-to-your-migration-directory>
+```
+
+It should have no output, since all is in sync. If you'd edit an existing file or manually create a new one and run that
+command again:
+
+```shell
+> atlas migrate validate --dir file://<path-to-your-migration-directory>
+Error: checksum mismatch
+
+You have a checksum error in your migration directory.
+This happens if you manually create or edit a migration file.
+Please check your migration files and run
+
+'atlas migrate hash --force'
+
+to re-hash the contents and resolve the error.
+
+exit status 1
+```
+
+You can get rid of this error by checking your migration files, and if everything is correct, create an
+updated `atlas.sum` file reflecting the latest changes:
+
+```shell
+> atlas migrate hash --dir file://<path-to-your-migration-directory> --force
+> atlas migrate validate --dir file://<path-to-your-migration-directory>
+```
+
+You can add the `atlas migrate validate` call to your CI to have the migration directory checked continuously.
