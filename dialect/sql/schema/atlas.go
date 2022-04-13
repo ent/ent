@@ -264,6 +264,13 @@ func WithFormatter(fmt migrate.Formatter) MigrateOption {
 	}
 }
 
+// EnableSumFile instructs atlas to generate a migration directory integrity sum file as well.
+func EnableSumFile() MigrateOption {
+	return func(m *Migrate) {
+		m.atlas.genSum = true
+	}
+}
+
 type (
 	// atlasOptions describes the options for atlas.
 	atlasOptions struct {
@@ -273,6 +280,7 @@ type (
 		skip    ChangeKind
 		dir     migrate.Dir
 		fmt     migrate.Formatter
+		genSum  bool
 	}
 
 	// atBuilder must be implemented by the different drivers in
