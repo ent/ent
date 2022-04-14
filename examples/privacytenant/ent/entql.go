@@ -128,7 +128,7 @@ func (gq *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the GroupQuery builder.
 func (gq *GroupQuery) Filter() *GroupFilter {
-	return &GroupFilter{gq}
+	return &GroupFilter{gq.config, gq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -138,11 +138,12 @@ func (m *GroupMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the GroupMutation builder.
 func (m *GroupMutation) Filter() *GroupFilter {
-	return &GroupFilter{m}
+	return &GroupFilter{m.config, m}
 }
 
 // GroupFilter provides a generic filtering capability at runtime for GroupQuery.
 type GroupFilter struct {
+	config
 	predicateAdder
 }
 
@@ -200,7 +201,7 @@ func (tq *TenantQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the TenantQuery builder.
 func (tq *TenantQuery) Filter() *TenantFilter {
-	return &TenantFilter{tq}
+	return &TenantFilter{tq.config, tq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -210,11 +211,12 @@ func (m *TenantMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the TenantMutation builder.
 func (m *TenantMutation) Filter() *TenantFilter {
-	return &TenantFilter{m}
+	return &TenantFilter{m.config, m}
 }
 
 // TenantFilter provides a generic filtering capability at runtime for TenantQuery.
 type TenantFilter struct {
+	config
 	predicateAdder
 }
 
@@ -244,7 +246,7 @@ func (uq *UserQuery) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns a Filter implementation to apply filters on the UserQuery builder.
 func (uq *UserQuery) Filter() *UserFilter {
-	return &UserFilter{uq}
+	return &UserFilter{uq.config, uq}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -254,11 +256,12 @@ func (m *UserMutation) addPredicate(pred func(s *sql.Selector)) {
 
 // Filter returns an entql.Where implementation to apply filters on the UserMutation builder.
 func (m *UserMutation) Filter() *UserFilter {
-	return &UserFilter{m}
+	return &UserFilter{m.config, m}
 }
 
 // UserFilter provides a generic filtering capability at runtime for UserQuery.
 type UserFilter struct {
+	config
 	predicateAdder
 }
 

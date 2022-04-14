@@ -7,6 +7,8 @@
 package ent
 
 import (
+	"net/http"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 )
@@ -23,7 +25,8 @@ type config struct {
 	// log used for logging on debug mode.
 	log func(...interface{})
 	// hooks to execute on mutations.
-	hooks *hooks
+	hooks      *hooks
+	HTTPClient *http.Client
 }
 
 // hooks per client, for fast access.
@@ -61,5 +64,12 @@ func Log(fn func(...interface{})) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
+	}
+}
+
+// HTTPClient configures the HTTPClient.
+func HTTPClient(v *http.Client) Option {
+	return func(c *config) {
+		c.HTTPClient = v
 	}
 }
