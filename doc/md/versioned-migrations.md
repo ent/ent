@@ -245,10 +245,10 @@ func main() {
 ## Atlas migration directory integrity file
 
 Suppose you have multiple teams develop a feature in parallel and both of them need a migration. If Team A and Team B do
-not check in with each other, they might end up with a broken migration directory since new files do not raise a merge
-conflict in a version control system like git. To prevent concurrent creation of new migration files and guard against
-accidental changes in the migration history, Atlas has a feature called __Migration Directory Integrity File__, which simply is
-another file in your migration directory called `atlas.sum`. 
+not check in with each other, they might end up with a broken set of migration files (like adding the same column twice)
+since new files do not raise a merge conflict in a version control system like git. To prevent concurrent creation of
+new migration files and guard against accidental changes in the migration history, Atlas has a feature called __
+Migration Directory Integrity File__, which simply is another file in your migration directory called `atlas.sum`. 
 
 The `atlas.sum` file contains the checksum of each migration file (implemented by a reverse, one branch merkle hash
 tree), and a sum of all files. Adding new files results in a change to the sum file, which will raise merge conflicts in
