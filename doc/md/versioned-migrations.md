@@ -113,7 +113,7 @@ import (
 
 func main() {
     // Load the graph.
-    graph, err := entc.LoadGraph("/.schema", &gen.Config{})
+    graph, err := entc.LoadGraph("./schema", &gen.Config{})
     if err != nil {
         log.Fatalln(err)
     }
