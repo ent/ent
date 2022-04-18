@@ -789,6 +789,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "thmeitz",
+      "name": "Thomas Meitz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92851940?v=4",
+      "profile": "https://github.com/thmeitz",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
