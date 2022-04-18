@@ -152,7 +152,7 @@ The Atlas migration engine does not support applying the migration files onto a 
 execute the generated migration files, you have to rely on an external tool (or execute them by hand). By default, Atlas
 generates one "up" and one "down" migration file for the computed diff. These files are compatible with the popular
 [golang-migrate/migrate](https://github.com/golang-migrate/migrate) package, and you can use that tool to manage the
-migrations in you deployments.
+migrations in your deployments.
 
 ```shell
 migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306)/test up
