@@ -6,13 +6,13 @@ title: Versioned Migrations
 If you are using the Atlas migration engine you are able to use the versioned migrations feature of it. Instead of
 applying the computed changes directly to the database, it will generate a set of migration files containing the
 necessary SQL statements to migrate the database. These files can then be edited to your needs and be applied by any
-tool you like (like golang-migrate, Flyway, liquibase). 
+tool you like (like golang-migrate, Flyway, liquibase).
 
 ![atlas-versioned-migration-process](https://entgo.io/images/assets/migrate-atlas-versioned.png)
 
 ## Generating Versioned Migration Files
 
-### From Client 
+### From Client
 
 If you want to use an instantiated Ent client to create new migration files, you have to enable the versioned
 migrations feature flag in order to have Ent make the necessary changes to the generated code. Depending on how you
@@ -37,7 +37,7 @@ package main
 
 import (
 	"log"
-	
+
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
 )
@@ -161,7 +161,7 @@ migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306
 ## Moving from Auto-Migration to Versioned Migrations
 
 In case you already have an Ent application in production and want to switch over from auto migration to the new
-versioned migration, you need to take some extra steps. 
+versioned migration, you need to take some extra steps.
 
 1. Create an initial migration file (or several files if you want) reflecting the currently deployed state.
 
@@ -169,7 +169,7 @@ versioned migration, you need to take some extra steps.
    run the diff command once as described above. This will create the statements needed to create the current state of
    your schema graph.
 
-2. Configure the tool you use to manage migrations to consider this file as **applied**. 
+2. Configure the tool you use to manage migrations to consider this file as **applied**.
 
    In case of `golang-migrate` this can be done by forcing your database version as
    described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
@@ -241,3 +241,17 @@ func main() {
    }
 }
 ```
+
+### Note for using golang-migrate
+
+If you use golang-migrate with MySQL, you need to change the DSN as follows:
+
+```
+"user:password@tcp(host:port)/dbname?multiStatements=true"
+```
+
+**Why?**
+
+Without the `multiStatements=true` parameter, the migration will fail if there is more than one SQL statement in the migration file.
+
+Please note that all other options you use for your DSN must be added as well!
