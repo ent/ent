@@ -241,3 +241,169 @@ func main() {
    }
 }
 ```
+
+## Atlas migration directory integrity file
+
+### The Problem
+
+Suppose you have multiple teams develop a feature in parallel and both of them need a migration. If Team A and Team B do
+not check in with each other, they might end up with a broken set of migration files (like adding the same table or
+column twice) since new files do not raise a merge conflict in a version control system like git. The following example
+demonstrates such behavior: 
+
+![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/no-conflict.svg)
+
+Assume both Team A and Team B add a new schema called User and generate a versioned migration file on their respective
+branch.
+
+```sql title="20220318104614_team_A.sql"
+-- create "users" table
+CREATE TABLE `users` (
+    `id` bigint NOT NULL AUTO_INCREMENT, 
+    // highlight-start
+    `team_a_col` INTEGER NOT NULL, 
+    // highlight-end
+    PRIMARY KEY (`id`)
+) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+```
+```sql title="20220318104615_team_B.sql"
+-- create "users" table
+CREATE TABLE `users` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    // highlight-start
+     `team_b_col` INTEGER NOT NULL, 
+    // highlight-end
+     PRIMARY KEY (`id`)
+) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+```
+
+If they both merge their branch into master, git will not raise a conflict and everything seems fine. But attempting to
+apply the pending migrations will result in migration failure:
+
+```shell
+mysql> CREATE TABLE `users` (`id` bigint NOT NULL AUTO_INCREMENT, `team_a_col` INTEGER NOT NULL, PRIMARY KEY (`id`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+[2022-04-14 10:00:38] completed in 31 ms
+
+mysql> CREATE TABLE `users` (`id` bigint NOT NULL AUTO_INCREMENT, `team_b_col` INTEGER NOT NULL, PRIMARY KEY (`id`)) CHARSET utf8mb4 COLLATE utf8mb4_bin;
+[2022-04-14 10:00:48] [42S01][1050] Table 'users' already exists
+```
+
+Depending on the SQL this can potentially leave your database in a crippled state.
+
+### The Solution
+
+Luckily, the Atlas migration engine offers a way to prevent concurrent creation of new migration files and guard against
+accidental changes in the migration history we call __Migration Directory Integrity File__, which simply is another file
+in your migration directory called `atlas.sum`. For the migration directory of team A it would look similar to this:
+
+```text
+h1:KRFsSi68ZOarsQAJZ1mfSiMSkIOZlMq4RzyF//Pwf8A=
+20220318104614_team_A.sql h1:EGknG5Y6GQYrc4W8e/r3S61Aqx2p+NmQyVz/2m8ZNwA=
+
+```
+
+The `atlas.sum` file contains the checksum of each migration file (implemented by a reverse, one branch merkle hash
+tree), and a sum of all files. Adding new files results in a change to the sum file, which will raise merge conflicts in
+most version controls systems. Let's see how we can use the __Migration Directory Integrity File__ to detect the case
+from above automatically. 
+
+:::note
+Please note, that you need to have the Atlas CLI installed in your system for this to work, so make sure to follow
+the [installation instructions](https://atlasgo.io/cli/getting-started/setting-up#install-the-cli) before proceeding.
+:::
+
+The first step is to tell the migration engine to create a sum file by using the `schema.WithSumFile()` option:
+
+```go
+package main
+
+import (
+   "context"
+   "log"
+
+   "ariga.io/atlas/sql/migrate"
+   "ariga.io/atlas/sql/sqltool"
+   "entgo.io/ent/dialect/sql"
+   "entgo.io/ent/dialect/sql/schema"
+   "entgo.io/ent/entc"
+   "entgo.io/ent/entc/gen"
+)
+
+func main() {
+   // Load the graph.
+   graph, err := entc.LoadGraph("/.schema", &gen.Config{})
+   if err != nil {
+      log.Fatalln(err)
+   }
+   tbls, err := graph.Tables()
+   if err != nil {
+      log.Fatalln(err)
+   }
+   // Create a local migration directory.
+   d, err := migrate.NewLocalDir("migrations")
+   if err != nil {
+      log.Fatalln(err)
+   }
+   // Open connection to the database.
+   dlct, err := sql.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+   if err != nil {
+      log.Fatalln(err)
+   }
+   // Inspect it and compare it with the graph.
+   m, err := schema.NewMigrate(dlct, schema.WithDir(d),
+      // highlight-start
+      // Enable the Atlas Migration Directory Integrity File.
+      schema.WithSumFile(),
+      // highlight-end
+   )
+   if err != nil {
+      log.Fatalln(err)
+   }
+   if err := m.Diff(context.Background(), tbls...); err != nil {
+      log.Fatalln(err)
+   }
+}
+```
+
+In addition to the usual `.sql` migration files the migration directory will contain the `atlas.sum` file. Every time
+you let Ent generate a new migration file, this file is updated for you. However, every manual change made to the
+mitration directory will render the migration directory and the `atlas.sum` file out-of-sync. With the Atlas CLI you can
+both check if the file and migration directory are in-sync, and fix it if not:
+
+```shell
+# If there is no output, the migration directory is in-sync.
+atlas migrate validate --dir file://<path-to-your-migration-directory>
+```
+
+```shell
+# If the migration directory and sum file are out-of-sync the Atlas CLI will tell you.
+atlas migrate validate --dir file://<path-to-your-migration-directory>
+Error: checksum mismatch
+
+You have a checksum error in your migration directory.
+This happens if you manually create or edit a migration file.
+Please check your migration files and run
+
+'atlas migrate hash --force'
+
+to re-hash the contents and resolve the error.
+
+exit status 1
+```
+
+If you are sure, that the contents in your migration files are correct, you can re-compute the hashes in the `atlas.sum`
+file:
+
+```shell
+# Recompute the sum file.
+atlas migrate hash --dir file://<path-to-your-migration-directory> --force
+```
+
+Back to the problem above, if team A would land their changes on master first and team B would now attempt to land
+theirs, they'd get a merge conflict, as you can see in the example below:
+
+![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/conflict.svg)
+
+You can add the `atlas migrate validate` call to your CI to have the migration directory checked continuously. Even if
+any team member would now forget to update the `atlas.sum` file after a manual edit, the CI would not go green,
+indicating a problem.
