@@ -244,14 +244,8 @@ func main() {
 
 ### Note for using golang-migrate
 
-If you use golang-migrate with MySQL, you need to change the DSN as follows:
+If you use golang-migrate with MySQL, you need to add the `multiStatements` parameter to `true` as in the example below and then take the DSN we used in the documents with the param applied.
 
 ```
 "user:password@tcp(host:port)/dbname?multiStatements=true"
 ```
-
-**Why?**
-
-Without the `multiStatements=true` parameter, the migration will fail if there is more than one SQL statement in the migration file.
-
-Please note that all other options you use for your DSN must be added as well!
