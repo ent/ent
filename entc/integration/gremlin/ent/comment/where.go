@@ -311,6 +311,105 @@ func NillableIntNotNil() predicate.Comment {
 	})
 }
 
+// TableEQ applies the EQ predicate on the "table" field.
+func TableEQ(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.EQ(v))
+	})
+}
+
+// TableNEQ applies the NEQ predicate on the "table" field.
+func TableNEQ(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.NEQ(v))
+	})
+}
+
+// TableIn applies the In predicate on the "table" field.
+func TableIn(vs ...string) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.Within(v...))
+	})
+}
+
+// TableNotIn applies the NotIn predicate on the "table" field.
+func TableNotIn(vs ...string) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.Without(v...))
+	})
+}
+
+// TableGT applies the GT predicate on the "table" field.
+func TableGT(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.GT(v))
+	})
+}
+
+// TableGTE applies the GTE predicate on the "table" field.
+func TableGTE(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.GTE(v))
+	})
+}
+
+// TableLT applies the LT predicate on the "table" field.
+func TableLT(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.LT(v))
+	})
+}
+
+// TableLTE applies the LTE predicate on the "table" field.
+func TableLTE(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.LTE(v))
+	})
+}
+
+// TableContains applies the Contains predicate on the "table" field.
+func TableContains(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.Containing(v))
+	})
+}
+
+// TableHasPrefix applies the HasPrefix predicate on the "table" field.
+func TableHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.StartingWith(v))
+	})
+}
+
+// TableHasSuffix applies the HasSuffix predicate on the "table" field.
+func TableHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.EndingWith(v))
+	})
+}
+
+// TableIsNil applies the IsNil predicate on the "table" field.
+func TableIsNil() predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.HasLabel(Label).HasNot(FieldTable)
+	})
+}
+
+// TableNotNil applies the NotNil predicate on the "table" field.
+func TableNotNil() predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.HasLabel(Label).Has(FieldTable)
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Comment) predicate.Comment {
 	return predicate.Comment(func(tr *dsl.Traversal) {

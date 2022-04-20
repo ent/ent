@@ -812,6 +812,7 @@ type CommentMutation struct {
 	addunique_float *float64
 	nillable_int    *int
 	addnillable_int *int
+	table           *string
 	clearedFields   map[string]struct{}
 	done            bool
 	oldValue        func(context.Context) (*Comment, error)
@@ -1098,6 +1099,55 @@ func (m *CommentMutation) ResetNillableInt() {
 	delete(m.clearedFields, comment.FieldNillableInt)
 }
 
+// SetTable sets the "table" field.
+func (m *CommentMutation) SetTable(s string) {
+	m.table = &s
+}
+
+// Table returns the value of the "table" field in the mutation.
+func (m *CommentMutation) Table() (r string, exists bool) {
+	v := m.table
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTable returns the old "table" field's value of the Comment entity.
+// If the Comment object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CommentMutation) OldTable(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTable is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTable requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTable: %w", err)
+	}
+	return oldValue.Table, nil
+}
+
+// ClearTable clears the value of the "table" field.
+func (m *CommentMutation) ClearTable() {
+	m.table = nil
+	m.clearedFields[comment.FieldTable] = struct{}{}
+}
+
+// TableCleared returns if the "table" field was cleared in this mutation.
+func (m *CommentMutation) TableCleared() bool {
+	_, ok := m.clearedFields[comment.FieldTable]
+	return ok
+}
+
+// ResetTable resets all changes to the "table" field.
+func (m *CommentMutation) ResetTable() {
+	m.table = nil
+	delete(m.clearedFields, comment.FieldTable)
+}
+
 // Where appends a list predicates to the CommentMutation builder.
 func (m *CommentMutation) Where(ps ...predicate.Comment) {
 	m.predicates = append(m.predicates, ps...)
@@ -1117,7 +1167,7 @@ func (m *CommentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CommentMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.unique_int != nil {
 		fields = append(fields, comment.FieldUniqueInt)
 	}
@@ -1126,6 +1176,9 @@ func (m *CommentMutation) Fields() []string {
 	}
 	if m.nillable_int != nil {
 		fields = append(fields, comment.FieldNillableInt)
+	}
+	if m.table != nil {
+		fields = append(fields, comment.FieldTable)
 	}
 	return fields
 }
@@ -1141,6 +1194,8 @@ func (m *CommentMutation) Field(name string) (ent.Value, bool) {
 		return m.UniqueFloat()
 	case comment.FieldNillableInt:
 		return m.NillableInt()
+	case comment.FieldTable:
+		return m.Table()
 	}
 	return nil, false
 }
@@ -1156,6 +1211,8 @@ func (m *CommentMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUniqueFloat(ctx)
 	case comment.FieldNillableInt:
 		return m.OldNillableInt(ctx)
+	case comment.FieldTable:
+		return m.OldTable(ctx)
 	}
 	return nil, fmt.Errorf("unknown Comment field %s", name)
 }
@@ -1185,6 +1242,13 @@ func (m *CommentMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNillableInt(v)
+		return nil
+	case comment.FieldTable:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTable(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)
@@ -1258,6 +1322,9 @@ func (m *CommentMutation) ClearedFields() []string {
 	if m.FieldCleared(comment.FieldNillableInt) {
 		fields = append(fields, comment.FieldNillableInt)
 	}
+	if m.FieldCleared(comment.FieldTable) {
+		fields = append(fields, comment.FieldTable)
+	}
 	return fields
 }
 
@@ -1275,6 +1342,9 @@ func (m *CommentMutation) ClearField(name string) error {
 	case comment.FieldNillableInt:
 		m.ClearNillableInt()
 		return nil
+	case comment.FieldTable:
+		m.ClearTable()
+		return nil
 	}
 	return fmt.Errorf("unknown Comment nullable field %s", name)
 }
@@ -1291,6 +1361,9 @@ func (m *CommentMutation) ResetField(name string) error {
 		return nil
 	case comment.FieldNillableInt:
 		m.ResetNillableInt()
+		return nil
+	case comment.FieldTable:
+		m.ResetTable()
 		return nil
 	}
 	return fmt.Errorf("unknown Comment field %s", name)

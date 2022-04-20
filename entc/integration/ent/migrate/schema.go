@@ -60,6 +60,7 @@ var (
 		{Name: "unique_int", Type: field.TypeInt, Unique: true},
 		{Name: "unique_float", Type: field.TypeFloat64, Unique: true},
 		{Name: "nillable_int", Type: field.TypeInt, Nullable: true},
+		{Name: "table", Type: field.TypeString, Nullable: true},
 	}
 	// CommentsTable holds the schema information for the "comments" table.
 	CommentsTable = &schema.Table{

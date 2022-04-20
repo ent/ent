@@ -51,6 +51,20 @@ func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
 	return cc
 }
 
+// SetTable sets the "table" field.
+func (cc *CommentCreate) SetTable(s string) *CommentCreate {
+	cc.mutation.SetTable(s)
+	return cc
+}
+
+// SetNillableTable sets the "table" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableTable(s *string) *CommentCreate {
+	if s != nil {
+		cc.SetTable(*s)
+	}
+	return cc
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cc *CommentCreate) Mutation() *CommentMutation {
 	return cc.mutation
@@ -179,6 +193,14 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		})
 		_node.NillableInt = &value
 	}
+	if value, ok := cc.mutation.Table(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldTable,
+		})
+		_node.Table = value
+	}
 	return _node, _spec
 }
 
@@ -293,6 +315,24 @@ func (u *CommentUpsert) ClearNillableInt() *CommentUpsert {
 	return u
 }
 
+// SetTable sets the "table" field.
+func (u *CommentUpsert) SetTable(v string) *CommentUpsert {
+	u.Set(comment.FieldTable, v)
+	return u
+}
+
+// UpdateTable sets the "table" field to the value that was provided on create.
+func (u *CommentUpsert) UpdateTable() *CommentUpsert {
+	u.SetExcluded(comment.FieldTable)
+	return u
+}
+
+// ClearTable clears the value of the "table" field.
+func (u *CommentUpsert) ClearTable() *CommentUpsert {
+	u.SetNull(comment.FieldTable)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -402,6 +442,27 @@ func (u *CommentUpsertOne) UpdateNillableInt() *CommentUpsertOne {
 func (u *CommentUpsertOne) ClearNillableInt() *CommentUpsertOne {
 	return u.Update(func(s *CommentUpsert) {
 		s.ClearNillableInt()
+	})
+}
+
+// SetTable sets the "table" field.
+func (u *CommentUpsertOne) SetTable(v string) *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetTable(v)
+	})
+}
+
+// UpdateTable sets the "table" field to the value that was provided on create.
+func (u *CommentUpsertOne) UpdateTable() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateTable()
+	})
+}
+
+// ClearTable clears the value of the "table" field.
+func (u *CommentUpsertOne) ClearTable() *CommentUpsertOne {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearTable()
 	})
 }
 
@@ -675,6 +736,27 @@ func (u *CommentUpsertBulk) UpdateNillableInt() *CommentUpsertBulk {
 func (u *CommentUpsertBulk) ClearNillableInt() *CommentUpsertBulk {
 	return u.Update(func(s *CommentUpsert) {
 		s.ClearNillableInt()
+	})
+}
+
+// SetTable sets the "table" field.
+func (u *CommentUpsertBulk) SetTable(v string) *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.SetTable(v)
+	})
+}
+
+// UpdateTable sets the "table" field to the value that was provided on create.
+func (u *CommentUpsertBulk) UpdateTable() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.UpdateTable()
+	})
+}
+
+// ClearTable clears the value of the "table" field.
+func (u *CommentUpsertBulk) ClearTable() *CommentUpsertBulk {
+	return u.Update(func(s *CommentUpsert) {
+		s.ClearTable()
 	})
 }
 

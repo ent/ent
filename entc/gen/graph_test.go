@@ -130,6 +130,9 @@ func TestNewGraph(t *testing.T) {
 	require.Equal(t2.Edges[5], t2.Edges[6].Ref)
 	require.Equal(map[string]string{"Name": "From"}, t2.Edges[5].Annotations["GQL"])
 	require.Equal(map[string]string{"Name": "To"}, t2.Edges[6].Annotations["GQL"])
+
+	_, err = NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{Name: "Client"})
+	require.EqualError(err, `entc/gen: add schema "Client": "Client" is a reserved name and cannot be used as schema name`)
 }
 
 func TestNewGraphRequiredLoop(t *testing.T) {

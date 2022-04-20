@@ -17,6 +17,8 @@ const (
 	FieldUniqueFloat = "unique_float"
 	// FieldNillableInt holds the string denoting the nillable_int field in the database.
 	FieldNillableInt = "nillable_int"
+	// FieldTable holds the string denoting the table field in the database.
+	FieldTable = "table"
 	// Table holds the table name of the comment in the database.
 	Table = "comments"
 )
@@ -27,6 +29,7 @@ var Columns = []string{
 	FieldUniqueInt,
 	FieldUniqueFloat,
 	FieldNillableInt,
+	FieldTable,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

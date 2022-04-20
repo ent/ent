@@ -17,6 +17,8 @@ const (
 	FieldUniqueFloat = "unique_float"
 	// FieldNillableInt holds the string denoting the nillable_int field in the database.
 	FieldNillableInt = "nillable_int"
+	// FieldTable holds the string denoting the table field in the database.
+	FieldTable = "table"
 )
 
 // comment from another template.
