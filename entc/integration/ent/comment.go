@@ -25,6 +25,8 @@ type Comment struct {
 	UniqueFloat float64 `json:"unique_float,omitempty"`
 	// NillableInt holds the value of the "nillable_int" field.
 	NillableInt *int `json:"nillable_int,omitempty"`
+	// Table holds the value of the "table" field.
+	Table string `json:"table,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -36,6 +38,8 @@ func (*Comment) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullFloat64)
 		case comment.FieldID, comment.FieldUniqueInt, comment.FieldNillableInt:
 			values[i] = new(sql.NullInt64)
+		case comment.FieldTable:
+			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Comment", columns[i])
 		}
@@ -76,6 +80,12 @@ func (c *Comment) assignValues(columns []string, values []interface{}) error {
 				c.NillableInt = new(int)
 				*c.NillableInt = int(value.Int64)
 			}
+		case comment.FieldTable:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field table", values[i])
+			} else if value.Valid {
+				c.Table = value.String
+			}
 		}
 	}
 	return nil
@@ -112,6 +122,8 @@ func (c *Comment) String() string {
 		builder.WriteString(", nillable_int=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", table=")
+	builder.WriteString(c.Table)
 	builder.WriteByte(')')
 	return builder.String()
 }

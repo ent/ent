@@ -64,6 +64,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			comment.FieldUniqueInt:   {Type: field.TypeInt, Column: comment.FieldUniqueInt},
 			comment.FieldUniqueFloat: {Type: field.TypeFloat64, Column: comment.FieldUniqueFloat},
 			comment.FieldNillableInt: {Type: field.TypeInt, Column: comment.FieldNillableInt},
+			comment.FieldTable:       {Type: field.TypeString, Column: comment.FieldTable},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -797,6 +798,11 @@ func (f *CommentFilter) WhereUniqueFloat(p entql.Float64P) {
 // WhereNillableInt applies the entql int predicate on the nillable_int field.
 func (f *CommentFilter) WhereNillableInt(p entql.IntP) {
 	f.Where(p.Field(comment.FieldNillableInt))
+}
+
+// WhereTable applies the entql string predicate on the table field.
+func (f *CommentFilter) WhereTable(p entql.StringP) {
+	f.Where(p.Field(comment.FieldTable))
 }
 
 // addPredicate implements the predicateAdder interface.

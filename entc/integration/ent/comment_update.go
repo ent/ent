@@ -84,6 +84,26 @@ func (cu *CommentUpdate) ClearNillableInt() *CommentUpdate {
 	return cu
 }
 
+// SetTable sets the "table" field.
+func (cu *CommentUpdate) SetTable(s string) *CommentUpdate {
+	cu.mutation.SetTable(s)
+	return cu
+}
+
+// SetNillableTable sets the "table" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableTable(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetTable(*s)
+	}
+	return cu
+}
+
+// ClearTable clears the value of the "table" field.
+func (cu *CommentUpdate) ClearTable() *CommentUpdate {
+	cu.mutation.ClearTable()
+	return cu
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
@@ -209,6 +229,19 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: comment.FieldNillableInt,
 		})
 	}
+	if value, ok := cu.mutation.Table(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldTable,
+		})
+	}
+	if cu.mutation.TableCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: comment.FieldTable,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
@@ -278,6 +311,26 @@ func (cuo *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
 	cuo.mutation.ClearNillableInt()
+	return cuo
+}
+
+// SetTable sets the "table" field.
+func (cuo *CommentUpdateOne) SetTable(s string) *CommentUpdateOne {
+	cuo.mutation.SetTable(s)
+	return cuo
+}
+
+// SetNillableTable sets the "table" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableTable(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetTable(*s)
+	}
+	return cuo
+}
+
+// ClearTable clears the value of the "table" field.
+func (cuo *CommentUpdateOne) ClearTable() *CommentUpdateOne {
+	cuo.mutation.ClearTable()
 	return cuo
 }
 
@@ -428,6 +481,19 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: comment.FieldNillableInt,
+		})
+	}
+	if value, ok := cuo.mutation.Table(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: comment.FieldTable,
+		})
+	}
+	if cuo.mutation.TableCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: comment.FieldTable,
 		})
 	}
 	_node = &Comment{config: cuo.config}

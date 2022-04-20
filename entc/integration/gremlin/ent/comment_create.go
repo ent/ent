@@ -52,6 +52,20 @@ func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
 	return cc
 }
 
+// SetTable sets the "table" field.
+func (cc *CommentCreate) SetTable(s string) *CommentCreate {
+	cc.mutation.SetTable(s)
+	return cc
+}
+
+// SetNillableTable sets the "table" field if the given value is not nil.
+func (cc *CommentCreate) SetNillableTable(s *string) *CommentCreate {
+	if s != nil {
+		cc.SetTable(*s)
+	}
+	return cc
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cc *CommentCreate) Mutation() *CommentMutation {
 	return cc.mutation
@@ -170,6 +184,9 @@ func (cc *CommentCreate) gremlin() *dsl.Traversal {
 	}
 	if value, ok := cc.mutation.NillableInt(); ok {
 		v.Property(dsl.Single, comment.FieldNillableInt, value)
+	}
+	if value, ok := cc.mutation.Table(); ok {
+		v.Property(dsl.Single, comment.FieldTable, value)
 	}
 	if len(constraints) == 0 {
 		return v.ValueMap(true)

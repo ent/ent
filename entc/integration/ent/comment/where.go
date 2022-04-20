@@ -357,6 +357,131 @@ func NillableIntNotNil() predicate.Comment {
 	})
 }
 
+// TableEQ applies the EQ predicate on the "table" field.
+func TableEQ(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTable), v))
+	})
+}
+
+// TableNEQ applies the NEQ predicate on the "table" field.
+func TableNEQ(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTable), v))
+	})
+}
+
+// TableIn applies the In predicate on the "table" field.
+func TableIn(vs ...string) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldTable), v...))
+	})
+}
+
+// TableNotIn applies the NotIn predicate on the "table" field.
+func TableNotIn(vs ...string) predicate.Comment {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Comment(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldTable), v...))
+	})
+}
+
+// TableGT applies the GT predicate on the "table" field.
+func TableGT(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTable), v))
+	})
+}
+
+// TableGTE applies the GTE predicate on the "table" field.
+func TableGTE(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTable), v))
+	})
+}
+
+// TableLT applies the LT predicate on the "table" field.
+func TableLT(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTable), v))
+	})
+}
+
+// TableLTE applies the LTE predicate on the "table" field.
+func TableLTE(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTable), v))
+	})
+}
+
+// TableContains applies the Contains predicate on the "table" field.
+func TableContains(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldTable), v))
+	})
+}
+
+// TableHasPrefix applies the HasPrefix predicate on the "table" field.
+func TableHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldTable), v))
+	})
+}
+
+// TableHasSuffix applies the HasSuffix predicate on the "table" field.
+func TableHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldTable), v))
+	})
+}
+
+// TableIsNil applies the IsNil predicate on the "table" field.
+func TableIsNil() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTable)))
+	})
+}
+
+// TableNotNil applies the NotNil predicate on the "table" field.
+func TableNotNil() predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTable)))
+	})
+}
+
+// TableEqualFold applies the EqualFold predicate on the "table" field.
+func TableEqualFold(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldTable), v))
+	})
+}
+
+// TableContainsFold applies the ContainsFold predicate on the "table" field.
+func TableContainsFold(v string) predicate.Comment {
+	return predicate.Comment(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldTable), v))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Comment) predicate.Comment {
 	return predicate.Comment(func(s *sql.Selector) {

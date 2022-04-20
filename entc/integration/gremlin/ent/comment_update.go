@@ -86,6 +86,26 @@ func (cu *CommentUpdate) ClearNillableInt() *CommentUpdate {
 	return cu
 }
 
+// SetTable sets the "table" field.
+func (cu *CommentUpdate) SetTable(s string) *CommentUpdate {
+	cu.mutation.SetTable(s)
+	return cu
+}
+
+// SetNillableTable sets the "table" field if the given value is not nil.
+func (cu *CommentUpdate) SetNillableTable(s *string) *CommentUpdate {
+	if s != nil {
+		cu.SetTable(*s)
+	}
+	return cu
+}
+
+// ClearTable clears the value of the "table" field.
+func (cu *CommentUpdate) ClearTable() *CommentUpdate {
+	cu.mutation.ClearTable()
+	return cu
+}
+
 // Mutation returns the CommentMutation object of the builder.
 func (cu *CommentUpdate) Mutation() *CommentMutation {
 	return cu.mutation
@@ -209,9 +229,15 @@ func (cu *CommentUpdate) gremlin() *dsl.Traversal {
 	if value, ok := cu.mutation.AddedNillableInt(); ok {
 		v.Property(dsl.Single, comment.FieldNillableInt, __.Union(__.Values(comment.FieldNillableInt), __.Constant(value)).Sum())
 	}
+	if value, ok := cu.mutation.Table(); ok {
+		v.Property(dsl.Single, comment.FieldTable, value)
+	}
 	var properties []interface{}
 	if cu.mutation.NillableIntCleared() {
 		properties = append(properties, comment.FieldNillableInt)
+	}
+	if cu.mutation.TableCleared() {
+		properties = append(properties, comment.FieldTable)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
@@ -289,6 +315,26 @@ func (cuo *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (cuo *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
 	cuo.mutation.ClearNillableInt()
+	return cuo
+}
+
+// SetTable sets the "table" field.
+func (cuo *CommentUpdateOne) SetTable(s string) *CommentUpdateOne {
+	cuo.mutation.SetTable(s)
+	return cuo
+}
+
+// SetNillableTable sets the "table" field if the given value is not nil.
+func (cuo *CommentUpdateOne) SetNillableTable(s *string) *CommentUpdateOne {
+	if s != nil {
+		cuo.SetTable(*s)
+	}
+	return cuo
+}
+
+// ClearTable clears the value of the "table" field.
+func (cuo *CommentUpdateOne) ClearTable() *CommentUpdateOne {
+	cuo.mutation.ClearTable()
 	return cuo
 }
 
@@ -427,9 +473,15 @@ func (cuo *CommentUpdateOne) gremlin(id string) *dsl.Traversal {
 	if value, ok := cuo.mutation.AddedNillableInt(); ok {
 		v.Property(dsl.Single, comment.FieldNillableInt, __.Union(__.Values(comment.FieldNillableInt), __.Constant(value)).Sum())
 	}
+	if value, ok := cuo.mutation.Table(); ok {
+		v.Property(dsl.Single, comment.FieldTable, value)
+	}
 	var properties []interface{}
 	if cuo.mutation.NillableIntCleared() {
 		properties = append(properties, comment.FieldNillableInt)
+	}
+	if cuo.mutation.TableCleared() {
+		properties = append(properties, comment.FieldTable)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())

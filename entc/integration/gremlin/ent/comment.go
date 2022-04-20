@@ -24,6 +24,8 @@ type Comment struct {
 	UniqueFloat float64 `json:"unique_float,omitempty"`
 	// NillableInt holds the value of the "nillable_int" field.
 	NillableInt *int `json:"nillable_int,omitempty"`
+	// Table holds the value of the "table" field.
+	Table string `json:"table,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Comment.
@@ -37,6 +39,7 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 		UniqueInt   int     `json:"unique_int,omitempty"`
 		UniqueFloat float64 `json:"unique_float,omitempty"`
 		NillableInt *int    `json:"nillable_int,omitempty"`
+		Table       string  `json:"table,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -45,6 +48,7 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 	c.UniqueInt = scanc.UniqueInt
 	c.UniqueFloat = scanc.UniqueFloat
 	c.NillableInt = scanc.NillableInt
+	c.Table = scanc.Table
 	return nil
 }
 
@@ -79,6 +83,8 @@ func (c *Comment) String() string {
 		builder.WriteString(", nillable_int=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", table=")
+	builder.WriteString(c.Table)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -97,6 +103,7 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		UniqueInt   int     `json:"unique_int,omitempty"`
 		UniqueFloat float64 `json:"unique_float,omitempty"`
 		NillableInt *int    `json:"nillable_int,omitempty"`
+		Table       string  `json:"table,omitempty"`
 	}
 	if err := vmap.Decode(&scanc); err != nil {
 		return err
@@ -107,6 +114,7 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 			UniqueInt:   v.UniqueInt,
 			UniqueFloat: v.UniqueFloat,
 			NillableInt: v.NillableInt,
+			Table:       v.Table,
 		})
 	}
 	return nil
