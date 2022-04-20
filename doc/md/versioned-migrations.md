@@ -6,13 +6,13 @@ title: Versioned Migrations
 If you are using the Atlas migration engine you are able to use the versioned migrations feature of it. Instead of
 applying the computed changes directly to the database, it will generate a set of migration files containing the
 necessary SQL statements to migrate the database. These files can then be edited to your needs and be applied by any
-tool you like (like golang-migrate, Flyway, liquibase). 
+tool you like (like golang-migrate, Flyway, liquibase).
 
 ![atlas-versioned-migration-process](https://entgo.io/images/assets/migrate-atlas-versioned.png)
 
 ## Generating Versioned Migration Files
 
-### From Client 
+### From Client
 
 If you want to use an instantiated Ent client to create new migration files, you have to enable the versioned
 migrations feature flag in order to have Ent make the necessary changes to the generated code. Depending on how you
@@ -37,7 +37,7 @@ package main
 
 import (
 	"log"
-	
+
 	"entgo.io/ent/entc"
 	"entgo.io/ent/entc/gen"
 )
@@ -161,7 +161,7 @@ migrate -source file://migrations -database mysql://root:pass@tcp(localhost:3306
 ## Moving from Auto-Migration to Versioned Migrations
 
 In case you already have an Ent application in production and want to switch over from auto migration to the new
-versioned migration, you need to take some extra steps. 
+versioned migration, you need to take some extra steps.
 
 1. Create an initial migration file (or several files if you want) reflecting the currently deployed state.
 
@@ -169,7 +169,7 @@ versioned migration, you need to take some extra steps.
    run the diff command once as described above. This will create the statements needed to create the current state of
    your schema graph.
 
-2. Configure the tool you use to manage migrations to consider this file as **applied**. 
+2. Configure the tool you use to manage migrations to consider this file as **applied**.
 
    In case of `golang-migrate` this can be done by forcing your database version as
    described [here](https://github.com/golang-migrate/migrate/blob/master/GETTING_STARTED.md#forcing-your-database-version).
@@ -242,6 +242,14 @@ func main() {
 }
 ```
 
+### Note for using golang-migrate
+
+If you use golang-migrate with MySQL, you need to add the `multiStatements` parameter to `true` as in the example below and then take the DSN we used in the documents with the param applied.
+
+```
+"user:password@tcp(host:port)/dbname?multiStatements=true"
+```
+
 ## Atlas migration directory integrity file
 
 ### The Problem
@@ -249,7 +257,7 @@ func main() {
 Suppose you have multiple teams develop a feature in parallel and both of them need a migration. If Team A and Team B do
 not check in with each other, they might end up with a broken set of migration files (like adding the same table or
 column twice) since new files do not raise a merge conflict in a version control system like git. The following example
-demonstrates such behavior: 
+demonstrates such behavior:
 
 ![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/no-conflict.svg)
 
@@ -259,19 +267,20 @@ branch.
 ```sql title="20220318104614_team_A.sql"
 -- create "users" table
 CREATE TABLE `users` (
-    `id` bigint NOT NULL AUTO_INCREMENT, 
+    `id` bigint NOT NULL AUTO_INCREMENT,
     // highlight-start
-    `team_a_col` INTEGER NOT NULL, 
+    `team_a_col` INTEGER NOT NULL,
     // highlight-end
     PRIMARY KEY (`id`)
 ) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 ```
+
 ```sql title="20220318104615_team_B.sql"
 -- create "users" table
 CREATE TABLE `users` (
     `id` bigint NOT NULL AUTO_INCREMENT,
     // highlight-start
-     `team_b_col` INTEGER NOT NULL, 
+     `team_b_col` INTEGER NOT NULL,
     // highlight-end
      PRIMARY KEY (`id`)
 ) CHARSET utf8mb4 COLLATE utf8mb4_bin;
@@ -293,7 +302,7 @@ Depending on the SQL this can potentially leave your database in a crippled stat
 ### The Solution
 
 Luckily, the Atlas migration engine offers a way to prevent concurrent creation of new migration files and guard against
-accidental changes in the migration history we call __Migration Directory Integrity File__, which simply is another file
+accidental changes in the migration history we call **Migration Directory Integrity File**, which simply is another file
 in your migration directory called `atlas.sum`. For the migration directory of team A it would look similar to this:
 
 ```text
@@ -304,8 +313,8 @@ h1:KRFsSi68ZOarsQAJZ1mfSiMSkIOZlMq4RzyF//Pwf8A=
 
 The `atlas.sum` file contains the checksum of each migration file (implemented by a reverse, one branch merkle hash
 tree), and a sum of all files. Adding new files results in a change to the sum file, which will raise merge conflicts in
-most version controls systems. Let's see how we can use the __Migration Directory Integrity File__ to detect the case
-from above automatically. 
+most version controls systems. Let's see how we can use the **Migration Directory Integrity File** to detect the case
+from above automatically.
 
 :::note
 Please note, that you need to have the Atlas CLI installed in your system for this to work, so make sure to follow
