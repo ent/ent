@@ -142,9 +142,8 @@ func (f GenerateFunc) Generate(g *Graph) error {
 func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	defer catch(&err)
 	g = &Graph{c, make([]*Type, 0, len(schemas)), schemas}
-	for _, s := range schemas {
-		check(reservedName(s.Name), "add schema %q", s.Name)
-		g.addNode(s)
+	for i := range schemas {
+		g.addNode(schemas[i])
 	}
 	for i := range schemas {
 		g.addEdges(schemas[i])
@@ -434,17 +433,6 @@ func resolve(t *Type) error {
 			if !e.M2M() {
 				e.Rel.Columns = []string{fmt.Sprintf("%s_%s", t.Label(), snake(e.Name))}
 			}
-		}
-	}
-	return nil
-}
-
-var reservedNames = []string{"Client"}
-
-func reservedName(n string) error {
-	for _, rn := range reservedNames {
-		if rn == n {
-			return fmt.Errorf("%q is a reserved name and cannot be used as schema name", n)
 		}
 	}
 	return nil
