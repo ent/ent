@@ -59,8 +59,9 @@ go run entgo.io/ent/cmd/ent init User Group
 ```
 
 :::note 
-Pleae note, that `Client` is a reserved Go struct and cannot be used as schema name. For database tables
-named `client`, please use an annotation as mentioned [here](schema-annotations.md#custom-table-name).
+Please note, that some schema names (like `Client`) are not available due to 
+[internal use](https://pkg.go.dev/entgo.io/ent/entc/gen#ValidSchemaName). You can circumvent reserved names by using an 
+annotation as mentioned [here](schema-annotations.md#custom-table-name).
 :::
 
 ## It's Just Another ORM
