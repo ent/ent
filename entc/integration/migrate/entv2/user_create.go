@@ -134,6 +134,20 @@ func (uc *UserCreate) SetNillableNewName(s *string) *UserCreate {
 	return uc
 }
 
+// SetNewToken sets the "new_token" field.
+func (uc *UserCreate) SetNewToken(s string) *UserCreate {
+	uc.mutation.SetNewToken(s)
+	return uc
+}
+
+// SetNillableNewToken sets the "new_token" field if the given value is not nil.
+func (uc *UserCreate) SetNillableNewToken(s *string) *UserCreate {
+	if s != nil {
+		uc.SetNewToken(*s)
+	}
+	return uc
+}
+
 // SetBlob sets the "blob" field.
 func (uc *UserCreate) SetBlob(b []byte) *UserCreate {
 	uc.mutation.SetBlob(b)
@@ -342,6 +356,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultTitle
 		uc.mutation.SetTitle(v)
 	}
+	if _, ok := uc.mutation.NewToken(); !ok {
+		v := user.DefaultNewToken()
+		uc.mutation.SetNewToken(v)
+	}
 	if _, ok := uc.mutation.State(); !ok {
 		v := user.DefaultState
 		uc.mutation.SetState(v)
@@ -384,6 +402,9 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`entv2: missing required field "User.title"`)}
+	}
+	if _, ok := uc.mutation.NewToken(); !ok {
+		return &ValidationError{Name: "new_token", err: errors.New(`entv2: missing required field "User.new_token"`)}
 	}
 	if v, ok := uc.mutation.Blob(); ok {
 		if err := user.BlobValidator(v); err != nil {
@@ -515,6 +536,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldNewName,
 		})
 		_node.NewName = value
+	}
+	if value, ok := uc.mutation.NewToken(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldNewToken,
+		})
+		_node.NewToken = value
 	}
 	if value, ok := uc.mutation.Blob(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

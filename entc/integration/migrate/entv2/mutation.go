@@ -2987,6 +2987,7 @@ type UserMutation struct {
 	buffer         *[]byte
 	title          *string
 	new_name       *string
+	new_token      *string
 	blob           *[]byte
 	state          *user.State
 	status         *user.Status
@@ -3529,6 +3530,42 @@ func (m *UserMutation) ResetNewName() {
 	delete(m.clearedFields, user.FieldNewName)
 }
 
+// SetNewToken sets the "new_token" field.
+func (m *UserMutation) SetNewToken(s string) {
+	m.new_token = &s
+}
+
+// NewToken returns the value of the "new_token" field in the mutation.
+func (m *UserMutation) NewToken() (r string, exists bool) {
+	v := m.new_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNewToken returns the old "new_token" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldNewToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNewToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNewToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNewToken: %w", err)
+	}
+	return oldValue.NewToken, nil
+}
+
+// ResetNewToken resets all changes to the "new_token" field.
+func (m *UserMutation) ResetNewToken() {
+	m.new_token = nil
+}
+
 // SetBlob sets the "blob" field.
 func (m *UserMutation) SetBlob(b []byte) {
 	m.blob = &b
@@ -3927,7 +3964,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 16)
 	if m.mixed_string != nil {
 		fields = append(fields, user.FieldMixedString)
 	}
@@ -3957,6 +3994,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.new_name != nil {
 		fields = append(fields, user.FieldNewName)
+	}
+	if m.new_token != nil {
+		fields = append(fields, user.FieldNewToken)
 	}
 	if m.blob != nil {
 		fields = append(fields, user.FieldBlob)
@@ -4001,6 +4041,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case user.FieldNewName:
 		return m.NewName()
+	case user.FieldNewToken:
+		return m.NewToken()
 	case user.FieldBlob:
 		return m.Blob()
 	case user.FieldState:
@@ -4040,6 +4082,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldTitle(ctx)
 	case user.FieldNewName:
 		return m.OldNewName(ctx)
+	case user.FieldNewToken:
+		return m.OldNewToken(ctx)
 	case user.FieldBlob:
 		return m.OldBlob(ctx)
 	case user.FieldState:
@@ -4128,6 +4172,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNewName(v)
+		return nil
+	case user.FieldNewToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNewToken(v)
 		return nil
 	case user.FieldBlob:
 		v, ok := value.([]byte)
@@ -4302,6 +4353,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldNewName:
 		m.ResetNewName()
+		return nil
+	case user.FieldNewToken:
+		m.ResetNewToken()
 		return nil
 	case user.FieldBlob:
 		m.ResetBlob()

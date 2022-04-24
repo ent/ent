@@ -36,6 +36,8 @@ const (
 	FieldTitle = "title"
 	// FieldNewName holds the string denoting the new_name field in the database.
 	FieldNewName = "renamed"
+	// FieldNewToken holds the string denoting the new_token field in the database.
+	FieldNewToken = "new_token"
 	// FieldBlob holds the string denoting the blob field in the database.
 	FieldBlob = "blob"
 	// FieldState holds the string denoting the state field in the database.
@@ -89,6 +91,7 @@ var Columns = []string{
 	FieldBuffer,
 	FieldTitle,
 	FieldNewName,
+	FieldNewToken,
 	FieldBlob,
 	FieldState,
 	FieldStatus,
@@ -123,6 +126,8 @@ var (
 	DefaultBuffer func() []byte
 	// DefaultTitle holds the default value on creation for the "title" field.
 	DefaultTitle string
+	// DefaultNewToken holds the default value on creation for the "new_token" field.
+	DefaultNewToken func() string
 	// BlobValidator is a validator for the "blob" field. It is called by the builders before save.
 	BlobValidator func([]byte) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.

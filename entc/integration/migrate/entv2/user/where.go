@@ -160,6 +160,13 @@ func NewName(v string) predicate.User {
 	})
 }
 
+// NewToken applies equality check predicate on the "new_token" field. It's identical to NewTokenEQ.
+func NewToken(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNewToken), v))
+	})
+}
+
 // Blob applies equality check predicate on the "blob" field. It's identical to BlobEQ.
 func Blob(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1197,6 +1204,117 @@ func NewNameEqualFold(v string) predicate.User {
 func NewNameContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldNewName), v))
+	})
+}
+
+// NewTokenEQ applies the EQ predicate on the "new_token" field.
+func NewTokenEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenNEQ applies the NEQ predicate on the "new_token" field.
+func NewTokenNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenIn applies the In predicate on the "new_token" field.
+func NewTokenIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldNewToken), v...))
+	})
+}
+
+// NewTokenNotIn applies the NotIn predicate on the "new_token" field.
+func NewTokenNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldNewToken), v...))
+	})
+}
+
+// NewTokenGT applies the GT predicate on the "new_token" field.
+func NewTokenGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenGTE applies the GTE predicate on the "new_token" field.
+func NewTokenGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenLT applies the LT predicate on the "new_token" field.
+func NewTokenLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenLTE applies the LTE predicate on the "new_token" field.
+func NewTokenLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenContains applies the Contains predicate on the "new_token" field.
+func NewTokenContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenHasPrefix applies the HasPrefix predicate on the "new_token" field.
+func NewTokenHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenHasSuffix applies the HasSuffix predicate on the "new_token" field.
+func NewTokenHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenEqualFold applies the EqualFold predicate on the "new_token" field.
+func NewTokenEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldNewToken), v))
+	})
+}
+
+// NewTokenContainsFold applies the ContainsFold predicate on the "new_token" field.
+func NewTokenContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldNewToken), v))
 	})
 }
 

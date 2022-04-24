@@ -7,6 +7,8 @@ package schema
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	"entgo.io/ent/schema"
 
 	"entgo.io/ent"
@@ -70,10 +72,14 @@ func (User) Fields() []ent.Field {
 		field.String("title").
 			Default("SWE"),
 		// change column name and reference it to the
-		// previous one ("renamed").
+		// previous one using storage-key ("renamed").
 		field.String("new_name").
 			Optional().
 			StorageKey("renamed"),
+		// change column name from "old_token" to "new_token"
+		// and use Atlas diff hook in the migration.
+		field.String("new_token").
+			DefaultFunc(uuid.NewString),
 		// extending the blob size.
 		field.Bytes("blob").
 			Optional().

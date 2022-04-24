@@ -42,12 +42,16 @@ func init() {
 	userDescTitle := userFields[7].Descriptor()
 	// user.DefaultTitle holds the default value on creation for the title field.
 	user.DefaultTitle = userDescTitle.Default.(string)
+	// userDescNewToken is the schema descriptor for new_token field.
+	userDescNewToken := userFields[9].Descriptor()
+	// user.DefaultNewToken holds the default value on creation for the new_token field.
+	user.DefaultNewToken = userDescNewToken.Default.(func() string)
 	// userDescBlob is the schema descriptor for blob field.
-	userDescBlob := userFields[9].Descriptor()
+	userDescBlob := userFields[10].Descriptor()
 	// user.BlobValidator is a validator for the "blob" field. It is called by the builders before save.
 	user.BlobValidator = userDescBlob.Validators[0].(func([]byte) error)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[13].Descriptor()
+	userDescCreatedAt := userFields[14].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 }

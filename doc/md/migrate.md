@@ -300,6 +300,8 @@ options for hooking into schema migration steps.
 ![atlas-migration-process](https://entgo.io/images/assets/migrate-atlas-process.png)
 
 
+#### Atlas `Diff` and `Apply` Hooks
+
 Here are two examples that show how to hook into the Atlas `Diff` and `Apply` steps.
 
 ```go
@@ -361,5 +363,56 @@ func main() {
     if err != nil {
         log.Fatalf("failed creating schema resources: %v", err)
     }
+}
+```
+
+In case a field was renamed in the `ent/schema`, Ent won't detect this change as renaming and will propose `DropColumn`
+and `AddColumn` changes in the diff stage. One way to get over this is to use the
+[StorageKey](schema-fields.md#storage-key) option on the field and keep the old column name in the database table.
+However, using Atlas `Diff` hooks allow replacing the `DropColumn` and `AddColumn` changes with a `RenameColumn` change.
+
+```go
+func main() {
+    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalf("failed connecting to mysql: %v", err)
+    }
+    defer client.Close()
+    // ...
+    if err := client.Schema.Create(ctx, schema.WithDiffHook(renameColumnHook)); err != nil {
+        log.Fatalf("failed creating schema resources: %v", err)
+    }
+}
+
+func renameColumnHook(next schema.Differ) schema.Differ {
+    return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+        changes, err := next.Diff(current, desired)
+        if err != nil {
+            return nil, err
+        }
+        for _, c := range changes {
+            m, ok := c.(*atlas.ModifyTable)
+            // Skip if the change is not a ModifyTable,
+            // or if the table is not the "users" table.
+            if !ok || m.T.Name != user.Table {
+                continue
+            }
+            changes := atlas.Changes(m.Changes)
+            switch i, j := changes.IndexDropColumn("old_name"), changes.IndexAddColumn("new_name"); {
+            case i != -1 && j != -1:
+                // Append a new renaming change.
+                changes = append(changes, &atlas.RenameColumn{
+                    From: changes[i].(*atlas.DropColumn).C,
+                    To: changes[j].(*atlas.AddColumn).C,
+                })
+                // Remove the drop and add changes.
+                changes.RemoveIndex(i, j)
+                m.Changes = changes
+            case i != -1 || j != -1:
+                return nil, errors.New("old_name and new_name must be present or absent")
+            }
+        }
+        return changes, nil
+    })
 }
 ```

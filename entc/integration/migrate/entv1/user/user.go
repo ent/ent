@@ -27,6 +27,8 @@ const (
 	FieldAddress = "address"
 	// FieldRenamed holds the string denoting the renamed field in the database.
 	FieldRenamed = "renamed"
+	// FieldOldToken holds the string denoting the old_token field in the database.
+	FieldOldToken = "old_token"
 	// FieldBlob holds the string denoting the blob field in the database.
 	FieldBlob = "blob"
 	// FieldState holds the string denoting the state field in the database.
@@ -77,6 +79,7 @@ var Columns = []string{
 	FieldNickname,
 	FieldAddress,
 	FieldRenamed,
+	FieldOldToken,
 	FieldBlob,
 	FieldState,
 	FieldStatus,
@@ -108,6 +111,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultOldToken holds the default value on creation for the "old_token" field.
+	DefaultOldToken func() string
 	// BlobValidator is a validator for the "blob" field. It is called by the builders before save.
 	BlobValidator func([]byte) error
 	// WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.

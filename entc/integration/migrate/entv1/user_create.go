@@ -84,6 +84,20 @@ func (uc *UserCreate) SetNillableRenamed(s *string) *UserCreate {
 	return uc
 }
 
+// SetOldToken sets the "old_token" field.
+func (uc *UserCreate) SetOldToken(s string) *UserCreate {
+	uc.mutation.SetOldToken(s)
+	return uc
+}
+
+// SetNillableOldToken sets the "old_token" field if the given value is not nil.
+func (uc *UserCreate) SetNillableOldToken(s *string) *UserCreate {
+	if s != nil {
+		uc.SetOldToken(*s)
+	}
+	return uc
+}
+
 // SetBlob sets the "blob" field.
 func (uc *UserCreate) SetBlob(b []byte) *UserCreate {
 	uc.mutation.SetBlob(b)
@@ -281,6 +295,10 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.OldToken(); !ok {
+		v := user.DefaultOldToken()
+		uc.mutation.SetOldToken(v)
+	}
 	if _, ok := uc.mutation.State(); !ok {
 		v := user.DefaultState
 		uc.mutation.SetState(v)
@@ -302,6 +320,9 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Nickname(); !ok {
 		return &ValidationError{Name: "nickname", err: errors.New(`entv1: missing required field "User.nickname"`)}
+	}
+	if _, ok := uc.mutation.OldToken(); !ok {
+		return &ValidationError{Name: "old_token", err: errors.New(`entv1: missing required field "User.old_token"`)}
 	}
 	if v, ok := uc.mutation.Blob(); ok {
 		if err := user.BlobValidator(v); err != nil {
@@ -398,6 +419,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldRenamed,
 		})
 		_node.Renamed = value
+	}
+	if value, ok := uc.mutation.OldToken(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldOldToken,
+		})
+		_node.OldToken = value
 	}
 	if value, ok := uc.mutation.Blob(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

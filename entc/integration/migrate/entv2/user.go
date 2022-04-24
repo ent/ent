@@ -41,6 +41,8 @@ type User struct {
 	Title string `json:"title,omitempty"`
 	// NewName holds the value of the "new_name" field.
 	NewName string `json:"new_name,omitempty"`
+	// NewToken holds the value of the "new_token" field.
+	NewToken string `json:"new_token,omitempty"`
 	// Blob holds the value of the "blob" field.
 	Blob []byte `json:"blob,omitempty"`
 	// State holds the value of the "state" field.
@@ -110,7 +112,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new([]byte)
 		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldMixedString, user.FieldMixedEnum, user.FieldName, user.FieldDescription, user.FieldNickname, user.FieldPhone, user.FieldTitle, user.FieldNewName, user.FieldState, user.FieldStatus, user.FieldWorkplace:
+		case user.FieldMixedString, user.FieldMixedEnum, user.FieldName, user.FieldDescription, user.FieldNickname, user.FieldPhone, user.FieldTitle, user.FieldNewName, user.FieldNewToken, user.FieldState, user.FieldStatus, user.FieldWorkplace:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -194,6 +196,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field new_name", values[i])
 			} else if value.Valid {
 				u.NewName = value.String
+			}
+		case user.FieldNewToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field new_token", values[i])
+			} else if value.Valid {
+				u.NewToken = value.String
 			}
 		case user.FieldBlob:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -288,6 +296,8 @@ func (u *User) String() string {
 	builder.WriteString(u.Title)
 	builder.WriteString(", new_name=")
 	builder.WriteString(u.NewName)
+	builder.WriteString(", new_token=")
+	builder.WriteString(u.NewToken)
 	builder.WriteString(", blob=")
 	builder.WriteString(fmt.Sprintf("%v", u.Blob))
 	builder.WriteString(", state=")
