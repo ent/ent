@@ -32,6 +32,8 @@ type User struct {
 	Address string `json:"address,omitempty"`
 	// Renamed holds the value of the "renamed" field.
 	Renamed string `json:"renamed,omitempty"`
+	// OldToken holds the value of the "old_token" field.
+	OldToken string `json:"old_token,omitempty"`
 	// Blob holds the value of the "blob" field.
 	Blob []byte `json:"blob,omitempty"`
 	// State holds the value of the "state" field.
@@ -122,7 +124,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new([]byte)
 		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName, user.FieldDescription, user.FieldNickname, user.FieldAddress, user.FieldRenamed, user.FieldState, user.FieldStatus, user.FieldWorkplace:
+		case user.FieldName, user.FieldDescription, user.FieldNickname, user.FieldAddress, user.FieldRenamed, user.FieldOldToken, user.FieldState, user.FieldStatus, user.FieldWorkplace:
 			values[i] = new(sql.NullString)
 		case user.ForeignKeys[0]: // user_children
 			values[i] = new(sql.NullInt64)
@@ -184,6 +186,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field renamed", values[i])
 			} else if value.Valid {
 				u.Renamed = value.String
+			}
+		case user.FieldOldToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field old_token", values[i])
+			} else if value.Valid {
+				u.OldToken = value.String
 			}
 		case user.FieldBlob:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -283,6 +291,8 @@ func (u *User) String() string {
 	builder.WriteString(u.Address)
 	builder.WriteString(", renamed=")
 	builder.WriteString(u.Renamed)
+	builder.WriteString(", old_token=")
+	builder.WriteString(u.OldToken)
 	builder.WriteString(", blob=")
 	builder.WriteString(fmt.Sprintf("%v", u.Blob))
 	builder.WriteString(", state=")

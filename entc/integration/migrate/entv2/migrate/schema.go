@@ -141,6 +141,7 @@ var (
 		{Name: "buffer", Type: field.TypeBytes, Nullable: true},
 		{Name: "title", Type: field.TypeString, Default: "SWE"},
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
+		{Name: "new_token", Type: field.TypeString},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 1000},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out", "online"}, Default: "logged_in"},
 		{Name: "status", Type: field.TypeEnum, Nullable: true, Enums: []string{"done", "pending"}},

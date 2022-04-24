@@ -117,6 +117,20 @@ func (uu *UserUpdate) ClearRenamed() *UserUpdate {
 	return uu
 }
 
+// SetOldToken sets the "old_token" field.
+func (uu *UserUpdate) SetOldToken(s string) *UserUpdate {
+	uu.mutation.SetOldToken(s)
+	return uu
+}
+
+// SetNillableOldToken sets the "old_token" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableOldToken(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetOldToken(*s)
+	}
+	return uu
+}
+
 // SetBlob sets the "blob" field.
 func (uu *UserUpdate) SetBlob(b []byte) *UserUpdate {
 	uu.mutation.SetBlob(b)
@@ -475,6 +489,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldRenamed,
 		})
 	}
+	if value, ok := uu.mutation.OldToken(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldOldToken,
+		})
+	}
 	if value, ok := uu.mutation.Blob(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBytes,
@@ -787,6 +808,20 @@ func (uuo *UserUpdateOne) SetNillableRenamed(s *string) *UserUpdateOne {
 // ClearRenamed clears the value of the "renamed" field.
 func (uuo *UserUpdateOne) ClearRenamed() *UserUpdateOne {
 	uuo.mutation.ClearRenamed()
+	return uuo
+}
+
+// SetOldToken sets the "old_token" field.
+func (uuo *UserUpdateOne) SetOldToken(s string) *UserUpdateOne {
+	uuo.mutation.SetOldToken(s)
+	return uuo
+}
+
+// SetNillableOldToken sets the "old_token" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableOldToken(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetOldToken(*s)
+	}
 	return uuo
 }
 
@@ -1170,6 +1205,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldRenamed,
+		})
+	}
+	if value, ok := uuo.mutation.OldToken(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldOldToken,
 		})
 	}
 	if value, ok := uuo.mutation.Blob(); ok {

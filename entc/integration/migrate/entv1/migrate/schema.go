@@ -71,6 +71,7 @@ var (
 		{Name: "nickname", Type: field.TypeString, Unique: true},
 		{Name: "address", Type: field.TypeString, Nullable: true},
 		{Name: "renamed", Type: field.TypeString, Nullable: true},
+		{Name: "old_token", Type: field.TypeString},
 		{Name: "blob", Type: field.TypeBytes, Nullable: true, Size: 255},
 		{Name: "state", Type: field.TypeEnum, Nullable: true, Enums: []string{"logged_in", "logged_out"}, Default: "logged_in"},
 		{Name: "status", Type: field.TypeString, Nullable: true},
@@ -86,13 +87,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "users_users_children",
-				Columns:    []*schema.Column{UsersColumns[11]},
+				Columns:    []*schema.Column{UsersColumns[12]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "users_users_spouse",
-				Columns:    []*schema.Column{UsersColumns[12]},
+				Columns:    []*schema.Column{UsersColumns[13]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

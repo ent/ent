@@ -6,6 +6,7 @@ package migrate
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/fs"
 	"math"
@@ -110,6 +111,7 @@ func TestSQLite(t *testing.T) {
 			migratev2.WithGlobalUniqueID(true),
 			migratev2.WithDropIndex(true),
 			migratev2.WithDropColumn(true),
+			schema.WithDiffHook(renameTokenColumn),
 			schema.WithDiffHook(func(next schema.Differ) schema.Differ {
 				return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
 					// Example to hook into the diff process.
@@ -208,7 +210,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	SanityV1(t, dialect, clientv1)
 
 	// Run migration and execute queries on v2.
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true), schema.WithDiffHook(renameTokenColumn)))
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
 
@@ -304,6 +306,9 @@ func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 
 func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	ctx := context.Background()
+	for _, u := range client.User.Query().AllX(ctx) {
+		require.NotEmpty(t, u.NewToken, "old_token column should be renamed to new_token")
+	}
 	if dbdialect != dialect.SQLite {
 		require.True(t, client.User.Query().ExistX(ctx), "table 'users' should contain rows after running the migration")
 		users := client.User.Query().Select(user.FieldCreatedAt).AllX(ctx)
@@ -451,4 +456,30 @@ func countFiles(t *testing.T, d migrate.Dir) int {
 	files, err := fs.ReadDir(d, "")
 	require.NoError(t, err)
 	return len(files)
+}
+
+func renameTokenColumn(next schema.Differ) schema.Differ {
+	return schema.DiffFunc(func(current, desired *atlas.Schema) ([]atlas.Change, error) {
+		// Example to hook into the diff process.
+		changes, err := next.Diff(current, desired)
+		if err != nil {
+			return nil, err
+		}
+		for _, c := range changes {
+			m, ok := c.(*atlas.ModifyTable)
+			if !ok || m.T.Name != user.Table {
+				continue
+			}
+			changes := atlas.Changes(m.Changes)
+			switch i, j := changes.IndexDropColumn("old_token"), changes.IndexAddColumn("new_token"); {
+			case i != -1 && j != -1:
+				rename := &atlas.RenameColumn{From: changes[i].(*atlas.DropColumn).C, To: changes[j].(*atlas.AddColumn).C}
+				changes.RemoveIndex(i, j)
+				m.Changes = append(changes, rename)
+			case i != -1 || j != -1:
+				return nil, errors.New("old_token and new_token must be present or absent")
+			}
+		}
+		return changes, nil
+	})
 }
