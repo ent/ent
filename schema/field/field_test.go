@@ -508,6 +508,8 @@ func TestJSON(t *testing.T) {
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
 	fd = field.JSON("values", map[string]*url.Values{}).Descriptor()
 	assert.Equal(t, "net/url", fd.Info.PkgPath)
+	fd = field.JSON("addr", net.Addr(nil)).Descriptor()
+	assert.EqualError(t, fd.Err, "expect a Go value as JSON type, but got nil")
 }
 
 func TestField_Tag(t *testing.T) {

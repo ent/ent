@@ -178,6 +178,20 @@ func StringsNotNil() predicate.User {
 	})
 }
 
+// AddrIsNil applies the IsNil predicate on the "addr" field.
+func AddrIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAddr)))
+	})
+}
+
+// AddrNotNil applies the NotNil predicate on the "addr" field.
+func AddrNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAddr)))
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

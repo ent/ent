@@ -37,6 +37,8 @@ type User struct {
 	Floats []float64 `json:"floats,omitempty"`
 	// Strings holds the value of the "strings" field.
 	Strings []string `json:"strings,omitempty"`
+	// Addr holds the value of the "addr" field.
+	Addr schema.Addr `json:"addr,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -44,7 +46,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldT, user.FieldURL, user.FieldRaw, user.FieldDirs, user.FieldInts, user.FieldFloats, user.FieldStrings:
+		case user.FieldT, user.FieldURL, user.FieldRaw, user.FieldDirs, user.FieldInts, user.FieldFloats, user.FieldStrings, user.FieldAddr:
 			values[i] = new([]byte)
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -125,6 +127,14 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 					return fmt.Errorf("unmarshal field strings: %w", err)
 				}
 			}
+		case user.FieldAddr:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field addr", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Addr); err != nil {
+					return fmt.Errorf("unmarshal field addr: %w", err)
+				}
+			}
 		}
 	}
 	return nil
@@ -167,6 +177,8 @@ func (u *User) String() string {
 	builder.WriteString(fmt.Sprintf("%v", u.Floats))
 	builder.WriteString(", strings=")
 	builder.WriteString(fmt.Sprintf("%v", u.Strings))
+	builder.WriteString(", addr=")
+	builder.WriteString(fmt.Sprintf("%v", u.Addr))
 	builder.WriteByte(')')
 	return builder.String()
 }

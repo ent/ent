@@ -71,15 +71,19 @@ func Time(name string) *timeBuilder {
 //		Optional()
 //
 func JSON(name string, typ interface{}) *jsonBuilder {
-	t := reflect.TypeOf(typ)
 	b := &jsonBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{
-			Type:    TypeJSON,
-			Ident:   t.String(),
-			PkgPath: t.PkgPath(),
+			Type: TypeJSON,
 		},
 	}}
+	t := reflect.TypeOf(typ)
+	if t == nil {
+		b.desc.Err = errors.New("expect a Go value as JSON type, but got nil")
+		return b
+	}
+	b.desc.Info.Ident = t.String()
+	b.desc.Info.PkgPath = t.PkgPath()
 	b.desc.goType(typ, t)
 	switch t.Kind() {
 	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:

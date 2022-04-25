@@ -22,6 +22,7 @@ var (
 		{Name: "ints", Type: field.TypeJSON, Nullable: true},
 		{Name: "floats", Type: field.TypeJSON, Nullable: true},
 		{Name: "strings", Type: field.TypeJSON, Nullable: true},
+		{Name: "addr", Type: field.TypeJSON, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
