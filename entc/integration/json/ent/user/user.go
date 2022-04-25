@@ -29,6 +29,8 @@ const (
 	FieldFloats = "floats"
 	// FieldStrings holds the string denoting the strings field in the database.
 	FieldStrings = "strings"
+	// FieldAddr holds the string denoting the addr field in the database.
+	FieldAddr = "addr"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -43,6 +45,7 @@ var Columns = []string{
 	FieldInts,
 	FieldFloats,
 	FieldStrings,
+	FieldAddr,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

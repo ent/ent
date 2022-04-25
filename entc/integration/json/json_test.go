@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"testing"
@@ -46,6 +47,7 @@ func TestMySQL(t *testing.T) {
 			Ints(t, client)
 			Floats(t, client)
 			Strings(t, client)
+			NetAddr(t, client)
 			RawMessage(t, client)
 			// Skip predicates test for MySQL old versions.
 			if version != "56" {
@@ -79,6 +81,7 @@ func TestMaria(t *testing.T) {
 			Ints(t, client)
 			Floats(t, client)
 			Strings(t, client)
+			NetAddr(t, client)
 			RawMessage(t, client)
 			Predicates(t, client)
 		})
@@ -108,6 +111,7 @@ func TestPostgres(t *testing.T) {
 			Ints(t, client)
 			Floats(t, client)
 			Strings(t, client)
+			NetAddr(t, client)
 			RawMessage(t, client)
 			Predicates(t, client)
 		})
@@ -126,6 +130,7 @@ func TestSQLite(t *testing.T) {
 	Ints(t, client)
 	Floats(t, client)
 	Strings(t, client)
+	NetAddr(t, client)
 	RawMessage(t, client)
 	Predicates(t, client)
 }
@@ -185,6 +190,15 @@ func RawMessage(t *testing.T, client *ent.Client) {
 	usr := client.User.Create().SetRaw(raw).SaveX(ctx)
 	require.Equal(t, raw, usr.Raw)
 	require.Equal(t, raw, client.User.GetX(ctx, usr.ID).Raw)
+}
+
+func NetAddr(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	ip := net.ParseIP("127.0.0.1")
+	usr := client.User.Create().SetAddr(schema.Addr{Addr: &net.TCPAddr{IP: ip, Port: 80}}).SaveX(ctx)
+	require.Equal(t, "127.0.0.1:80", client.User.GetX(ctx, usr.ID).Addr.String())
+	usr.Update().SetAddr(schema.Addr{Addr: &net.UDPAddr{IP: ip, Port: 1812}}).ExecX(ctx)
+	require.Equal(t, "127.0.0.1:1812", client.User.GetX(ctx, usr.ID).Addr.String())
 }
 
 func Dirs(t *testing.T, client *ent.Client) {

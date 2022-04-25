@@ -69,6 +69,20 @@ func (uc *UserCreate) SetStrings(s []string) *UserCreate {
 	return uc
 }
 
+// SetAddr sets the "addr" field.
+func (uc *UserCreate) SetAddr(s schema.Addr) *UserCreate {
+	uc.mutation.SetAddr(s)
+	return uc
+}
+
+// SetNillableAddr sets the "addr" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAddr(s *schema.Addr) *UserCreate {
+	if s != nil {
+		uc.SetAddr(*s)
+	}
+	return uc
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -237,6 +251,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldStrings,
 		})
 		_node.Strings = value
+	}
+	if value, ok := uc.mutation.Addr(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeJSON,
+			Value:  value,
+			Column: user.FieldAddr,
+		})
+		_node.Addr = value
 	}
 	return _node, _spec
 }
