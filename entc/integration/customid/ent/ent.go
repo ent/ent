@@ -24,6 +24,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/revision"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
@@ -47,19 +48,20 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		account.Table: account.ValidColumn,
-		blob.Table:    blob.ValidColumn,
-		car.Table:     car.ValidColumn,
-		device.Table:  device.ValidColumn,
-		doc.Table:     doc.ValidColumn,
-		group.Table:   group.ValidColumn,
-		mixinid.Table: mixinid.ValidColumn,
-		note.Table:    note.ValidColumn,
-		other.Table:   other.ValidColumn,
-		pet.Table:     pet.ValidColumn,
-		session.Table: session.ValidColumn,
-		token.Table:   token.ValidColumn,
-		user.Table:    user.ValidColumn,
+		account.Table:  account.ValidColumn,
+		blob.Table:     blob.ValidColumn,
+		car.Table:      car.ValidColumn,
+		device.Table:   device.ValidColumn,
+		doc.Table:      doc.ValidColumn,
+		group.Table:    group.ValidColumn,
+		mixinid.Table:  mixinid.ValidColumn,
+		note.Table:     note.ValidColumn,
+		other.Table:    other.ValidColumn,
+		pet.Table:      pet.ValidColumn,
+		revision.Table: revision.ValidColumn,
+		session.Table:  session.ValidColumn,
+		token.Table:    token.ValidColumn,
+		user.Table:     user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

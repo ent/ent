@@ -36,6 +36,8 @@ type Tx struct {
 	Other *OtherClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// Revision is the client for interacting with the Revision builders.
+	Revision *RevisionClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// Token is the client for interacting with the Token builders.
@@ -187,6 +189,7 @@ func (tx *Tx) init() {
 	tx.Note = NewNoteClient(tx.config)
 	tx.Other = NewOtherClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
+	tx.Revision = NewRevisionClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.Token = NewTokenClient(tx.config)
 	tx.User = NewUserClient(tx.config)

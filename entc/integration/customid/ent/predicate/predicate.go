@@ -40,6 +40,9 @@ type Other func(*sql.Selector)
 // Pet is the predicate function for pet builders.
 type Pet func(*sql.Selector)
 
+// Revision is the predicate function for revision builders.
+type Revision func(*sql.Selector)
+
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
 
