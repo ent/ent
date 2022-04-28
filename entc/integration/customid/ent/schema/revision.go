@@ -17,5 +17,7 @@ type Revision struct {
 
 // Fields of the Revision.
 func (Revision) Fields() []ent.Field {
-	return []ent.Field{field.String("id")}
+	return []ent.Field{
+		field.String("id"),
+	}
 }
