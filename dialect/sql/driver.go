@@ -20,18 +20,23 @@ type Driver struct {
 	dialect string
 }
 
+// NewDriver creates a new Driver with the given Conn and dialect.
+func NewDriver(c Conn, d string) *Driver {
+	return &Driver{c, d}
+}
+
 // Open wraps the database/sql.Open method and returns a dialect.Driver that implements the an ent/dialect.Driver interface.
 func Open(driver, source string) (*Driver, error) {
 	db, err := sql.Open(driver, source)
 	if err != nil {
 		return nil, err
 	}
-	return &Driver{Conn{db}, driver}, nil
+	return NewDriver(Conn{db}, driver), nil
 }
 
 // OpenDB wraps the given database/sql.DB method with a Driver.
 func OpenDB(driver string, db *sql.DB) *Driver {
-	return &Driver{Conn{db}, driver}
+	return NewDriver(Conn{db}, driver)
 }
 
 // DB returns the underlying *sql.DB instance.
