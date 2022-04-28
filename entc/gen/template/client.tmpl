@@ -6,25 +6,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
 
-{{ define "client" }}
-
-{{ $pkg := base $.Config.Package }}
-{{ template "header" $ }}
-
-import (
-	"log"
-
-	"{{ $.Config.Package }}/migrate"
-	{{ range $n := $.Nodes }}
-		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
-	{{- end }}
-
-	"entgo.io/ent/dialect"
-	{{ range $import := $.Storage.Imports -}}
-		"{{ $import }}"
-	{{ end -}}
-)
-
+{{ define "client/init" }}
 // Client is the client that holds all ent builders.
 type Client struct {
 	config
@@ -58,9 +40,31 @@ func (c *Client) init() {
 		c.Schema = migrate.NewSchema(c.driver)
 	{{- end }}
 	{{- range $n := $.Nodes }}
-    	c.{{ $n.Name }} =  New{{ $n.Name }}Client(c.config)
+    	c.{{ $n.Name }} = New{{ $n.Name }}Client(c.config)
 	{{- end }}
 }
+{{ end }}
+
+{{ define "client" }}
+
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+import (
+	"log"
+
+	"{{ $.Config.Package }}/migrate"
+	{{ range $n := $.Nodes }}
+		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
+	{{- end }}
+
+	"entgo.io/ent/dialect"
+	{{ range $import := $.Storage.Imports -}}
+		"{{ $import }}"
+	{{ end -}}
+)
+
+{{ template "client/init" $ }}
 
 // Open opens a database/sql.DB specified by the driver name and
 // the data source name, and returns a new client attached to it.

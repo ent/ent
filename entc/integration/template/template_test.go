@@ -91,4 +91,6 @@ func TestCustomTemplate(t *testing.T) {
 		Select().
 		IntX(ctx)
 	require.Equal(t, sum, got)
+
+	require.Equal(t, 20, client.HiddenData())
 }
