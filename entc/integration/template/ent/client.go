@@ -25,6 +25,7 @@ import (
 // Client is the client that holds all ent builders.
 type Client struct {
 	config
+	extraHiddenField int
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
 	// Group is the client for interacting with the Group builders.
@@ -47,10 +48,16 @@ func NewClient(opts ...Option) *Client {
 }
 
 func (c *Client) init() {
+	c.extraHiddenField = 20
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Group = NewGroupClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.User = NewUserClient(c.config)
+}
+
+// HiddenData returns the extraHiddenField value.
+func (c *Client) HiddenData() int {
+	return c.extraHiddenField
 }
 
 // Open opens a database/sql.DB specified by the driver name and
