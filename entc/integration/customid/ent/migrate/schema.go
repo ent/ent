@@ -205,6 +205,16 @@ var (
 			},
 		},
 	}
+	// RevisionsColumns holds the columns for the "revisions" table.
+	RevisionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+	}
+	// RevisionsTable holds the schema information for the "revisions" table.
+	RevisionsTable = &schema.Table{
+		Name:       "revisions",
+		Columns:    RevisionsColumns,
+		PrimaryKey: []*schema.Column{RevisionsColumns[0]},
+	}
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeBytes, Size: 64},
@@ -350,6 +360,7 @@ var (
 		NotesTable,
 		OthersTable,
 		PetsTable,
+		RevisionsTable,
 		SessionsTable,
 		TokensTable,
 		UsersTable,

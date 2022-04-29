@@ -26,6 +26,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
+	"entgo.io/ent/entc/integration/customid/ent/revision"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
@@ -60,6 +61,8 @@ type Client struct {
 	Other *OtherClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
+	// Revision is the client for interacting with the Revision builders.
+	Revision *RevisionClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
 	// Token is the client for interacting with the Token builders.
@@ -89,6 +92,7 @@ func (c *Client) init() {
 	c.Note = NewNoteClient(c.config)
 	c.Other = NewOtherClient(c.config)
 	c.Pet = NewPetClient(c.config)
+	c.Revision = NewRevisionClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.Token = NewTokenClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -123,21 +127,22 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Account: NewAccountClient(cfg),
-		Blob:    NewBlobClient(cfg),
-		Car:     NewCarClient(cfg),
-		Device:  NewDeviceClient(cfg),
-		Doc:     NewDocClient(cfg),
-		Group:   NewGroupClient(cfg),
-		MixinID: NewMixinIDClient(cfg),
-		Note:    NewNoteClient(cfg),
-		Other:   NewOtherClient(cfg),
-		Pet:     NewPetClient(cfg),
-		Session: NewSessionClient(cfg),
-		Token:   NewTokenClient(cfg),
-		User:    NewUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Account:  NewAccountClient(cfg),
+		Blob:     NewBlobClient(cfg),
+		Car:      NewCarClient(cfg),
+		Device:   NewDeviceClient(cfg),
+		Doc:      NewDocClient(cfg),
+		Group:    NewGroupClient(cfg),
+		MixinID:  NewMixinIDClient(cfg),
+		Note:     NewNoteClient(cfg),
+		Other:    NewOtherClient(cfg),
+		Pet:      NewPetClient(cfg),
+		Revision: NewRevisionClient(cfg),
+		Session:  NewSessionClient(cfg),
+		Token:    NewTokenClient(cfg),
+		User:     NewUserClient(cfg),
 	}, nil
 }
 
@@ -155,21 +160,22 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Account: NewAccountClient(cfg),
-		Blob:    NewBlobClient(cfg),
-		Car:     NewCarClient(cfg),
-		Device:  NewDeviceClient(cfg),
-		Doc:     NewDocClient(cfg),
-		Group:   NewGroupClient(cfg),
-		MixinID: NewMixinIDClient(cfg),
-		Note:    NewNoteClient(cfg),
-		Other:   NewOtherClient(cfg),
-		Pet:     NewPetClient(cfg),
-		Session: NewSessionClient(cfg),
-		Token:   NewTokenClient(cfg),
-		User:    NewUserClient(cfg),
+		ctx:      ctx,
+		config:   cfg,
+		Account:  NewAccountClient(cfg),
+		Blob:     NewBlobClient(cfg),
+		Car:      NewCarClient(cfg),
+		Device:   NewDeviceClient(cfg),
+		Doc:      NewDocClient(cfg),
+		Group:    NewGroupClient(cfg),
+		MixinID:  NewMixinIDClient(cfg),
+		Note:     NewNoteClient(cfg),
+		Other:    NewOtherClient(cfg),
+		Pet:      NewPetClient(cfg),
+		Revision: NewRevisionClient(cfg),
+		Session:  NewSessionClient(cfg),
+		Token:    NewTokenClient(cfg),
+		User:     NewUserClient(cfg),
 	}, nil
 }
 
@@ -209,6 +215,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Note.Use(hooks...)
 	c.Other.Use(hooks...)
 	c.Pet.Use(hooks...)
+	c.Revision.Use(hooks...)
 	c.Session.Use(hooks...)
 	c.Token.Use(hooks...)
 	c.User.Use(hooks...)
@@ -1352,6 +1359,96 @@ func (c *PetClient) QueryBestFriend(pe *Pet) *PetQuery {
 // Hooks returns the client hooks.
 func (c *PetClient) Hooks() []Hook {
 	return c.hooks.Pet
+}
+
+// RevisionClient is a client for the Revision schema.
+type RevisionClient struct {
+	config
+}
+
+// NewRevisionClient returns a client for the Revision from the given config.
+func NewRevisionClient(c config) *RevisionClient {
+	return &RevisionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `revision.Hooks(f(g(h())))`.
+func (c *RevisionClient) Use(hooks ...Hook) {
+	c.hooks.Revision = append(c.hooks.Revision, hooks...)
+}
+
+// Create returns a create builder for Revision.
+func (c *RevisionClient) Create() *RevisionCreate {
+	mutation := newRevisionMutation(c.config, OpCreate)
+	return &RevisionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Revision entities.
+func (c *RevisionClient) CreateBulk(builders ...*RevisionCreate) *RevisionCreateBulk {
+	return &RevisionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Revision.
+func (c *RevisionClient) Update() *RevisionUpdate {
+	mutation := newRevisionMutation(c.config, OpUpdate)
+	return &RevisionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RevisionClient) UpdateOne(r *Revision) *RevisionUpdateOne {
+	mutation := newRevisionMutation(c.config, OpUpdateOne, withRevision(r))
+	return &RevisionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RevisionClient) UpdateOneID(id string) *RevisionUpdateOne {
+	mutation := newRevisionMutation(c.config, OpUpdateOne, withRevisionID(id))
+	return &RevisionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Revision.
+func (c *RevisionClient) Delete() *RevisionDelete {
+	mutation := newRevisionMutation(c.config, OpDelete)
+	return &RevisionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *RevisionClient) DeleteOne(r *Revision) *RevisionDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *RevisionClient) DeleteOneID(id string) *RevisionDeleteOne {
+	builder := c.Delete().Where(revision.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RevisionDeleteOne{builder}
+}
+
+// Query returns a query builder for Revision.
+func (c *RevisionClient) Query() *RevisionQuery {
+	return &RevisionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Revision entity by its id.
+func (c *RevisionClient) Get(ctx context.Context, id string) (*Revision, error) {
+	return c.Query().Where(revision.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RevisionClient) GetX(ctx context.Context, id string) *Revision {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *RevisionClient) Hooks() []Hook {
+	return c.hooks.Revision
 }
 
 // SessionClient is a client for the Session schema.

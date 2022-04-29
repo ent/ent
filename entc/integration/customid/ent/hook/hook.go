@@ -143,6 +143,19 @@ func (f PetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 	return f(ctx, mv)
 }
 
+// The RevisionFunc type is an adapter to allow the use of ordinary
+// function as Revision mutator.
+type RevisionFunc func(context.Context, *ent.RevisionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RevisionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.RevisionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RevisionMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The SessionFunc type is an adapter to allow the use of ordinary
 // function as Session mutator.
 type SessionFunc func(context.Context, *ent.SessionMutation) (ent.Value, error)
