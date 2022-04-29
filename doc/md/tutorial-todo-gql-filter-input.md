@@ -288,13 +288,11 @@ func (r *todoWhereInputResolver) IsCompleted(ctx context.Context, obj *ent.TodoW
 	if obj == nil || data == nil {
 		return nil
 	}
-
 	if *data {
 		obj.AddPredicates(todo.StatusEQ(todo.StatusCompleted))
 	} else {
 		obj.AddPredicates(todo.StatusNEQ(todo.StatusCompleted))
 	}
-
 	return nil
 }
 ```
