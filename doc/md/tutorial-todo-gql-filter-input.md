@@ -255,6 +255,64 @@ client.Todo.
 	All(ctx)
 ```
 
+### Custom filters
+
+Sometimes we need to add custom conditions to our filters, while it is always possible to use [Templates](https://pkg.go.dev/entgo.io/contrib@master/entgql#WithTemplates) and [SchemaHooks](https://pkg.go.dev/entgo.io/contrib@master/entgql#WithSchemaHook)
+it's not always the easiest solution, specially if we only want to add simple conditions.
+
+Luckily by using a combination of the [GraphQL object type extensions](https://spec.graphql.org/October2021/#sec-Object-Extensions) and custom resolvers, we can achieve this functionality.
+
+Let's see an example of adding a custom `isCompleted` filter that will receive a boolean value and filter
+all the TODO's that have the `completed` status.
+
+Let's start by extending the `TodoWhereInput`:
+
+```graphql title="todo.graphql"
+extend input TodoWhereInput {
+  isCompleted: Boolean
+}
+```
+
+After running the code generation, we should see a new field resolver inside the `todo.resolvers.go` file:
+
+```go title="todo.resolvers.go"
+func (r *todoWhereInputResolver) IsCompleted(ctx context.Context, obj *ent.TodoWhereInput, data *bool) error {
+	panic(fmt.Errorf("not implemented"))
+}
+```
+
+We can now use the `AddPredicates` method inside the `ent.TodoWhereInput` struct to implement our custom filtering:
+
+```go title="todo.resolvers.go"
+func (r *todoWhereInputResolver) IsCompleted(ctx context.Context, obj *ent.TodoWhereInput, data *bool) error {
+	if obj == nil || data == nil {
+		return nil
+	}
+
+	if *data {
+		obj.AddPredicates(todo.StatusEQ(todo.StatusCompleted))
+	} else {
+		obj.AddPredicates(todo.StatusNEQ(todo.StatusCompleted))
+	}
+
+	return nil
+}
+```
+
+We can use this new filtering as any other predicate:
+
+```graphql
+{
+  isCompleted: true,
+}
+# including the not, and and or fields
+{
+  not: {
+    isCompleted: true,
+  }
+}
+```
+
 ---
 
 Well done! As you can see, by changing a few lines of code our application now exposes a type-safe GraphQL filters
