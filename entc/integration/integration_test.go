@@ -689,6 +689,16 @@ func Select(t *testing.T, client *ent.Client) {
 	}).Int(ctx)
 	require.NoError(err)
 	require.Equal(1, i)
+	// example with join
+	u = client.User.Create().SetName("crossworth").SetAge(28).SaveX(ctx)
+	userTable := sql.Table(user.Table)
+	subQuery = sql.Select("id").From(userTable).Where(sql.EQ(userTable.C(user.FieldName), "crossworth"))
+	users = client.User.Query().Modify(func(s *sql.Selector) {
+		s.Select("*").From(userTable)
+		s.Join(subQuery).On(userTable.C("id"), subQuery.C("id"))
+	}).AllX(ctx)
+	require.Len(users, 1)
+	require.Equal(u.ID, users[0].ID)
 }
 
 func ExecQuery(t *testing.T, client *ent.Client) {
