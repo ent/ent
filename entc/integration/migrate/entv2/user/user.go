@@ -48,6 +48,8 @@ const (
 	FieldWorkplace = "workplace"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldDropOptional holds the string denoting the drop_optional field in the database.
+	FieldDropOptional = "drop_optional"
 	// EdgeCar holds the string denoting the car edge name in mutations.
 	EdgeCar = "car"
 	// EdgePets holds the string denoting the pets edge name in mutations.
@@ -97,6 +99,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldWorkplace,
 	FieldCreatedAt,
+	FieldDropOptional,
 }
 
 var (
@@ -132,6 +135,8 @@ var (
 	BlobValidator func([]byte) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultDropOptional holds the default value on creation for the "drop_optional" field.
+	DefaultDropOptional func() string
 )
 
 // MixedEnum defines the type for the "mixed_enum" enum field.

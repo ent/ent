@@ -37,6 +37,8 @@ const (
 	FieldStatus = "status"
 	// FieldWorkplace holds the string denoting the workplace field in the database.
 	FieldWorkplace = "workplace"
+	// FieldDropOptional holds the string denoting the drop_optional field in the database.
+	FieldDropOptional = "drop_optional"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
 	EdgeParent = "parent"
 	// EdgeChildren holds the string denoting the children edge name in mutations.
@@ -84,6 +86,7 @@ var Columns = []string{
 	FieldState,
 	FieldStatus,
 	FieldWorkplace,
+	FieldDropOptional,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "users"

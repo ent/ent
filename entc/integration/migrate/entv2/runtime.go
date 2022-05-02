@@ -54,4 +54,8 @@ func init() {
 	userDescCreatedAt := userFields[14].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescDropOptional is the schema descriptor for drop_optional field.
+	userDescDropOptional := userFields[15].Descriptor()
+	// user.DefaultDropOptional holds the default value on creation for the drop_optional field.
+	user.DefaultDropOptional = userDescDropOptional.Default.(func() string)
 }

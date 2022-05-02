@@ -1897,6 +1897,7 @@ type UserMutation struct {
 	state           *user.State
 	status          *string
 	workplace       *string
+	drop_optional   *string
 	clearedFields   map[string]struct{}
 	parent          *int
 	clearedparent   bool
@@ -2523,6 +2524,55 @@ func (m *UserMutation) ResetWorkplace() {
 	delete(m.clearedFields, user.FieldWorkplace)
 }
 
+// SetDropOptional sets the "drop_optional" field.
+func (m *UserMutation) SetDropOptional(s string) {
+	m.drop_optional = &s
+}
+
+// DropOptional returns the value of the "drop_optional" field in the mutation.
+func (m *UserMutation) DropOptional() (r string, exists bool) {
+	v := m.drop_optional
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDropOptional returns the old "drop_optional" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDropOptional(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDropOptional is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDropOptional requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDropOptional: %w", err)
+	}
+	return oldValue.DropOptional, nil
+}
+
+// ClearDropOptional clears the value of the "drop_optional" field.
+func (m *UserMutation) ClearDropOptional() {
+	m.drop_optional = nil
+	m.clearedFields[user.FieldDropOptional] = struct{}{}
+}
+
+// DropOptionalCleared returns if the "drop_optional" field was cleared in this mutation.
+func (m *UserMutation) DropOptionalCleared() bool {
+	_, ok := m.clearedFields[user.FieldDropOptional]
+	return ok
+}
+
+// ResetDropOptional resets all changes to the "drop_optional" field.
+func (m *UserMutation) ResetDropOptional() {
+	m.drop_optional = nil
+	delete(m.clearedFields, user.FieldDropOptional)
+}
+
 // SetParentID sets the "parent" edge to the User entity by id.
 func (m *UserMutation) SetParentID(id int) {
 	m.parent = &id
@@ -2713,7 +2763,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.age != nil {
 		fields = append(fields, user.FieldAge)
 	}
@@ -2747,6 +2797,9 @@ func (m *UserMutation) Fields() []string {
 	if m.workplace != nil {
 		fields = append(fields, user.FieldWorkplace)
 	}
+	if m.drop_optional != nil {
+		fields = append(fields, user.FieldDropOptional)
+	}
 	return fields
 }
 
@@ -2777,6 +2830,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Status()
 	case user.FieldWorkplace:
 		return m.Workplace()
+	case user.FieldDropOptional:
+		return m.DropOptional()
 	}
 	return nil, false
 }
@@ -2808,6 +2863,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStatus(ctx)
 	case user.FieldWorkplace:
 		return m.OldWorkplace(ctx)
+	case user.FieldDropOptional:
+		return m.OldDropOptional(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2894,6 +2951,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetWorkplace(v)
 		return nil
+	case user.FieldDropOptional:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDropOptional(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -2960,6 +3024,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldWorkplace) {
 		fields = append(fields, user.FieldWorkplace)
 	}
+	if m.FieldCleared(user.FieldDropOptional) {
+		fields = append(fields, user.FieldDropOptional)
+	}
 	return fields
 }
 
@@ -2994,6 +3061,9 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldWorkplace:
 		m.ClearWorkplace()
+		return nil
+	case user.FieldDropOptional:
+		m.ClearDropOptional()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -3035,6 +3105,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldWorkplace:
 		m.ResetWorkplace()
+		return nil
+	case user.FieldDropOptional:
+		m.ResetDropOptional()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

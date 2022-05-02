@@ -102,6 +102,10 @@ func (User) Fields() []ent.Field {
 			Annotations(&entsql.Annotation{
 				Default: "CURRENT_TIMESTAMP",
 			}),
+		// nullable field was changed to non-nullable without a static
+		// default value, and it requires apply hook to fix this.
+		field.String("drop_optional").
+			DefaultFunc(uuid.NewString),
 		// deleting the `address` column.
 	}
 }

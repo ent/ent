@@ -366,6 +366,8 @@ func main() {
 }
 ```
 
+#### `Diff` Hook Example
+
 In case a field was renamed in the `ent/schema`, Ent won't detect this change as renaming and will propose `DropColumn`
 and `AddColumn` changes in the diff stage. One way to get over this is to use the
 [StorageKey](schema-fields.md#storage-key) option on the field and keep the old column name in the database table.
@@ -414,5 +416,66 @@ func renameColumnHook(next schema.Differ) schema.Differ {
         }
         return changes, nil
     })
+}
+```
+
+#### `Apply` Hook Example
+
+The `Apply` hook allows accessing and mutating the migration plan and its raw changes (SQL statements), but in addition
+to that it is also useful for executing custom SQL statements before or after the plan is applied. For example, changing
+a nullable column to non-nullable without a default value is not allowed by default. However, we can work around this
+using an `Apply` hook that `UPDATE`s all rows that contain `NULL` value in this column:
+
+```go
+func main() {
+    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
+    if err != nil {
+        log.Fatalf("failed connecting to mysql: %v", err)
+    }
+    defer client.Close()
+    // ...
+    if err := client.Schema.Create(ctx, schema.WithApplyHook(fillNulls)); err != nil {
+        log.Fatalf("failed creating schema resources: %v", err)
+    }
+}
+
+func fillNulls(next schema.Applier) schema.Applier {
+	return schema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *migrate.Plan) error {
+		// There are three ways to UPDATE the NULL values to "Unknown" in this stage.
+		// Append a custom migrate.Change to the plan, execute an SQL statement directly
+		// on the dialect.ExecQuerier, or use the ent.Client used by the project.
+
+		// Execute a custom SQL statement.
+		query, args := sql.Dialect(dialect.MySQL).
+			Update(user.Table).
+			Set(user.FieldDropOptional, "Unknown").
+			Where(sql.IsNull(user.FieldDropOptional)).
+			Query()
+		if err := conn.Exec(ctx, query, args, nil); err != nil {
+			return err
+		}
+
+		// Append a custom statement to migrate.Plan.
+		//
+		//  plan.Changes = append([]*migrate.Change{
+		//	    {
+		//		    Cmd: fmt.Sprintf("UPDATE users SET %[1]s = '%[2]s' WHERE %[1]s IS NULL", user.FieldDropOptional, "Unknown"),
+		//	    },
+		//  }, plan.Changes...)
+
+		// Use the ent.Client used by the project.
+		//
+		//  drv := sql.NewDriver(dialect.MySQL, sql.Conn{ExecQuerier: conn.(*sql.Tx)})
+		//  if err := ent.NewClient(ent.Driver(drv)).
+		//  	User.
+		//  	Update().
+		//  	SetDropOptional("Unknown").
+		//  	Where(/* Add predicate to filter only rows with NULL values */).
+		//  	Exec(ctx); err != nil {
+		//  	return fmt.Errorf("fix default values to uppercase: %w", err)
+		//  }
+
+		return next.Apply(ctx, conn, plan)
+	})
 }
 ```

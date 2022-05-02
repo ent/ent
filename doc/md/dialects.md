@@ -28,7 +28,7 @@ supported by default by SQLite, and will be added in the future using a [tempora
 
 Gremlin does not support migration nor indexes, and **<ins>it's considered experimental</ins>**.
 
-## TiDB - **<ins>preview</ins>**
+## TiDB **(<ins>preview</ins>)**
 
 TiDB support is in preview and requires the [Atlas migration engine](#atlas-integration).  
 TiDB is MySQL compatible and thus any feature that works on MySQL _should_ work on TiDB as well.  

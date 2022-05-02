@@ -146,6 +146,20 @@ func (uc *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
 	return uc
 }
 
+// SetDropOptional sets the "drop_optional" field.
+func (uc *UserCreate) SetDropOptional(s string) *UserCreate {
+	uc.mutation.SetDropOptional(s)
+	return uc
+}
+
+// SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDropOptional(s *string) *UserCreate {
+	if s != nil {
+		uc.SetDropOptional(*s)
+	}
+	return uc
+}
+
 // SetID sets the "id" field.
 func (uc *UserCreate) SetID(i int) *UserCreate {
 	uc.mutation.SetID(i)
@@ -459,6 +473,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldWorkplace,
 		})
 		_node.Workplace = value
+	}
+	if value, ok := uc.mutation.DropOptional(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDropOptional,
+		})
+		_node.DropOptional = value
 	}
 	if nodes := uc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

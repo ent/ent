@@ -49,6 +49,8 @@ func (User) Fields() []ent.Field {
 		field.String("workplace").
 			MaxLen(30).
 			Optional(),
+		field.String("drop_optional").
+			Optional(),
 	}
 }
 

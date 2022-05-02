@@ -203,6 +203,26 @@ func (uu *UserUpdate) ClearWorkplace() *UserUpdate {
 	return uu
 }
 
+// SetDropOptional sets the "drop_optional" field.
+func (uu *UserUpdate) SetDropOptional(s string) *UserUpdate {
+	uu.mutation.SetDropOptional(s)
+	return uu
+}
+
+// SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDropOptional(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetDropOptional(*s)
+	}
+	return uu
+}
+
+// ClearDropOptional clears the value of the "drop_optional" field.
+func (uu *UserUpdate) ClearDropOptional() *UserUpdate {
+	uu.mutation.ClearDropOptional()
+	return uu
+}
+
 // SetParentID sets the "parent" edge to the User entity by ID.
 func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
 	uu.mutation.SetParentID(id)
@@ -546,6 +566,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldWorkplace,
+		})
+	}
+	if value, ok := uu.mutation.DropOptional(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDropOptional,
+		})
+	}
+	if uu.mutation.DropOptionalCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldDropOptional,
 		})
 	}
 	if uu.mutation.ParentCleared() {
@@ -894,6 +927,26 @@ func (uuo *UserUpdateOne) SetNillableWorkplace(s *string) *UserUpdateOne {
 // ClearWorkplace clears the value of the "workplace" field.
 func (uuo *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
 	uuo.mutation.ClearWorkplace()
+	return uuo
+}
+
+// SetDropOptional sets the "drop_optional" field.
+func (uuo *UserUpdateOne) SetDropOptional(s string) *UserUpdateOne {
+	uuo.mutation.SetDropOptional(s)
+	return uuo
+}
+
+// SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDropOptional(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetDropOptional(*s)
+	}
+	return uuo
+}
+
+// ClearDropOptional clears the value of the "drop_optional" field.
+func (uuo *UserUpdateOne) ClearDropOptional() *UserUpdateOne {
+	uuo.mutation.ClearDropOptional()
 	return uuo
 }
 
@@ -1264,6 +1317,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Column: user.FieldWorkplace,
+		})
+	}
+	if value, ok := uuo.mutation.DropOptional(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDropOptional,
+		})
+	}
+	if uuo.mutation.DropOptionalCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldDropOptional,
 		})
 	}
 	if uuo.mutation.ParentCleared() {

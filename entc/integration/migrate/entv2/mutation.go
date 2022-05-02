@@ -2993,6 +2993,7 @@ type UserMutation struct {
 	status         *user.Status
 	workplace      *string
 	created_at     *time.Time
+	drop_optional  *string
 	clearedFields  map[string]struct{}
 	car            map[int]struct{}
 	removedcar     map[int]struct{}
@@ -3798,6 +3799,42 @@ func (m *UserMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
+// SetDropOptional sets the "drop_optional" field.
+func (m *UserMutation) SetDropOptional(s string) {
+	m.drop_optional = &s
+}
+
+// DropOptional returns the value of the "drop_optional" field in the mutation.
+func (m *UserMutation) DropOptional() (r string, exists bool) {
+	v := m.drop_optional
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDropOptional returns the old "drop_optional" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldDropOptional(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDropOptional is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDropOptional requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDropOptional: %w", err)
+	}
+	return oldValue.DropOptional, nil
+}
+
+// ResetDropOptional resets all changes to the "drop_optional" field.
+func (m *UserMutation) ResetDropOptional() {
+	m.drop_optional = nil
+}
+
 // AddCarIDs adds the "car" edge to the Car entity by ids.
 func (m *UserMutation) AddCarIDs(ids ...int) {
 	if m.car == nil {
@@ -3964,7 +4001,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 17)
 	if m.mixed_string != nil {
 		fields = append(fields, user.FieldMixedString)
 	}
@@ -4013,6 +4050,9 @@ func (m *UserMutation) Fields() []string {
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
+	if m.drop_optional != nil {
+		fields = append(fields, user.FieldDropOptional)
+	}
 	return fields
 }
 
@@ -4053,6 +4093,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Workplace()
 	case user.FieldCreatedAt:
 		return m.CreatedAt()
+	case user.FieldDropOptional:
+		return m.DropOptional()
 	}
 	return nil, false
 }
@@ -4094,6 +4136,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldWorkplace(ctx)
 	case user.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
+	case user.FieldDropOptional:
+		return m.OldDropOptional(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -4214,6 +4258,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
+		return nil
+	case user.FieldDropOptional:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDropOptional(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -4371,6 +4422,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldCreatedAt:
 		m.ResetCreatedAt()
+		return nil
+	case user.FieldDropOptional:
+		m.ResetDropOptional()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
