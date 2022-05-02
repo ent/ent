@@ -33,4 +33,4 @@ Gremlin does not support migration nor indexes, and **<ins>it's considered exper
 TiDB support is in preview and requires the [Atlas migration engine](#atlas-integration).  
 TiDB is MySQL compatible and thus any feature that works on MySQL _should_ work on TiDB as well.  
 For a list of known compatibility issues, visit: https://docs.pingcap.com/tidb/stable/mysql-compatibility  
-The integration with TiDB is currently tested on version `5.4.0`.
+The integration with TiDB is currently tested on versions `5.4.0`, `6.0.0`.
