@@ -736,7 +736,7 @@ func (d *MySQL) defaultSize(c *Column) int64 {
 	case compareVersions(version, checked) != -1:
 	// Column is non-unique, or not part of any index (reaching
 	// the error 1071).
-	case !c.Unique && len(c.indexes) == 0:
+	case !c.Unique && len(c.indexes) == 0 && !c.PrimaryKey():
 	default:
 		size = 191
 	}
