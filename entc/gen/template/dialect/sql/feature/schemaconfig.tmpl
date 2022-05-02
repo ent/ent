@@ -47,7 +47,8 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 
 {{/* Addtional fields to the config struct. */}}
 {{- define "dialect/sql/config/fields/schemaconfig" -}}
-	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" -}}
+		// schemaConfig contains alternative names for all tables.
 		schemaConfig SchemaConfig
 	{{- end }}
 {{- end -}}
