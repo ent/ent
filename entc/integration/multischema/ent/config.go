@@ -27,7 +27,7 @@ type config struct {
 	log func(...interface{})
 	// hooks to execute on mutations.
 	hooks *hooks
-
+	// schemaConfig contains alternative names for all tables.
 	schemaConfig SchemaConfig
 }
 
