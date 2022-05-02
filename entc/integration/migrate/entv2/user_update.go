@@ -267,6 +267,20 @@ func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
+// SetDropOptional sets the "drop_optional" field.
+func (uu *UserUpdate) SetDropOptional(s string) *UserUpdate {
+	uu.mutation.SetDropOptional(s)
+	return uu
+}
+
+// SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDropOptional(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetDropOptional(*s)
+	}
+	return uu
+}
+
 // AddCarIDs adds the "car" edge to the Car entity by IDs.
 func (uu *UserUpdate) AddCarIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddCarIDs(ids...)
@@ -636,6 +650,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: user.FieldCreatedAt,
+		})
+	}
+	if value, ok := uu.mutation.DropOptional(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDropOptional,
 		})
 	}
 	if uu.mutation.CarCleared() {
@@ -1033,6 +1054,20 @@ func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
+// SetDropOptional sets the "drop_optional" field.
+func (uuo *UserUpdateOne) SetDropOptional(s string) *UserUpdateOne {
+	uuo.mutation.SetDropOptional(s)
+	return uuo
+}
+
+// SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDropOptional(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetDropOptional(*s)
+	}
+	return uuo
+}
+
 // AddCarIDs adds the "car" edge to the Car entity by IDs.
 func (uuo *UserUpdateOne) AddCarIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddCarIDs(ids...)
@@ -1426,6 +1461,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: user.FieldCreatedAt,
+		})
+	}
+	if value, ok := uuo.mutation.DropOptional(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldDropOptional,
 		})
 	}
 	if uuo.mutation.CarCleared() {

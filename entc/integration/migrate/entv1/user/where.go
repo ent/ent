@@ -165,6 +165,13 @@ func Workplace(v string) predicate.User {
 	})
 }
 
+// DropOptional applies equality check predicate on the "drop_optional" field. It's identical to DropOptionalEQ.
+func DropOptional(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDropOptional), v))
+	})
+}
+
 // AgeEQ applies the EQ predicate on the "age" field.
 func AgeEQ(v int32) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1348,6 +1355,131 @@ func WorkplaceEqualFold(v string) predicate.User {
 func WorkplaceContainsFold(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldWorkplace), v))
+	})
+}
+
+// DropOptionalEQ applies the EQ predicate on the "drop_optional" field.
+func DropOptionalEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalNEQ applies the NEQ predicate on the "drop_optional" field.
+func DropOptionalNEQ(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalIn applies the In predicate on the "drop_optional" field.
+func DropOptionalIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDropOptional), v...))
+	})
+}
+
+// DropOptionalNotIn applies the NotIn predicate on the "drop_optional" field.
+func DropOptionalNotIn(vs ...string) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDropOptional), v...))
+	})
+}
+
+// DropOptionalGT applies the GT predicate on the "drop_optional" field.
+func DropOptionalGT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalGTE applies the GTE predicate on the "drop_optional" field.
+func DropOptionalGTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalLT applies the LT predicate on the "drop_optional" field.
+func DropOptionalLT(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalLTE applies the LTE predicate on the "drop_optional" field.
+func DropOptionalLTE(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalContains applies the Contains predicate on the "drop_optional" field.
+func DropOptionalContains(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalHasPrefix applies the HasPrefix predicate on the "drop_optional" field.
+func DropOptionalHasPrefix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalHasSuffix applies the HasSuffix predicate on the "drop_optional" field.
+func DropOptionalHasSuffix(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalIsNil applies the IsNil predicate on the "drop_optional" field.
+func DropOptionalIsNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDropOptional)))
+	})
+}
+
+// DropOptionalNotNil applies the NotNil predicate on the "drop_optional" field.
+func DropOptionalNotNil() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDropOptional)))
+	})
+}
+
+// DropOptionalEqualFold applies the EqualFold predicate on the "drop_optional" field.
+func DropOptionalEqualFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDropOptional), v))
+	})
+}
+
+// DropOptionalContainsFold applies the ContainsFold predicate on the "drop_optional" field.
+func DropOptionalContainsFold(v string) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDropOptional), v))
 	})
 }
 

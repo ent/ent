@@ -21,22 +21,22 @@ type Driver struct {
 }
 
 // NewDriver creates a new Driver with the given Conn and dialect.
-func NewDriver(c Conn, d string) *Driver {
-	return &Driver{c, d}
+func NewDriver(dialect string, c Conn) *Driver {
+	return &Driver{dialect: dialect, Conn: c}
 }
 
 // Open wraps the database/sql.Open method and returns a dialect.Driver that implements the an ent/dialect.Driver interface.
-func Open(driver, source string) (*Driver, error) {
-	db, err := sql.Open(driver, source)
+func Open(dialect, source string) (*Driver, error) {
+	db, err := sql.Open(dialect, source)
 	if err != nil {
 		return nil, err
 	}
-	return NewDriver(Conn{db}, driver), nil
+	return NewDriver(dialect, Conn{db}), nil
 }
 
 // OpenDB wraps the given database/sql.DB method with a Driver.
-func OpenDB(driver string, db *sql.DB) *Driver {
-	return NewDriver(Conn{db}, driver)
+func OpenDB(dialect string, db *sql.DB) *Driver {
+	return NewDriver(dialect, Conn{db})
 }
 
 // DB returns the underlying *sql.DB instance.
@@ -46,7 +46,7 @@ func (d Driver) DB() *sql.DB {
 
 // Dialect implements the dialect.Dialect method.
 func (d Driver) Dialect() string {
-	// If the underlying driver is wrapped with opencensus driver.
+	// If the underlying driver is wrapped with a telemetry driver.
 	for _, name := range []string{dialect.MySQL, dialect.SQLite, dialect.Postgres} {
 		if strings.HasPrefix(d.dialect, name) {
 			return name

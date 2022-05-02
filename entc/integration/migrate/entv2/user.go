@@ -53,6 +53,8 @@ type User struct {
 	Workplace string `json:"workplace,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// DropOptional holds the value of the "drop_optional" field.
+	DropOptional string `json:"drop_optional,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -112,7 +114,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new([]byte)
 		case user.FieldID, user.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case user.FieldMixedString, user.FieldMixedEnum, user.FieldName, user.FieldDescription, user.FieldNickname, user.FieldPhone, user.FieldTitle, user.FieldNewName, user.FieldNewToken, user.FieldState, user.FieldStatus, user.FieldWorkplace:
+		case user.FieldMixedString, user.FieldMixedEnum, user.FieldName, user.FieldDescription, user.FieldNickname, user.FieldPhone, user.FieldTitle, user.FieldNewName, user.FieldNewToken, user.FieldState, user.FieldStatus, user.FieldWorkplace, user.FieldDropOptional:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
@@ -233,6 +235,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.CreatedAt = value.Time
 			}
+		case user.FieldDropOptional:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field drop_optional", values[i])
+			} else if value.Valid {
+				u.DropOptional = value.String
+			}
 		}
 	}
 	return nil
@@ -308,6 +316,8 @@ func (u *User) String() string {
 	builder.WriteString(u.Workplace)
 	builder.WriteString(", created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", drop_optional=")
+	builder.WriteString(u.DropOptional)
 	builder.WriteByte(')')
 	return builder.String()
 }

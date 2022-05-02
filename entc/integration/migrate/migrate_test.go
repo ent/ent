@@ -26,6 +26,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 	migratev2 "entgo.io/ent/entc/integration/migrate/entv2/migrate"
+	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 	"entgo.io/ent/entc/integration/migrate/versioned"
 
@@ -210,7 +211,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	SanityV1(t, dialect, clientv1)
 
 	// Run migration and execute queries on v2.
-	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true), schema.WithDiffHook(renameTokenColumn)))
+	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true), schema.WithDiffHook(renameTokenColumn), schema.WithApplyHook(fillNulls(dialect))))
 	require.NoError(t, clientv2.Schema.Create(ctx, migratev2.WithGlobalUniqueID(true), migratev2.WithDropIndex(true), migratev2.WithDropColumn(true), schema.WithAtlas(true)), "should not create additional resources on multiple runs")
 	SanityV2(t, dialect, clientv2)
 
@@ -482,4 +483,24 @@ func renameTokenColumn(next schema.Differ) schema.Differ {
 		}
 		return changes, nil
 	})
+}
+
+func fillNulls(dbdialect string) schema.ApplyHook {
+	return func(next schema.Applier) schema.Applier {
+		return schema.ApplyFunc(func(ctx context.Context, conn dialect.ExecQuerier, plan *migrate.Plan) error {
+			// There are three ways to UPDATE the NULL values to "Unknown" in this stage.
+			// Append a custom migrate.Change to the plan, execute an SQL statement directly
+			// on the dialect.ExecQuerier, or use the ent.Client used by the project.
+			drv := sql.NewDriver(dbdialect, sql.Conn{ExecQuerier: conn.(*sql.Tx)})
+			client := entv2.NewClient(entv2.Driver(drv))
+			if err := client.User.
+				Update().
+				SetDropOptional("Unknown").
+				Where(predicate.User(userv1.DropOptionalIsNil())).
+				Exec(ctx); err != nil {
+				return fmt.Errorf("fix default values to uppercase: %w", err)
+			}
+			return next.Apply(ctx, conn, plan)
+		})
+	}
 }
