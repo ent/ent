@@ -396,8 +396,6 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18'
@@ -407,13 +405,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Checkout origin/master
-        run: git checkout origin/master
-      - name: Run integration on origin/master
-        working-directory: entc/integration
-        run: go test -race -count=2 -tags='json1' ./...
-      - name: Checkout previous HEAD
-        run: git checkout -
-      - name: Run integration on HEAD
+      - name: Run integration
         working-directory: entc/integration
         run: go test -race -count=2 -tags='json1' ./...
