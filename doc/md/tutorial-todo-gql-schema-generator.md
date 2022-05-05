@@ -23,7 +23,7 @@ go run ./cmd/todo/
 
 Go to your `ent/entc.go` file, and add the highlighted line (extension options):
 
-```go {4} title="ent/entc.go"
+```go {5} title="ent/entc.go"
 func main() {
 	ex, err := entgql.NewExtension(
 		entgql.WithWhereInputs(true),
