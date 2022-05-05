@@ -222,12 +222,13 @@ func TestUpdateAfterCreation(t *testing.T) {
 			if err != nil {
 				return nil, err
 			}
+
 			existingUser, ok := value.(*ent.User)
 			require.Truef(t, ok, "value should be of type %T", existingUser)
-			require.Equal(t, existingUser.Version, 1, "version does not match the original value")
+			require.Equal(t, 1, existingUser.Version, "version does not match the original value")
 
 			// After the user was created, return its updated version (a new object).
-			newUser := m.Client().User.UpdateOneID(existingUser.ID).
+			newUser := m.Client().User.UpdateOne(existingUser).
 				SetVersion(2).
 				SaveX(ctx)
 			return newUser, nil
@@ -248,15 +249,19 @@ func TestUpdateAfterUpdateOne(t *testing.T) {
 			if err != nil {
 				return nil, err
 			}
-			existingUser, ok := value.(*ent.User)
-			require.Truef(t, ok, "value should be of type %T", existingUser)
-			require.Equal(t, existingUser.Version, 1, "version does not match the original value")
 
-			// After the user was created, return its updated version (a new object).
-			newUser := m.Client().User.UpdateOneID(existingUser.ID).
+			u, ok := value.(*ent.User)
+			require.Truef(t, ok, "value should be of type %T", u)
+			require.Equal(t, 2, u.Version, "version does not match the original value")
+
+			// After the user was created, return its updated version (a new object).  Don't use UpdateOne because it
+			// will cause recursive calls to this hook.
+			m.Client().User.Update().
+				Where(user.IDEQ(u.ID)).
 				SetVersion(3).
 				SaveX(ctx)
-			return newUser, nil
+
+			return m.Client().User.Get(ctx, u.ID)
 		})
 	}, ent.OpUpdateOne))
 
