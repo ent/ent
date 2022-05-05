@@ -84,6 +84,19 @@ func TestMigrate_Diff(t *testing.T) {
 	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
 	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
 	require.NoFileExists(t, filepath.Join(p, "atlas.sum"))
+
+	// Test integrity file.
+	p = t.TempDir()
+	d, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	m, err = NewMigrate(db, WithDir(d), WithSumFile())
+	require.NoError(t, err)
+	require.NoError(t, m.Diff(context.Background(), &Table{Name: "users"}))
+	requireFileEqual(t, filepath.Join(p, v+"_changes.up.sql"), "-- create \"users\" table\nCREATE TABLE `users` (, PRIMARY KEY ());\n")
+	requireFileEqual(t, filepath.Join(p, v+"_changes.down.sql"), "-- reverse: create \"users\" table\nDROP TABLE `users`;\n")
+	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+	require.NoError(t, d.WriteFile("tmp.sql", nil))
+	require.ErrorIs(t, m.Diff(context.Background(), &Table{Name: "users"}), migrate.ErrChecksumMismatch)
 }
 
 func requireFileEqual(t *testing.T, name, contents string) {
