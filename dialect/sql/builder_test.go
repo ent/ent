@@ -1289,6 +1289,14 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{"bar"},
 		},
 		{
+			input:     SelectExpr(Raw("1")),
+			wantQuery: "SELECT 1",
+		},
+		{
+			input:     Select("*").From(SelectExpr(Raw("1")).As("s")),
+			wantQuery: "SELECT * FROM (SELECT 1) AS `s`",
+		},
+		{
 			input: func() Querier {
 				builder := Dialect(dialect.Postgres)
 				t1 := builder.Table("groups")

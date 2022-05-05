@@ -2657,12 +2657,13 @@ func (s *Selector) Query() (string, []interface{}) {
 	} else {
 		b.WriteString("*")
 	}
-	b.WriteString(" FROM ")
 	switch t := s.from.(type) {
 	case *SelectTable:
+		b.WriteString(" FROM ")
 		t.SetDialect(s.dialect)
 		b.WriteString(t.ref())
 	case *Selector:
+		b.WriteString(" FROM ")
 		t.SetDialect(s.dialect)
 		b.Nested(func(b *Builder) {
 			b.Join(t)
@@ -2670,6 +2671,7 @@ func (s *Selector) Query() (string, []interface{}) {
 		b.WriteString(" AS ")
 		b.Ident(t.as)
 	case *WithBuilder:
+		b.WriteString(" FROM ")
 		t.SetDialect(s.dialect)
 		b.Ident(t.Name())
 	}
