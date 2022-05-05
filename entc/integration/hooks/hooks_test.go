@@ -212,6 +212,65 @@ func TestPostCreation(t *testing.T) {
 	client.Card.CreateBulk(client.Card.Create().SetNumber("12345")).SaveX(ctx)
 }
 
+func TestUpdateAfterCreation(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			value, err := next.Mutate(ctx, m)
+			if err != nil {
+				return nil, err
+			}
+
+			existingUser, ok := value.(*ent.User)
+			require.Truef(t, ok, "value should be of type %T", existingUser)
+			require.Equal(t, 1, existingUser.Version, "version does not match the original value")
+
+			// After the user was created, return its updated version (a new object).
+			newUser := m.Client().User.UpdateOne(existingUser).
+				SetVersion(2).
+				SaveX(ctx)
+			return newUser, nil
+		})
+	}, ent.OpCreate))
+
+	u := client.User.Create().SetName("a8m").SetVersion(1).SaveX(ctx)
+	require.Equal(t, 2, u.Version, "version mutation in hook should have propagated back to call site")
+}
+
+func TestUpdateAfterUpdateOne(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			value, err := next.Mutate(ctx, m)
+			if err != nil {
+				return nil, err
+			}
+
+			u, ok := value.(*ent.User)
+			require.Truef(t, ok, "value should be of type %T", u)
+			require.Equal(t, 2, u.Version, "version does not match the original value")
+
+			// After the user was created, return its updated version (a new object).  Don't use UpdateOne because it
+			// will cause recursive calls to this hook.
+			m.Client().User.Update().
+				Where(user.IDEQ(u.ID)).
+				SetVersion(3).
+				SaveX(ctx)
+
+			return m.Client().User.Get(ctx, u.ID)
+		})
+	}, ent.OpUpdateOne))
+
+	u := client.User.Create().SetName("a8m").SetVersion(1).SaveX(ctx)
+	u = client.User.UpdateOne(u).SetVersion(2).SaveX(ctx)
+
+	require.Equal(t, 3, u.Version, "version mutation in hook should have propagated back to call site")
+}
+
 func TestOldValues(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))

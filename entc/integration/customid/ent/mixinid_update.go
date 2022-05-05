@@ -202,9 +202,15 @@ func (miuo *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
 			}
 			mut = miuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, miuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, miuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*MixinID)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from MixinIDMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

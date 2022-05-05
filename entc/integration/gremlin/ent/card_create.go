@@ -165,9 +165,15 @@ func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
 			}
 			mut = cc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, cc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, cc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Card)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from CardMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

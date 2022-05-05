@@ -103,9 +103,15 @@ func (rc *RentalCreate) Save(ctx context.Context) (*Rental, error) {
 			}
 			mut = rc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, rc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, rc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Rental)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from RentalMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

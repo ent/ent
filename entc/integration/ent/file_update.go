@@ -719,9 +719,15 @@ func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 			}
 			mut = fuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, fuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, fuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*File)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from FileMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

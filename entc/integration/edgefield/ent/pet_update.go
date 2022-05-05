@@ -262,9 +262,15 @@ func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 			}
 			mut = puo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, puo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, puo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Pet)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from PetMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

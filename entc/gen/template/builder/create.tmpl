@@ -83,9 +83,15 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			}
 			mut = {{ $receiver }}.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, {{ $mutation }}); err != nil {
+		v, err := mut.Mutate(ctx, {{ $mutation }})
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*{{ $.Name }})
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from {{ $.MutationName }}", v)
+		}
+		node = nv
 	}
 	return node, err
 }

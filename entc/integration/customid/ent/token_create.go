@@ -99,9 +99,15 @@ func (tc *TokenCreate) Save(ctx context.Context) (*Token, error) {
 			}
 			mut = tc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, tc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Token)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from TokenMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

@@ -164,9 +164,15 @@ func (ouo *OtherUpdateOne) Save(ctx context.Context) (*Other, error) {
 			}
 			mut = ouo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ouo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ouo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Other)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from OtherMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

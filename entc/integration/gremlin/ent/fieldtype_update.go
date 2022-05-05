@@ -3299,9 +3299,15 @@ func (ftuo *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 			}
 			mut = ftuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ftuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ftuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*FieldType)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from FieldTypeMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

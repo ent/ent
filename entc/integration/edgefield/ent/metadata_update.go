@@ -529,9 +529,15 @@ func (muo *MetadataUpdateOne) Save(ctx context.Context) (*Metadata, error) {
 			}
 			mut = muo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, muo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, muo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Metadata)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from MetadataMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

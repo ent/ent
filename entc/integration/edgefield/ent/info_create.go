@@ -95,9 +95,15 @@ func (ic *InfoCreate) Save(ctx context.Context) (*Info, error) {
 			}
 			mut = ic.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ic.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Info)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from InfoMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

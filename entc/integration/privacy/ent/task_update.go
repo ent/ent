@@ -565,9 +565,15 @@ func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 			}
 			mut = tuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, tuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, tuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Task)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from TaskMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }
