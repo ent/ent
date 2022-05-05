@@ -1,6 +1,6 @@
 ## ent - 一个强大的Go语言实体框架
 
-[English](README.md) | [中文](README_zh.md)
+[English](README.md) | [中文](README_zh.md) | [日本語](README_jp.md)
 
 <img width="50%"
 align="right"
