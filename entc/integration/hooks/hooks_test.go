@@ -235,7 +235,35 @@ func TestUpdateAfterCreation(t *testing.T) {
 	}, ent.OpCreate))
 
 	u := client.User.Create().SetName("a8m").SetVersion(1).SaveX(ctx)
-	require.Equal(t, u.Version, 2, "version mutation in hook should have propagated back to call site")
+	require.Equal(t, 2, u.Version, "version mutation in hook should have propagated back to call site")
+}
+
+func TestUpdateAfterUpdateOne(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			value, err := next.Mutate(ctx, m)
+			if err != nil {
+				return nil, err
+			}
+			existingUser, ok := value.(*ent.User)
+			require.Truef(t, ok, "value should be of type %T", existingUser)
+			require.Equal(t, existingUser.Version, 1, "version does not match the original value")
+
+			// After the user was created, return its updated version (a new object).
+			newUser := m.Client().User.UpdateOneID(existingUser.ID).
+				SetVersion(3).
+				SaveX(ctx)
+			return newUser, nil
+		})
+	}, ent.OpUpdateOne))
+
+	u := client.User.Create().SetName("a8m").SetVersion(1).SaveX(ctx)
+	u = client.User.UpdateOne(u).SetVersion(2).SaveX(ctx)
+
+	require.Equal(t, 3, u.Version, "version mutation in hook should have propagated back to call site")
 }
 
 func TestOldValues(t *testing.T) {
