@@ -143,11 +143,15 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 			}
 			mut = bc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, bc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, bc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Blob); ok {
-			node = v
 		}
+		nv, ok := v.(*Blob)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from BlobMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

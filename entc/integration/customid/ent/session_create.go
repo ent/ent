@@ -101,11 +101,15 @@ func (sc *SessionCreate) Save(ctx context.Context) (*Session, error) {
 			}
 			mut = sc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, sc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, sc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Session); ok {
-			node = v
 		}
+		nv, ok := v.(*Session)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from SessionMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

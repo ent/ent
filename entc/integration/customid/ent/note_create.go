@@ -129,11 +129,15 @@ func (nc *NoteCreate) Save(ctx context.Context) (*Note, error) {
 			}
 			mut = nc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, nc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, nc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Note); ok {
-			node = v
 		}
+		nv, ok := v.(*Note)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from NoteMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

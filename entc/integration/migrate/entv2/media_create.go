@@ -103,11 +103,15 @@ func (mc *MediaCreate) Save(ctx context.Context) (*Media, error) {
 			}
 			mut = mc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, mc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, mc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Media); ok {
-			node = v
 		}
+		nv, ok := v.(*Media)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from MediaMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

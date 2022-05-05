@@ -100,11 +100,15 @@ func (tc *TeamCreate) Save(ctx context.Context) (*Team, error) {
 			}
 			mut = tc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, tc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, tc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Team); ok {
-			node = v
 		}
+		nv, ok := v.(*Team)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from TeamMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

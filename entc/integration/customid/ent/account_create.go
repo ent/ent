@@ -103,11 +103,15 @@ func (ac *AccountCreate) Save(ctx context.Context) (*Account, error) {
 			}
 			mut = ac.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, ac.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ac.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Account); ok {
-			node = v
 		}
+		nv, ok := v.(*Account)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from AccountMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

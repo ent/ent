@@ -115,11 +115,15 @@ func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 			}
 			mut = ftc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, ftc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ftc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*FileType); ok {
-			node = v
 		}
+		nv, ok := v.(*FileType)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from FileTypeMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

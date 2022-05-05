@@ -103,11 +103,15 @@ func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
 			}
 			mut = pc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, pc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, pc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Pet); ok {
-			node = v
 		}
+		nv, ok := v.(*Pet)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from PetMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

@@ -102,11 +102,15 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 			}
 			mut = gic.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, gic.mutation); err != nil {
+		v, err := mut.Mutate(ctx, gic.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*GroupInfo); ok {
-			node = v
 		}
+		nv, ok := v.(*GroupInfo)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from GroupInfoMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

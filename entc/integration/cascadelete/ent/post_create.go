@@ -113,11 +113,15 @@ func (pc *PostCreate) Save(ctx context.Context) (*Post, error) {
 			}
 			mut = pc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, pc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, pc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Post); ok {
-			node = v
 		}
+		nv, ok := v.(*Post)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from PostMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

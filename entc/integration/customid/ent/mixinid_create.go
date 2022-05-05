@@ -93,11 +93,15 @@ func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 			}
 			mut = mic.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, mic.mutation); err != nil {
+		v, err := mut.Mutate(ctx, mic.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*MixinID); ok {
-			node = v
 		}
+		nv, ok := v.(*MixinID)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from MixinIDMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

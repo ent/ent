@@ -80,11 +80,15 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 			}
 			mut = tc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, tc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, tc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Task); ok {
-			node = v
 		}
+		nv, ok := v.(*Task)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from TaskMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

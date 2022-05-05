@@ -183,11 +183,15 @@ func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
 			}
 			mut = fc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, fc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, fc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*File); ok {
-			node = v
 		}
+		nv, ok := v.(*File)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from FileMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

@@ -107,11 +107,15 @@ func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
 			}
 			mut = cc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, cc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, cc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Car); ok {
-			node = v
 		}
+		nv, ok := v.(*Car)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from CarMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

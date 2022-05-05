@@ -129,11 +129,15 @@ func (dc *DocCreate) Save(ctx context.Context) (*Doc, error) {
 			}
 			mut = dc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, dc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, dc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Doc); ok {
-			node = v
 		}
+		nv, ok := v.(*Doc)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from DocMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

@@ -137,11 +137,15 @@ func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 			}
 			mut = mc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, mc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, mc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Metadata); ok {
-			node = v
 		}
+		nv, ok := v.(*Metadata)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from MetadataMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

@@ -68,11 +68,15 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 			}
 			mut = gc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, gc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, gc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*Group); ok {
-			node = v
 		}
+		nv, ok := v.(*Group)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from GroupMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

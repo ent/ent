@@ -829,11 +829,15 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 			}
 			mut = ftc.hooks[i](mut)
 		}
-		if v, err := mut.Mutate(ctx, ftc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ftc.mutation)
+		if err != nil {
 			return nil, err
-		} else if v, ok := v.(*FieldType); ok {
-			node = v
 		}
+		nv, ok := v.(*FieldType)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from FieldTypeMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }
