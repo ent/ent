@@ -160,9 +160,15 @@ func (guo *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
 			}
 			mut = guo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, guo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Goods)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from GoodsMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

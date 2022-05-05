@@ -364,9 +364,15 @@ func (ruo *RentalUpdateOne) Save(ctx context.Context) (*Rental, error) {
 			}
 			mut = ruo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ruo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ruo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Rental)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from RentalMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

@@ -81,9 +81,15 @@ func (oc *OtherCreate) Save(ctx context.Context) (*Other, error) {
 			}
 			mut = oc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, oc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, oc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Other)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from OtherMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

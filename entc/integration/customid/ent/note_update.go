@@ -429,9 +429,15 @@ func (nuo *NoteUpdateOne) Save(ctx context.Context) (*Note, error) {
 			}
 			mut = nuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, nuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, nuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Note)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from NoteMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

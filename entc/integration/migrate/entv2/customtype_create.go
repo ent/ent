@@ -104,9 +104,15 @@ func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 			}
 			mut = ctc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ctc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ctc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*CustomType)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from CustomTypeMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

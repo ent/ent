@@ -459,9 +459,15 @@ func (tuo *TeamUpdateOne) Save(ctx context.Context) (*Team, error) {
 			}
 			mut = tuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, tuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, tuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Team)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from TeamMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

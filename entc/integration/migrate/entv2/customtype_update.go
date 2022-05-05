@@ -324,9 +324,15 @@ func (ctuo *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) 
 			}
 			mut = ctuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ctuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, ctuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*CustomType)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from CustomTypeMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

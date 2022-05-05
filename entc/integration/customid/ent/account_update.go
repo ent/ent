@@ -333,9 +333,15 @@ func (auo *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
 			}
 			mut = auo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, auo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, auo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Account)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from AccountMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

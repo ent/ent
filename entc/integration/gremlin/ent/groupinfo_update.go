@@ -327,9 +327,15 @@ func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 			}
 			mut = giuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, giuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, giuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*GroupInfo)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from GroupInfoMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

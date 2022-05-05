@@ -323,9 +323,15 @@ func (muo *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
 			}
 			mut = muo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, muo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, muo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Media)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from MediaMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }
