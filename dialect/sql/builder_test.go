@@ -1473,6 +1473,16 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{1},
 		},
 		{
+			input:     Select("id").From(Table("users")).Where(ExprP("Date(last_login_at) >= ?")),
+			wantQuery: "SELECT `id` FROM `users` WHERE Date(last_login_at) >= ?",
+			wantArgs:  []interface{}{"2022-05-03"},
+		},
+		{
+			input:     Select("id").From(Table("events")).Where(ExprP("DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?")),
+			wantQuery: "SELECT `id` FROM `events` WHERE DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?",
+			wantArgs:  []interface{}{"2022-05-03", "2022-05-04"},
+		},
+		{
 			input: func() Querier {
 				t1, t2 := Table("users").Schema("s1"), Table("pets").Schema("s2")
 				return Select("*").
