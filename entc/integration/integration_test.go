@@ -692,15 +692,15 @@ func Select(t *testing.T, client *ent.Client) {
 		Int(ctx)
 	require.NoError(err)
 	require.Equal(1, i)
-	
+
 	// Select with join.
 	u = client.User.Create().SetName("crossworth").SetAge(28).SaveX(ctx)
 	id := client.User.
 		Query().
-		Modify(func(s *sql.Selector) {
+		Where(func(s *sql.Selector) {
 			subQuery := sql.Select(user.FieldID).
 				From(sql.Table(user.Table)).
-				Where(sql.EQ(userT.C(user.FieldName), "crossworth"))
+				Where(sql.EQ(s.C(user.FieldName), "crossworth"))
 			s.Join(subQuery).On(s.C(user.FieldID), subQuery.C(user.FieldID))
 		}).
 		OnlyIDX(ctx)
