@@ -129,8 +129,10 @@ func (nc *NoteCreate) Save(ctx context.Context) (*Note, error) {
 			}
 			mut = nc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, nc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Note); ok {
+			node = v
 		}
 	}
 	return node, err

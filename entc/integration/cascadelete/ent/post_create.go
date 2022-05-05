@@ -113,8 +113,10 @@ func (pc *PostCreate) Save(ctx context.Context) (*Post, error) {
 			}
 			mut = pc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, pc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, pc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Post); ok {
+			node = v
 		}
 	}
 	return node, err

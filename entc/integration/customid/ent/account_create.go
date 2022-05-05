@@ -103,8 +103,10 @@ func (ac *AccountCreate) Save(ctx context.Context) (*Account, error) {
 			}
 			mut = ac.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ac.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, ac.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Account); ok {
+			node = v
 		}
 	}
 	return node, err

@@ -80,8 +80,10 @@ func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
 			}
 			mut = tc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, tc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Task); ok {
+			node = v
 		}
 	}
 	return node, err

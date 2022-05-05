@@ -71,8 +71,10 @@ func (rc *RevisionCreate) Save(ctx context.Context) (*Revision, error) {
 			}
 			mut = rc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, rc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, rc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Revision); ok {
+			node = v
 		}
 	}
 	return node, err

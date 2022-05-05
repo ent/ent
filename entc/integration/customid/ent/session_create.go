@@ -101,8 +101,10 @@ func (sc *SessionCreate) Save(ctx context.Context) (*Session, error) {
 			}
 			mut = sc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, sc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Session); ok {
+			node = v
 		}
 	}
 	return node, err

@@ -81,8 +81,10 @@ func (oc *OtherCreate) Save(ctx context.Context) (*Other, error) {
 			}
 			mut = oc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, oc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, oc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Other); ok {
+			node = v
 		}
 	}
 	return node, err

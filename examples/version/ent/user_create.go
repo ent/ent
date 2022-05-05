@@ -83,8 +83,10 @@ func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 			}
 			mut = uc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, uc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, uc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*User); ok {
+			node = v
 		}
 	}
 	return node, err

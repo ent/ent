@@ -93,8 +93,10 @@ func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
 			}
 			mut = gc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, gc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, gc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Group); ok {
+			node = v
 		}
 	}
 	return node, err

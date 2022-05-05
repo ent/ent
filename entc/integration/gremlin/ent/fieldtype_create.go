@@ -829,8 +829,10 @@ func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 			}
 			mut = ftc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ftc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, ftc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*FieldType); ok {
+			node = v
 		}
 	}
 	return node, err

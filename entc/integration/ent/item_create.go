@@ -94,8 +94,10 @@ func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
 			}
 			mut = ic.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ic.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, ic.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Item); ok {
+			node = v
 		}
 	}
 	return node, err

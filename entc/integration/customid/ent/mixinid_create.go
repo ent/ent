@@ -93,8 +93,10 @@ func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 			}
 			mut = mic.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, mic.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, mic.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*MixinID); ok {
+			node = v
 		}
 	}
 	return node, err

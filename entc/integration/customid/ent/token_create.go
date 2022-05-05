@@ -99,8 +99,10 @@ func (tc *TokenCreate) Save(ctx context.Context) (*Token, error) {
 			}
 			mut = tc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, tc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Token); ok {
+			node = v
 		}
 	}
 	return node, err

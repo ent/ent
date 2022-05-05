@@ -104,8 +104,10 @@ func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 			}
 			mut = ctc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, ctc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, ctc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*CustomType); ok {
+			node = v
 		}
 	}
 	return node, err

@@ -129,8 +129,10 @@ func (dc *DocCreate) Save(ctx context.Context) (*Doc, error) {
 			}
 			mut = dc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, dc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, dc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Doc); ok {
+			node = v
 		}
 	}
 	return node, err

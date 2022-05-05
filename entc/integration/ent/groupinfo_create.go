@@ -101,8 +101,10 @@ func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 			}
 			mut = gic.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, gic.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, gic.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*GroupInfo); ok {
+			node = v
 		}
 	}
 	return node, err

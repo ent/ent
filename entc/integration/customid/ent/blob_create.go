@@ -143,8 +143,10 @@ func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 			}
 			mut = bc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, bc.mutation); err != nil {
+		if v, err := mut.Mutate(ctx, bc.mutation); err != nil {
 			return nil, err
+		} else if v, ok := v.(*Blob); ok {
+			node = v
 		}
 	}
 	return node, err
