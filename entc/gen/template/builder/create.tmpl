@@ -87,11 +87,11 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 		if err != nil {
 			return nil, err
 		}
-		 nv, ok := v.(*{{ $.Name }})
-		 if !ok {
-		 	 return nil, fmt.Errorf("unexpected node type %T returned from {{ $.MutationName }}", v)
-		 }
-		 node = nv
+		nv, ok := v.(*{{ $.Name }})
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from {{ $.MutationName }}", v)
+		}
+		node = nv
 	}
 	return node, err
 }
