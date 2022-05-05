@@ -223,10 +223,10 @@ func TestUpdateAfterCreation(t *testing.T) {
 				return nil, err
 			}
 			existingUser, ok := value.(*ent.User)
-			require.True(t, ok, "value should be of type %T", existingUser)
+			require.Truef(t, ok, "value should be of type %T", existingUser)
 			require.Equal(t, existingUser.Version, 1, "version does not match the original value")
 
-			// Important to return a completely new model; don't just mutate the existing user.
+			// After the user was created, return its updated version (a new object).
 			newUser := m.Client().User.UpdateOneID(existingUser.ID).
 				SetVersion(2).
 				SaveX(ctx)
