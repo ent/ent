@@ -683,22 +683,28 @@ func Select(t *testing.T, client *ent.Client) {
 
 	// Select Subquery.
 	t.Log("select subquery")
-	subQuery := sql.SelectExpr(sql.Raw("1"))
-	i, err := client.User.Query().Modify(func(s *sql.Selector) {
-		s.Select("*").From(subQuery.As("s"))
-	}).Int(ctx)
+	i, err := client.User.
+		Query().
+		Modify(func(s *sql.Selector) {
+			subQuery := sql.SelectExpr(sql.Raw("1")).As("s")
+			s.Select("*").From(subQuery)
+		}).
+		Int(ctx)
 	require.NoError(err)
 	require.Equal(1, i)
-	// example with join
+	
+	// Select with join.
 	u = client.User.Create().SetName("crossworth").SetAge(28).SaveX(ctx)
-	userTable := sql.Table(user.Table)
-	subQuery = sql.Select("id").From(userTable).Where(sql.EQ(userTable.C(user.FieldName), "crossworth"))
-	users = client.User.Query().Modify(func(s *sql.Selector) {
-		s.Select("*").From(userTable)
-		s.Join(subQuery).On(userTable.C("id"), subQuery.C("id"))
-	}).AllX(ctx)
-	require.Len(users, 1)
-	require.Equal(u.ID, users[0].ID)
+	id := client.User.
+		Query().
+		Modify(func(s *sql.Selector) {
+			subQuery := sql.Select(user.FieldID).
+				From(sql.Table(user.Table)).
+				Where(sql.EQ(userT.C(user.FieldName), "crossworth"))
+			s.Join(subQuery).On(s.C(user.FieldID), subQuery.C(user.FieldID))
+		}).
+		OnlyIDX(ctx)
+	require.Equal(u.ID, id)
 }
 
 func ExecQuery(t *testing.T, client *ent.Client) {
