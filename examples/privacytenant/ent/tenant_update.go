@@ -205,9 +205,15 @@ func (tuo *TenantUpdateOne) Save(ctx context.Context) (*Tenant, error) {
 			}
 			mut = tuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, tuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, tuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Tenant)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from TenantMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }
