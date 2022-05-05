@@ -212,6 +212,32 @@ func TestPostCreation(t *testing.T) {
 	client.Card.CreateBulk(client.Card.Create().SetNumber("12345")).SaveX(ctx)
 }
 
+func TestUpdateAfterCreation(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+			value, err := next.Mutate(ctx, m)
+			if err != nil {
+				return nil, err
+			}
+			existingUser, ok := value.(*ent.User)
+			require.True(t, ok, "value should be of type %T", existingUser)
+			require.Equal(t, existingUser.Version, 1, "version does not match the original value")
+
+			// Important to return a completely new model; don't just mutate the existing user.
+			newUser := m.Client().User.UpdateOneID(existingUser.ID).
+				SetVersion(2).
+				SaveX(ctx)
+			return newUser, nil
+		})
+	}, ent.OpCreate))
+
+	u := client.User.Create().SetName("a8m").SetVersion(1).SaveX(ctx)
+	require.Equal(t, u.Version, 2, "version mutation in hook should have propagated back to call site")
+}
+
 func TestOldValues(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
