@@ -102,9 +102,15 @@ func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
 			}
 			mut = nc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, nc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, nc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Node)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from NodeMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

@@ -641,9 +641,15 @@ func (cuo *ConversionUpdateOne) Save(ctx context.Context) (*Conversion, error) {
 			}
 			mut = cuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, cuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, cuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Conversion)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from ConversionMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

@@ -377,9 +377,15 @@ func (duo *DeviceUpdateOne) Save(ctx context.Context) (*Device, error) {
 			}
 			mut = duo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, duo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, duo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Device)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from DeviceMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

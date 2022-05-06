@@ -187,7 +187,12 @@ func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) 
 	opts := []migrate.PlannerOption{
 		migrate.WithFormatter(m.atlas.fmt),
 	}
-	if !m.atlas.genSum {
+	if m.atlas.genSum {
+		// Validate the migration directory before proceeding.
+		if err := migrate.Validate(m.atlas.dir); err != nil {
+			return err
+		}
+	} else {
 		opts = append(opts, migrate.DisableChecksum())
 	}
 	return migrate.NewPlanner(nil, m.atlas.dir, opts...).WritePlan(plan)

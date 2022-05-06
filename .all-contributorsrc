@@ -799,6 +799,15 @@
         "code",
         "doc"
       ]
+    },
+    {
+      "login": "booleangate",
+      "name": "Justin Johnson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/181567?v=4",
+      "profile": "http://justinjohnson.org",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -256,9 +256,15 @@ func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 			}
 			mut = iuo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, iuo.mutation); err != nil {
+		v, err := mut.Mutate(ctx, iuo.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Item)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from ItemMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

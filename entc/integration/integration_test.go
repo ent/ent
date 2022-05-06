@@ -680,6 +680,31 @@ func Select(t *testing.T, client *ent.Client) {
 	require.Len(gs, 2)
 	require.Equal(hub.QueryUsers().CountX(ctx), gs[0].UsersCount)
 	require.Equal(lab.QueryUsers().CountX(ctx), gs[1].UsersCount)
+
+	// Select Subquery.
+	t.Log("select subquery")
+	i, err := client.User.
+		Query().
+		Modify(func(s *sql.Selector) {
+			subQuery := sql.SelectExpr(sql.Raw("1")).As("s")
+			s.Select("*").From(subQuery)
+		}).
+		Int(ctx)
+	require.NoError(err)
+	require.Equal(1, i)
+
+	// Select with join.
+	u = client.User.Create().SetName("crossworth").SetAge(28).SaveX(ctx)
+	id := client.User.
+		Query().
+		Where(func(s *sql.Selector) {
+			subQuery := sql.Select(user.FieldID).
+				From(sql.Table(user.Table)).
+				Where(sql.EQ(s.C(user.FieldName), "crossworth"))
+			s.Join(subQuery).On(s.C(user.FieldID), subQuery.C(user.FieldID))
+		}).
+		OnlyIDX(ctx)
+	require.Equal(u.ID, id)
 }
 
 func ExecQuery(t *testing.T, client *ent.Client) {

@@ -80,9 +80,15 @@ func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 			}
 			mut = sc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, sc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, sc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Spec)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from SpecMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }

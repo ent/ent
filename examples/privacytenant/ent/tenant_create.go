@@ -68,9 +68,15 @@ func (tc *TenantCreate) Save(ctx context.Context) (*Tenant, error) {
 			}
 			mut = tc.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, tc.mutation); err != nil {
+		v, err := mut.Mutate(ctx, tc.mutation)
+		if err != nil {
 			return nil, err
 		}
+		nv, ok := v.(*Tenant)
+		if !ok {
+			return nil, fmt.Errorf("unexpected node type %T returned from TenantMutation", v)
+		}
+		node = nv
 	}
 	return node, err
 }
