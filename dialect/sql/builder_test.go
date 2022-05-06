@@ -1473,12 +1473,30 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []interface{}{1},
 		},
 		{
-			input:     Select("id").From(Table("users")).Where(ExprP("Date(last_login_at) >= ?")),
-			wantQuery: "SELECT `id` FROM `users` WHERE Date(last_login_at) >= ?",
+			input:     Select("id").From(Table("users")).Where(ExprP("DATE(last_login_at) >= ?", "2022-05-03")),
+			wantQuery: "SELECT `id` FROM `users` WHERE DATE(last_login_at) >= ?",
 			wantArgs:  []interface{}{"2022-05-03"},
 		},
 		{
-			input:     Select("id").From(Table("events")).Where(ExprP("DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?")),
+			input: Select("id").
+				From(Table("users")).
+				Where(P(func(b *Builder) {
+					b.WriteString("DATE(").Ident("last_login_at").WriteString(") >= ").Arg("2022-05-03")
+				})),
+			wantQuery: "SELECT `id` FROM `users` WHERE DATE(`last_login_at`) >= ?",
+			wantArgs:  []interface{}{"2022-05-03"},
+		},
+		{
+			input:     Select("id").From(Table("events")).Where(ExprP("DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?", "2022-05-03", "2022-05-04")),
+			wantQuery: "SELECT `id` FROM `events` WHERE DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?",
+			wantArgs:  []interface{}{"2022-05-03", "2022-05-04"},
+		},
+		{
+			input: Select("id").
+				From(Table("events")).
+				Where(P(func(b *Builder) {
+					b.WriteString("DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ").Arg("2022-05-03").WriteString(" AND ").Arg("2022-05-04")
+				})),
 			wantQuery: "SELECT `id` FROM `events` WHERE DATE_ADD(date, INTERVAL duration MINUTE) BETWEEN ? AND ?",
 			wantArgs:  []interface{}{"2022-05-03", "2022-05-04"},
 		},
