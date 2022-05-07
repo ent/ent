@@ -597,7 +597,7 @@ In addition, we need to rethink testing as we only have access to local and end-
 
 Nevertheless, the proposed GraphQL server scales well into the complex demands of real-world applications benefiting from the serverless infrastructure and Ent's pleasurable developer experience.
 
-Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+Have questions? Need help with getting started? Feel free to join our [Discord server](https://discord.gg/qZmPgTE6RX) or Slack channel](https://entgo.io/docs/slack/).
 
 :::note For more Ent news and updates:
 

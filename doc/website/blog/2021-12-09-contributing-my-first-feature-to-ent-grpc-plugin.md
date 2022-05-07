@@ -241,7 +241,7 @@ options and keyset pagination to smaller insights gained through PR review, I le
 (and software development in general) in the process! I'd highly encourage anyone thinking they might want to contribute 
 something to take that leap! You'll be surprised with how much you gain from the experience.
 
-Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+Have questions? Need help with getting started? Feel free to join our [Discord server](https://discord.gg/qZmPgTE6RX) or [Slack channel](https://entgo.io/docs/slack/).
 
 :::note For more Ent news and updates:
 

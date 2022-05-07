@@ -40,6 +40,6 @@ framework by our team. In addition, Ariga employees will dedicate time and resou
 community.
 
 If you have any questions about this change or have any ideas on how to make it even better, please don’t hesitate to
-reach out to me on our [Slack channel](https://entgo.io/docs/slack/).
+reach out to me on our [Discord server](https://discord.gg/qZmPgTE6RX) or [Slack channel](https://entgo.io/docs/slack/).
 
 Ariel :heart:

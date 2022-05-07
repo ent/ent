@@ -465,10 +465,11 @@ Amazing! With a few annotations on our schema, we used the super-powers of code 
 
 We believe that `ent` + gRPC can be a great way to build server applications in Go. For example, to set granular access control to the entities managed by our application, developers can already use [Privacy Policies](https://entgo.io/docs/privacy/) that work out-of-the-box with the gRPC integration. To run any arbitrary Go code on the different lifecycle events of entities, developers can utilize custom [Hooks](https://entgo.io/docs/hooks/).
 
-Do you want to build gRPC servers with `ent`? If you want some help setting up or want the integration to support your use case, please reach out to us via our [Discussions Page on GitHub](https://github.com/ent/ent/discussions) or in the #ent channel on the [Gophers Slack](https://app.slack.com/client/T029RQSE6/C01FMSQDT53).
+Do you want to build gRPC servers with `ent`? If you want some help setting up or want the integration to support your use case, please reach out to us via our [Discussions Page on GitHub](https://github.com/ent/ent/discussions) or in the #ent channel on the [Gophers Slack](https://app.slack.com/client/T029RQSE6/C01FMSQDT53) or our [Discord server](https://discord.gg/qZmPgTE6RX).
 
 
 :::note For more Ent news and updates:
 - Subscribe to our [Newsletter](https://www.getrevue.co/profile/ent)
 - Follow us on [Twitter](https://twitter.com/entgo_io)
 - Join us on #ent on the [Gophers Slack](https://app.slack.com/client/T029RQSE6/C01FMSQDT53)
+- Join us on the [Ent Discord Server](https://discord.gg/qZmPgTE6RX)
