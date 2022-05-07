@@ -562,7 +562,7 @@ Go code generator for OpenAPI v3 documents, to provide a ready-to-use, extensibl
 Please note, that both `ogen` and `entoas`/`ogent` have not reached their first major release yet, and it is work in
 progress. Nevertheless, the API can be considered stable.
 
-Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+Have questions? Need help with getting started? Feel free to join our [Discord server](https://discord.gg/qZmPgTE6RX) or [Slack channel](https://entgo.io/docs/slack/).
 
 :::note For more Ent news and updates:
 

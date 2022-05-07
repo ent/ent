@@ -314,4 +314,4 @@ We can use this new filtering as any other predicate:
 ---
 
 Well done! As you can see, by changing a few lines of code our application now exposes a type-safe GraphQL filters
-that automatically map to Ent queries. Have questions? Need help with getting started? Feel free to join our [Slack channel](https://entgo.io/docs/slack).
+that automatically map to Ent queries. Have questions? Need help with getting started? Feel free to join our [Discord server](https://discord.gg/qZmPgTE6RX) or [Slack channel](https://entgo.io/docs/slack).
