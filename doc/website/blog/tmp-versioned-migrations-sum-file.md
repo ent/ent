@@ -20,8 +20,8 @@ like [Flyway](https://flywaydb.org/), [Liquibase](https://liquibase.org/),
 [pressly/goose](https://github.com/pressly/goose) when developing services with Ent.
 
 In this blog post I want to show you another new feature of the Atlas project we call the **Migration Directory 
-Integrity File**, which is now supported in Ent and how you can use it with any of the migration management tools you are
-already used to and like. 
+Integrity File**, which is now supported in Ent and how you can use it with any of the migration management tools you 
+are already used to and like. 
 
 ### The Problem
 
@@ -176,8 +176,8 @@ Now the version control will raise a merge conflict once the second Team attempt
 ![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/conflict-2.svg)
 
 :::note
-You need to have the Atlas CLI installed on your system in order to follow along the next steps in this post. If you
-haven't yet, please follow the installation
+In the following steps we invoke the Atlas CLI by calling `go run -mod=mod ariga.io/atlas/cmd/atlas`, but you can also
+install the CLI globally (and then simply invoke it by calling `atlas`) to your system by following the installation 
 instructions [here](https://atlasgo.io/cli/getting-started/setting-up#install-the-cli).
 :::
 
@@ -185,7 +185,7 @@ You can check at any time, if your `atlas.sum` file is in sync with the migratio
 which should not output any errors now):
 
 ```shell
-atlas migrate validate
+go run -mod=mod ariga.io/atlas/cmd/atlas migrate validate
 ```
 
 However, if you happen to make a manual change to your migration files, like adding a new SQL statement, editing an
@@ -194,7 +194,7 @@ directory's contents. Attempting to generate new migration files for a schema ch
 migration engine. Try it out by creating a new empty migration file and run the `main.go` once again:
 
 ```shell
-atlas migrate new migrations/manual_version.sql --format golang-migrate
+go run -mod=mod ariga.io/atlas/cmd/atlas migrate new migrations/manual_version.sql --format golang-migrate
 go run -mod=mod main.go initial
 # 2022/05/04 15:08:09 failed creating schema resources: validating migration directory: checksum mismatch
 # exit status 1
@@ -204,7 +204,7 @@ go run -mod=mod main.go initial
 The `atlas migrate validate` command will tell you the same:
 
 ```shell
-atlas migrate validate
+go run -mod=mod ariga.io/atlas/cmd/atlas migrate validate
 # Error: checksum mismatch
 # 
 # You have a checksum error in your migration directory.
@@ -221,7 +221,7 @@ atlas migrate validate
 In order to get the `atlas.sum` file back in sync with the migration directory, we can once again use the Atlas CLI:
 
 ```shell
-atlas migrate hash --force
+go run -mod=mod ariga.io/atlas/cmd/atlas migrate hash --force
 ```
 
 As a safety measure, the Atlas CLI does not operate on a migration directory that is not in sync with its `atlas.sum`
