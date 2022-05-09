@@ -3,7 +3,7 @@ title: Versioned Migrations Management and Migration Directory Integrity
 author: Jannik Clausen (MasseElch)
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
-image: "TBD"
+image: "https://entgo.io/images/assets/migrate/atlas-validate.png"
 ---
 
 Five weeks ago we released a long awaited feature for managing database changes in Ent: **Versioned Migrations**. In
@@ -28,7 +28,7 @@ are already used to and like.
 When using versioned migrations, developers need to be careful of doing the following in order to not break the database:
 
 1. Retroactively changing migrations that have already run.
-2. Accidently changing the order in which migrations are organized.
+2. Accidentally changing the order in which migrations are organized.
 3. Checking in semantically incorrect SQL scripts.
 Theoretically, code review should guard teams from merging migrations with these issues. In my experience, however, there are many kinds of errors that can slip the human eye, making this approach error-prone.
 Therefore, an automated way of preventing these errors is much safer.
