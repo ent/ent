@@ -190,7 +190,7 @@ func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) 
 	if m.atlas.genSum {
 		// Validate the migration directory before proceeding.
 		if err := migrate.Validate(m.atlas.dir); err != nil {
-			return err
+			return fmt.Errorf("validating migration directory: %w", err)
 		}
 	} else {
 		opts = append(opts, migrate.DisableChecksum())
