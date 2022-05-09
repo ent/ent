@@ -19,8 +19,8 @@ like [Flyway](https://flywaydb.org/), [Liquibase](https://liquibase.org/),
 [golang-migrate/migrate](https://github.com/golang-migrate/migrate), or 
 [pressly/goose](https://github.com/pressly/goose) when developing services with Ent.
 
-In this blog post I want to show you another new feature of the Atlas project we call **Migration Directory Integrity
-File**, which now also has support in Ent and how you can use it with any of the migration management tools you are
+In this blog post I want to show you another new feature of the Atlas project we call the **Migration Directory 
+Integrity File**, which is now supported in Ent and how you can use it with any of the migration management tools you are
 already used to and like. 
 
 ### The Problem
@@ -47,7 +47,7 @@ This diagram shows two possible errors that go undetected. The first one being t
 
 Team A and Team B both branch a feature roughly at the same time. Team B generates a migration file with a version
 timestamp **x** and continues to work on the feature. Team A generates a migration file at a later point in time and
-therefore has migration version timestamp **x+1**. Team A finishes the feature and merges it into master,
+therefore has the migration version timestamp **x+1**. Team A finishes the feature and merges it into master,
 possibly automatically deploying it in production with the migration version **x+1** applied. No problem so far.
 
 Now, Team B merges its feature with the migration version **x**, which predates the already applied version **x+1**. If the code
@@ -228,7 +228,7 @@ As a safety measure, the Atlas CLI does not operate on a migration directory tha
 file. Therefore, you need to add the `--force` flag to the command. 
 
 For cases, where a developer forgets to update the `atlas.sum` file after making a manual change, you can add
-a `atlas migrate validate` call to your CI. We are actively working on a GitHub action and CI solution, that does this 
+an `atlas migrate validate` call to your CI. We are actively working on a GitHub action and CI solution, that does this 
 (among and other things) for you _out-of-the-box_.
 
 ### Wrapping Up
