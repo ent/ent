@@ -7,14 +7,14 @@ image: "TBD"
 ---
 
 Five weeks ago we released a long awaited feature for managing database changes in Ent: **Versioned Migrations**. In
-the [announcing blog post](2022-03-14-announcing-versioned-migrations.md) we gave a brief introduction into both the
+the [announcement blog post](2022-03-14-announcing-versioned-migrations.md) we gave a brief introduction into both the
 declarative and change-based approach to keep database schemas in sync with the consuming applications, as well as their
 drawbacks and why [Atlas'](https://atlasgo.io) (Ents underlying migration engine) attempt of bringing the best of both
 worlds into one workflow is worth a try. We call it **Versioned Migration Authoring** and if you haven't read it, now is
 a good time!
 
 With versioned migration authoring, the resulting migration files are still "change-based", but have been safely planned
-by the Atlas engine. This means, that you can still use your favorite and used-to migration management tool,
+by the Atlas engine. This means that you can still use your favorite migration management tool,
 like [Flyway](https://flywaydb.org/), [Liquibase](https://liquibase.org/), 
 [golang-migrate/migrate](https://github.com/golang-migrate/migrate), or 
 [pressly/goose](https://github.com/pressly/goose) when developing services with Ent.
@@ -31,11 +31,11 @@ Using versioned migration has three major downsides a developer has to be aware 
 2. The order matters
 3. SQL semantics are not checked automatically
 
-While both of the above should be detected in basic code review, it can slip the human eye, as it is error-prone.
+While all of the above should be detected in basic code review, it can slip the human eye, as it is error-prone.
 Therefore, an automated solution is a nice-to-have safety guard.
 
 The first issue is addressed by most management tools by saving a hash of the applied migration file to the managed
-database and comparing them with the files. If they don't match, the migration can be aborted. But this happens in a
+database and comparing it with the files. If they don't match, the migration can be aborted. However, this happens in a
 very late stage in a features' development cycle, and it could save both time and resources if this can be detected
 earlier.
 
@@ -43,31 +43,31 @@ For the second (and third) issue, have a look at the following image:
 
 ![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/no-conflict-2.svg)
 
-This diagram shows two possible errors, that go undetected. The first one being the order of the migration files. 
+This diagram shows two possible errors that go undetected. The first one being the order of the migration files. 
 
-Team A and Team B both branch a feature roughly the same time. Team B generates a migration file with version
+Team A and Team B both branch a feature roughly at the same time. Team B generates a migration file with a version
 timestamp **x** and continues to work on the feature. Team A generates a migration file at a later point in time and
-therefore has migration version timestamp **x+1**. But Team A is done with the feature and merges it into master,
+therefore has migration version timestamp **x+1**. Team A finishes the feature and merges it into master,
 possibly automatically deploying it in production with the migration version **x+1** applied. No problem so far.
 
-Now Team B merges its feature with migration version **x**, which predates already applied version **x+1**. If the code
-review process does not detect this, the migration file lands in production, and it now depends on the used migration
-management tool what happens.
+Now, Team B merges its feature with the migration version **x**, which predates the already applied version **x+1**. If the code
+review process does not detect this, the migration file lands in production, and it now depends on the specific migration
+management tool to decide what happens.
 
 Most tools have their own solution to that problem, `pressly/goose` for example takes an approach they
 call [hybrid versioning](https://github.com/pressly/goose/issues/63#issuecomment-428681694). Before I introduce you to
-Atlas' (Ents) unique way of handling this problem, let's have a quick look at the third issue:
+Atlas' (Ent's) unique way of handling this problem, let's have a quick look at the third issue:
 
-If both Team A and Team B develop a feature where they need new tables or columns, and they name them the same, (e.g.
+If both Team A and Team B develop a feature where they need new tables or columns, and they give them the same name, (e.g.
 `users`) they could both generate a statement to create that table. While the team that merges first will have a
-successful migration, the second teams' migration will fail since the table or column already exists.
+successful migration, the second team's migration will fail since the table or column already exists.
 
 ### The Solution
 
 Atlas has a unique way of handling the above problems. The goal is to raise awareness about the issues as soon as
-possible. In our opinion, the best place for this are the version control and continuous integration (CI) parts of a
+possible. In our opinion, the best place to do so is in version control and continuous integration (CI) parts of a
 product. Atlas' solution to this is the introduction of a new file we call the **Migration Directory Integrity File**.
-It simply is another file named `atlas.sum` that is stored together with the migration files and contains some
+It is simply another file named `atlas.sum` that is stored together with the migration files and contains some
 meta-data about the migration directory. Its format is inspired by the `go.sum` file of a Go module, and it would look
 similar to this: 
 
@@ -78,7 +78,7 @@ h1:KRFsSi68ZOarsQAJZ1mfSiMSkIOZlMq4RzyF//Pwf8A=
 
 The `atlas.sum` file contains a sum of the whole directory as its first entry, and a checksum for each of the migration
 files (implemented by a reverse, one branch merkle hash tree). Let's see how we can use this file to detect the cases
-above in version control and CI. Our goal is to raise awareness, that both teams added migrations and that they most
+above in version control and CI. Our goal is to raise awareness that both teams added migrations and that they most
 likely have to be checked before proceeding the merge.
 
 :::note
@@ -86,7 +86,7 @@ To follow along, run the following commands to quickly have an example to work w
 
 1. Create a Go module and download all needed dependencies
 2. Create a very basic User schema
-3. Enable versioned migrations feature
+3. Enable the versioned migrations feature
 4. Run the codegen
 5. Start a MySQL docker container to use (remove with `docker stop atlas-sum`)
 
@@ -144,7 +144,7 @@ func main() {
 ```
 
 After creating a migrations directory and running the above commands you should see `golang-migrate/migrate` compatible
-migration files and in addition to that the `atlas.sum` file with the following contents:
+migration files and in addition, the `atlas.sum` file with the following contents:
 
 ```shell
 mkdir migrations
@@ -188,9 +188,9 @@ which should not output any errors now):
 atlas migrate validate
 ```
 
-However, if you'd happen to make a manual change to your migration files, like adding a new SQL statement, editing an
-existing one or even creating a complete new file, the `atlas.sum` file is no longer in sync with the migration
-directories contents. Attempting to generate new migration files for a schema change will now be blocked by the Atlas
+However, if you happen to make a manual change to your migration files, like adding a new SQL statement, editing an
+existing one or even creating a completely new file, the `atlas.sum` file is no longer in sync with the migration
+directory's contents. Attempting to generate new migration files for a schema change will now be blocked by the Atlas
 migration engine. Try it out by creating a new empty migration file and run the `main.go` once again:
 
 ```shell
@@ -224,7 +224,7 @@ In order to get the `atlas.sum` file back in sync with the migration directory, 
 atlas migrate hash --force
 ```
 
-As a safety measure, the Atlas CLI does not operate on a migration directory, that is not in sync with its `atlas.sum`
+As a safety measure, the Atlas CLI does not operate on a migration directory that is not in sync with its `atlas.sum`
 file. Therefore, you need to add the `--force` flag to the command. 
 
 For cases, where a developer forgets to update the `atlas.sum` file after making a manual change, you can add
