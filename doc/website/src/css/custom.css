@@ -549,7 +549,7 @@ li.navSearchWrapper.reactNavSearchWrapper {
   margin-top: 0;
 }
 
-header ul, ol {
+header ul, header ol {
   margin-bottom: 0;
 }
 
