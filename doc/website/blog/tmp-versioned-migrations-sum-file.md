@@ -1,5 +1,5 @@
 ---
-title: Versioned Migrations Management and Migration Directory Integrity File
+title: Versioned Migrations Management and Migration Directory Integrity
 author: MasseElch
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
@@ -41,7 +41,7 @@ earlier.
 
 For the second (and third) issue, have a look at the following image:
 
-![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/no-conflict.svg)
+![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/no-conflict-2.svg)
 
 This diagram shows two possible errors, that go undetected. The first one being the order of the migration files. 
 
@@ -74,10 +74,9 @@ similar to this:
 ```text
 h1:KRFsSi68ZOarsQAJZ1mfSiMSkIOZlMq4RzyF//Pwf8A=
 20220318104614_team_A.sql h1:EGknG5Y6GQYrc4W8e/r3S61Aqx2p+NmQyVz/2m8ZNwA=
-
 ```
 
-The `atlas.sum` file contains a sum of the whole directory as it's first entry, and a checksum for each of the migration
+The `atlas.sum` file contains a sum of the whole directory as its first entry, and a checksum for each of the migration
 files (implemented by a reverse, one branch merkle hash tree). Let's see how we can use this file to detect the cases
 above in version control and CI. Our goal is to raise awareness, that both teams added migrations and that they most
 likely have to be checked before proceeding the merge.
@@ -95,8 +94,8 @@ To follow along, run the following commands to quickly have an example to work w
 mkdir ent-sum-file
 cd ent-sum-file
 go mod init ent-sum-file
-go get -u entgo.io/ent/cmd/ent@0569a50725ef61c1cd6816f66ba5c67321223717 # todo(masseelch): change to master once https://github.com/ent/ent/pull/2521 is merged 
-go run entgo.io/ent/cmd/ent@ init User
+go install entgo.io/ent/cmd/ent@master
+go run entgo.io/ent/cmd/ent init User
 sed -i -E 's|^//go(.*)$|//go\1 --feature sql/versioned-migration|' ent/generate.go
 go generate ./...
 docker run --rm --name atlas-sum --detach --env MYSQL_ROOT_PASSWORD=pass --env MYSQL_DATABASE=ent -p 3306:3306 mysql
@@ -168,7 +167,6 @@ DROP TABLE `users`;
 h1:SxbWjP6gufiBpBjOVtFXgXy7q3pq1X11XYUxvT4ErxM=
 20220504114411_initial.down.sql h1:OllnelRaqecTrPbd2YpDbBEymCpY/l6ihbyd/tVDgeY=
 20220504114411_initial.up.sql h1:o/6yOczGSNYQLlvALEU9lK2/L6/ws65FrHJkEk/tjBk=
-
 ```
 
 As you can see the `atlas.sum` file contains one entry for each migration file generated. With the `atlas.sum`
