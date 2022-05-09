@@ -20,26 +20,25 @@ like [Flyway](https://flywaydb.org/), [Liquibase](https://liquibase.org/),
 [pressly/goose](https://github.com/pressly/goose) when developing services with Ent.
 
 In this blog post I want to show you another new feature of the Atlas project we call the **Migration Directory 
-Integrity File**, which is now supported in Ent and how you can use it with any of the migration management tools you 
+Integrity File**, which is now supported in Ent, and how you can use it with any of the migration management tools you 
 are already used to and like. 
 
 ### The Problem
 
-Using versioned migration has three major downsides a developer has to be aware of in order to not break the database.
+When using versioned migrations, developers need to be careful of doing the following in order to not break the database:
 
-1. History should not be changed
-2. The order matters
-3. SQL semantics are not checked automatically
+1. Retroactively changing migrations that have already run.
+2. Accidently changing the order in which migrations are organized.
+3. Checking in semantically incorrect SQL scripts.
+Theoretically, code review should guard teams from merging migrations with these issues. In my experience, however, there are many kinds of errors that can slip the human eye, making this approach error-prone.
+Therefore, an automated way of preventing these errors is much safer.
 
-While all of the above should be detected in basic code review, it can slip the human eye, as it is error-prone.
-Therefore, an automated solution is a nice-to-have safety guard.
-
-The first issue is addressed by most management tools by saving a hash of the applied migration file to the managed
+The first issue (changing history) is addressed by most management tools by saving a hash of the applied migration file to the managed
 database and comparing it with the files. If they don't match, the migration can be aborted. However, this happens in a
-very late stage in a features' development cycle, and it could save both time and resources if this can be detected
+very late stage in the development cycle (during deployment), and it could save both time and resources if this can be detected
 earlier.
 
-For the second (and third) issue, have a look at the following image:
+For the second (and third) issue, consider the following scenario:
 
 ![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/no-conflict-2.svg)
 
@@ -68,7 +67,7 @@ Atlas has a unique way of handling the above problems. The goal is to raise awar
 possible. In our opinion, the best place to do so is in version control and continuous integration (CI) parts of a
 product. Atlas' solution to this is the introduction of a new file we call the **Migration Directory Integrity File**.
 It is simply another file named `atlas.sum` that is stored together with the migration files and contains some
-meta-data about the migration directory. Its format is inspired by the `go.sum` file of a Go module, and it would look
+metadata about the migration directory. Its format is inspired by the `go.sum` file of a Go module, and it would look
 similar to this: 
 
 ```text
