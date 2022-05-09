@@ -52,7 +52,7 @@ Go to your `ent/entc.go` file, and add the 3 highlighted lines (extension option
 ```go {3-5} title="ent/entc.go"
 func main() {
 	ex, err := entgql.NewExtension(
-		entgql.WithWhereFilters(true),
+		entgql.WithWhereInputs(true),
 		entgql.WithConfigPath("../gqlgen.yml"),
 		entgql.WithSchemaPath("../ent.graphql"),
 	)
@@ -69,7 +69,7 @@ func main() {
 } 
 ```
 
-The `WithWhereFilters` option enables the filter generation, the `WithConfigPath` configures the path to the `gqlgen`
+The `WithWhereInputs` option enables the filter generation, the `WithConfigPath` configures the path to the `gqlgen`
 config file, which allows the extension to more accurately map GraphQL to Ent types. The last option `WithSchemaPath`,
 configures a path to a new, or an existing GraphQL schema to write the generated filters to.
 
@@ -166,7 +166,7 @@ type Query {
     last: Int,
     orderBy: TodoOrder,
     where: TodoWhereInput,
-  ): TodoConnection
+  ): TodoConnection!
 }
 ```
 

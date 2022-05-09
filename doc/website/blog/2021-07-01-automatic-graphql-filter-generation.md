@@ -237,7 +237,7 @@ type Query {
     last: Int,
     orderBy: TodoOrder,
     where: TodoWhereInput,
-  ): TodoConnection
+  ): TodoConnection!
 }
 ```
 

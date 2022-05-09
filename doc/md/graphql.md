@@ -203,7 +203,7 @@ type Query {
     before: Cursor
     last: Int
     orderBy: TodoOrder
-  ): TodoConnection
+  ): TodoConnection!
 }
 ```
 That's all for the GraphQL schema changes, let's run `gqlgen` code generation.
