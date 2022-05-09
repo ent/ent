@@ -1,6 +1,6 @@
 ---
 title: Versioned Migrations Management and Migration Directory Integrity
-author: MasseElch
+author: Jannik Clausen (MasseElch)
 authorURL: "https://github.com/masseelch"
 authorImageURL: "https://avatars.githubusercontent.com/u/12862103?v=4"
 image: "TBD"
