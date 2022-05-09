@@ -19,9 +19,9 @@ like [Flyway](https://flywaydb.org/), [Liquibase](https://liquibase.org/),
 [golang-migrate/migrate](https://github.com/golang-migrate/migrate), or 
 [pressly/goose](https://github.com/pressly/goose) when developing services with Ent.
 
-In this blog post I want to show you another new feature of the Atlas we call **Migration Directory Integrity File**,
-which now also has support in Ent and how you can use it with any of the migration management tools you are already used
-to and like. 
+In this blog post I want to show you another new feature of the Atlas project we call **Migration Directory Integrity
+File**, which now also has support in Ent and how you can use it with any of the migration management tools you are
+already used to and like. 
 
 ### The Problem
 
@@ -103,7 +103,7 @@ docker run --rm --name atlas-sum --detach --env MYSQL_ROOT_PASSWORD=pass --env M
 :::
 
 The first step is to tell the migration engine to create and manage the `atlas.sum` by using the `schema.WithSumFile()`
-option. The below example uses and [instantiated Ent client](/docs/versioned-migrations.md#from-client) to generate new
+option. The below example uses an [instantiated Ent client](/docs/versioned-migrations.md#from-client) to generate new
 migration files:
 
 ```go
@@ -173,7 +173,7 @@ As you can see the `atlas.sum` file contains one entry for each migration file g
 generation file enabled, both Team A and Team B will have such a file once they generate migrations for a schema change.
 Now the version control will raise a merge conflict once the second Team attempts to merge their feature. 
 
-![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/conflict.svg)
+![atlas-versioned-migrations-no-conflict](https://entgo.io/images/assets/migrate/conflict-2.svg)
 
 :::note
 You need to have the Atlas CLI installed on your system in order to follow along the next steps in this post. If you
@@ -228,7 +228,8 @@ As a safety measure, the Atlas CLI does not operate on a migration directory, th
 file. Therefore, you need to add the `--force` flag to the command. 
 
 For cases, where a developer forgets to update the `atlas.sum` file after making a manual change, you can add
-a `atlas migrate validate` call to your CI.
+a `atlas migrate validate` call to your CI. We are actively working on a GitHub action and CI solution, that does this 
+(among and other things) for you _out-of-the-box_.
 
 ### Wrapping Up
 
