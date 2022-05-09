@@ -13,8 +13,6 @@ and maintain applications with large data-models and sticks with the following p
 - Database queries and graph traversals are easy to write.
 - Simple to extend and customize using Go templates.
 
-<br/>
-
 ![gopher-schema-as-code](https://entgo.io/images/assets/gopher-schema-as-code.png)
 
 ## Setup A Go Environment
