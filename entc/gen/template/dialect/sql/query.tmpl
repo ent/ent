@@ -276,6 +276,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	{{- $e := $.Scope.Edge }}
 	{{- $receiver := $.Scope.Rec }}
 	if query := {{ $receiver }}.{{ $e.EagerLoadField }}; query != nil {
+	err := sql.Chunked(func(start, end int) error {
+		nodes := nodes[start:end]
 		{{- if $e.M2M }}
 			edgeids := make([]driver.Value, len(nodes))
 			byid := make(map[{{ $.ID.Type }}]*{{ $.Name }})
@@ -320,12 +322,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				}
 			})
 			if err != nil {
-				return nil, err
+				return err
 			}
 			for _, n := range neighbors {
 				nodes, ok := nids[n.ID]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected "{{ $e.Name }}" node returned %v`, n.ID)
+					return fmt.Errorf(`unexpected "{{ $e.Name }}" node returned %v`, n.ID)
 				}
 				for kn := range nodes {
 					kn.Edges.{{ $e.StructField }} = append(kn.Edges.{{ $e.StructField }}, n)
@@ -350,12 +352,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			query.Where({{ $e.Type.Package }}.IDIn(ids...))
 			neighbors, err := query.All(ctx)
 			if err != nil {
-				return nil, err
+				return err
 			}
 			for _, n := range neighbors {
 				nodes, ok := nodeids[n.ID]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v`, n.ID)
+					return fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v`, n.ID)
 				}
 				for i := range nodes {
 					nodes[i].Edges.{{ $e.StructField }} = n
@@ -379,23 +381,28 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			}))
 			neighbors, err := query.All(ctx)
 			if err != nil {
-				return nil, err
+				return err
 			}
 			for _, n := range neighbors {
 				{{- $fk := $e.ForeignKey }}
 				fk := n.{{ $fk.StructField }}
 				{{- if $fk.Field.Nillable }}
 					if fk == nil {
-						return nil, fmt.Errorf(`foreign-key "{{ $fk.Field.Name }}" is nil for node %v`, n.ID)
+						return fmt.Errorf(`foreign-key "{{ $fk.Field.Name }}" is nil for node %v`, n.ID)
 					}
 				{{- end }}
 				node, ok := nodeids[{{ if $fk.Field.Nillable }}*{{ end }}fk]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n.ID)
+					return fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n.ID)
 				}
 				node.Edges.{{ $e.StructField }} = {{ if $e.Unique }}n{{ else }}append(node.Edges.{{ $e.StructField }}, n){{ end }}
 			}
 		{{- end }}
+		return nil
+	}, len(nodes), sql.MaxParams({{ $receiver }}.driver.Dialect()))
+	if err != nil {
+		return nil, err
+	}
 	}
 {{ end }}
 
