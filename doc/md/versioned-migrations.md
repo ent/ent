@@ -185,6 +185,14 @@ following four:
 3. [Flyway](https://flywaydb.org/)
 4. [Liquibase](https://www.liquibase.org/)
 
+:::note
+You need to have the latest master of Ent installed for this to be working. 
+
+```shell
+go get -u entgo.io/ent@master
+```
+:::
+
 ```go
 package main
 
