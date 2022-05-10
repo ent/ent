@@ -470,89 +470,110 @@ func (fq *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	}
 
 	if query := fq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*File)
-		for i := range nodes {
-			if nodes[i].user_files == nil {
-				continue
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			ids := make([]int, 0, len(nodes))
+			nodeids := make(map[int][]*File)
+			for i := range nodes {
+				if nodes[i].user_files == nil {
+					continue
+				}
+				fk := *nodes[i].user_files
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
-			fk := *nodes[i].user_files
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
+			query.Where(user.IDIn(ids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
 			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+			for _, n := range neighbors {
+				nodes, ok := nodeids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "user_files" returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.Owner = n
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(fq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_files" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
 		}
 	}
 
 	if query := fq.withType; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*File)
-		for i := range nodes {
-			if nodes[i].file_type_files == nil {
-				continue
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			ids := make([]int, 0, len(nodes))
+			nodeids := make(map[int][]*File)
+			for i := range nodes {
+				if nodes[i].file_type_files == nil {
+					continue
+				}
+				fk := *nodes[i].file_type_files
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
-			fk := *nodes[i].file_type_files
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
+			query.Where(filetype.IDIn(ids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
 			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(filetype.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+			for _, n := range neighbors {
+				nodes, ok := nodeids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.Type = n
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(fq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Type = n
-			}
 		}
 	}
 
 	if query := fq.withField; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*File)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Field = []*FieldType{}
-		}
-		query.withFKs = true
-		query.Where(predicate.FieldType(func(s *sql.Selector) {
-			s.Where(sql.InValues(file.FieldColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			fks := make([]driver.Value, 0, len(nodes))
+			nodeids := make(map[int]*File)
+			for i := range nodes {
+				fks = append(fks, nodes[i].ID)
+				nodeids[nodes[i].ID] = nodes[i]
+				nodes[i].Edges.Field = []*FieldType{}
+			}
+			query.withFKs = true
+			query.Where(predicate.FieldType(func(s *sql.Selector) {
+				s.Where(sql.InValues(file.FieldColumn, fks...))
+			}))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
+			}
+			for _, n := range neighbors {
+				fk := n.file_field
+				if fk == nil {
+					return fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
+				}
+				node, ok := nodeids[*fk]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
+				}
+				node.Edges.Field = append(node.Edges.Field, n)
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(fq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.file_field
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Field = append(node.Edges.Field, n)
 		}
 	}
 

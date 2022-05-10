@@ -506,142 +506,170 @@ func (gq *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 	}
 
 	if query := gq.withFiles; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Group)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Files = []*File{}
-		}
-		query.withFKs = true
-		query.Where(predicate.File(func(s *sql.Selector) {
-			s.Where(sql.InValues(group.FilesColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			fks := make([]driver.Value, 0, len(nodes))
+			nodeids := make(map[int]*Group)
+			for i := range nodes {
+				fks = append(fks, nodes[i].ID)
+				nodeids[nodes[i].ID] = nodes[i]
+				nodes[i].Edges.Files = []*File{}
+			}
+			query.withFKs = true
+			query.Where(predicate.File(func(s *sql.Selector) {
+				s.Where(sql.InValues(group.FilesColumn, fks...))
+			}))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
+			}
+			for _, n := range neighbors {
+				fk := n.group_files
+				if fk == nil {
+					return fmt.Errorf(`foreign-key "group_files" is nil for node %v`, n.ID)
+				}
+				node, ok := nodeids[*fk]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "group_files" returned %v for node %v`, *fk, n.ID)
+				}
+				node.Edges.Files = append(node.Edges.Files, n)
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(gq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.group_files
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_files" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_files" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Files = append(node.Edges.Files, n)
 		}
 	}
 
 	if query := gq.withBlocked; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Group)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Blocked = []*User{}
-		}
-		query.withFKs = true
-		query.Where(predicate.User(func(s *sql.Selector) {
-			s.Where(sql.InValues(group.BlockedColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			fks := make([]driver.Value, 0, len(nodes))
+			nodeids := make(map[int]*Group)
+			for i := range nodes {
+				fks = append(fks, nodes[i].ID)
+				nodeids[nodes[i].ID] = nodes[i]
+				nodes[i].Edges.Blocked = []*User{}
+			}
+			query.withFKs = true
+			query.Where(predicate.User(func(s *sql.Selector) {
+				s.Where(sql.InValues(group.BlockedColumn, fks...))
+			}))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
+			}
+			for _, n := range neighbors {
+				fk := n.group_blocked
+				if fk == nil {
+					return fmt.Errorf(`foreign-key "group_blocked" is nil for node %v`, n.ID)
+				}
+				node, ok := nodeids[*fk]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "group_blocked" returned %v for node %v`, *fk, n.ID)
+				}
+				node.Edges.Blocked = append(node.Edges.Blocked, n)
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(gq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.group_blocked
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_blocked" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_blocked" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Blocked = append(node.Edges.Blocked, n)
 		}
 	}
 
 	if query := gq.withUsers; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*Group)
-		nids := make(map[int]map[*Group]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Users = []*User{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(group.UsersTable)
-			s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[0]))
-			s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[1]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(group.UsersPrimaryKey[1]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			edgeids := make([]driver.Value, len(nodes))
+			byid := make(map[int]*Group)
+			nids := make(map[int]map[*Group]struct{})
+			for i, node := range nodes {
+				edgeids[i] = node.ID
+				byid[node.ID] = node
+				node.Edges.Users = []*User{}
 			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Group]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
+			query.Where(func(s *sql.Selector) {
+				joinT := sql.Table(group.UsersTable)
+				s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[0]))
+				s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[1]), edgeids...))
+				columns := s.SelectedColumns()
+				s.Select(joinT.C(group.UsersPrimaryKey[1]))
+				s.AppendSelect(columns...)
+				s.SetDistinct(false)
+			})
+			neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+				assign := spec.Assign
+				values := spec.ScanValues
+				spec.ScanValues = func(columns []string) ([]interface{}, error) {
+					values, err := values(columns[1:])
+					if err != nil {
+						return nil, err
+					}
+					return append([]interface{}{new(sql.NullInt64)}, values...), nil
 				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
+				spec.Assign = func(columns []string, values []interface{}) error {
+					outValue := int(values[0].(*sql.NullInt64).Int64)
+					inValue := int(values[1].(*sql.NullInt64).Int64)
+					if nids[inValue] == nil {
+						nids[inValue] = map[*Group]struct{}{byid[outValue]: struct{}{}}
+						return assign(columns[1:], values[1:])
+					}
+					nids[inValue][byid[outValue]] = struct{}{}
+					return nil
+				}
+			})
+			if err != nil {
+				return err
 			}
-		})
+			for _, n := range neighbors {
+				nodes, ok := nids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
+				}
+				for kn := range nodes {
+					kn.Edges.Users = append(kn.Edges.Users, n)
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(gq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Users = append(kn.Edges.Users, n)
-			}
 		}
 	}
 
 	if query := gq.withInfo; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Group)
-		for i := range nodes {
-			if nodes[i].group_info == nil {
-				continue
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			ids := make([]int, 0, len(nodes))
+			nodeids := make(map[int][]*Group)
+			for i := range nodes {
+				if nodes[i].group_info == nil {
+					continue
+				}
+				fk := *nodes[i].group_info
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
-			fk := *nodes[i].group_info
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
+			query.Where(groupinfo.IDIn(ids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
 			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(groupinfo.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+			for _, n := range neighbors {
+				nodes, ok := nodeids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "group_info" returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.Info = n
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(gq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_info" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Info = n
-			}
 		}
 	}
 

@@ -431,60 +431,74 @@ func (pq *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	}
 
 	if query := pq.withTeam; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Pet)
-		for i := range nodes {
-			if nodes[i].user_team == nil {
-				continue
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			ids := make([]int, 0, len(nodes))
+			nodeids := make(map[int][]*Pet)
+			for i := range nodes {
+				if nodes[i].user_team == nil {
+					continue
+				}
+				fk := *nodes[i].user_team
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
-			fk := *nodes[i].user_team
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
+			query.Where(user.IDIn(ids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
 			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+			for _, n := range neighbors {
+				nodes, ok := nodeids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "user_team" returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.Team = n
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(pq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_team" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Team = n
-			}
 		}
 	}
 
 	if query := pq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Pet)
-		for i := range nodes {
-			if nodes[i].user_pets == nil {
-				continue
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			ids := make([]int, 0, len(nodes))
+			nodeids := make(map[int][]*Pet)
+			for i := range nodes {
+				if nodes[i].user_pets == nil {
+					continue
+				}
+				fk := *nodes[i].user_pets
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
-			fk := *nodes[i].user_pets
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
+			query.Where(user.IDIn(ids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
 			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+			for _, n := range neighbors {
+				nodes, ok := nodeids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.Owner = n
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(pq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
 		}
 	}
 
