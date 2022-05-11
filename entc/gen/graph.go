@@ -497,7 +497,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 					Symbol:     fkSymbol(e, owner, ref),
 				})
 			case M2M:
-				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
+				t1, t2, ass := tables[n.Table()], tables[e.Type.Table()], tables[e.Rel.Table]
 				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt}
 				if ref := n.ID; ref.UserDefined {
 					c1.Type = ref.Type.Type
@@ -509,6 +509,33 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 					c2.Size = ref.size()
 				}
 				s1, s2 := fkSymbols(e, c1, c2)
+				// if association table defined,force fix foreign key and other infomation,because the purpose of assoiation table is clear
+				if ass != nil {
+					mayAddColumn(ass, c1)
+					mayAddColumn(ass, c2)
+					// allow primary key exist because the key maybe id
+					if len(ass.PrimaryKey) == 0 {
+						ass.PrimaryKey = []*schema.Column{c1, c2}
+					}
+					// force set foreign keys
+					ass.ForeignKeys = []*schema.ForeignKey{
+						{
+							RefTable:   t1,
+							OnDelete:   schema.Cascade,
+							Columns:    []*schema.Column{c1},
+							RefColumns: []*schema.Column{t1.PrimaryKey[0]},
+							Symbol:     s1,
+						},
+						{
+							RefTable:   t2,
+							OnDelete:   schema.Cascade,
+							Columns:    []*schema.Column{c2},
+							RefColumns: []*schema.Column{t2.PrimaryKey[0]},
+							Symbol:     s2,
+						},
+					}
+					continue
+				}
 				all = append(all, &schema.Table{
 					Name:       e.Rel.Table,
 					Columns:    []*schema.Column{c1, c2},
