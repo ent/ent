@@ -231,7 +231,8 @@ func initTemplates() {
 // provide additional functionality for ent extensions.
 type Template struct {
 	*template.Template
-	FuncMap template.FuncMap
+	FuncMap   template.FuncMap
+	condition func(*Graph) bool
 }
 
 // NewTemplate creates an empty template with the standard codegen functions.
@@ -251,6 +252,12 @@ func (t *Template) Funcs(funcMap template.FuncMap) *Template {
 			t.FuncMap[name] = f
 		}
 	}
+	return t
+}
+
+// SkipIf allows registering a function to determine if the template needs to be skipped or not.
+func (t *Template) SkipIf(cond func(*Graph) bool) *Template {
+	t.condition = cond
 	return t
 }
 
