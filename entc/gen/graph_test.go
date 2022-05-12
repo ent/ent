@@ -307,11 +307,12 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(os.MkdirAll(target, os.ModePerm), "creating tmpdir")
 	defer os.RemoveAll(target)
 	external := MustParse(NewTemplate("external").Parse("package external"))
+	skipped := MustParse(NewTemplate("skipped").SkipIf(func(*Graph) bool { return true }).Parse("package external"))
 	graph, err := NewGraph(&Config{
 		Package:   "entc/gen",
 		Target:    target,
 		Storage:   drivers[0],
-		Templates: []*Template{external},
+		Templates: []*Template{external, skipped},
 		IDType:    &field.TypeInfo{Type: field.TypeInt},
 		Features:  AllFeatures,
 	}, &load.Schema{
@@ -340,6 +341,8 @@ func TestGraph_Gen(t *testing.T) {
 	}
 	_, err = os.Stat(filepath.Join(target, "external.go"))
 	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "skipped.go"))
+	require.True(os.IsNotExist(err))
 
 	// Generated feature templates.
 	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
