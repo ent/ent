@@ -15,7 +15,7 @@ var (
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "version", Type: field.TypeInt64},
+		{Name: "version", Type: field.TypeInt64, Comment: "Unix time of when the latest update occurred"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"online", "offline"}},
 	}
 	// UsersTable holds the schema information for the "users" table.

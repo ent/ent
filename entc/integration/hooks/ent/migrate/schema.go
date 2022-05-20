@@ -16,9 +16,9 @@ var (
 	CardsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "number", Type: field.TypeString, Default: "unknown"},
-		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "name", Type: field.TypeString, Comment: "Exact name written on card", Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "in_hook", Type: field.TypeString},
+		{Name: "in_hook", Type: field.TypeString, Comment: "A mandatory field that is set by the hook"},
 		{Name: "user_cards", Type: field.TypeInt, Nullable: true},
 	}
 	// CardsTable holds the schema information for the "cards" table.
