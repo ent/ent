@@ -687,6 +687,7 @@ func (g *Graph) templates() (*Template, []GraphTemplate) {
 				external = append(external, GraphTemplate{
 					Name:   name,
 					Format: snake(name) + ".go",
+					Skip:   rootT.condition,
 				})
 				roots[name] = struct{}{}
 			}
