@@ -33,6 +33,7 @@ var (
 			{{- range $c := $t.Columns }}
 				{ Name: "{{ $c.Name }}", Type: field.{{ $c.Type.ConstName }},
 				{{- if $c.Unique }} Unique: true,{{ end }}
+				{{- with $c.Comment }} Comment: "{{ $c.Comment }}",{{ end }}
 				{{- if $c.Increment }} Increment: true,{{ end }}
 				{{- if $c.Nullable }} Nullable: {{ $c.Nullable }},{{ end }}
 				{{- with $c.Size }} Size: {{ . }},{{ end }}

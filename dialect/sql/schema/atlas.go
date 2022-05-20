@@ -505,6 +505,9 @@ func (m *Migrate) aColumns(b atBuilder, t1 *Table, t2 *schema.Table) error {
 		if c1.Increment {
 			b.atIncrementC(t2, c2)
 		}
+		if c1.Comment != "" {
+			c2.AddAttrs(&schema.Comment{Text: c1.Comment})
+		}
 		t2.AddColumns(c2)
 	}
 	return nil
