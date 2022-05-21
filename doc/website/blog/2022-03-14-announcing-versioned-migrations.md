@@ -352,7 +352,7 @@ In this post, we demonstrated the general workflow when using Ent Versioned Migr
 created a small example schema, generated the migration files for it and learned how to apply them. We now know the
 workflow and how to add custom migration files. 
 
-Have questions? Need help with getting started? Feel free to [join our Slack channel](https://entgo.io/docs/slack/).
+Have questions? Need help with getting started? Feel free to join our [Discord server](https://discord.gg/qZmPgTE6RX) or [Slack channel](https://entgo.io/docs/slack/).
 
 :::note For more Ent news and updates:
 
