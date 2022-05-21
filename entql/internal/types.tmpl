@@ -45,15 +45,19 @@ func (p *{{ $builder }}) Field(name string) P {
 
 func (*{{ $builder }}) {{ ident $t }}() {}
 
-{{ $builderFunc := print $titled "Func" }}
-// {{ $builderFunc }} implements the {{ $iface }} interface.
-type {{ $builderFunc }} func(name string) P
-
-func (p {{ $builderFunc }}) Field(name string) P {
-	return p(name)
+// {{ $titled }}Nil applies the Nil operation
+func {{ $titled }}Nil() {{ $iface }} {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &{{ $builder }}{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func ({{ $builderFunc }}) {{ ident $t }}() {}
+// {{ $titled }}NotNil applies the NotNil operation
+func {{ $titled }}NotNil() {{ $iface }} {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &{{ $builder }}{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 {{ range $op := ops $t }}
 	// {{ $titled }}{{ $op }} applies the {{ $op }} operation on the given value.

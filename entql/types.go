@@ -38,14 +38,19 @@ func (p *boolP) Field(name string) P {
 
 func (*boolP) bool() {}
 
-// BoolFunc implements the BoolP interface.
-type BoolFunc func(name string) P
-
-func (p BoolFunc) Field(name string) P {
-	return p(name)
+// BoolNil applies the Nil operation
+func BoolNil() BoolP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &boolP{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (BoolFunc) bool() {}
+// BoolNotNil applies the NotNil operation
+func BoolNotNil() BoolP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &boolP{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // BoolEQ applies the EQ operation on the given value.
 func BoolEQ(v bool) BoolP {
@@ -117,14 +122,19 @@ func (p *bytesP) Field(name string) P {
 
 func (*bytesP) bytes() {}
 
-// BytesFunc implements the BytesP interface.
-type BytesFunc func(name string) P
-
-func (p BytesFunc) Field(name string) P {
-	return p(name)
+// BytesNil applies the Nil operation
+func BytesNil() BytesP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &bytesP{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (BytesFunc) bytes() {}
+// BytesNotNil applies the NotNil operation
+func BytesNotNil() BytesP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &bytesP{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // BytesEQ applies the EQ operation on the given value.
 func BytesEQ(v []byte) BytesP {
@@ -196,14 +206,19 @@ func (p *timeP) Field(name string) P {
 
 func (*timeP) time() {}
 
-// TimeFunc implements the TimeP interface.
-type TimeFunc func(name string) P
-
-func (p TimeFunc) Field(name string) P {
-	return p(name)
+// TimeNil applies the Nil operation
+func TimeNil() TimeP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &timeP{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (TimeFunc) time() {}
+// TimeNotNil applies the NotNil operation
+func TimeNotNil() TimeP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &timeP{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // TimeEQ applies the EQ operation on the given value.
 func TimeEQ(v time.Time) TimeP {
@@ -307,14 +322,19 @@ func (p *uintP) Field(name string) P {
 
 func (*uintP) uint() {}
 
-// UintFunc implements the UintP interface.
-type UintFunc func(name string) P
-
-func (p UintFunc) Field(name string) P {
-	return p(name)
+// UintNil applies the Nil operation
+func UintNil() UintP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uintP{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (UintFunc) uint() {}
+// UintNotNil applies the NotNil operation
+func UintNotNil() UintP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uintP{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // UintEQ applies the EQ operation on the given value.
 func UintEQ(v uint) UintP {
@@ -418,14 +438,19 @@ func (p *uint8P) Field(name string) P {
 
 func (*uint8P) uint8() {}
 
-// Uint8Func implements the Uint8P interface.
-type Uint8Func func(name string) P
-
-func (p Uint8Func) Field(name string) P {
-	return p(name)
+// Uint8Nil applies the Nil operation
+func Uint8Nil() Uint8P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uint8P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Uint8Func) uint8() {}
+// Uint8NotNil applies the NotNil operation
+func Uint8NotNil() Uint8P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uint8P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Uint8EQ applies the EQ operation on the given value.
 func Uint8EQ(v uint8) Uint8P {
@@ -529,14 +554,19 @@ func (p *uint16P) Field(name string) P {
 
 func (*uint16P) uint16() {}
 
-// Uint16Func implements the Uint16P interface.
-type Uint16Func func(name string) P
-
-func (p Uint16Func) Field(name string) P {
-	return p(name)
+// Uint16Nil applies the Nil operation
+func Uint16Nil() Uint16P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uint16P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Uint16Func) uint16() {}
+// Uint16NotNil applies the NotNil operation
+func Uint16NotNil() Uint16P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uint16P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Uint16EQ applies the EQ operation on the given value.
 func Uint16EQ(v uint16) Uint16P {
@@ -640,14 +670,19 @@ func (p *uint32P) Field(name string) P {
 
 func (*uint32P) uint32() {}
 
-// Uint32Func implements the Uint32P interface.
-type Uint32Func func(name string) P
-
-func (p Uint32Func) Field(name string) P {
-	return p(name)
+// Uint32Nil applies the Nil operation
+func Uint32Nil() Uint32P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uint32P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Uint32Func) uint32() {}
+// Uint32NotNil applies the NotNil operation
+func Uint32NotNil() Uint32P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uint32P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Uint32EQ applies the EQ operation on the given value.
 func Uint32EQ(v uint32) Uint32P {
@@ -751,14 +786,19 @@ func (p *uint64P) Field(name string) P {
 
 func (*uint64P) uint64() {}
 
-// Uint64Func implements the Uint64P interface.
-type Uint64Func func(name string) P
-
-func (p Uint64Func) Field(name string) P {
-	return p(name)
+// Uint64Nil applies the Nil operation
+func Uint64Nil() Uint64P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uint64P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Uint64Func) uint64() {}
+// Uint64NotNil applies the NotNil operation
+func Uint64NotNil() Uint64P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &uint64P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Uint64EQ applies the EQ operation on the given value.
 func Uint64EQ(v uint64) Uint64P {
@@ -862,14 +902,19 @@ func (p *intP) Field(name string) P {
 
 func (*intP) int() {}
 
-// IntFunc implements the IntP interface.
-type IntFunc func(name string) P
-
-func (p IntFunc) Field(name string) P {
-	return p(name)
+// IntNil applies the Nil operation
+func IntNil() IntP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &intP{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (IntFunc) int() {}
+// IntNotNil applies the NotNil operation
+func IntNotNil() IntP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &intP{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // IntEQ applies the EQ operation on the given value.
 func IntEQ(v int) IntP {
@@ -973,14 +1018,19 @@ func (p *int8P) Field(name string) P {
 
 func (*int8P) int8() {}
 
-// Int8Func implements the Int8P interface.
-type Int8Func func(name string) P
-
-func (p Int8Func) Field(name string) P {
-	return p(name)
+// Int8Nil applies the Nil operation
+func Int8Nil() Int8P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &int8P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Int8Func) int8() {}
+// Int8NotNil applies the NotNil operation
+func Int8NotNil() Int8P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &int8P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Int8EQ applies the EQ operation on the given value.
 func Int8EQ(v int8) Int8P {
@@ -1084,14 +1134,19 @@ func (p *int16P) Field(name string) P {
 
 func (*int16P) int16() {}
 
-// Int16Func implements the Int16P interface.
-type Int16Func func(name string) P
-
-func (p Int16Func) Field(name string) P {
-	return p(name)
+// Int16Nil applies the Nil operation
+func Int16Nil() Int16P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &int16P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Int16Func) int16() {}
+// Int16NotNil applies the NotNil operation
+func Int16NotNil() Int16P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &int16P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Int16EQ applies the EQ operation on the given value.
 func Int16EQ(v int16) Int16P {
@@ -1195,14 +1250,19 @@ func (p *int32P) Field(name string) P {
 
 func (*int32P) int32() {}
 
-// Int32Func implements the Int32P interface.
-type Int32Func func(name string) P
-
-func (p Int32Func) Field(name string) P {
-	return p(name)
+// Int32Nil applies the Nil operation
+func Int32Nil() Int32P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &int32P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Int32Func) int32() {}
+// Int32NotNil applies the NotNil operation
+func Int32NotNil() Int32P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &int32P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Int32EQ applies the EQ operation on the given value.
 func Int32EQ(v int32) Int32P {
@@ -1306,14 +1366,19 @@ func (p *int64P) Field(name string) P {
 
 func (*int64P) int64() {}
 
-// Int64Func implements the Int64P interface.
-type Int64Func func(name string) P
-
-func (p Int64Func) Field(name string) P {
-	return p(name)
+// Int64Nil applies the Nil operation
+func Int64Nil() Int64P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &int64P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Int64Func) int64() {}
+// Int64NotNil applies the NotNil operation
+func Int64NotNil() Int64P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &int64P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Int64EQ applies the EQ operation on the given value.
 func Int64EQ(v int64) Int64P {
@@ -1417,14 +1482,19 @@ func (p *float32P) Field(name string) P {
 
 func (*float32P) float32() {}
 
-// Float32Func implements the Float32P interface.
-type Float32Func func(name string) P
-
-func (p Float32Func) Field(name string) P {
-	return p(name)
+// Float32Nil applies the Nil operation
+func Float32Nil() Float32P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &float32P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Float32Func) float32() {}
+// Float32NotNil applies the NotNil operation
+func Float32NotNil() Float32P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &float32P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Float32EQ applies the EQ operation on the given value.
 func Float32EQ(v float32) Float32P {
@@ -1528,14 +1598,19 @@ func (p *float64P) Field(name string) P {
 
 func (*float64P) float64() {}
 
-// Float64Func implements the Float64P interface.
-type Float64Func func(name string) P
-
-func (p Float64Func) Field(name string) P {
-	return p(name)
+// Float64Nil applies the Nil operation
+func Float64Nil() Float64P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &float64P{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (Float64Func) float64() {}
+// Float64NotNil applies the NotNil operation
+func Float64NotNil() Float64P {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &float64P{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // Float64EQ applies the EQ operation on the given value.
 func Float64EQ(v float64) Float64P {
@@ -1639,14 +1714,19 @@ func (p *stringP) Field(name string) P {
 
 func (*stringP) string() {}
 
-// StringFunc implements the StringP interface.
-type StringFunc func(name string) P
-
-func (p StringFunc) Field(name string) P {
-	return p(name)
+// StringNil applies the Nil operation
+func StringNil() StringP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &stringP{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (StringFunc) string() {}
+// StringNotNil applies the NotNil operation
+func StringNotNil() StringP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &stringP{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // StringEQ applies the EQ operation on the given value.
 func StringEQ(v string) StringP {
@@ -1750,14 +1830,19 @@ func (p *valueP) Field(name string) P {
 
 func (*valueP) value() {}
 
-// ValueFunc implements the ValueP interface.
-type ValueFunc func(name string) P
-
-func (p ValueFunc) Field(name string) P {
-	return p(name)
+// ValueNil applies the Nil operation
+func ValueNil() ValueP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &valueP{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (ValueFunc) value() {}
+// ValueNotNil applies the NotNil operation
+func ValueNotNil() ValueP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &valueP{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // ValueEQ applies the EQ operation on the given value.
 func ValueEQ(v driver.Valuer) ValueP {
@@ -1829,14 +1914,19 @@ func (p *otherP) Field(name string) P {
 
 func (*otherP) other() {}
 
-// OtherFunc implements the OtherP interface.
-type OtherFunc func(name string) P
-
-func (p OtherFunc) Field(name string) P {
-	return p(name)
+// OtherNil applies the Nil operation
+func OtherNil() OtherP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &otherP{P: EQ(field, (*Value)(nil)), done: done}
 }
 
-func (OtherFunc) other() {}
+// OtherNotNil applies the NotNil operation
+func OtherNotNil() OtherP {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &otherP{P: NEQ(field, (*Value)(nil)), done: done}
+}
 
 // OtherEQ applies the EQ operation on the given value.
 func OtherEQ(v driver.Valuer) OtherP {
