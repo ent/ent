@@ -45,6 +45,20 @@ func (p *{{ $builder }}) Field(name string) P {
 
 func (*{{ $builder }}) {{ ident $t }}() {}
 
+// {{ $titled }}Nil applies the Nil operation
+func {{ $titled }}Nil() {{ $iface }} {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &{{ $builder }}{P: EQ(field, (*Value)(nil)), done: done}
+}
+
+// {{ $titled }}NotNil applies the NotNil operation
+func {{ $titled }}NotNil() {{ $iface }} {
+	field := &Field{}
+	done := func(name string) { field.Name = name }
+	return &{{ $builder }}{P: NEQ(field, (*Value)(nil)), done: done}
+}
+
 {{ range $op := ops $t }}
 	// {{ $titled }}{{ $op }} applies the {{ $op }} operation on the given value.
 	func {{ $titled }}{{ $op }}(v {{ type $t }}) {{ $iface }} {
