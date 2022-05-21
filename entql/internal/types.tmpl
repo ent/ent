@@ -45,6 +45,16 @@ func (p *{{ $builder }}) Field(name string) P {
 
 func (*{{ $builder }}) {{ ident $t }}() {}
 
+{{ $builderFunc := print $titled "Func" }}
+// {{ $builderFunc }} implements the {{ $iface }} interface.
+type {{ $builderFunc }} func(name string) P
+
+func (p {{ $builderFunc }}) Field(name string) P {
+	return p(name)
+}
+
+func ({{ $builderFunc }}) {{ ident $t }}() {}
+
 {{ range $op := ops $t }}
 	// {{ $titled }}{{ $op }} applies the {{ $op }} operation on the given value.
 	func {{ $titled }}{{ $op }}(v {{ type $t }}) {{ $iface }} {

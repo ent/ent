@@ -38,6 +38,15 @@ func (p *boolP) Field(name string) P {
 
 func (*boolP) bool() {}
 
+// BoolFunc implements the BoolP interface.
+type BoolFunc func(name string) P
+
+func (p BoolFunc) Field(name string) P {
+	return p(name)
+}
+
+func (BoolFunc) bool() {}
+
 // BoolEQ applies the EQ operation on the given value.
 func BoolEQ(v bool) BoolP {
 	field := &Field{}
@@ -108,6 +117,15 @@ func (p *bytesP) Field(name string) P {
 
 func (*bytesP) bytes() {}
 
+// BytesFunc implements the BytesP interface.
+type BytesFunc func(name string) P
+
+func (p BytesFunc) Field(name string) P {
+	return p(name)
+}
+
+func (BytesFunc) bytes() {}
+
 // BytesEQ applies the EQ operation on the given value.
 func BytesEQ(v []byte) BytesP {
 	field := &Field{}
@@ -177,6 +195,15 @@ func (p *timeP) Field(name string) P {
 }
 
 func (*timeP) time() {}
+
+// TimeFunc implements the TimeP interface.
+type TimeFunc func(name string) P
+
+func (p TimeFunc) Field(name string) P {
+	return p(name)
+}
+
+func (TimeFunc) time() {}
 
 // TimeEQ applies the EQ operation on the given value.
 func TimeEQ(v time.Time) TimeP {
@@ -280,6 +307,15 @@ func (p *uintP) Field(name string) P {
 
 func (*uintP) uint() {}
 
+// UintFunc implements the UintP interface.
+type UintFunc func(name string) P
+
+func (p UintFunc) Field(name string) P {
+	return p(name)
+}
+
+func (UintFunc) uint() {}
+
 // UintEQ applies the EQ operation on the given value.
 func UintEQ(v uint) UintP {
 	field := &Field{}
@@ -381,6 +417,15 @@ func (p *uint8P) Field(name string) P {
 }
 
 func (*uint8P) uint8() {}
+
+// Uint8Func implements the Uint8P interface.
+type Uint8Func func(name string) P
+
+func (p Uint8Func) Field(name string) P {
+	return p(name)
+}
+
+func (Uint8Func) uint8() {}
 
 // Uint8EQ applies the EQ operation on the given value.
 func Uint8EQ(v uint8) Uint8P {
@@ -484,6 +529,15 @@ func (p *uint16P) Field(name string) P {
 
 func (*uint16P) uint16() {}
 
+// Uint16Func implements the Uint16P interface.
+type Uint16Func func(name string) P
+
+func (p Uint16Func) Field(name string) P {
+	return p(name)
+}
+
+func (Uint16Func) uint16() {}
+
 // Uint16EQ applies the EQ operation on the given value.
 func Uint16EQ(v uint16) Uint16P {
 	field := &Field{}
@@ -585,6 +639,15 @@ func (p *uint32P) Field(name string) P {
 }
 
 func (*uint32P) uint32() {}
+
+// Uint32Func implements the Uint32P interface.
+type Uint32Func func(name string) P
+
+func (p Uint32Func) Field(name string) P {
+	return p(name)
+}
+
+func (Uint32Func) uint32() {}
 
 // Uint32EQ applies the EQ operation on the given value.
 func Uint32EQ(v uint32) Uint32P {
@@ -688,6 +751,15 @@ func (p *uint64P) Field(name string) P {
 
 func (*uint64P) uint64() {}
 
+// Uint64Func implements the Uint64P interface.
+type Uint64Func func(name string) P
+
+func (p Uint64Func) Field(name string) P {
+	return p(name)
+}
+
+func (Uint64Func) uint64() {}
+
 // Uint64EQ applies the EQ operation on the given value.
 func Uint64EQ(v uint64) Uint64P {
 	field := &Field{}
@@ -789,6 +861,15 @@ func (p *intP) Field(name string) P {
 }
 
 func (*intP) int() {}
+
+// IntFunc implements the IntP interface.
+type IntFunc func(name string) P
+
+func (p IntFunc) Field(name string) P {
+	return p(name)
+}
+
+func (IntFunc) int() {}
 
 // IntEQ applies the EQ operation on the given value.
 func IntEQ(v int) IntP {
@@ -892,6 +973,15 @@ func (p *int8P) Field(name string) P {
 
 func (*int8P) int8() {}
 
+// Int8Func implements the Int8P interface.
+type Int8Func func(name string) P
+
+func (p Int8Func) Field(name string) P {
+	return p(name)
+}
+
+func (Int8Func) int8() {}
+
 // Int8EQ applies the EQ operation on the given value.
 func Int8EQ(v int8) Int8P {
 	field := &Field{}
@@ -993,6 +1083,15 @@ func (p *int16P) Field(name string) P {
 }
 
 func (*int16P) int16() {}
+
+// Int16Func implements the Int16P interface.
+type Int16Func func(name string) P
+
+func (p Int16Func) Field(name string) P {
+	return p(name)
+}
+
+func (Int16Func) int16() {}
 
 // Int16EQ applies the EQ operation on the given value.
 func Int16EQ(v int16) Int16P {
@@ -1096,6 +1195,15 @@ func (p *int32P) Field(name string) P {
 
 func (*int32P) int32() {}
 
+// Int32Func implements the Int32P interface.
+type Int32Func func(name string) P
+
+func (p Int32Func) Field(name string) P {
+	return p(name)
+}
+
+func (Int32Func) int32() {}
+
 // Int32EQ applies the EQ operation on the given value.
 func Int32EQ(v int32) Int32P {
 	field := &Field{}
@@ -1197,6 +1305,15 @@ func (p *int64P) Field(name string) P {
 }
 
 func (*int64P) int64() {}
+
+// Int64Func implements the Int64P interface.
+type Int64Func func(name string) P
+
+func (p Int64Func) Field(name string) P {
+	return p(name)
+}
+
+func (Int64Func) int64() {}
 
 // Int64EQ applies the EQ operation on the given value.
 func Int64EQ(v int64) Int64P {
@@ -1300,6 +1417,15 @@ func (p *float32P) Field(name string) P {
 
 func (*float32P) float32() {}
 
+// Float32Func implements the Float32P interface.
+type Float32Func func(name string) P
+
+func (p Float32Func) Field(name string) P {
+	return p(name)
+}
+
+func (Float32Func) float32() {}
+
 // Float32EQ applies the EQ operation on the given value.
 func Float32EQ(v float32) Float32P {
 	field := &Field{}
@@ -1401,6 +1527,15 @@ func (p *float64P) Field(name string) P {
 }
 
 func (*float64P) float64() {}
+
+// Float64Func implements the Float64P interface.
+type Float64Func func(name string) P
+
+func (p Float64Func) Field(name string) P {
+	return p(name)
+}
+
+func (Float64Func) float64() {}
 
 // Float64EQ applies the EQ operation on the given value.
 func Float64EQ(v float64) Float64P {
@@ -1504,6 +1639,15 @@ func (p *stringP) Field(name string) P {
 
 func (*stringP) string() {}
 
+// StringFunc implements the StringP interface.
+type StringFunc func(name string) P
+
+func (p StringFunc) Field(name string) P {
+	return p(name)
+}
+
+func (StringFunc) string() {}
+
 // StringEQ applies the EQ operation on the given value.
 func StringEQ(v string) StringP {
 	field := &Field{}
@@ -1606,6 +1750,15 @@ func (p *valueP) Field(name string) P {
 
 func (*valueP) value() {}
 
+// ValueFunc implements the ValueP interface.
+type ValueFunc func(name string) P
+
+func (p ValueFunc) Field(name string) P {
+	return p(name)
+}
+
+func (ValueFunc) value() {}
+
 // ValueEQ applies the EQ operation on the given value.
 func ValueEQ(v driver.Valuer) ValueP {
 	field := &Field{}
@@ -1675,6 +1828,15 @@ func (p *otherP) Field(name string) P {
 }
 
 func (*otherP) other() {}
+
+// OtherFunc implements the OtherP interface.
+type OtherFunc func(name string) P
+
+func (p OtherFunc) Field(name string) P {
+	return p(name)
+}
+
+func (OtherFunc) other() {}
 
 // OtherEQ applies the EQ operation on the given value.
 func OtherEQ(v driver.Valuer) OtherP {
