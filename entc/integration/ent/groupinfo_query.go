@@ -388,31 +388,38 @@ func (giq *GroupInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*G
 	}
 
 	if query := giq.withGroups; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*GroupInfo)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Groups = []*Group{}
-		}
-		query.withFKs = true
-		query.Where(predicate.Group(func(s *sql.Selector) {
-			s.Where(sql.InValues(groupinfo.GroupsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			fks := make([]driver.Value, 0, len(nodes))
+			nodeids := make(map[int]*GroupInfo)
+			for i := range nodes {
+				fks = append(fks, nodes[i].ID)
+				nodeids[nodes[i].ID] = nodes[i]
+				nodes[i].Edges.Groups = []*Group{}
+			}
+			query.withFKs = true
+			query.Where(predicate.Group(func(s *sql.Selector) {
+				s.Where(sql.InValues(groupinfo.GroupsColumn, fks...))
+			}))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
+			}
+			for _, n := range neighbors {
+				fk := n.group_info
+				if fk == nil {
+					return fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
+				}
+				node, ok := nodeids[*fk]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
+				}
+				node.Edges.Groups = append(node.Edges.Groups, n)
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(giq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.group_info
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Groups = append(node.Edges.Groups, n)
 		}
 	}
 

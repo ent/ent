@@ -433,84 +433,98 @@ func (cq *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 	}
 
 	if query := cq.withOwner; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Card)
-		for i := range nodes {
-			if nodes[i].user_card == nil {
-				continue
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			ids := make([]int, 0, len(nodes))
+			nodeids := make(map[int][]*Card)
+			for i := range nodes {
+				if nodes[i].user_card == nil {
+					continue
+				}
+				fk := *nodes[i].user_card
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
-			fk := *nodes[i].user_card
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
+			query.Where(user.IDIn(ids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
 			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+			for _, n := range neighbors {
+				nodes, ok := nodeids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "user_card" returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.Owner = n
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(cq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_card" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Owner = n
-			}
 		}
 	}
 
 	if query := cq.withSpec; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*Card)
-		nids := make(map[int]map[*Card]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Spec = []*Spec{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(card.SpecTable)
-			s.Join(joinT).On(s.C(spec.FieldID), joinT.C(card.SpecPrimaryKey[0]))
-			s.Where(sql.InValues(joinT.C(card.SpecPrimaryKey[1]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(card.SpecPrimaryKey[1]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			edgeids := make([]driver.Value, len(nodes))
+			byid := make(map[int]*Card)
+			nids := make(map[int]map[*Card]struct{})
+			for i, node := range nodes {
+				edgeids[i] = node.ID
+				byid[node.ID] = node
+				node.Edges.Spec = []*Spec{}
 			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Card]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
+			query.Where(func(s *sql.Selector) {
+				joinT := sql.Table(card.SpecTable)
+				s.Join(joinT).On(s.C(spec.FieldID), joinT.C(card.SpecPrimaryKey[0]))
+				s.Where(sql.InValues(joinT.C(card.SpecPrimaryKey[1]), edgeids...))
+				columns := s.SelectedColumns()
+				s.Select(joinT.C(card.SpecPrimaryKey[1]))
+				s.AppendSelect(columns...)
+				s.SetDistinct(false)
+			})
+			neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+				assign := spec.Assign
+				values := spec.ScanValues
+				spec.ScanValues = func(columns []string) ([]interface{}, error) {
+					values, err := values(columns[1:])
+					if err != nil {
+						return nil, err
+					}
+					return append([]interface{}{new(sql.NullInt64)}, values...), nil
 				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
+				spec.Assign = func(columns []string, values []interface{}) error {
+					outValue := int(values[0].(*sql.NullInt64).Int64)
+					inValue := int(values[1].(*sql.NullInt64).Int64)
+					if nids[inValue] == nil {
+						nids[inValue] = map[*Card]struct{}{byid[outValue]: struct{}{}}
+						return assign(columns[1:], values[1:])
+					}
+					nids[inValue][byid[outValue]] = struct{}{}
+					return nil
+				}
+			})
+			if err != nil {
+				return err
 			}
-		})
+			for _, n := range neighbors {
+				nodes, ok := nids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected "spec" node returned %v`, n.ID)
+				}
+				for kn := range nodes {
+					kn.Edges.Spec = append(kn.Edges.Spec, n)
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(cq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "spec" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Spec = append(kn.Edges.Spec, n)
-			}
 		}
 	}
 

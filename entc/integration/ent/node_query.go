@@ -431,59 +431,73 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 	}
 
 	if query := nq.withPrev; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Node)
-		for i := range nodes {
-			if nodes[i].node_next == nil {
-				continue
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			ids := make([]int, 0, len(nodes))
+			nodeids := make(map[int][]*Node)
+			for i := range nodes {
+				if nodes[i].node_next == nil {
+					continue
+				}
+				fk := *nodes[i].node_next
+				if _, ok := nodeids[fk]; !ok {
+					ids = append(ids, fk)
+				}
+				nodeids[fk] = append(nodeids[fk], nodes[i])
 			}
-			fk := *nodes[i].node_next
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
+			query.Where(node.IDIn(ids...))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
 			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(node.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+			for _, n := range neighbors {
+				nodes, ok := nodeids[n.ID]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "node_next" returned %v`, n.ID)
+				}
+				for i := range nodes {
+					nodes[i].Edges.Prev = n
+				}
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(nq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "node_next" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Prev = n
-			}
 		}
 	}
 
 	if query := nq.withNext; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Node)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.Node(func(s *sql.Selector) {
-			s.Where(sql.InValues(node.NextColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
+		err := sql.Chunked(func(start, end int) error {
+			nodes := nodes[start:end]
+			fks := make([]driver.Value, 0, len(nodes))
+			nodeids := make(map[int]*Node)
+			for i := range nodes {
+				fks = append(fks, nodes[i].ID)
+				nodeids[nodes[i].ID] = nodes[i]
+			}
+			query.withFKs = true
+			query.Where(predicate.Node(func(s *sql.Selector) {
+				s.Where(sql.InValues(node.NextColumn, fks...))
+			}))
+			neighbors, err := query.All(ctx)
+			if err != nil {
+				return err
+			}
+			for _, n := range neighbors {
+				fk := n.node_next
+				if fk == nil {
+					return fmt.Errorf(`foreign-key "node_next" is nil for node %v`, n.ID)
+				}
+				node, ok := nodeids[*fk]
+				if !ok {
+					return fmt.Errorf(`unexpected foreign-key "node_next" returned %v for node %v`, *fk, n.ID)
+				}
+				node.Edges.Next = n
+			}
+			return nil
+		}, len(nodes), sql.MaxParams(nq.driver.Dialect()))
 		if err != nil {
 			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.node_next
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "node_next" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "node_next" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Next = n
 		}
 	}
 
