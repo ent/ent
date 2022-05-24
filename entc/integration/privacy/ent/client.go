@@ -157,7 +157,7 @@ func (c *TaskClient) Use(hooks ...Hook) {
 	c.hooks.Task = append(c.hooks.Task, hooks...)
 }
 
-// Create returns a create builder for Task.
+// Create returns a builder for creating a Task entity.
 func (c *TaskClient) Create() *TaskCreate {
 	mutation := newTaskMutation(c.config, OpCreate)
 	return &TaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -192,12 +192,12 @@ func (c *TaskClient) Delete() *TaskDelete {
 	return &TaskDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// DeleteOne returns a delete builder for the given entity.
+// DeleteOne returns a builder for deleting the given entity.
 func (c *TaskClient) DeleteOne(t *Task) *TaskDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOneID returns a delete builder for the given id.
+// DeleteOne returns a builder for deleting the given entity by its id.
 func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 	builder := c.Delete().Where(task.ID(id))
 	builder.mutation.id = &id
@@ -280,7 +280,7 @@ func (c *TeamClient) Use(hooks ...Hook) {
 	c.hooks.Team = append(c.hooks.Team, hooks...)
 }
 
-// Create returns a create builder for Team.
+// Create returns a builder for creating a Team entity.
 func (c *TeamClient) Create() *TeamCreate {
 	mutation := newTeamMutation(c.config, OpCreate)
 	return &TeamCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -315,12 +315,12 @@ func (c *TeamClient) Delete() *TeamDelete {
 	return &TeamDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// DeleteOne returns a delete builder for the given entity.
+// DeleteOne returns a builder for deleting the given entity.
 func (c *TeamClient) DeleteOne(t *Team) *TeamDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOneID returns a delete builder for the given id.
+// DeleteOne returns a builder for deleting the given entity by its id.
 func (c *TeamClient) DeleteOneID(id int) *TeamDeleteOne {
 	builder := c.Delete().Where(team.ID(id))
 	builder.mutation.id = &id
@@ -403,7 +403,7 @@ func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
 }
 
-// Create returns a create builder for User.
+// Create returns a builder for creating a User entity.
 func (c *UserClient) Create() *UserCreate {
 	mutation := newUserMutation(c.config, OpCreate)
 	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -438,12 +438,12 @@ func (c *UserClient) Delete() *UserDelete {
 	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// DeleteOne returns a delete builder for the given entity.
+// DeleteOne returns a builder for deleting the given entity.
 func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOneID returns a delete builder for the given id.
+// DeleteOne returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id

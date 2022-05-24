@@ -151,12 +151,14 @@ func (f *File) Unwrap() *File {
 func (f *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
-	builder.WriteString(fmt.Sprintf("id=%v", f.ID))
-	builder.WriteString(", name=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString("name=")
 	builder.WriteString(f.Name)
-	builder.WriteString(", deleted=")
+	builder.WriteString(", ")
+	builder.WriteString("deleted=")
 	builder.WriteString(fmt.Sprintf("%v", f.Deleted))
-	builder.WriteString(", parent_id=")
+	builder.WriteString(", ")
+	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", f.ParentID))
 	builder.WriteByte(')')
 	return builder.String()

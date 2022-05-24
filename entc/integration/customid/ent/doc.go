@@ -144,8 +144,8 @@ func (d *Doc) Unwrap() *Doc {
 func (d *Doc) String() string {
 	var builder strings.Builder
 	builder.WriteString("Doc(")
-	builder.WriteString(fmt.Sprintf("id=%v", d.ID))
-	builder.WriteString(", text=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
+	builder.WriteString("text=")
 	builder.WriteString(d.Text)
 	builder.WriteByte(')')
 	return builder.String()

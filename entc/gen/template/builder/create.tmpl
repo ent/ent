@@ -73,8 +73,10 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 			if node, err = {{ $receiver }}.{{ $.Storage }}Save(ctx) ; err != nil {
 				return nil, err
 			}
-			mutation.{{ $.ID.BuilderField }} = &node.{{ $.ID.StructField }}
-			mutation.done = true
+			{{- if $.HasOneFieldID }}
+				mutation.{{ $.ID.BuilderField }} = &node.{{ $.ID.StructField }}
+				mutation.done = true
+			{{- end }}
 			return node, err
 		})
 		for i := len({{ $receiver }}.hooks) - 1; i >= 0; i-- {
@@ -118,7 +120,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 	}
 }
 
-{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 {{ if $.HasDefault }}
 	// defaults sets the default values of the builder before save.
 	func ({{ $receiver }} *{{ $builder }}) defaults() {{ if $runtimeRequired }}error{{ end }}{
@@ -144,7 +146,8 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- range $f := $fields }}
-		{{- if and (not $f.Optional) (ne $f.Name $.ID.Name) }}
+		{{- $skip := false }}{{ if $.HasOneFieldID }}{{ if eq $f.Name $.ID.Name }}{{ $skip = true }}{{ end }}{{ end }}
+		{{- if and (not $f.Optional) (not $skip) }}
 			if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
 				return &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $.Name }}.{{ $f.Name }}"`)}
 			}
@@ -158,7 +161,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 			}
 		{{- end }}
 	{{- end }}
-	{{- range $e := $.Edges }}
+	{{- range $e := $.EdgesWithID }}
 		{{- if not $e.Optional }}
 			{{- if $e.Unique }}
 				if _, ok := {{ $mutation }}.{{ $e.StructField }}ID(); !ok {

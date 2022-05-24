@@ -102,12 +102,14 @@ func (m *Media) Unwrap() *Media {
 func (m *Media) String() string {
 	var builder strings.Builder
 	builder.WriteString("Media(")
-	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
-	builder.WriteString(", source=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
+	builder.WriteString("source=")
 	builder.WriteString(m.Source)
-	builder.WriteString(", source_uri=")
+	builder.WriteString(", ")
+	builder.WriteString("source_uri=")
 	builder.WriteString(m.SourceURI)
-	builder.WriteString(", text=")
+	builder.WriteString(", ")
+	builder.WriteString("text=")
 	builder.WriteString(m.Text)
 	builder.WriteByte(')')
 	return builder.String()

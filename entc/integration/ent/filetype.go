@@ -128,12 +128,14 @@ func (ft *FileType) Unwrap() *FileType {
 func (ft *FileType) String() string {
 	var builder strings.Builder
 	builder.WriteString("FileType(")
-	builder.WriteString(fmt.Sprintf("id=%v", ft.ID))
-	builder.WriteString(", name=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", ft.ID))
+	builder.WriteString("name=")
 	builder.WriteString(ft.Name)
-	builder.WriteString(", type=")
+	builder.WriteString(", ")
+	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", ft.Type))
-	builder.WriteString(", state=")
+	builder.WriteString(", ")
+	builder.WriteString("state=")
 	builder.WriteString(fmt.Sprintf("%v", ft.State))
 	builder.WriteByte(')')
 	return builder.String()

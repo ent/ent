@@ -146,8 +146,8 @@ func (n *Node) Unwrap() *Node {
 func (n *Node) String() string {
 	var builder strings.Builder
 	builder.WriteString("Node(")
-	builder.WriteString(fmt.Sprintf("id=%v", n.ID))
-	builder.WriteString(", value=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
+	builder.WriteString("value=")
 	builder.WriteString(fmt.Sprintf("%v", n.Value))
 	builder.WriteByte(')')
 	return builder.String()

@@ -112,8 +112,8 @@ func (c *City) Unwrap() *City {
 func (c *City) String() string {
 	var builder strings.Builder
 	builder.WriteString("City(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", name=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("name=")
 	builder.WriteString(c.Name)
 	builder.WriteByte(')')
 	return builder.String()

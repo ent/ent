@@ -262,7 +262,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ $receiver := receiver $builder }}
 {{ $mutation := print $receiver ".mutation" }}
 
-{{ range $e := $.Edges }}
+{{ range $e := $.EdgesWithID }}
 	{{ $func := $e.MutationClear }}
 	// {{ $func }} clears {{ if $e.Unique }}the "{{ $e.Name }}" edge{{ else }}all "{{ $e.Name }}" edges{{ end }} to the {{ $e.Type.Name }} entity.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {

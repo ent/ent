@@ -121,8 +121,8 @@ func (i *Info) Unwrap() *Info {
 func (i *Info) String() string {
 	var builder strings.Builder
 	builder.WriteString("Info(")
-	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
-	builder.WriteString(", content=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
+	builder.WriteString("content=")
 	builder.WriteString(fmt.Sprintf("%v", i.Content))
 	builder.WriteByte(')')
 	return builder.String()

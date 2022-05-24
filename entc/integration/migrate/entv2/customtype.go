@@ -105,12 +105,14 @@ func (ct *CustomType) Unwrap() *CustomType {
 func (ct *CustomType) String() string {
 	var builder strings.Builder
 	builder.WriteString("CustomType(")
-	builder.WriteString(fmt.Sprintf("id=%v", ct.ID))
-	builder.WriteString(", custom=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", ct.ID))
+	builder.WriteString("custom=")
 	builder.WriteString(ct.Custom)
-	builder.WriteString(", tz0=")
+	builder.WriteString(", ")
+	builder.WriteString("tz0=")
 	builder.WriteString(ct.Tz0.Format(time.ANSIC))
-	builder.WriteString(", tz3=")
+	builder.WriteString(", ")
+	builder.WriteString("tz3=")
 	builder.WriteString(ct.Tz3.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()

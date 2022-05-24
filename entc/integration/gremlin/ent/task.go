@@ -63,8 +63,8 @@ func (t *Task) Unwrap() *Task {
 func (t *Task) String() string {
 	var builder strings.Builder
 	builder.WriteString("Task(")
-	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
-	builder.WriteString(", priority=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString("priority=")
 	builder.WriteString(fmt.Sprintf("%v", t.Priority))
 	builder.WriteByte(')')
 	return builder.String()

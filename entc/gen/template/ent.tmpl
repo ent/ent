@@ -27,13 +27,15 @@ import (
 {{- end }}
 type {{ $.Name }} struct {
 	config {{ template "model/omittags" $ }}
-	// ID of the ent.
-	{{- if $.ID.Comment }}
-		{{- range $line := split $.ID.Comment "\n" }}
-			// {{ $line }}
+	{{- if $.HasOneFieldID }}
+		// ID of the ent.
+		{{- if $.ID.Comment }}
+			{{- range $line := split $.ID.Comment "\n" }}
+				// {{ $line }}
+			{{- end }}
 		{{- end }}
+		ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
 	{{- end }}
-	ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
 	{{- range $f := $.Fields }}
 		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
 		{{- template "model/fieldcomment" $f }}
@@ -145,15 +147,20 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 	func ({{ $receiver }} *{{ $.Name }}) String() string {
 		var builder strings.Builder
 		builder.WriteString("{{ $.Name }}(")
-		builder.WriteString(fmt.Sprintf("id=%v", {{ $receiver }}.ID))
+		{{- if $.HasOneFieldID }}
+			builder.WriteString(fmt.Sprintf("id=%v{{ if $.Fields }}, {{ end }}", {{ $receiver }}.ID))
+		{{- end }}
 		{{- range $i, $f := $.Fields }}
+			{{- if ne $i 0 }}
+				builder.WriteString(", ")
+			{{- end }}
 			{{- if $f.Sensitive }}
-				builder.WriteString(", {{ $f.Name }}={{ print "<sensitive>" }}")
+				builder.WriteString("{{ $f.Name }}={{ print "<sensitive>" }}")
 			{{- else }}
 				{{- $sf := printf "%s.%s" $receiver $f.StructField }}
 				{{- if $f.Nillable }}
 					if v := {{ $sf }}; v != nil {
-						builder.WriteString(", {{ $f.Name }}=")
+						builder.WriteString("{{ $f.Name }}=")
 						{{- if and $f.IsTime (not $f.HasGoType) }}
 							builder.WriteString(v.Format(time.ANSIC))
 						{{- else if and $f.IsString (not $f.HasGoType) }}
@@ -163,7 +170,7 @@ func ({{ $receiver }} {{ $slice }}) config(cfg config) {
 						{{- end }}
 					}
 				{{- else }}
-					builder.WriteString(", {{ $f.Name }}=")
+					builder.WriteString("{{ $f.Name }}=")
 					{{- if and $f.IsTime (not $f.HasGoType) }}
 						builder.WriteString({{ $sf }}.Format(time.ANSIC))
 					{{- else if and $f.IsString (not $f.HasGoType) }}

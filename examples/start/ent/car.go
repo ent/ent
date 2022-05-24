@@ -139,10 +139,11 @@ func (c *Car) Unwrap() *Car {
 func (c *Car) String() string {
 	var builder strings.Builder
 	builder.WriteString("Car(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", model=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("model=")
 	builder.WriteString(c.Model)
-	builder.WriteString(", registered_at=")
+	builder.WriteString(", ")
+	builder.WriteString("registered_at=")
 	builder.WriteString(c.RegisteredAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()

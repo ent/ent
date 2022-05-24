@@ -139,10 +139,11 @@ func (c *Card) Unwrap() *Card {
 func (c *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", expired=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("expired=")
 	builder.WriteString(c.Expired.Format(time.ANSIC))
-	builder.WriteString(", number=")
+	builder.WriteString(", ")
+	builder.WriteString("number=")
 	builder.WriteString(c.Number)
 	builder.WriteByte(')')
 	return builder.String()
