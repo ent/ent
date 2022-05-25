@@ -143,7 +143,7 @@ func (c *FileClient) Use(hooks ...Hook) {
 	c.hooks.File = append(c.hooks.File, hooks...)
 }
 
-// Create returns a create builder for File.
+// Create returns a builder for creating a File entity.
 func (c *FileClient) Create() *FileCreate {
 	mutation := newFileMutation(c.config, OpCreate)
 	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -178,12 +178,12 @@ func (c *FileClient) Delete() *FileDelete {
 	return &FileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// DeleteOne returns a delete builder for the given entity.
+// DeleteOne returns a builder for deleting the given entity.
 func (c *FileClient) DeleteOne(f *File) *FileDeleteOne {
 	return c.DeleteOneID(f.ID)
 }
 
-// DeleteOneID returns a delete builder for the given id.
+// DeleteOne returns a builder for deleting the given entity by its id.
 func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	builder := c.Delete().Where(file.ID(id))
 	builder.mutation.id = &id

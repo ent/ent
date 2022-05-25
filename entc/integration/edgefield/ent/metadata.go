@@ -161,10 +161,11 @@ func (m *Metadata) Unwrap() *Metadata {
 func (m *Metadata) String() string {
 	var builder strings.Builder
 	builder.WriteString("Metadata(")
-	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
-	builder.WriteString(", age=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
+	builder.WriteString("age=")
 	builder.WriteString(fmt.Sprintf("%v", m.Age))
-	builder.WriteString(", parent_id=")
+	builder.WriteString(", ")
+	builder.WriteString("parent_id=")
 	builder.WriteString(fmt.Sprintf("%v", m.ParentID))
 	builder.WriteByte(')')
 	return builder.String()

@@ -128,8 +128,8 @@ func (t *Team) Unwrap() *Team {
 func (t *Team) String() string {
 	var builder strings.Builder
 	builder.WriteString("Team(")
-	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
-	builder.WriteString(", name=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString("name=")
 	builder.WriteString(t.Name)
 	builder.WriteByte(')')
 	return builder.String()

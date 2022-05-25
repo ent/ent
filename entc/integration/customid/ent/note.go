@@ -142,8 +142,8 @@ func (n *Note) Unwrap() *Note {
 func (n *Note) String() string {
 	var builder strings.Builder
 	builder.WriteString("Note(")
-	builder.WriteString(fmt.Sprintf("id=%v", n.ID))
-	builder.WriteString(", text=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
+	builder.WriteString("text=")
 	builder.WriteString(n.Text)
 	builder.WriteByte(')')
 	return builder.String()

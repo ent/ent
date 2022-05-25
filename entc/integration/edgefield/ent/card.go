@@ -126,10 +126,11 @@ func (c *Card) Unwrap() *Card {
 func (c *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", number=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("number=")
 	builder.WriteString(c.Number)
-	builder.WriteString(", owner_id=")
+	builder.WriteString(", ")
+	builder.WriteString("owner_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.OwnerID))
 	builder.WriteByte(')')
 	return builder.String()

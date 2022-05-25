@@ -96,11 +96,17 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	_spec.Node.Columns = {{ $receiver }}.fields
-	if len({{ $receiver }}.fields) > 0 {
-		{{- /* In case of field selection, configure query to unique only if was explicitly set to true. */}}
-		_spec.Unique = {{ $receiver }}.unique != nil && *{{ $receiver }}.unique
-	}
+	{{- if $.HasCompositeID }}
+		{{- /* In case of an edge schema with composite primary-key, there is no need to SELECT DISTINCT. */}}
+		_spec.Unique = false
+		_spec.Node.Columns = nil
+	{{- else }}
+		_spec.Node.Columns = {{ $receiver }}.fields
+		if len({{ $receiver }}.fields) > 0 {
+			{{- /* In case of field selection, configure query to unique only if was explicitly set to true. */}}
+			_spec.Unique = {{ $receiver }}.unique != nil && *{{ $receiver }}.unique
+		}
+	{{- end }}
 	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, _spec)
 }
 
@@ -117,10 +123,12 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 		Node: &sqlgraph.NodeSpec{
 			Table: {{ $.Package }}.Table,
 			Columns: {{ $.Package }}.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type: field.{{ $.ID.Type.ConstName }},
-				Column: {{ $.Package }}.{{ $.ID.Constant }},
-			},
+			{{- if $.HasOneFieldID }}
+				ID: &sqlgraph.FieldSpec{
+					Type: field.{{ $.ID.Type.ConstName }},
+					Column: {{ $.Package }}.{{ $.ID.Constant }},
+				},
+			{{- end }}
 		},
 		From: {{ $receiver }}.sql,
 		Unique: true,
@@ -130,12 +138,18 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := {{ $receiver }}.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
-		for i := range fields {
-			if fields[i] != {{ $.Package }}.{{ $.ID.Constant }} {
+		{{- if $.HasOneFieldID }}
+			_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
+			for i := range fields {
+				if fields[i] != {{ $.Package }}.{{ $.ID.Constant }} {
+					_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
+				}
+			}
+		{{- else }}
+			for i := range fields {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
-		}
+		{{- end }}
 	}
 	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -218,7 +232,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 {{/* query/path defines the query generation for path of a given edge. */}}
 {{ define "dialect/sql/query/path" }}
 	{{- $n := $ }} {{/* the node we start the query from. */}}
-	{{- $e := $.Scope.Edge }} {{/* the edge we need to genegrate the path to. */}}
+	{{- $e := $.Scope.Edge }} {{/* the edge we need to generate the path to. */}}
 	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
 	selector := {{ $receiver }}.sqlQuery(ctx)
@@ -226,8 +240,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 		return nil, err
 	}
 	step := sqlgraph.NewStep(
-		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, selector),
-		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
+		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ if $n.HasCompositeID }}{{ $e.ColumnConstant }}{{ else }}{{ $n.ID.Constant }}{{ end }}, selector),
+		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }}),
 		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
 			{{- if $e.M2M -}}
 				{{ $n.Package }}.{{ $e.PKConstant }}...
@@ -254,7 +268,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	id := {{ $receiver }}.ID
 	step := sqlgraph.NewStep(
 		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
-		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}),
+		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }}),
 		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
 			{{- if $e.M2M -}}
 				{{ $n.Package }}.{{ $e.PKConstant }}...
@@ -391,7 +405,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 				{{- end }}
 				node, ok := nodeids[{{ if $fk.Field.Nillable }}*{{ end }}fk]
 				if !ok {
-					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n.ID)
+					return nil, fmt.Errorf(`unexpected foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}fk, n{{ if $e.Type.HasOneFieldID }}.ID{{ end }})
 				}
 				node.Edges.{{ $e.StructField }} = {{ if $e.Unique }}n{{ else }}append(node.Edges.{{ $e.StructField }}, n){{ end }}
 			}

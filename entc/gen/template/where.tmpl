@@ -14,26 +14,28 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "import" $ }}
 
-// ID filters vertices based on their ID field.
-func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}(
-		{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
-		{{- xtemplate $tmpl $ -}}
-	)
-}
-
-{{ range $op := $.ID.Ops }}
-	{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
-	{{ $func := printf "ID%s" $op.Name }}
-	// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
-	func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
+{{ if .HasOneFieldID }}
+	// ID filters vertices based on their ID field.
+	func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 		return predicate.{{ $.Name }}(
-			{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
-				{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
-				{{- xtemplate $tmpl . }}
-			{{- end -}}
+			{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
+			{{- xtemplate $tmpl $ -}}
 		)
 	}
+
+	{{ range $op := $.ID.Ops }}
+		{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
+		{{ $func := printf "ID%s" $op.Name }}
+		// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
+		func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
+			return predicate.{{ $.Name }}(
+				{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
+					{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
+					{{- xtemplate $tmpl . }}
+				{{- end -}}
+			)
+		}
+	{{ end }}
 {{ end }}
 
 {{ range $f := $.Fields }}
@@ -118,7 +120,7 @@ func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
 	return predicate.{{ $.Name }}(
-		{{- $tmpl = printf "dialect/%s/predicate/and" $.Storage }}
+		{{- $tmpl := printf "dialect/%s/predicate/and" $.Storage }}
 		{{- xtemplate $tmpl . -}}
 	)
 }

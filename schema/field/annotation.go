@@ -19,6 +19,30 @@ type Annotation struct {
 	//	}
 	//
 	StructTag map[string]string
+
+	// ID defines a multi-field schema identifier. Note,
+	// the annotation is valid only for edge schemas.
+	//
+	//	func (TweetLike) Annotations() []schema.Annotation {
+	//		return []schema.Annotation{
+	//			field.ID("user_id", "tweet_id"),
+	//		}
+	//	}
+	//
+	ID []string
+}
+
+// ID defines a multi-field schema identifier. Note, the
+// annotation is valid only for edge schemas.
+//
+//	func (TweetLike) Annotations() []schema.Annotation {
+//		return []schema.Annotation{
+//			field.ID("user_id", "tweet_id"),
+//		}
+//	}
+//
+func ID(first, second string, fields ...string) *Annotation {
+	return &Annotation{ID: append([]string{first, second}, fields...)}
 }
 
 // Name describes the annotation name.
@@ -45,10 +69,13 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 		}
 		a.StructTag[k] = v
 	}
+	if len(ant.ID) > 0 {
+		a.ID = ant.ID
+	}
 	return a
 }
 
-var (
-	_ schema.Annotation = (*Annotation)(nil)
-	_ schema.Merger     = (*Annotation)(nil)
-)
+var _ interface {
+	schema.Annotation
+	schema.Merger
+} = (*Annotation)(nil)

@@ -9,7 +9,11 @@ in the LICENSE file in the root directory of this source tree.
 {{/* constants needed for sql dialects. */}}
 {{ define "dialect/sql/meta/constants" }}
 	{{- range $t := $.RelatedTypes }}
-		{{- if ne $t.ID.StorageKey $.ID.StorageKey }}
+		{{- $withEID := $.HasCompositeID }}
+		{{- if and (not $withEID) $t.HasOneFieldID }}
+			{{- if ne $t.ID.StorageKey $.ID.StorageKey }}{{ $withEID = true }}{{ end }}
+		{{- end }}
+		{{- if $withEID }}
 			// {{ $t.Name }}FieldID holds the string denoting the ID field of the {{ $t.Name }}.
 			{{ $t.Name }}FieldID = "{{ $t.ID.StorageKey }}"
 		{{- end }}
@@ -36,7 +40,9 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/meta/variables" }}
 	// Columns holds all SQL columns for {{ lower $.Name }} fields.
 	var Columns = []string{
-		{{ $.ID.Constant }},
+		{{- if $.HasOneFieldID }}
+			{{ $.ID.Constant }},
+		{{- end }}
 		{{- range $f := $.Fields }}
 			{{ $f.Constant }},
 		{{- end }}

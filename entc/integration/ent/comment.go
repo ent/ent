@@ -113,16 +113,19 @@ func (c *Comment) Unwrap() *Comment {
 func (c *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", unique_int=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("unique_int=")
 	builder.WriteString(fmt.Sprintf("%v", c.UniqueInt))
-	builder.WriteString(", unique_float=")
+	builder.WriteString(", ")
+	builder.WriteString("unique_float=")
 	builder.WriteString(fmt.Sprintf("%v", c.UniqueFloat))
+	builder.WriteString(", ")
 	if v := c.NillableInt; v != nil {
-		builder.WriteString(", nillable_int=")
+		builder.WriteString("nillable_int=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
-	builder.WriteString(", table=")
+	builder.WriteString(", ")
+	builder.WriteString("table=")
 	builder.WriteString(c.Table)
 	builder.WriteByte(')')
 	return builder.String()

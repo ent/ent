@@ -160,12 +160,14 @@ func (r *Rental) Unwrap() *Rental {
 func (r *Rental) String() string {
 	var builder strings.Builder
 	builder.WriteString("Rental(")
-	builder.WriteString(fmt.Sprintf("id=%v", r.ID))
-	builder.WriteString(", date=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
+	builder.WriteString("date=")
 	builder.WriteString(r.Date.Format(time.ANSIC))
-	builder.WriteString(", user_id=")
+	builder.WriteString(", ")
+	builder.WriteString("user_id=")
 	builder.WriteString(fmt.Sprintf("%v", r.UserID))
-	builder.WriteString(", car_id=")
+	builder.WriteString(", ")
+	builder.WriteString("car_id=")
 	builder.WriteString(fmt.Sprintf("%v", r.CarID))
 	builder.WriteByte(')')
 	return builder.String()

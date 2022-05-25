@@ -120,28 +120,30 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 	return node
 }
 
-// FirstID returns the first {{ $.Name }} ID from the query. 
-// Returns a *NotFoundError when no {{ $.Name }} ID was found.
-func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
-	var ids []{{ $.ID.Type }}
-	if ids, err = {{ $receiver }}.Limit(1).IDs(ctx); err != nil {
-		return
+{{ if $.HasOneFieldID }}
+	// FirstID returns the first {{ $.Name }} ID from the query.
+	// Returns a *NotFoundError when no {{ $.Name }} ID was found.
+	func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+		var ids []{{ $.ID.Type }}
+		if ids, err = {{ $receiver }}.Limit(1).IDs(ctx); err != nil {
+			return
+		}
+		if len(ids) == 0 {
+			err = &NotFoundError{ {{ $.Package }}.Label}
+			return
+		}
+		return ids[0], nil
 	}
-	if len(ids) == 0 {
-		err = &NotFoundError{ {{ $.Package }}.Label}
-		return
+	
+	// FirstIDX is like FirstID, but panics if an error occurs.
+	func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} {
+		id, err := {{ $receiver }}.FirstID(ctx)
+		if err != nil && !IsNotFound(err) {
+			panic(err)
+		}
+		return id
 	}
-	return ids[0], nil
-}
-
-// FirstIDX is like FirstID, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} {
-	id, err := {{ $receiver }}.FirstID(ctx)
-	if err != nil && !IsNotFound(err) {
-		panic(err)
-	}
-	return id
-}
+{{ end }}
 
 // Only returns a single {{ $.Name }} entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one {{ $.Name }} entity is found.
@@ -170,33 +172,35 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 	return node
 }
 
-// OnlyID is like Only, but returns the only {{ $.Name }} ID in the query.
-// Returns a *NotSingularError when more than one {{ $.Name }} ID is found.
-// Returns a *NotFoundError when no entities are found.
-func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
-	var ids []{{ $.ID.Type }}
-	if ids, err = {{ $receiver }}.Limit(2).IDs(ctx); err != nil {
+{{ if $.HasOneFieldID }}
+	// OnlyID is like Only, but returns the only {{ $.Name }} ID in the query.
+	// Returns a *NotSingularError when more than one {{ $.Name }} ID is found.
+	// Returns a *NotFoundError when no entities are found.
+	func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
+		var ids []{{ $.ID.Type }}
+		if ids, err = {{ $receiver }}.Limit(2).IDs(ctx); err != nil {
+			return
+		}
+		switch len(ids) {
+		case 1:
+			id = ids[0]
+		case 0:
+			err = &NotFoundError{ {{ $.Package }}.Label}
+		default:
+			err = &NotSingularError{ {{ $.Package }}.Label}
+		}
 		return
 	}
-	switch len(ids) {
-	case 1:
-		id = ids[0]
-	case 0:
-		err = &NotFoundError{ {{ $.Package }}.Label}
-	default:
-		err = &NotSingularError{ {{ $.Package }}.Label}
+	
+	// OnlyIDX is like OnlyID, but panics if an error occurs.
+	func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} {
+		id, err := {{ $receiver }}.OnlyID(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return id
 	}
-	return
-}
-
-// OnlyIDX is like OnlyID, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} {
-	id, err := {{ $receiver }}.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+{{ end }}
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
@@ -215,23 +219,25 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 	return nodes
 }
 
-// IDs executes the query and returns a list of {{ $.Name }} IDs.
-func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
-	var ids []{{ $.ID.Type }}
-	if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
-		return nil, err
+{{ if $.HasOneFieldID }}
+	// IDs executes the query and returns a list of {{ $.Name }} IDs.
+	func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) ([]{{ $.ID.Type }}, error) {
+		var ids []{{ $.ID.Type }}
+		if err := {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
+			return nil, err
+		}
+		return ids, nil
 	}
-	return ids, nil
-}
-
-// IDsX is like IDs, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type }} {
-	ids, err := {{ $receiver }}.IDs(ctx)
-	if err != nil {
-		panic(err)
+	
+	// IDsX is like IDs, but panics if an error occurs.
+	func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type }} {
+		ids, err := {{ $receiver }}.IDs(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return ids
 	}
-	return ids
-}
+{{ end }}
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {

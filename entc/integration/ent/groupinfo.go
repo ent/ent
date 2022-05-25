@@ -120,10 +120,11 @@ func (gi *GroupInfo) Unwrap() *GroupInfo {
 func (gi *GroupInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("GroupInfo(")
-	builder.WriteString(fmt.Sprintf("id=%v", gi.ID))
-	builder.WriteString(", desc=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", gi.ID))
+	builder.WriteString("desc=")
 	builder.WriteString(gi.Desc)
-	builder.WriteString(", max_users=")
+	builder.WriteString(", ")
+	builder.WriteString("max_users=")
 	builder.WriteString(fmt.Sprintf("%v", gi.MaxUsers))
 	builder.WriteByte(')')
 	return builder.String()
