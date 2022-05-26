@@ -3,6 +3,9 @@ id: schema-edges
 title: Edges
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 ## Quick Summary
 
 Edges are the relations (or associations) of entities. For example, user's pets, or group's users.
@@ -1015,6 +1018,323 @@ func (Post) Fields() []ent.Field {
 
 If you're not sure how the foreign-key was named before using the edge-field option,
 check out the generated schema description in your project: `<project>/ent/migrate/schema.go`.
+
+## Edge Schema
+
+Edge schemas are intermediate entity schemas for M2M edges. By using the `Through` option, users can define edge schemas
+for relationships. This allows users to expose relationships in their public APIs, store additional fields, apply CRUD
+operations, and set hooks and privacy policies on edges.
+
+#### User Friendships Example
+
+In the following example, we demonstrate how to model the friendship between two users using an edge schema with the two
+required fields of the relationship (`user_id` and `friend_id`), and an additional field named `created_at` whose value
+is automatically set on creation.
+
+![er_edgeschema_bidi](https://entgo.io/images/assets/er_edgeschema_bidi.png)
+
+<Tabs
+defaultValue="user"
+values={[
+{label: 'User', value: 'user'},
+{label: 'Friendship', value: 'friendship'},
+]}>
+<TabItem value="user">
+
+```go title="ent/schema/user.go" {18}
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Default("Unknown"),
+	}
+}
+
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("friends", User.Type).
+			Through("friendships", Friendship.Type),
+	}
+}
+```
+
+</TabItem>
+<TabItem value="friendship">
+
+```go title="ent/schema/friendship.go" {11-12}
+// Friendship holds the edge schema definition of the Friendship relationship.
+type Friendship struct {
+	ent.Schema
+}
+
+// Fields of the Friendship.
+func (Friendship) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("created_at").
+			Default(time.Now),
+		field.Int("user_id"),
+		field.Int("friend_id"),
+	}
+}
+
+// Edges of the Friendship.
+func (Friendship) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("user", User.Type).
+			Required().
+			Unique().
+			Field("user_id"),
+		edge.To("friend", User.Type).
+			Required().
+			Unique().
+			Field("friend_id"),
+	}
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::info
+- Similar to entity schemas, the `ID` field is automatically generated for edge schemas if not stated otherwise.
+- Edge schemas cannot be used by more than one relationship.
+- The `user_id` and `friend_id` edge-fields are **required** in the edge schema as they compose the relationship.
+:::
+
+#### User Likes Example
+
+In the following example, we demonstrate how to model a system where users can "like" tweets, and a timestamp of when
+the tweet was "liked" is stored in the database. This is a way to store additional fields on the edge.
+
+<Tabs
+defaultValue="user"
+values={[
+{label: 'User', value: 'user'},
+{label: 'Tweet', value: 'tweet'},
+{label: 'Like', value: 'like'},
+]}>
+<TabItem value="user">
+
+```go title="ent/schema/user.go" {18}
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Default("Unknown"),
+	}
+}
+
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("liked_tweets", Tweet.Type).
+			Through("likes", Like.Type),
+	}
+}
+```
+
+</TabItem>
+<TabItem value="tweet">
+
+```go title="ent/schema/tweet.go" {18}
+// Tweet holds the schema definition for the Tweet entity.
+type Tweet struct {
+	ent.Schema
+}
+
+// Fields of the Tweet.
+func (Tweet) Fields() []ent.Field {
+	return []ent.Field{
+		field.Text("text"),
+	}
+}
+
+// Edges of the Tweet.
+func (Tweet) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("liked_users", User.Type).
+			Ref("liked_tweets").
+			Through("likes", Like.Type),
+	}
+}
+```
+
+</TabItem>
+<TabItem value="like">
+
+```go title="ent/schema/like.go" {8,17-18}
+// Like holds the edge schema definition for the Like edge.
+type Like struct {
+	ent.Schema
+}
+
+func (Like) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		field.ID("user_id", "tweet_id"),
+	}
+}
+
+// Fields of the Like.
+func (Like) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("liked_at").
+			Default(time.Now),
+		field.Int("user_id"),
+		field.Int("tweet_id"),
+	}
+}
+
+// Edges of the Like.
+func (Like) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("user", User.Type).
+			Unique().
+			Required().
+			Field("user_id"),
+		edge.To("tweet", Tweet.Type).
+			Unique().
+			Required().
+			Field("tweet_id"),
+	}
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::info
+In the example above, the `field.ID` annotation is used to tell Ent that the edge schema identifier is a
+composite primary-key of the two edge-fields, `user_id` and `tweet_id`. Therefore, the `ID` field will
+not be generated for the `Like` struct along with any of its builder methods. e.g. `Get`, `OnlyID`, etc.
+:::
+
+#### Usage Of Edge Schema In Other Edge Types
+
+In some cases, users want to store O2M/M2O or O2O relationships in a separate table (i.e. join table) in order to
+simplify future migrations in case the edge type was changed. For example, wanting to change a O2M/M2O edge to M2M by
+dropping a unique constraint instead of migrating foreign-key values to a new table.
+
+In the following example, we present a model where users can "author" tweets with the constraint that a tweet can be
+written by only one user. Unlike regular O2M/M2O edges, by using an edge schema, we enforce this constraint on the join
+table using a unique index on the `tweet_id` column. This constraint may be dropped in the future to allow multiple
+users to participate in the "authoring" of a tweet. Hence, changing the edge type to M2M without migrating the data to
+a new table.
+
+
+<Tabs
+defaultValue="user"
+values={[
+{label: 'User', value: 'user'},
+{label: 'Tweet', value: 'tweet'},
+{label: 'UserTweet', value: 'usertweet'},
+]}>
+<TabItem value="user">
+
+```go title="ent/schema/user.go" {18}
+// User holds the schema definition for the User entity.
+type User struct {
+	ent.Schema
+}
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name").
+			Default("Unknown"),
+	}
+}
+
+// Edges of the User.
+func (User) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("tweets", Tweet.Type).
+			Through("user_tweets", UserTweet.Type),
+	}
+}
+```
+
+</TabItem>
+<TabItem value="tweet">
+
+```go title="ent/schema/tweet.go" {18}
+// Tweet holds the schema definition for the Tweet entity.
+type Tweet struct {
+	ent.Schema
+}
+
+// Fields of the Tweet.
+func (Tweet) Fields() []ent.Field {
+	return []ent.Field{
+		field.Text("text"),
+	}
+}
+
+// Edges of the Tweet.
+func (Tweet) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.From("user", User.Type).
+			Ref("tweets").
+			Through("tweet_user", UserTweet.Type).
+			Comment("The uniqueness of the author is enforced on the edge schema"),
+	}
+}
+```
+
+</TabItem>
+<TabItem value="usertweet">
+
+```go title="ent/schema/usertweet.go" {33-34}
+// UserTweet holds the schema definition for the UserTweet entity.
+type UserTweet struct {
+	ent.Schema
+}
+
+// Fields of the UserTweet.
+func (UserTweet) Fields() []ent.Field {
+	return []ent.Field{
+		field.Time("created_at").
+			Default(time.Now),
+		field.Int("user_id"),
+		field.Int("tweet_id"),
+	}
+}
+
+// Edges of the UserTweet.
+func (UserTweet) Edges() []ent.Edge {
+	return []ent.Edge{
+		edge.To("user", User.Type).
+			Unique().
+			Required().
+			Field("user_id"),
+		edge.To("tweet", Tweet.Type).
+			Unique().
+			Required().
+			Field("tweet_id"),
+	}
+}
+
+// Indexes of the UserTweet.
+func (UserTweet) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("tweet_id").
+			Unique(),
+	}
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Required
 

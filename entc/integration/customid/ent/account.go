@@ -113,8 +113,8 @@ func (a *Account) Unwrap() *Account {
 func (a *Account) String() string {
 	var builder strings.Builder
 	builder.WriteString("Account(")
-	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
-	builder.WriteString(", email=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
+	builder.WriteString("email=")
 	builder.WriteString(a.Email)
 	builder.WriteByte(')')
 	return builder.String()

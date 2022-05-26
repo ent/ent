@@ -128,8 +128,8 @@ func (s *Street) Unwrap() *Street {
 func (s *Street) String() string {
 	var builder strings.Builder
 	builder.WriteString("Street(")
-	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
-	builder.WriteString(", name=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
+	builder.WriteString("name=")
 	builder.WriteString(s.Name)
 	builder.WriteByte(')')
 	return builder.String()

@@ -152,10 +152,11 @@ func (b *Blob) Unwrap() *Blob {
 func (b *Blob) String() string {
 	var builder strings.Builder
 	builder.WriteString("Blob(")
-	builder.WriteString(fmt.Sprintf("id=%v", b.ID))
-	builder.WriteString(", uuid=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
+	builder.WriteString("uuid=")
 	builder.WriteString(fmt.Sprintf("%v", b.UUID))
-	builder.WriteString(", count=")
+	builder.WriteString(", ")
+	builder.WriteString("count=")
 	builder.WriteString(fmt.Sprintf("%v", b.Count))
 	builder.WriteByte(')')
 	return builder.String()

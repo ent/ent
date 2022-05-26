@@ -128,8 +128,8 @@ func (c *Car) Unwrap() *Car {
 func (c *Car) String() string {
 	var builder strings.Builder
 	builder.WriteString("Car(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", name=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("name=")
 	builder.WriteString(c.Name)
 	builder.WriteByte(')')
 	return builder.String()

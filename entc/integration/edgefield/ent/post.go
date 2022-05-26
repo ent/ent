@@ -127,11 +127,12 @@ func (po *Post) Unwrap() *Post {
 func (po *Post) String() string {
 	var builder strings.Builder
 	builder.WriteString("Post(")
-	builder.WriteString(fmt.Sprintf("id=%v", po.ID))
-	builder.WriteString(", text=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", po.ID))
+	builder.WriteString("text=")
 	builder.WriteString(po.Text)
+	builder.WriteString(", ")
 	if v := po.AuthorID; v != nil {
-		builder.WriteString(", author_id=")
+		builder.WriteString("author_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')

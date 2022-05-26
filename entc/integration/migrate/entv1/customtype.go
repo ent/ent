@@ -86,8 +86,8 @@ func (ct *CustomType) Unwrap() *CustomType {
 func (ct *CustomType) String() string {
 	var builder strings.Builder
 	builder.WriteString("CustomType(")
-	builder.WriteString(fmt.Sprintf("id=%v", ct.ID))
-	builder.WriteString(", custom=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", ct.ID))
+	builder.WriteString("custom=")
 	builder.WriteString(ct.Custom)
 	builder.WriteByte(')')
 	return builder.String()

@@ -1136,6 +1136,29 @@ func TestCreateNode(t *testing.T) {
 			},
 		},
 		{
+			name: "edges/m2m/fields",
+			spec: &CreateSpec{
+				Table: "groups",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "GitHub"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2M, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}, Fields: []*FieldSpec{{Column: "ts", Type: field.TypeInt, Value: 3}}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `groups` (`name`) VALUES (?)")).
+					WithArgs("GitHub").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`, `ts`) VALUES (?, ?, ?)")).
+					WithArgs(1, 2, 3).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
 			name: "edges/m2m/inverse",
 			spec: &CreateSpec{
 				Table: "users",
@@ -1177,6 +1200,29 @@ func TestCreateNode(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`) VALUES (?, ?), (?, ?)")).
 					WithArgs(1, 2, 2, 1).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectCommit()
+			},
+		},
+		{
+			name: "edges/m2m/bidi/fields",
+			spec: &CreateSpec{
+				Table: "users",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "mashraki"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2M, Bidi: true, Table: "user_friends", Columns: []string{"user_id", "friend_id"}, Target: &EdgeTarget{Nodes: []driver.Value{2}, IDSpec: &FieldSpec{Column: "id"}, Fields: []*FieldSpec{{Column: "ts", Type: field.TypeInt, Value: 3}}}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `users` (`name`) VALUES (?)")).
+					WithArgs("mashraki").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `user_friends` (`user_id`, `friend_id`, `ts`) VALUES (?, ?, ?), (?, ?, ?)")).
+					WithArgs(1, 2, 3, 2, 1, 3).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				m.ExpectCommit()
 			},

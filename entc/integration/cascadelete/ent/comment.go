@@ -126,10 +126,11 @@ func (c *Comment) Unwrap() *Comment {
 func (c *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
-	builder.WriteString(", text=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("text=")
 	builder.WriteString(c.Text)
-	builder.WriteString(", post_id=")
+	builder.WriteString(", ")
+	builder.WriteString("post_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.PostID))
 	builder.WriteByte(')')
 	return builder.String()

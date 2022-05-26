@@ -143,7 +143,7 @@ func (c *NodeClient) Use(hooks ...Hook) {
 	c.hooks.Node = append(c.hooks.Node, hooks...)
 }
 
-// Create returns a create builder for Node.
+// Create returns a builder for creating a Node entity.
 func (c *NodeClient) Create() *NodeCreate {
 	mutation := newNodeMutation(c.config, OpCreate)
 	return &NodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -178,12 +178,12 @@ func (c *NodeClient) Delete() *NodeDelete {
 	return &NodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// DeleteOne returns a delete builder for the given entity.
+// DeleteOne returns a builder for deleting the given entity.
 func (c *NodeClient) DeleteOne(n *Node) *NodeDeleteOne {
 	return c.DeleteOneID(n.ID)
 }
 
-// DeleteOneID returns a delete builder for the given id.
+// DeleteOne returns a builder for deleting the given entity by its id.
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	builder := c.Delete().Where(node.ID(id))
 	builder.mutation.id = &id

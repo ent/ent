@@ -144,8 +144,8 @@ func (gr *Group) Unwrap() *Group {
 func (gr *Group) String() string {
 	var builder strings.Builder
 	builder.WriteString("Group(")
-	builder.WriteString(fmt.Sprintf("id=%v", gr.ID))
-	builder.WriteString(", name=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
+	builder.WriteString("name=")
 	builder.WriteString(gr.Name)
 	builder.WriteByte(')')
 	return builder.String()
