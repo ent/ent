@@ -37,7 +37,7 @@ Then, in `entc/integration` run `docker-compose` in order to spin-up all databas
 docker-compose -f docker-compose.yaml up -d
 ```
 
-Then, run `go test -tags json1 ./...` to run all integration tests.
+Then, run `go test ./...` to run all integration tests.
 
 
 ## Pull Requests
