@@ -411,7 +411,7 @@ jobs:
         run: git checkout origin/master
       - name: Run integration on origin/master
         working-directory: entc/integration
-        run: go test -race -count=2 ./...
+        run: go test -race -count=2 -tags=json1 ./...
       - name: Checkout previous HEAD
         run: git checkout -
       - name: Run integration on HEAD
