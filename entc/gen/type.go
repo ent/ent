@@ -1312,9 +1312,9 @@ func (f Field) PK() *schema.Column {
 		Name:      f.StorageKey(),
 		Type:      f.Type.Type,
 		Key:       schema.PrimaryKey,
-		Increment: f.incremental(true),
+		Increment: f.incremental(f.Type.Type.Integer()),
 	}
-	// If the PK was defined by the user and it's UUID or string.
+	// If the PK was defined by the user, and it is UUID or string.
 	if f.UserDefined && !f.Type.Numeric() {
 		c.Increment = false
 		c.Type = f.Type.Type
