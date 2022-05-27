@@ -362,6 +362,8 @@ func (d *Postgres) cType(c *Column) (t string) {
 		t = "varchar"
 		if c.Size > maxCharSize {
 			t = "text"
+		} else if c.Size > 0 {
+			t = fmt.Sprintf("varchar(%d)", c.Size)
 		}
 	case field.TypeTime:
 		t = c.scanTypeOr("timestamp with time zone")
