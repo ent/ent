@@ -125,7 +125,7 @@ users := client.User.Query().
 The above code will produce the following SQL query:
 
 ```sql
-SELECT `users`.`id`, `users`.`last_login_at` FROM users WHERE DATE(last_login_at) <= ?;
+SELECT `users`.`id`, `users`.`last_login_at` FROM users WHERE DATE(last_login_at) >= ?;
 ```
 
 You may also perform a more complex sql query, for example `DATE_ADD()`
