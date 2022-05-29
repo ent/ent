@@ -97,6 +97,7 @@ type (
 		*Config
 		// Nodes are list of Go types that mapped to the types in the loaded schema.
 		Nodes []*Type
+		nodes map[string]*Type
 		// Schemas holds the raw interfaces for the loaded schemas.
 		Schemas []*load.Schema
 	}
@@ -141,7 +142,7 @@ func (f GenerateFunc) Generate(g *Graph) error {
 // It fails if one of the schemas is invalid.
 func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	defer catch(&err)
-	g = &Graph{c, make([]*Type, 0, len(schemas)), schemas}
+	g = &Graph{Config: c, Nodes: make([]*Type, 0, len(schemas)), Schemas: schemas}
 	for i := range schemas {
 		g.addNode(schemas[i])
 	}
@@ -149,11 +150,12 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 		g.addEdges(schemas[i])
 	}
 	for _, t := range g.Nodes {
-		check(resolve(t), "resolve %q relations", t.Name)
+		check(g.resolve(t), "resolve %q relations", t.Name)
 	}
 	for _, t := range g.Nodes {
 		check(t.setupFKs(), "set %q foreign-keys", t.Name)
 	}
+	check(g.edgeSchemas(), "resolving edges")
 	for i := range schemas {
 		g.addIndexes(schemas[i])
 	}
@@ -274,7 +276,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 		typ, ok := g.typ(e.Type)
 		expect(ok, "type %q does not exist for edge", e.Type)
 		_, ok = t.fields[e.Name]
-		expect(!ok, "%s schema can't contain field and edge with the same name %q", schema.Name, e.Name)
+		expect(!ok, "%s schema cannot contain field and edge with the same name %q", schema.Name, e.Name)
 		_, ok = seen[e.Name]
 		expect(!ok, "%s schema contains multiple %q edges", schema.Name, e.Name)
 		seen[e.Name] = struct{}{}
@@ -293,7 +295,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 			})
 		// Inverse only.
 		case e.Inverse && e.Ref == nil:
-			expect(e.RefName != "", "missing reference name for inverse edge: %s.%s", t.Name, e.Name)
+			expect(e.RefName != "", "back-reference edge %s.%s is missing the Ref attribute", t.Name, e.Name)
 			t.Edges = append(t.Edges, &Edge{
 				def:         e,
 				Type:        typ,
@@ -362,7 +364,7 @@ func (g *Graph) addEdges(schema *load.Schema) {
 // 	 - A have an edge (E) to B (not unique), and B have a back-reference non-unique edge (E') for E.
 // 	 - A have an edge (E) to A (not unique).
 //
-func resolve(t *Type) error {
+func (g *Graph) resolve(t *Type) error {
 	for _, e := range t.Edges {
 		switch {
 		case e.IsInverse():
@@ -398,8 +400,8 @@ func resolve(t *Type) error {
 				e.Rel.Type, ref.Rel.Type = M2M, M2M
 				table = e.Type.Label() + "_" + ref.Name
 				c1, c2 := ref.Owner.Label()+"_id", ref.Type.Label()+"_id"
-				// If the relation is from the same type: User has Friends ([]User).
-				// give the second column a different name (the relation name).
+				// If the relation is from the same type: User has Friends ([]User),
+				// we give the second column a different name (the relation name).
 				if c1 == c2 {
 					c2 = rules.Singularize(e.Name) + "_id"
 				}
@@ -438,13 +440,131 @@ func resolve(t *Type) error {
 	return nil
 }
 
+// edgeSchemas visits all edges in the graph and detects which schemas are used as "edge schemas".
+// Note, edge schemas cannot be used by more than one association (edge.To), must define two required
+// edges (+ edge-fields) to the types that go through them, and allow adding additional fields with
+// optional default values.
+func (g *Graph) edgeSchemas() error {
+	for _, n := range g.Nodes {
+		for _, e := range n.Edges {
+			if e.def.Through == nil {
+				continue
+			}
+			if !e.M2M() {
+				return fmt.Errorf("edge %s.%s Through(%q, %s.Type) is allowed only on M2M edges, but got: %q", n.Name, e.Name, e.def.Through.N, e.def.Through.T, e.Rel.Type)
+			}
+			typ, ok := g.typ(e.def.Through.T)
+			switch {
+			case !ok:
+				return fmt.Errorf("edge %s.%s defined with Through(%q, %s.Type), but type %[4]s was not found", n.Name, e.Name, e.def.Through.N, e.def.Through.T, e.def.Through.T)
+			case typ == n:
+				return fmt.Errorf("edge %s.%s defined with Through(%q, %s.Type), but edge cannot go through itself", n.Name, e.Name, e.def.Through.N, e.def.Through.T)
+			case e.def.Through.N == "" || n.hasEdge(e.def.Through.N):
+				return fmt.Errorf("edge %s.%s defined with Through(%q, %s.Type), but schema %[1]s already has an edge named %[3]s", n.Name, e.Name, e.def.Through.N, e.def.Through.T)
+			case e.IsInverse():
+				if typ.EdgeSchema.From != nil {
+					return fmt.Errorf("type %s is already used as an edge schema by other edge.From: %s.%s", typ.Name, typ.EdgeSchema.From.Name, typ.EdgeSchema.From.Owner.Name)
+				}
+				e.Through = typ
+				typ.EdgeSchema.From = e
+				if to, from := typ.EdgeSchema.To, typ.EdgeSchema.From; to != nil && from.Ref != to {
+					return fmt.Errorf("mismtached edge.From(%q, %s.Type) and edge.To(%q, %s.Type) for edge schema %s", from.Name, from.Type.Name, to.Name, to.Type.Name, typ.Name)
+				}
+			default: // Assoc.
+				if typ.EdgeSchema.To != nil {
+					return fmt.Errorf("type %s is already used as an edge schema by other edge.To: %s.%s", typ.Name, typ.EdgeSchema.From.Name, typ.EdgeSchema.From.Owner.Name)
+				}
+				e.Through = typ
+				typ.EdgeSchema.To = e
+				if to, from := typ.EdgeSchema.To, typ.EdgeSchema.From; from != nil && from.Ref != to {
+					return fmt.Errorf("mismtached edge.To(%q, %s.Type) and edge.From(%q, %s.Type) for edge schema %s", from.Name, from.Type.Name, to.Name, to.Type.Name, typ.Name)
+				}
+			}
+			e.Rel.Table = typ.Table()
+			var ref *Edge
+			for i, c := range e.Rel.Columns {
+				r, ok := func() (*Edge, bool) {
+					for _, fk := range typ.ForeignKeys {
+						if fk.Field.Name == c {
+							return fk.Edge, true
+						}
+					}
+					return nil, false
+				}()
+				if !ok {
+					return fmt.Errorf("missing edge-field %s.%s for edge schema used by %s.%s in Through(%q, %s.Type)", typ.Name, c, n.Name, e.Name, e.def.Through.N, typ.Name)
+				}
+				if r.Optional {
+					return fmt.Errorf("edge-schema %s is missing a Required() attribute for its reference edge %q", typ.Name, e.Name)
+				}
+				if !e.IsInverse() && i == 0 || e.IsInverse() && i == 1 {
+					ref = r
+				}
+			}
+			// Edges from src/dest table are always O2M. One row to many
+			// rows in the join table. Hence, a many-to-many relationship.
+			n.Edges = append(n.Edges, &Edge{
+				def:       &load.Edge{},
+				Name:      e.def.Through.N,
+				Type:      typ,
+				Inverse:   ref.Name,
+				Ref:       ref,
+				Owner:     n,
+				Optional:  true,
+				StructTag: structTag(e.def.Through.N, ""),
+				Rel: Relation{
+					Type:    O2M,
+					fk:      ref.Rel.fk,
+					Table:   ref.Rel.Table,
+					Columns: ref.Rel.Columns,
+				},
+			})
+			// Edge schema contains a composite primary key.
+			if ant := fieldAnnotate(typ.Annotations); ant != nil && len(ant.ID) > 0 && len(typ.EdgeSchema.ID) == 0 {
+				r1, r2 := e.Rel.Columns[0], e.Rel.Columns[1]
+				if len(ant.ID) != 2 || ant.ID[0] != r1 || ant.ID[1] != r2 {
+					return fmt.Errorf(`edge schema primary key can only be defined on "id" or (%q, %q) in the same order`, r1, r2)
+				}
+				typ.ID = nil
+				for _, f := range ant.ID {
+					typ.EdgeSchema.ID = append(typ.EdgeSchema.ID, typ.fields[f])
+				}
+			}
+			if typ.HasCompositeID() {
+				continue
+			}
+			hasI := func() bool {
+				for _, idx := range typ.Indexes {
+					if !idx.Unique && len(idx.Columns) != 2 {
+						continue
+					}
+					c1, c2 := idx.Columns[0], idx.Columns[1]
+					r1, r2 := e.Rel.Columns[0], e.Rel.Columns[1]
+					if c1 == r1 && c2 == r2 || c1 == r2 && c2 == r1 {
+						return true
+					}
+				}
+				return false
+			}()
+			if !hasI {
+				if err := typ.AddIndex(&load.Index{Unique: true, Fields: e.Rel.Columns}); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // Tables returns the schema definitions of SQL tables for the graph.
 func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.Nodes {
-		table := schema.NewTable(n.Table()).
-			AddPrimary(n.ID.PK()).
-			SetAnnotation(n.EntSQL())
+		table := schema.NewTable(n.Table())
+		if n.HasOneFieldID() {
+			table.AddPrimary(n.ID.PK())
+		}
+		table.SetAnnotation(n.EntSQL())
 		for _, f := range n.Fields {
 			if !f.IsEdgeField() {
 				table.AddColumn(f.Column())
@@ -454,7 +574,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 		all = append(all, table)
 	}
 	for _, n := range g.Nodes {
-		// Foreign key and a reference, or a join table.
+		// Foreign key and its reference, or a join table.
 		for _, e := range n.Edges {
 			if e.IsInverse() {
 				continue
@@ -497,6 +617,10 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 					Symbol:     fkSymbol(e, owner, ref),
 				})
 			case M2M:
+				// If there is an edge schema for the association (i.e. edge.Through).
+				if e.Through != nil || e.Ref != nil && e.Ref.Through != nil {
+					continue
+				}
 				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
 				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt}
 				if ref := n.ID; ref.UserDefined {
@@ -532,6 +656,9 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				})
 			}
 		}
+		if n.HasCompositeID() {
+			addCompositePK(tables[n.Table()], n)
+		}
 	}
 	// Append indexes to tables after all columns were added (including relation columns).
 	for _, n := range g.Nodes {
@@ -546,11 +673,23 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 	return
 }
 
-// mayAddColumn adds the given column if it doesn't already exist in the table.
+// mayAddColumn adds the given column if it does not already exist in the table.
 func mayAddColumn(t *schema.Table, c *schema.Column) {
 	if !t.HasColumn(c.Name) {
 		t.AddColumn(c)
 	}
+}
+
+func addCompositePK(t *schema.Table, n *Type) {
+	columns := make([]*schema.Column, 0, len(n.EdgeSchema.ID))
+	for _, id := range n.EdgeSchema.ID {
+		for i, f := range n.Fields {
+			if f.IsEdgeField() && id == f && t.Columns[i].Name == f.StorageKey() {
+				columns = append(columns, t.Columns[i])
+			}
+		}
+	}
+	t.PrimaryKey = columns
 }
 
 // fkSymbol returns the symbol of the foreign-key constraint for edges of type O2M, M2O and O2O.
@@ -624,12 +763,14 @@ func (g *Graph) SchemaSnapshot() (string, error) {
 }
 
 func (g *Graph) typ(name string) (*Type, bool) {
-	for _, n := range g.Nodes {
-		if name == n.Name {
-			return n, true
+	if g.nodes == nil {
+		g.nodes = make(map[string]*Type, len(g.Nodes))
+		for _, n := range g.Nodes {
+			g.nodes[n.Name] = n
 		}
 	}
-	return nil, false
+	n, ok := g.nodes[name]
+	return n, ok
 }
 
 // templates returns the Template to execute on the Graph,

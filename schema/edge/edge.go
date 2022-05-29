@@ -12,17 +12,18 @@ import (
 
 // A Descriptor for edge configuration.
 type Descriptor struct {
-	Tag         string              // struct tag.
-	Type        string              // edge type.
-	Name        string              // edge name.
-	Field       string              // edge field name (e.g. foreign-key).
-	RefName     string              // ref name; inverse only.
-	Ref         *Descriptor         // edge reference; to/from of the same type.
-	Unique      bool                // unique edge.
-	Inverse     bool                // inverse edge.
-	Required    bool                // required on creation.
-	StorageKey  *StorageKey         // optional storage-key configuration.
-	Annotations []schema.Annotation // edge annotations.
+	Tag         string                 // struct tag.
+	Type        string                 // edge type.
+	Name        string                 // edge name.
+	Field       string                 // edge field name (e.g. foreign-key).
+	RefName     string                 // ref name; inverse only.
+	Ref         *Descriptor            // edge reference; to/from of the same type.
+	Through     *struct{ N, T string } // through type and name.
+	Unique      bool                   // unique edge.
+	Inverse     bool                   // inverse edge.
+	Required    bool                   // required on creation.
+	StorageKey  *StorageKey            // optional storage-key configuration.
+	Annotations []schema.Annotation    // edge annotations.
 }
 
 // To defines an association edge between two vertices.
@@ -83,6 +84,16 @@ func (b *assocBuilder) From(name string) *inverseBuilder {
 //
 func (b *assocBuilder) Field(f string) *assocBuilder {
 	b.desc.Field = f
+	return b
+}
+
+// Through allows setting an "edge schema" to interact explicitly with M2M edges.
+//
+//	edge.To("friends", User.Type).
+//		Through("friendships", Friendship.Type)
+//
+func (b *assocBuilder) Through(name string, t interface{}) *assocBuilder {
+	b.desc.Through = &struct{ N, T string }{N: name, T: typ(t)}
 	return b
 }
 
@@ -170,6 +181,17 @@ func (b *inverseBuilder) Comment(string) *inverseBuilder {
 //
 func (b *inverseBuilder) Field(f string) *inverseBuilder {
 	b.desc.Field = f
+	return b
+}
+
+// Through allows setting an "edge schema" to interact explicitly with M2M edges.
+//
+//	edge.From("liked_users", User.Type).
+//		Ref("liked_tweets").
+//		Through("likes", TweetLike.Type)
+//
+func (b *inverseBuilder) Through(name string, t interface{}) *inverseBuilder {
+	b.desc.Through = &struct{ N, T string }{N: name, T: typ(t)}
 	return b
 }
 

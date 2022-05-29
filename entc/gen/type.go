@@ -52,6 +52,12 @@ type (
 		// Annotations that were defined for the field in the schema.
 		// The mapping is from the Annotation.Name() to a JSON decoded object.
 		Annotations Annotations
+		// EdgeSchema indicates that this type (schema) is being used as an "edge schema".
+		// The To and From fields holds references to the edges that go "through" this type.
+		EdgeSchema struct {
+			ID       []*Field
+			To, From *Edge
+		}
 	}
 
 	// Field holds the information of a type field used for the templates.
@@ -79,7 +85,7 @@ type (
 		Immutable bool
 		// StructTag of the field. default to "json".
 		StructTag string
-		// Validators holds the number of validators this field have.
+		// Validators holds the number of validators the field have.
 		Validators int
 		// Position info of the field.
 		Position *load.Position
@@ -113,6 +119,8 @@ type (
 		// Owner holds the type of the edge-owner. For assoc-edges it's the
 		// type that holds the edge, for inverse-edges, it's the assoc type.
 		Owner *Type
+		// Through edge schema type.
+		Through *Type
 		// StructTag of the edge-field in the struct. default to "json".
 		StructTag string
 		// Relation holds the relation info of an edge.
@@ -251,6 +259,22 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 	return typ, nil
 }
 
+// IsEdgeSchema indicates if the type (schema) is used as an edge-schema.
+// i.e. is being used by an edge (or its inverse) with edge.Through modifier.
+func (t Type) IsEdgeSchema() bool {
+	return t.EdgeSchema.To != nil || t.EdgeSchema.From != nil
+}
+
+// HasCompositeID indicates if the type has a composite ID field.
+func (t Type) HasCompositeID() bool {
+	return t.IsEdgeSchema() && len(t.EdgeSchema.ID) > 1
+}
+
+// HasOneFieldID indicates if the type has an ID with one field (not composite).
+func (t Type) HasOneFieldID() bool {
+	return !t.HasCompositeID()
+}
+
 // Label returns Gremlin label name of the node/type.
 func (t Type) Label() string {
 	return snake(t.Name)
@@ -294,6 +318,17 @@ func (t Type) Receiver() string {
 	return receiver(t.Name)
 }
 
+// hasEdge returns true if this type as an edge (reverse or assoc)
+/// with the given name.
+func (t Type) hasEdge(name string) bool {
+	for _, e := range t.Edges {
+		if name == e.Name {
+			return true
+		}
+	}
+	return false
+}
+
 // HasAssoc returns true if this type has an assoc-edge (edge.To)
 // with the given name. faster than map access for most cases.
 func (t Type) HasAssoc(name string) (*Edge, bool) {
@@ -308,7 +343,7 @@ func (t Type) HasAssoc(name string) (*Edge, bool) {
 // HasValidators reports if any of the type's field has validators.
 func (t Type) HasValidators() bool {
 	fields := t.Fields
-	if t.ID.UserDefined {
+	if t.HasOneFieldID() && t.ID.UserDefined {
 		fields = append(fields, t.ID)
 	}
 	for _, f := range fields {
@@ -322,7 +357,7 @@ func (t Type) HasValidators() bool {
 // HasDefault reports if any of this type's fields has default value on creation.
 func (t Type) HasDefault() bool {
 	fields := t.Fields
-	if t.ID.UserDefined {
+	if t.HasOneFieldID() && t.ID.UserDefined {
 		fields = append(fields, t.ID)
 	}
 	for _, f := range fields {
@@ -388,6 +423,17 @@ func (t Type) FKEdges() (edges []*Edge) {
 	return
 }
 
+// EdgesWithID returns all edges that point to entities with non-composite identifiers.
+// These types of edges can be created, updated and deleted by their identifiers.
+func (t Type) EdgesWithID() (edges []*Edge) {
+	for _, e := range t.Edges {
+		if !e.Type.HasCompositeID() {
+			edges = append(edges, e)
+		}
+	}
+	return
+}
+
 // RuntimeMixin returns schema mixin that needs to be loaded at
 // runtime. For example, for default values, validators or hooks.
 func (t Type) RuntimeMixin() bool {
@@ -398,7 +444,7 @@ func (t Type) RuntimeMixin() bool {
 func (t Type) MixedInFields() []int {
 	idx := make(map[int]struct{})
 	fields := t.Fields
-	if t.ID.UserDefined {
+	if t.HasOneFieldID() && t.ID.UserDefined {
 		fields = append(fields, t.ID)
 	}
 	for _, f := range fields {
@@ -892,7 +938,7 @@ func aliases(g *Graph) {
 			if name == "" && f.Type.PkgPath != "" {
 				name = path.Base(f.Type.PkgPath)
 			}
-			// An user-defined type already uses the
+			// A user-defined type already uses the
 			// package local name.
 			if n, ok := names[name]; ok {
 				// By default, a package named "pet" will be named as "entpet".
@@ -1266,9 +1312,9 @@ func (f Field) PK() *schema.Column {
 		Name:      f.StorageKey(),
 		Type:      f.Type.Type,
 		Key:       schema.PrimaryKey,
-		Increment: f.incremental(true),
+		Increment: f.incremental(f.Type.Type.Integer()),
 	}
-	// If the PK was defined by the user and it's UUID or string.
+	// If the PK was defined by the user, and it is UUID or string.
 	if f.UserDefined && !f.Type.Numeric() {
 		c.Increment = false
 		c.Type = f.Type.Type
@@ -1764,13 +1810,25 @@ func structTag(name, tag string) string {
 
 // builderField returns the struct field for the given name
 // and ensures it doesn't conflict with Go keywords and other
-// builder fields and it's not exported.
+// builder fields, and it is not exported.
 func builderField(name string) string {
 	_, ok := privateField[name]
 	if ok || token.Lookup(name).IsKeyword() || strings.ToUpper(name[:1]) == name[:1] {
 		return "_" + name
 	}
 	return name
+}
+
+// fieldAnnotate extracts the field annotation from a loaded annotation format.
+func fieldAnnotate(annotation map[string]interface{}) *field.Annotation {
+	annotate := &field.Annotation{}
+	if annotation == nil || annotation[annotate.Name()] == nil {
+		return nil
+	}
+	if buf, err := json.Marshal(annotation[annotate.Name()]); err == nil {
+		_ = json.Unmarshal(buf, &annotate)
+	}
+	return annotate
 }
 
 // entsqlAnnotate extracts the entsql annotation from a loaded annotation format.

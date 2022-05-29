@@ -17,8 +17,10 @@ import (
 	{{- /* Ignore generting on graph specififc templates */}}
 	{{- if not (eq $.Config.Package $.Package) }}
 		"{{ $.Config.Package }}/predicate"
-		{{- with $.ID.Type.PkgPath }}
-			"{{ . }}"
+		{{- if $.HasOneFieldID }}
+			{{- with $.ID.Type.PkgPath }}
+				"{{ . }}"
+			{{- end }}
 		{{- end }}
 		{{- /* Import external packages */}}
         {{- template "import/types" $ }}
@@ -36,7 +38,7 @@ import (
 
 {{/* A template for importing fields with custom types */}}
 {{ define "import/types" -}}
-	{{- $fields := $.Fields }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}
+	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 	{{- range $f := $fields }}
 		{{- $pkg := $f.Type.PkgPath }}
 		{{- if and $pkg (not (hasImport (base $pkg ))) }}

@@ -302,6 +302,9 @@ type (
 	EdgeTarget struct {
 		Nodes  []driver.Value
 		IDSpec *FieldSpec
+		// Additional fields can be set on the
+		// edge join table. Valid for M2M edges.
+		Fields []*FieldSpec
 	}
 
 	// EdgeSpec holds the information for updating a field
@@ -590,7 +593,7 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	// If no columns were selected in count,
 	// the default selection is by node ids.
 	columns := q.Node.Columns
-	if len(columns) == 0 {
+	if len(columns) == 0 && q.Node.ID != nil {
 		columns = append(columns, q.Node.ID.Column)
 	}
 	for i, c := range columns {
@@ -873,6 +876,12 @@ func (c *creator) node(ctx context.Context, drv dialect.Driver) error {
 		return err
 	}
 	if err := func() error {
+		// In case the spec does not contain an ID field, we assume
+		// we interact with an edge-schema with composite primary key.
+		if c.ID == nil {
+			query, args := insert.Query()
+			return c.tx.Exec(ctx, query, args, nil)
+		}
 		if err := c.insert(ctx, insert); err != nil {
 			return err
 		}
@@ -907,7 +916,7 @@ func (c *creator) setTableColumns(insert *sql.InsertBuilder, edges map[Rel][]*Ed
 	return err
 }
 
-// insert inserts the node to its table and sets its ID if it was not provided by the user.
+// insert a node to its table and sets its ID if it was not provided by the user.
 func (c *creator) insert(ctx context.Context, insert *sql.InsertBuilder) error {
 	if opts := c.CreateSpec.OnConflict; len(opts) > 0 {
 		insert.OnConflict(opts...)
@@ -916,7 +925,7 @@ func (c *creator) insert(ctx context.Context, insert *sql.InsertBuilder) error {
 	// If the id field was provided by the user.
 	if c.ID.Value != nil {
 		insert.Set(c.ID.Column, c.ID.Value)
-		// In case of "ON CONFLICT", the record may exists in the
+		// In case of "ON CONFLICT", the record may exist in the
 		// database, and we need to get back the database id field.
 		if len(c.CreateSpec.OnConflict) == 0 {
 			query, args := insert.Query()
@@ -1128,8 +1137,17 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 	// The EdgeSpec is the same for all members in a group.
 	tables := edges.GroupTable()
 	for _, table := range edgeKeys(tables) {
-		edges := tables[table]
-		insert := g.builder.Insert(table).Columns(edges[0].Columns...)
+		var (
+			edges   = tables[table]
+			columns = edges[0].Columns
+			values  = make([]interface{}, 0, len(edges[0].Target.Fields))
+		)
+		// Specs are generated equally for all edges from the same type.
+		for _, f := range edges[0].Target.Fields {
+			values = append(values, f.Value)
+			columns = append(columns, f.Column)
+		}
+		insert := g.builder.Insert(table).Columns(columns...)
 		if edges[0].Schema != "" {
 			// If the Schema field was provided to the EdgeSpec (by the
 			// generated code), it should be the same for all EdgeSpecs.
@@ -1141,9 +1159,9 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 				pk1, pk2 = pk2, pk1
 			}
 			for _, pair := range product(pk1, pk2) {
-				insert.Values(pair[0], pair[1])
+				insert.Values(append([]interface{}{pair[0], pair[1]}, values...)...)
 				if edge.Bidi {
-					insert.Values(pair[1], pair[0])
+					insert.Values(append([]interface{}{pair[1], pair[0]}, values...)...)
 				}
 			}
 		}

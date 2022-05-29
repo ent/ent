@@ -86,8 +86,8 @@ func (t *Tenant) Unwrap() *Tenant {
 func (t *Tenant) String() string {
 	var builder strings.Builder
 	builder.WriteString("Tenant(")
-	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
-	builder.WriteString(", name=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString("name=")
 	builder.WriteString(t.Name)
 	builder.WriteByte(')')
 	return builder.String()

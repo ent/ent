@@ -84,8 +84,8 @@ func (i *Item) Unwrap() *Item {
 func (i *Item) String() string {
 	var builder strings.Builder
 	builder.WriteString("Item(")
-	builder.WriteString(fmt.Sprintf("id=%v", i.ID))
-	builder.WriteString(", text=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
+	builder.WriteString("text=")
 	builder.WriteString(i.Text)
 	builder.WriteByte(')')
 	return builder.String()

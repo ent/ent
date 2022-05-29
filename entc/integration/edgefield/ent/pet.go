@@ -116,8 +116,8 @@ func (pe *Pet) Unwrap() *Pet {
 func (pe *Pet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Pet(")
-	builder.WriteString(fmt.Sprintf("id=%v", pe.ID))
-	builder.WriteString(", owner_id=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", pe.ID))
+	builder.WriteString("owner_id=")
 	builder.WriteString(fmt.Sprintf("%v", pe.OwnerID))
 	builder.WriteByte(')')
 	return builder.String()

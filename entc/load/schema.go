@@ -67,6 +67,7 @@ type Edge struct {
 	Field       string                 `json:"field,omitempty"`
 	RefName     string                 `json:"ref_name,omitempty"`
 	Ref         *Edge                  `json:"ref,omitempty"`
+	Through     *struct{ N, T string } `json:"through,omitempty"`
 	Unique      bool                   `json:"unique,omitempty"`
 	Inverse     bool                   `json:"inverse,omitempty"`
 	Required    bool                   `json:"required,omitempty"`
@@ -94,6 +95,7 @@ func NewEdge(ed *edge.Descriptor) *Edge {
 		Inverse:     ed.Inverse,
 		Required:    ed.Required,
 		RefName:     ed.RefName,
+		Through:     ed.Through,
 		StorageKey:  ed.StorageKey,
 		Annotations: make(map[string]interface{}),
 	}

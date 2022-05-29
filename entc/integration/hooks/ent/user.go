@@ -183,14 +183,17 @@ func (u *User) Unwrap() *User {
 func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
-	builder.WriteString(", version=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString("version=")
 	builder.WriteString(fmt.Sprintf("%v", u.Version))
-	builder.WriteString(", name=")
+	builder.WriteString(", ")
+	builder.WriteString("name=")
 	builder.WriteString(u.Name)
-	builder.WriteString(", worth=")
+	builder.WriteString(", ")
+	builder.WriteString("worth=")
 	builder.WriteString(fmt.Sprintf("%v", u.Worth))
-	builder.WriteString(", password=<sensitive>")
+	builder.WriteString(", ")
+	builder.WriteString("password=<sensitive>")
 	builder.WriteByte(')')
 	return builder.String()
 }

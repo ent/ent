@@ -212,7 +212,49 @@ func TestNewGraphDuplicateEdgeField(t *testing.T) {
 				{Name: "parent", Type: "User"},
 			},
 		})
-	require.EqualError(t, err, `entc/gen: User schema can't contain field and edge with the same name "parent"`)
+	require.EqualError(t, err, `entc/gen: User schema cannot contain field and edge with the same name "parent"`)
+}
+
+func TestNewGraphThroughUndefinedType(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name: "T1",
+		Edges: []*load.Edge{
+			{Name: "groups", Type: "T1", Required: true, Through: &struct{ N, T string }{N: "groups_edge", T: "T2"}},
+		},
+	})
+	require.EqualError(t, err, `entc/gen: resolving edges: edge T1.groups defined with Through("groups_edge", T2.Type), but type T2 was not found`)
+}
+
+func TestNewGraphThroughInvalidRel(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name: "T1",
+		Edges: []*load.Edge{
+			{Name: "groups", Type: "T1", Unique: true, Required: true, Through: &struct{ N, T string }{N: "groups_edge", T: "T2"}},
+		},
+	})
+	require.EqualError(t, err, `entc/gen: resolving edges: edge T1.groups Through("groups_edge", T2.Type) is allowed only on M2M edges, but got: "O2O"`)
+}
+
+func TestNewGraphThroughDuplicates(t *testing.T) {
+	_, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]},
+		&load.Schema{
+			Name: "User",
+			Edges: []*load.Edge{
+				{Name: "groups", Type: "Group", Through: &struct{ N, T string }{N: "group_edges", T: "T1"}},
+				{Name: "group_edges", Type: "Group"},
+			},
+		},
+		&load.Schema{
+			Name: "Group",
+			Edges: []*load.Edge{
+				{Name: "users", Type: "User", Inverse: true, RefName: "groups", Through: &struct{ N, T string }{N: "user_edges", T: "T1"}},
+			},
+		},
+		&load.Schema{
+			Name: "T1",
+		},
+	)
+	require.EqualError(t, err, `entc/gen: resolving edges: edge User.groups defined with Through("group_edges", T1.Type), but schema User already has an edge named group_edges`)
 }
 
 func TestRelation(t *testing.T) {

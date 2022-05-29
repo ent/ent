@@ -19,7 +19,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		}
 		return nil, err
 	}
-	{{- if and $.ID.UserDefined (or $.ID.Type.ValueScanner (not $.ID.Type.Numeric)) }}
+	{{- if $.HasCompositeID }}
+	{{- else if or $.ID.Type.ValueScanner (not $.ID.Type.Numeric) }}
 		if _spec.ID.Value != nil {
 			{{- /* If the ID type is not a pointer, but implements the ValueScanner interface (e.g. UUID fields). */}}
 			{{- if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}
@@ -56,10 +57,12 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec = &sqlgraph.CreateSpec{
 			Table: {{ $.Package }}.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type: field.{{ $.ID.Type.ConstName }},
-				Column: {{ $.Package }}.{{ $.ID.Constant }},
-			},
+			{{- if $.HasOneFieldID }}
+				ID: &sqlgraph.FieldSpec{
+					Type: field.{{ $.ID.Type.ConstName }},
+					Column: {{ $.Package }}.{{ $.ID.Constant }},
+				},
+			{{- end }}
 		}
 	)
 	{{- /* Allow mutating the sqlgraph.CreateSpec by ent extensions or user templates.*/}}
@@ -68,7 +71,9 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{- if $.ID.UserDefined }}
+	{{- if $.HasCompositeID }}
+	{{- /* TODO(a8m): Remove redudent if-s when Go 1.19 released as short-circuit was added in 1.18. */}}
+	{{- else if $.ID.UserDefined }}
 		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
 			_node.ID = id
 			_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
@@ -84,7 +89,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			_node.{{ $f.StructField }} = {{ if $f.NillableValue }}&{{ end }}value
 		}
 	{{- end }}
-	{{- range $e := $.Edges }}
+	{{- range $e := $.EdgesWithID }}
 		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
 			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
 				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
@@ -172,16 +177,18 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 				if err != nil {
 					return nil, err
 				}
-				mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
-				mutation.done = true
-				{{- if and $.ID.UserDefined (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther) }}
-					{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
-				{{- else }}
-					if specs[i].ID.Value != nil {{ if $.ID.UserDefined }}&& nodes[i].ID == 0{{ end }} {
-						id := specs[i].ID.Value.(int64)
-						nodes[i].ID = {{ $.ID.Type }}(id)
-					}
+				{{- if $.HasOneFieldID }}
+					mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
+					{{- if or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther }}
+						{{- /* Do nothing, because these 2 types must be supplied by the user. */ -}}
+					{{- else }}
+						if specs[i].ID.Value != nil {{ if $.ID.UserDefined }}&& nodes[i].ID == 0{{ end }} {
+							id := specs[i].ID.Value.(int64)
+							nodes[i].ID = {{ $.ID.Type }}(id)
+						}
+					{{- end }}
 				{{- end }}
+				mutation.done = true
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

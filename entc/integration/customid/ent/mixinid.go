@@ -95,10 +95,11 @@ func (mi *MixinID) Unwrap() *MixinID {
 func (mi *MixinID) String() string {
 	var builder strings.Builder
 	builder.WriteString("MixinID(")
-	builder.WriteString(fmt.Sprintf("id=%v", mi.ID))
-	builder.WriteString(", some_field=")
+	builder.WriteString(fmt.Sprintf("id=%v, ", mi.ID))
+	builder.WriteString("some_field=")
 	builder.WriteString(mi.SomeField)
-	builder.WriteString(", mixin_field=")
+	builder.WriteString(", ")
+	builder.WriteString("mixin_field=")
 	builder.WriteString(mi.MixinField)
 	builder.WriteByte(')')
 	return builder.String()
