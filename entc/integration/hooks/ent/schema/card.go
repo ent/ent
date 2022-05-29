@@ -18,7 +18,7 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-// RejectMany rejects all update operations
+// RejectUpdate rejects all update operations
 // that are not on a specific entity.
 type RejectUpdate struct {
 	mixin.Schema

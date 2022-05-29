@@ -226,11 +226,11 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Error(err)
 	require.True(ent.IsNotFound(err))
 	// Update a vertex with filter.
-	u := client.User.UpdateOneID(usr.ID)
-	u.Mutation().Where(user.Name("baz"))
+	u := client.User.UpdateOneID(usr.ID).SetName("foo")
+	u.Mutation().Where(user.Name(usr.Name))
 	require.NoError(u.Exec(ctx))
-	u = client.User.UpdateOneID(usr.ID)
-	u.Mutation().Where(user.Name("bar"))
+	u = client.User.UpdateOneID(usr.ID).SetName("bar")
+	u.Mutation().Where(user.Name("baz"))
 	require.Error(u.Exec(ctx))
 	require.True(ent.IsNotFound(err))
 
@@ -1918,6 +1918,22 @@ func Mutation(t *testing.T, client *ent.Client) {
 		require.Len(t, mids, 1)
 		require.Equal(t, a8m.ID, mids[0])
 		u.ExecX(ctx)
+	})
+
+	t.Run("Predicate", func(t *testing.T) {
+		updater := a8m.Update()
+		updater.Mutation().Where(user.Name(a8m.Name))
+		updater.SetName("mashraki")
+		a8m, err := updater.Save(ctx)
+		require.NoError(t, err, "predicate should not affect the returned object")
+		require.Equal(t, "mashraki", a8m.Name)
+
+		updater = a8m.Update()
+		updater.Mutation().Where(user.Name(a8m.Name + a8m.Name))
+		updater.SetName("a8m")
+		a8m, err = updater.Save(ctx)
+		require.True(t, ent.IsNotFound(err))
+		require.Nil(t, a8m)
 	})
 }
 
