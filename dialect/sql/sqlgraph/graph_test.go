@@ -1572,7 +1572,7 @@ func TestUpdateNode(t *testing.T) {
 			wantUser: &user{name: "Ariel", age: 30, id: 1},
 		},
 		{
-			name: "fields/add_clear",
+			name: "fields/add_set_clear",
 			spec: &UpdateSpec{
 				Node: &NodeSpec{
 					Table:   "users",
@@ -1586,6 +1586,9 @@ func TestUpdateNode(t *testing.T) {
 					Add: []*FieldSpec{
 						{Column: "age", Type: field.TypeInt, Value: 1},
 					},
+					Set: []*FieldSpec{
+						{Column: "deleted", Type: field.TypeBool, Value: true},
+					},
 					Clear: []*FieldSpec{
 						{Column: "name", Type: field.TypeString},
 					},
@@ -1593,16 +1596,53 @@ func TestUpdateNode(t *testing.T) {
 			},
 			prepare: func(mock sqlmock.Sqlmock) {
 				mock.ExpectBegin()
-				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND NOT `deleted`")).
-					WithArgs(1, 1).
-					WillReturnResult(sqlmock.NewResult(1, 1))
-				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ? AND NOT `deleted`")).
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `deleted` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND NOT `deleted`")).
+					WithArgs(true, 1, 1).
+					WillReturnResult(sqlmock.NewResult(0, 1))
+				mock.ExpectQuery(escape("SELECT `id`, `name`, `age` FROM `users` WHERE `id` = ?")).
 					WithArgs(1).
 					WillReturnRows(sqlmock.NewRows([]string{"id", "age", "name"}).
 						AddRow(1, 31, nil))
 				mock.ExpectCommit()
 			},
 			wantUser: &user{age: 31, id: 1},
+		},
+		{
+			name: "fields/ensure_exists",
+			spec: &UpdateSpec{
+				Node: &NodeSpec{
+					Table:   "users",
+					Columns: []string{"id", "name", "age"},
+					ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+				},
+				Predicate: func(s *sql.Selector) {
+					s.Where(sql.EQ("deleted", false))
+				},
+				Fields: FieldMut{
+					Add: []*FieldSpec{
+						{Column: "age", Type: field.TypeInt, Value: 1},
+					},
+					Set: []*FieldSpec{
+						{Column: "deleted", Type: field.TypeBool, Value: true},
+					},
+					Clear: []*FieldSpec{
+						{Column: "name", Type: field.TypeString},
+					},
+				},
+			},
+			prepare: func(mock sqlmock.Sqlmock) {
+				mock.ExpectBegin()
+				mock.ExpectExec(escape("UPDATE `users` SET `name` = NULL, `deleted` = ?, `age` = COALESCE(`users`.`age`, 0) + ? WHERE `id` = ? AND NOT `deleted`")).
+					WithArgs(true, 1, 1).
+					WillReturnResult(sqlmock.NewResult(0, 0))
+				mock.ExpectQuery(escape("SELECT EXISTS (SELECT * FROM `users` WHERE `id` = ? AND NOT `deleted`)")).
+					WithArgs(1).
+					WillReturnRows(sqlmock.NewRows([]string{"exists"}).
+						AddRow(false))
+				mock.ExpectRollback()
+			},
+			wantErr:  true,
+			wantUser: &user{},
 		},
 		{
 			name: "edges/o2o_non_inverse and m2o",
