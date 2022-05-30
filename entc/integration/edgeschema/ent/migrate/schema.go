@@ -41,6 +41,11 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{FriendshipsColumns[3], FriendshipsColumns[4]},
 			},
+			{
+				Name:    "friendship_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{FriendshipsColumns[2]},
+			},
 		},
 	}
 	// GroupsColumns holds the columns for the "groups" table.
@@ -77,6 +82,13 @@ var (
 				Columns:    []*schema.Column{RelationshipsColumns[2]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "relationship_weight",
+				Unique:  false,
+				Columns: []*schema.Column{RelationshipsColumns[0]},
 			},
 		},
 	}

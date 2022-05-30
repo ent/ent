@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Relationship holds the schema definition for the Relationship entity.
@@ -43,5 +44,12 @@ func (Relationship) Edges() []ent.Edge {
 			Required().
 			Unique().
 			Field("relative_id"),
+	}
+}
+
+// Indexes of the Relationship.
+func (Relationship) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("weight"),
 	}
 }
