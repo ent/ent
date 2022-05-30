@@ -846,10 +846,11 @@ func False() *Predicate {
 	return (&Predicate{}).False()
 }
 
-// False appends FALSE to the predicate.
+// False appends 0 = 1 to the predicate.
+// Kingshard reports an error for FALSE, so convert to the equivalent boolean expression.
 func (p *Predicate) False() *Predicate {
 	return p.append(func(b *Builder) {
-		b.WriteString("FALSE")
+		b.WriteString("0 = 1")
 	})
 }
 
@@ -1825,7 +1826,7 @@ func (b *Builder) Quote(ident string) string {
 		// If it was quoted with the wrong
 		// identifier character.
 		if strings.Contains(ident, "`") {
-			return strings.Replace(ident, "`", `"`, -1)
+			return strings.ReplaceAll(ident, "`", `"`)
 		}
 		return strconv.Quote(ident)
 	// An identifier for unknown dialect.
@@ -1855,7 +1856,7 @@ func (b *Builder) Ident(s string) *Builder {
 	case (isFunc(s) || isModifier(s)) && b.postgres():
 		// Modifiers and aggregation functions that
 		// were called without dialect information.
-		b.WriteString(strings.Replace(s, "`", `"`, -1))
+		b.WriteString(strings.ReplaceAll(s, "`", `"`))
 	default:
 		b.WriteString(s)
 	}

@@ -181,7 +181,7 @@ func schemaTemplates() ([]string, error) {
 }
 
 func filename(pkg string) string {
-	name := strings.Replace(pkg, "/", "_", -1)
+	name := strings.ReplaceAll(pkg, "/", "_")
 	return fmt.Sprintf("entc_%s_%d", name, time.Now().Unix())
 }
 
