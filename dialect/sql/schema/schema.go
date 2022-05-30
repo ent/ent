@@ -245,7 +245,7 @@ func (c *Column) defaultValue(b *sql.ColumnBuilder) {
 			attr += strconv.FormatBool(v)
 		case string:
 			// Escape single quote by replacing each with 2.
-			attr += fmt.Sprintf("'%s'", strings.Replace(v, "'", "''", -1))
+			attr += fmt.Sprintf("'%s'", strings.ReplaceAll(v, "'", "''"))
 		default:
 			attr += fmt.Sprint(v)
 		}
@@ -357,7 +357,7 @@ func (r ReferenceOption) ConstName() string {
 	if r == NoAction {
 		return ""
 	}
-	return strings.Replace(strings.Title(strings.ToLower(string(r))), " ", "", -1)
+	return strings.ReplaceAll(strings.Title(strings.ToLower(string(r))), " ", "")
 }
 
 // Index definition for table index.

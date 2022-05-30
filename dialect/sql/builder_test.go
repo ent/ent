@@ -492,13 +492,13 @@ func TestBuilder(t *testing.T) {
 		{
 			input: Delete("users").
 				Where(And(False(), False())),
-			wantQuery: "DELETE FROM `users` WHERE FALSE AND FALSE",
+			wantQuery: "DELETE FROM `users` WHERE 0 = 1 AND 0 = 1",
 		},
 		{
 			input: Dialect(dialect.Postgres).
 				Delete("users").
 				Where(And(False(), False())),
-			wantQuery: `DELETE FROM "users" WHERE FALSE AND FALSE`,
+			wantQuery: `DELETE FROM "users" WHERE 0 = 1 AND 0 = 1`,
 		},
 		{
 			input: Delete("users").
