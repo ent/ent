@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Friendship holds the edge schema definition of the Friendship relationship.
@@ -40,5 +41,12 @@ func (Friendship) Edges() []ent.Edge {
 			Required().
 			Unique().
 			Field("friend_id"),
+	}
+}
+
+// Indexes of the Friendship.
+func (Friendship) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("created_at"),
 	}
 }

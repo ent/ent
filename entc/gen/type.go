@@ -619,14 +619,10 @@ func (t *Type) AddIndex(idx *load.Index) error {
 	}
 	for _, name := range idx.Fields {
 		var f *Field
-		if name == t.ID.Name {
+		if t.HasOneFieldID() && name == t.ID.Name {
 			f = t.ID
-		} else {
-			var ok bool
-			f, ok = t.fields[name]
-			if !ok {
-				return fmt.Errorf("unknown index field %q", name)
-			}
+		} else if f = t.fields[name]; f == nil {
+			return fmt.Errorf("unknown index field %q", name)
 		}
 		index.Columns = append(index.Columns, f.StorageKey())
 	}
@@ -640,7 +636,7 @@ func (t *Type) AddIndex(idx *load.Index) error {
 		}
 		switch {
 		case ed == nil:
-			return fmt.Errorf("unknown index field %q", name)
+			return fmt.Errorf("unknown index edge %q", name)
 		case ed.Rel.Type == O2O && !ed.IsInverse():
 			return fmt.Errorf("non-inverse edge (edge.From) for index %q on O2O relation", name)
 		case ed.Rel.Type != M2O && ed.Rel.Type != O2O:
