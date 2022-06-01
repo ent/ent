@@ -102,7 +102,7 @@ docker run --rm --name atlas-sum --detach --env MYSQL_ROOT_PASSWORD=pass --env M
 :::
 
 The first step is to tell the migration engine to create and manage the `atlas.sum` by using the `schema.WithSumFile()`
-option. The below example uses an [instantiated Ent client](/docs/versioned-migrations.md#from-client) to generate new
+option. The below example uses an [instantiated Ent client](/docs/versioned-migrations#from-client) to generate new
 migration files:
 
 ```go
