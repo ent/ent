@@ -123,7 +123,7 @@ ent
 
 ## Create Your First Entity
 
-To get started, create a new `ent.Client`. For this example, we will use SQLite3.  
+To get started, create a new `ent.Client`.
 
 <Tabs
 defaultValue="sqlite"
