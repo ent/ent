@@ -4,6 +4,9 @@ title: Quick Introduction
 sidebar_label: Quick Introduction
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 **ent** is a simple, yet powerful entity framework for Go, that makes it easy to build
 and maintain applications with large data-models and sticks with the following principles:
 
@@ -122,8 +125,16 @@ ent
 
 To get started, create a new `ent.Client`. For this example, we will use SQLite3.  
 
-```go title="<project>/start/start.go"
+<Tabs
+defaultValue="sqlite"
+values={[
+{label: 'SQLite', value: 'sqlite'},
+{label: 'PostgreSQL', value: 'postgres'},
+{label: 'MySQL', value: 'mysql'},
+]}>
+<TabItem value="sqlite">
 
+```go title="<project>/start/start.go"
 package main
 
 import (
@@ -148,10 +159,68 @@ func main() {
 }
 ```
 
+</TabItem>
+<TabItem value="postgres">
+
+```go title="<project>/start/start.go"
+package main
+
+import (
+	"context"
+	"log"
+
+	"<project>/ent"
+
+	_ "github.com/lib/pq"
+)
+
+func main() {
+	client, err := ent.Open("postgres","host=<host> port=<port> user=<user> dbname=<database> password=<pass>")
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+}
+```
+
+</TabItem>
+<TabItem value="mysql">
+
+```go title="<project>/start/start.go"
+package main
+
+import (
+	"context"
+	"log"
+
+	"<project>/ent"
+
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	client, err := ent.Open("mysql", "<user>:<pass>@tcp(<host>:<port>)/<database>?parseTime=True")
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+}
+```
+
+</TabItem>
+</Tabs>
+
 Now, we're ready to create our user. Let's call this function `CreateUser` for the sake of example:
 
 ```go title="<project>/start/start.go"
-
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
 		Create().
@@ -164,7 +233,6 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	log.Println("user was created: ", u)
 	return u, nil
 }
-
 ```
 
 ## Query Your Entities
@@ -173,7 +241,6 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 and additional information about storage elements (column names, primary keys, etc).
 
 ```go title="<project>/start/start.go"
-
 package main
 
 import (
@@ -196,7 +263,6 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	log.Println("user returned: ", u)
 	return u, nil
 }
-
 ```
 
 
