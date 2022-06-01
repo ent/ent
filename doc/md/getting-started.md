@@ -135,7 +135,6 @@ values={[
 <TabItem value="sqlite">
 
 ```go title="<project>/start/start.go"
-
 package main
 
 import (
@@ -164,7 +163,6 @@ func main() {
 <TabItem value="postgres">
 
 ```go title="<project>/start/start.go"
-
 package main
 
 import (
@@ -193,7 +191,6 @@ func main() {
 <TabItem value="mysql">
 
 ```go title="<project>/start/start.go"
-
 package main
 
 import (
@@ -224,7 +221,6 @@ func main() {
 Now, we're ready to create our user. Let's call this function `CreateUser` for the sake of example:
 
 ```go title="<project>/start/start.go"
-
 func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	u, err := client.User.
 		Create().
@@ -237,7 +233,6 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	log.Println("user was created: ", u)
 	return u, nil
 }
-
 ```
 
 ## Query Your Entities
@@ -246,7 +241,6 @@ func CreateUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 and additional information about storage elements (column names, primary keys, etc).
 
 ```go title="<project>/start/start.go"
-
 package main
 
 import (
@@ -269,7 +263,6 @@ func QueryUser(ctx context.Context, client *ent.Client) (*ent.User, error) {
 	log.Println("user returned: ", u)
 	return u, nil
 }
-
 ```
 
 
