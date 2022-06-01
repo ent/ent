@@ -18,6 +18,11 @@ and it's being tested constantly on the following 3 versions: `10.2`, `10.3` and
 PostgreSQL supports all the features that are mentioned in the [Migration](migrate.md) section,
 and it's being tested constantly on the following 4 versions: `10`, `11`, `12` and `13`.
 
+## CockroachDB **(<ins>preview</ins>)**
+
+CockroachDB support is in preview and requires the [Atlas migration engine](#atlas-integration).  
+The integration with CRDB is currently tested on versions `v21.2.11`.
+
 ## SQLite
 
 SQLite supports all _"append-only"_ features mentioned in the [Migration](migrate.md) section. 
