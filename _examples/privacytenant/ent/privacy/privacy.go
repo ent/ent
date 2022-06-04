@@ -11,7 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/entql"
-	"entgo.io/ent/examples/privacytenant/ent"
+	"entgo.io/ent/_examples/privacytenant/ent"
 
 	"entgo.io/ent/privacy"
 )

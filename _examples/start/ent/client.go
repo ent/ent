@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/start/ent/migrate"
+	"entgo.io/ent/_examples/start/ent/migrate"
 
-	"entgo.io/ent/examples/start/ent/car"
-	"entgo.io/ent/examples/start/ent/group"
-	"entgo.io/ent/examples/start/ent/user"
+	"entgo.io/ent/_examples/start/ent/car"
+	"entgo.io/ent/_examples/start/ent/group"
+	"entgo.io/ent/_examples/start/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

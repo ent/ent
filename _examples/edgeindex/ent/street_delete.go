@@ -12,8 +12,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/edgeindex/ent/predicate"
-	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/_examples/edgeindex/ent/predicate"
+	"entgo.io/ent/_examples/edgeindex/ent/street"
 	"entgo.io/ent/schema/field"
 )
 

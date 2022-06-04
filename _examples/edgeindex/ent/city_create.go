@@ -12,8 +12,8 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/edgeindex/ent/city"
-	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/_examples/edgeindex/ent/city"
+	"entgo.io/ent/_examples/edgeindex/ent/street"
 	"entgo.io/ent/schema/field"
 )
 

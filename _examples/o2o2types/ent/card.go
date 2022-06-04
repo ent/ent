@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/o2o2types/ent/card"
-	"entgo.io/ent/examples/o2o2types/ent/user"
+	"entgo.io/ent/_examples/o2o2types/ent/card"
+	"entgo.io/ent/_examples/o2o2types/ent/user"
 )
 
 // Card is the model entity for the Card schema.

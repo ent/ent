@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/edgeindex/ent/city"
-	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/_examples/edgeindex/ent/city"
+	"entgo.io/ent/_examples/edgeindex/ent/street"
 )
 
 // Street is the model entity for the Street schema.

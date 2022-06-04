@@ -9,9 +9,9 @@ package enttest
 import (
 	"context"
 
-	"entgo.io/ent/examples/start/ent"
+	"entgo.io/ent/_examples/start/ent"
 	// required by schema hooks.
-	_ "entgo.io/ent/examples/start/ent/runtime"
+	_ "entgo.io/ent/_examples/start/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

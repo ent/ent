@@ -9,7 +9,7 @@ package street
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/edgeindex/ent/predicate"
+	"entgo.io/ent/_examples/edgeindex/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

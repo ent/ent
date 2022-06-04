@@ -12,8 +12,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/privacytenant/ent/predicate"
-	"entgo.io/ent/examples/privacytenant/ent/tenant"
+	"entgo.io/ent/_examples/privacytenant/ent/predicate"
+	"entgo.io/ent/_examples/privacytenant/ent/tenant"
 	"entgo.io/ent/schema/field"
 )
 

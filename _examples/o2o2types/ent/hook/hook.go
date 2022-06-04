@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"entgo.io/ent/examples/o2o2types/ent"
+	"entgo.io/ent/_examples/o2o2types/ent"
 )
 
 // The CardFunc type is an adapter to allow the use of ordinary

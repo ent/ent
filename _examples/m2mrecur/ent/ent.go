@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/m2mrecur/ent/user"
+	"entgo.io/ent/_examples/m2mrecur/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

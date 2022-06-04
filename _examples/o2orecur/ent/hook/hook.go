@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"entgo.io/ent/examples/o2orecur/ent"
+	"entgo.io/ent/_examples/o2orecur/ent"
 )
 
 // The NodeFunc type is an adapter to allow the use of ordinary

@@ -12,7 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/o2obidi/ent/user"
+	"entgo.io/ent/_examples/o2obidi/ent/user"
 	"entgo.io/ent/schema/field"
 )
 

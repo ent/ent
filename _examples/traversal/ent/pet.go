@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/traversal/ent/pet"
-	"entgo.io/ent/examples/traversal/ent/user"
+	"entgo.io/ent/_examples/traversal/ent/pet"
+	"entgo.io/ent/_examples/traversal/ent/user"
 )
 
 // Pet is the model entity for the Pet schema.

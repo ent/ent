@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/version/ent/migrate"
+	"entgo.io/ent/_examples/version/ent/migrate"
 
-	"entgo.io/ent/examples/version/ent/user"
+	"entgo.io/ent/_examples/version/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

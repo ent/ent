@@ -9,8 +9,8 @@ package runtime
 import (
 	"context"
 
-	"entgo.io/ent/examples/privacyadmin/ent/schema"
-	"entgo.io/ent/examples/privacyadmin/ent/user"
+	"entgo.io/ent/_examples/privacyadmin/ent/schema"
+	"entgo.io/ent/_examples/privacyadmin/ent/user"
 
 	"entgo.io/ent"
 	"entgo.io/ent/privacy"

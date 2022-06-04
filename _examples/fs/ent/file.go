@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/fs/ent/file"
+	"entgo.io/ent/_examples/fs/ent/file"
 )
 
 // File is the model entity for the File schema.

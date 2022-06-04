@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/privacytenant/ent/group"
-	"entgo.io/ent/examples/privacytenant/ent/tenant"
+	"entgo.io/ent/_examples/privacytenant/ent/group"
+	"entgo.io/ent/_examples/privacytenant/ent/tenant"
 )
 
 // Group is the model entity for the Group schema.

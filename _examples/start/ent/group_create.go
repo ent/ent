@@ -12,8 +12,8 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/start/ent/group"
-	"entgo.io/ent/examples/start/ent/user"
+	"entgo.io/ent/_examples/start/ent/group"
+	"entgo.io/ent/_examples/start/ent/user"
 	"entgo.io/ent/schema/field"
 )
 

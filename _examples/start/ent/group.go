@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/start/ent/group"
+	"entgo.io/ent/_examples/start/ent/group"
 )
 
 // Group is the model entity for the Group schema.

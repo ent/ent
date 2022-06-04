@@ -9,9 +9,9 @@ package enttest
 import (
 	"context"
 
-	"entgo.io/ent/examples/privacytenant/ent"
+	"entgo.io/ent/_examples/privacytenant/ent"
 	// required by schema hooks.
-	_ "entgo.io/ent/examples/privacytenant/ent/runtime"
+	_ "entgo.io/ent/_examples/privacytenant/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

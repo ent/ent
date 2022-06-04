@@ -14,8 +14,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/o2orecur/ent/node"
-	"entgo.io/ent/examples/o2orecur/ent/predicate"
+	"entgo.io/ent/_examples/o2orecur/ent/node"
+	"entgo.io/ent/_examples/o2orecur/ent/predicate"
 	"entgo.io/ent/schema/field"
 )
 

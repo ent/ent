@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"entgo.io/ent/examples/fs/ent"
+	"entgo.io/ent/_examples/fs/ent"
 )
 
 // The FileFunc type is an adapter to allow the use of ordinary

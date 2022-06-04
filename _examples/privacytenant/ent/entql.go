@@ -7,10 +7,10 @@
 package ent
 
 import (
-	"entgo.io/ent/examples/privacytenant/ent/group"
-	"entgo.io/ent/examples/privacytenant/ent/predicate"
-	"entgo.io/ent/examples/privacytenant/ent/tenant"
-	"entgo.io/ent/examples/privacytenant/ent/user"
+	"entgo.io/ent/_examples/privacytenant/ent/group"
+	"entgo.io/ent/_examples/privacytenant/ent/predicate"
+	"entgo.io/ent/_examples/privacytenant/ent/tenant"
+	"entgo.io/ent/_examples/privacytenant/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"entgo.io/ent/examples/privacyadmin/ent"
+	"entgo.io/ent/_examples/privacyadmin/ent"
 
 	"entgo.io/ent/privacy"
 )

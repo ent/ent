@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"entgo.io/ent/examples/edgeindex/ent"
+	"entgo.io/ent/_examples/edgeindex/ent"
 )
 
 // The CityFunc type is an adapter to allow the use of ordinary

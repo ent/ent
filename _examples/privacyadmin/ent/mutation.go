@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"sync"
 
-	"entgo.io/ent/examples/privacyadmin/ent/predicate"
-	"entgo.io/ent/examples/privacyadmin/ent/user"
+	"entgo.io/ent/_examples/privacyadmin/ent/predicate"
+	"entgo.io/ent/_examples/privacyadmin/ent/user"
 
 	"entgo.io/ent"
 )

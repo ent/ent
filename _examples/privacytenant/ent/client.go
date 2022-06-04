@@ -11,11 +11,11 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/privacytenant/ent/migrate"
+	"entgo.io/ent/_examples/privacytenant/ent/migrate"
 
-	"entgo.io/ent/examples/privacytenant/ent/group"
-	"entgo.io/ent/examples/privacytenant/ent/tenant"
-	"entgo.io/ent/examples/privacytenant/ent/user"
+	"entgo.io/ent/_examples/privacytenant/ent/group"
+	"entgo.io/ent/_examples/privacytenant/ent/tenant"
+	"entgo.io/ent/_examples/privacytenant/ent/user"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

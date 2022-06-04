@@ -7,7 +7,7 @@ package viewer
 import (
 	"context"
 
-	"entgo.io/ent/examples/privacytenant/ent"
+	"entgo.io/ent/_examples/privacytenant/ent"
 )
 
 // Role for viewer actions.

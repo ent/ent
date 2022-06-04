@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/edgeindex/ent/migrate"
+	"entgo.io/ent/_examples/edgeindex/ent/migrate"
 
-	"entgo.io/ent/examples/edgeindex/ent/city"
-	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/_examples/edgeindex/ent/city"
+	"entgo.io/ent/_examples/edgeindex/ent/street"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"

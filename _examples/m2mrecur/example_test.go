@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/m2mrecur/ent/user"
+	"entgo.io/ent/_examples/m2mrecur/ent/user"
 
-	"entgo.io/ent/examples/m2mrecur/ent"
+	"entgo.io/ent/_examples/m2mrecur/ent"
 
 	_ "github.com/mattn/go-sqlite3"
 )

@@ -14,8 +14,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/m2mbidi/ent/predicate"
-	"entgo.io/ent/examples/m2mbidi/ent/user"
+	"entgo.io/ent/_examples/m2mbidi/ent/predicate"
+	"entgo.io/ent/_examples/m2mbidi/ent/user"
 	"entgo.io/ent/schema/field"
 )
 

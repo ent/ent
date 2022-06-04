@@ -10,11 +10,11 @@ import (
 	"fmt"
 	"log"
 
-	"entgo.io/ent/examples/privacyadmin/viewer"
+	"entgo.io/ent/_examples/privacyadmin/viewer"
 
-	"entgo.io/ent/examples/privacyadmin/ent"
-	"entgo.io/ent/examples/privacyadmin/ent/privacy"
-	_ "entgo.io/ent/examples/privacyadmin/ent/runtime"
+	"entgo.io/ent/_examples/privacyadmin/ent"
+	"entgo.io/ent/_examples/privacyadmin/ent/privacy"
+	_ "entgo.io/ent/_examples/privacyadmin/ent/runtime"
 
 	_ "github.com/mattn/go-sqlite3"
 )

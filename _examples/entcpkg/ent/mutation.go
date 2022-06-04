@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"sync"
 
-	"entgo.io/ent/examples/entcpkg/ent/predicate"
-	"entgo.io/ent/examples/entcpkg/ent/user"
+	"entgo.io/ent/_examples/entcpkg/ent/predicate"
+	"entgo.io/ent/_examples/entcpkg/ent/user"
 
 	"entgo.io/ent"
 )

@@ -6,8 +6,8 @@ package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/examples/privacytenant/ent/privacy"
-	"entgo.io/ent/examples/privacytenant/rule"
+	"entgo.io/ent/_examples/privacytenant/ent/privacy"
+	"entgo.io/ent/_examples/privacytenant/rule"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/mixin"
 )

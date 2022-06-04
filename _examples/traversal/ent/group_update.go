@@ -13,9 +13,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/traversal/ent/group"
-	"entgo.io/ent/examples/traversal/ent/predicate"
-	"entgo.io/ent/examples/traversal/ent/user"
+	"entgo.io/ent/_examples/traversal/ent/group"
+	"entgo.io/ent/_examples/traversal/ent/predicate"
+	"entgo.io/ent/_examples/traversal/ent/user"
 	"entgo.io/ent/schema/field"
 )
 

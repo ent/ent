@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/traversal/ent/user"
+	"entgo.io/ent/_examples/traversal/ent/user"
 )
 
 // User is the model entity for the User schema.

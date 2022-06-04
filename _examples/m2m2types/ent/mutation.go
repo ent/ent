@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"sync"
 
-	"entgo.io/ent/examples/m2m2types/ent/group"
-	"entgo.io/ent/examples/m2m2types/ent/predicate"
-	"entgo.io/ent/examples/m2m2types/ent/user"
+	"entgo.io/ent/_examples/m2m2types/ent/group"
+	"entgo.io/ent/_examples/m2m2types/ent/predicate"
+	"entgo.io/ent/_examples/m2m2types/ent/user"
 
 	"entgo.io/ent"
 )

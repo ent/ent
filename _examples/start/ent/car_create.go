@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/start/ent/car"
-	"entgo.io/ent/examples/start/ent/user"
+	"entgo.io/ent/_examples/start/ent/car"
+	"entgo.io/ent/_examples/start/ent/user"
 	"entgo.io/ent/schema/field"
 )
 

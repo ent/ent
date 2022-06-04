@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/edgeindex/ent/city"
+	"entgo.io/ent/_examples/edgeindex/ent/city"
 )
 
 // City is the model entity for the City schema.
