@@ -112,7 +112,7 @@ in this case. 1 for getting N users, 1 for getting the todo items of **all** use
 of **all** todo items.
 
 With `entcache`, the number of queries may be reduced to 2, as the first and last queries are identical (see
-[code example](https://github.com/ariga/entcache/blob/master/internal/examples/ctxlevel/main_test.go)).
+[code example](https://github.com/ariga/entcache/blob/master/internal/_examples/ctxlevel/main_test.go)).
 
 ![context-level-cache](https://entgo.io/images/assets/entcache/ctxlevel.png)
 

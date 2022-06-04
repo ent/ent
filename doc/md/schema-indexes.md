@@ -146,7 +146,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/edgeindex).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/_examples/edgeindex).
 
 ## Index On Edge Fields
 

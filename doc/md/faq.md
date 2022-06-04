@@ -537,7 +537,7 @@ A full example exists in the [example repository](https://github.com/a8m/entspat
 
 Ent supports extending generated types (both global types and models) using custom templates. For example, in order to
 add additional struct fields or methods to the generated model, we can override the `model/fields/additional` template like in this
-[example](https://github.com/ent/ent/blob/dd4792f5b30bdd2db0d9a593a977a54cb3f0c1ce/examples/entcpkg/ent/template/static.tmpl).
+[example](https://github.com/ent/ent/blob/dd4792f5b30bdd2db0d9a593a977a54cb3f0c1ce/_examples/entcpkg/ent/template/static.tmpl).
 
 
 If your custom fields/methods require additional imports, you can add those imports using custom templates as well:
@@ -555,7 +555,7 @@ If your custom fields/methods require additional imports, you can add those impo
 #### How to extend the generated builders?
 
 See the *[Injecting External Dependencies](code-gen.md#external-dependencies)* section, or follow the
-example on [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
+example on [GitHub](https://github.com/ent/ent/tree/master/_examples/entcpkg).
 
 #### How to store Protobuf objects in a BLOB column?
 

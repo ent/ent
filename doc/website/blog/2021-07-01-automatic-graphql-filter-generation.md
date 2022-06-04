@@ -74,7 +74,7 @@ large data-models. To facilitate this, we decided early on that one of the core 
 of Ent is "statically typed and explicit API using code generation". This means, that for every
 entity a developer defines in their `ent/schema`, explicit, type-safe code is generated for the
 developer to efficiently interact with their data. For example, In the
-[Filesystem Example in the ent repository](https://github.com/ent/ent/blob/master/examples/fs/), you will
+[Filesystem Example in the ent repository](https://github.com/ent/ent/blob/master/_examples/fs/), you will
 find a schema named `File`:
 
 ```go
