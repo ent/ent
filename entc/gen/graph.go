@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"go/parser"
 	"go/token"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -206,16 +207,13 @@ func generate(g *Graph) error {
 	)
 	templates, external = g.templates()
 	for _, n := range g.Nodes {
-		assets.dirs = append(assets.dirs, filepath.Join(g.Config.Target, n.PackageDir()))
+		assets.addDir(filepath.Join(g.Config.Target, n.PackageDir()))
 		for _, tmpl := range Templates {
 			b := bytes.NewBuffer(nil)
 			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
 				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 			}
-			assets.files = append(assets.files, file{
-				path:    filepath.Join(g.Config.Target, tmpl.Format(n)),
-				content: b.Bytes(),
-			})
+			assets.add(filepath.Join(g.Config.Target, tmpl.Format(n)), b.Bytes())
 		}
 	}
 	for _, tmpl := range append(GraphTemplates, external...) {
@@ -223,16 +221,13 @@ func generate(g *Graph) error {
 			continue
 		}
 		if dir := filepath.Dir(tmpl.Format); dir != "." {
-			assets.dirs = append(assets.dirs, filepath.Join(g.Config.Target, dir))
+			assets.addDir(filepath.Join(g.Config.Target, dir))
 		}
 		b := bytes.NewBuffer(nil)
 		if err := templates.ExecuteTemplate(b, tmpl.Name, g); err != nil {
 			return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 		}
-		assets.files = append(assets.files, file{
-			path:    filepath.Join(g.Config.Target, tmpl.Format),
-			content: b.Bytes(),
-		})
+		assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes())
 	}
 	for _, f := range AllFeatures {
 		if f.cleanup == nil || g.featureEnabled(f) {
@@ -247,9 +242,11 @@ func generate(g *Graph) error {
 	if err := assets.write(); err != nil {
 		return err
 	}
+	// cleanup assets that are not needed anymore.
+	cleanOldNodes(assets, g.Config.Target)
 	// We can't run "imports" on files when the state is not completed.
-	// Because, "goimports" will drop undefined package. Therefore, it's
-	// suspended to the end of the writing.
+	// Because, "goimports" will drop undefined package. Therefore, it
+	// is suspended to the end of the writing.
 	return assets.format()
 }
 
@@ -900,27 +897,75 @@ func PrepareEnv(c *Config) (undo func() error, err error) {
 	return func() error { return os.WriteFile(path, out, 0644) }, nil
 }
 
-type (
-	file struct {
-		path    string
-		content []byte
+// cleanOldNodes removes all files that were generated
+// for nodes that were removed from the schema.
+func cleanOldNodes(assets assets, target string) {
+	d, err := os.ReadDir(target)
+	if err != nil {
+		return
 	}
-	assets struct {
-		dirs  []string
-		files []file
+	// Find deleted nodes by selecting one generated
+	// file from standard templates (<T>_query.go).
+	var deleted []*Type
+	for _, f := range d {
+		if !strings.HasSuffix(f.Name(), "_query.go") {
+			continue
+		}
+		typ := &Type{Name: strings.TrimSuffix(f.Name(), "_query.go")}
+		path := filepath.Join(target, typ.PackageDir())
+		if _, ok := assets.dirs[path]; ok {
+			continue
+		}
+		// If it is a node, it must have a model file and a dir (e.g. ent/t.go, ent/t).
+		_, err1 := os.Stat(path + ".go")
+		f2, err2 := os.Stat(path)
+		if err1 == nil && err2 == nil && f2.IsDir() {
+			deleted = append(deleted, typ)
+		}
 	}
-)
+	for _, typ := range deleted {
+		for _, t := range Templates {
+			err := os.Remove(filepath.Join(target, t.Format(typ)))
+			if err != nil && !os.IsNotExist(err) {
+				log.Printf("remove old file %s: %s\n", filepath.Join(target, t.Format(typ)), err)
+			}
+		}
+		err := os.Remove(filepath.Join(target, typ.PackageDir()))
+		if err != nil && !os.IsNotExist(err) {
+			log.Printf("remove old dir %s: %s\n", filepath.Join(target, typ.PackageDir()), err)
+		}
+	}
+}
+
+type assets struct {
+	dirs  map[string]struct{}
+	files map[string][]byte
+}
+
+func (a *assets) add(path string, content []byte) {
+	if a.files == nil {
+		a.files = make(map[string][]byte)
+	}
+	a.files[path] = content
+}
+
+func (a *assets) addDir(path string) {
+	if a.dirs == nil {
+		a.dirs = make(map[string]struct{})
+	}
+	a.dirs[path] = struct{}{}
+}
 
 // write files and dirs in the assets.
 func (a assets) write() error {
-	for _, dir := range a.dirs {
+	for dir := range a.dirs {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			return fmt.Errorf("create dir %q: %w", dir, err)
 		}
 	}
-	for _, file := range a.files {
-		if err := os.WriteFile(file.path, file.content, 0644); err != nil {
-			return fmt.Errorf("write file %q: %w", file.path, err)
+	for path, content := range a.files {
+		if err := os.WriteFile(path, content, 0644); err != nil {
+			return fmt.Errorf("write file %q: %w", path, err)
 		}
 	}
 	return nil
@@ -928,9 +973,8 @@ func (a assets) write() error {
 
 // format runs "goimports" on all assets.
 func (a assets) format() error {
-	for _, file := range a.files {
-		path := file.path
-		src, err := imports.Process(path, file.content, nil)
+	for path, content := range a.files {
+		src, err := imports.Process(path, content, nil)
 		if err != nil {
 			return fmt.Errorf("format file %s: %w", path, err)
 		}
