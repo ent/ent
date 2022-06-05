@@ -52,7 +52,7 @@ Go to your `ent/entc.go` file, and add the 3 highlighted lines (extension option
 ```go {3-5} title="ent/entc.go"
 func main() {
 	ex, err := entgql.NewExtension(
-		entgql.WithWhereInputs(true),
+		entgql.WithWhereFilters(true),
 		entgql.WithConfigPath("../gqlgen.yml"),
 		entgql.WithSchemaPath("../ent.graphql"),
 	)
