@@ -69,7 +69,7 @@ func main() {
 } 
 ```
 
-The `WithWhereInputs` option enables the filter generation, the `WithConfigPath` configures the path to the `gqlgen`
+The `WithWhereFilters` option enables the filter generation, the `WithConfigPath` configures the path to the `gqlgen`
 config file, which allows the extension to more accurately map GraphQL to Ent types. The last option `WithSchemaPath`,
 configures a path to a new, or an existing GraphQL schema to write the generated filters to.
 
