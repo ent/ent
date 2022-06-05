@@ -350,6 +350,22 @@ func TestGraph_Gen(t *testing.T) {
 	defer os.RemoveAll(target)
 	external := MustParse(NewTemplate("external").Parse("package external"))
 	skipped := MustParse(NewTemplate("skipped").SkipIf(func(*Graph) bool { return true }).Parse("package external"))
+	schemas := []*load.Schema{
+		{
+			Name: "T1",
+			Fields: []*load.Field{
+				{Name: "age", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
+				{Name: "expired_at", Info: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Optional: true},
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+			Edges: []*load.Edge{
+				{Name: "t1", Type: "T1", Unique: true},
+			},
+		},
+		{
+			Name: "T2",
+		},
+	}
 	graph, err := NewGraph(&Config{
 		Package:   "entc/gen",
 		Target:    target,
@@ -357,28 +373,20 @@ func TestGraph_Gen(t *testing.T) {
 		Templates: []*Template{external, skipped},
 		IDType:    &field.TypeInfo{Type: field.TypeInt},
 		Features:  AllFeatures,
-	}, &load.Schema{
-		Name: "T1",
-		Fields: []*load.Field{
-			{Name: "age", Info: &field.TypeInfo{Type: field.TypeInt}, Optional: true},
-			{Name: "expired_at", Info: &field.TypeInfo{Type: field.TypeTime}, Nillable: true, Optional: true},
-			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
-		},
-		Edges: []*load.Edge{
-			{Name: "t1", Type: "T1", Unique: true},
-		},
-	})
+	}, schemas...)
 	require.NoError(err)
 	require.NotNil(graph)
 	require.NoError(graph.Gen())
-	// ensure graph files were generated.
+	// Ensure graph files were generated.
 	for _, name := range []string{"ent", "client", "config"} {
 		_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, name))
 		require.NoError(err)
 	}
-	// ensure entity files were generated.
+	// Ensure entity files were generated.
 	for _, format := range []string{"%s", "%s_create", "%s_update", "%s_delete", "%s_query"} {
 		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
+		require.NoError(err)
+		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
 		require.NoError(err)
 	}
 	_, err = os.Stat(filepath.Join(target, "external.go"))
@@ -404,6 +412,26 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(graph.Gen())
 	_, err = os.Stat(filepath.Join(target, "internal"))
 	require.True(os.IsNotExist(err))
+
+	schemas = schemas[:1]
+	graph, err = NewGraph(&Config{
+		Package:   "entc/gen",
+		Target:    target,
+		Storage:   drivers[0],
+		Templates: []*Template{external, skipped},
+		IDType:    &field.TypeInfo{Type: field.TypeInt},
+		Features:  AllFeatures,
+	}, schemas...)
+	require.NoError(err)
+	require.NotNil(graph)
+	require.NoError(graph.Gen())
+	// Ensure entity files were generated.
+	for _, format := range []string{"%s", "%s_create", "%s_update", "%s_delete", "%s_query"} {
+		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
+		require.NoError(err)
+		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
+		require.Error(err)
+	}
 }
 
 func ensureStructTag(name string) Hook {
