@@ -63,10 +63,10 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	default:
 		return a
 	}
+	if a.StructTag == nil && len(ant.StructTag) > 0 {
+		a.StructTag = make(map[string]string, len(ant.StructTag))
+	}
 	for k, v := range ant.StructTag {
-		if a.StructTag == nil {
-			a.StructTag = make(map[string]string)
-		}
 		a.StructTag[k] = v
 	}
 	if len(ant.ID) > 0 {
