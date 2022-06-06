@@ -218,7 +218,7 @@ const config = {
       The Go gopher was designed by <a href="http://reneefrench.blogspot.com/">Renee French</a>.
       <br/>
       The design is licensed under the Creative Commons 3.0 Attributions license. Read this 
-      <a href="https://blog.golang.org/gopher">article</a> for more details.
+      <a href="https://go.dev/blog/gopher">article</a> for more details.
       <br/>
       Design by Moriah Rich, illustration by Ariel Mashraki.
       `,
