@@ -245,10 +245,10 @@ type graphScope struct {
 //	{{ end}}
 //
 func extend(v interface{}, kv ...interface{}) (interface{}, error) {
-	scope := make(map[interface{}]interface{})
 	if len(kv)%2 != 0 {
 		return nil, fmt.Errorf("invalid number of parameters: %d", len(kv))
 	}
+	scope := make(map[interface{}]interface{}, len(kv)/2)
 	for i := 0; i < len(kv); i += 2 {
 		scope[kv[i]] = kv[i+1]
 	}
