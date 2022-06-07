@@ -130,12 +130,12 @@ with admin role. We will create 2 additional packages for the purpose of the exa
 
 After running the code-generation (with the feature-flag for privacy), we add the `Policy` method with 2 generated policy rules.
 
-```go title="examples/privacyadmin/ent/schema/user.go"
+```go title="_examples/privacyadmin/ent/schema/user.go"
 package schema
 
 import (
 	"entgo.io/ent"
-	"entgo.io/ent/examples/privacyadmin/ent/privacy"
+	"entgo.io/ent/_examples/privacyadmin/ent/privacy"
 )
 
 // User holds the schema definition for the User entity.
@@ -161,14 +161,14 @@ func (User) Policy() ent.Policy {
 We defined a policy that rejects any mutation and accepts any query. However, as mentioned above, in this example,
 we accept mutations only from viewers with admin role. Let's create 2 privacy rules to enforce this:
 
-```go title="examples/privacyadmin/rule/rule.go"
+```go title="_examples/privacyadmin/rule/rule.go"
 package rule
 
 import (
 	"context"
 
-	"entgo.io/ent/examples/privacyadmin/ent/privacy"
-	"entgo.io/ent/examples/privacyadmin/viewer"
+	"entgo.io/ent/_examples/privacyadmin/ent/privacy"
+	"entgo.io/ent/_examples/privacyadmin/viewer"
 )
 
 // DenyIfNoViewer is a rule that returns Deny decision if the viewer is
@@ -201,7 +201,7 @@ As you can see, the first rule `DenyIfNoViewer`, makes sure every operation has 
 otherwise, the operation rejected. The second rule `AllowIfAdmin`, accepts any operation from viewer with
 admin role. Let's add them to the schema, and run the code-generation:
 
-```go title="examples/privacyadmin/ent/schema/user.go"
+```go title="_examples/privacyadmin/ent/schema/user.go"
 // Policy defines the privacy policy of the User.
 func (User) Policy() ent.Policy {
 	return privacy.Policy{
@@ -223,7 +223,7 @@ Since we define the `DenyIfNoViewer` first, it will be executed before all other
 After adding the rules above and running the code-generation, we expect the privacy-layer logic to be applied on
 `ent.Client` operations.
 
-```go title="examples/privacyadmin/example_test.go"
+```go title="_examples/privacyadmin/example_test.go"
 func Do(ctx context.Context, client *ent.Client) error {
 	// Expect operation to fail, because viewer-context
 	// is missing (first mutation rule check).
@@ -255,7 +255,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 Sometimes, we want to bind a specific privacy decision to the `context.Context`. In cases like this, we
 can use the `privacy.DecisionContext` function to create a new context with a privacy decision attached to it.
 
-```go title="examples/privacyadmin/example_test.go"
+```go title="_examples/privacyadmin/example_test.go"
 func Do(ctx context.Context, client *ent.Client) error {
 	// Bind a privacy decision to the context (bypass all other rules).
 	allow := privacy.DecisionContext(ctx, privacy.Allow)
@@ -266,7 +266,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/privacyadmin).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/_examples/privacyadmin).
 
 ### Multi Tenancy
 
@@ -275,10 +275,10 @@ The helper packages `viewer` and `rule` (as mentioned above) also exist in this 
 
 ![tenant-example](https://entgo.io/images/assets/tenant_medium.png)
 
-Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://github.com/ent/ent/tree/master/examples/privacytenant/ent/schema)),
+Let's start building this application piece by piece. We begin by creating 3 different schemas (see the full code [here](https://github.com/ent/ent/tree/master/_examples/privacytenant/ent/schema)),
 and since we want to share some logic between them, we create another [mixed-in schema](schema-mixin.md) and add it to all other schemas as follows:
 
-```go title="examples/privacytenant/ent/schema/mixin.go"
+```go title="_examples/privacytenant/ent/schema/mixin.go"
 // BaseMixin for all schemas in the graph.
 type BaseMixin struct {
 	mixin.Schema
@@ -297,7 +297,7 @@ func (BaseMixin) Policy() ent.Policy {
 }
 ```
 
-```go title="examples/privacytenant/ent/schema/tenant.go"
+```go title="_examples/privacytenant/ent/schema/tenant.go"
 // Mixin of the Tenant schema.
 func (Tenant) Mixin() []ent.Mixin {
 	return []ent.Mixin{
@@ -312,7 +312,7 @@ contain the `viewer.Viewer` information.
 Similar to the previous example, we want add a constraint that only admin users can create tenants (and deny otherwise).
 We do it by copying the `AllowIfAdmin` rule from above, and adding it to the `Policy` of the `Tenant` schema:
 
-```go title="examples/privacytenant/ent/schema/tenant.go"
+```go title="_examples/privacytenant/ent/schema/tenant.go"
 // Policy defines the privacy policy of the User.
 func (Tenant) Policy() ent.Policy {
 	return privacy.Policy{
@@ -328,7 +328,7 @@ func (Tenant) Policy() ent.Policy {
 
 Then, we expect the following code to run successfully:
 
-```go title="examples/privacytenant/example_test.go"
+```go title="_examples/privacytenant/example_test.go"
 func Do(ctx context.Context, client *ent.Client) error {
 	// Expect operation to fail, because viewer-context
 	// is missing (first mutation rule check).
@@ -359,7 +359,7 @@ func Do(ctx context.Context, client *ent.Client) error {
 We continue by adding the rest of the edges in our data-model (see image above), and since both `User` and `Group` have
 an edge to the `Tenant` schema, we create a shared [mixed-in schema](schema-mixin.md) named `TenantMixin` for this:
 
-```go title="examples/privacytenant/ent/schema/mixin.go"
+```go title="_examples/privacytenant/ent/schema/mixin.go"
 // TenantMixin for embedding the tenant info in different schemas.
 type TenantMixin struct {
 	mixin.Schema
@@ -384,7 +384,7 @@ Unlike the rules we previously discussed, `Filter` rules can limit the scope of 
 
 > Note, the privacy filtering option needs to be enabled using the [`entql`](features.md#entql-filtering) feature-flag (see instructions [above](#configuration)).
 
-```go title="examples/privacytenant/rule/rule.go"
+```go title="_examples/privacytenant/rule/rule.go"
 // FilterTenantRule is a query/mutation rule that filters out entities that are not in the tenant.
 func FilterTenantRule() privacy.QueryMutationRule {
 	// TenantsFilter is an interface to wrap WhereHasTenantWith()
@@ -412,7 +412,7 @@ func FilterTenantRule() privacy.QueryMutationRule {
 After creating the `FilterTenantRule` privacy rule, we add it to the `TenantMixin` to make sure **all schemas**
 that use this mixin, will also have this privacy rule.
 
-```go title="examples/privacytenant/ent/schema/mixin.go"
+```go title="_examples/privacytenant/ent/schema/mixin.go"
 // Policy for all schemas that embed TenantMixin.
 func (TenantMixin) Policy() ent.Policy {
 	return privacy.Policy{
@@ -428,7 +428,7 @@ func (TenantMixin) Policy() ent.Policy {
 
 Then, after running the code-generation, we expect the privacy-rules to take effect on the client operations.
 
-```go title="examples/privacytenant/example_test.go"
+```go title="_examples/privacytenant/example_test.go"
 func Do(ctx context.Context, client *ent.Client) error {
     // A continuation of the code-block above.
 
@@ -459,7 +459,7 @@ We finish our example with another privacy-rule named `DenyMismatchedTenants` on
 The `DenyMismatchedTenants` rule rejects group creation if the associated users don't belong to
 the same tenant as the group.
 
-```go title="examples/privacytenant/rule/rule.go"
+```go title="_examples/privacytenant/rule/rule.go"
 // DenyMismatchedTenants is a rule that runs only on create operations and returns a deny
 // decision if the operation tries to add users to groups that are not in the same tenant.
 func DenyMismatchedTenants() privacy.MutationRule {
@@ -490,7 +490,7 @@ func DenyMismatchedTenants() privacy.MutationRule {
 
 We add this rule to the `Group` schema and run code-generation.
 
-```go title="examples/privacytenant/ent/schema/group.go"
+```go title="_examples/privacytenant/ent/schema/group.go"
 // Policy defines the privacy policy of the Group.
 func (Group) Policy() ent.Policy {
 	return privacy.Policy{
@@ -508,7 +508,7 @@ func (Group) Policy() ent.Policy {
 
 Again, we expect the privacy-rules to take effect on the client operations.
 
-```go title="examples/privacytenant/example_test.go"
+```go title="_examples/privacytenant/example_test.go"
 func Do(ctx context.Context, client *ent.Client) error {
     // A continuation of the code-block above.
 
@@ -535,7 +535,7 @@ In some cases, we want to reject user operations on entities that don't belong t
 these entities from the database** (unlike the `DenyMismatchedTenants` example above). 
 To achieve this, we can use the `FilterTenantRule` rule for mutations as well, but limit it to specific operations as follows:
 
-```go title="examples/privacytenant/ent/schema/group.go"
+```go title="_examples/privacytenant/ent/schema/group.go"
 // Policy defines the privacy policy of the Group.
 func (Group) Policy() ent.Policy {
 	return privacy.Policy{
@@ -559,7 +559,7 @@ func (Group) Policy() ent.Policy {
 
 Then, we expect the privacy-rules to take effect on the client operations.
 
-```go title="examples/privacytenant/example_test.go"
+```go title="_examples/privacytenant/example_test.go"
 func Do(ctx context.Context, client *ent.Client) error {
     // A continuation of the code-block above.
 
@@ -578,6 +578,6 @@ func Do(ctx context.Context, client *ent.Client) error {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/privacytenant).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/_examples/privacytenant).
 
 Please note that this documentation is under active development.

@@ -51,7 +51,7 @@ jobs:
         run: go test -race ./...
         working-directory: entc/gen
       - name: Run example tests
-        working-directory: examples
+        working-directory: _examples
         run: go test -race ./...
 
   generate:

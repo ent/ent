@@ -146,7 +146,7 @@ package ent
 //go:generate go run -mod=mod entc.go
 ```
 
-The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/_examples/entcpkg).
 
 ## Schema Description
 
@@ -288,7 +288,7 @@ func Example_Deps() {
 }
 ```
 
-The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
+The full example exists in [GitHub](https://github.com/ent/ent/tree/master/_examples/entcpkg).
 
 ## Feature Flags
 
