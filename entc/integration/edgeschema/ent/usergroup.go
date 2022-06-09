@@ -141,11 +141,11 @@ func (ug *UserGroup) Update() *UserGroupUpdateOne {
 // Unwrap unwraps the UserGroup entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (ug *UserGroup) Unwrap() *UserGroup {
-	tx, ok := ug.config.driver.(*txDriver)
+	_tx, ok := ug.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: UserGroup is not a transactional entity")
 	}
-	ug.config.driver = tx.drv
+	ug.config.driver = _tx.drv
 	return ug
 }
 

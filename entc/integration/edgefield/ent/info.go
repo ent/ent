@@ -109,11 +109,11 @@ func (i *Info) Update() *InfoUpdateOne {
 // Unwrap unwraps the Info entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (i *Info) Unwrap() *Info {
-	tx, ok := i.config.driver.(*txDriver)
+	_tx, ok := i.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Info is not a transactional entity")
 	}
-	i.config.driver = tx.drv
+	i.config.driver = _tx.drv
 	return i
 }
 

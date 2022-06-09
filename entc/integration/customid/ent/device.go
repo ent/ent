@@ -123,11 +123,11 @@ func (d *Device) Update() *DeviceUpdateOne {
 // Unwrap unwraps the Device entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (d *Device) Unwrap() *Device {
-	tx, ok := d.config.driver.(*txDriver)
+	_tx, ok := d.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Device is not a transactional entity")
 	}
-	d.config.driver = tx.drv
+	d.config.driver = _tx.drv
 	return d
 }
 

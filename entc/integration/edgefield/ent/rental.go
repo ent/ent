@@ -148,11 +148,11 @@ func (r *Rental) Update() *RentalUpdateOne {
 // Unwrap unwraps the Rental entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (r *Rental) Unwrap() *Rental {
-	tx, ok := r.config.driver.(*txDriver)
+	_tx, ok := r.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Rental is not a transactional entity")
 	}
-	r.config.driver = tx.drv
+	r.config.driver = _tx.drv
 	return r
 }
 

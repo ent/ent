@@ -101,11 +101,11 @@ func (a *Account) Update() *AccountUpdateOne {
 // Unwrap unwraps the Account entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (a *Account) Unwrap() *Account {
-	tx, ok := a.config.driver.(*txDriver)
+	_tx, ok := a.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Account is not a transactional entity")
 	}
-	a.config.driver = tx.drv
+	a.config.driver = _tx.drv
 	return a
 }
 

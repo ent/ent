@@ -107,11 +107,11 @@ func (s *Session) Update() *SessionUpdateOne {
 // Unwrap unwraps the Session entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (s *Session) Unwrap() *Session {
-	tx, ok := s.config.driver.(*txDriver)
+	_tx, ok := s.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Session is not a transactional entity")
 	}
-	s.config.driver = tx.drv
+	s.config.driver = _tx.drv
 	return s
 }
 

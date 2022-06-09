@@ -314,11 +314,11 @@ func (ft *FieldType) Update() *FieldTypeUpdateOne {
 // Unwrap unwraps the FieldType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (ft *FieldType) Unwrap() *FieldType {
-	tx, ok := ft.config.driver.(*txDriver)
+	_tx, ok := ft.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: FieldType is not a transactional entity")
 	}
-	ft.config.driver = tx.drv
+	ft.config.driver = _tx.drv
 	return ft
 }
 

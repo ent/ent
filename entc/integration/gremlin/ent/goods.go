@@ -46,11 +46,11 @@ func (_go *Goods) Update() *GoodsUpdateOne {
 // Unwrap unwraps the Goods entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (_go *Goods) Unwrap() *Goods {
-	tx, ok := _go.config.driver.(*txDriver)
+	_tx, ok := _go.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Goods is not a transactional entity")
 	}
-	_go.config.driver = tx.drv
+	_go.config.driver = _tx.drv
 	return _go
 }
 

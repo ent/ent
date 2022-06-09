@@ -93,11 +93,11 @@ func (ct *CustomType) Update() *CustomTypeUpdateOne {
 // Unwrap unwraps the CustomType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (ct *CustomType) Unwrap() *CustomType {
-	tx, ok := ct.config.driver.(*txDriver)
+	_tx, ok := ct.config.driver.(*txDriver)
 	if !ok {
 		panic("entv2: CustomType is not a transactional entity")
 	}
-	ct.config.driver = tx.drv
+	ct.config.driver = _tx.drv
 	return ct
 }
 

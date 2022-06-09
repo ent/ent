@@ -64,11 +64,11 @@ func (r *Revision) Update() *RevisionUpdateOne {
 // Unwrap unwraps the Revision entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (r *Revision) Unwrap() *Revision {
-	tx, ok := r.config.driver.(*txDriver)
+	_tx, ok := r.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Revision is not a transactional entity")
 	}
-	r.config.driver = tx.drv
+	r.config.driver = _tx.drv
 	return r
 }
 

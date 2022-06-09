@@ -50,11 +50,11 @@ func (i *Item) Update() *ItemUpdateOne {
 // Unwrap unwraps the Item entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (i *Item) Unwrap() *Item {
-	tx, ok := i.config.driver.(*txDriver)
+	_tx, ok := i.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Item is not a transactional entity")
 	}
-	i.config.driver = tx.drv
+	i.config.driver = _tx.drv
 	return i
 }
 

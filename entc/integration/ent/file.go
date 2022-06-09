@@ -209,11 +209,11 @@ func (f *File) Update() *FileUpdateOne {
 // Unwrap unwraps the File entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (f *File) Unwrap() *File {
-	tx, ok := f.config.driver.(*txDriver)
+	_tx, ok := f.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: File is not a transactional entity")
 	}
-	f.config.driver = tx.drv
+	f.config.driver = _tx.drv
 	return f
 }
 

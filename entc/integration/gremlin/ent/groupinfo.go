@@ -80,11 +80,11 @@ func (gi *GroupInfo) Update() *GroupInfoUpdateOne {
 // Unwrap unwraps the GroupInfo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (gi *GroupInfo) Unwrap() *GroupInfo {
-	tx, ok := gi.config.driver.(*txDriver)
+	_tx, ok := gi.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: GroupInfo is not a transactional entity")
 	}
-	gi.config.driver = tx.drv
+	gi.config.driver = _tx.drv
 	return gi
 }
 

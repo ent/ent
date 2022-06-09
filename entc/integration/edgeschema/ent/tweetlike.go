@@ -133,11 +133,11 @@ func (tl *TweetLike) Update() *TweetLikeUpdateOne {
 // Unwrap unwraps the TweetLike entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (tl *TweetLike) Unwrap() *TweetLike {
-	tx, ok := tl.config.driver.(*txDriver)
+	_tx, ok := tl.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: TweetLike is not a transactional entity")
 	}
-	tl.config.driver = tx.drv
+	tl.config.driver = _tx.drv
 	return tl
 }
 

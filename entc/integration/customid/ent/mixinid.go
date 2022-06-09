@@ -83,11 +83,11 @@ func (mi *MixinID) Update() *MixinIDUpdateOne {
 // Unwrap unwraps the MixinID entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (mi *MixinID) Unwrap() *MixinID {
-	tx, ok := mi.config.driver.(*txDriver)
+	_tx, ok := mi.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: MixinID is not a transactional entity")
 	}
-	mi.config.driver = tx.drv
+	mi.config.driver = _tx.drv
 	return mi
 }
 

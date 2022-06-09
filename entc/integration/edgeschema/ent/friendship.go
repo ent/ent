@@ -148,11 +148,11 @@ func (f *Friendship) Update() *FriendshipUpdateOne {
 // Unwrap unwraps the Friendship entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (f *Friendship) Unwrap() *Friendship {
-	tx, ok := f.config.driver.(*txDriver)
+	_tx, ok := f.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Friendship is not a transactional entity")
 	}
-	f.config.driver = tx.drv
+	f.config.driver = _tx.drv
 	return f
 }
 

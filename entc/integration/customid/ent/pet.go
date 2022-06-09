@@ -169,11 +169,11 @@ func (pe *Pet) Update() *PetUpdateOne {
 // Unwrap unwraps the Pet entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (pe *Pet) Unwrap() *Pet {
-	tx, ok := pe.config.driver.(*txDriver)
+	_tx, ok := pe.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Pet is not a transactional entity")
 	}
-	pe.config.driver = tx.drv
+	pe.config.driver = _tx.drv
 	return pe
 }
 

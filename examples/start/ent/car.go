@@ -127,11 +127,11 @@ func (c *Car) Update() *CarUpdateOne {
 // Unwrap unwraps the Car entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (c *Car) Unwrap() *Car {
-	tx, ok := c.config.driver.(*txDriver)
+	_tx, ok := c.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Car is not a transactional entity")
 	}
-	c.config.driver = tx.drv
+	c.config.driver = _tx.drv
 	return c
 }
 

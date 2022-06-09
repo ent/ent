@@ -141,11 +141,11 @@ func (ut *UserTweet) Update() *UserTweetUpdateOne {
 // Unwrap unwraps the UserTweet entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (ut *UserTweet) Unwrap() *UserTweet {
-	tx, ok := ut.config.driver.(*txDriver)
+	_tx, ok := ut.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: UserTweet is not a transactional entity")
 	}
-	ut.config.driver = tx.drv
+	ut.config.driver = _tx.drv
 	return ut
 }
 
