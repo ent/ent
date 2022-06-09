@@ -122,6 +122,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/CharlesGe129"><img src="https://avatars.githubusercontent.com/u/20162173?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Charles Ge</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=CharlesGe129" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/thmeitz"><img src="https://avatars.githubusercontent.com/u/92851940?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thomas Meitz</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=thmeitz" title="Code">💻</a> <a href="https://github.com/ent/ent/commits?author=thmeitz" title="Documentation">📖</a></td>
     <td align="center"><a href="http://justinjohnson.org"><img src="https://avatars.githubusercontent.com/u/181567?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Justin Johnson</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=booleangate" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/hax10"><img src="https://avatars.githubusercontent.com/u/85743468?v=4?s=100" width="100px;" alt=""/><br /><sub><b>hax10</b></sub></a><br /><a href="https://github.com/ent/ent/commits?author=hax10" title="Code">💻</a></td>
   </tr>
 </table>
 
