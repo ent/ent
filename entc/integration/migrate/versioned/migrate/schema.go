@@ -13,40 +13,42 @@ import (
 )
 
 var (
-	// UsersColumns holds the columns for the "users" table.
-	UsersColumns = []*schema.Column{
+	// VersionedGroupsColumns holds the columns for the "versioned_groups" table.
+	VersionedGroupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// VersionedGroupsTable holds the schema information for the "versioned_groups" table.
+	VersionedGroupsTable = &schema.Table{
+		Name:       "versioned_groups",
+		Columns:    VersionedGroupsColumns,
+		PrimaryKey: []*schema.Column{VersionedGroupsColumns[0]},
+	}
+	// VersionedUsersColumns holds the columns for the "versioned_users" table.
+	VersionedUsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "age", Type: field.TypeInt32},
 		{Name: "name", Type: field.TypeString, Size: 10},
-		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "address", Type: field.TypeString, Nullable: true},
 	}
-	// UsersTable holds the schema information for the "users" table.
-	UsersTable = &schema.Table{
-		Name:       "users",
-		Columns:    UsersColumns,
-		PrimaryKey: []*schema.Column{UsersColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "user_description",
-				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[3]},
-				Annotation: &entsql.IndexAnnotation{
-					Prefix: 50,
-				},
-			},
-			{
-				Name:    "user_name_address",
-				Unique:  true,
-				Columns: []*schema.Column{UsersColumns[2], UsersColumns[4]},
-			},
-		},
+	// VersionedUsersTable holds the schema information for the "versioned_users" table.
+	VersionedUsersTable = &schema.Table{
+		Name:       "versioned_users",
+		Columns:    VersionedUsersColumns,
+		PrimaryKey: []*schema.Column{VersionedUsersColumns[0]},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		UsersTable,
+		VersionedGroupsTable,
+		VersionedUsersTable,
 	}
 )
 
 func init() {
+	VersionedGroupsTable.Annotation = &entsql.Annotation{
+		Table: "versioned_groups",
+	}
+	VersionedUsersTable.Annotation = &entsql.Annotation{
+		Table: "versioned_users",
+	}
 }

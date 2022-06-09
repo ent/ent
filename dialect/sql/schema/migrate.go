@@ -114,6 +114,7 @@ type Migrate struct {
 	atlas           *atlasOptions // migrate with atlas.
 	typeRanges      []string      // types order by their range.
 	hooks           []Hook        // hooks to apply before creation
+	typeStore       typeStore
 }
 
 // NewMigrate create a migration structure for the given SQL driver.
@@ -132,6 +133,7 @@ func NewMigrate(d dialect.Driver, opts ...MigrateOption) (*Migrate, error) {
 	default:
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", d.Dialect())
 	}
+	m.typeStore = &dbTypeStore{m.sqlDialect}
 	if err := m.setupAtlas(); err != nil {
 		return nil, err
 	}
@@ -175,6 +177,11 @@ func (m *Migrate) NamedDiff(ctx context.Context, name string, tables ...*Table) 
 	}
 	if err := m.init(ctx, m); err != nil {
 		return err
+	}
+	if m.universalID {
+		if err := m.types(ctx, m); err != nil {
+			return err
+		}
 	}
 	plan, err := m.atDiff(ctx, m, name, tables...)
 	if err != nil {
@@ -534,7 +541,7 @@ func (m *Migrate) fixture(ctx context.Context, tx dialect.Tx, curr, new *Table) 
 	return nil
 }
 
-// verify verifies that the auto-increment counter is correct for table with universal-id support.
+// verify that the auto-increment counter is correct for table with universal-id support.
 func (m *Migrate) verify(ctx context.Context, tx dialect.Tx, t *Table) error {
 	vr, ok := m.sqlDialect.(verifyRanger)
 	if !ok || !m.universalID {
@@ -547,31 +554,10 @@ func (m *Migrate) verify(ctx context.Context, tx dialect.Tx, t *Table) error {
 	return vr.verifyRange(ctx, tx, t, int64(id<<32))
 }
 
-// types loads the type list from the database.
-// If the table does not create, it will create one.
-func (m *Migrate) types(ctx context.Context, tx dialect.ExecQuerier) error {
-	exists, err := m.tableExist(ctx, tx, TypeTable)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		t := NewTable(TypeTable).
-			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
-			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
-		query, args := m.tBuilder(t).Query()
-		if err := tx.Exec(ctx, query, args, nil); err != nil {
-			return fmt.Errorf("create types table: %w", err)
-		}
-		return nil
-	}
-	rows := &sql.Rows{}
-	query, args := sql.Dialect(m.Dialect()).
-		Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
-	if err := tx.Query(ctx, query, args, rows); err != nil {
-		return fmt.Errorf("query types table: %w", err)
-	}
-	defer rows.Close()
-	return sql.ScanSlice(rows, &m.typeRanges)
+// types loads the type list from the type store.
+func (m *Migrate) types(ctx context.Context, tx dialect.ExecQuerier) (err error) {
+	m.typeRanges, err = m.typeStore.load(ctx, tx)
+	return
 }
 
 func (m *Migrate) allocPKRange(ctx context.Context, conn dialect.ExecQuerier, t *Table) error {
@@ -590,10 +576,8 @@ func (m *Migrate) pkRange(ctx context.Context, conn dialect.ExecQuerier, t *Tabl
 		if len(m.typeRanges) > MaxTypes {
 			return 0, fmt.Errorf("max number of types exceeded: %d", MaxTypes)
 		}
-		query, args := sql.Dialect(m.Dialect()).
-			Insert(TypeTable).Columns("type").Values(t.Name).Query()
-		if err := conn.Exec(ctx, query, args, nil); err != nil {
-			return 0, fmt.Errorf("insert into ent_types: %w", err)
+		if err := m.typeStore.add(ctx, conn, t.Name); err != nil {
+			return 0, fmt.Errorf("store type range: %w", err)
 		}
 		id = len(m.typeRanges)
 		m.typeRanges = append(m.typeRanges, t.Name)
@@ -735,3 +719,55 @@ type fkRenamer interface {
 type verifyRanger interface {
 	verifyRange(context.Context, dialect.Tx, *Table, int64) error
 }
+
+// typeStore wraps methods for loading and storing pk range information for types.
+type typeStore interface {
+	load(context.Context, dialect.ExecQuerier) ([]string, error)
+	add(context.Context, dialect.ExecQuerier, string) error
+}
+
+// dbTypeStore stores and read pk information in a database table.
+// This is the "old" behaviour before the typeStore interface was added.
+type dbTypeStore struct {
+	drv sqlDialect
+}
+
+// load the types from the database. If the table does not exist, it will be created.
+func (s *dbTypeStore) load(ctx context.Context, conn dialect.ExecQuerier) ([]string, error) {
+	exists, err := s.drv.tableExist(ctx, conn, TypeTable)
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		t := NewTable(TypeTable).
+			AddPrimary(&Column{Name: "id", Type: field.TypeUint, Increment: true}).
+			AddColumn(&Column{Name: "type", Type: field.TypeString, Unique: true})
+		query, args := s.drv.tBuilder(t).Query()
+		if err := conn.Exec(ctx, query, args, nil); err != nil {
+			return nil, fmt.Errorf("create types table: %w", err)
+		}
+		return nil, nil
+	}
+	rows := &sql.Rows{}
+	query, args := sql.Dialect(s.drv.Dialect()).
+		Select("type").From(sql.Table(TypeTable)).OrderBy(sql.Asc("id")).Query()
+	if err := conn.Query(ctx, query, args, rows); err != nil {
+		return nil, fmt.Errorf("query types table: %w", err)
+	}
+	defer rows.Close()
+	var types []string
+	return types, sql.ScanSlice(rows, &types)
+}
+
+// add a new type entry to the database table. since load is called first,
+// there is no need to check for the tables' existence.
+func (s *dbTypeStore) add(ctx context.Context, conn dialect.ExecQuerier, t string) error {
+	query, args := sql.Dialect(s.drv.Dialect()).
+		Insert(TypeTable).Columns("type").Values(t).Query()
+	if err := conn.Exec(ctx, query, args, nil); err != nil {
+		return fmt.Errorf("insert into ent_types: %w", err)
+	}
+	return nil
+}
+
+var _ typeStore = (*dbTypeStore)(nil)
