@@ -138,11 +138,11 @@ func (c *Conversion) Update() *ConversionUpdateOne {
 // Unwrap unwraps the Conversion entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (c *Conversion) Unwrap() *Conversion {
-	tx, ok := c.config.driver.(*txDriver)
+	_tx, ok := c.config.driver.(*txDriver)
 	if !ok {
 		panic("entv1: Conversion is not a transactional entity")
 	}
-	c.config.driver = tx.drv
+	c.config.driver = _tx.drv
 	return c
 }
 

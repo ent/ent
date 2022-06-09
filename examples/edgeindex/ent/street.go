@@ -116,11 +116,11 @@ func (s *Street) Update() *StreetUpdateOne {
 // Unwrap unwraps the Street entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (s *Street) Unwrap() *Street {
-	tx, ok := s.config.driver.(*txDriver)
+	_tx, ok := s.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Street is not a transactional entity")
 	}
-	s.config.driver = tx.drv
+	s.config.driver = _tx.drv
 	return s
 }
 

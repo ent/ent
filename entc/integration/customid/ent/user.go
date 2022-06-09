@@ -153,11 +153,11 @@ func (u *User) Update() *UserUpdateOne {
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (u *User) Unwrap() *User {
-	tx, ok := u.config.driver.(*txDriver)
+	_tx, ok := u.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: User is not a transactional entity")
 	}
-	u.config.driver = tx.drv
+	u.config.driver = _tx.drv
 	return u
 }
 

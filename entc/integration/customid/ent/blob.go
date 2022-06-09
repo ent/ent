@@ -140,11 +140,11 @@ func (b *Blob) Update() *BlobUpdateOne {
 // Unwrap unwraps the Blob entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (b *Blob) Unwrap() *Blob {
-	tx, ok := b.config.driver.(*txDriver)
+	_tx, ok := b.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Blob is not a transactional entity")
 	}
-	b.config.driver = tx.drv
+	b.config.driver = _tx.drv
 	return b
 }
 

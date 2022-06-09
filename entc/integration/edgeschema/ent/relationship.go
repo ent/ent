@@ -129,11 +129,11 @@ func (r *Relationship) Update() *RelationshipUpdateOne {
 // Unwrap unwraps the Relationship entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (r *Relationship) Unwrap() *Relationship {
-	tx, ok := r.config.driver.(*txDriver)
+	_tx, ok := r.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Relationship is not a transactional entity")
 	}
-	r.config.driver = tx.drv
+	r.config.driver = _tx.drv
 	return r
 }
 

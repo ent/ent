@@ -90,11 +90,11 @@ func (m *Media) Update() *MediaUpdateOne {
 // Unwrap unwraps the Media entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (m *Media) Unwrap() *Media {
-	tx, ok := m.config.driver.(*txDriver)
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv2: Media is not a transactional entity")
 	}
-	m.config.driver = tx.drv
+	m.config.driver = _tx.drv
 	return m
 }
 

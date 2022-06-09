@@ -132,11 +132,11 @@ func (d *Doc) Update() *DocUpdateOne {
 // Unwrap unwraps the Doc entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (d *Doc) Unwrap() *Doc {
-	tx, ok := d.config.driver.(*txDriver)
+	_tx, ok := d.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Doc is not a transactional entity")
 	}
-	d.config.driver = tx.drv
+	d.config.driver = _tx.drv
 	return d
 }
 

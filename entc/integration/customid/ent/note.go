@@ -130,11 +130,11 @@ func (n *Note) Update() *NoteUpdateOne {
 // Unwrap unwraps the Note entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (n *Note) Unwrap() *Note {
-	tx, ok := n.config.driver.(*txDriver)
+	_tx, ok := n.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Note is not a transactional entity")
 	}
-	n.config.driver = tx.drv
+	n.config.driver = _tx.drv
 	return n
 }
 

@@ -129,11 +129,11 @@ func (n *Node) Update() *NodeUpdateOne {
 // Unwrap unwraps the Node entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (n *Node) Unwrap() *Node {
-	tx, ok := n.config.driver.(*txDriver)
+	_tx, ok := n.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Node is not a transactional entity")
 	}
-	n.config.driver = tx.drv
+	n.config.driver = _tx.drv
 	return n
 }
 
