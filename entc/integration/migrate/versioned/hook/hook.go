@@ -13,6 +13,19 @@ import (
 	"entgo.io/ent/entc/integration/migrate/versioned"
 )
 
+// The GroupFunc type is an adapter to allow the use of ordinary
+// function as Group mutator.
+type GroupFunc func(context.Context, *versioned.GroupMutation) (versioned.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GroupFunc) Mutate(ctx context.Context, m versioned.Mutation) (versioned.Value, error) {
+	mv, ok := m.(*versioned.GroupMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *versioned.GroupMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *versioned.UserMutation) (versioned.Value, error)

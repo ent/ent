@@ -5,6 +5,7 @@
 package migrate
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"text/template"
 
 	"ariga.io/atlas/sql/sqltool"
 	"entgo.io/ent/dialect"
@@ -51,6 +53,7 @@ func TestMySQL(t *testing.T) {
 
 			drv, err := sql.Open("mysql", fmt.Sprintf("root:pass@tcp(localhost:%d)/migrate?parseTime=True", port))
 			require.NoError(t, err, "connecting to migrate database")
+			defer drv.Close()
 
 			clientv1 := entv1.NewClient(entv1.Driver(drv))
 			clientv2 := entv2.NewClient(entv2.Driver(drv))
@@ -61,9 +64,10 @@ func TestMySQL(t *testing.T) {
 			NicknameSearch(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = ? AND column_name = ?")
 
-			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS migrate", []interface{}{}, new(sql.Result)))
-			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS migrate", []interface{}{}, new(sql.Result)))
-			Versioned(t, versioned.NewClient(versioned.Driver(drv)))
+			require.NoError(t, err, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE IF NOT EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result))
+			Versioned(t, drv, versioned.NewClient(versioned.Driver(drv)))
 		})
 	}
 }
@@ -94,6 +98,14 @@ func TestPostgres(t *testing.T) {
 			V1ToV2(t, drv.Dialect(), clientv1, clientv2)
 			CheckConstraint(t, clientv2)
 			TimePrecision(t, drv, "SELECT datetime_precision FROM information_schema.columns WHERE table_name = $1 AND column_name = $2")
+
+			vdrv, err := sql.Open(dialect.Postgres, dsn+" dbname=versioned_migrate")
+			require.NoError(t, err, "connecting to versioned migrate database")
+			defer vdrv.Close()
+			require.NoError(t, root.Exec(ctx, "DROP DATABASE IF EXISTS versioned_migrate", []interface{}{}, new(sql.Result)))
+			require.NoError(t, root.Exec(ctx, "CREATE DATABASE versioned_migrate", []interface{}{}, new(sql.Result)))
+			defer root.Exec(ctx, "DROP DATABASE versioned_migrate", []interface{}{}, new(sql.Result))
+			Versioned(t, vdrv, versioned.NewClient(versioned.Driver(vdrv)))
 		})
 	}
 }
@@ -160,6 +172,11 @@ func TestSQLite(t *testing.T) {
 	EqualFold(t, client)
 	ContainsFold(t, client)
 	CheckConstraint(t, client)
+
+	vdrv, err := sql.Open("sqlite3", "file:versioned_ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer vdrv.Close()
+	Versioned(t, vdrv, versioned.NewClient(versioned.Driver(vdrv)))
 }
 
 func TestStorageKey(t *testing.T) {
@@ -168,7 +185,7 @@ func TestStorageKey(t *testing.T) {
 	require.Equal(t, "user_friend_id2", migratev2.FriendsTable.ForeignKeys[1].Symbol)
 }
 
-func Versioned(t *testing.T, client *versioned.Client) {
+func Versioned(t *testing.T, drv sql.ExecQuerier, client *versioned.Client) {
 	ctx := context.Background()
 
 	p := t.TempDir()
@@ -201,6 +218,38 @@ func Versioned(t *testing.T, client *versioned.Client) {
 	require.NoError(t, client.Schema.Diff(ctx, schema.WithDir(dir), schema.WithSumFile()))
 	require.Equal(t, 3, countFiles(t, dir))
 	require.FileExists(t, filepath.Join(p, "atlas.sum"))
+
+	// GlobalUniqueID with drift check.
+	p = t.TempDir()
+	dir, err = migrate.NewLocalDir(p)
+	require.NoError(t, err)
+	format, err := migrate.NewTemplateFormatter(
+		template.Must(template.New("name").Parse("{{ .Name }}.sql")),
+		template.Must(template.New("name").Parse(`{{ range .Changes }}{{ printf "%s;\n" .Cmd }}{{ end }}`)),
+	)
+	require.NoError(t, err)
+	opts := []schema.MigrateOption{schema.WithDir(dir), schema.WithGlobalUniqueID(true), schema.WithFormatter(format)}
+
+	// Compared to empty database.
+	require.NoError(t, client.Schema.NamedDiff(ctx, "first", opts...))
+	require.Equal(t, 1, countFiles(t, dir))
+
+	// Apply the migrations.
+	fs, err := dir.Files()
+	require.NoError(t, err)
+	for _, f := range fs {
+		sc := bufio.NewScanner(f)
+		for sc.Scan() {
+			if sc.Text() != "" {
+				_, err := drv.ExecContext(ctx, sc.Text())
+				require.NoError(t, err)
+			}
+		}
+	}
+
+	// Diff again - there should not be a new file.
+	require.NoError(t, client.Schema.NamedDiff(ctx, "second", opts...))
+	require.Equal(t, 1, countFiles(t, dir))
 }
 
 func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv2.Client) {

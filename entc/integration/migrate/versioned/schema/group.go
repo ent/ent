@@ -11,25 +11,21 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// User holds the schema definition for the User entity.
-type User struct {
+// Group holds the schema definition for the Group entity.
+type Group struct {
 	ent.Schema
 }
 
-// Fields of the User.
-func (User) Fields() []ent.Field {
+// Fields of the Group.
+func (Group) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int32("age"),
-		field.String("name").
-			MaxLen(10),
-		field.String("address").
-			Optional(),
+		field.String("name"),
 	}
 }
 
-// Annotations of the User.
-func (User) Annotations() []schema.Annotation {
+// Annotations of the Group.
+func (Group) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		entsql.Annotation{Table: "versioned_users"},
+		entsql.Annotation{Table: "versioned_groups"},
 	}
 }
