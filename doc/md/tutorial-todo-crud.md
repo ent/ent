@@ -51,7 +51,6 @@ func (Todo) Fields() []ent.Field {
 			Default(0),
 	}
 }
-
 ```
 
 After adding these fields, we need to run the code-generation as before:
